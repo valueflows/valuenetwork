@@ -921,7 +921,8 @@ class EconomicAgent(models.Model):
     def related_contexts(self):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         agents.extend([ag.is_associate for ag in self.has_associates.all()])
-        return [a for a in agents if a.is_context]
+        cas = [a for a in agents if a.is_context]
+        return list(set(cas))
 
     #  bum2
     def managed_projects(self): #returns a list or None

@@ -383,7 +383,7 @@ def share_payment(request, agent_id):
 def project_work(request):
     #import pdb; pdb.set_trace()
     agent = get_agent(request)
-    projects = agent.related_contexts()
+    projects = agent.managed_projects()  #related_contexts()
     if not agent or agent.is_participant_candidate():
         return render_to_response('work/no_permission.html')
     next = "/work/project-work/"
@@ -415,11 +415,8 @@ def project_work(request):
 
     start_date = start.strftime('%Y_%m_%d')
     end_date = end.strftime('%Y_%m_%d')
-    #processes, context_agents = assemble_schedule(start, end, chosen_context_agent)
-    #my_context_agents = []
-    #for ca in context_agents:
-    #    if ca in projects:
-    #        my_context_agents.append(ca)
+    processes, context_agents = assemble_schedule(start, end, chosen_context_agent)
+
     todos = Commitment.objects.todos().filter(due_date__range=(start, end))
     if chosen_context_agent:
         todos = todos.filter(context_agent=chosen_context_agent)
@@ -427,9 +424,10 @@ def project_work(request):
     for todo in todos:
         if todo.context_agent in projects:
             my_project_todos.append(todo)
+    #import pdb; pdb.set_trace()
     return render_to_response("work/project_work.html", {
         "agent": agent,
-        #"context_agents": my_context_agents,
+        "context_agents": context_agents,
         "all_processes": projects,
         "date_form": date_form,
         "start_date": start_date,

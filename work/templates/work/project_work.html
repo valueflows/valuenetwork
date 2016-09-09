@@ -30,7 +30,7 @@ h3 {
     font-weight: bold;
     font-size: 1.1em;
     margin-top: .8em;
-    background-color: #FFFFB2; /*lightyellow*/
+    background-color: #eaeafb; /*#FFFFB2; lightyellow*/
     border: 1px solid gainsboro;
     padding: 6px;
 }
@@ -165,12 +165,12 @@ th, td {
 		    <legend>
 		        {% trans "Your project tasks" %}
 
-            <div class="subnav">
-               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
-            </div>
-        </legend>
+                <div class="subnav">
+                    <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+                </div>
+            </legend>
 
-	      <form id="dateForm" action="." method="POST" >
+	        <form id="dateForm" action="." method="POST" >
                 {% csrf_token %}
                 <div id="div_id_start_date" class="control-group" style="display: inline;" >
                     <label for="id_start_date" class="control-label required-field" style="display: inline; vertical-align: text-bottom;" >
@@ -197,15 +197,15 @@ th, td {
                     </div>
                 </div>&nbsp;
                 <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'Reload' %}" />
-{% comment %}
-                <a href=#todos id="todolink"> To Do's <span id="arrow">&#8595;</span></a>
-{% endcomment %}
+
+                <a href=#todos id="todolink"> Simple Tasks <span id="arrow">&#8595;</span></a>
+
 	        </form>
 
-{% comment %}
             {% if context_agents %}
 
                 {% for context_agent, processes in context_agents.items %}
+                  {% if context_agent in all_processes %}
                     <div class="context-agent-line">
                         {% trans "Project" %}: {% if context_agent %} {{ context_agent.name }} {% else %} {% trans "No project" %} {% endif %}
                     </div>
@@ -218,7 +218,7 @@ th, td {
 
                                     <span class="prefix process-prefix"  >{% trans "Process" %}:</span>
 
-                                    <a href="{{ process.get_absolute_url }}">
+                                    <a href="{% url "process_logging" process_id=process.id %}">
                                         {{ process.name_with_order }} {% trans "starting" %} <span id="start-dt{{ process.id }}">{{ process.start_date|date:"Y-m-d" }}</span>
                                         {% trans "ending" %} <span id="end-dt{{ process.id }}"> {{ process.end_date|date:"Y-m-d" }}
                                     </a>
@@ -249,7 +249,7 @@ th, td {
                                 </div>
                                 <div class="row-fluid">
                                     <div class="span8">
-                                        {% include  "valueaccounting/_process_for_sked.html" %}
+                                        {% include  "work/_work_process_for_sked.html" %}
                                     </div>
                                     <div class="span4 notes" id="proc-notes{{ process.id }}">
                                         {% if process.notes %}
@@ -263,7 +263,7 @@ th, td {
 			                    <h4>{% trans "Previous processes" %}</h4>
 			                    {% for proc in process.previous_processes %}
 				                    <p>
-				                        <a href="{{ proc.get_absolute_url }}">{{ proc }}</a>
+				                        <a href="{% url "process_logging" process_id=proc.id %}">{{ proc }}</a>
 				                        {% if proc in all_processes %}
 				                            <a href="#{{ proc.id }}" title="go to" ><i class="icon-search"></i></a>
 				                        {% endif %}
@@ -272,7 +272,7 @@ th, td {
 			                    <h4>{% trans "Next processes" %}</h4>
 			                    {% for proc in process.next_processes %}
 				                    <p>
-				                        <a href="{{ proc.get_absolute_url }}">{{ proc }}</a>
+				                        <a href="{% url "process_logging" process_id=proc.id %}">{{ proc }}</a>
 				                        {% if proc in all_processes %}
 				                            <a href="#{{ proc.id }}" title="go to" ><i class="icon-search"></i></a>
 				                        {% endif %}
@@ -280,21 +280,24 @@ th, td {
 			                    {% endfor %}
                                 {% if process.independent_demand %}
                                     <h4>{% trans "Order" %} </h4>
+                                    {{ process.independent_demand }}
+{% comment %}
                                     <a href="{% url "order_schedule" order_id=process.independent_demand.id %}">{{ process.independent_demand }}</a>
+{% endcomment %}
                                 {% endif %}
                             </div>
                         </div>
                     {% endfor %}
+                  {% endif %}
                 {% endfor %}
             {% else %}
                 No processes scheduled for this date range and project selection
             {% endif %}
-{% endcomment %}
 
 	        <div class="row-fluid" id="todos">
 			    <div class="span12 todos">
 			        <h3>
-			            {% trans "Task list" %}
+			            {% trans "Simple Task List" %}
 	                    {% if agent %}
 					        &nbsp;&nbsp;&nbsp;&nbsp;
 					        <div style="display: inline;" >

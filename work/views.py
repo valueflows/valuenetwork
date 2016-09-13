@@ -18,6 +18,8 @@ from django.utils.datastructures import SortedDict
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.core import validators
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
@@ -2045,13 +2047,14 @@ from fobi.base import (
 #from fobi.base import (
 #    FormHandlerPlugin, form_handler_plugin_registry, get_processed_form_data
 #)
-from django.utils.translation import ugettext, ugettext_lazy as _
 
 import simplejson as json
+from django.utils.html import escape, escapejs
 
 def joinaproject_request(request, form_slug = False):
     join_form = JoinRequestForm(data=request.POST or None)
     fobi_form = False
+    cleaned_data = False
     form = False
     if form_slug:
       project = Project.objects.get(fobi_slug=form_slug)
@@ -2067,10 +2070,15 @@ def joinaproject_request(request, form_slug = False):
           form_element_entries = form_element_entries,
           request = request
       )
-
-
+    
+    
     if request.method == "POST":
         #import pdb; pdb.set_trace()
+        fobi_form = FormClass(request.POST, request.FILES)
+        #form_element_entries = form_entry.formelemententry_set.all()[:]
+        #field_name_to_label_map, cleaned_data = get_processed_form_data(
+        #    fobi_form, form_element_entries,
+        #)
 
         if join_form.is_valid():
             human = True
@@ -2088,7 +2096,7 @@ def joinaproject_request(request, form_slug = False):
             #request.POST['join_request'] = str(jn_req.pk)
 
             if form_slug:
-              fobi_form = FormClass(request.POST, request.FILES)
+              #fobi_form = FormClass(request.POST, request.FILES)
 
               # Fire pre form validation callbacks
               fire_form_callbacks(form_entry=form_entry, request=request, form=fobi_form, stage=CALLBACK_BEFORE_FORM_VALIDATION)
@@ -2168,19 +2176,20 @@ def joinaproject_request(request, form_slug = False):
                 jn.save()
 
             # add relation candidate
-            association_type = AgentAssociationType.objects.get(identifier="participant")
-            fc_aa = AgentAssociation(
-                is_associate=jn_req.agent,
-                has_associate=jn_req.project.agent,
-                association_type=association_type,
-                state="candidate",
-                )
-            fc_aa.save()
+            #ass_type = get_object_or_404(AgentAssociationType, identifier="participant")
+            #if ass_type:
+            #    fc_aa = AgentAssociation(
+            #        is_associate=jn_req.agent,
+            #        has_associate=jn_req.project.agent,
+            #        association_type=ass_type,
+            #        state="potential",
+            #        )
+            #    fc_aa.save()
 
             event_type = EventType.objects.get(relationship="todo")
             description = "Create an Agent and User for the Join Request from "
             description += name
-            join_url = get_url_starter() + "/work/agent/" + str(jn_req.project.agent.id) +"/join-request/" + str(jn_req.id) + "/"
+            join_url = get_url_starter() + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
             context_agent = jn_req.project.agent #EconomicAgent.objects.get(name__icontains="Membership Request")
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
@@ -2205,7 +2214,11 @@ def joinaproject_request(request, form_slug = False):
 
 
             if notification:
-                users = jn_req.project.agent.managers() #User.objects.filter(is_staff=True)
+                managers = jn_req.project.agent.managers()
+                users = []
+                for manager in managers:
+                  if manager.user():
+                    users.append(manager.user().user)
                 if users:
                     site_name = get_site_name()
                     notification.send(
@@ -2217,11 +2230,12 @@ def joinaproject_request(request, form_slug = False):
                         "description": description,
                         "site_name": site_name,
                         "join_url": join_url,
+                        "context_agent": context_agent,
                         }
                     )
 
             return HttpResponseRedirect('/%s/'
-                % ('joinaprojectthanks'))
+                % ('joinaproject-thanks'))
 
 
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
@@ -2232,6 +2246,7 @@ def joinaproject_request(request, form_slug = False):
         "join_form": join_form,
         "fobi_form": fobi_form,
         "project": project,
+        "post": escapejs(json.dumps(request.POST)),
     }, context_instance=RequestContext(request))
 
 
@@ -2260,7 +2275,7 @@ def join_requests(request, agent_id):
     if fobi_slug and requests:
         form_entry = FormEntry.objects.get(slug=fobi_slug)
         req = requests[0]
-        if req.fobi_data:
+        if req.fobi_data and req.fobi_data._default_manager:
             req.entries = req.fobi_data._default_manager.filter(pk=req.fobi_data.pk).select_related('form_entry')
             entry = req.entries[0]
             form_headers = json.loads(entry.form_data_headers)
@@ -2323,12 +2338,11 @@ def decline_request(request, join_request_id):
     mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
     mbr_req.state = "declined"
     mbr_req.save()
-
     if mbr_req.agent and mbr_req.project:
         # modify relation to active
-        ass_type = AgentAssociationType.objects.get(identifier="Participant")
+        ass_type = AgentAssociationType.objects.get(identifier="participant")
         ass = AgentAssociation.objects.get(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
-        ass.state = "candidate"
+        ass.state = "potential"
         ass.save()
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('work/agent', mbr_req.project.agent.id, 'join-requests'))
@@ -2358,7 +2372,7 @@ def accept_request(request, join_request_id):
     mbr_req.save()
 
     # modify relation to active
-    association_type = AgentAssociationType.objects.get(identifier="Participant")
+    association_type = AgentAssociationType.objects.get(identifier="participant")
     association = AgentAssociation.objects.get(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=association_type)
     association.state = "active"
     association.save()
@@ -2367,23 +2381,139 @@ def accept_request(request, join_request_id):
         % ('work/agent', mbr_req.project.agent.id, 'join-requests'))
 
 
-'''
+from itertools import chain
+
 @login_required
-def create_agent_for_join_request(request, join_request_id):
+def create_account_for_join_request(request, join_request_id):
     if request.method == "POST":
-        mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
-        form = AgentCreateForm(request.POST)
+        jn_req = get_object_or_404(JoinRequest, pk=join_request_id)
+        #import pdb; pdb.set_trace()
+        form = ProjectAgentCreateForm(prefix=jn_req.form_prefix(), data=request.POST or None)
         if form.is_valid():
+            data = form.cleaned_data
             agent = form.save(commit=False)
             agent.created_by=request.user
+            if not agent.is_individual():
+                agent.is_context=True
             agent.save()
-            mbr_req.agent = agent
-            mbr_req.save()
-            return HttpResponseRedirect('/%s/%s/'
-                % ('work/agent', agent.id))
-    return HttpResponseRedirect('/%s/%s/%s/%s/'
-        % ('work/agent', agent.id, 'join-requests', join_request_id))
-'''
+            jn_req.agent = agent
+            jn_req.save()
+            project = jn_req.project
+            # add relation candidate
+            ass_type = get_object_or_404(AgentAssociationType, identifier="participant")
+            if ass_type:
+                aa = AgentAssociation(
+                    is_associate=agent,
+                    has_associate=project.agent,
+                    association_type=ass_type,
+                    state="potential",
+                    )
+                aa.save()
+            password = data["password"]
+            if password:
+                username = data["nick"]
+                email = data["email"]
+                if username:
+                    user = User(
+                        username=username,
+                        email=email,
+                        )
+                    user.set_password(password)
+                    user.save()
+                    au = AgentUser(
+                        agent = agent,
+                        user = user)
+                    au.save()
+                    #agent.request_faircoin_address()
+
+                    name = data["name"]
+                    if notification:
+                        managers = project.agent.managers()
+                        users = [agent.user().user,]
+                        for manager in managers:
+                            if manager.user():
+                                users.append(manager.user().user)
+                        #users = User.objects.filter(is_staff=True)
+                        if users:
+                            #allusers = chain(users, agent)
+                            #users = list(users)
+                            #users.append(agent.user)
+                            site_name = get_site_name()
+                            notification.send(
+                                users,
+                                "work_new_account",
+                                {"name": name,
+                                "username": username,
+                                "password": password,
+                                "site_name": site_name,
+                                "context_agent": project.agent,
+                                }
+                            )
+
+            return HttpResponseRedirect('/%s/%s/%s/'
+                % ('work/agent', project.agent.id, 'join-requests'))
+
+    return HttpResponseRedirect('/%s/%s/%s/'
+        % ('work/agent', jn_req.project.agent.id, 'join-requests'))
+
+def validate_nick(request):
+    #import pdb; pdb.set_trace()
+    answer = True
+    error = ""
+    data = request.GET
+    values = data.values()
+    if values:
+        nick = values[0]
+        try:
+            user = EconomicAgent.objects.get(nick=nick)
+            error = "ID already taken"
+        except EconomicAgent.DoesNotExist:
+            pass
+        if not error:
+            username = nick
+            try:
+                user = User.objects.get(username=username)
+                error = "Username already taken"
+            except User.DoesNotExist:
+                pass
+            if not error:
+                val = validators.RegexValidator(r'^[\w.@+-]+$',
+                                            _('Enter a valid username. '
+                                                'This value may contain only letters, numbers '
+                                               'and @/./+/-/_ characters.'), 'invalid')
+                try:
+                    error = val(username)
+                except ValidationError:
+                    error = "Error: May only contain letters, numbers, and @/./+/-/_ characters."
+
+    if error:
+        answer = error
+    response = simplejson.dumps(answer, ensure_ascii=False)
+    return HttpResponse(response, content_type="text/json-comment-filtered")
+
+def validate_username(request):
+    #import pdb; pdb.set_trace()
+    answer = True
+    error = ""
+    data = request.GET
+    values = data.values()
+    if values:
+        username = values[0]
+        try:
+            user = User.objects.get(username=username)
+            error = "Username already taken"
+        except User.DoesNotExist:
+            pass
+        if not error:
+            val = validators.RegexValidator(r'^[\w.@+-]+$',
+                                        _('Enter a valid username. '
+                                            'This value may contain only letters, numbers '
+                                            'and @/./+/-/_ characters.'), 'invalid')
+            error = val(username)
+    if error:
+        answer = error
+    response = simplejson.dumps(answer, ensure_ascii=False)
+    return HttpResponse(response, content_type="text/json-comment-filtered")
 
 @login_required
 def connect_agent_to_join_request(request, agent_id, join_request_id):

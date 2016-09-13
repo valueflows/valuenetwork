@@ -14,6 +14,42 @@ from valuenetwork.valueaccounting.models import *
 from work.models import *
 from valuenetwork.valueaccounting.forms import *
 
+
+class ProjectAgentCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required-field input-xlarge',}))   
+    nick = forms.CharField(
+        label="ID", 
+        help_text="Must be unique, and no more than 32 characters",
+        widget=forms.TextInput(attrs={'class': 'nick required-field',}))   
+    email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'class': 'email input-xxlarge',}))
+    #address = forms.CharField(
+    #    required=False, 
+    #    label="Work location",
+    #    help_text="Enter address for a new work location. Otherwise, select existing location on map.",
+    #    widget=forms.TextInput(attrs={'class': 'input-xxlarge',}))
+    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+    description = forms.CharField(
+        required=False, 
+        widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
+    agent_type = forms.ModelChoiceField(
+        queryset=AgentType.objects.all(),
+        empty_label=None,
+        widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    #is_context = forms.BooleanField(
+    #    required=False, 
+    #    label="Is a context agent", 
+    #    widget=forms.CheckboxInput())
+    password = forms.CharField(label=_("Password"),
+        help_text=_("Login password"),
+        widget=forms.PasswordInput(attrs={'class': 'password',}))
+
+    class Meta:
+        model = EconomicAgent
+        #removed address and is_context
+        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email')
+
+
 class UploadAgentForm(forms.ModelForm):
     photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
 

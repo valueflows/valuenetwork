@@ -403,7 +403,7 @@ class ResourceAdjustmentForm(forms.ModelForm):
 class DemandSelectionForm(forms.Form):
     demand = forms.ModelChoiceField(
         queryset=Order.objects.exclude(order_type="holder"), 
-        label="For customer or R&D order (optional)",
+        label="Add to an exiting order (optional)",
         required=False)
 
 

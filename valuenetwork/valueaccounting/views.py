@@ -2404,6 +2404,9 @@ def delete_order(request, order_id):
         if next == "closed_work_orders":
             return HttpResponseRedirect('/%s/'
                 % ('accounting/closed-work-orders'))
+        if next == "order-list":
+            return HttpResponseRedirect('/%s/'
+                % ('work/order-list'))
 
 @login_required
 def delete_process_input(request, 
@@ -5809,7 +5812,7 @@ def add_uninventoried_shipment(request, exchange_id):
 @login_required
 def create_production_process(request, commitment_id):
     """ this creates a production process for a shipment commitment
-        on the order_schedule page
+        on the order_schedule page (order_plan page in work app)
     """
     commitment = get_object_or_404(Commitment, pk=commitment_id)
     if request.method == "POST":
@@ -5833,7 +5836,11 @@ def create_production_process(request, commitment_id):
                 state=None,
                 from_agent=process.context_agent,
                 to_agent=commitment.context_agent)
-                
+        next = request.POST.get("next")
+        if next:
+            if next == "order-plan":
+                return HttpResponseRedirect('/%s/%s/'
+                    % ('work/order-plan', commitment.order.id))
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/order-schedule', commitment.order.id))
         

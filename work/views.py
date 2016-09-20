@@ -2717,3 +2717,372 @@ def create_project_user_and_agent(request, agent_id):
     }, context_instance=RequestContext(request))
 
 '''
+            
+@login_required
+def order_list(request):
+    agent = get_agent(request)
+    help = get_help("order_list")
+    #import pdb; pdb.set_trace()
+    projects = agent.managed_projects()   
+    
+    return render_to_response("work/order_list.html", {
+        "projects": projects,
+        "agent": agent,
+        "help": help,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def order_plan(request, order_id):
+    agent = get_agent(request)
+    order = get_object_or_404(Order, pk=order_id)
+    #import pdb; pdb.set_trace()
+    error_message = ""
+    order_items = order.order_items()
+    rts = None
+    add_order_item_form = None
+    if agent:
+        if order.order_type == "customer":
+            patterns = PatternUseCase.objects.filter(use_case__identifier='cust_orders')
+            if patterns:
+                pattern = patterns[0].pattern
+            else:
+                raise ValidationError("no Customer Order ProcessPattern")
+            rts = pattern.all_resource_types()
+        else:
+            rts = ProcessPattern.objects.all_production_resource_types()
+        if rts:
+            add_order_item_form = AddOrderItemForm(resource_types=rts)
+        #import pdb; pdb.set_trace()
+        visited = set()
+        for order_item in order_items:
+            order_item.processes = order_item.unique_processes_for_order_item(visited)
+            if order_item.is_workflow_order_item():
+                #import pdb; pdb.set_trace()
+                init = {'quantity': order_item.quantity,}
+                order_item.resource_qty_form = ResourceQuantityForm(prefix=str(order_item.id), initial=init)
+                init = {'context_agent': order_item.context_agent,}
+                order_item.project_form = ProjectSelectionForm(prefix=str(order_item.id), initial=init)
+                last_date = order_item.process.end_date
+                next_date = last_date + datetime.timedelta(days=1)
+                init = {"start_date": next_date, "end_date": next_date}
+                order_item.add_process_form = WorkflowProcessForm(prefix=str(order_item.id), initial=init, order_item=order_item)
+    return render_to_response("work/order_plan.html", {
+        "order": order,
+        "agent": agent,
+        "order_items": order_items,
+        "add_order_item_form": add_order_item_form,
+        "error_message": error_message,
+    }, context_instance=RequestContext(request))
+
+    
+@login_required
+def change_project_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    #import pdb; pdb.set_trace()
+    order_form = OrderChangeForm(instance=order, data=request.POST or None)
+    if request.method == "POST":
+        if order_form.is_valid():
+            order = order_form.save()
+            return HttpResponseRedirect('/%s/'
+                % ('work/order-list'))
+
+    return render_to_response("work/change_project_order.html", {
+        "order_form": order_form,
+        "order": order,
+        "next": next,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def plan_work(request, rand=0):
+    #import pdb; pdb.set_trace()
+    agent = get_agent(request)
+    slots = []
+    resource_types = []
+    selected_pattern = None
+    selected_context_agent = None
+    pattern_form = PatternProdSelectionForm()
+    #import pdb; pdb.set_trace()
+    ca_form = ProjectSelectionFilteredForm(agent=agent)
+    init = {"start_date": datetime.date.today(), "end_date": datetime.date.today()}
+    process_form = DateAndNameForm(data=request.POST or None)
+    #demand_form = OrderSelectionFilteredForm(data=request.POST or None)
+    if request.method == "POST":
+        input_resource_types = []
+        input_process_types = []
+        done_process = request.POST.get("create-process")
+        add_another = request.POST.get("add-another")
+        edit_process = request.POST.get("edit-process")
+        get_related = request.POST.get("get-related")
+        if get_related:
+            #import pdb; pdb.set_trace()
+            selected_pattern = ProcessPattern.objects.get(id=request.POST.get("pattern"))
+            selected_context_agent = EconomicAgent.objects.get(id=request.POST.get("context_agent"))
+            if selected_pattern:
+                slots = selected_pattern.event_types()
+                for slot in slots:
+                    slot.resource_types = selected_pattern.get_resource_types(slot)
+            process_form = DateAndNameForm(initial=init)
+            #demand_form = OrderSelectionFilteredForm(provider=selected_context_agent)
+        else:
+            #import pdb; pdb.set_trace()
+            rp = request.POST
+            today = datetime.date.today()
+            if process_form.is_valid():
+                start_date = process_form.cleaned_data["start_date"]
+                end_date = process_form.cleaned_data["end_date"]
+                process_name = process_form.cleaned_data["process_name"]
+            else:
+                start_date = today
+                end_date = today
+            demand = None
+            added_to_order = False
+            #if demand_form.is_valid():
+            #    demand = demand_form.cleaned_data["demand"] 
+            #    if demand:
+            #        added_to_order = True               
+            produced_rts = []
+            cited_rts = []
+            consumed_rts = []
+            used_rts = []
+            work_rts = []
+            #import pdb; pdb.set_trace()
+            for key, value in dict(rp).iteritems():
+                if "selected-context-agent" in key:
+                    context_agent_id = key.split("~")[1]
+                    selected_context_agent = EconomicAgent.objects.get(id=context_agent_id)
+                    continue
+                if "selected-pattern" in key:
+                    pattern_id = key.split("~")[1]
+                    selected_pattern = ProcessPattern.objects.get(id=pattern_id)
+                    continue
+                et = None
+                action = ""
+                try:
+                    #import pdb; pdb.set_trace()
+                    et_name = key.split("~")[0]
+                    et = EventType.objects.get(name=et_name)
+                    action = et.relationship
+                except EventType.DoesNotExist:
+                    pass
+                if action == "consume":
+                    consumed_id = int(value[0])
+                    consumed_rt = EconomicResourceType.objects.get(id=consumed_id)
+                    consumed_rts.append(consumed_rt)
+                    continue
+                if action == "use":
+                    used_id = int(value[0])
+                    used_rt = EconomicResourceType.objects.get(id=used_id)
+                    used_rts.append(used_rt)
+                    continue
+                if action == "cite":
+                    cited_id = int(value[0])
+                    cited_rt = EconomicResourceType.objects.get(id=cited_id)
+                    cited_rts.append(cited_rt)
+                    continue
+                if action == "out":
+                    produced_id = int(value[0])
+                    produced_rt = EconomicResourceType.objects.get(id=produced_id)
+                    produced_rts.append(produced_rt)
+                    continue
+                if action == "work":
+                    work_id = int(value[0])
+                    work_rt = EconomicResourceType.objects.get(id=work_id)
+                    work_rts.append(work_rt)
+                    continue
+
+            if rand: 
+                if not demand:
+                    demand = Order(
+                        order_type="rand",
+                        order_date=today,
+                        due_date=end_date,
+                        provider=selected_context_agent,
+                        created_by=request.user)
+                    demand.save()
+            if not process_name:
+                process_name = "Make something"
+                if produced_rts:
+                    process_name = " ".join([
+                        "Make",
+                        produced_rts[0].name,
+                    ])
+
+            process = Process(
+                name=process_name,
+                end_date=end_date,
+                start_date=start_date,
+                process_pattern=selected_pattern,
+                created_by=request.user,
+                context_agent=selected_context_agent
+            )
+            process.save()
+        
+            #import pdb; pdb.set_trace()      
+            for rt in produced_rts:
+                #import pdb; pdb.set_trace()
+                resource_types.append(rt)
+                et = selected_pattern.event_type_for_resource_type("out", rt)
+                if et:
+                    commitment = process.add_commitment(
+                        resource_type= rt,
+                        demand=demand,
+                        quantity=Decimal("1"),
+                        event_type=et,
+                        unit=rt.unit,
+                        description="",
+                        user=request.user)
+                    if rand:
+                        if not added_to_order: #add to order feature removed, didn't work, no simple solution
+                            commitment.order = demand
+                            commitment.order_item = commitment
+                            commitment.save()
+
+            for rt in cited_rts:
+                et = selected_pattern.event_type_for_resource_type("cite", rt)
+                if et:
+                    commitment = process.add_commitment(
+                        resource_type= rt,
+                        demand=demand,
+                        order_item = process.order_item(),
+                        quantity=Decimal("1"),
+                        event_type=et,
+                        unit=rt.unit,
+                        description="",
+                        user=request.user)
+            for rt in used_rts:
+                if rt not in resource_types:
+                    resource_types.append(rt)
+                    et = selected_pattern.event_type_for_resource_type("use", rt)
+                    if et:
+                        commitment = process.add_commitment(
+                            resource_type= rt,
+                            demand=demand,
+                            order_item = process.order_item(),
+                            quantity=Decimal("1"),
+                            event_type=et,
+                            unit=rt.unit,
+                            description="",
+                            user=request.user)
+                        
+            for rt in consumed_rts:
+                if rt not in resource_types:
+                    resource_types.append(rt)
+                    et = selected_pattern.event_type_for_resource_type("consume", rt)
+                    if et:
+                        commitment = process.add_commitment(
+                            resource_type= rt,
+                            demand=demand,
+                            order_item = process.order_item(),
+                            quantity=Decimal("1"),
+                            event_type=et,
+                            unit=rt.unit,
+                            description="",
+                            user=request.user)
+                            
+            for rt in work_rts:
+                #import pdb; pdb.set_trace()
+                agent = None
+                et = selected_pattern.event_type_for_resource_type("work", rt)
+                if et:
+                    work_commitment = process.add_commitment(
+                        resource_type= rt,
+                        demand=demand,
+                        order_item = process.order_item(),
+                        quantity=Decimal("1"),
+                        event_type=et,
+                        unit=rt.unit,
+                        from_agent=agent,
+                        description="",
+                        user=request.user)
+                    if notification:
+                        #import pdb; pdb.set_trace()
+                        if not work_commitment.from_agent:
+                            agent = get_agent(request)
+                            users = work_commitment.possible_work_users()
+                            site_name = get_site_name()
+                            if users:
+                                notification.send(
+                                    users, 
+                                    "valnet_new_task", 
+                                    {"resource_type": work_commitment.resource_type,
+                                    "due_date": work_commitment.due_date,
+                                    "hours": work_commitment.quantity,
+                                    "unit": work_commitment.resource_type.unit,
+                                    "description": work_commitment.description or "",
+                                    "process": work_commitment.process,
+                                    "creator": agent,
+                                    "site_name": site_name,
+                                    }
+                                )
+
+            if done_process: 
+                return HttpResponseRedirect('/%s/'
+                    % ('work/order-list'))
+            #if add_another: 
+            #    return HttpResponseRedirect('/%s/%s/'
+            #        % ('work/plan-work', rand))
+            if edit_process:
+                return HttpResponseRedirect('/%s/%s/'
+                    % ('work/process-logging', process.id))
+
+    return render_to_response("work/plan_work.html", {
+        "slots": slots,
+        "selected_pattern": selected_pattern,
+        "selected_context_agent": selected_context_agent,
+        "ca_form": ca_form,
+        "pattern_form": pattern_form,
+        "process_form": process_form,
+        #"demand_form": demand_form,
+        "rand": rand,
+        "help": get_help("process_select"),
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def order_delete_confirmation_work(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    pcs = order.producing_commitments()
+    sked = []
+    reqs = []
+    work = []
+    tools = []
+    #import pdb; pdb.set_trace()
+    next = "order-list"
+    if pcs:
+        visited_resources = set()
+        for ct in pcs:
+            #visited_resources.add(ct.resource_type)
+            schedule_commitment(ct, sked, reqs, work, tools, visited_resources, 0)
+        return render_to_response('work/order_delete_confirmation_work.html', {
+            "order": order,
+            "sked": sked,
+            "reqs": reqs,
+            "work": work,
+            "tools": tools,
+            "next": next,
+        }, context_instance=RequestContext(request))
+    else:
+        commitments = Commitment.objects.filter(independent_demand=order)
+        if commitments:
+            for ct in commitments:
+                sked.append(ct)
+                if ct.process not in sked:
+                    sked.append(ct.process)
+            return render_to_response('work/order_delete_confirmation_work.html', {
+                "order": order,
+                "sked": sked,
+                "reqs": reqs,
+                "work": work,
+                "tools": tools,
+                "next": next,
+            }, context_instance=RequestContext(request))
+        else:
+            order.delete()
+            if next == "order-list":
+                return HttpResponseRedirect('/%s/'
+                    % ('work/order-list'))
+            #if next == "closed_work_orders":
+            #    return HttpResponseRedirect('/%s/'
+            #        % ('work/closed-work-orders'))

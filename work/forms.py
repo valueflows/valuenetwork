@@ -269,3 +269,24 @@ class JoinAgentSelectionForm(forms.Form):
         queryset=EconomicAgent.objects.without_join_request(),
         required=False)
 
+
+class ProjectSelectionFilteredForm(forms.Form):
+    context_agent = forms.ChoiceField()
+
+    def __init__(self, agent, *args, **kwargs):
+        super(ProjectSelectionFilteredForm, self).__init__(*args, **kwargs)
+        projects = agent.managed_projects()
+        if projects:
+            self.fields["context_agent"].choices = [(proj.id, proj.name) for proj in projects]
+            
+        
+class OrderSelectionFilteredForm(forms.Form):
+    demand = forms.ModelChoiceField(
+        queryset=Order.objects.exclude(order_type="holder"), 
+        label="Add to an existing order (optional)",
+        required=False)
+
+    def __init__(self, provider=None, *args, **kwargs):
+        super(OrderSelectionFilteredForm, self).__init__(*args, **kwargs)
+        if provider:
+            self.fields["demand"].queryset = provider.sales_orders.all()

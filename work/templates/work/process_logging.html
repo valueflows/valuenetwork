@@ -1400,7 +1400,7 @@ hr {
 		        <br />
 		        {% trans "Order" %}: 
 		        <span class="rand-order" >
-		            <b>{{ process.independent_demand }}</b>
+		            <a href="{% url "order_plan" order_id=process.independent_demand.id %}"><b>{{ process.independent_demand }}</b></a>
 	            </span>
 	        {% endif %}
 	        

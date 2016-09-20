@@ -583,6 +583,9 @@ def process_logging(request, process_id):
     #import pdb; pdb.set_trace()
     agent = get_agent(request)
     user = request.user
+    agent_projects = agent.related_contexts()
+    if process.context_agent not in agent_projects:
+        return render_to_response('valueaccounting/no_permission.html')
     logger = False
     worker = False
     super_logger = False
@@ -2994,6 +2997,9 @@ def order_plan(request, order_id):
     agent = get_agent(request)
     order = get_object_or_404(Order, pk=order_id)
     #import pdb; pdb.set_trace()
+    coordinated_projects = agent.managed_projects()
+    if order.provider not in coordinated_projects:
+        return render_to_response('valueaccounting/no_permission.html')
     error_message = ""
     order_items = order.order_items()
     rts = None
@@ -3036,6 +3042,10 @@ def order_plan(request, order_id):
 @login_required
 def change_project_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
+    agent = get_agent(request)
+    coordinated_projects = agent.managed_projects()
+    if order.provider not in coordinated_projects:
+        return render_to_response('valueaccounting/no_permission.html')
     #import pdb; pdb.set_trace()
     order_form = OrderChangeForm(instance=order, data=request.POST or None)
     if request.method == "POST":
@@ -3300,6 +3310,10 @@ def plan_work(request, rand=0):
 @login_required
 def order_delete_confirmation_work(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
+    agent = get_agent(request)
+    coordinated_projects = agent.managed_projects()
+    if order.provider not in coordinated_projects:
+        return render_to_response('valueaccounting/no_permission.html')
     pcs = order.producing_commitments()
     sked = []
     reqs = []

@@ -130,6 +130,7 @@ legend {
                {% endif %}
                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
+               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
         </div>
 		</legend>
 		<div class="button-row">

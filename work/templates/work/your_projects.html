@@ -165,6 +165,7 @@
                         </div>
                       {% endif %}
                     {% endfor %}
+                    <a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>
                    </li>
               {% endif %}
             {% endif %}
@@ -224,6 +225,7 @@
                 </div>
                 {% endif%}
               {% endfor %}
+              <a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>
             </li>
             {% endif %}
           {% endfor %}

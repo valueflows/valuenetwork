@@ -6174,7 +6174,12 @@ def add_transfer(request, exchange_id, transfer_type_id):
                         created_by = request.user,
                     )    
                     event2.save()
-   
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))
+    
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6287,6 +6292,11 @@ def transfer_from_commitment(request, transfer_id):
                     event_res.save()
                 commit.finished = True
                 commit.save()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', transfer.context_agent.id, 0, exchange.id))
             
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))    
@@ -6397,6 +6407,11 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                         created_by = request.user,
                     )    
                     commit2.save()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))
             
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
@@ -6509,6 +6524,11 @@ def change_transfer_events(request, transfer_id):
 
                 transfer.transfer_date = event_date
                 transfer.save()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))
                 
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))    
@@ -6564,6 +6584,11 @@ def change_transfer_commitments(request, transfer_id):
                     commit.description=description
                     commit.changed_by = request.user
                     commit.save()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))
                  
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))   
@@ -6578,6 +6603,11 @@ def delete_transfer_commitments(request, transfer_id):
                 commit.delete()
         if transfer.is_deletable():
              transfer.delete()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', transfer.context_agent.id, 0, exchange.id))
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id)) 
 
@@ -6615,6 +6645,12 @@ def delete_transfer_events(request, transfer_id):
                     receive_res.save()
         if transfer.is_deletable():
              transfer.delete()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', transfer.context_agent.id, 0, exchange.id))
+            
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))   
 
@@ -6936,6 +6972,9 @@ def delete_event(request, event_id):
     if next == "exchange":
         return HttpResponseRedirect('/%s/%s/%s/'
             % ('accounting/exchange', 0, exchange.id))
+    if next == "exchange-work":
+        return HttpResponseRedirect('/%s/%s/%s/%s/'
+            % ('work/exchange-logging-work', event.context_agent.id, 0, exchange.id))
     if next == "distribution":
         return HttpResponseRedirect('/%s/%s/'
             % ('accounting/distribution', distribution.id))
@@ -7006,7 +7045,10 @@ def delete_exchange(request, exchange_id):
         if next == "distributions":
             return HttpResponseRedirect('/%s/'
                 % ('accounting/distributions'))
-       #needs a fall-through if next is none of the above
+        if next == "exchanges-all":
+            return HttpResponseRedirect('/%s/'
+                % ('work/exchanges-all'))
+       #todo: needs a fall-through if next is none of the above
 
 
 @login_required
@@ -8127,6 +8169,11 @@ def add_work_for_exchange(request, exchange_id):
         event.created_by = request.user
         event.changed_by = request.user
         event.save()
+    next = request.POST.get("next")
+    if next:
+        if next == "exchange-work":
+            return HttpResponseRedirect('/%s/%s/%s/%s/'
+                % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -9121,9 +9168,17 @@ def change_exchange_work_event(request, event_id):
         if form.is_valid():
             data = form.cleaned_data
             form.save()
+            
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))  
+        
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
+#obsolete?
 @login_required
 def change_unplanned_payment_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)
@@ -9166,6 +9221,7 @@ def change_unplanned_payment_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_receipt_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)
@@ -9185,6 +9241,7 @@ def change_receipt_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_cash_receipt_event(request, event_id):
     #import pdb; pdb.set_trace()
@@ -9227,6 +9284,7 @@ def change_cash_receipt_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_shipment_event(request, event_id):
     #import pdb; pdb.set_trace()
@@ -9261,6 +9319,7 @@ def change_shipment_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_uninventoried_shipment_event(request, event_id):
     #import pdb; pdb.set_trace()
@@ -9364,6 +9423,7 @@ def change_disbursement_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/distribution', distribution.id))
 
+#obsolete?
 @login_required
 def change_expense_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)

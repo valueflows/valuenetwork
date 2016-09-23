@@ -3357,3 +3357,229 @@ def order_delete_confirmation_work(request, order_id):
             #if next == "closed_work_orders":
             #    return HttpResponseRedirect('/%s/'
             #        % ('work/closed-work-orders'))
+
+@login_required
+def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exchange_id=None): 
+    #import pdb; pdb.set_trace()
+    context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
+    agent = get_agent(request)
+    logger = False
+    add_work_form = None
+    if agent:
+        if request.user.is_superuser:
+            logger = True
+    
+    if exchange_type_id != "0": #new exchange
+        if agent:
+            exchange_type = get_object_or_404(ExchangeType, id=exchange_type_id)
+            use_case = exchange_type.use_case
+            
+            if request.method == "POST":
+                exchange_form = ExchangeContextForm(data=request.POST)
+                if exchange_form.is_valid():
+                    exchange = exchange_form.save(commit=False)
+                    exchange.context_agent = context_agent
+                    exchange.use_case = use_case
+                    exchange.exchange_type = exchange_type
+                    exchange.created_by = request.user
+                    exchange.save()
+
+                    return HttpResponseRedirect('/%s/%s/%s/%s/'
+                        % ('work/exchange-logging-work', context_agent.id, 0, exchange.id)) 
+
+            exchange_form = ExchangeContextForm()                
+            slots = exchange_type.slots()
+            return render_to_response("work/exchange_logging_work.html", {
+                "use_case": use_case,
+                "exchange_type": exchange_type,
+                "exchange_form": exchange_form,
+                "agent": agent,
+                "context_agent": context_agent,
+                "user": request.user,
+                "logger": logger,
+                "slots": slots,
+                "total_t": 0,
+                "total_rect": 0,
+                "help": get_help("exchange"),
+            }, context_instance=RequestContext(request))
+        else:
+            raise ValidationError("System Error: No agent, not allowed to create exchange.")
+
+    elif exchange_id != "0": #existing exchange
+        exchange = get_object_or_404(Exchange, id=exchange_id)
+        
+        if request.method == "POST":
+            #import pdb; pdb.set_trace()
+            exchange_form = ExchangeContextForm(instance=exchange, data=request.POST)
+            if exchange_form.is_valid():
+                exchange = exchange_form.save()
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))   
+
+        exchange_type = exchange.exchange_type
+        use_case = exchange_type.use_case
+        exchange_form = ExchangeContextForm(instance=exchange)
+        
+        slots = []
+        total_t = 0
+        total_rect = 0
+        #import pdb; pdb.set_trace()
+        work_events = exchange.work_events()
+        slots = exchange.slots_with_detail()
+    
+        for slot in slots:
+            if slot.is_reciprocal:
+                total_rect = total_rect + slot.total
+            else:
+                total_t = total_t + slot.total
+
+        if agent:
+            #import pdb; pdb.set_trace()
+            if request.user == exchange.created_by:
+                logger = True
+
+            for event in work_events:
+                event.changeform = WorkEventAgentForm(
+                    context_agent=context_agent,
+                    instance=event, 
+                    prefix=str(event.id))
+            work_init = {
+                "from_agent": agent,
+                "event_date": datetime.date.today()
+            }
+            add_work_form = WorkEventAgentForm(initial=work_init, context_agent=context_agent)
+ 
+            #import pdb; pdb.set_trace()
+            for slot in slots:
+                ta_init = slot.default_to_agent
+                fa_init = slot.default_from_agent
+                if not ta_init:
+                    ta_init = agent
+                if not fa_init:
+                    fa_init = agent
+                xfer_init = {
+                    "from_agent": fa_init,
+                    "to_agent": ta_init,
+                    "event_date": datetime.date.today()
+                }
+                slot.add_xfer_form = TransferForm(initial=xfer_init, prefix="ATR" + str(slot.id), context_agent=context_agent, transfer_type=slot)
+                slot.create_role_formset = resource_role_agent_formset(prefix=str(slot.id))
+                commit_init = {
+                    "from_agent": fa_init,
+                    "to_agent": ta_init,
+                    "commitment_date": datetime.date.today(), 
+                    "due_date": exchange.start_date,
+                }
+                slot.add_commit_form = TransferCommitmentForm(initial=commit_init, prefix="ACM" + str(slot.id), context_agent=context_agent, transfer_type=slot)
+                
+    else:
+        raise ValidationError("System Error: No exchange or use case.")
+
+    return render_to_response("work/exchange_logging_work.html", {
+        "use_case": use_case,
+        "exchange": exchange,
+        "exchange_type": exchange_type,
+        "exchange_form": exchange_form,
+        "agent": agent,
+        "context_agent": context_agent,
+        "logger": logger,
+        "slots": slots,
+        "work_events": work_events,
+        "add_work_form": add_work_form,
+        "total_t": total_t,
+        "total_rect": total_rect,
+        "help": get_help("exchange"),
+    }, context_instance=RequestContext(request))
+
+@login_required
+def exchanges_all(request, agent_id): #all types of exchanges for one context agent
+    #import pdb; pdb.set_trace()
+    project = get_object_or_404(EconomicAgent, id=agent_id)
+    today = datetime.date.today()
+    end =  today
+    start = today - datetime.timedelta(days=365)
+    init = {"start_date": start, "end_date": end}
+    dt_selection_form = DateSelectionForm(initial=init, data=request.POST or None)
+    et_give = EventType.objects.get(name="Give")
+    et_receive = EventType.objects.get(name="Receive")
+    ets = ExchangeType.objects.all()
+    event_ids = ""
+    select_all = True
+    selected_values = "all"
+    nav_form = ExchangeNavForm(data=request.POST or None)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        new_exchange = request.POST.get("new-exchange")
+        if new_exchange:        
+            if nav_form.is_valid():
+                data = nav_form.cleaned_data
+                ext = data["exchange_type"]
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('work/exchange-logging-work', project.id, ext.id, 0))
+        
+        dt_selection_form = DateSelectionForm(data=request.POST)
+        if dt_selection_form.is_valid():
+            start = dt_selection_form.cleaned_data["start_date"]
+            end = dt_selection_form.cleaned_data["end_date"]
+            exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, project)
+        else:
+            exchanges = Exchange.objects.filter(context_agent=project)
+        selected_values = request.POST["categories"]
+        if selected_values:
+            sv = selected_values.split(",")
+            vals = []
+            for v in sv:
+                vals.append(v.strip())
+            if vals[0] == "all":
+                select_all = True
+            else:
+                select_all = False
+                transfers_included = []
+                exchanges_included = []
+                events_included = []
+                for ex in exchanges:
+                    if str(ex.exchange_type.id) in vals:
+                        exchanges_included.append(ex)
+                exchanges = exchanges_included
+    else:
+        exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, project)
+
+    total_transfers = 0
+    total_rec_transfers = 0
+    comma = ""
+    #import pdb; pdb.set_trace()
+    for x in exchanges:
+        try:
+            xx = list(x.transfer_list)
+        except AttributeError:
+            x.transfer_list = list(x.transfers.all())
+        for transfer in x.transfer_list:
+            if not transfer.transfer_type.is_reciprocal:
+                if transfer.quantity():
+                    total_transfers = total_transfers + transfer.quantity()
+            else:
+                if transfer.quantity():
+                    total_rec_transfers = total_rec_transfers + transfer.quantity()
+            for event in transfer.events.all():
+                event_ids = event_ids + comma + str(event.id)
+                comma = ","
+        #import pdb; pdb.set_trace()
+        for event in x.events.all():
+            event_ids = event_ids + comma + str(event.id)
+            comma = ","
+        #todo: get sort to work
+
+    #import pdb; pdb.set_trace()
+
+    return render_to_response("work/exchanges_all.html", {
+        "exchanges": exchanges, 
+        "dt_selection_form": dt_selection_form,
+        "total_transfers": total_transfers,
+        "total_rec_transfers": total_rec_transfers,
+        "select_all": select_all,
+        "selected_values": selected_values,
+        "ets": ets,
+        "event_ids": event_ids,
+        "project": project,
+        "nav_form": nav_form,
+    }, context_instance=RequestContext(request))

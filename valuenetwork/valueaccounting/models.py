@@ -7170,6 +7170,9 @@ class ExchangeManager(models.Manager):
         else:
             exchanges = Exchange.objects.filter(use_case__identifier="intrnl_xfer")
         return exchanges
+    
+    def exchanges_by_date_and_context(self, start, end, agent):
+        return Exchange.objects.filter(start_date__range=[start, end]).filter(context_agent=agent)
 
 class Exchange(models.Model):
     name = models.CharField(_('name'), blank=True, max_length=128)

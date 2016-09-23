@@ -336,3 +336,28 @@ class OrderSelectionFilteredForm(forms.Form):
         super(OrderSelectionFilteredForm, self).__init__(*args, **kwargs)
         if provider:
             self.fields["demand"].queryset = provider.sales_orders.all()
+            
+
+class ExchangeNavForm(forms.Form):
+    exchange_type = forms.ModelChoiceField(
+        queryset=ExchangeType.objects.all(),
+        empty_label=None,
+        widget=forms.Select(
+            attrs={'class': 'exchange-selector'}))
+        
+
+class ExchangeContextForm(forms.ModelForm):
+    start_date = forms.DateField(required=True, 
+        label=_("Date"),
+        widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
+    notes = forms.CharField(required=False, 
+        label=_("Comments"),
+        widget=forms.Textarea(attrs={'class': 'item-description',}))
+    url = forms.CharField(required=False, 
+        label=_("Link to receipt(s)"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+
+    class Meta:
+        model = Exchange
+        fields = ('start_date', 'url', 'notes')
+        

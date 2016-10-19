@@ -231,3 +231,44 @@ form#stateForm {
 #joinForm input[type="textarea"], #joinForm input[type="text"], #joinForm input[type="email"], #joinForm input[type="url"], #joinForm textarea {
 	width: 98%;
 }
+
+/*   P R O J E C T   E X C H A N G E S   */
+
+.totals {
+  background-color: #f0f0da;
+  padding: 16px 15px;
+  max-width: 496px;
+  font-size: 105%;
+  border: 1px solid #CACAC6;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+}
+#new_exchange {
+  float: right;
+  padding: 7px 15px;
+  max-width: 600px;
+  text-align: right;
+
+  background-color: #F5F5F0;
+  border: 1px solid #94B8B8;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+}
+#new_exchange select {
+  margin: 4px;
+}
+#new_exchange .btn {
+  margin: 6px 0;
+}
+.span12 {
+  margin-left: 0px;
+}
+.filter {
+  float: right;
+  border: 1px solid #94B8B8;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+}

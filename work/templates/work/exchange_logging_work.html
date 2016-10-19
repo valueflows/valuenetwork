@@ -14,7 +14,7 @@
 <style>
 
 .event {
-    margin-left: 2em; 
+    margin-left: 2em;
     margin-bottom: 4px;
 }
 .btn {
@@ -38,9 +38,9 @@ li {
 }
 .log-section {
     border: solid 1px gainsboro;
-    background-color: beige; 
+    background-color: beige;
     padding: 4px;
-    margin-bottom: 7px;   
+    margin-bottom: 7px;
 }
 .event-label {
     color: green;
@@ -86,10 +86,10 @@ li {
     width: 480px;
 }
 .totals {
-    border: solid 2px firebrick;
-    background-color: oldlace;
+    /*border: solid 2px firebrick;
+    background-color: oldlace;*/
     margin-bottom: 12px;
-    padding-left: 1em;
+    /*padding-left: 1em;*/
 }
 .total-top {
     font-weight: bold;
@@ -103,9 +103,9 @@ li {
 }
 .trt {
     border: solid 1px gainsboro;
-    background-color: lightyellow; 
+    background-color: lightyellow;
     padding: 4px;
-    margin-bottom: 7px;   
+    margin-bottom: 7px;
 }
 .trtheading {
     color: #7D1818;
@@ -132,56 +132,59 @@ li {
     {% include "_messages.html" %}
 	<div>
 	<legend>
+    <span style="font-size:90%;">
         {% if exchange %}
             {{ exchange }}
         {% else %}
             New {{ exchange_type.name }}
         {% endif %}
-        for {{ context_agent }}
+        for {{ context_agent.name }}
+    </span>
 {% comment %}
         {% if exchange.order %}
-            <form 
-                style="display: inline;" 
-                id="order" 
-                action="{% url "order_plan" order_id=exchange.order.id %}" 
+            <form
+                style="display: inline;"
+                id="order"
+                action="{% url "order_plan" order_id=exchange.order.id %}"
                 method="GET" >
                 <button style="display: inline;"  class="btn btn-info" title="Order for this sale" >{% trans 'Go to Order' %}</button>
             </form>
         {% endif %}
 {% endcomment %}
         <div class="subnav">
+            <a class="indent" href="{% url "exchanges_all" agent_id=context_agent.id %}">{% trans "All Exchanges" %}</a>
+            <a class="indent" href="../{{ agent.id }}">{% trans "View Project" %}</a>
             <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
-            <a class="indent" href="{% url "exchanges_all" agent_id=context_agent.id %}">{% trans "Exchanges" %}</a>
         </div>
 	</legend>
 
 	<div class="row-fluid">
-	
+
         <div class="span5">
             <div class="totals">
-                <span class="total-top">{% trans "Total transfer value" %}: {{ total_t }} </span> 
-                <span class="total-top">{% trans "Total reciprocal transfer value" %}: {{ total_rect }} </span> 
+                <span class="total-top">{% trans "Total transfer value" %}: {{ total_t }} </span>
+                <span class="total-top">{% trans "Total reciprocal transfer value" %}: {{ total_rect }} </span>
             </div>
             <form class="validateMe" id="exchangeForm" method="POST" action="">
                 {% csrf_token %}
                 {{ exchange_form|as_bootstrap }}
                 {% if agent %}
                     <div class="form-actions">
-                        <input type="submit" name="save" value="{% trans 'Save changes' %}" class="btn btn-primary" /> 
+                        <input type="submit" name="save" value="{% trans 'Save changes' %}" class="btn btn-primary" />
                     </div>
                     {% if not exchange %}
                         <p>Enter this information, click on Save changes, then you can enter the exchange detail.</p>
                     {% endif %}
                 {% endif %}
             </form>
-               
+
         </div>
-        
+
         <div class="span7">
           {% if exchange %}
             <div class="trt">
                 <h3 class="trtheading">Transfers
-                <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left" 
+                <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
                     data-content="Log the planned and actual transfers for this exchange.  The types of transfers are determined by the type of exchange,
                     as defined by your network.">
                     <img src="{% static 'img/information-icon.png' %}" /></a>
@@ -216,7 +219,7 @@ li {
                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ax_form.from_agent }}<br />{% endif %}
                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
                                             Quantity transferred:<br />{{ ax_form.quantity }}<br />
-                                            Resource type transferred:<br />{{ ax_form.resource_type }}<br />   
+                                            Resource type transferred:<br />{{ ax_form.resource_type }}<br />
                                             {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                 Account from (if virtual account)<br />{{ ax_form.from_resource }}<br />
                                                 Account to (if virtual account)<br />{{ ax_form.resource }}<br />
@@ -250,7 +253,7 @@ li {
                                                         <td>{% trans "Is contact" %} &nbsp;</td>
                                                     </tr>
                                                     {% for form in slot.create_role_formset %}
-                                                        {{ form.id }}  
+                                                        {{ form.id }}
                                                         <tr class="role-row">
                                                             <td class="td-role">{{ form.role }}</td>
                                                             <td class="td-agent">{{ form.agent }}</td>
@@ -298,7 +301,7 @@ li {
                                     </div>
                                 </div>
                             {% endif %}
-                            
+
                             {% for xfer in slot.xfers %}
                                 <div class="event">
                                     {% if xfer.commitments.all %}
@@ -339,10 +342,10 @@ li {
                                             </div>
                                             {% if not xfer.events.all %}
                                                 <form
-                                                    style="display: inline;" 
-                                                    class="delete-form" 
-                                                    id="deleteForm{{ xfer.id }}" 
-                                                    action="{% url "delete_transfer_commitments" transfer_id=xfer.id %}" 
+                                                    style="display: inline;"
+                                                    class="delete-form"
+                                                    id="deleteForm{{ xfer.id }}"
+                                                    action="{% url "delete_transfer_commitments" transfer_id=xfer.id %}"
                                                     method="POST" >
                                                     {% csrf_token %}
                                                     <input type="hidden" id="next" name="next" value="exchange-work" />
@@ -406,8 +409,8 @@ li {
                                                             </div>
                                                         </form>
                                                     </div>
-                                                </div>              
-                                            {% endif %}                            
+                                                </div>
+                                            {% endif %}
                                         {% endif %}
                                         {% if xfer.commit_description %}
                                             <div class="notes"> {{ xfer.commit_description|urlize|linebreaks }} </div>
@@ -418,7 +421,7 @@ li {
                                                     <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                         <i class="icon-edit"></i>
                                                     </a>
-                            
+
                                                     <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                         <div class="modal-header">
                                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -445,7 +448,7 @@ li {
                                                                 {% endif %}
                                                                 {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ ce_form.is_contribution }}<br />{% endif %}
                                                                 {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ce_form.is_to_distribute }}<br />{% endif %}
-                                                                {% if slot.is_currency %}Event reference:<br />{{ ce_form.event_reference }}<br />{% endif %}                                                               
+                                                                {% if slot.is_currency %}Event reference:<br />{{ ce_form.event_reference }}<br />{% endif %}
                                                                 {% endwith %}
                                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
                                                                 <div class="modal-footer">
@@ -456,10 +459,10 @@ li {
                                                         </div>
                                                     </div>
                                                     <form
-                                                        style="display: inline;" 
-                                                        class="delete-form" 
-                                                        id="deleteForm{{ event.id }}" 
-                                                        action="{% url "delete_transfer_events" transfer_id=xfer.id %}" 
+                                                        style="display: inline;"
+                                                        class="delete-form"
+                                                        id="deleteForm{{ event.id }}"
+                                                        action="{% url "delete_transfer_events" transfer_id=xfer.id %}"
                                                         method="POST" >
                                                         {% csrf_token %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
@@ -504,7 +507,7 @@ li {
                                                         {% endif %}
                                                         {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ cev_form.is_contribution }}<br />{% endif %}
                                                         {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ cev_form.is_to_distribute }}<br />{% endif %}
-                                                        {% if slot.is_currency %}Event reference:<br />{{ cev_form.event_reference }}<br />{% endif %} 
+                                                        {% if slot.is_currency %}Event reference:<br />{{ cev_form.event_reference }}<br />{% endif %}
                                                         {% endwith %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                         <div class="modal-footer">
@@ -515,10 +518,10 @@ li {
                                                 </div>
                                             </div>
                                             <form
-                                                style="display: inline;" 
-                                                class="delete-form" 
-                                                id="deleteForm{{ xfer.id }}" 
-                                                action="{% url "delete_transfer_events" transfer_id=xfer.id %}" 
+                                                style="display: inline;"
+                                                class="delete-form"
+                                                id="deleteForm{{ xfer.id }}"
+                                                action="{% url "delete_transfer_events" transfer_id=xfer.id %}"
                                                 method="POST" >
                                                 {% csrf_token %}
                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
@@ -531,15 +534,15 @@ li {
                                     {% endif %}
                                 </div>
                             {% endfor %}
-                            
+
                         </div>
                     {% endif %}
                 {% endfor %}
             </div>
             {% if exchange.can_have_reciprocal_transfers %}
-            <div class="trt">    
+            <div class="trt">
                 <h3 CLASS="trtheading">Reciprocal Transfers
-                <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left" 
+                <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"
                     data-content="Log the planned and actual reciprocal transfers for this exchange.  The types of reciprocal transfers are determined by the type of exchange,
                     as defined by your network.  They are in return for the primary transfers above.">
                     <img src="{% static 'img/information-icon.png' %}" /></a>
@@ -607,7 +610,7 @@ li {
                                                         <td>{% trans "Is contact" %} &nbsp;</td>
                                                     </tr>
                                                     {% for form in slot.create_role_formset %}
-                                                        {{ form.id }}  
+                                                        {{ form.id }}
                                                         <tr class="role-row">
                                                             <td class="td-role">{{ form.role }}</td>
                                                             <td class="td-agent">{{ form.agent }}</td>
@@ -655,7 +658,7 @@ li {
                                     </div>
                                 </div>
                             {% endif %}
-                            
+
                             {% for xfer in slot.xfers %}
                                 <div class="event">
                                     {% if xfer.commitments.all %}
@@ -696,10 +699,10 @@ li {
                                             </div>
                                             {% if not xfer.events.all %}
                                                 <form
-                                                    style="display: inline;" 
-                                                    class="delete-form" 
-                                                    id="deleteForm{{ xfer.id }}" 
-                                                    action="{% url "delete_transfer_commitments" transfer_id=xfer.id %}" 
+                                                    style="display: inline;"
+                                                    class="delete-form"
+                                                    id="deleteForm{{ xfer.id }}"
+                                                    action="{% url "delete_transfer_commitments" transfer_id=xfer.id %}"
                                                     method="POST" >
                                                     {% csrf_token %}
                                                     <input type="hidden" id="next" name="next" value="exchange-work" />
@@ -763,8 +766,8 @@ li {
                                                             </div>
                                                         </form>
                                                     </div>
-                                                </div>              
-                                            {% endif %}                            
+                                                </div>
+                                            {% endif %}
                                         {% endif %}
                                         {% if xfer.events.all %}
                                             <div class="ce">>&nbsp;<span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.commit_event_text }}
@@ -772,7 +775,7 @@ li {
                                                     <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                         <i class="icon-edit"></i>
                                                     </a>
-                            
+
                                                     <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                         <div class="modal-header">
                                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -800,7 +803,7 @@ li {
                                                                 {% endif %}
                                                                 {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ ce_form.is_contribution }}<br />{% endif %}
                                                                 {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ce_form.is_to_distribute }}<br />{% endif %}
-                                                                {% if slot.is_currency %}Event reference:<br />{{ ce_form.event_reference }}<br />{% endif %}                                                               
+                                                                {% if slot.is_currency %}Event reference:<br />{{ ce_form.event_reference }}<br />{% endif %}
                                                                 {% endwith %}
                                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
                                                                 <div class="modal-footer">
@@ -811,10 +814,10 @@ li {
                                                         </div>
                                                     </div>
                                                     <form
-                                                        style="display: inline;" 
-                                                        class="delete-form" 
-                                                        id="deleteForm{{ event.id }}" 
-                                                        action="{% url "delete_transfer_events" transfer_id=xfer.id %}" 
+                                                        style="display: inline;"
+                                                        class="delete-form"
+                                                        id="deleteForm{{ event.id }}"
+                                                        action="{% url "delete_transfer_events" transfer_id=xfer.id %}"
                                                         method="POST" >
                                                         {% csrf_token %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
@@ -858,7 +861,7 @@ li {
                                                         {% endif %}
                                                         {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ cev_form.is_contribution }}<br />{% endif %}
                                                         {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ cev_form.is_to_distribute }}<br />{% endif %}
-                                                        {% if slot.is_currency %}Event reference:<br />{{ cev_form.event_reference }}<br />{% endif %} 
+                                                        {% if slot.is_currency %}Event reference:<br />{{ cev_form.event_reference }}<br />{% endif %}
                                                         {% endwith %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                         <div class="modal-footer">
@@ -869,10 +872,10 @@ li {
                                                 </div>
                                             </div>
                                             <form
-                                                style="display: inline;" 
-                                                class="delete-form" 
-                                                id="deleteForm{{ xfer.id }}" 
-                                                action="{% url "delete_transfer_events" transfer_id=xfer.id %}" 
+                                                style="display: inline;"
+                                                class="delete-form"
+                                                id="deleteForm{{ xfer.id }}"
+                                                action="{% url "delete_transfer_events" transfer_id=xfer.id %}"
                                                 method="POST" >
                                                 {% csrf_token %}
                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
@@ -885,28 +888,28 @@ li {
                                     {% endif %}
                                 </div>
                             {% endfor %}
-                            
-                        </div> 
+
+                        </div>
                     {% endif %}
 
-                {% endfor %}        
-            </div> 
+                {% endfor %}
+            </div>
             {% endif %}
-        
+
             <div class="log-section">
                 <h3 style="margin-bottom: 4px;" >
-                    {% trans "Work" %}  
+                    {% trans "Work" %}
                     {% if logger and exchange %}
                         <a href="#addWorkModal" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Add work done for this exchange.">
                             {% trans "Log a work event" %}
                         </a>
                     {% endif %}
-                    <span class="info"> <a href="#" id="work-info" data-toggle="popover" data-trigger='hover' title="Work Events" 
-                        data-content="Enter the time you spent on this exchange. This might be preparing paperwork, 
+                    <span class="info"> <a href="#" id="work-info" data-toggle="popover" data-trigger='hover' title="Work Events"
+                        data-content="Enter the time you spent on this exchange. This might be preparing paperwork,
                         communicating, traveling, even logging the exchange." data-placement="left">
                         <img src="{% static 'img/information-icon.png' %}" /></a>
                     </span>
-                </h3> 
+                </h3>
                 {% if logger and exchange %}
                     <div class="modal hide fade" id="addWorkModal" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
                         <div class="modal-header">
@@ -931,11 +934,11 @@ li {
                     <div class="event" >
                         <span ><span class="event-label">{% trans "Work event" %}: </span><b> {{ event.resource_type.name }}</b> {{ event.quantity }} {{ event.unit_of_quantity }} {{ event.event_date }} <span class="taken">{% trans "Done by" %} {{ event.from_agent.nick }}</span></span>
                         {% if agent == event.from_agent or logger  %}
-                            
+
                             <a href="#eventModal{{ event.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                 <i class="icon-edit"></i>
                             </a>
-        
+
                             <div class="modal hide fade" id="eventModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -955,10 +958,10 @@ li {
                             </div>
 
                             <form
-                                style="display: inline;" 
-                                class="delete-form" 
-                                id="deleteForm{{ event.id }}" 
-                                action="{% url "delete_event" event_id=event.id %}" 
+                                style="display: inline;"
+                                class="delete-form"
+                                id="deleteForm{{ event.id }}"
+                                action="{% url "delete_event" event_id=event.id %}"
                                 method="POST" >
                                 {% csrf_token %}
                                 <input type="hidden" id="next" name="next" value="exchange-work" />
@@ -967,10 +970,10 @@ li {
                         {% endif %}
                         {% if event.description %}
                         <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
-                        {% endif %}                     
+                        {% endif %}
                     </div>
                 {% endfor %}
-            </div> 
+            </div>
           {% endif %}
         </div>
     </div>
@@ -997,7 +1000,7 @@ li {
         $('#work-info').popover()
         $('#xfer-info').popover()
         $('#rxfer-info').popover()
-		
+
 		jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
@@ -1006,7 +1009,7 @@ li {
             "Please enter a number less than 1000000 with no more than 2 decimal places"
         );
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
 		        label
 			        .text('').addClass('valid')
@@ -1018,13 +1021,13 @@ li {
         //$.validator.addClassRules("value", { required: true, number: true });
 		$.validator.addClassRules("url", { url: true });
         $.validator.addClassRules("resourceType", { required: true});
-        $.validator.addClassRules("hours", { 
+        $.validator.addClassRules("hours", {
 			required: true,
 			number: true,
 			min: 0,
 			max: 24
 		});
-		$.validator.addClassRules("minutes", { 
+		$.validator.addClassRules("minutes", {
 			required: true,
 			number: true,
 			min: 0,
@@ -1046,7 +1049,7 @@ li {
             }
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
-        
+
         $.validator.addMethod("roleRequired", function (value, element) {
             var form_id = element.form.id;
             form_id = "#" + form_id;
@@ -1061,7 +1064,7 @@ li {
             }
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
-        
+
         $.validator.addClassRules("select-role", { agentRequired: true });
         $.validator.addClassRules("select-agent", { roleRequired: true });
 
@@ -1107,9 +1110,9 @@ li {
                 JsonSetUnitAndRule(resourceTypeId, targetId);
 		    }
 	    }
-	    
+
 	    $(".resource-type-for-resource").change(getResources);
-        
+
         function getResources(event)
         {
             var resourceTypeId = event.target.value;
@@ -1126,18 +1129,18 @@ li {
                     for(var i=0 ; i<data.length ; i++)
                     {
                         var id = data[i].fields['pk'];
-                        var name = data[i].fields['identifier']; 
-                        var loc = data[i].fields['location']; 
+                        var name = data[i].fields['identifier'];
+                        var loc = data[i].fields['location'];
                         if (loc){
                             name = name + " at " + loc;
                         }
-                        $(resourceFieldId).append('<option value="' + id + '">' + name + '</option>') 
+                        $(resourceFieldId).append('<option value="' + id + '">' + name + '</option>')
                     }
                     $(".chzn-select").trigger("liszt:updated");
                 });
             }
         }
-        
+
 
         if($( '#use-case' ).val() == 'res_contr' || $( '#use-case' ).val() == 'cash_contr')
         {
@@ -1189,13 +1192,13 @@ li {
         });
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
-        
+
         {% if use_case.identifier == 'sale' %}
             $("#id_context_agent").change(getCustomers);
         {% endif %}
@@ -1223,29 +1226,29 @@ li {
                 var inventory_rule = data["rule"];
                 //alert(inventory_rule);
                 if (inventory_rule == "yes") {
-                    //$('#div_id_unorderedreceipt-quantity').show(); 
-                    //$('#div_id_unorderedreceipt-unit_of_quantity').show(); 
-                    $('#div_id_unorderedreceipt-identifier').show(); 
-                    $('#div_id_unorderedreceipt-url').show(); 
-                    $('#div_id_unorderedreceipt-photo_url').show(); 
-                    $('#div_id_unorderedreceipt-notes').show(); 
-                    $('#div_id_unorderedreceipt-current_location').show(); 
-                    $('#div_id_unorderedreceipt-access_rules').show(); 
-                    $('.hideShow').show(); 
+                    //$('#div_id_unorderedreceipt-quantity').show();
+                    //$('#div_id_unorderedreceipt-unit_of_quantity').show();
+                    $('#div_id_unorderedreceipt-identifier').show();
+                    $('#div_id_unorderedreceipt-url').show();
+                    $('#div_id_unorderedreceipt-photo_url').show();
+                    $('#div_id_unorderedreceipt-notes').show();
+                    $('#div_id_unorderedreceipt-current_location').show();
+                    $('#div_id_unorderedreceipt-access_rules').show();
+                    $('.hideShow').show();
                 } else {
-                    //$('#div_id_unorderedreceipt-quantity').hide(); 
-                    //$('#div_id_unorderedreceipt-unit_of_quantity').hide(); 
-                    $('#div_id_unorderedreceipt-identifier').hide(); 
-                    $('#div_id_unorderedreceipt-url').hide(); 
-                    $('#div_id_unorderedreceipt-photo_url').hide(); 
-                    $('#div_id_unorderedreceipt-notes').hide();  
-                    $('#div_id_unorderedreceipt-current_location').hide(); 
-                    $('#div_id_unorderedreceipt-access_rules').hide(); 
-                    $('.hideShow').hide();                            
-                }                    
+                    //$('#div_id_unorderedreceipt-quantity').hide();
+                    //$('#div_id_unorderedreceipt-unit_of_quantity').hide();
+                    $('#div_id_unorderedreceipt-identifier').hide();
+                    $('#div_id_unorderedreceipt-url').hide();
+                    $('#div_id_unorderedreceipt-photo_url').hide();
+                    $('#div_id_unorderedreceipt-notes').hide();
+                    $('#div_id_unorderedreceipt-current_location').hide();
+                    $('#div_id_unorderedreceipt-access_rules').hide();
+                    $('.hideShow').hide();
+                }
 		    });
     }
-    
+
     {% if use_case.identifier == 'sale' %}
     function getCustomers()
     {
@@ -1257,15 +1260,15 @@ li {
         $("#id_customer").empty();
         $.get(jsonUrl,
         function(data){
-            $("#id_customer").append('<option value="">' + '--------' + '</option>'); 
+            $("#id_customer").append('<option value="">' + '--------' + '</option>');
             for(var i=0 ; i<data.length ; i++)
             {
                 var id = data[i]['pk'];
-                var name = data[i].fields['nick']; 
+                var name = data[i].fields['nick'];
                 if (selectedCustomer == id) {
                     $("#id_customer").append('<option value="' + id + '" selected>' + name + '</option>');
                 } else {
-                    $("#id_customer").append('<option value="' + id + '">' + name + '</option>'); 
+                    $("#id_customer").append('<option value="' + id + '">' + name + '</option>');
                 }
             }
             $(".chzn-select").trigger("liszt:updated");

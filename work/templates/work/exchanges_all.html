@@ -8,12 +8,12 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 
 <style>
-.totals {
+/*.totals {
     border: solid 2px firebrick;
     background-color: oldlace;
     margin-bottom: 12px;
     padding-left: 1em;
-}
+}*/
 .total {
     font-weight: bold;
     padding-right: 2em;
@@ -36,39 +36,42 @@
         {% include "_messages.html" %}
 		<legend>{% trans "Exchanges" %} for {{ project.name }}
             <div class="subnav">
+                <a class="indent" href="../{{ agent.id }}">{% trans "View Project" %}</a>
                 <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             </div>
         </legend>
 
-        <div class="span8">
-          <div>
+        <div class="span12">
+          <div id="new_exchange">
             <form id="exchangeForm" style="display: inline;" method="POST" action="">
                 {% csrf_token %}
                 Choose a type to create a new exchange: {{ nav_form.exchange_type }}
-                <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" /> 
+                <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
             </form>
           </div>
-          <br />
           <div class="totals">
-            <span class="total">Incoming total: {{ total_transfers }} </span> 
-            <span class="total">Outgoing total: {{ total_rec_transfers }} </span> 
+            <span class="total">Incoming total: {{ total_transfers }} </span>
+            <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 {% comment %}
             <br />* Note these totals are meaningful only if the events selected all use the same currency.
 {% endcomment %}
-          </div> 
+          </div>
+          <br />
+      </div>
+      <div class="span9">
 		  {% if exchanges %}
 			<ul>
 			    {% for x in exchanges %}
                     <li>
-                        <a href="{% url "exchange_logging_work" context_agent_id=x.context_agent.id exchange_type_id=0 exchange_id=x.id %}">{{ x }}</a>  {% trans "created by" %} {{ x.created_by }}
+                        <a href="{% url "exchange_logging_work" context_agent_id=x.context_agent.id exchange_type_id=0 exchange_id=x.id %}"><b>{{ x }}</b></a>  {% trans "created by" %} {{ x.created_by }}
                         {% if user = x.created_by or user.is_superuser%}
-                            <a class="btn btn-info btn-mini" href="{% url "exchange_logging_work" context_agent_id=x.context_agent.id exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a> 
+                            <a class="btn btn-info btn-mini" href="{% url "exchange_logging_work" context_agent_id=x.context_agent.id exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a>
                             {% if x.is_deletable %}
                                 <form
-                                    style="display: inline;" 
-                                    class="delete-form" 
-                                    id="deleteForm{{ exchange.id }}" 
-                                    action="{% url "delete_exchange" exchange_id=x.id %}" 
+                                    style="display: inline;"
+                                    class="delete-form"
+                                    id="deleteForm{{ exchange.id }}"
+                                    action="{% url "delete_exchange" exchange_id=x.id %}"
                                     method="POST" >
                                     {% csrf_token %}
                                     <input type="hidden" id="next" name="next" value="exchanges-all" />
@@ -95,7 +98,7 @@
 			</ul>
 		  {% endif %}
         </div>
-        <div class="span3 filter">
+        <div class="span2 filter">
 {% comment %}
             {% if exchanges %}
                 <div>
@@ -106,29 +109,29 @@
             <h3>{% trans "Filter the List" %}</h3>
             <form id="filter-form" action="." method="POST">
 	            {% csrf_token %}
-                <div id="div_id_start_date" class="control-group" style="display: inline;" > 
+                <div id="div_id_start_date" class="control-group" style="display: inline;" >
                     <label for="id_start_date" class="control-label required-field" style="display: inline; vertical-align: text-bottom;" >
                         {% trans "Start date " %}
-                    </label>    
+                    </label>
                     <div class="controls" style="display: inline;" >
                         {{ dt_selection_form.start_date }}
                     </div>
                 </div>
-                <div id="div_id_end_date" class="control-group" > 
+                <div id="div_id_end_date" class="control-group" >
                     <label for="id_end_date" class="control-label required-field" style="display: inline;  vertical-align: text-bottom; " >
                         {% trans "End date  " %}
-                    </label>    
+                    </label>
                     <div class="controls" style="display: inline;" >
                         {{ dt_selection_form.end_date }}
                     </div>
                 </div>
 	            <p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All in the date range" %}</p>
-                <p class="title"> {% trans "Exchange Type" %} </p> 
+                <p class="title"> {% trans "Exchange Type" %} </p>
                 {% for et in ets %}
                     <p><input type="checkbox" class="category" id="{{ et.id }}" name="{{ et.id }}" value="{{ et.id }}" /> {{ et.name }}</p>
-                {% endfor %} 
+                {% endfor %}
 {% comment %}
-                {% if references %}               
+                {% if references %}
 	            <p class="title"> {% trans "Accounting Reference" %} </p>
 	            {% for ar in references %}
 	                <p><input type="checkbox" class="category" id="{{ ar.code }}" name="{{ ar.code }}" value="{{ ar.code }}" /> {{ ar.name }}</p>
@@ -155,7 +158,7 @@
 	$(document).ready(function(){
 
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -175,7 +178,7 @@
 			}
 		});
 
-		$('.category').click(function() 
+		$('.category').click(function()
 		{
 			var checkedCats = [];
 			var checkedBox = $(this)[0];

@@ -39,11 +39,11 @@ legend {
   font-weight: bold;
   border-bottom: 2px solid #678B8B;
 }
-h3, h4 {
+h2, h3, h4 {
   color: #476B6B;
 }
 ul h4 {
-  color: inherit;
+  /*color: inherit;*/
 }
 
 li > h4 {
@@ -187,6 +187,32 @@ legend a.btn {
   margin-bottom: 9px;
 }
 
+/*   A G E N T   P R O J E C T   P A G E   */
+
+.span6.infobox {
+  margin-left: 0;
+}
+.table-bordered {
+  border: 1px solid #CACAC6;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+}
+.table-bordered th {
+  border-bottom: 1px #CACAC6;
+  border-left: none;
+}
+.table-bordered tr:first-child th {
+  -moz-border-radius: 7px 0 0 0;
+  -webkit-border-radius: 7px 0 0 0;
+  border-radius: 7px 0 0 0;
+}
+.table-bordered tr:last-child th {
+  -moz-border-radius: 0 0 0 7px;
+  -webkit-border-radius: 0 0 0 7px;
+  border-radius: 0 0 0 7px;
+}
+
 
 /*   J O I N   R E Q U E S T S   P A G E   */
 
@@ -234,27 +260,52 @@ form#stateForm {
 
 /*   P R O J E C T   E X C H A N G E S   */
 
-.totals {
-  background-color: #f0f0da;
-  padding: 16px 15px;
-  max-width: 496px;
-  font-size: 105%;
-  border: 1px solid #CACAC6;
-  -moz-border-radius: 7px;
-  -webkit-border-radius: 7px;
-  border-radius: 7px;
-}
-#new_exchange {
-  float: right;
-  padding: 7px 15px;
-  max-width: 600px;
-  text-align: right;
 
+.miniform {
+  padding: 7px 15px;
   background-color: #F5F5F0;
   border: 1px solid #94B8B8;
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   border-radius: 7px;
+}
+.infobox {
+  background-color: #f0f0da;
+  padding: 7px 15px;
+  border: 1px solid #CACAC6;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  margin-bottom: 13px;
+}
+.infobox2 {
+  background-color: beige;
+  padding: 16px 15px;
+  border: 1px solid #CACAC6;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  margin-bottom: 7px;
+  margin-top: 7px;
+}
+.infobox h3 {
+  margin: 0 0 5px 0;
+  padding: 0;
+}
+.hdg {
+    color: #444;/*firebrick;*/
+}
+.infobox-div {
+  margin-top: 5px;
+}
+.totals {
+  max-width: 496px;
+  font-size: 105%;
+}
+#new_exchange {
+  float: right;
+  max-width: 600px;
+  text-align: right;
 }
 #new_exchange select {
   margin: 4px;
@@ -265,10 +316,18 @@ form#stateForm {
 .span12 {
   margin-left: 0px;
 }
+#exchangeForm p {
+  margin: 9px 0 0 0;
+}
 .filter {
   float: right;
-  border: 1px solid #94B8B8;
-  -moz-border-radius: 7px;
-  -webkit-border-radius: 7px;
-  border-radius: 7px;
+}
+
+/*   P O P O V E R S   */
+
+.popover .popover-inner {
+  background-color: #476B6B;
+}
+.popover.left .arrow {
+  border-left: 5px solid #476B6B;
 }

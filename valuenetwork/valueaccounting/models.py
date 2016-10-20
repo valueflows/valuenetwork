@@ -3381,7 +3381,7 @@ class Order(models.Model):
         if process:
             process_name = ", " + process.name
         if self.name:
-            process_name = " ".join(["for", self.name])
+            process_name = " ".join([" for", self.name])
         if self.provider:
             provider_name = self.provider.nick
             provider_label = ", provider:"
@@ -3395,7 +3395,7 @@ class Order(models.Model):
         due_label = " due:"
         if provider_name or receiver_name:
             due_label = ", due:"
-        return " ".join(
+        return "".join(
             [self.get_order_type_display(),
             str(self.id),
             process_name,
@@ -7170,7 +7170,7 @@ class ExchangeManager(models.Manager):
         else:
             exchanges = Exchange.objects.filter(use_case__identifier="intrnl_xfer")
         return exchanges
-    
+
     def exchanges_by_date_and_context(self, start, end, agent):
         return Exchange.objects.filter(start_date__range=[start, end]).filter(context_agent=agent)
 

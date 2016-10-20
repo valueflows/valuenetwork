@@ -26,13 +26,15 @@
 .item-description
 {
 	width: 32em;
-    height: 40px;
+  height: 40px;
 }
 .selected {
     font-size: 1.2em;
 }
 .section {
-    color: firebrick;
+    /*color: firebrick;*/
+  margin-bottom: 5px;
+  /*margin-top: 13px;*/
 }
 .select-buttons p {
     margin-top: 20px;
@@ -47,40 +49,46 @@
 {% block body_class %}x{% endblock %}
 
 {% block body_base %}
-    <div class="container">
+  <div class="container">
       {% include "_messages.html" %}
 	  <div>
-        <legend>{% trans "Production Planning" %}</legend>
-		<form class="form-horizontal" id="processForm" method="POST" action=".">
+      <legend>
+        {% trans "Production Planning" %}
+        <div class="subnav">
+          <a class="indent" href="{% url "order_list" %}">{% trans "Open Orders" %}</a>
+          <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
+        </div>
+      </legend>
+
+		  <form class="form-horizontal" id="processForm" method="POST" action=".">
 	      {% csrf_token %}
-		  <div class="row-fluid">
-			<div class="span12">
+		    <div class="row-fluid">
+			    <div class="span12">
                 {% if selected_pattern %}
                     <p class="selected">
                     <i>Chosen:</i>&nbsp;&nbsp;
-                    {% trans "Pattern " %} 
-	                <input type="text" name="selected-pattern~{{ selected_pattern.id }}" value="{{ selected_pattern }}"
-                        readonly="readonly" />&nbsp;&nbsp; 
-                    {% trans "Project " %} 
+                    {% trans "Project " %}
 	                <input type="text" name="selected-context-agent~{{ selected_context_agent.id }}" value="{{ selected_context_agent }}"
-                        readonly="readonly" /> 
+                        readonly="readonly" />&nbsp;&nbsp;
+                    {% trans "Pattern " %}
+	                <input type="text" name="selected-pattern~{{ selected_pattern.id }}" value="{{ selected_pattern }}"
+                        readonly="readonly" />
                     </p>
                 {% else %}
-                    {% trans "Choose a pattern " %} {{ pattern_form.pattern }} &nbsp; 
-                    {% trans "Choose a project " %} {{ ca_form.context_agent }} &nbsp;&nbsp; 
+                    {% trans "Choose a project " %} {{ ca_form.context_agent }} &nbsp;
+                    {% trans "Choose a pattern " %} {{ pattern_form.pattern }} &nbsp;&nbsp;
 	                <input type="submit" name="get-related" value="{% trans 'Get resource types' %}" class="btn btn-primary" />
                 {% endif %}
-            </div>
           </div>
+        </div>
 
 		  {% if selected_pattern %}
 
-		    <div class="row-fluid">
-			  <div class="span6">
-
+		    <div class="row-fluid miniform">
+			    <div class="span6">
 	              {% for slot in slots %}
-
-                    <legend class="section"> {{ slot }} </legend>
+                    <h3 class="section"> {{ slot }}: </h3>
                     <div>
                         {% for item in slot.resource_types %}
                             <div>
@@ -93,18 +101,18 @@
                     </div>
 
                   {% endfor %}
-              </div>
-              <div class="span6">
+          </div>
+          <div class="span6">
 
-                    <hr />
+                    <!-- <hr /> -->
                     {{ process_form|as_bootstrap }}
 {% comment %}
-                    {{ demand_form|as_bootstrap }}  
-                    (If an order is not selected, a new work order will be created automatically.) 
+                    {{ demand_form|as_bootstrap }}
+                    (If an order is not selected, a new work order will be created automatically.)
 {% endcomment %}
-                    <hr />                
-                    
-                    <div class="select-buttons">
+                    <!-- <hr /> -->
+
+                    <div class="select-buttons" style="text-align:right;">
                         <p>
                             <input type="submit" name="create-process" value="{% trans 'Save process & exit' %}" class="btn btn-primary" />
                             </br>Create planned work using the selected resource types.
@@ -122,20 +130,20 @@
 
                     </div>
 
-               </div>
-            </div>
-   
+          </div>
+        </div>
+
 	      {% endif %}
 
-		</form>
-      </div>
+		  </form>
     </div>
+  </div>
 {% endblock %}
 {% block extra_script %}
 	<script src="https://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
 	<script src="{% static 'js/chosen.jquery.js' %}"></script>
-	
+
 {% endblock %}
 
 {% block extra_body %}
@@ -146,7 +154,7 @@
  	$(document).ready(function(){
 
 	    $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -156,22 +164,22 @@
         //$(".chzn-select").chosen();
 
         $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
-        $( "#id_end_date" ).datepicker({ 
+        $( "#id_end_date" ).datepicker({
 			dateFormat: "yy-mm-dd",
     		onClose: function() {
       			$( this ).valid();
 			}
 		 });
 
-		jQuery.validator.addMethod("equalToOrGreaterThan", 
+		jQuery.validator.addMethod("equalToOrGreaterThan",
 		function(value, element, params) {
 
 			if (!/Invalid|NaN/.test(new Date(value))) {
 				return new Date(value) >= new Date($(params).val());
 			}
 
-			return isNaN(value) && isNaN($(params).val()) 
-				|| (Number(value) >= Number($(params).val())); 
+			return isNaN(value) && isNaN($(params).val())
+				|| (Number(value) >= Number($(params).val()));
 		},'Must be equal to or greater than start date.');
 
 		$( "#processForm" ).validate({
@@ -190,7 +198,7 @@
 			},
 		});
 
-        $(".work").click(function() { 
+        $(".work").click(function() {
             var numberChecked = 0;
             var works = $('.work');
             var gotWork = false;
@@ -225,10 +233,10 @@
         else
         {
             $('#startNow').attr("disabled", "disabled");
-            $('#pastWork').attr("disabled", "disabled"); 
+            $('#pastWork').attr("disabled", "disabled");
         }
     }
-	
+
     </script>
 
 {% endblock %}

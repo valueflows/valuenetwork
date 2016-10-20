@@ -8,12 +8,14 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
 
 <style>
-/*.totals {
-    border: solid 2px firebrick;
+.totals {
+    /*border: solid 2px firebrick;
     background-color: oldlace;
     margin-bottom: 12px;
-    padding-left: 1em;
-}*/
+    padding-left: 1em;*/
+  padding-bottom: 16px;
+  padding-top: 16px;
+}
 .total {
     font-weight: bold;
     padding-right: 2em;
@@ -40,16 +42,18 @@
                 <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             </div>
         </legend>
-
         <div class="span12">
-          <div id="new_exchange">
+          {% if request.user.agent.agent in project.managers or request.user.is_staff %}
+          <div id="new_exchange" class="miniform">
             <form id="exchangeForm" style="display: inline;" method="POST" action="">
                 {% csrf_token %}
                 Choose a type to create a new exchange: {{ nav_form.exchange_type }}
                 <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
             </form>
           </div>
-          <div class="totals">
+
+          {% endif %}
+          <div class="totals infobox">
             <span class="total">Incoming total: {{ total_transfers }} </span>
             <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 {% comment %}
@@ -57,7 +61,7 @@
 {% endcomment %}
           </div>
           <br />
-      </div>
+        </div>
       <div class="span9">
 		  {% if exchanges %}
 			<ul>
@@ -98,7 +102,7 @@
 			</ul>
 		  {% endif %}
         </div>
-        <div class="span2 filter">
+        <div class="span2 filter miniform">
 {% comment %}
             {% if exchanges %}
                 <div>

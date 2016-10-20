@@ -26,9 +26,7 @@
 .btn-info {
     margin-left: 10px;
 }
-.hdg {
-    /*color: firebrick;*/
-}
+
 .btn {
     margin-top: 1px;
     margin-bottom: 1px;
@@ -139,7 +137,7 @@ legend {
                 {% if agent.is_context %}
                   <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Edit Project" %}</a>
                 {% endif %}
-                {% if not agent.faircoin_address and user_agent.is_staff%}
+                {% if not agent.faircoin_address%}
                     <form
                         style="display: inline;"
                         class="faircoin-form indent"
@@ -385,11 +383,45 @@ legend {
 
 	            </table>
 
+              {% if user.is_staff or user_agent in agent.managers %}
+              <!-- <div class="row-fluid" tyle="margin-top:2em;"> -->
+                <div class="span6 infobox" style="width:100%;">
+                  <h3 class="">{% trans "Resources" %}:</h3>
+                  {% if agent.resources_created %}
+                    <h4 class="hdg">{% trans "Resources Created" %}:</h4>
+                    <ul>
+                        {% for resource in agent.resources_created %}
+                            <li>
+                                <a href="{{ resource.get_absolute_url }}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                  {% if agent.resource_relationships %}
+                    <h4 class="hdg">{% trans "Resource Relationships" %}:</h4>
+                    <ul>
+                        {% for rel in agent.resource_relationships %}
+                            {% ifchanged rel.role %}
+                                <h4>{{ rel.role.name }} </h4>
+                            {% endifchanged %}
+                            <li>
+                                <a href="{{ rel.resource.get_absolute_url }}"> {{ rel.resource }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+
+
+              <!-- </div> -->
+              {% endif %}
+
 	        </div>
 
         {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+          <div class="span6">
           {% if agent.project and form_entries and fobi_name and user_agent in agent.managers %}
-            <div class="span5 requests">
+            <div class="requests">
               <h3>
                 {% trans "Pending to create user+agent:" %} <!-- <span style="font-weight:normal;">{{ fobi_name }}</span> -->
               </h3>
@@ -403,7 +435,10 @@ legend {
               <p>&nbsp;</p>
             </div>
           {% endif %}
-	        <div class="span4 assoc">
+	        <div class="assoc infobox" style="width:95%;">
+            <h3>
+              {% trans "Relations:" %}
+            </h3>
                 <h4 class="hdg"> {{ agent.name }} {% trans "is associated with" %}: </h4>
                 <ul>
                 {% for assoc in is_associated_with  %}
@@ -453,6 +488,23 @@ legend {
                 {% endif %}
 
 	          </div>
+            <div class="infobox" style="width:95%;">
+                  <h3 class="">{% trans "Active Processes" %}:</h3>
+                  {% if agent.active_processes %}
+                    <ul>
+                        {% for process in agent.active_processes %}
+                            <li>
+                                <a href="{% url "process_logging" process_id=process.id %}"><b>{{ process }}</b></a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% else %}
+                        <p>{% trans "None" %}</p>
+                  {% endif %}
+            </div>
+          </div>
+
+		    </div>
 
 
             {% if agent.is_individual and user.is_staff %}
@@ -462,59 +514,6 @@ legend {
                 </div>
             {% endif %}
 
-		      </div>
-        {% if user.is_staff %}
-          <div class="row-fluid" tyle="margin-top:2em;">
-            <div class="span6">
-              <h3 class="hdg">{% trans "Resources" %}:</h3>
-              {% if agent.resources_created %}
-                <h4 class="hdg">{% trans "Resources Created" %}:</h4>
-                <ul>
-                    {% for resource in agent.resources_created %}
-                        <li>
-                            <a href="{{ resource.get_absolute_url }}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
-                        </li>
-
-                    {% endfor %}
-                </ul>
-              {% endif %}
-              {% if agent.resource_relationships %}
-                <h4 class="hdg">{% trans "Resource Relationships" %}:</h4>
-                <ul>
-                    {% for rel in agent.resource_relationships %}
-                        {% ifchanged rel.role %}
-                            <h4>{{ rel.role.name }} </h4>
-                        {% endifchanged %}
-                        <li>
-                            <a href="{{ rel.resource.get_absolute_url }}"> {{ rel.resource }}</a>
-                        </li>
-
-                    {% endfor %}
-                </ul>
-              {% endif %}
-
-            </div>
-
-            <div class="span6">
-              <h3 class="hdg">{% trans "Active Processes" %}:</h3>
-
-              {% if agent.active_processes %}
-                <ul>
-                    {% for process in agent.active_processes %}
-                        <li>
-                            <a href="{{ process.get_absolute_url }}"> {{ process }}</a>
-                        </li>
-
-                    {% endfor %}
-                </ul>
-              {% else %}
-                    <p>{% trans "None" %}</p>
-
-              {% endif %}
-
-            </div>
-          </div>
-          {% endif %}
          <div class="row-fluid" tyle="margin-bottom:2em;">
         <hr />
         <h3>{% trans "Cumulative Time" %}</h3>

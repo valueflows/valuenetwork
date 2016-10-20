@@ -225,9 +225,12 @@ th, td {
           {% trans "Here you can see the projects you are involved in and their structure. If you are a project coordinator you can manage your project also here." %}
         </li>
         <li><h3><a href="{% url 'project_work' %}">{% trans 'Your project tasks' %}</a></h3>
-          {% trans "A complet list of tasks related to the projects you are involved in." %}
+          {% trans "A complete list of tasks related to the projects you are involved in." %}
         </li>
-        <li><h3><a href="#">{% trans 'Plan project proceses' %}</a> <small><em>{% trans "(coming soon)" %}</em></small></h3>
+        <li><h3><a href="{% url 'order_list' %}">{% trans 'Your project open work orders' %}</a> </h3>
+          {% trans "A complete list of open work orders related your projects." %}
+        </li>
+        <li><h3><a href="{% url "plan_work" rand=1 %}">{% trans 'Plan project proceses' %}</a> </h3>
           {% trans "Here you can define a work plan for your managed project and setup the needed process with work orders and tasks." %}
         </li>
         <li><h3><a href="#">{% trans "OCP project's tutorial" %}</a> <small><em>{% trans "(coming soon)" %}</em></small></h3>
@@ -288,7 +291,7 @@ th, td {
             {% get_comment_count for mreq as comment_count %}
             {% if comment_count %}
                 <span class="comments">
-                    - {{ comment_count }} 
+                    - {{ comment_count }}
                     {% if comment_count == 1 %}
                         {% trans "comment" %}
                     {% else %}

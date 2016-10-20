@@ -21,8 +21,8 @@
     margin-left: 10px;
 }
 h3, h4 {
-    color: firebrick;
-    margin-bottom: 4px;
+    /*color: firebrick;*/
+    margin-bottom: 3px;
 }
 .modal {
     width: 600px;
@@ -36,14 +36,8 @@ h3, h4 {
 li {
     list-style-type: none;
 }
-.log-section {
-    border: solid 1px gainsboro;
-    background-color: beige;
-    padding: 4px;
-    margin-bottom: 7px;
-}
 .event-label {
-    color: green;
+    color: #BE6F54;
     font-weight: bold;
     font-style: normal;
 }
@@ -68,7 +62,7 @@ li {
 }
 .total {
     float: right;
-    color: green;
+    color: #333;
     font-size: 10pt;
     margin-bottom: 0;
     margin-top: 2px;
@@ -89,6 +83,8 @@ li {
     /*border: solid 2px firebrick;
     background-color: oldlace;*/
     margin-bottom: 12px;
+  padding-bottom: 12px;
+  padding-top: 11px;
     /*padding-left: 1em;*/
 }
 .total-top {
@@ -101,14 +97,29 @@ li {
 .commitment {
     margin-left: 1em;
 }
+
+.log-section {
+    /*border: solid 1px gainsboro;*/
+    background-color: beige;
+    /*padding: 4px;*/
+  margin-bottom: 8px;
+  padding: 5px 15px;
+}
 .trt {
-    border: solid 1px gainsboro;
+    /*border: solid 1px gainsboro;
     background-color: lightyellow;
     padding: 4px;
-    margin-bottom: 7px;
+    margin-bottom: 7px;*/
+  padding: 5px 15px;
+  margin-bottom: 13px;
+  /*background-color: #f0f0da;
+  border: 1px solid #CACAC6;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;*/
 }
 .trtheading {
-    color: #7D1818;
+    color: #666;
     font-style: italic;
     font-size: 1.2em;
 }
@@ -134,9 +145,9 @@ li {
 	<legend>
     <span style="font-size:90%;">
         {% if exchange %}
-            {{ exchange }}
+            {% trans "Exchange:" %} {{ exchange }}
         {% else %}
-            New {{ exchange_type.name }}
+            {% trans "New" %} {{ exchange_type.name }}
         {% endif %}
         for {{ context_agent.name }}
     </span>
@@ -153,7 +164,7 @@ li {
 {% endcomment %}
         <div class="subnav">
             <a class="indent" href="{% url "exchanges_all" agent_id=context_agent.id %}">{% trans "All Exchanges" %}</a>
-            <a class="indent" href="../{{ agent.id }}">{% trans "View Project" %}</a>
+            <a class="indent" href="{% url 'members_agent' agent_id=context_agent.id %}">{% trans "View Project" %}</a>
             <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
         </div>
 	</legend>
@@ -161,17 +172,17 @@ li {
 	<div class="row-fluid">
 
         <div class="span5">
-            <div class="totals">
+            <div class="totals infobox">
                 <span class="total-top">{% trans "Total transfer value" %}: {{ total_t }} </span>
                 <span class="total-top">{% trans "Total reciprocal transfer value" %}: {{ total_rect }} </span>
             </div>
-            <form class="validateMe" id="exchangeForm" method="POST" action="">
+            <form class="validateMe miniform" id="exchangeForm" method="POST" action="" style="padding-bottom:13px;">
                 {% csrf_token %}
                 {{ exchange_form|as_bootstrap }}
                 {% if agent %}
-                    <div class="form-actions">
+                    <!-- <div class="form-actions"> -->
                         <input type="submit" name="save" value="{% trans 'Save changes' %}" class="btn btn-primary" />
-                    </div>
+                    <!-- </div> -->
                     {% if not exchange %}
                         <p>Enter this information, click on Save changes, then you can enter the exchange detail.</p>
                     {% endif %}
@@ -182,7 +193,7 @@ li {
 
         <div class="span7">
           {% if exchange %}
-            <div class="trt">
+            <div class="trt infobox">
                 <h3 class="trtheading">Transfers
                 <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
                     data-content="Log the planned and actual transfers for this exchange.  The types of transfers are determined by the type of exchange,
@@ -192,7 +203,7 @@ li {
                 </h3>
                 {% for slot in slots %}
                     {% if not slot.is_reciprocal %}
-                        <div class="log-section">
+                        <div class="log-section infobox2">
                             <h3>
                                 {{ slot.name }}
                                 {% if agent and exchange %}
@@ -540,7 +551,7 @@ li {
                 {% endfor %}
             </div>
             {% if exchange.can_have_reciprocal_transfers %}
-            <div class="trt">
+            <div class="trt infobox">
                 <h3 CLASS="trtheading">Reciprocal Transfers
                 <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"
                     data-content="Log the planned and actual reciprocal transfers for this exchange.  The types of reciprocal transfers are determined by the type of exchange,
@@ -549,7 +560,7 @@ li {
                 </span></h3>
                 {% for slot in slots %}
                     {% if slot.is_reciprocal %}
-                        <div class="log-section">
+                        <div class="log-section infobox2">
                             <h3>
                                 {{ slot.name }}
                                 {% if agent and exchange %}
@@ -896,7 +907,7 @@ li {
             </div>
             {% endif %}
 
-            <div class="log-section">
+            <div class="log-section infobox2">
                 <h3 style="margin-bottom: 4px;" >
                     {% trans "Work" %}
                     {% if logger and exchange %}

@@ -21,6 +21,7 @@ urlpatterns = patterns("",
     url(r'^agent/(?P<agent_id>\d+)/exchanges/$', 'work.views.exchanges_all', name="exchanges_all"),
     url(r'^agent/(?P<context_agent_id>\d+)/exchange-logging-work/(?P<exchange_type_id>\d+)/(?P<exchange_id>\d+)/$', 'work.views.exchange_logging_work',
         name="exchange_logging_work"),
+
     url(r'^profile/$', 'work.views.profile', name="profile"),
     url(r'^change-personal-info/(?P<agent_id>\d+)/$', 'work.views.change_personal_info', name="change_personal_info"),
     url(r'^upload-picture/(?P<agent_id>\d+)/$', 'work.views.upload_picture', name="upload_picture"),

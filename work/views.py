@@ -2733,11 +2733,11 @@ def join_project(request, project_id):
             state="active",
             )
         aa.save()
-    
+
     return HttpResponseRedirect("/work/your-projects/")
-    
-    
-    
+
+
+
 def validate_nick(request):
     #import pdb; pdb.set_trace()
     answer = True
@@ -2977,14 +2977,14 @@ def create_project_user_and_agent(request, agent_id):
     }, context_instance=RequestContext(request))
 
 '''
-            
+
 @login_required
 def order_list(request):
     agent = get_agent(request)
     help = get_help("order_list")
     #import pdb; pdb.set_trace()
-    projects = agent.managed_projects()   
-    
+    projects = agent.managed_projects()
+
     return render_to_response("work/order_list.html", {
         "projects": projects,
         "agent": agent,
@@ -3038,7 +3038,7 @@ def order_plan(request, order_id):
         "error_message": error_message,
     }, context_instance=RequestContext(request))
 
-    
+
 @login_required
 def change_project_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -3106,9 +3106,9 @@ def plan_work(request, rand=0):
             demand = None
             added_to_order = False
             #if demand_form.is_valid():
-            #    demand = demand_form.cleaned_data["demand"] 
+            #    demand = demand_form.cleaned_data["demand"]
             #    if demand:
-            #        added_to_order = True               
+            #        added_to_order = True
             produced_rts = []
             cited_rts = []
             consumed_rts = []
@@ -3159,7 +3159,7 @@ def plan_work(request, rand=0):
                     work_rts.append(work_rt)
                     continue
 
-            if rand: 
+            if rand:
                 if not demand:
                     demand = Order(
                         order_type="rand",
@@ -3185,8 +3185,8 @@ def plan_work(request, rand=0):
                 context_agent=selected_context_agent
             )
             process.save()
-        
-            #import pdb; pdb.set_trace()      
+
+            #import pdb; pdb.set_trace()
             for rt in produced_rts:
                 #import pdb; pdb.set_trace()
                 resource_types.append(rt)
@@ -3232,7 +3232,7 @@ def plan_work(request, rand=0):
                             unit=rt.unit,
                             description="",
                             user=request.user)
-                        
+
             for rt in consumed_rts:
                 if rt not in resource_types:
                     resource_types.append(rt)
@@ -3247,7 +3247,7 @@ def plan_work(request, rand=0):
                             unit=rt.unit,
                             description="",
                             user=request.user)
-                            
+
             for rt in work_rts:
                 #import pdb; pdb.set_trace()
                 agent = None
@@ -3271,8 +3271,8 @@ def plan_work(request, rand=0):
                             site_name = get_site_name()
                             if users:
                                 notification.send(
-                                    users, 
-                                    "valnet_new_task", 
+                                    users,
+                                    "valnet_new_task",
                                     {"resource_type": work_commitment.resource_type,
                                     "due_date": work_commitment.due_date,
                                     "hours": work_commitment.quantity,
@@ -3284,10 +3284,10 @@ def plan_work(request, rand=0):
                                     }
                                 )
 
-            if done_process: 
+            if done_process:
                 return HttpResponseRedirect('/%s/'
                     % ('work/order-list'))
-            #if add_another: 
+            #if add_another:
             #    return HttpResponseRedirect('/%s/%s/'
             #        % ('work/plan-work', rand))
             if edit_process:
@@ -3359,7 +3359,7 @@ def order_delete_confirmation_work(request, order_id):
             #        % ('work/closed-work-orders'))
 
 @login_required
-def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exchange_id=None): 
+def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exchange_id=None):
     #import pdb; pdb.set_trace()
     context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
     agent = get_agent(request)
@@ -3368,12 +3368,12 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
     if agent:
         if request.user.is_superuser:
             logger = True
-    
+
     if exchange_type_id != "0": #new exchange
         if agent:
             exchange_type = get_object_or_404(ExchangeType, id=exchange_type_id)
             use_case = exchange_type.use_case
-            
+
             if request.method == "POST":
                 exchange_form = ExchangeContextForm(data=request.POST)
                 if exchange_form.is_valid():
@@ -3384,10 +3384,10 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                     exchange.created_by = request.user
                     exchange.save()
 
-                    return HttpResponseRedirect('/%s/%s/%s/%s/'
-                        % ('work/exchange-logging-work', context_agent.id, 0, exchange.id)) 
+                    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
 
-            exchange_form = ExchangeContextForm()                
+            exchange_form = ExchangeContextForm()
             slots = exchange_type.slots()
             return render_to_response("work/exchange_logging_work.html", {
                 "use_case": use_case,
@@ -3407,26 +3407,26 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
 
     elif exchange_id != "0": #existing exchange
         exchange = get_object_or_404(Exchange, id=exchange_id)
-        
+
         if request.method == "POST":
             #import pdb; pdb.set_trace()
             exchange_form = ExchangeContextForm(instance=exchange, data=request.POST)
             if exchange_form.is_valid():
                 exchange = exchange_form.save()
-                return HttpResponseRedirect('/%s/%s/%s/%s/'
-                    % ('work/exchange-logging-work', context_agent.id, 0, exchange.id))   
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
 
         exchange_type = exchange.exchange_type
         use_case = exchange_type.use_case
         exchange_form = ExchangeContextForm(instance=exchange)
-        
+
         slots = []
         total_t = 0
         total_rect = 0
         #import pdb; pdb.set_trace()
         work_events = exchange.work_events()
         slots = exchange.slots_with_detail()
-    
+
         for slot in slots:
             if slot.is_reciprocal:
                 total_rect = total_rect + slot.total
@@ -3441,14 +3441,14 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
             for event in work_events:
                 event.changeform = WorkEventAgentForm(
                     context_agent=context_agent,
-                    instance=event, 
+                    instance=event,
                     prefix=str(event.id))
             work_init = {
                 "from_agent": agent,
                 "event_date": datetime.date.today()
             }
             add_work_form = WorkEventAgentForm(initial=work_init, context_agent=context_agent)
- 
+
             #import pdb; pdb.set_trace()
             for slot in slots:
                 ta_init = slot.default_to_agent
@@ -3467,11 +3467,11 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 commit_init = {
                     "from_agent": fa_init,
                     "to_agent": ta_init,
-                    "commitment_date": datetime.date.today(), 
+                    "commitment_date": datetime.date.today(),
                     "due_date": exchange.start_date,
                 }
                 slot.add_commit_form = TransferCommitmentForm(initial=commit_init, prefix="ACM" + str(slot.id), context_agent=context_agent, transfer_type=slot)
-                
+
     else:
         raise ValidationError("System Error: No exchange or use case.")
 
@@ -3510,13 +3510,13 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         new_exchange = request.POST.get("new-exchange")
-        if new_exchange:        
+        if new_exchange:
             if nav_form.is_valid():
                 data = nav_form.cleaned_data
                 ext = data["exchange_type"]
-                return HttpResponseRedirect('/%s/%s/%s/%s/'
-                    % ('work/exchange-logging-work', project.id, ext.id, 0))
-        
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', project.id, 'exchange-logging-work', ext.id, 0))
+
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
             start = dt_selection_form.cleaned_data["start_date"]
@@ -3572,7 +3572,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     #import pdb; pdb.set_trace()
 
     return render_to_response("work/exchanges_all.html", {
-        "exchanges": exchanges, 
+        "exchanges": exchanges,
         "dt_selection_form": dt_selection_form,
         "total_transfers": total_transfers,
         "total_rec_transfers": total_rec_transfers,

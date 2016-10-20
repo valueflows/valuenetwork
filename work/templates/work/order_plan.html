@@ -32,36 +32,36 @@ textarea {
     margin-top: 1.5em;
 }
 .process {
-    font-weight: bold;
+    /*font-weight: bold;
     font-size: 1.1em;
     margin-top: .8em;
     background-color: lightyellow;
     border: 1px solid gainsboro;
-    padding: 1em;
+    padding: 1em;*/
 }
 .resource-type {
     font-weight: bold;
     font-size: 1.1em;
     vertical-align: text-bottom;
 }
-.oi {
+/*.oi {
     color: firebrick;
     font-size: 1.2em;
     vertical-align: text-bottom;
-}
+}*/
 .production-process-btn {
     vertical-align: text-bottom;
 }
-.space-down {
+/*.space-down {
     margin-top: 12px;
-}
+}*/
 .for, .req-description p, .description p {
     font-size: 1em;
     font-style: italic;
     font-weight: normal;
 }
 .section {
-    color:     #008A2E;
+    color:     #476B6B;
     font-size: 1em;
 }
 .indent {
@@ -81,7 +81,7 @@ textarea {
 }
 .process-dates {
     font-size: 1em;
-    color:     #008A2E;
+    /*color:     #008A2E;*/
     font-weight: normal;
 }
 </style>
@@ -94,7 +94,7 @@ textarea {
     <div class="container">
         {% include "_messages.html" %}
 	<div>
-    <legend><span style="font-size:90%;">{% trans "Schedule for " %}{{ order }}</span>
+    <legend>{% trans "Order: " %}<span style="font-size:85%; color:#555;">{{ order }} </span>
 {% comment %}
             {% if order.exchange %}
                 <a href="{% url "exchange_logging" exchange_type_id=0 exchange_id=order.exchange.id %}" style="display: inline;"  class="btn btn-info indent" title="Exchange for this order" >
@@ -115,6 +115,22 @@ textarea {
 
 
             {% if agent %}
+              <div class="infobox home-block">
+
+                <h4>
+                  <p>
+                    {% trans "Due Date:" %} <span style="color:#555;">{{ order.due_date }}</span>
+                  </p>
+                  <p>
+                    {% trans "Provider:" %} <a href="{% url 'members_agent' agent_id=order.provider.id %}" >{{ order.provider }}</a>
+                  </p>
+                  <p>
+                    {% trans "Receiver:" %} {% if order.receiver %}<a href="{% url 'members_agent' agent_id=order.receiver.id %}" >{{ order.receiver }}</a>{% endif %}
+                  </p>
+
+                </h4>
+              </div>
+              <div style="float:left; margin:13px 7px;">
                 <h3>
                     {% if order.order_type == "customer" %}
                         {% trans "Order Items" %}:
@@ -126,12 +142,11 @@ textarea {
                         {% endif %}
                     {% endif %}
                 </h3>
-            {% endif %}
 
-			<ul>
-			    {% for item in order_items %}
-					<li>
-					    <a class="resource-type" href="#item-{{ item.id }}">
+			          <ul style="margin:8px 0px 21px 13px;">
+			            {% for item in order_items %}
+					          <li>
+					             <a class="resource-type" href="#item-{{ item.id }}">
                             {{ item.resource_type }}
                             {% if item.stage %}
                                 @{{ item.stage.name }}
@@ -187,11 +202,13 @@ textarea {
 
                           {% endif %}
                         {% endif %}
-				    </li>
-                {% empty %}
-                    None
-				{% endfor %}
-			</ul>
+                      </li>
+                          {% empty %}
+                              None
+                  {% endfor %}
+                </ul>
+              </div>
+              {% endif %}
 
 			{% if agent %}
                 <div class="modal hide fade" id="addOrderItem" tabindex="-1" role="dialog" aria-labelledby="order-item-label" aria-hidden="true">
@@ -228,12 +245,14 @@ textarea {
 {% endcomment %}
 
                     {% for item in order_items %}
-                      <div id="item-{{ item.id }}" class="resource-type space-down">
-                            <span class="oi">{% trans 'Order Item' %}:</span>
-                            {{ item.resource_type }}
+                      <div id="item-{{ item.id }}" class="resource-type space-down infobox">
+                            <h3>
+                              <span class="oi">{% trans 'Item' %}:</span>
+                              {{ item.resource_type }}
                             {% if item.stage %}
                                 @{{ item.stage.name }}
                             {% endif %}
+                            </h3>
                             {% if item.needs_production_process %}
                               {% if agent %}
                                 <a href="#productionProcessModal{{ item.id }}" role="button" class="btn btn-info btn-mini production-process-btn" data-toggle="modal">
@@ -241,7 +260,7 @@ textarea {
                                 </a>
                               {% endif %}
                             {% endif %}
-                      </div>
+
 
                       {% if agent %}
                         <div class="modal hide fade productionProcessModal" id="productionProcessModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="productionProcess-label" aria-hidden="true">
@@ -270,7 +289,7 @@ textarea {
                       {% endfor %}
                       {% for process in item.processes %}
 
-					    {% if agent %}
+					              {% if agent %}
                           {% if process.to_be_changed_requirements %}
                             <div class="row-fluid indent">
                                 <div class="span12">
@@ -319,11 +338,11 @@ textarea {
                                 </div>
                             </div>
                           {% endif %}
-					    {% endif %}
+					               {% endif %}
 
                         <div class="row-fluid indent">
                             <div class="span9">
-                                <div class="process" >{% include  "work/_process_for_order_work.html" %}</div>
+                                <div class="process infobox2" >{% include  "work/_process_for_order_work.html" %}</div>
                             </div>
 
                             <div class="span3">
@@ -365,7 +384,7 @@ textarea {
 						 </div>
 
 					{% endfor %}
-
+</div>
 					{% if agent %}
                         {% if item.is_workflow_order_item %}
                             <div class="row-fluid indent">

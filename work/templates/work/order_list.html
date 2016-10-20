@@ -31,7 +31,7 @@ h4 {
     <div class="container">
         {% include "_messages.html" %}
 	<div>
-        <legend>{% trans "Your projects Open Orders" %}
+        <legend>{% trans "Your projects open work orders" %}
 
             <div class="subnav">
                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
@@ -41,13 +41,13 @@ h4 {
             <a class="report" href="{% url "closed_work_orders" %}">{% trans "Closed Work Orders" %}</a>
             <a class="report" href="{% url "demand_exchanges" %}">{% trans "Exchange List" %}</a>
 {% endcomment %}
-		</legend>
+		    </legend>
         <p>
 {% comment %}
                 <a class="btn btn-primary" href="{% url "create_order" %}">{% trans "Create Customer Order" %}</a>
                 <a class="btn btn-primary" href="{% url "plan_from_recipe" %}">{% trans "Plan Work Using Recipe" %}</a>
 {% endcomment %}
-                <a class="btn btn-primary" href="{% url "plan_work" rand=1 %}">{% trans "Plan Work" %}</a>
+                <a class="btn btn-primary" href="{% url "plan_work" rand=1 %}">{% trans "New Work Plan" %}</a>
 {% comment %}
                 <form id="exchangeForm" style="display: inline;" method="POST" action="">
                     {% csrf_token %}
@@ -62,7 +62,7 @@ h4 {
             <ul>
                 {% for order in orders %}
                     <li>
-                        <a href="{% url "order_schedule" order_id=order.id %}"><b>{{ order }}</b></a> {% trans "created by" %} {{ order.created_by }}
+                        {% trans "Order:" %} <a href="{% url "order_schedule" order_id=order.id %}"><b>{{ order }}</b></a> {% trans "created by" %} {{ order.created_by }}
                         {% if user = order.created_by or user.is_superuser %}
                             <form
                                 style="display: inline;"
@@ -93,12 +93,12 @@ h4 {
             <h3 style="margin-bottom: 4px;" >{% trans "Open Orders" %}:</h3>
 {% endcomment %}
             {% for project in projects %}
-              <h4>{{ project.name }}</h4>
+              <h3><a href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a></h3>
               <ul>
                 {% for rand in project.sales_orders.all %}
                     <li>
-                        <a href="{% url "order_plan" order_id=rand.id %}"><b>{{ rand }}</b></a>  {% trans "created by" %} {{ rand.created_by }}
-                        {% if user = rand.created_by or user.is_superuser %}
+                        <b>{% trans "Order:" %}</b> <a href="{% url "order_plan" order_id=rand.id %}"><b>{{ rand }}</b></a>  {% trans "created by" %} {{ rand.created_by }}
+                        {% if user = rand.created_by or user.is_superuser or user.agent.agent in project.managers %}
                             <form
                                 style="display: inline;"
                                 action="{% url "change_project_order" order_id=rand.id %}"
@@ -106,7 +106,7 @@ h4 {
                                 {% csrf_token %}
                                 <input type="hidden" id="next" name="next" value="order_list" />
                                 <input type="hidden" id="from" name="from" value="report" />
-                                <button style="display: inline;"  class="btn btn-info" title="Change Order" >{% trans "Change" %}</button>
+                                <button style="display: inline;"  class="btn btn-info btn-mini" title="Change Order" >{% trans "Change" %}</button>
                             </form>
                             <form
                                 style="display: inline;"
@@ -114,7 +114,7 @@ h4 {
                                 method="POST" >
                                 {% csrf_token %}
                                 <input type="hidden" id="next" name="next" value="order_list" />
-                                <button style="display: inline;"  class="btn btn-warning" title="Delete Order" >{% trans "Delete" %}</button>
+                                <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete Order" >{% trans "Delete" %}</button>
                             </form>
                         {% else %}
                             {% if agent %}

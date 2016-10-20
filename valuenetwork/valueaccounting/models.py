@@ -945,8 +945,21 @@ class EconomicAgent(models.Model):
     def related_contexts(self):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         agents.extend([ag.is_associate for ag in self.has_associates.all()])
-        cas = [a for a in agents if a.is_context]
-        return list(set(cas))
+        #cas = [a for a in agents if a.is_context]
+        #return list(set(cas))
+        return [a for a in agents if a.is_context]
+
+    def related_context_queryset(self):
+        ctx_ids = [ctx.id for ctx in self.related_contexts()]
+        return EconomicAgent.objects.filter(id__in=ctx_ids)
+
+    def invoicing_candidates(self):
+        ctx = self.related_contexts()
+        ids = [c.id for c in ctx if c.is_active_freedom_coop_member()]
+        if self.is_active_freedom_coop_member():
+            ids.insert(0, self.id)
+        return EconomicAgent.objects.filter(id__in=ids)
+
 
     #  bum2
     def managed_projects(self): #returns a list or None
@@ -1062,7 +1075,9 @@ class EconomicAgent(models.Model):
 
     def members(self):
         #import pdb; pdb.set_trace()
-        agent_ids = self.has_associates.filter(association_type__association_behavior="member").filter(state="active").values_list('is_associate')
+        agent_ids = self.has_associates.filter(
+            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")
+            ).filter(state="active").values_list('is_associate')
         return EconomicAgent.objects.filter(pk__in=agent_ids)
 
     def individual_members(self):

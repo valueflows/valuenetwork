@@ -58,6 +58,14 @@ def my_dashboard(request):
     }, context_instance=RequestContext(request))
 
 
+def new_features(request):
+    new_features = NewFeature.objects.all()
+    
+    return render_to_response("work/new_features.html", {
+        "new_features": new_features,
+        "photo_size": (256, 256),
+    }, context_instance=RequestContext(request))
+    
 @login_required
 def my_tasks(request):
     #import pdb; pdb.set_trace()
@@ -98,6 +106,7 @@ def my_tasks(request):
     else:
         todo_form = WorkTodoForm(agent=agent, initial=init)
     #work_now = settings.USE_WORK_NOW
+    #import pdb; pdb.set_trace()
     return render_to_response("work/my_tasks.html", {
         "agent": agent,
         "my_work": my_work,
@@ -752,6 +761,9 @@ def process_logging(request, process_id):
         "help": get_help("process_work"),
     }, context_instance=RequestContext(request))
 
+    
+from functools import partial, wraps
+
 @login_required
 def non_process_logging(request):
     member = get_agent(request)
@@ -766,6 +778,7 @@ def non_process_logging(request):
         extra=8,
         max_num=8,
         )
+
     init = []
     for i in range(0, 8):
         init.append({"is_contribution": True,})
@@ -773,6 +786,10 @@ def non_process_logging(request):
         queryset=EconomicEvent.objects.none(),
         initial = init,
         data=request.POST or None)
+    #import pdb; pdb.set_trace()
+    ctx_qs = member.related_context_queryset()
+    for form in time_formset.forms:
+        form.fields["context_agent"].queryset = ctx_qs
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         keep_going = request.POST.get("keep-going")
@@ -1557,14 +1574,14 @@ def work_todo_done(request, todo_id):
 def work_add_todo(request):
     if request.method == "POST":
         #import pdb; pdb.set_trace()
+        agent = get_agent(request)
         patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
         if patterns:
             pattern = patterns[0].pattern
-            form = TodoForm(data=request.POST, pattern=pattern)
+            form = WorkTodoForm(agent=agent, pattern=pattern, data=request.POST)
         else:
-            form = TodoForm(request.POST)
+            form = WorkTodoForm(agent=agent, data=request.POST)
         next = request.POST.get("next")
-        agent = get_agent(request)
         et = None
         ets = EventType.objects.filter(
             relationship='todo')
@@ -1636,7 +1653,7 @@ def work_todo_change(request, todo_id):
             todo = None
         if todo:
             prefix = todo.form_prefix()
-            form = TodoForm(data=request.POST, instance=todo, prefix=prefix)
+            form = WorkTodoForm(data=request.POST, instance=todo, prefix=prefix)
             if form.is_valid():
                 todo = form.save()
 
@@ -2791,7 +2808,10 @@ def validate_username(request):
                                         _('Enter a valid username. '
                                             'This value may contain only letters, numbers '
                                             'and @/./+/-/_ characters.'), 'invalid')
-            error = val(username)
+            try:
+                error = val(username)
+            except ValidationError:
+                error = "Error: May only contain letters, numbers, and @/./+/-/_ characters."
     if error:
         answer = error
     response = simplejson.dumps(answer, ensure_ascii=False)
@@ -2886,6 +2906,34 @@ def project_feedback(request, agent_id, join_request_id):
         "user_agent": user_agent,
         "agent": agent,
         "fobi_headers": fobi_headers,
+    }, context_instance=RequestContext(request))
+    
+@login_required
+def invoice_number(request):
+    agent = get_agent(request)
+    invoice_numbers = InvoiceNumber.objects.filter(
+        created_by=request.user)
+    form = InvoiceNumberForm(agent=agent, data=request.POST or None)
+    if request.method == "POST":
+        if form.is_valid():
+            data = form.cleaned_data
+            member = data["member"]
+            nbr = form.save(commit=False)
+            idate = datetime.date.today()
+            nbr.invoice_date = idate
+            nbr.created_date = idate
+            nbr.created_by = request.user
+            nbr.save()
+        
+        return HttpResponseRedirect('/%s/'
+            % ('work/invoice-number',))
+
+    
+    return render_to_response("work/invoice_number.html", {
+        "help": get_help("invoice_number"),
+        "agent": agent,
+        "form": form,
+        "invoice_numbers": invoice_numbers,
     }, context_instance=RequestContext(request))
 
 '''

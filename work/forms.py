@@ -143,9 +143,11 @@ class WorkTodoForm(forms.ModelForm):
         from_agent_choices = [('', 'Unassigned')] + [(peep.id, peep) for peep in peeps]
 
         self.fields["from_agent"].choices = from_agent_choices
+        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
-            self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
+            #self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
+            self.fields["resource_type"].queryset = pattern.todo_resource_types()
 
 
 class ProjectCreateForm(AgentCreateForm):
@@ -217,36 +219,27 @@ class WorkAgentCreateForm(AgentCreateForm):
         #exclude = ('is_context',)
 
 
-class WorkCasualTimeContributionForm(CasualTimeContributionForm):
-    #resource_type = WorkModelChoiceField(
-    #    queryset=EconomicResourceType.objects.all(),
-    #    empty_label=None,
-    #    widget=forms.Select(attrs={'class': 'chzn-select'}))
+class WorkCasualTimeContributionForm(forms.ModelForm):
+    resource_type = WorkModelChoiceField(
+        queryset=EconomicResourceType.objects.filter(behavior="work"),
+        empty_label=None,
+        widget=forms.Select(attrs={'class': 'chzn-select'}))
     context_agent = forms.ModelChoiceField(
         queryset=EconomicAgent.objects.open_projects(),
         label=_("Context"),
         empty_label=None,
         widget=forms.Select(attrs={'class': 'chzn-select'}))
-    #event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
-    #description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
-    #url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
-    #quantity = forms.DecimalField(required=False,
-    #    widget=DecimalDurationWidget,
-    #    help_text="hrs, mins")
+    event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
+    description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
+    url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
+    quantity = forms.DecimalField(required=False,
+        widget=DecimalDurationWidget,
+        help_text="hrs, mins")
 
     class Meta:
         model = EconomicEvent
         fields = ('event_date', 'resource_type', 'context_agent', 'quantity', 'is_contribution', 'url', 'description')
 
-    def __init__(self, *args, **kwargs):
-        super(WorkCasualTimeContributionForm, self).__init__(*args, **kwargs)
-        #pattern = None
-        #try:
-        #    pattern = PatternUseCase.objects.get(use_case__identifier='non_prod').pattern
-        #except PatternUseCase.DoesNotExist:
-        #    pass
-        #if pattern:
-        #    self.fields["resource_type"].queryset = pattern.work_resource_types().order_by("name")
 
 # public join form
 class JoinRequestForm(forms.ModelForm):
@@ -309,7 +302,6 @@ class JoinRequestInternalForm(forms.ModelForm):
             self.cleaned_data[name] = bleach.clean(value)
 
 
-
 class JoinAgentSelectionForm(forms.Form):
     created_agent = AgentModelChoiceField(
         queryset=EconomicAgent.objects.without_join_request(),
@@ -324,11 +316,11 @@ class ProjectSelectionFilteredForm(forms.Form):
         projects = agent.managed_projects()
         if projects:
             self.fields["context_agent"].choices = [(proj.id, proj.name) for proj in projects]
-            
-        
+
+
 class OrderSelectionFilteredForm(forms.Form):
     demand = forms.ModelChoiceField(
-        queryset=Order.objects.exclude(order_type="holder"), 
+        queryset=Order.objects.exclude(order_type="holder"),
         label="Add to an existing order (optional)",
         required=False)
 
@@ -336,7 +328,7 @@ class OrderSelectionFilteredForm(forms.Form):
         super(OrderSelectionFilteredForm, self).__init__(*args, **kwargs)
         if provider:
             self.fields["demand"].queryset = provider.sales_orders.all()
-            
+
 
 class ExchangeNavForm(forms.Form):
     exchange_type = forms.ModelChoiceField(
@@ -344,20 +336,37 @@ class ExchangeNavForm(forms.Form):
         empty_label=None,
         widget=forms.Select(
             attrs={'class': 'exchange-selector'}))
-        
+
 
 class ExchangeContextForm(forms.ModelForm):
-    start_date = forms.DateField(required=True, 
+    start_date = forms.DateField(required=True,
         label=_("Date"),
         widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
-    notes = forms.CharField(required=False, 
+    notes = forms.CharField(required=False,
         label=_("Comments"),
         widget=forms.Textarea(attrs={'class': 'item-description',}))
-    url = forms.CharField(required=False, 
+    url = forms.CharField(required=False,
         label=_("Link to receipt(s)"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
 
     class Meta:
         model = Exchange
         fields = ('start_date', 'url', 'notes')
-        
+
+
+class InvoiceNumberForm(forms.ModelForm):
+    member = forms.ModelChoiceField(
+        queryset=EconomicAgent.objects.none(),
+        label=_("for Freedom Coop Member:"),
+        empty_label=None,
+        )
+
+    class Meta:
+        model = InvoiceNumber
+        fields = ('member', 'description', )
+
+    def __init__(self, agent, *args, **kwargs):
+        super(InvoiceNumberForm, self).__init__(*args, **kwargs)
+        #import pdb; pdb.set_trace()
+        self.fields["member"].queryset = agent.invoicing_candidates()
+

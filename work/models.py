@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 
 from django.utils.translation import ugettext_lazy as _
 
-from valuenetwork.valueaccounting.models import EconomicAgent, AgentType, EconomicResourceType
+from easy_thumbnails.fields import ThumbnailerImageField
+
+from valuenetwork.valueaccounting.models import *
 #from fobi.models import FormEntry
 
 MEMBERSHIP_TYPE_CHOICES = (
@@ -224,3 +226,73 @@ class JoinRequest(models.Model):
             init["agent_type"] = agent_type
         return ProjectAgentCreateForm(initial=init, prefix=self.form_prefix())
 
+
+class NewFeature(models.Model):
+    name = models.CharField(_('name'), max_length=24)
+    deployment_date = models.DateField(_("deployment date"),)
+    description = models.TextField(_('Description'),)
+    permissions = models.TextField(_('permissions'), blank=True, null=True,)
+    url = models.CharField(_('url'), max_length=255, blank=True,)
+    screenshot = ThumbnailerImageField(_("screenshot"),
+        upload_to='photos', blank=True, null=True,)
+    
+    class Meta:
+        ordering = ('-deployment_date',)
+    
+    def __unicode__(self):
+        return self.name
+        
+
+class InvoiceNumber(models.Model):
+    invoice_number = models.CharField(_('invoice number'), max_length=128)
+    invoice_date = models.DateField(_("invoice date"),)
+    year = models.IntegerField(_("year"),)
+    quarter = models.IntegerField(_("quarter"),)
+    sequence = models.IntegerField(_("sequence"),)
+    description = models.TextField(_('Description'), blank=True,null=True)
+    member = models.ForeignKey(EconomicAgent, related_name="invoice_numbers",
+        verbose_name=_('member'),)
+    exchange = models.ForeignKey(Exchange,
+        blank=True, null=True,
+        verbose_name=_('exchange'), related_name='invoice_numbers')
+    created_by = models.ForeignKey(User, verbose_name=_('created by'),
+        related_name='invoice_numbers_created', editable=False)
+    created_date = models.DateField(auto_now_add=True, editable=False)
+        
+    class Meta:
+        ordering = ('-invoice_date', "-sequence",)
+    
+    def __unicode__(self):
+        return self.invoice_number
+        
+    def save(self, *args, **kwargs):
+        if self.year:
+            year = self.year
+        else:
+            year = self.invoice_date.year
+            self.year = year
+        if self.quarter:
+            quarter = self.quarter
+        else:
+            month = self.invoice_date.month
+            quarter = (month-1)//3 + 1
+            self.quarter = quarter
+        if self.sequence:
+            sequence = self.sequence
+        else:
+            prevs = InvoiceNumber.objects.filter(
+                year=year,
+                quarter=quarter).order_by("-sequence")
+            if prevs:
+                sequence = prevs[0].sequence + 1
+            else:
+                sequence = 1
+            self.sequence = sequence
+        self.invoice_number = "/".join([
+            unicode(year),
+            unicode(quarter),
+            unicode(sequence),
+            unicode(self.member.id),
+            ])
+        super(InvoiceNumber, self).save(*args, **kwargs)
+    

@@ -144,12 +144,12 @@ li {
 	<div>
 	<legend>
     <span style="font-size:90%;">
-        {% if exchange %}
-            {% trans "Exchange:" %} {{ exchange }}
-        {% else %}
-            {% trans "New" %} {{ exchange_type.name }}
-        {% endif %}
-        for {{ context_agent.name }}
+      {% if exchange %}
+        {% trans "Exchange:" %} <span style="font-size:85%; color:#555;">{{ exchange }}</span>
+      {% else %}
+        {% trans "New" %} {{ exchange_type.name }}
+      {% endif %}
+      <span style="font-size:85%; color:#555;">for {{ context_agent.name }}</span>
     </span>
 {% comment %}
         {% if exchange.order %}

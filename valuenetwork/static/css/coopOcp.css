@@ -53,6 +53,9 @@ li > h4 {
 th {
   background-color: #f0f0da
 }
+.entry-row th {
+  background-color: inherit;
+}
 
 legend .subnav {
   float: right;

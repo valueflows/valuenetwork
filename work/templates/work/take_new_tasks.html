@@ -32,18 +32,18 @@
 
 }
 .my-skills {
-    background-color: #FAFAEE;
+    /*background-color: #FAFAEE;*/
 }
 .other-unassigned, .unassigned-todos {
     background-color: #FAFAEE;
 }
 .todos {
-    background-color: whitesmoke;
+    /*background-color: whitesmoke;*/
 }
 .my-work, .my-skills, .other-unassigned, .todos, .unassigned-todos {
-    padding: 2px 6px 3px 6px;
+    /*padding: 2px 6px 3px 6px;
     margin-bottom: 12px;
-    border: 1px solid gainsboro;
+    border: 1px solid gainsboro;*/
 }
 
 .work-description {
@@ -437,7 +437,7 @@ th, td {
 
           <div class="span12" id="take-new-task">
 
-            <div class="my-skills">
+            <div class="my-skills infobox">
 
                 <h3 style="margin-bottom: 4px;" >{% trans "Unassigned process tasks using my skills" %}:</h3>
 
@@ -505,17 +505,13 @@ th, td {
 
             </div>
 
-            <div class="my-skills">
+            <div class="my-skills infobox">
 
                 <h3 style="margin-bottom: 4px;" >{% trans "Unassigned simple tasks using my skills" %}:</h3>
 
                 {% if my_skillz %}
                         <div class="row-fluid" id="todos">
                 <div class="span12 todos">
-                    <h3>
-                        {% trans "Tasks" %}
-
-                    </h3>
 
                     <table class="todo-table" >
                         <thead>

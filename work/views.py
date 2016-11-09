@@ -60,12 +60,12 @@ def my_dashboard(request):
 
 def new_features(request):
     new_features = NewFeature.objects.all()
-    
+
     return render_to_response("work/new_features.html", {
         "new_features": new_features,
         "photo_size": (256, 256),
     }, context_instance=RequestContext(request))
-    
+
 @login_required
 def my_tasks(request):
     #import pdb; pdb.set_trace()
@@ -761,7 +761,7 @@ def process_logging(request, process_id):
         "help": get_help("process_work"),
     }, context_instance=RequestContext(request))
 
-    
+
 from functools import partial, wraps
 
 @login_required
@@ -775,13 +775,13 @@ def non_process_logging(request):
         EconomicEvent,
         form=WorkCasualTimeContributionForm,
         can_delete=False,
-        extra=8,
+        extra=4,
         max_num=8,
         )
 
     init = []
-    for i in range(0, 8):
-        init.append({"is_contribution": True,})
+    for i in range(0, 4):
+        init.append({"is_contribution": False,})
     time_formset = TimeFormSet(
         queryset=EconomicEvent.objects.none(),
         initial = init,
@@ -790,6 +790,7 @@ def non_process_logging(request):
     ctx_qs = member.related_context_queryset()
     for form in time_formset.forms:
         form.fields["context_agent"].queryset = ctx_qs
+        #form.fields["context_agent"].empty_label = "choose...";
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         keep_going = request.POST.get("keep-going")
@@ -2908,7 +2909,7 @@ def project_feedback(request, agent_id, join_request_id):
         "agent": agent,
         "fobi_headers": fobi_headers,
     }, context_instance=RequestContext(request))
-    
+
 @login_required
 def invoice_number(request):
     agent = get_agent(request)
@@ -2925,11 +2926,11 @@ def invoice_number(request):
             nbr.created_date = idate
             nbr.created_by = request.user
             nbr.save()
-        
+
         return HttpResponseRedirect('/%s/'
             % ('work/invoice-number',))
 
-    
+
     return render_to_response("work/invoice_number.html", {
         "help": get_help("invoice_number"),
         "agent": agent,

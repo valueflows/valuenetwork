@@ -28,8 +28,7 @@
 	margin-right: 2em;
 }
 .my-work {
-    background-color: whitesmoke;
-
+    /*background-color: whitesmoke;*/
 }
 .my-skills {
     background-color: #FAFAEE;
@@ -38,12 +37,12 @@
     background-color: #FAFAEE;
 }
 .todos {
-    background-color: whitesmoke;
+    /*background-color: whitesmoke;*/
 }
 .my-work, .my-skills, .other-unassigned, .todos, .unassigned-todos {
-    padding: 2px 6px 3px 6px;
+    /*padding: 2px 6px 3px 6px;
     margin-bottom: 12px;
-    border: 1px solid gainsboro;
+    border: 1px solid gainsboro;*/
 }
 
 .work-description {
@@ -77,13 +76,19 @@
     padding-top: 4px;
     text-align: left;
 }
-
-.btn-mini {
-    margin-bottom: 3px;
+.entry-buttons form, .doneForm {
+  margin: 0 0 5px 0;
 }
+
+/*.btn-mini {
+    margin-bottom: 3px;
+}*/
 
 .todo-input {
     vertical-align: bottom;
+}
+.todo-input form {
+    margin: 0;
 }
 
 .todo-table {
@@ -93,11 +98,17 @@
 th, td {
     padding-left:10px;
     padding-right:10px;
+  text-align: left;
 }
 
 .did {
     padding: 0;
-    height: 46px;
+    height: 45px;
+}
+.did .ui-wrapper {
+  padding-right: 0px !important;
+  padding-bottom: 0px !important;
+  margin: 4px 0px 2px !important;
 }
 
 .my-row {
@@ -107,11 +118,11 @@ th, td {
 }
 
 .odd {
-    background-color: #F9F9F7;
+    background-color: beige;
 }
 
 .even {
-    background-color: #EDEDE6;
+    /*background-color: #EDEDE6;*/
 }
 
 .not-my-row {
@@ -144,7 +155,7 @@ th, td {
     width: 80px;
 }
 .description {
-    color: firebrick;
+    color: #476B6B;
     font-weight: bold;
 }
 .date {
@@ -177,7 +188,7 @@ th, td {
         {% include "_messages.html" %}
 
 		<legend>
-		    {% trans "Tasks Assigned to" %} {{ agent.name }}
+		    {% trans "Tasks assigned to" %} {{ agent.name }}
 
         <div class="subnav">
                <a class="indent" href="{% url "take_new_tasks" %}">{% trans "Take New task" %}</a>
@@ -190,7 +201,7 @@ th, td {
 
           <div class="span12" id="my_tasks">
 
-            <div class="my-work">
+            <div class="my-work infobox">
 
 				<h3 style="margin-bottom: 4px;" >{% trans "Your process work" %}:</h3>
 
@@ -249,7 +260,7 @@ th, td {
 
 			</div>
 
-            <div class="my-work">
+            <div class="my-work infobox">
 				<h3 style="margin-bottom: 4px;" >{% trans "Your simple tasks" %}:
 
                     {% if agent %}
@@ -292,13 +303,12 @@ th, td {
                         <tr>
                             <th>{% trans "Due" %}</th>
                             <th>{% trans "Poster" %}</th>
-                            <th>&nbsp;</th>
                             <th>{% trans "What" %}</th>
-                            <th>&nbsp;</th>
-                            {% comment %}
                             <th>{% trans "Project" %}</th>
-                            {% endcomment %}
                             <th>{% trans "Url" %}</th>
+                            <th>&nbsp;</th>
+                            <th>{% trans "Did" %}:</th>
+                            <th>{% trans "Hours" %}:</th>
                             <th>&nbsp;</th>
                         </tr>
                     </thead>
@@ -315,18 +325,17 @@ th, td {
                                 <td class="who">
                                     {{ todo.to_agent }}
                                 </td>
-                                <td colspan="3" class="description">
+                                <td colspan="1" class="description">
                                     {% if todo.description %}
                                         {{ todo.description|urlize|linebreaks }}
                                     {% else %}
                                         &nbsp;
                                     {% endif %}
                                 </td>
-                                {% comment %}
+
                                 <td>
-                                    {{ todo.context_agent }}
+                                    <a href="{% url 'members_agent' agent_id=todo.context_agent.id %}">{{ todo.context_agent }}</a>
                                 </td>
-                                {% endcomment %}
                                 <td>
                                     {% if todo.url %}
                                         <a href="{{ todo.url }}" target="_blank">{% trans "Open" %}</a>
@@ -379,20 +388,21 @@ th, td {
                                         {% endif %}
                                     {% endif %}
                                 </td>
-                            </tr>
+
+                            <!-- </tr> -->
 
 
                             {% if agent == todo.from_agent %}
                                 {% with todo.todo_event as event %}
-                                <tr class="entry-row {{ rowcolors }}" >
-                                    <th class="entry-label" >{% trans "Did" %}:</td>
-                                    <td colspan="3" class="did" >
+                                <!-- <tr class="entry-row {{ rowcolors }}" >
+                                    <th class="entry-label" >{% trans "Did" %}:</td> -->
+                                    <td colspan="1" class="did" >
                                         <textarea class="input-block-level did" id="{{ todo.id }}-didId" name="{{ todo.id }}-did" rows="3"
                                         />{% if event %}{{ event.description }}{% endif %}</textarea>
                                     </td>
-                                    <th class="entry-label">
+                                    <!-- <th class="entry-label">
                                         {% trans "Hours" %}:
-                                    </th>
+                                    </th> -->
                                     <td class="todo-input" >
                                         <form class="timeForm"id="timeForm-{{ todo.id }}" action="{% url "work_todo_time" %}" method="POST" >
                                             {% csrf_token %}

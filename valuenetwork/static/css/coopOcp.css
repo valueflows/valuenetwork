@@ -90,6 +90,10 @@ span.error {
   color: #c00;
 }
 
+.link-normal {
+  font-size: 13px;
+}
+
 
 /*   M E M B E R S H I P   P R O C E S S   P A G E   */
 
@@ -291,6 +295,19 @@ form#stateForm {
 .infobox h3 {
   margin: 0 0 5px 0;
   padding: 0;
+}
+.infobox .row-fluid {
+  width: inherit;
+}
+.infobox3 {
+  background-color: #faffe0;
+  padding: 10px 15px;
+  border: 1px solid #CACAC6;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  margin-bottom: 7px;
+  margin-top: 7px;
 }
 .hdg {
     color: #444;/*firebrick;*/

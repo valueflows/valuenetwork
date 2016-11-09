@@ -35,10 +35,17 @@ h3 {
     border: 1px solid gainsboro;
     padding: 6px;*/
 }
+.process .prevnext {
+  padding: 3px;
+  display: block;
+  float: left;
+  /*margin: 7px;*/
+  width: 37%;
+}
 
 #arrow {
     font-weight: bold;
-    font-size: 2em;
+    font-size: 1.5em;
 }
 
 .for, .req-description {
@@ -53,6 +60,7 @@ h3 {
     /*border: solid 1px gainsboro;
     background-color: honeydew;*/
     padding: 4px;
+  margin-right: 16px;
 }
 .section {
     color:     #008A2E;
@@ -169,6 +177,7 @@ th, td {
 		        {% trans "Your projects tasks" %}
 
                 <div class="subnav">
+                    <a class="indent" href="{% url "order_list" %}">{% trans "Open Orders" %}</a>
                     <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                 </div>
             </legend>
@@ -207,16 +216,16 @@ th, td {
 
 
               <div class="infobox">
-                <h2>
+                <h3>
                   {% trans "Process Task List:" %}
-                </h2>
+                </h3>
                 {% if context_agents %}
                 {% for context_agent, processes in context_agents.items %}
                   {% if context_agent in all_processes %}
                     <div class="context-agent-line infobox2">
-                      <h3>
+                      <h4>
                         {% trans "Project" %}: {% if context_agent %} <a href="{% url 'members_agent' agent_id=context_agent.id %}">{{ context_agent.name }}</a> {% else %} {% trans "No project" %} {% endif %}
-                      </h3>
+                      </h4>
 
 
                       {% for process in processes %}
@@ -261,16 +270,16 @@ th, td {
                                         {% include  "work/_work_process_for_sked.html" %}
                                     </div>
                                     <div class="span3 notes" id="proc-notes{{ process.id }}">
-                                      <h5>
-                                        {% trans "Notes:" %}
-                                      </h5>
+                                      <span>
+                                        <b>{% trans "Notes:" %} </b>
                                         {% if process.notes %}
-                                            {{ process.notes|urlize|linebreaks }}
+                                            {{ process.notes|urlize }}
                                         {% endif %}
+                                      </span>
                                     </div>
                                 <!-- </div>
                             </div> -->
-                            <div class="span4 prevnext">
+                            <div class="prevnext">
                               {% if process.previous_processes %}
 			                        <h4>{% trans "Previous processes" %}</h4>
 			                          {% for proc in process.previous_processes %}
@@ -320,7 +329,7 @@ th, td {
 
 	        <div class="row-fluid" id="todos">
 		  	    <div class="span12 todos infobox">
-			        <h2>
+			        <h3>
 			            {% trans "Simple Task List:" %}
 	                    {% if agent %}
 					        &nbsp;&nbsp;&nbsp;&nbsp;
@@ -353,7 +362,7 @@ th, td {
 			            <a href="{% url "open_todos" %}">{% trans "Unfinished Tasks" %}</a>&nbsp;&nbsp;&nbsp;&nbsp;
 			            <a href="{% url "todo_history" %}">{% trans "Finished Tasks" %}</a>
 {% endcomment %}
-		            </h2>
+		            </h3>
 
 		            <table class="todo-table" >
 		                <thead>

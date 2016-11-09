@@ -44,6 +44,9 @@ textarea {
     font-size: 1.1em;
     vertical-align: text-bottom;
 }
+.resource-type ul {
+  font-size: 97%;
+}
 /*.oi {
     color: firebrick;
     font-size: 1.2em;
@@ -68,7 +71,7 @@ textarea {
     margin-left: 1em;
 }
 .process-btn {
-    margin-top: 10px;
+    margin-top: 5px;
 }
 .btn-warning {
     margin-top: 5px;
@@ -248,18 +251,18 @@ textarea {
                       <div id="item-{{ item.id }}" class="resource-type space-down infobox">
                             <h3>
                               <span class="oi">{% trans 'Item' %}:</span>
-                              {{ item.resource_type }}
-                            {% if item.stage %}
-                                @{{ item.stage.name }}
-                            {% endif %}
-                            </h3>
-                            {% if item.needs_production_process %}
-                              {% if agent %}
-                                <a href="#productionProcessModal{{ item.id }}" role="button" class="btn btn-info btn-mini production-process-btn" data-toggle="modal">
-                                    {% blocktrans %}Add Process to produce {% endblocktrans %} {{ item.resource_type }}
-                                </a>
+                              {{ item.resource_type }} &nbsp; &nbsp;
+                              {% if item.stage %}
+                                  @{{ item.stage.name }}
                               {% endif %}
-                            {% endif %}
+                              {% if item.needs_production_process %}
+                                {% if agent %}
+                                  <a href="#productionProcessModal{{ item.id }}" role="button" class="btn btn-info btn-mini production-process-btn" data-toggle="modal">
+                                      {% blocktrans %}Add Process to produce {% endblocktrans %} {{ item.resource_type }}
+                                  </a>
+                                {% endif %}
+                              {% endif %}
+                            </h3>
 
 
                       {% if agent %}
@@ -287,6 +290,7 @@ textarea {
                                 {% trans 'Onhand' %}: <a href="{{ oh.get_absolute_url }}"> {{ oh }} {{ oh.formatted_quantity }}</a>
                             </div>
                       {% endfor %}
+
                       {% for process in item.processes %}
 
 					              {% if agent %}
@@ -341,11 +345,10 @@ textarea {
 					               {% endif %}
 
                         <div class="row-fluid indent">
-                            <div class="span9">
-                                <div class="process infobox2" >{% include  "work/_process_for_order_work.html" %}</div>
-                            </div>
+                          <div class="span12 infobox2">
+                            <div class="span10 process" >{% include  "work/_process_for_order_work.html" %}</div>
 
-                            <div class="span3">
+                            <div class="span2">
                               {% if agent %}
                               <a href="#processChangeForm{{ process.id }}" role="button" class="btn btn-primary btn-mini process-btn" data-toggle="modal">{% trans "Change process plan" %}</a>
 
@@ -381,7 +384,8 @@ textarea {
                                {% endif %}
                               {% endif %}
                             </div>
-						 </div>
+                          </div>
+						            </div>
 
 					{% endfor %}
 </div>

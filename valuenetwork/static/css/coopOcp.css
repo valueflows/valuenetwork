@@ -262,8 +262,8 @@ form#stateForm {
 	width: 98%;
 }
 
-/*   P R O J E C T   E X C H A N G E S   */
 
+/*   I N F O B O X E S   A N D   M I N I F O R M S   */
 
 .miniform {
   padding: 7px 15px;
@@ -295,6 +295,7 @@ form#stateForm {
 .infobox h3 {
   margin: 0 0 5px 0;
   padding: 0;
+  font-size: 19.5px;
 }
 .infobox .row-fluid {
   width: inherit;
@@ -309,6 +310,9 @@ form#stateForm {
   margin-bottom: 7px;
   margin-top: 7px;
 }
+
+/*   P R O J E C T   E X C H A N G E S   */
+
 .hdg {
     color: #444;/*firebrick;*/
 }
@@ -340,11 +344,19 @@ form#stateForm {
   float: right;
 }
 
-/*   P O P O V E R S   */
+/*   P O P O V E R S   &   H E L P   */
 
 .popover .popover-inner {
   background-color: #476B6B;
 }
 .popover.left .arrow {
   border-left: 5px solid #476B6B;
+}
+.help-content {
+  background-color: #476B6B;
+  border: 1px solid #CACAC6;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  margin-bottom: 13px;
 }

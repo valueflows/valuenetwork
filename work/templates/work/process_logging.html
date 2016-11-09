@@ -24,10 +24,10 @@
 }
 
 .event-section {
-    margin: 4px;
+    /*margin: 4px;
     padding: 4px;
     border: 1px solid lightgray;
-    background-color: #F0F6F0;
+    background-color: #F0F6F0;*/
 }
 
 .commitment {
@@ -40,8 +40,8 @@
 .notes {
     margin: 3px 1em 3px 1em;
     font-style: italic;
-    border: 1px solid lightgray;
-    padding: 3px 3px 0px 5px;
+    /*border: 1px solid lightgray;
+    padding: 3px 3px 0px 5px;*/
 }
 
 .error {
@@ -114,7 +114,7 @@ li {
 }
 
 .event-label {
-    color: green;
+    color: #476B6B;
     font-weight: bold;
     font-style: normal;
 }
@@ -209,7 +209,7 @@ hr {
 
 		<div class="span8">
       <div class="log-section infobox">
-		    <h2 style="margin-bottom: 4px;" >
+		    <h3 style="margin-bottom: 4px;" >
 		        {% trans "Outputs" %}
 		        {% if logger %}
 		            <a href="#addOutputModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Add an output requirement">
@@ -229,7 +229,7 @@ hr {
                     planning.">
                     <img src="{% static 'img/information-icon.png' %}" /></a>
                 </span>
-	        </h2>
+	        </h3>
 
             <h4 class="subsection-label">{% trans "Scheduled" %}:</h4>
 		    {% for item in process.outgoing_commitments %}
@@ -414,7 +414,7 @@ hr {
             {% if process.uncommitted_production_events %}
                 <h4 class="subsection-label">{% trans "Unplanned Production" %}:</h4>
 		        {% for event in process.uncommitted_production_events %}
-			        <div class="event-section" >
+			        <div class="event-section infobox3" >
 				        <span class="event-label">{% trans "Created" %}: </span>
                         <span class="event" >
                             {% if event.resource %}
@@ -447,7 +447,7 @@ hr {
 
 	    {% if work_reqs or process.uncommitted_work_events or "work" in slots %}
 		    <div class="log-section infobox">
-		        <h2 style="margin-bottom: 4px;" >
+		        <h3 style="margin-bottom: 4px;" >
 		            {% trans "Work" %}
 		            {% if logger %}
 			            <a href="#addWorkModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Add a new work requirement, people with those skills will be notified">
@@ -471,7 +471,7 @@ hr {
                     to do the work.  Or you can just log the work directly without committing to the task.">
                     <img src="{% static 'img/information-icon.png' %}" /></a>
                 </span>
-	            </h2>
+	            </h3>
 
                 <h4 class="subsection-label">{% trans "Planned Work" %}: <span class="normal">{% trans "(Requirements are ordered by due date)" %}</span></h4>
 		        {% for item in work_reqs %}
@@ -668,7 +668,7 @@ hr {
                             </div>
 
 			                {% if work_events %}
-			                    <div class="event-section">
+			                    <div class="event-section infobox3">
 			                        <div class="subsection-label event-label" >{% trans "Work events" %}:</div>
 				                    {% for event in work_events %}
 					                    <div>
@@ -1171,7 +1171,7 @@ hr {
 
 	    {% if use_reqs or uncommitted_use  or "use" in slots %}
 		    <div class="log-section infobox">
-		        <h2 style="margin-bottom: 4px;" >
+		        <h3 style="margin-bottom: 4px;" >
 		            {% trans "Usable Inputs" %}
 		            {% if logger %}
 		                <a href="#addUsableModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Add a usable input requirement">
@@ -1188,7 +1188,7 @@ hr {
                         the process.  Typical examples are equipment, tools, and space.  Inventory is not decremented.">
                         <img src="{% static 'img/information-icon.png' %}" /></a>
                     </span>
-	            </h2>
+	            </h3>
 
 	            {% if agent %}
                     <div class="modal hide fade" id="unplannedUseModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-use-label" aria-hidden="true">

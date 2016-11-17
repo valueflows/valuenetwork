@@ -135,7 +135,17 @@ legend {
 
             {% if user_agent in agent.managers or user_agent.is_staff %}
                 {% if agent.is_context %}
-                  <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Edit Project" %}</a>
+                  <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">
+                    {% if not agent.project %}
+                      {% trans "Upgrade to an OCP Project" %}
+                    {% else %}
+                      {% trans "Edit Project" %}
+                    {% endif %}</a>
+                  {% if not agent.project %}
+                  <div class="infobox3 alert" style="display:inline-block; padding-right:13px; margin:0 13px;">
+                    {% trans "This agent is not yet a regular ocp's 'project', only is pending to be defined the visibility and the joining style." %}
+                  </div>
+                  {% endif %}
                 {% endif %}
                 {% if not agent.faircoin_address%}
                     <form

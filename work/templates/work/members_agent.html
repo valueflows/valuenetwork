@@ -136,7 +136,17 @@ legend {
 
             {% if user_agent in agent.managers or user_agent.is_staff %}
                 {% if agent.is_context %}
-                  <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Edit Project" %}</a>
+                  <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">
+                    {% if not agent.project %}
+                      {% trans "Upgrade to an OCP Project" %}
+                    {% else %}
+                      {% trans "Edit Project" %}
+                    {% endif %}</a>
+                  {% if not agent.project %}
+                  <div class="infobox3 alert" style="display:inline-block; padding-right:13px; margin:0 13px;">
+                    {% trans "This agent is not yet a regular ocp's 'project', only is pending to be defined the visibility and the joining style." %}
+                  </div>
+                  {% endif %}
                 {% endif %}
                 {% if not agent.faircoin_address and user_agent.is_staff%}
                     <form
@@ -178,11 +188,6 @@ legend {
             {% endif %}
 
             {% if user_agent and user_agent in agent.managers or user.is_staff %}
-                {% if not agent.project %}
-                  <p>
-                    {% trans "Still not defined the Visibility and the Joining style for this project..." %}
-                  </p>
-                {% endif %}
                 <div class="modal hide fade" id="agentChangeForm" tabindex="-1" role="dialog" aria-labelledby="agent-change-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

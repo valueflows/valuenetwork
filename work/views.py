@@ -60,12 +60,12 @@ def my_dashboard(request):
 
 def new_features(request):
     new_features = NewFeature.objects.all()
-    
+
     return render_to_response("work/new_features.html", {
         "new_features": new_features,
         "photo_size": (256, 256),
     }, context_instance=RequestContext(request))
-    
+
 @login_required
 def my_tasks(request):
     #import pdb; pdb.set_trace()
@@ -760,7 +760,7 @@ def process_logging(request, process_id):
         "help": get_help("process_work"),
     }, context_instance=RequestContext(request))
 
-    
+
 from functools import partial, wraps
 
 @login_required
@@ -2070,7 +2070,8 @@ def change_your_project(request, agent_id):
             project.save()
         else:
           pro_form = ProjectCreateForm(instance=project, data=request.POST or None)
-          agn_form = AgentCreateForm(instance=agent, data=request.POST or None)
+
+        agn_form = AgentCreateForm(instance=agent, data=request.POST or None)
         if pro_form.is_valid() and agn_form.is_valid():
             project = pro_form.save()
             data = agn_form.cleaned_data
@@ -2750,11 +2751,11 @@ def join_project(request, project_id):
             state="active",
             )
         aa.save()
-    
+
     return HttpResponseRedirect("/work/your-projects/")
-    
-    
-    
+
+
+
 def validate_nick(request):
     #import pdb; pdb.set_trace()
     answer = True
@@ -2907,7 +2908,7 @@ def project_feedback(request, agent_id, join_request_id):
         "agent": agent,
         "fobi_headers": fobi_headers,
     }, context_instance=RequestContext(request))
-    
+
 @login_required
 def invoice_number(request):
     agent = get_agent(request)
@@ -2924,11 +2925,11 @@ def invoice_number(request):
             nbr.created_date = idate
             nbr.created_by = request.user
             nbr.save()
-        
+
         return HttpResponseRedirect('/%s/'
             % ('work/invoice-number',))
 
-    
+
     return render_to_response("work/invoice_number.html", {
         "help": get_help("invoice_number"),
         "agent": agent,

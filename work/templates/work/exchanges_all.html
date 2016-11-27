@@ -1,11 +1,14 @@
 {% extends "work_base.html" %}
 
+{% load staticfiles %}
 {% load i18n %}
+{% load bootstrap_tags %}
 
 {% block head_title %}{% trans "Exchanges" %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
 
 <style>
 .totals {
@@ -47,8 +50,13 @@
           <div id="new_exchange" class="miniform">
             <form id="exchangeForm" style="display: inline;" method="POST" action="">
                 {% csrf_token %}
-                Choose a type to create a new exchange: {{ nav_form.exchange_type }}
-                <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
+                {% trans "Choose a type to create a new exchange:" %}
+                {% if nav_form.exchange_type %}
+                  {{ nav_form.exchange_type }}
+                  &nbsp; <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
+                {% else %}
+                  <span class="error">{% trans "Not found any related exchange type!" %}</span>
+                {% endif %}
             </form>
           </div>
 
@@ -152,6 +160,7 @@
 
 {% block extra_script %}
 	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+  <script src="{% static 'js/chosen.jquery.js' %}"></script>
 {% endblock %}
 
 {% block extra_body %}
@@ -161,23 +170,23 @@
 
 	$(document).ready(function(){
 
-        $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help");
-        }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow");
-            $( "#help" ).text("Show Help");
-        })
+    $( "#help" ).toggle( function(){
+        $('#help-content').show("slide", { direction: "right" }, "slow" );
+        $( "#help" ).text("Hide Help");
+      }, function(){
+        $('#help-content').hide("slide", { direction: "right" }, "slow");
+        $( "#help" ).text("Show Help");
+    });
 
 		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
+    $(".chzn-select").chosen();
+
 		var selectedCats = "{{ selected_values }}";
 
-		$('.category').each(function()
-		{
+		$('.category').each(function(){
 			var cat = $(this)[0];
-            if (selectedCats.indexOf(cat.name) > -1)
-			{
+      if (selectedCats.indexOf(cat.name) > -1) {
 				$(this).prop('checked', true);
 			}
 		});

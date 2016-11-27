@@ -99,16 +99,15 @@
         </legend>
 
 
-      {% if roots %}
+      {% if projects %}
        {% if managed_projects %}
         <h3>
           {% trans "Projects coordinated by you:" %}
         </h3>
         <ul class="managed-project">
-        {% for root in roots %}
-          {% for node in root.nodes %}
+        {% for node in projects %}
             {% if not node.name == 'Freedom Coop' %}
-              {% if agent in node.managers %}
+              {% if node in agent.managed_projects %}
                   <li><h4><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b></h4>
                     &nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>
                     <!-- <a class="indent" href="{% url "contributions" project_id=node.id %}">{% trans "Contributions" %}: {{ node.contributions_count }}</a>
@@ -170,7 +169,7 @@
                    </li>
               {% endif %}
             {% endif %}
-          {% endfor %}
+
         {% endfor %}
        </ul>
        {% endif %}
@@ -204,8 +203,8 @@
             {% endif %}
         {% endwith %}
 
-        {% for root in roots %}
-          {% for node in root.nodes %}
+        {% for node in projects %}
+
             {% if not node.name = 'Freedom Coop' and not agent in node.managers and agent in node.members %}
             <li><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b>
               &nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>
@@ -229,7 +228,7 @@
               {% endfor %}
             </li>
             {% endif %}
-          {% endfor %}
+
         {% endfor %}
       </ul>
 

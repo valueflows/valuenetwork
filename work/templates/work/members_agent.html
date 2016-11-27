@@ -596,56 +596,56 @@ legend {
 
     $(document).ready(function(){
 
-		$('#projects').addClass('active');
+        $('#projects').addClass('active');
 
-		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help");
-        }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow");
-            $( "#help" ).text("Show Help");
-        })
+        $( "#help" ).toggle( function(){
+                $('#help-content').show("slide", { direction: "right" }, "slow" );
+                $( "#help" ).text("Hide Help");
+            }, function() {
+                $('#help-content').hide("slide", { direction: "right" }, "slow");
+                $( "#help" ).text("Show Help");
+        });
 
         $('td.td-role > select').addClass('select-role');
         $('td.td-agent > select').addClass('select-agent');
 
-        $.validator.addMethod("agentRequired", function (value, element) {
+        if(typeof($.validator) != "undefined"){
+          $.validator.addMethod("agentRequired", function (value, element) {
             alert("value " + value + " element " + element);
             //agent = element.closest(".select-agent");
             //alert("agent " + agent);
 
             return true;
-        }, "Both role and agent must be entered.");
+          }, "Both role and agent must be entered.");
 
-        $.validator.addClassRules("select-role", { agentRequired: true });
+          $.validator.addClassRules("select-role", { agentRequired: true });
 
-        jQuery.validator.setDefaults({
+          jQuery.validator.setDefaults({
             success: function(label) {
-                label
-                    .text('').addClass('valid')
-                    .closest('.control-group').addClass('success');
+              label
+              .text('').addClass('valid')
+              .closest('.control-group').addClass('success');
             }
-        });
+          });
 
-
-        $( "#userForm" ).validate({
-            rules: {
-                username: {
-                    required: true
-                },
-                password1: {
-                    required: true
-                },
-                password2: {
-                    required: true,
-                    equalTo: "#id_password1"
-                },
-            },
-            highlight: function(label) {
-                $(label).closest('.control-group').addClass('error');
-            },
-        });
-
+          $( "#userForm" ).validate({
+              rules: {
+                  username: {
+                      required: true
+                  },
+                  password1: {
+                      required: true
+                  },
+                  password2: {
+                      required: true,
+                      equalTo: "#id_password1"
+                  },
+              },
+              highlight: function(label) {
+                  $(label).closest('.control-group').addClass('error');
+              },
+          });
+        }
 
     }); // end document.ready
 
@@ -659,7 +659,7 @@ legend {
 		});
 	});
 
-
+  if(typeof(google) != "undefined"){
         google.load("visualization", "1", {packages:["corechart"]});
         {% if agent.is_individual %}
             google.setOnLoadCallback(drawChartIndividualStats);
@@ -752,7 +752,7 @@ legend {
                 );
             }
             {% endif %}
-
+    }
     </script>
 
 {% endblock %}

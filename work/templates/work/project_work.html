@@ -13,6 +13,13 @@
 <link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
 
 <style>
+.span12 .span4, .span12 .span3 {
+  min-height: 0;
+  font-size: 0.9em;
+}
+.span12 .span4 > ul {
+  margin: 0;
+}
 
 li {
     list-style-type: none;
@@ -63,7 +70,7 @@ h3 {
   margin-right: 16px;
 }
 .section {
-    color:     #008A2E;
+    color: #476B6B;
     font-size: 1em;
 }
 .work, .deliverable, .material, .subline {
@@ -264,26 +271,24 @@ th, td {
 				                                <button class="btn btn-primary" id="chg-proc{{ process.id }}">{% trans "Save" %}</button>
 								              </div>
 								            </form>
-                                        </div>
+                          </div>
 						            </div>
-                                    {% endif %}
+                                  {% endif %}
 
                                   </div>
-                                <!-- </div> -->
-                                <!-- <div class="row-fluid"> -->
-                                    <div class="span4">
+
+                                  <div class="span4">
                                         {% include  "work/_work_process_for_sked.html" %}
-                                    </div>
-                                    <div class="span3 notes" id="proc-notes{{ process.id }}">
+                                  </div>
+                                  <div class="span3 notes" id="proc-notes{{ process.id }}">
+                                    {% if process.notes %}
                                       <span>
                                         <b>{% trans "Notes:" %} </b>
-                                        {% if process.notes %}
                                             {{ process.notes|urlize }}
-                                        {% endif %}
                                       </span>
-                                    </div>
-                                <!-- </div>
-                            </div> -->
+                                    {% endif %}
+                                  </div>
+
                             <div class="prevnext">
                               {% if process.previous_processes %}
 			                        <h4>{% trans "Previous processes" %}</h4>

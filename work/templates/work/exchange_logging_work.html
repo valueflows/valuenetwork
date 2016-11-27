@@ -247,9 +247,9 @@ li {
                                             {% if slot.is_currency %}Event reference:<br />{{ ax_form.event_reference }}<br />{% endif %}
                                             {% if slot.can_create_resource %}
                                                 <br />
-                                                <span class="modal-hdg">Incoming resource:</span><br>
-                                                Add to an existing resource:<br />{{ ax_form.resource }}<br />
-                                                <br /><b>OR create a new resource:</b><br />
+                                                <h4>Incoming resource:</h4>
+                                                <p>Add to an existing resource:<br />{{ ax_form.resource }}
+                                                <br />OR <b>create a new resource</b>:</p>
                                                 Identifier: (for example, lot number or serial number)<br />{{ ax_form.identifier }}<br />
                                                 URL:<br />{{ ax_form.url }}<br />
                                                 Photo URL:<br />{{ ax_form.photo_url }}<br />
@@ -929,9 +929,9 @@ li {
                         </div>
                         <div class="modal-body">
                             <form class="validateMe" id="workForm" enctype="multipart/form-data" action="{% url "add_work_for_exchange" exchange_id=exchange.id %}" method="POST" >
+                                <input type="hidden" id="next" name="next" value="exchange-work" />
                                 {% csrf_token %}
                                 {{ add_work_form }}
-                                <input type="hidden" id="next" name="next" value="exchange-work" />
                                 <div class="modal-footer">
                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                     <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />

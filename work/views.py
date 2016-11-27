@@ -1831,7 +1831,21 @@ def your_projects(request):
     if not allowed:
         return render_to_response('work/no_permission.html')
 
-    roots = [p for p in projects if not p.is_root()] # if p.is_root()
+    for node in projects:
+        aats = []
+        for aat in node.agent_association_types():
+          #if aat.association_behavior != "child":
+          aat.assoc_count = node.associate_count_of_type(aat.identifier)
+          assoc_list = node.all_has_associates_by_type(aat.identifier)
+          for assoc in assoc_list:
+            association = AgentAssociation.objects.get(is_associate=assoc, has_associate=node, association_type=aat)#
+            assoc.state = association.state
+          aat.assoc_list = assoc_list
+          if not aat in aats:
+            aats.append(aat)
+        node.aats = aats
+
+    '''roots = [p for p in projects if not p.is_root()] # if p.is_root()
 
     for root in roots:
         root.nodes = root.child_tree()
@@ -1847,11 +1861,12 @@ def your_projects(request):
                         association = AgentAssociation.objects.get(is_associate=assoc, has_associate=node, association_type=aat)#
                         assoc.state = association.state
                     aat.assoc_list = assoc_list
-                    aats.append(aat)
-            node.aats = aats
+                    if not aat in aats:
+                      aats.append(aat)
+            node.aats = aats'''
 
     return render_to_response("work/your_projects.html", {
-        "roots": roots,
+        "projects": projects,
         "help": get_help("your_projects"),
         "agent": agent,
         "agent_form": agent_form,
@@ -3490,7 +3505,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 logger = True
 
             for event in work_events:
-                event.changeform = WorkEventAgentForm(
+                event.changeform = WorkEventContextAgentForm(
                     context_agent=context_agent,
                     instance=event,
                     prefix=str(event.id))
@@ -3498,7 +3513,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 "from_agent": agent,
                 "event_date": datetime.date.today()
             }
-            add_work_form = WorkEventAgentForm(initial=work_init, context_agent=context_agent)
+            add_work_form = WorkEventContextAgentForm(initial=work_init, context_agent=context_agent)
 
             #import pdb; pdb.set_trace()
             for slot in slots:
@@ -3513,15 +3528,19 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                     "to_agent": ta_init,
                     "event_date": datetime.date.today()
                 }
-                slot.add_xfer_form = TransferForm(initial=xfer_init, prefix="ATR" + str(slot.id), context_agent=context_agent, transfer_type=slot)
-                slot.create_role_formset = resource_role_agent_formset(prefix=str(slot.id))
+                slot.add_xfer_form = ContextTransferForm(initial=xfer_init, prefix="ATR" + str(slot.id), context_agent=context_agent, transfer_type=slot)
+                slot.create_role_formset = resource_role_context_agent_formset(prefix=str(slot.id))
+                ctx_qs = context_agent.related_all_contexts_queryset()
+                for form in slot.create_role_formset.forms:
+                    form.fields["agent"].queryset = ctx_qs
+
                 commit_init = {
                     "from_agent": fa_init,
                     "to_agent": ta_init,
                     "commitment_date": datetime.date.today(),
                     "due_date": exchange.start_date,
                 }
-                slot.add_commit_form = TransferCommitmentForm(initial=commit_init, prefix="ACM" + str(slot.id), context_agent=context_agent, transfer_type=slot)
+                slot.add_commit_form = ContextTransferCommitmentForm(initial=commit_init, prefix="ACM" + str(slot.id), context_agent=context_agent, transfer_type=slot)
 
     else:
         raise ValidationError("System Error: No exchange or use case.")
@@ -3545,7 +3564,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
 @login_required
 def exchanges_all(request, agent_id): #all types of exchanges for one context agent
     #import pdb; pdb.set_trace()
-    project = get_object_or_404(EconomicAgent, id=agent_id)
+    agent = get_object_or_404(EconomicAgent, id=agent_id)
     today = datetime.date.today()
     end =  today
     start = today - datetime.timedelta(days=365)
@@ -3553,11 +3572,14 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     dt_selection_form = DateSelectionForm(initial=init, data=request.POST or None)
     et_give = EventType.objects.get(name="Give")
     et_receive = EventType.objects.get(name="Receive")
-    ets = ExchangeType.objects.all()
+    context_ids = [c.id for c in agent.related_all_contexts()]
+    context_ids.append(agent.id)
+    ets = ExchangeType.objects.filter(context_agent__id__in=context_ids) #all()
     event_ids = ""
     select_all = True
     selected_values = "all"
-    nav_form = ExchangeNavForm(data=request.POST or None)
+
+    nav_form = ExchangeNavForm(agent=agent, data=request.POST or None)
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         new_exchange = request.POST.get("new-exchange")
@@ -3566,34 +3588,39 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 data = nav_form.cleaned_data
                 ext = data["exchange_type"]
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                    % ('work/agent', project.id, 'exchange-logging-work', ext.id, 0))
+                    % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
             start = dt_selection_form.cleaned_data["start_date"]
             end = dt_selection_form.cleaned_data["end_date"]
-            exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, project)
+            exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, agent)
         else:
-            exchanges = Exchange.objects.filter(context_agent=project)
-        selected_values = request.POST["categories"]
-        if selected_values:
-            sv = selected_values.split(",")
-            vals = []
-            for v in sv:
-                vals.append(v.strip())
-            if vals[0] == "all":
-                select_all = True
-            else:
-                select_all = False
-                transfers_included = []
-                exchanges_included = []
-                events_included = []
-                for ex in exchanges:
-                    if str(ex.exchange_type.id) in vals:
-                        exchanges_included.append(ex)
-                exchanges = exchanges_included
+            exchanges = Exchange.objects.filter(context_agent=agent)
+
+        if "categories" in request.POST:
+            selected_values = request.POST["categories"]
+            if selected_values:
+                sv = selected_values.split(",")
+                vals = []
+                for v in sv:
+                    vals.append(v.strip())
+                if vals[0] == "all":
+                    select_all = True
+                else:
+                    select_all = False
+                    #transfers_included = []
+                    exchanges_included = []
+                    #events_included = []
+                    for ex in exchanges:
+                        if str(ex.exchange_type.id) in vals:
+                            exchanges_included.append(ex)
+                    exchanges = exchanges_included
+        else:
+          exchanges = Exchange.objects.filter(context_agent=agent) #.none()
+          selected_values = "0"
     else:
-        exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, project)
+        exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, agent)
 
     total_transfers = 0
     total_rec_transfers = 0
@@ -3631,6 +3658,19 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "selected_values": selected_values,
         "ets": ets,
         "event_ids": event_ids,
-        "project": project,
+        "project": agent,
         "nav_form": nav_form,
     }, context_instance=RequestContext(request))
+
+
+
+def resource_role_context_agent_formset(prefix, data=None):
+    #import pdb; pdb.set_trace()
+    RraFormSet = modelformset_factory(
+        AgentResourceRole,
+        form=ResourceRoleContextAgentForm,
+        can_delete=True,
+        extra=4,
+        )
+    formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
+    return formset

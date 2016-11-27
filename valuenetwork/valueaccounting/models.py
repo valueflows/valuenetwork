@@ -949,8 +949,24 @@ class EconomicAgent(models.Model):
         #return list(set(cas))
         return [a for a in agents if a.is_context]
 
+    def related_all_contexts(self):
+        agents = [ag.has_associate for ag in self.is_associate_of.all()]
+        agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        # bumbum get also parents of parents contexts
+        grand_parents = []
+        for agn in agents:
+          grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+        agents.extend(grand_parents)
+        return list(set(agents))
+        #return [a for a in agents if a.is_context]
+
     def related_context_queryset(self):
         ctx_ids = [ctx.id for ctx in self.related_contexts()]
+        return EconomicAgent.objects.filter(id__in=ctx_ids)
+
+    def related_all_contexts_queryset(self):
+        ctx_ids = [ctx.id for ctx in self.related_all_contexts()]
+        #ctx_ids.insert(0, self.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
     def invoicing_candidates(self):
@@ -984,7 +1000,8 @@ class EconomicAgent(models.Model):
         from valuenetwork.valueaccounting.utils import agent_dfs_by_association
         #todo: figure out why this failed when AAs were ordered by from_agent
         aas = AgentAssociation.objects.filter(association_type__association_behavior="child").order_by("is_associate__name")
-        return agent_dfs_by_association(self, aas, 1)
+        aas = agent_dfs_by_association(self, aas, 1)
+        return list(set(aas))
 
     def wip(self):
         return self.active_processes()
@@ -1850,6 +1867,11 @@ class EconomicResourceType(models.Model):
     created_date = models.DateField(auto_now_add=True, blank=True, null=True, editable=False)
     changed_date = models.DateField(auto_now=True, blank=True, null=True, editable=False)
     slug = models.SlugField(_("Page name"), editable=False)
+
+    context_agent = models.ForeignKey(EconomicAgent,
+        blank=True, null=True,
+        limit_choices_to={"is_context": True,},
+        verbose_name=_('context agent'), related_name='context_resource_types')
 
     objects = EconomicResourceTypeManager()
 
@@ -2746,6 +2768,12 @@ class ProcessPatternManager(models.Manager):
 
 class ProcessPattern(models.Model):
     name = models.CharField(_('name'), max_length=32)
+
+    context_agent = models.ForeignKey(EconomicAgent,
+        blank=True, null=True,
+        limit_choices_to={"is_context": True,},
+        verbose_name=_('context agent'), related_name='process_patterns')
+
     objects = ProcessPatternManager()
 
     class Meta:
@@ -4106,6 +4134,11 @@ class ExchangeType(models.Model):
     created_date = models.DateField(auto_now_add=True, blank=True, null=True, editable=False)
     changed_date = models.DateField(auto_now=True, blank=True, null=True, editable=False)
     slug = models.SlugField(_("Page name"), editable=False)
+
+    context_agent = models.ForeignKey(EconomicAgent,
+        blank=True, null=True,
+        limit_choices_to={"is_context": True,},
+        verbose_name=_('context agent'), related_name='exchange_types')
 
     objects = ExchangeTypeManager()
 
@@ -7127,11 +7160,24 @@ class TransferType(models.Model):
         else:
             return EconomicAgent.objects.all()
 
+    def to_context_agents(self, context_agent):
+        #import pdb; pdb.set_trace()
+        if self.receive_agent_association_type:
+            return context_agent.has_associates_self_or_inherited(self.receive_agent_association_type.identifier)
+        else:
+            return context_agent.related_all_contexts_queryset() #EconomicAgent.objects.all()
+
     def from_agents(self, context_agent):
         if self.give_agent_association_type:
             return context_agent.has_associates_self_or_inherited(self.give_agent_association_type.identifier)
         else:
             return EconomicAgent.objects.all()
+
+    def from_context_agents(self, context_agent):
+        if self.give_agent_association_type:
+            return context_agent.has_associates_self_or_inherited(self.give_agent_association_type.identifier)
+        else:
+            return context_agent.related_all_contexts_queryset() #EconomicAgent.objects.all()
 
     def form_prefix(self):
         return "-".join(["TT", str(self.id)])
@@ -8191,6 +8237,7 @@ class Transfer(models.Model):
         #import pdb; pdb.set_trace()
         from valuenetwork.valueaccounting.views import resource_role_agent_formset
         return resource_role_agent_formset(prefix=self.form_prefix(), data=data)
+
 
     def change_commitments_form(self):
         from valuenetwork.valueaccounting.forms import TransferCommitmentForm

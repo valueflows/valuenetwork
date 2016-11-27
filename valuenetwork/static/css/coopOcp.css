@@ -329,13 +329,17 @@ form#stateForm {
 #new_exchange {
   float: right;
   max-width: 600px;
-  text-align: right;
+  /*text-align: right;*/
 }
 #new_exchange select {
   margin: 4px;
 }
 #new_exchange .btn {
   margin: 6px 0;
+}
+#new_exchange .chzn-container {
+  margin-top: 5px;
+  display: inline-table;
 }
 .span12 {
   margin-left: 0px;

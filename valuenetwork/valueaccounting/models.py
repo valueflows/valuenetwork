@@ -1000,8 +1000,7 @@ class EconomicAgent(models.Model):
         from valuenetwork.valueaccounting.utils import agent_dfs_by_association
         #todo: figure out why this failed when AAs were ordered by from_agent
         aas = AgentAssociation.objects.filter(association_type__association_behavior="child").order_by("is_associate__name")
-        aas = agent_dfs_by_association(self, aas, 1)
-        return list(set(aas))
+        return agent_dfs_by_association(self, aas, 1)
 
     def wip(self):
         return self.active_processes()
@@ -1055,6 +1054,19 @@ class EconomicAgent(models.Model):
             parent = associations[0].has_associate
         return parent
 
+    def context_parents(self):
+        #assumes multiple parents
+        #import pdb; pdb.set_trace()
+        associations = self.is_associate_of.filter(association_type__association_behavior="child").filter(state="active")
+        parents = None
+        if associations.count() > 0:
+            parents = associations #.has_associate
+        else:
+          associations = self.is_associate_of.filter(association_type__association_behavior="member").filter(state="active")
+          if associations.count() > 0:
+            parents = associations
+        return parents
+
     def all_ancestors(self):
         parent_ids = []
         parent_ids.append(self.id)
@@ -1076,6 +1088,12 @@ class EconomicAgent(models.Model):
 
     def is_root(self):
         if self.parent():
+            return False
+        else:
+            return True
+
+    def is_context_root(self):
+        if self.context_parents(): #.count() > 0:
             return False
         else:
             return True
@@ -8232,6 +8250,21 @@ class Transfer(models.Model):
             "to_agent": self.to_agent(),
             }
         return TransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, posting=False, prefix=prefix)
+
+    def commit_transfer_context_form(self):
+        from work.forms import ContextTransferForm
+        prefix=self.form_prefix()
+        #import pdb; pdb.set_trace()
+        init = {
+            "event_date": datetime.date.today(),
+            "resource_type": self.resource_type(),
+            "quantity": self.quantity(),
+            "value": self.value(),
+            "unit_of_value": self.unit_of_value(),
+            "from_agent": self.from_agent(),
+            "to_agent": self.to_agent(),
+            }
+        return ContextTransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, posting=False, prefix=prefix)
 
     def create_role_formset(self, data=None):
         #import pdb; pdb.set_trace()

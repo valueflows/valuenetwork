@@ -371,7 +371,7 @@ li {
                                                     <div class="modal-body">
                                                         <form class="validateMe" enctype="multipart/form-data" action="{% url "transfer_from_commitment" transfer_id=xfer.id %}" method="POST" >
                                                             {% csrf_token %}
-                                                            {% with xfer.commit_transfer_form as ct_form %}
+                                                            {% with xfer.commit_transfer_context_form as ct_form %}
                                                             Event date:<br />{{ ct_form.event_date }}<br />
                                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ct_form.from_agent }}<br />{% endif %}
                                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ct_form.to_agent }}<br />{% endif %}
@@ -728,7 +728,7 @@ li {
                                                     <div class="modal-body">
                                                         <form class="validateMe" enctype="multipart/form-data" action="{% url "transfer_from_commitment" transfer_id=xfer.id %}" method="POST" >
                                                             {% csrf_token %}
-                                                            {% with xfer.commit_transfer_form as ct_form %}
+                                                            {% with xfer.commit_transfer_context_form as ct_form %}
                                                             Event date:<br />{{ ct_form.event_date }}<br />
                                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ct_form.from_agent }}<br />{% endif %}
                                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ct_form.to_agent }}<br />{% endif %}

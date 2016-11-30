@@ -275,6 +275,7 @@ form#stateForm {
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   border-radius: 7px;
+  margin-bottom: 13px;
 }
 .infobox {
   background-color: #f0f0da;
@@ -322,34 +323,7 @@ form#stateForm {
 .infobox-div {
   margin-top: 5px;
 }
-.totals {
-  max-width: 496px;
-  font-size: 105%;
-}
-#new_exchange {
-  float: right;
-  max-width: 600px;
-  /*text-align: right;*/
-}
-#new_exchange select {
-  margin: 4px;
-}
-#new_exchange .btn {
-  margin: 6px 0;
-}
-#new_exchange .chzn-container {
-  margin-top: 5px;
-  display: inline-table;
-}
-.span12 {
-  margin-left: 0px;
-}
-#exchangeForm p {
-  margin: 9px 0 0 0;
-}
-.filter {
-  float: right;
-}
+
 
 /*   P O P O V E R S   &   H E L P   */
 

@@ -161,7 +161,7 @@ class PatternUseCaseInline(admin.TabularInline):
 
 
 class ProcessPatternAdmin(admin.ModelAdmin):
-    list_display = ('name', 'use_case_list')
+    list_display = ('name', 'use_case_list', 'context_agent')
     inlines = [ PatternFacetInline, PatternUseCaseInline]
 
 admin.site.register(ProcessPattern, ProcessPatternAdmin)
@@ -189,9 +189,9 @@ class ResourceTypeFacetInline(admin.TabularInline):
     model = ResourceTypeFacetValue
 
 class EconomicResourceTypeAdmin(admin.ModelAdmin):
-    list_display = ('label', 'name', 'resource_class', 'unit', 'unit_of_use', 'description', 'substitutable', 'facet_list')
+    list_display = ('name', 'resource_class', 'unit', 'unit_of_use', 'description', 'substitutable', 'facet_list', 'context_agent')
     list_filter = ['facets__facet_value']
-    search_fields = ['name',]
+    search_fields = ['name', 'context_agent']
     list_editable = ['unit', 'unit_of_use', 'substitutable', 'resource_class',]
     inlines = [ ResourceTypeFacetInline, ]
 

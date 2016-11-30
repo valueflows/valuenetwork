@@ -11,17 +11,24 @@
 <link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
 
 <style>
+
+ul, li {
+  min-height: 23px;
+}
 .totals {
     /*border: solid 2px firebrick;
     background-color: oldlace;
     margin-bottom: 12px;
     padding-left: 1em;*/
+  font-size: 105%;
   padding-bottom: 16px;
   padding-top: 16px;
+  max-width: 300px;
 }
-.total {
-    font-weight: bold;
-    padding-right: 2em;
+span.total {
+  font-weight: bold;
+  padding: 4px 10px;
+  display: inline-block;
 }
 #btn-export {
     margin-bottom: 8px;
@@ -29,7 +36,56 @@
 .title {
     font-size: 1.1em;
     font-weight: bold;
+  color: #476B6B;
 }
+
+#exchangeTypeForm {
+  /*min-height: 20px;*/
+}
+.use-case {
+  width: 140px;
+}
+#new_exchange #exchangeForm > div#id_exchange_type_chzn {
+  min-width: 300px;
+}
+#new_exchange .chzn-drop {
+  min-width: 298px;
+}
+#new_exchange .chzn-drop .chzn-search input {
+  min-width: 260px;
+}
+
+#new_exchange {
+  float: right;
+  width: 794px;
+  text-align: right;
+}
+#new_exchange select {
+  margin: 4px;
+}
+#new_exchange .btn {
+  margin: 6px 0;
+}
+#new_exchange .chzn-container {
+  margin-top: 5px;
+  display: inline-table;
+  text-align: left;
+}
+.span12 {
+  margin-left: 0px;
+  max-height: 97px;
+}
+.span9 {
+  margin-left: 0px;
+}
+#exchangeForm p {
+  margin: 9px 0 0 0;
+}
+.filter {
+  float: right;
+  width: 230px;
+}
+
 </style>
 
 {% endblock %}
@@ -50,19 +106,25 @@
           <div id="new_exchange" class="miniform">
             <form id="exchangeForm" style="display: inline;" method="POST" action="">
                 {% csrf_token %}
-                {% trans "Choose a type to create a new exchange:" %}
+                {% trans "Choose an exchange type to create a new Exchange:" %}
                 {% if nav_form.exchange_type %}
                   {{ nav_form.exchange_type }}
                   &nbsp; <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
                 {% else %}
                   <span class="error">{% trans "Not found any related exchange type!" %}</span>
                 {% endif %}
+            </form><br/>
+            <form id="exchangeTypeForm" style="display: inline;" method="POST" action="" >
+                {% csrf_token %}
+                <span style="line-height: 32px;">&nbsp;</span>{% trans "To create a new exchange Type, please request it to an Ocp admin." %}
+                <!-- {{ new_form.use_case }}
+                &nbsp; <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange-type" value="{% trans 'New Exchange Type' %}" class="btn btn-primary btn-mini" /> -->
             </form>
           </div>
 
           {% endif %}
           <div class="totals infobox">
-            <span class="total">Incoming total: {{ total_transfers }} </span>
+            <span class="total">Incoming total: {{ total_transfers }} </span><br/>
             <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 {% comment %}
             <br />* Note these totals are meaningful only if the events selected all use the same currency.
@@ -72,7 +134,10 @@
         </div>
       <div class="span9">
 		  {% if exchanges %}
-			<ul>
+        <h3>
+          {% trans "List of Exchanges" %}:
+        </h3>
+			  <ul>
 			    {% for x in exchanges %}
                     <li>
                         <a href="{% url "exchange_logging_work" context_agent_id=x.context_agent.id exchange_type_id=0 exchange_id=x.id %}"><b>{{ x }}</b></a>  {% trans "created by" %} {{ x.created_by }}
@@ -138,9 +203,15 @@
                     </div>
                 </div>
 	            <p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All in the date range" %}</p>
-                <p class="title"> {% trans "Exchange Type" %} </p>
-                {% for et in ets %}
-                    <p><input type="checkbox" class="category" id="{{ et.id }}" name="{{ et.id }}" value="{{ et.id }}" /> {{ et.name }}</p>
+                <p class="title"> {% trans "Filter by Type" %} </p>
+                {% for uc in usecases %}
+                  <h5>{{ uc.name }}:</h5>
+                  {% for et in ets %}
+                    {% if et.use_case = uc %}
+                      <p><input type="checkbox" class="category" id="{{ et.id }}" name="{{ et.id }}" value="{{ et.id }}" /> {{ et.name }}</p>
+                    {% endif %}
+                  {% endfor %}
+
                 {% endfor %}
 {% comment %}
                 {% if references %}

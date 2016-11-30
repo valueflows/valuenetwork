@@ -609,3 +609,16 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
         if context_agent:
           context_agents = context_agent.related_all_contexts_queryset() # EconomicAgent.objects.context_agents() #
           self.fields["agent"].queryset = context_agents
+
+
+class NewContextExchangeTypeForm(forms.ModelForm):
+    use_case = forms.ModelChoiceField(
+        queryset=UseCase.objects.exchange_use_cases(),
+        empty_label=None,
+        widget=forms.Select(
+            attrs={'class': 'use-case chzn-select'}))
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input-xlarge',})) # not required now, to be set in the next page
+
+    class Meta:
+        model = ExchangeType
+        fields = ('use_case', 'name')

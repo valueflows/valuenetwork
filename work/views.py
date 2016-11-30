@@ -653,7 +653,7 @@ def process_logging(request, process_id):
         output_resource_types = pattern.output_resource_types()
         unplanned_output_form = UnplannedOutputForm(prefix='unplannedoutput')
         unplanned_output_form.fields["resource_type"].queryset = output_resource_types
-        role_formset = resource_role_agent_formset(prefix="resource")
+        role_formset = resource_role_context_agent_formset(prefix="resource")
         produce_et = EventType.objects.get(name="Resource Production")
         change_et = EventType.objects.get(name="Change")
         #import pdb; pdb.set_trace()
@@ -3424,6 +3424,7 @@ def order_delete_confirmation_work(request, order_id):
             #    return HttpResponseRedirect('/%s/'
             #        % ('work/closed-work-orders'))
 
+
 @login_required
 def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exchange_id=None):
     #import pdb; pdb.set_trace()
@@ -3451,7 +3452,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                     exchange.save()
 
                     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+                        % ('work/agent', context_agent.id, 'exchange-logging-work', exchange_type_id, exchange.id))
 
             exchange_form = ExchangeContextForm()
             slots = exchange_type.slots()
@@ -3580,6 +3581,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     selected_values = "all"
 
     nav_form = ExchangeNavForm(agent=agent, data=request.POST or None)
+    usecases = UseCase.objects.filter(identifier__icontains='_xfer')
+    new_form = NewContextExchangeTypeForm(data=request.POST or None)
+
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         new_exchange = request.POST.get("new-exchange")
@@ -3589,6 +3593,14 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 ext = data["exchange_type"]
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                     % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
+
+        new_exchange_type = request.POST.get("new-exchange-type") # TODO
+        if new_exchange_type:
+            if new_form.is_valid():
+                data = new_form.cleaned_data
+                uca = data["use_case"]
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type
 
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
@@ -3618,7 +3630,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     exchanges = exchanges_included
         else:
           exchanges = Exchange.objects.filter(context_agent=agent) #.none()
-          selected_values = "0"
+          selected_values = "all"
     else:
         exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, agent)
 
@@ -3660,6 +3672,8 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "event_ids": event_ids,
         "project": agent,
         "nav_form": nav_form,
+        "usecases": usecases,
+        "new_form": new_form,
     }, context_instance=RequestContext(request))
 
 
@@ -3674,3 +3688,4 @@ def resource_role_context_agent_formset(prefix, data=None):
         )
     formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
     return formset
+

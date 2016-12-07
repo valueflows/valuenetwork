@@ -44,7 +44,7 @@ def create_address_for_agent(agent):
     address = None
     try:
         address = efn.new_fair_address(
-            entity_id = agent.nick, 
+            entity_id = agent.nick.encode('ascii','ignore'), 
             entity = agent.agent_type.name,
             )
     except Exception:

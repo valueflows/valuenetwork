@@ -194,7 +194,9 @@ INSTALLED_APPS = [
     'account',
     'work',
 
-
+    # general
+    'general',
+    'mptt', # This provide Tree management in a 'nested set' style
 ]
 
 REST_FRAMEWORK = {

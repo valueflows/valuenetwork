@@ -46,13 +46,13 @@ span.total {
   width: 140px;
 }
 #new_exchange #exchangeForm > div#id_exchange_type_chzn {
-  min-width: 300px;
+  min-width: 350px;
 }
 #new_exchange .chzn-drop {
-  min-width: 298px;
+  min-width: 348px;
 }
 #new_exchange .chzn-drop .chzn-search input {
-  min-width: 260px;
+  min-width: 313px;
 }
 
 #new_exchange {
@@ -71,6 +71,11 @@ span.total {
   display: inline-table;
   text-align: left;
 }
+
+#new_exchange .chzn-container .chzn-results li {
+  padding: 4px 6px 0;
+}
+
 .span12 {
   margin-left: 0px;
   max-height: 97px;
@@ -105,6 +110,7 @@ span.total {
           {% if request.user.agent.agent in project.managers or request.user.is_staff %}
           <div id="new_exchange" class="miniform">
             <form id="exchangeForm" style="display: inline;" method="POST" action="">
+
                 {% csrf_token %}
                 {% trans "Choose an exchange type to create a new Exchange:" %}
                 {% if nav_form.exchange_type %}

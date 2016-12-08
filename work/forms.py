@@ -330,21 +330,40 @@ class OrderSelectionFilteredForm(forms.Form):
             self.fields["demand"].queryset = provider.sales_orders.all()
 
 
+
+from general.models import Record_Type
+from mptt.forms import TreeNodeChoiceField
+
 class ExchangeNavForm(forms.Form):
-    exchange_type = forms.ModelChoiceField(
-        queryset=ExchangeType.objects.all(),
-        #empty_label=None,
-        widget=forms.Select(
-            attrs={'class': 'exchange-selector chzn-select'}))
+    get_et = False
+    try:
+      gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
+      exchange_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+          queryset=Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id), #ExchangeType.objects.all(),
+          empty_label=_('. . .'),
+          level_indicator='. ',
+          widget=forms.Select(
+              attrs={'class': 'exchange-selector chzn-select'}
+          )
+      )
+    except:
+      pass
 
     def __init__(self, agent=None, *args, **kwargs):
         super(ExchangeNavForm, self).__init__(*args, **kwargs)
+        try:
+          gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
+        except:
+          get_et = False
         if agent:
           context_ids = [c.id for c in agent.related_all_contexts()]
           if not agent.id in context_ids:
             context_ids.append(agent.id)
-          self.fields["exchange_type"].queryset = ExchangeType.objects.filter(context_agent__id__in=context_ids)
-          if not self.fields["exchange_type"].queryset:
+          if gen_et:
+            self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_contexts())
+            self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+
+          if not self.fields or not self.fields["exchange_type"].queryset:
             self.fields["exchange_type"] = False
 
 
@@ -420,6 +439,9 @@ class WorkEventContextAgentForm(forms.ModelForm):
             self.fields["from_agent"].queryset = context_agent.related_all_contexts_queryset()
 
 
+from general.models import Material_Type, Nonmaterial_Type, Artwork_Type
+from work.utils import *
+
 class ContextTransferForm(forms.Form):
     event_date = forms.DateField(required=True,
         widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
@@ -441,11 +463,27 @@ class ContextTransferForm(forms.Form):
         label="Quantity transferred",
         initial=1,
         widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
+
+    try:
+      ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Material_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        level_indicator='. ',
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type-for-resource input-xlarge chzn-select'})
+      )
+    except:
+      ocp_resource_type = False
+
     resource_type = forms.ModelChoiceField(
         queryset=EconomicResourceType.objects.all(),
+        label="Facets:",
         #empty_label=None,
+        required=False,
         widget=forms.Select(
-            attrs={'class': 'resource-type-for-resource chzn-select'}))
+            attrs={'class': 'resource-type-for-resource chzn-select'})
+    )
+
     resource = ResourceModelChoiceField(
         queryset=EconomicResource.objects.none(),
         label="Resource transferred (optional if not inventoried)",
@@ -508,12 +546,17 @@ class ContextTransferForm(forms.Form):
         label="Resource Access Rules",
         widget=forms.Textarea(attrs={'class': 'item-description',}))
 
-    def __init__(self, transfer_type=None, context_agent=None, resource_type=None, posting=False, *args, **kwargs):
+
+    def __init__(self, transfer_type=None, context_agent=None, resource_type=None, ocp_resource_type=None, posting=False, *args, **kwargs):
         super(ContextTransferForm, self).__init__(*args, **kwargs)
         #import pdb; pdb.set_trace()
+
         if transfer_type:
             rts = transfer_type.get_resource_types()
-            self.fields["resource_type"].queryset = rts
+            if resource_type:
+              self.fields["resource_type"].queryset = EconomicResourceType.objects.filter(id=resource_type.id)
+            else:
+              self.fields["resource_type"].queryset = rts
             if posting:
                 self.fields["resource"].queryset = EconomicResource.objects.all()
                 self.fields["from_resource"].queryset = EconomicResource.objects.all()
@@ -528,6 +571,78 @@ class ContextTransferForm(forms.Form):
             if context_agent:
                 self.fields["to_agent"].queryset = transfer_type.to_context_agents(context_agent)
                 self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
+
+            facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
+            self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
+
+            for fv in facetvalues:
+                #self.fields["ocp_resource_type"].label += " FV:"+fv
+                try:
+                    gtyp = Ocp_Material_Type.objects.get(facet_value__value=fv)
+                    self.fields["ocp_resource_type"].label += " M:"+str(gtyp.name)
+                except:
+                    pass
+                #self.fields["ocp_resource_type"].label += " FV:"+fv
+                try:
+                    gtyp = Ocp_Nonmaterial_Type.objects.get(facet_value__value=fv)
+                    self.fields["ocp_resource_type"].label += " N:"+str(gtyp.name)
+                except:
+                    pass
+
+
+            for facet in transfer_type.facets():
+                if facet.clas == "Material_Type":
+                    gen_mts = Material_Type.objects.all()
+                    ocp_mts =  Ocp_Material_Type.objects.all()
+                    if not gen_mts.count() == ocp_mts.count():
+                      self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_mts.count())+" gen:"+str(gen_mts.count())+")"
+                      update = update_from_general(facet.clas)
+                      self.fields["ocp_resource_type"].label += "UPDATE: "+str(update)
+
+                    if resource_type:
+                       try:
+                          self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
+                       except:
+                          try:
+                             self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
+                          except:
+                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+
+
+                elif facet.clas == "Nonmaterial_Type":
+                    gen_nts = Nonmaterial_Type.objects.all()
+                    ocp_nts =  Ocp_Nonmaterial_Type.objects.all()
+                    if not gen_nts.count() == ocp_nts.count():
+                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_nts.count())+" gen:"+str(gen_nts.count())+")"
+                       update = update_from_general(facet.clas)
+                       self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
+
+                    if resource_type:
+                       try:
+                          self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
+                       except:
+                          try:
+                             self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
+                          except:
+                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+
+                else:
+                  pass
+
+            self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+
+    def clean(self):
+        data = super(ContextTransferForm, self).clean()
+        ocp_rt = data["ocp_resource_type"]
+        ini_rt = data["resource_type"]
+        if ocp_rt and not ini_rt:
+            rt = get_rt_from_ocp_rt(ocp_rt)
+            if rt:
+              data["resource_type"] = rt
+            else:
+              self.add_error('ocp_resource_type', "This type is too general, try a more specific")
+        return data
+
 
 
 class ContextTransferCommitmentForm(forms.Form):
@@ -553,9 +668,22 @@ class ContextTransferCommitmentForm(forms.Form):
         label="Quantity",
         initial=1,
         widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
+
+    try:
+      ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Material_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        level_indicator='. ',
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type-for-resource input-xlarge chzn-select'})
+      )
+    except:
+      ocp_resource_type = False
+
     resource_type = forms.ModelChoiceField(
         queryset=EconomicResourceType.objects.all(),
         #empty_label=None,
+        required=False,
         widget=forms.Select(
             attrs={'class': 'resource-type-for-resource chzn-select'}))
     value = forms.DecimalField(
@@ -573,7 +701,7 @@ class ContextTransferCommitmentForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={'class': 'item-description',}))
 
-    def __init__(self, transfer_type=None, context_agent=None, posting=False, *args, **kwargs):
+    def __init__(self, transfer_type=None, context_agent=None, resource_type=None, ocp_resource_type=None, posting=False, *args, **kwargs):
         super(ContextTransferCommitmentForm, self).__init__(*args, **kwargs)
         #import pdb; pdb.set_trace()
         if transfer_type:
@@ -581,6 +709,54 @@ class ContextTransferCommitmentForm(forms.Form):
             if context_agent:
                 self.fields["to_agent"].queryset = transfer_type.to_context_agents(context_agent)
                 self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
+
+            facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
+            self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
+
+            for facet in transfer_type.facets():
+                if facet.clas == "Material_Type":
+                    gen_mts = Material_Type.objects.all()
+                    ocp_mts =  Ocp_Material_Type.objects.all()
+                    if not gen_mts.count() == ocp_mts.count():
+                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_mts.count())+" gen:"+str(gen_mts.count())+")"
+                       update = update_from_general(facet.clas)
+                       self.fields["ocp_resource_type"].label += "UPDATE: "+str(update)
+
+                    if resource_type:
+                       try:
+                          self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
+                       except:
+                          try:
+                             self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
+                          except:
+                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+                    #else:
+                       #self.fields["ocp_resource_type"].label += " FALTA RT! "+str(resource_type)
+
+                elif facet.clas == "Nonmaterial_Type":
+                    gen_nts = Nonmaterial_Type.objects.all()
+                    ocp_nts =  Ocp_Nonmaterial_Type.objects.all()
+                    if not gen_nts.count() == ocp_nts.count():
+                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_nts.count())+" gen:"+str(gen_nts.count())+")"
+                       update = update_from_general(facet.clas)
+                       self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
+
+                    if resource_type:
+                       try:
+                          self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
+                       except:
+                          try:
+                             self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
+                          except:
+                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+                       #import pdb; pdb.set_trace()
+                    #else:
+                       #self.fields["ocp_resource_type"].label += " FALTA RT! "+str(resource_type)
+                else:
+                  pass
+
+            self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+            #import pdb; pdb.set_trace()
 
 
 
@@ -622,3 +798,5 @@ class NewContextExchangeTypeForm(forms.ModelForm):
     class Meta:
         model = ExchangeType
         fields = ('use_case', 'name')
+
+

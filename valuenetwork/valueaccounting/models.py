@@ -204,9 +204,20 @@ class Help(models.Model):
         return self.get_page_display()
 
 
+GENERAL_CLASS_CHOICES = (
+    ('Material_Type', _('Material_Type')),
+    ('Nonmaterial_Type', _('Nonmaterial_Type')),
+)
+
 class Facet(models.Model):
     name = models.CharField(_('name'), max_length=32, unique=True)
     description = models.TextField(_('description'), blank=True, null=True)
+
+    clas = models.CharField(_('clas'),
+        max_length=20,
+        blank=True, null=True,
+        #choices=GENERAL_CLASS_CHOICES
+    )
 
     class Meta:
         ordering = ('name',)
@@ -951,12 +962,14 @@ class EconomicAgent(models.Model):
 
     def related_all_contexts(self):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
-        agents.extend([ag.is_associate for ag in self.has_associates.all()])
         # bumbum get also parents of parents contexts
         grand_parents = []
         for agn in agents:
           grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
         agents.extend(grand_parents)
+
+        agents.extend([ag.is_associate for ag in self.has_associates.all()])
+
         return list(set(agents))
         #return [a for a in agents if a.is_context]
 
@@ -7090,6 +7103,9 @@ class Process(models.Model):
                                 ip.resource.compute_income_shares_for_use(value_equation, ip, ip_value, resource_value, events, visited)
 
 
+#from general.models import Material_Type, Nonmaterial_Type, Artwork_Type
+#from work.models import Ocp_Material_Type, Ocp_Nonmaterial_Type
+
 class TransferType(models.Model):
     name = models.CharField(_('name'), max_length=128)
     sequence = models.IntegerField(_('sequence'), default=0)
@@ -8081,11 +8097,13 @@ class Transfer(models.Model):
             return None
 
     def save(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         if self.id:
             if not self.transfer_type:
                 msg = " ".join(["No transfer type on transfer: ", str(self.id)])
                 assert False, msg
         if self.transfer_type:
+            #if self.events. # try to reach the ocp_resource_type and save the related resource_type
             super(Transfer, self).save(*args, **kwargs)
 
     def is_reciprocal(self):
@@ -8251,7 +8269,7 @@ class Transfer(models.Model):
             }
         return TransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, posting=False, prefix=prefix)
 
-    def commit_transfer_context_form(self):
+    def commit_transfer_context_form(self): # bumbum
         from work.forms import ContextTransferForm
         prefix=self.form_prefix()
         #import pdb; pdb.set_trace()
@@ -8264,7 +8282,7 @@ class Transfer(models.Model):
             "from_agent": self.from_agent(),
             "to_agent": self.to_agent(),
             }
-        return ContextTransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, posting=False, prefix=prefix)
+        return ContextTransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=self.resource_type(), posting=False, prefix=prefix)
 
     def create_role_formset(self, data=None):
         #import pdb; pdb.set_trace()
@@ -8290,6 +8308,26 @@ class Transfer(models.Model):
                 "to_agent": commit.to_agent,
                 }
             return TransferCommitmentForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, posting=False, prefix=prefix)
+        return None
+
+    def change_commitments_context_form(self): # bumbum
+        from work.forms import ContextTransferCommitmentForm
+        prefix = self.form_prefix() + "C"
+        commits = self.commitments.all()
+        if commits:
+            commit = commits[0]
+            init = {
+                "commitment_date": commit.commitment_date,
+                "due_date": commit.due_date,
+                "description":commit.description,
+                "resource_type": commit.resource_type,
+                "quantity": commit.quantity,
+                "value": commit.value,
+                "unit_of_value": commit.unit_of_value,
+                "from_agent": commit.from_agent,
+                "to_agent": commit.to_agent,
+                }
+            return ContextTransferCommitmentForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=commit.resource_type, posting=False, prefix=prefix)
         return None
 
     def change_events_form(self):
@@ -8318,6 +8356,34 @@ class Transfer(models.Model):
                 "to_agent": event.to_agent,
                 }
             return TransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=event.resource_type, posting=False, prefix=prefix)
+        return None
+
+    def change_events_context_form(self):
+        #import pdb; pdb.set_trace()
+        from work.forms import ContextTransferForm
+        prefix = self.form_prefix() + "E"
+        events = self.events.all()
+        if events:
+            event = events[0]
+            from_resource, resource = self.give_and_receive_resources()
+            if from_resource and not resource:
+                resource = from_resource
+            init = {
+                "resource": resource,
+                "from_resource": from_resource,
+                "description": event.description,
+                "is_contribution": event.is_contribution,
+                "event_reference": event.event_reference,
+                "event_date": event.event_date,
+                "description":event.description,
+                "resource_type": event.resource_type,
+                "quantity": event.quantity,
+                "value": event.value,
+                "unit_of_value": event.unit_of_value,
+                "from_agent": event.from_agent,
+                "to_agent": event.to_agent,
+                }
+            return ContextTransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=event.resource_type, posting=False, prefix=prefix)
         return None
 
 

@@ -13,6 +13,18 @@
 
 <style>
 
+div p:last-child {
+    margin-bottom: 2px;
+}
+
+form[id^='xferForm'] div[id*='_ocp_resource_type_chzn'] {
+  float: left;
+}
+.add-new-type {
+  display: table;
+  padding-left: 1em;
+}
+
 .event {
     margin-left: 2em;
     margin-bottom: 4px;
@@ -53,7 +65,7 @@ li {
     color: 	#7D1818;
 }
 #id_notes, #id_url {
-    width: 32em;
+    width: 328px;
 }
 .notes {
     margin-left: 3em;
@@ -77,7 +89,7 @@ li {
 }
 .item-description {
     height: 40px;
-    width: 480px;
+    width: 328px;
 }
 .totals {
     /*border: solid 2px firebrick;
@@ -131,7 +143,9 @@ li {
     color: green;
     font-size: 1.1em;
 }
-
+.chzn-container .chzn-results li {
+  padding: 3px 6px 6px;
+}
 </style>
 
 {% endblock %}
@@ -171,10 +185,12 @@ li {
 
 	<div class="row-fluid">
 
-        <div class="span5">
+        <div class="span4">
             <div class="totals infobox">
-                <span class="total-top">{% trans "Total transfer value" %}: {{ total_t }} </span>
-                <span class="total-top">{% trans "Total reciprocal transfer value" %}: {{ total_rect }} </span>
+                <p><span class="total-top">{% trans "Total transfer value" %}: {{ total_t }} </span></p>
+                <p>
+                  <span class="total-top">{% trans "Total reciprocal transfer value" %}: {{ total_rect }} </span>
+                </p>
             </div>
             <form class="validateMe miniform" id="exchangeForm" method="POST" action="" style="padding-bottom:13px;">
                 {% csrf_token %}
@@ -191,7 +207,7 @@ li {
 
         </div>
 
-        <div class="span7">
+        <div class="span8">
           {% if exchange %}
             <div class="trt infobox">
                 <h3 class="trtheading">Transfers
@@ -220,7 +236,7 @@ li {
                                 <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                        <h3 id="xfer{{ slot.id }}">{% trans "Log a New " %}{{ slot.name }}</h3>
+                                        <h3 id="xfer{{ slot.id }}">{% trans "Log a new " %}{{ slot.name }}</h3>
                                     </div>
                                     <div class="modal-body">
                                         <form class="validateMe" id="xferForm{{ slot.id }}" enctype="multipart/form-data" action="{% url "add_transfer" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
@@ -229,8 +245,16 @@ li {
                                             Event date:<br />{{ ax_form.event_date }}<br />
                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ax_form.from_agent }}<br />{% endif %}
                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
+                                            {% if ax_form.ocp_resource_type %}
+                                               {% trans "Type of Resource:" %} <i>{{ ax_form.ocp_resource_type.label }}</i><br />{{ ax_form.ocp_resource_type }}
+                                          <div class='add-new-type'>{{ add_type }}<a href='#' class='btn disabled btn-mini'>{% trans "New Resource Type" %}</a></div>
+                                          <br />
+                                            {% else %}
+                                               <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+
+                                                Resource type transferred:<br />{{ ax_form.resource_type }}<br />
+                                            {% endif %}
                                             Quantity transferred:<br />{{ ax_form.quantity }}<br />
-                                            Resource type transferred:<br />{{ ax_form.resource_type }}<br />
                                             {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                 Account from (if virtual account)<br />{{ ax_form.from_resource }}<br />
                                                 Account to (if virtual account)<br />{{ ax_form.resource }}<br />
@@ -285,7 +309,7 @@ li {
                                 <div class="modal hide fade" id="addCommitModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                        <h3 id="commit">{% trans "Log a New Commitment" %}</h3>
+                                        <h3 id="commit">{% trans "Log a new Commitment:" %} {{ slot.name }}</h3>
                                     </div>
                                     <div class="modal-body">
                                         <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url "add_transfer_commitment" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
@@ -296,7 +320,12 @@ li {
                                             {% if not slot.give_agent_is_context %}Transfer from:<br />{{ ac_form.from_agent }}<br />{% endif %}
                                             {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ ac_form.to_agent }}<br />{% endif %}
                                             Quantity:<br />{{ ac_form.quantity }}<br />
-                                            Resource type:<br />{{ ac_form.resource_type }}<br />
+                                            {% if ac_form.ocp_resource_type %}
+                                               {% trans "Type of Resource:" %} <i>{{ ac_form.ocp_resource_type.label }}</i><br />{{ ac_form.ocp_resource_type }}<br />
+                                            {% else %}
+                                               <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                                Resource type:<br />{{ ac_form.resource_type }}<br />
+                                            {% endif %}
                                             Description:<br />{{ ac_form.description }}<br />
                                             {% if not slot.is_currency %}
                                                 Value (total, not per unit):<br />{{ ac_form.value }}<br />
@@ -330,13 +359,20 @@ li {
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments" transfer_id=xfer.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {% with xfer.change_commitments_form as cc_form %}
+                                                        {% with xfer.change_commitments_context_form as cc_form %}
                                                         Commitment date:<br />{{ cc_form.commitment_date }}<br />
                                                         Due date:<br />{{ cc_form.due_date }}<br />
                                                         {% if not slot.give_agent_is_context %}Transfer from:<br />{{ cc_form.from_agent }}<br />{% endif %}
                                                         {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ cc_form.to_agent }}<br />{% endif %}
                                                         Quantity:<br />{{ cc_form.quantity }}<br />
-                                                        Resource type:<br />{{ cc_form.resource_type }}<br />
+                                                        {% if cc_form.ocp_resource_type %}
+                                                          {% trans "Type of Resource:" %} <i>{{ cc_form.ocp_resource_type.label }}</i><br />
+                                                          {{ cc_form.ocp_resource_type }}<br />
+                                                        {% else %}
+                                                          <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+
+                                                          Resource type:<br />{{ cc_form.resource_type }}<br />
+                                                        {% endif %}
                                                         Description:<br />{{ cc_form.description }}<br />
                                                         {% if not slot.is_currency %}
                                                             Value (total, not per unit):<br />{{ cc_form.value }}<br />
@@ -376,7 +412,13 @@ li {
                                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ct_form.from_agent }}<br />{% endif %}
                                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ct_form.to_agent }}<br />{% endif %}
                                                             Quantity transferred:<br />{{ ct_form.quantity }}<br />
-                                                            Resource type transferred:<br />{{ ct_form.resource_type }}<br />
+                                                            {% if ct_form.ocp_resource_type %}
+                                                              {% trans "Type of Resource transferred:" %} <i>{{ ct_form.ocp_resource_type.label }}</i><br />
+                                                              {{ ct_form.ocp_resource_type }}<br />
+                                                            {% else %}
+                                                              <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                                              Resource type transferred:<br />{{ ct_form.resource_type }}<br />
+                                                            {% endif %}
                                                             {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                                 Account from (if virtual account)<br />{{ ct_form.from_resource }}<br />
                                                                 Account to (if virtual account)<br />{{ ct_form.resource }}<br />
@@ -393,7 +435,7 @@ li {
                                                             {% if slot.is_currency %}Event reference:<br />{{ ct_form.event_reference }}<br />{% endif %}
                                                             {% if slot.can_create_resource %}
                                                                 <br />
-                                                                <span class="modal-hdg">Incoming resource:</span><br>
+                                                                <h4>Incoming resource:</h4>
                                                                 Add to an existing resource:<br />{{ ct_form.resource }}<br />
                                                                 <br /><b>OR create a new resource:</b><br />
                                                                 Identifier: (for example, lot number or serial number)<br />{{ ct_form.identifier }}<br />
@@ -441,12 +483,18 @@ li {
                                                         <div class="modal-body">
                                                             <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
                                                                 {% csrf_token %}
-                                                                {% with xfer.change_events_form as ce_form %}
+                                                                {% with xfer.change_events_context_form as ce_form %}
                                                                 Event date:<br />{{ ce_form.event_date }}<br />
                                                                 {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ce_form.from_agent }}<br />{% endif %}
                                                                 {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ce_form.to_agent }}<br />{% endif %}
                                                                 Quantity transferred:<br />{{ ce_form.quantity }}<br />
-                                                                Resource type transferred:<br />{{ ce_form.resource_type }}<br />
+                                                                {% if ce_form.ocp_resource_type %}
+                                                                  {% trans "Type of Resource:" %} <i>{{ ce_form.ocp_resource_type.label }}</i><br />
+                                                                  {{ ce_form.ocp_resource_type }}<br />
+                                                                {% else %}
+                                                                  <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                                                  Resource type transferred:<br />{{ ce_form.resource_type }}<br />
+                                                                {% endif %}
                                                                 {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                                     Account from (if virtual account)<br />{{ ce_form.from_resource }}<br />
                                                                     Account to (if virtual account)<br />{{ ce_form.resource }}<br />
@@ -499,12 +547,18 @@ li {
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {% with xfer.change_events_form as cev_form %}
+                                                        {% with xfer.change_events_context_form as cev_form %}
                                                         Event date:<br />{{ cev_form.event_date }}<br />
                                                         {% if not slot.give_agent_is_context %}Transferred from:<br />{{ cev_form.from_agent }}<br />{% endif %}
                                                         {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ cev_form.to_agent }}<br />{% endif %}
                                                         Quantity transferred:<br />{{ cev_form.quantity }}<br />
-                                                        Resource type transferred:<br />{{ cev_form.resource_type }}<br />
+                                                        {% if cev_form.ocp_resource_type %}
+                                                          {% trans "Type of Resource transferred:" %} <i>{{ cev_form.ocp_resource_type.label }}</i><br />
+                                                          {{ cev_form.ocp_resource_type }}<br />
+                                                        {% else %}
+                                                          <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                                          Resource type transferred:<br />{{ cev_form.resource_type }}<br />
+                                                        {% endif %}
                                                         {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                             Account from (if virtual account)<br />{{ cev_form.from_resource }}<br />
                                                             Account to (if virtual account)<br />{{ cev_form.resource }}<br />
@@ -577,7 +631,7 @@ li {
                                 <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                        <h3 id="xfer{{ slot.id }}">{% trans "Log a New " %}{{ slot.name }}</h3>
+                                        <h3 id="xfer{{ slot.id }}">{% trans "Log a new:" %} {{ slot.name }}</h3>
                                     </div>
                                     <div class="modal-body">
                                         <form class="validateMe" id="xferForm{{ slot.id }}" enctype="multipart/form-data" action="{% url "add_transfer" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
@@ -587,7 +641,15 @@ li {
                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ax_form.from_agent }}<br />{% endif %}
                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
                                             Quantity transferred:<br />{{ ax_form.quantity }}<br />
-                                            Resource type transferred:<br />{{ ax_form.resource_type }}<br />
+                                            {% if ax_form.ocp_resource_type %}
+                                              {% trans "Type of Resource:" %} <i>{{ ax_form.ocp_resource_type.label }}</i><br />
+                                              {{ ax_form.ocp_resource_type }}
+                                              <div class='add-new-type'>{{ add_type }}<a href='#' class='btn disabled btn-mini'>{% trans "New Resource Type" %}</a></div>
+                                              <br />
+                                            {% else %}
+                                              <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                              Resource type transferred:<br />{{ ax_form.resource_type }}<br />
+                                            {% endif %}
                                             {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                 Account from (if virtual account)<br />{{ ax_form.from_resource }}<br />
                                                 Account to (if virtual account)<br />{{ ax_form.resource }}<br />
@@ -604,7 +666,7 @@ li {
                                             {% if slot.is_currency %}Event reference:<br />{{ ax_form.event_reference }}<br />{% endif %}
                                             {% if slot.can_create_resource %}
                                                 <br />
-                                                <span class="modal-hdg">Incoming resource:</span><br>
+                                                <h4>Incoming resource:</h4>
                                                 Add to an existing resource:<br />{{ ax_form.resource }}<br />
                                                 <br /><b>OR create a new resource:</b><br />
                                                 Identifier: (for example, lot number or serial number)<br />{{ ax_form.identifier }}<br />
@@ -642,7 +704,7 @@ li {
                                 <div class="modal hide fade" id="addCommitModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                        <h3 id="commit">{% trans "Log a New Commitment" %}</h3>
+                                        <h3 id="commit">{% trans "Log a new Commitment:" %} {{ slot.name }}</h3>
                                     </div>
                                     <div class="modal-body">
                                         <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url "add_transfer_commitment" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
@@ -653,7 +715,13 @@ li {
                                             {% if not slot.give_agent_is_context %}Transfer from:<br />{{ ac_form.from_agent }}<br />{% endif %}
                                             {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ ac_form.to_agent }}<br />{% endif %}
                                             Quantity:<br />{{ ac_form.quantity }}<br />
-                                            Resource type:<br />{{ ac_form.resource_type }}<br />
+                                            {% if ac_form.ocp_resource_type %}
+                                              {% trans "Type of Resource:" %} <i>{{ ac_form.ocp_resource_type.label }}</i><br />
+                                              {{ ac_form.ocp_resource_type }}<br />
+                                            {% else %}
+                                              <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                              Resource type:<br />{{ ac_form.resource_type }}<br />
+                                            {% endif %}
                                             Description:<br />{{ ac_form.description }}<br />
                                             {% if not slot.is_currency %}
                                                 Value (total, not per unit):<br />{{ ac_form.value }}<br />
@@ -687,13 +755,20 @@ li {
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments" transfer_id=xfer.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {% with xfer.change_commitments_form as cc_form %}
+                                                        {% with xfer.change_commitments_context_form as cc_form %}
                                                         Commitment date:<br />{{ cc_form.commitment_date }}<br />
                                                         Due date:<br />{{ cc_form.due_date }}<br />
                                                         {% if not slot.give_agent_is_context %}Transfer from:<br />{{ cc_form.from_agent }}<br />{% endif %}
                                                         {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ cc_form.to_agent }}<br />{% endif %}
                                                         Quantity:<br />{{ cc_form.quantity }}<br />
-                                                        Resource type:<br />{{ cc_form.resource_type }}<br />
+                                                        {% if cc_form.ocp_resource_type %}
+                                                          {% trans "Type of Resource:" %} <i>{{ cc_form.ocp_resource_type.label }}</i><br />
+                                                          {{ cc_form.ocp_resource_type }}<br />
+                                                        {% else %}
+                                                          <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+
+                                                          Resource type:<br />{{ cc_form.resource_type }}<br />
+                                                        {% endif %}
                                                         Description:<br />{{ cc_form.description }}<br />
                                                         {% if not slot.is_currency %}
                                                             Value (total, not per unit):<br />{{ cc_form.value }}<br />
@@ -733,7 +808,13 @@ li {
                                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ct_form.from_agent }}<br />{% endif %}
                                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ct_form.to_agent }}<br />{% endif %}
                                                             Quantity transferred:<br />{{ ct_form.quantity }}<br />
-                                                            Resource type transferred:<br />{{ ct_form.resource_type }}<br />
+                                                            {% if ct_form.ocp_resource_type %}
+                                                              {% trans "Type of Resource transferred:" %} <i>{{ ct_form.ocp_resource_type.label }}</i><br />
+                                                              {{ ct_form.ocp_resource_type }}<br />
+                                                            {% else %}
+                                                              <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                                              Resource type transferred:<br />{{ ct_form.resource_type }}<br />
+                                                            {% endif %}
                                                             {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                                 Account from (if virtual account)<br />{{ ct_form.from_resource }}<br />
                                                                 Account to (if virtual account)<br />{{ ct_form.resource }}<br />
@@ -750,7 +831,7 @@ li {
                                                             {% if slot.is_currency %}Event reference:<br />{{ ct_form.event_reference }}<br />{% endif %}
                                                             {% if slot.can_create_resource %}
                                                                 <br />
-                                                                <span class="modal-hdg">Incoming resource:</span><br>
+                                                                <h4>Incoming resource:</h4>
                                                                 Add to an existing resource:<br />{{ ct_form.resource }}<br />
                                                                 <br /><b>OR create a new resource:</b><br />
                                                                 Identifier: (for example, lot number or serial number)<br />{{ ct_form.identifier }}<br />
@@ -795,12 +876,18 @@ li {
                                                         <div class="modal-body">
                                                             <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
                                                                 {% csrf_token %}
-                                                                {% with xfer.change_events_form as ce_form %}
+                                                                {% with xfer.change_events_context_form as ce_form %}
                                                                 Event date:<br />{{ ce_form.event_date }}<br />
                                                                 {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ce_form.from_agent }}<br />{% endif %}
                                                                 {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ce_form.to_agent }}<br />{% endif %}
                                                                 Quantity transferred:<br />{{ ce_form.quantity }}<br />
-                                                                Resource type transferred:<br />{{ ce_form.resource_type }}<br />
+                                                                {% if ce_form.ocp_resource_type %}
+                                                                  {% trans "Type of Resource transferred:" %} <i>{{ ce_form.ocp_resource_type.label }}</i><br />
+                                                                  {{ ce_form.ocp_resource_type }}<br />
+                                                                {% else %}
+                                                                  <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                                                  Resource type transferred:<br />{{ ce_form.resource_type }}<br />
+                                                                {% endif %}
                                                                 {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                                     Account from (if virtual account)<br />{{ ce_form.from_resource }}<br />
                                                                     Account to (if virtual account)<br />{{ ce_form.resource }}<br />
@@ -854,17 +941,23 @@ li {
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {% with xfer.change_events_form as cev_form %}
+                                                        {% with xfer.change_events_context_form as cev_form %}
                                                         Event date:<br />{{ cev_form.event_date }}<br />
                                                         {% if not slot.give_agent_is_context %}Transferred from:<br />{{ cev_form.from_agent }}<br />{% endif %}
                                                         {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ cev_form.to_agent }}<br />{% endif %}
                                                         Quantity transferred:<br />{{ cev_form.quantity }}<br />
-                                                        Resource type transferred:<br />{{ cev_form.resource_type }}<br />
+                                                        {% if cev_form.ocp_resource_type %}
+                                                          {% trans "Type of Resource transferred:" %} <i>{{ cev_form.ocp_resource_type.label }}</i><br />
+                                                          {{ cev_form.ocp_resource_type }}<br />
+                                                        {% else %}
+                                                          <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
+                                                          Resource type transferred:<br />{{ cev_form.resource_type }}<br />
+                                                        {% endif %}
                                                         {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
                                                             Account from (if virtual account)<br />{{ cev_form.from_resource }}<br />
                                                             Account to (if virtual account)<br />{{ cev_form.resource }}<br />
                                                         {% else %}
-                                                            Resource transferred (only if inventoried):<br />{{ cev_form.resource }}<br />Description:<br />{{ xfer.change_events_form.description }}<br />
+                                                            Resource transferred (only if inventoried):<br />{{ cev_form.resource }}<br />Description:<br />{{ xfer.change_events_context_form.description }}<br />
                                                         {% endif %}
                                                         {% if not slot.is_currency %}
                                                             Value (total, not per unit):<br />{{ cev_form.value }}<br />
@@ -1004,15 +1097,16 @@ li {
 
 	$(document).ready(function(){
 
-		$(".chzn-select").chosen();
+		  $(".chzn-select").chosen();
+      //$(".chzn-results").menu();
 
-		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+		  $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
-        $('#work-info').popover()
-        $('#xfer-info').popover()
-        $('#rxfer-info').popover()
+      $('#work-info').popover();
+      $('#xfer-info').popover();
+      $('#rxfer-info').popover();
 
-		jQuery.validator.addMethod("quantity",
+		  jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
                 return this.optional(element) || isValidQuantity;
@@ -1030,23 +1124,23 @@ li {
 
         $.validator.addClassRules("quantity", { required: true, quantity: true, });
         //$.validator.addClassRules("value", { required: true, number: true });
-		$.validator.addClassRules("url", { url: true });
+		    $.validator.addClassRules("url", { url: true });
         $.validator.addClassRules("resourceType", { required: true});
         $.validator.addClassRules("hours", {
-			required: true,
-			number: true,
-			min: 0,
-			max: 24
+			  required: true,
+			  number: true,
+			  min: 0,
+			  max: 24
 		});
 		$.validator.addClassRules("minutes", {
-			required: true,
-			number: true,
-			min: 0,
-			max: 60
+			  required: true,
+			  number: true,
+			  min: 0,
+			  max: 60
 		});
-        $.validator.addClassRules("date-entry", { required: true, date: true });
+    $.validator.addClassRules("date-entry", { required: true, date: true });
 
-        $.validator.addMethod("agentRequired", function (value, element) {
+    $.validator.addMethod("agentRequired", function (value, element) {
             var form_id = element.form.id;
             form_id = "#" + form_id;
             var parent = element.parentElement;
@@ -1061,7 +1155,7 @@ li {
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
 
-        $.validator.addMethod("roleRequired", function (value, element) {
+    $.validator.addMethod("roleRequired", function (value, element) {
             var form_id = element.form.id;
             form_id = "#" + form_id;
             var parent = element.parentElement;
@@ -1076,10 +1170,10 @@ li {
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
 
-        $.validator.addClassRules("select-role", { agentRequired: true });
-        $.validator.addClassRules("select-agent", { roleRequired: true });
+    $.validator.addClassRules("select-role", { agentRequired: true });
+    $.validator.addClassRules("select-agent", { roleRequired: true });
 
-        $('.validateMe').each( function(){
+    $('.validateMe').each( function(){
 			var form = $(this);
 			form.validate({
 				highlight: function(label) {
@@ -1088,44 +1182,39 @@ li {
 			});
 		});
 
-        $("#btnAddReceipt").click(setReceiptModal);
-        $("#btnAddMaterial").click(setMaterialModal);
+    $("#btnAddReceipt").click(setReceiptModal);
+    $("#btnAddMaterial").click(setMaterialModal);
 
-        function setReceiptModal()
-        {
-            var targetId = "id_unorderedreceipt-resource_type";
-            var resourceTypeId = $("#id_unorderedreceipt-resource_type").val()
-            //alert("onload rtid " + resourceTypeId);
-            JsonSetUnitAndRule(resourceTypeId, targetId);
-        }
+    function setReceiptModal() {
+      var targetId = "id_unorderedreceipt-resource_type";
+      var resourceTypeId = $("#id_unorderedreceipt-resource_type").val()
+      //alert("onload rtid " + resourceTypeId);
+      JsonSetUnitAndRule(resourceTypeId, targetId);
+    };
 
-        function setMaterialModal()
-        {
-            var targetId = "id_material-resource_type";
-            var resourceTypeId = $("#id_material-resource_type").val()
-            //alert("onload rtid " + resourceTypeId);
-            JsonSetUnitAndRule(resourceTypeId, targetId);
-        }
+    function setMaterialModal() {
+      var targetId = "id_material-resource_type";
+      var resourceTypeId = $("#id_material-resource_type").val()
+      //alert("onload rtid " + resourceTypeId);
+      JsonSetUnitAndRule(resourceTypeId, targetId);
+    };
 
-	    $(".resource-type-selector").change(getUnitAndRule);
+	  $(".resource-type-selector").change(getUnitAndRule);
 
-		function getUnitAndRule(event)
-		{
-	        $(".chzn-select").trigger("liszt:updated");
+		function getUnitAndRule(event) {
+	      $(".chzn-select").trigger("liszt:updated");
 		    var resourceTypeId = event.target.value;
             //alert("rt " + resourceTypeId);
-		    if (resourceTypeId)
-		    {
+		    if (resourceTypeId) {
                 var targetId = event.target.id;
                 //alert("targetId " + targetId);
                 JsonSetUnitAndRule(resourceTypeId, targetId);
 		    }
-	    }
+	   }
 
-	    $(".resource-type-for-resource").change(getResources);
+	   $(".resource-type-for-resource").change(getResources);
 
-        function getResources(event)
-        {
+     function getResources(event) {
             var resourceTypeId = event.target.value;
             if (resourceTypeId)
             {
@@ -1150,81 +1239,77 @@ li {
                     $(".chzn-select").trigger("liszt:updated");
                 });
             }
-        }
+      }
 
 
-        if($( '#use-case' ).val() == 'res_contr' || $( '#use-case' ).val() == 'cash_contr')
-        {
+      if($( '#use-case' ).val() == 'res_contr' || $( '#use-case' ).val() == 'cash_contr') {
             $( '#div_id_supplier' ).hide();
-        } else {
+      } else {
             $( '#div_id_supplier' ).show();
-        }
+      }
 
-        $('#receiptForm').click(function (event) {
+      /*$('#receiptForm').click(function (event) {
             var isValid = $("#receiptForm").validate();
             if (!isValid) {
                 event.preventDefault();
             }
-        });
+      });
 
-        $('#paymentForm').click(function (event) {
+      $('#paymentForm').click(function (event) {
             var isValid = $("#paymentForm").validate();
             if (!isValid) {
                 event.preventDefault();
             }
-        });
+      });
 
-        $('#expenseForm').click(function (event) {
+      $('#expenseForm').click(function (event) {
             var isValid = $("#expenseForm").validate();
             if (!isValid) {
                 event.preventDefault();
             }
-        });
+      });*/
 
-        $('#workForm').click(function (event) {
-            var isValid = $("#workForm").validate();
-            if (!isValid) {
-                event.preventDefault();
-            }
-        });
+      $('#workForm').click(function (event) {
+        var isValid = $("#workForm").validate();
+        if (!isValid) {
+          event.preventDefault();
+        }
+      });
 
-        $('#cashForm').click(function (event) {
+      /*$('#cashForm').click(function (event) {
             var isValid = $("#cashForm").validate();
             if (!isValid) {
                 event.preventDefault();
             }
-        });
+      });
 
-        $('#materialForm').click(function (event) {
+      $('#materialForm').click(function (event) {
             var isValid = $("#materialForm").validate();
             if (!isValid) {
                 event.preventDefault();
             }
-        });
+      });*/
 
-		$( "#help" ).toggle( function(){
+		  $( "#help" ).toggle( function(){
             $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
-        }, function() {
+      }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
-        })
+      })
 
-        {% if use_case.identifier == 'sale' %}
+      {% if use_case.identifier == 'sale' %}
             $("#id_context_agent").change(getCustomers);
-        {% endif %}
+      {% endif %}
 
 
 	}); // end document.ready
 
-    function JsonSetUnitAndRule(resourceTypeId, targetId)
-    {
-	    if (targetId.search("usable") >= 0)
-	    {
+  function JsonSetUnitAndRule(resourceTypeId, targetId) {
+	    if (targetId.search("usable") >= 0) {
 		    direction = "use";
 	    }
-	    else
-	    {
+	    else {
 		    direction = "other";
 	    }
 	    var prefix = targetId.split('-')[0];
@@ -1258,11 +1343,10 @@ li {
                     $('.hideShow').hide();
                 }
 		    });
-    }
+  };
 
-    {% if use_case.identifier == 'sale' %}
-    function getCustomers()
-    {
+  {% if use_case.identifier == 'sale' %}
+    function getCustomers() {
         $(".chzn-select").trigger("liszt:updated");
         var selectedAgent = document.getElementById('id_context_agent').value;
         var jsonUrl = encodeURI("/accounting/json-context-agent-customers/" + selectedAgent + "/");
@@ -1284,9 +1368,9 @@ li {
             }
             $(".chzn-select").trigger("liszt:updated");
         });
-    }
-    {% endif %}
+    };
+  {% endif %}
 
-    </script>
+  </script>
 
 {% endblock %}

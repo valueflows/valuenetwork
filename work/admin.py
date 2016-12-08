@@ -36,3 +36,50 @@ admin.site.register(NewFeature, NewFeatureAdmin)
 #    list_display = ('invoice_number', 'member', 'description', 'created_by',)
 
 #admin.site.register(InvoiceNumber, InvoiceNumberAdmin)
+
+from mptt.admin import MPTTModelAdmin
+#from mptt.fields import TreeForeignKey, TreeManyToManyField
+class Ocp_Type_RecordAdmin(MPTTModelAdmin):
+  model = Ocp_Record_Type
+  list_display = ['name', 'clas', 'exchange_type']
+  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    if db_field.name == 'parent':
+      try:
+        typ = Record_Type.objects.get(clas='ocp_record')
+        kwargs['queryset'] = Record_Type.objects.filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
+      except:
+        pass
+    return super(Ocp_Type_RecordAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+admin.site.register(Ocp_Record_Type, Ocp_Type_RecordAdmin)
+
+
+from general.models import Artwork_Type
+
+class Ocp_Type_MaterialAdmin(MPTTModelAdmin):
+  model = Ocp_Material_Type
+  list_display = ['name', 'clas', 'resource_type', 'facet_value']
+  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    if db_field.name == 'parent':
+      try:
+        typ = Artwork_Type.objects.get(clas='Material')
+        kwargs['queryset'] = Artwork_Type.objects.filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
+      except:
+        pass
+    return super(Ocp_Type_MaterialAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+admin.site.register(Ocp_Material_Type, Ocp_Type_MaterialAdmin)
+
+class Ocp_Type_NonmaterialAdmin(MPTTModelAdmin):
+  model = Ocp_Nonmaterial_Type
+  list_display = ['name', 'clas', 'resource_type', 'facet_value']
+  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    if db_field.name == 'parent':
+      try:
+        typ = Artwork_Type.objects.get(clas='Nonmaterial')
+        kwargs['queryset'] = Artwork_Type.objects.filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
+      except:
+        pass
+    return super(Ocp_Type_NonmaterialAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+admin.site.register(Ocp_Nonmaterial_Type, Ocp_Type_NonmaterialAdmin)

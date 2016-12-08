@@ -130,7 +130,7 @@ class SkillSuggestion(models.Model):
 
     def __unicode__(self):
         return self.skill
-       
+
     def form_prefix(self):
         return "".join(["SS", str(self.id)])
 
@@ -195,17 +195,17 @@ class JoinRequest(models.Model):
 
     def __unicode__(self):
         return self.name
-        
+
     def form_prefix(self):
         return "".join(["JR", str(self.id)])
-        
+
     def full_name(self):
         if self.surname:
             answer = " ".join([self.name, self.surname])
         else:
             answer = self.name
         return answer
-        
+
     def agent_type(self):
         if self.type_of_user == "individual":
             answer = AgentType.objects.individual_type()
@@ -235,13 +235,13 @@ class NewFeature(models.Model):
     url = models.CharField(_('url'), max_length=255, blank=True,)
     screenshot = ThumbnailerImageField(_("screenshot"),
         upload_to='photos', blank=True, null=True,)
-    
+
     class Meta:
         ordering = ('-deployment_date',)
-    
+
     def __unicode__(self):
         return self.name
-        
+
 
 class InvoiceNumber(models.Model):
     invoice_number = models.CharField(_('invoice number'), max_length=128)
@@ -258,13 +258,13 @@ class InvoiceNumber(models.Model):
     created_by = models.ForeignKey(User, verbose_name=_('created by'),
         related_name='invoice_numbers_created', editable=False)
     created_date = models.DateField(auto_now_add=True, editable=False)
-        
+
     class Meta:
         ordering = ('-invoice_date', "-sequence",)
-    
+
     def __unicode__(self):
         return self.invoice_number
-        
+
     def save(self, *args, **kwargs):
         if self.year:
             year = self.year
@@ -295,4 +295,144 @@ class InvoiceNumber(models.Model):
             unicode(self.member.id),
             ])
         super(InvoiceNumber, self).save(*args, **kwargs)
-    
+
+
+from general.models import Record_Type, Artwork_Type
+
+class Ocp_Record_Type(Record_Type):
+    record_type = models.OneToOneField(
+        Record_Type,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        parent_link=True
+    )
+    exchange_type = models.OneToOneField(
+        ExchangeType,
+        on_delete=models.CASCADE,
+        blank=True, null=True,
+        verbose_name=_('ocp exchange type'),
+        related_name='ocp_record_type'
+    )
+    class Meta:
+        verbose_name= _(u'Type of General Record')
+        verbose_name_plural= _(u'o-> Types of General Records')
+
+    def get_ocp_resource_types(self, transfer_type=None):
+        answer = False
+        if transfer_type:
+            facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
+            Mtyp = False
+            Ntyp = False
+            try:
+                Mtyp = Artwork_Type.objects.get(clas="Material")
+                Ntyp = Artwork_Type.objects.get(clas="Nonmaterial")
+            except:
+                pass
+
+            Mids = []
+            Nids = []
+            for fv in facetvalues:
+                #self.fields["ocp_resource_type"].label += " FV:"+fv
+                try:
+                    gtyp = Ocp_Material_Type.objects.get(facet_value__value=fv)
+                    #self.fields["ocp_resource_type"].label += " M-"+str(gtyp.name)
+                    subids = [typ.id for typ in Ocp_Material_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
+                    Mids += subids+[gtyp.id]
+                except:
+                    pass
+
+                #self.fields["ocp_resource_type"].label += " FV:"+fv
+                try:
+                    gtyp = Ocp_Nonmaterial_Type.objects.get(facet_value__value=fv)
+                    #self.fields["ocp_resource_type"].label += " N-"+str(gtyp.name)
+                    subids = [typ.id for typ in Ocp_Nonmaterial_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
+                    Nids += subids+[gtyp.id]
+                except:
+                    pass
+            #answer = Ocp_Material_Type.objects.filter(id__in=Mids)
+            for facet in transfer_type.facets():
+                if facet.clas == "Material_Type":
+                    if Mids:
+                        Mtys = Ocp_Material_Type.objects.filter(id__in=Mids)
+                        if Nids: # and Ntyp:
+                            Mtys = Artwork_Type.objects.filter(id__in=Nids+Mids) #+[Ntyp.id, Mtyp.id])
+                        answer = Mtys
+                    else:
+                        answer = Ocp_Material_Type.objects.all()
+                elif facet.clas == "Nonmaterial_Type":
+                    if Nids:
+                        Ntys = Ocp_Nonmaterial_Type.objects.filter(id__in=Nids)
+                        if Mids: # and Mtyp:
+                            Ntys = Artwork_Type.objects.filter(id__in=Mids+Nids) #+[Ntyp.id, Mtyp.id])
+                        answer = Ntys
+                    else:
+                        answer = Ocp_Nonmaterial_Type.objects.all()
+                else:
+                    pass
+
+        return answer
+
+from general.models import Material_Type, Nonmaterial_Type
+
+class Ocp_Material_Type(Material_Type):
+    material_type = models.OneToOneField(
+      Material_Type,
+      on_delete=models.CASCADE,
+      primary_key=True,
+      parent_link=True
+    )
+    resource_type = models.OneToOneField(
+      EconomicResourceType,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp resource_type'),
+      related_name='ocp_material_type',
+      blank=True, null=True,
+      help_text=_("a related OCP ResourceType")
+    )
+    facet_value = models.OneToOneField(
+      FacetValue,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet_value'),
+      related_name='ocp_material_type',
+      blank=True, null=True,
+      help_text=_("a related OCP FacetValue")
+    )
+    class Meta:
+      verbose_name= _(u'Type of General Material Resources')
+      verbose_name_plural= _(u'o-> Types of General Material Resources')
+
+    def __unicode__(self):
+      if self.resource_type:
+        return self.name+'  ('+self.resource_type.name+')'
+      elif self.facet_value:
+        return self.name+'  ('+self.facet_value.value+')'
+      else:
+        return self.name
+
+
+class Ocp_Nonmaterial_Type(Nonmaterial_Type):
+    nonmaterial_type = models.OneToOneField(
+      Nonmaterial_Type,
+      on_delete=models.CASCADE,
+      primary_key=True,
+      parent_link=True
+    )
+    resource_type = models.OneToOneField(
+      EconomicResourceType,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp resource_type'),
+      related_name='ocp_nonmaterial_type',
+      blank=True, null=True,
+      help_text=_("a related OCP ResourceType")
+    )
+    facet_value = models.OneToOneField(
+      FacetValue,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet_value'),
+      related_name='ocp_nonmaterial_type',
+      blank=True, null=True,
+      help_text=_("a related OCP FacetValue")
+    )
+    class Meta:
+      verbose_name= _(u'Type of General Non-material Resources')
+      verbose_name_plural= _(u'o-> Types of General Non-material Resources')

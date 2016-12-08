@@ -2505,6 +2505,7 @@ class ExchangeTypeForm(forms.ModelForm):
     context_agent = forms.ModelChoiceField(
         queryset=EconomicAgent.objects.context_agents(),
         #empty_label=None,
+        required=False,
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
 

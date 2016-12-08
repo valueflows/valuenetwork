@@ -2141,6 +2141,9 @@ def joinaproject_request(request, form_slug = False):
       except:
         user_agent = False
 
+      if project.visibility != "public" and not user_agent:
+        return HttpResponseRedirect('/%s/' % ('home'))
+
       fobi_slug = project.fobi_slug
       form_entry = FormEntry.objects.get(slug=fobi_slug)
       form_element_entries = form_entry.formelemententry_set.all()[:]
@@ -3452,7 +3455,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                     exchange.save()
 
                     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                        % ('work/agent', context_agent.id, 'exchange-logging-work', exchange_type_id, exchange.id))
+                        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
 
             exchange_form = ExchangeContextForm()
             slots = exchange_type.slots()
@@ -3560,7 +3563,17 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
         "total_t": total_t,
         "total_rect": total_rect,
         "help": get_help("exchange"),
+        "add_type": add_new_type_mkp(),
     }, context_instance=RequestContext(request))
+
+
+def add_new_type_mkp():
+    out = "" #"<div class='add-new-type'><p>"
+    out += str(_("If you don't find a type that suits, choose a subcategory and click:"))
+    #out += "</p><a href='#' class='btn-mini'>New Resource Type</a>"
+    #out += "</div>"
+    return out
+
 
 @login_required
 def exchanges_all(request, agent_id): #all types of exchanges for one context agent
@@ -3582,7 +3595,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
     nav_form = ExchangeNavForm(agent=agent, data=request.POST or None)
     usecases = UseCase.objects.filter(identifier__icontains='_xfer')
-    new_form = NewContextExchangeTypeForm(data=request.POST or None)
+    #new_form = NewContextExchangeTypeForm(data=request.POST or None)
 
     if request.method == "POST":
         #import pdb; pdb.set_trace()
@@ -3590,17 +3603,19 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         if new_exchange:
             if nav_form.is_valid():
                 data = nav_form.cleaned_data
-                ext = data["exchange_type"]
-                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                    % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
+                gen_ext = Ocp_Record_Type.objects.get(id=data["exchange_type"].id)
+                ext = gen_ext.exchange_type
+                if ext:
+                  return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                      % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
-        new_exchange_type = request.POST.get("new-exchange-type") # TODO
+        '''new_exchange_type = request.POST.get("new-exchange-type") # TODO
         if new_exchange_type:
             if new_form.is_valid():
                 data = new_form.cleaned_data
                 uca = data["use_case"]
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type
+                    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type'''
 
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
@@ -3673,7 +3688,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "project": agent,
         "nav_form": nav_form,
         "usecases": usecases,
-        "new_form": new_form,
+        #"new_form": new_form,
     }, context_instance=RequestContext(request))
 
 
@@ -3688,4 +3703,5 @@ def resource_role_context_agent_formset(prefix, data=None):
         )
     formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
     return formset
+
 

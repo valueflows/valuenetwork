@@ -27,8 +27,9 @@ from django_comments.models import Comment, CommentFlag
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
 from valuenetwork.valueaccounting.utils import *
-from work.models import MembershipRequest, SkillSuggestion
-from work.forms import ContextTransferForm
+from work.models import MembershipRequest, SkillSuggestion, Ocp_Material_Type, Ocp_Nonmaterial_Type
+from work.forms import ContextTransferForm, ContextTransferCommitmentForm
+from work.utils import *
 
 if "notification" in settings.INSTALLED_APPS:
     from notification import models as notification
@@ -5994,6 +5995,7 @@ def add_transfer(request, exchange_id, transfer_type_id):
         next = request.POST.get("next")
         if next and next == "exchange-work":
             form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ATR" + str(transfer_type.id))
+            #import pdb; pdb.set_trace()
         else:
             form = TransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ATR" + str(transfer_type.id))
         if form.is_valid():
@@ -6015,7 +6017,13 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+                #import pdb; pdb.set_trace()
                 #if not transfer_type.can_create_resource:
                 res = data["resource"]
                 if transfer_type.is_currency:
@@ -6224,7 +6232,12 @@ def transfer_from_commitment(request, transfer_id):
                 to_agent = context_agent
             else:
                 to_agent = data["to_agent"]
+
             rt = data["resource_type"]
+            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                gen_rt = data["ocp_resource_type"]
+                rt = get_rt_from_ocp_rt(gen_rt)
+
             #if not transfer_type.can_create_resource:
             res = data["resource"]
             description = data["description"]
@@ -6327,7 +6340,11 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
         #import pdb; pdb.set_trace()
         exchange_type = exchange.exchange_type
         context_agent = exchange.context_agent
-        form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
+        next = request.POST.get("next")
+        if next and next == "exchange-work":
+            form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
+        else:
+            form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
         if form.is_valid():
             data = form.cleaned_data
             qty = data["quantity"]
@@ -6343,7 +6360,12 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
                 description = data["description"]
                 if transfer_type.is_currency:
                     value = qty
@@ -6463,7 +6485,12 @@ def change_transfer_events(request, transfer_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
                 res = data["resource"]
                 res_from = None
                 if transfer_type.is_currency:
@@ -6564,7 +6591,11 @@ def change_transfer_commitments(request, transfer_id):
         exchange = transfer.exchange
         context_agent = transfer.context_agent
         #import pdb; pdb.set_trace()
-        form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
+        next = request.POST.get("next")
+        if next and next == "exchange-work":
+            form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
+        else:
+            form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
         if form.is_valid():
             data = form.cleaned_data
             et_give = EventType.objects.get(name="Give")
@@ -6581,7 +6612,13 @@ def change_transfer_commitments(request, transfer_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+
                 description = data["description"]
                 if transfer_type.is_currency:
                     value = qty

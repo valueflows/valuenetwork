@@ -19,7 +19,9 @@ media/avatars/*.jpg
 media/logos/*.png
 media/avatars/*.png
 valuenetwork/site_media/media/photos/*.jpg
+valuenetwork/site_media/media/photos/*.JPG
 valuenetwork/site_media/media/photos/*.png
+valuenetwork/site_media/media/photos/*.PNG
 faircoin_nrp/daemon/daemon.conf
 faircoin_nrp/daemon/daemon.py
 faircoin_nrp/daemon/daemon_service

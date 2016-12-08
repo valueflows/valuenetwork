@@ -336,35 +336,34 @@ from mptt.forms import TreeNodeChoiceField
 
 class ExchangeNavForm(forms.Form):
     get_et = False
-    try:
-      gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
-      exchange_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-          queryset=Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id), #ExchangeType.objects.all(),
+    #try:
+    #gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
+    exchange_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+          queryset=Ocp_Record_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id), #ExchangeType.objects.all(),
           empty_label=_('. . .'),
           level_indicator='. ',
           widget=forms.Select(
               attrs={'class': 'exchange-selector chzn-select'}
           )
-      )
-    except:
-      pass
+    )
+    #except:
+    #  pass
 
     def __init__(self, agent=None, *args, **kwargs):
         super(ExchangeNavForm, self).__init__(*args, **kwargs)
         try:
-          gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
-        except:
-          get_et = False
-        if agent:
-          context_ids = [c.id for c in agent.related_all_contexts()]
-          if not agent.id in context_ids:
-            context_ids.append(agent.id)
-          if gen_et:
-            self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_contexts())
-            self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+            gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
+            if agent:
+                context_ids = [c.id for c in agent.related_all_contexts()]
+                if not agent.id in context_ids:
+                    context_ids.append(agent.id)
+                if gen_et:
+                    self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_contexts())
+                    self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
 
-          if not self.fields or not self.fields["exchange_type"].queryset:
-            self.fields["exchange_type"] = False
+        except:
+            #pass
+            self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.all()
 
 
 class ExchangeContextForm(forms.ModelForm):
@@ -464,16 +463,13 @@ class ContextTransferForm(forms.Form):
         initial=1,
         widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
 
-    try:
-      ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+    ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Material_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
         widget=forms.Select(
             attrs={'class': 'ocp-resource-type-for-resource input-xlarge chzn-select'})
-      )
-    except:
-      ocp_resource_type = False
+    )
 
     resource_type = forms.ModelChoiceField(
         queryset=EconomicResourceType.objects.all(),
@@ -669,16 +665,13 @@ class ContextTransferCommitmentForm(forms.Form):
         initial=1,
         widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
 
-    try:
-      ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+    ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Material_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
         widget=forms.Select(
             attrs={'class': 'ocp-resource-type-for-resource input-xlarge chzn-select'})
-      )
-    except:
-      ocp_resource_type = False
+    )
 
     resource_type = forms.ModelChoiceField(
         queryset=EconomicResourceType.objects.all(),

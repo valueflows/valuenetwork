@@ -323,3 +323,6 @@ class InvoiceNumberForm(forms.ModelForm):
         super(InvoiceNumberForm, self).__init__(*args, **kwargs)
         #import pdb; pdb.set_trace()
         self.fields["member"].queryset = agent.invoicing_candidates()
+        
+
+class AssociationForm(forms.

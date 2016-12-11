@@ -625,7 +625,11 @@ class ContextTransferForm(forms.Form):
                 else:
                   pass
 
-            self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+            try:
+              self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+            except:
+              self.fields["ocp_resource_type"].label = "  Sorry, this exchange type is not yet related to any resource types..."
+
 
     def clean(self):
         data = super(ContextTransferForm, self).clean()
@@ -704,7 +708,8 @@ class ContextTransferCommitmentForm(forms.Form):
                 self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
 
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
-            self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
+            if facetvalues:
+              self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
 
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type":
@@ -748,7 +753,11 @@ class ContextTransferCommitmentForm(forms.Form):
                 else:
                   pass
 
-            self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+            try:
+              self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+            except:
+              self.fields["ocp_resource_type"].label = "  Sorry, this exchange type is not yet related to any resource types..."
+
             #import pdb; pdb.set_trace()
 
 

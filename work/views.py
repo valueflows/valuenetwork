@@ -1104,8 +1104,8 @@ def manage_faircoin_account(request, resource_id):
     balance = False
 
     if agent:
-        if agent.owns(resource):
-            send_coins_form = SendFairCoinsForm()
+        if agent.owns(resource) or resource.owner() in agent.managed_projects():
+            send_coins_form = SendFairCoinsForm(agent=agent)
             #from valuenetwork.valueaccounting.faircoin_utils import network_fee
             limit = resource.spending_limit()
 
@@ -1149,7 +1149,12 @@ def validate_faircoin_address_for_worker(request):
     address = data["to_address"]
     answer = is_valid(address)
     if not answer:
-        answer = "Invalid FairCoin address"
+        toagent = data["to_agent"]
+        toagent = get_object_or_404(EconomicAgent, pk=toagent)
+        if toagent and toagent.faircoin_address():
+            answer = is_valid(toagent.faircoin_address())
+        else:
+            answer = "Invalid FairCoin address "+toagent
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
 
@@ -1193,7 +1198,8 @@ def transfer_faircoins(request, resource_id):
         #import pdb; pdb.set_trace()
         resource = get_object_or_404(EconomicResource, id=resource_id)
         agent = get_agent(request)
-        send_coins_form = SendFairCoinsForm(data=request.POST)
+        to_agent = request.POST["to_user"]
+        send_coins_form = SendFairCoinsForm(data=request.POST, agent=agent)
         if send_coins_form.is_valid():
             data = send_coins_form.cleaned_data
             address_end = data["to_address"]

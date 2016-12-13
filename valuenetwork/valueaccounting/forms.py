@@ -76,6 +76,15 @@ class SendFairCoinsForm(forms.Form):
         if agent and agent.related_context_queryset:
             self.fields['to_user'].queryset = agent.related_context_queryset()
 
+    def clean(self):
+        #import pdb; pdb.set_trace()
+        data = super(SendFairCoinsForm, self).clean()
+        toaddress = data["to_address"]
+        touser = data["to_user"]
+        if touser and not toaddress:
+           if touser and touser.faircoin_address():
+               data["to_address"] = touser.faircoin_address()
+
 class AgentForm(forms.Form):
     nick = forms.CharField(label="ID", widget=forms.TextInput(attrs={'class': 'required-field',}))
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input-xlarge',}))

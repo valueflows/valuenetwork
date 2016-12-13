@@ -1147,7 +1147,12 @@ def validate_faircoin_address_for_worker(request):
     address = data["to_address"]
     answer = is_valid(address)
     if not answer:
-        answer = "Invalid FairCoin address"
+        toagent = data["to_agent"]
+        toagent = get_object_or_404(EconomicAgent, pk=toagent)
+        if toagent and toagent.faircoin_address():
+            answer = is_valid(toagent.faircoin_address())
+        else:
+            answer = "Invalid FairCoin address "+toagent
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
 
@@ -1192,8 +1197,10 @@ def transfer_faircoins(request, resource_id):
         resource = get_object_or_404(EconomicResource, id=resource_id)
         agent = get_agent(request)
         to_agent = request.POST["to_user"]
-        if to_agent.faircoin_address():
-            request.POST["to_address"] = to_agent.faircoin_address()
+        if to_agent:
+            to_agent = get_object_or_404(EconomicAgent, id=to_agent)
+            if to_agent and to_agent.faircoin_address():
+                request.POST["to_address"] = to_agent.faircoin_address()
         send_coins_form = SendFairCoinsForm(data=request.POST, agent=agent)
         if send_coins_form.is_valid():
             data = send_coins_form.cleaned_data

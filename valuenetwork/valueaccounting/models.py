@@ -946,11 +946,25 @@ class EconomicAgent(models.Model):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         agents.extend([ag.is_associate for ag in self.has_associates.all()])
         return [a for a in agents if a.is_context]
-        
+
+    def related_all_contexts(self):
+        agents = [ag.has_associate for ag in self.is_associate_of.all()]
+        # bumbum get also parents of parents contexts
+        grand_parents = []
+        for agn in agents:
+          grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+        agents.extend(grand_parents)
+        agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        return list(set(agents))
+
     def related_context_queryset(self):
         ctx_ids = [ctx.id for ctx in self.related_contexts()]
         return EconomicAgent.objects.filter(id__in=ctx_ids)
-        
+
+    def related_all_contexts_queryset(self):
+        ctx_ids = [ctx.id for ctx in self.related_all_contexts()]
+        return EconomicAgent.objects.filter(id__in=ctx_ids)
+
     def invoicing_candidates(self):
         ctx = self.related_contexts()
         ids = [c.id for c in ctx if c.is_active_freedom_coop_member()]
@@ -1073,7 +1087,7 @@ class EconomicAgent(models.Model):
     def members(self):
         #import pdb; pdb.set_trace()
         agent_ids = self.has_associates.filter(
-            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")            
+            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")
             ).filter(state="active").values_list('is_associate')
         return EconomicAgent.objects.filter(pk__in=agent_ids)
 

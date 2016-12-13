@@ -76,8 +76,8 @@ class SendFairCoinsForm(forms.Form):
 
     def __init__(self, agent=None, *args, **kwargs):
         super(SendFairCoinsForm, self).__init__(*args, **kwargs)
-        if agent and agent.related_context_queryset:
-            self.fields['to_user'].queryset = agent.related_context_queryset()
+        if agent and agent.related_all_context_queryset:
+            self.fields['to_user'].queryset = agent.related_all_context_queryset()
 
     def clean(self):
         #import pdb; pdb.set_trace()

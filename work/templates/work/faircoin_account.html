@@ -75,7 +75,7 @@
 
             <a href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Follow Chain" %}</a>
       <div class="subnav">
-        {% if agent.is_context_agent %}
+        {% if agent.is_context %}
           <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{% trans "View Project" %}</a>
         {% endif %}
       </div>

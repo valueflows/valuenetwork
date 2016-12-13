@@ -79,9 +79,10 @@ class SendFairCoinsForm(forms.Form):
     def clean(self):
         #import pdb; pdb.set_trace()
         data = super(SendFairCoinsForm, self).clean()
-        toaddress = data["to_address"]
-        touser = data["to_user"]
-        if touser and not toaddress:
+        #toaddress = data["to_address"]
+        #touser = data["to_user"]
+        if data["to_user"] and not data["to_address"]:
+           touser = data["to_user"]
            if touser and touser.faircoin_address():
                data["to_address"] = touser.faircoin_address()
 

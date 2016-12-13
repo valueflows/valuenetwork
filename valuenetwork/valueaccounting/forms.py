@@ -73,8 +73,8 @@ class SendFairCoinsForm(forms.Form):
 
     def __init__(self, agent=None, *args, **kwargs):
         super(SendFairCoinsForm, self).__init__(*args, **kwargs)
-        if agent:
-            self.fields['to_user'].queryset = agent.related_contexts_queryset()
+        if agent and agent.related_context_queryset:
+            self.fields['to_user'].queryset = agent.related_context_queryset()
 
 class AgentForm(forms.Form):
     nick = forms.CharField(label="ID", widget=forms.TextInput(attrs={'class': 'required-field',}))

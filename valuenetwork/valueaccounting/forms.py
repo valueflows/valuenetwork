@@ -59,7 +59,10 @@ class RequestStateForm(forms.Form):
 
 class SendFairCoinsForm(forms.Form):
     quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'faircoins input-small',}),min_value=Decimal('1.0'))
-    to_address = forms.CharField(widget=forms.TextInput(attrs={'class': 'input-xlarge',}))
+    to_address = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'input-xlarge',}),
+        required=None
+    )
     to_user = forms.ModelChoiceField(
         queryset=EconomicAgent.objects.filter(
             agent_resource_roles__role__is_owner=True,

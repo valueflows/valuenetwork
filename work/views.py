@@ -1103,7 +1103,7 @@ def manage_faircoin_account(request, resource_id):
 
     if agent:
         if agent.owns(resource) or resource.owner() in agent.managed_projects():
-            send_coins_form = SendFairCoinsForm()
+            send_coins_form = SendFairCoinsForm(agent=agent)
             #from valuenetwork.valueaccounting.faircoin_utils import network_fee
             limit = resource.spending_limit()
 
@@ -1191,7 +1191,10 @@ def transfer_faircoins(request, resource_id):
         #import pdb; pdb.set_trace()
         resource = get_object_or_404(EconomicResource, id=resource_id)
         agent = get_agent(request)
-        send_coins_form = SendFairCoinsForm(data=request.POST)
+        send_coins_form = SendFairCoinsForm(data=request.POST, agent=agent)
+        to_agent = data["to_user"]
+        if to_agent.faircoin_address():
+            data["to_address"] = to_agent.faircoin_address()
         if send_coins_form.is_valid():
             data = send_coins_form.cleaned_data
             address_end = data["to_address"]
@@ -2123,6 +2126,9 @@ def joinaproject_request(request, form_slug = False):
           return joinaproject_request_internal(request, project.agent.id)
       except:
         user_agent = False
+
+      if project.visibility != "public" and not user_agent:
+          return HttpResponseRedirect('/%s/' % ('home'))
 
       fobi_slug = project.fobi_slug
       form_entry = FormEntry.objects.get(slug=fobi_slug)

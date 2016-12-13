@@ -1102,7 +1102,7 @@ def manage_faircoin_account(request, resource_id):
     balance = False
 
     if agent:
-        if agent.owns(resource):
+        if agent.owns(resource) or resource.owner() in agent.managed_projects():
             send_coins_form = SendFairCoinsForm()
             #from valuenetwork.valueaccounting.faircoin_utils import network_fee
             limit = resource.spending_limit()

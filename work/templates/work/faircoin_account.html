@@ -74,6 +74,11 @@
             <a href="{% url "faircoin_history" resource_id=resource.id %}">{% trans "Account history" %}</a>&nbsp;&nbsp;
 
             <a href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Follow Chain" %}</a>
+      <div class="subnav">
+        {% if agent.is_context_agent %}
+          <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{% trans "View Project" %}</a>
+        {% endif %}
+      </div>
 		</legend>
 
         {% if agent and request.user.agent.agent.is_staff %}
@@ -185,7 +190,7 @@
 	                        <th style="text-align: right; vertical-align: top; ">{% trans "Assignments" %}</th>
 	                        <td>
                                 {% for item in resource.agent_resource_roles.all %}
-                                    {{ item.role.name }} : {{ item.agent.nick }}
+                                    {{ item.role.name }} : {{ item.agent.name }}
                                     {% if item.is_contact %} (Contact) {% endif %} <br />
                                 {% endfor %}
                             </td>

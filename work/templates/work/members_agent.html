@@ -296,7 +296,7 @@ legend {
                       {% if user_agent in agent.managers or user_is_agent %}
                         <tr>
                             <th style="text-align: right; vertical-align: top; ">{% trans "FairCoin address" %}</th>
-                            <td>{{ agent.faircoin_address }}</td>
+                            <td>{{ agent.faircoin_address }} {% if agent.faircoin_resource.id %} <b><a href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">Manage Account</a></b>{% endif %}</td>
                         </tr>
                       {% endif %}
                     {% endif %}

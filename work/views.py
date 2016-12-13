@@ -1197,10 +1197,6 @@ def transfer_faircoins(request, resource_id):
         resource = get_object_or_404(EconomicResource, id=resource_id)
         agent = get_agent(request)
         to_agent = request.POST["to_user"]
-        if to_agent:
-            to_agent = get_object_or_404(EconomicAgent, id=to_agent)
-            if to_agent and to_agent.faircoin_address():
-                request.POST["to_address"] = to_agent.faircoin_address()
         send_coins_form = SendFairCoinsForm(data=request.POST, agent=agent)
         if send_coins_form.is_valid():
             data = send_coins_form.cleaned_data

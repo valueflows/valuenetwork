@@ -967,11 +967,8 @@ class EconomicAgent(models.Model):
         for agn in agents:
           grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
         agents.extend(grand_parents)
-
         agents.extend([ag.is_associate for ag in self.has_associates.all()])
-
         return list(set(agents))
-        #return [a for a in agents if a.is_context]
 
     def related_context_queryset(self):
         ctx_ids = [ctx.id for ctx in self.related_contexts()]
@@ -979,7 +976,6 @@ class EconomicAgent(models.Model):
 
     def related_all_contexts_queryset(self):
         ctx_ids = [ctx.id for ctx in self.related_all_contexts()]
-        #ctx_ids.insert(0, self.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
     def invoicing_candidates(self):

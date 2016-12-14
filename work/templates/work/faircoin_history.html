@@ -7,7 +7,7 @@
 {% block extra_head %}
 <style>
 
-    tr.even td 
+    tr.even td
     {
         color:#000000;
         background-color:#EAF2D3;
@@ -16,6 +16,10 @@
     th
     {
         background-color:#C8D6E8;
+    }
+
+    .table-bordered tr:last-child th {
+        border-radius: 0;
     }
 
 </style>
@@ -30,14 +34,20 @@
     <div>
         <legend>
             {% trans "Account History for" %} {{ resource.identifier }}&nbsp;&nbsp;
+
+            <div class="subnav">
+                 {% if resource.id %}
+                     <a class="indent" href="{% url "manage_faircoin_account" resource_id=resource.id %}">Manage Account</a>
+                 {% endif %}
+            </div>
         </legend>
-        
+
         <p>
             {% trans "Current Balance" %}: {{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}<br />
             {% trans "This is a list of transactions inside OCP:" %}
         </p>
-        
-        
+
+
         <table style="width: 100%;" class="table table-bordered table-hover table-condensed" >
             <thead>
                 <th>{% trans "Date" %}</th>
@@ -54,7 +64,7 @@
                     <th>{% trans "Chain" %}</th>
                 {% endif %}
             </thead>
-            <tbody> 
+            <tbody>
                 {% for event in events %}
                     <tr class="{% cycle 'odd' 'even' %}">
                         <td>{{ event.event_date }}</td>
@@ -86,7 +96,7 @@
                         {% endif %}
                     </tr>
                 {% endfor %}
-            </tbody>    
+            </tbody>
         </table>
 <div class="pagination">
     <span class="step-links">

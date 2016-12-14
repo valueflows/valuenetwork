@@ -422,7 +422,7 @@ legend {
                         <h3 id="assn-label">{% trans "Maintain Associations" %}</h3>
                     </div>
                     <div class="modal-body">
-                        <form id="assnForm" enctype="multipart/form-data" action="{% url "create_user" agent_id=agent.id %}" method="POST" >
+                        <form id="assnForm" enctype="multipart/form-data" action="{% url "edit_relations" agent_id=agent.id %}" method="POST" >
                             {% csrf_token %}
                             {{ assn_form|as_bootstrap }}
 

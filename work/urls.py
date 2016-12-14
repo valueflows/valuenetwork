@@ -58,6 +58,7 @@ urlpatterns = patterns("",
         name="joinaproject"),
     url(r'^agent/(?P<agent_id>\d+)/project_joinform/$', 'work.views.joinaproject_request_internal',
         name="project_joinform"),
+    url(r"^edit-relations/(?P<agent_id>\d+)/$", 'work.views.edit_relations', name="edit_relations"),
     url(r'^join-project/(?P<project_id>\d+)/$', 'work.views.join_project',
         name="join_project"),
 
@@ -84,5 +85,4 @@ urlpatterns = patterns("",
     url(r'^new-features/$', 'work.views.new_features', name='new_features'),
     
     url(r"^invoice-number/$", 'work.views.invoice_number', name="invoice_number"),
-
 )

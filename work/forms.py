@@ -325,4 +325,16 @@ class InvoiceNumberForm(forms.ModelForm):
         self.fields["member"].queryset = agent.invoicing_candidates()
         
 
-class AssociationForm(forms.
+class AssociationForm(forms.Form):
+    member = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'chzn-select input-xlarge'}))
+    new_association_type = forms.ModelChoiceField(
+        queryset=AgentAssociationType.objects.member_types(),
+        label=_("Choose a new relationship"),
+        empty_label=None,
+        )
+        
+    def __init__(self, agent, *args, **kwargs):
+        super(AssociationForm, self).__init__(*args, **kwargs)
+        self.fields["member"].choices = [(assoc.id, assoc.is_associate.name + ' - ' + assoc.association_type.name) for assoc in agent.member_associations()]
+        

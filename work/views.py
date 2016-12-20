@@ -2055,14 +2055,14 @@ def members_agent(request, agent_id):
 def edit_relations(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    if user_agent.is_manager():
-        assn_form = AssociationForm(request.POST)
+    #import pdb; pdb.set_trace()
+    if user_agent in agent.managers():
+        assn_form = AssociationForm(agent=agent,data=request.POST)
         if assn_form.is_valid():
-            related_agent = request.POST.get("member")
-            assn_type = request.POST.get("new_association_type")
-            assn = AgentAssociatioin.objects.filter(is_associate=agent).filter(has_associate=related_agent)[0]
-            assn.association_type = assn_type
-            assn.save()       
+            member_assn = AgentAssociation.objects.get(id=int(request.POST.get("member")))
+            assn_type = AgentAssociationType.objects.get(id=int(request.POST.get("new_association_type")))
+            member_assn.association_type = assn_type
+            member_assn.save()       
 
     return HttpResponseRedirect('/%s/%s/'
         % ('work/agent', agent.id))

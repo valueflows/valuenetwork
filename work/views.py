@@ -1147,12 +1147,7 @@ def validate_faircoin_address_for_worker(request):
     address = data["to_address"]
     answer = is_valid(address)
     if not answer:
-        toagent = data["to_agent"]
-        toagent = get_object_or_404(EconomicAgent, pk=toagent)
-        if toagent and toagent.faircoin_address():
-            answer = is_valid(toagent.faircoin_address())
-        else:
-            answer = "Invalid FairCoin address "+toagent
+        answer = "Invalid FairCoin address"
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
 

@@ -4322,13 +4322,14 @@ class EconomicResource(models.Model):
                 newtxs = self.events.filter(digital_currency_tx_state="new")
                 newadd = 0
                 for ev in newtxs:
-                  if ev.quantity:
+                  if Decimal(ev.quantity):
                     if ev.from_agent == self.owner(): # sended fairs
                         newadd -= Decimal(ev.quantity)
                     else: # new received fairs
                         newadd += Decimal(ev.quantity)
-                bal = Decimal(balance1+unconfirmed+newadd) / FAIRCOIN_DIVISOR
-
+                bal = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
+                if newadd:
+                    bal += newadd
             except InvalidOperation:
                 bal = "Not accessible now"
         return bal

@@ -4319,10 +4319,15 @@ class EconomicResource(models.Model):
                 balance = get_address_balance(address)
                 balance1 = balance[0]
                 unconfirmed = balance[1]+balance[2] # the response is triple with unmature and unconfirmed (negative)
-                if balance1:
-                    bal = Decimal(balance1) / FAIRCOIN_DIVISOR
-                if unconfirmed:
-                    bal = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
+                newtxs = self.events.filter(digital_currency_tx_state="new")
+                newadd = 0
+                for ev in newtxs:
+                  if ev.quantity:
+                    newadd += ev.quantity
+
+                bal = Decimal(balance1+unconfirmed+newadd) / FAIRCOIN_DIVISOR
+
+
             except InvalidOperation:
                 bal = "Not accessible now"
         return bal

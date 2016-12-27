@@ -4322,8 +4322,7 @@ class EconomicResource(models.Model):
                 if balance1:
                     bal = Decimal(balance1) / FAIRCOIN_DIVISOR
                 if unconfirmed:
-                    new = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
-                    bal += " (-> "+new+")"
+                    bal = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
             except InvalidOperation:
                 bal = "Not accessible now"
         return bal

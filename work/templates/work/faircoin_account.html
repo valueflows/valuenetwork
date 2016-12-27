@@ -128,7 +128,11 @@
 	            <table class="table table-bordered" >
 	                <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
+                        {% if not resource.digital_currency_balance = resource.digital_currency_balance_unconfirmed %}
+                            <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
+                        {% else %}
+                            <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
+                        {% endif %}
                     </tr>
 {% comment %}
                     <tr>

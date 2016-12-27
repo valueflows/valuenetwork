@@ -4327,9 +4327,7 @@ class EconomicResource(models.Model):
                         newadd -= Decimal(ev.quantity)
                     else: # new received fairs
                         newadd += Decimal(ev.quantity)
-
                 bal = Decimal(balance1+unconfirmed+newadd) / FAIRCOIN_DIVISOR
-
 
             except InvalidOperation:
                 bal = "Not accessible now"

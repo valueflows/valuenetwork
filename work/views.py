@@ -1144,7 +1144,7 @@ def validate_faircoin_address_for_worker(request):
     #import pdb; pdb.set_trace()
     from valuenetwork.valueaccounting.faircoin_utils import is_valid
     data = request.GET
-    address = data["to_address"]
+    address = data["to_address"].strip()
     answer = is_valid(address)
     if not answer:
         answer = "Invalid FairCoin address"

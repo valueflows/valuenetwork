@@ -4309,6 +4309,44 @@ class EconomicResource(models.Model):
                 bal = "Not accessible now"
         return bal
 
+    def digital_currency_balance_unconfirmed(self):
+        bal = 0
+        unconfirmed = 0
+        address = self.digital_currency_address
+        if address:
+            try:
+                from valuenetwork.valueaccounting.faircoin_utils import get_address_balance
+                balance = get_address_balance(address)
+                balance1 = balance[0]
+                unconfirmed = balance[1]+balance[2] # the response is triple with unmature and unconfirmed (negative)
+                if balance1:
+                    bal = Decimal(balance1) / FAIRCOIN_DIVISOR
+                if unconfirmed:
+                    new = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
+                    bal += " (-> "+new+")"
+            except InvalidOperation:
+                bal = "Not accessible now"
+        return bal
+
+    def is_wallet_address(self):
+        address = self.digital_currency_address
+        if address:
+          if self.is_address_requested():
+            return True
+          else:
+            try:
+                from valuenetwork.valueaccounting.faircoin_utils import is_mine
+                return is_mine(address)
+            except:
+                pass
+
+    def is_address_requested(self):
+        address = self.digital_currency_address
+        if address == "address_requested":
+            return True
+        else:
+            return False
+
     def spending_limit(self):
         limit = 0
         address = self.digital_currency_address

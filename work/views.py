@@ -1112,7 +1112,7 @@ def manage_faircoin_account(request, resource_id):
             faircoin_account = agent.faircoin_resource()
             balance = 0
             if faircoin_account:
-                balance = faircoin_account.digital_currency_balance()
+                balance = faircoin_account.digital_currency_balance_unconfirmed()
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
             number_of_shares = agent.number_of_shares()

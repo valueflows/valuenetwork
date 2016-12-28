@@ -15,10 +15,10 @@
 
 tr.even td {
     color:#000000;
-    background-color:#EAF2D3;
+    background-color: beige;
 }
 th {
-    background-color:#C8D6E8;
+    /*background-color:#C8D6E8;*/
 }
 form {
     margin-bottom: 1px;
@@ -32,13 +32,13 @@ h4 {
     color: firebrick;
 }
 .summary {
-    border: solid 1px firebrick;
-    background-color: #C8D6E8;
+    /*border: solid 1px firebrick;
+    background-color: #C8D6E8;*/
     padding: .8em;
     margin-bottom: 10px;
 }
 .summary td, th {
-    background-color: #C8D6E8;
+    /*background-color: #C8D6E8;*/
 }
 .summary td {
     text-align: right;
@@ -46,6 +46,13 @@ h4 {
 }
 .summary th {
     text-align: right;
+}
+
+.change-form > button {
+  margin-right: 3px;
+}
+form.change-form, form.delete-form {
+  display: inline-flex;
 }
 
 </style>
@@ -68,7 +75,7 @@ h4 {
         </div>
       </legend>
         <div class="row-fluid">
-            <div class="span5 summary">
+            <div class="span5 summary infobox">
                 <table>
                     <tr>
                         <th>{% trans "Contributions with no Value Equation" %}:</th>
@@ -136,8 +143,8 @@ h4 {
                 </form>
             </div>
         </div>
-
-		<table class="table table-bordered table-hover table-condensed" >
+<br/>
+		<table class="table table-hover table-condensed" >
 			<thead>
 				<th>{% trans "Date" %}</th>
 				<th>{% trans "Type" %}</th>
@@ -200,7 +207,7 @@ h4 {
                                     method="GET" >
                                     <input type='hidden' class="page" id='changePage{{ event.id }}' name='page' value='' />
                                     <input type='hidden' id='next' name='next' value='{% url "my_history" %}' />
-                                    <button class="btn btn-info btn-mini" title="Change" ><i class="icon-edit icon-white"></button>
+                                  <button class="btn btn-info btn-mini" title="Change" ><i class="icon-edit icon-white"></i></button>
                                 </form>
                                 <form
                                     class="delete-form"
@@ -210,7 +217,7 @@ h4 {
                                     {% csrf_token %}
                                     <input type='hidden' class="page" id='deletePage{{ event.id }}' name='page' value='' />
                                     <input type='hidden' id='next' name='next' value='{% url "my_history" %}' />
-                                    <button class="btn btn-warning btn-mini" title="Delete" ><i class="icon-remove icon-white"></button>
+                                  <button class="btn btn-warning btn-mini" title="Delete" ><i class="icon-remove icon-white"></i></button>
                                 </form>
                             </td>
 					    {% endif %}

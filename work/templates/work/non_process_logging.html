@@ -57,7 +57,7 @@
     <form id="contributionsForm" method="POST" action=".">
 	    {% csrf_token %}
 	    {{ time_formset.management_form }}
-	    <table class="table table-bordered table-condensed table-hover">
+	    <table class="table table-condensed table-hover">
 	        <thead>
 	            <tr class="headings">
 	                <th>{% trans "Date" %}</th>
@@ -77,8 +77,8 @@
 	                <td style="white-space:nowrap;" >
 	                    {{ form.quantity }}</br>
 	                    {{ form.quantity.help_text }}
-                    </td>
-                    <td>{{ form.is_contribution }}</td>
+                  </td>
+                  <td>{{ form.is_contribution }}</td>
 	                <td>{{ form.description }}</td>
 	            </tr>
            	{% endfor %}

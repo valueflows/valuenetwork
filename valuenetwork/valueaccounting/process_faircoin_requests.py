@@ -57,6 +57,10 @@ def create_address_for_agent(agent):
             msg = " ".join(["address already existent! (count[0]=", str(used[0]), ") when creating new address for", agent.name])
             logger.critical(msg)
             return None #create_address_for_agent(agent)
+        if address == 'ERROR':
+            msg = " ".join(["address string is ERROR. None returned. agent:", agent.name])
+            logger.critical(msg)
+            return None
     return address
 
 def create_address_for_resource(resource):

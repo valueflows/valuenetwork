@@ -43,7 +43,13 @@
         </legend>
 
         <p>
-            {% trans "Current Balance" %}: {{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}<br />
+            {% trans "Current Balance" %}:
+                {% if not resource.digital_currency_balance = resource.digital_currency_balance_unconfirmed %}
+                    {{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }})
+                {% else %}
+                    {{ resource.digital_currency_balance }}
+                {% endif %}
+                {{ resource.unit_of_quantity }}<br />
             {% trans "This is a list of transactions inside OCP:" %}
         </p>
 

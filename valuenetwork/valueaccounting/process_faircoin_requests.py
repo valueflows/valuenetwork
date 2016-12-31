@@ -23,7 +23,7 @@ def init_electrum_fair():
         #handle failure better here
         msg = "Can not init Electrum Network. Exiting."
         assert False, msg
-        
+
 def acquire_lock():
     lock = FileLock("broadcast-faircoins")
     logger.debug("acquiring lock...")
@@ -38,20 +38,31 @@ def acquire_lock():
         return False
     logger.debug("lock acquired.")
     return lock
-    
+
 def create_address_for_agent(agent):
     #import pdb; pdb.set_trace()
     address = None
     try:
         address = efn.new_fair_address(
-            entity_id = agent.nick.encode('ascii','ignore'), 
+            entity_id = agent.nick.encode('ascii','ignore'),
             entity = agent.agent_type.name,
             )
     except Exception:
         _, e, _ = sys.exc_info()
         logger.critical("an exception occurred in creating a FairCoin address: {0}".format(e))
+
+    if address:
+        used = EconomicResource.objects.filter(digital_currency_address=address)
+        if used.count():
+            msg = " ".join(["address already existent! (count[0]=", str(used[0]), ") when creating new address for", agent.name])
+            logger.critical(msg)
+            return None #create_address_for_agent(agent)
+        if address == 'ERROR':
+            msg = " ".join(["address string is ERROR. None returned. agent:", agent.name])
+            logger.critical(msg)
+            return None
     return address
-    
+
 def create_address_for_resource(resource):
     agent = resource.owner()
     address = create_address_for_agent(agent)
@@ -63,7 +74,7 @@ def create_address_for_resource(resource):
         msg = " ".join(["Failed to get a FairCoin address for", agent.name])
         logger.warning(msg)
         return False
-    
+
 def create_requested_addresses():
     try:
         requests = EconomicResource.objects.filter(
@@ -75,21 +86,21 @@ def create_requested_addresses():
         _, e, _ = sys.exc_info()
         logger.critical("an exception occurred in retrieving FairCoin address requests: {0}".format(e))
         return "failed to get FairCoin address requests"
-        
+
     if requests:
         init_electrum_fair()
         logger.debug("broadcast_tx ready to process FairCoin address requests")
         for resource in requests:
             result = create_address_for_resource(resource)
-            
+
         msg = " ".join(["created", str(requests.count()), "new faircoin addresses."])
     else:
         msg = "No new faircoin address requests to process."
     return msg
-    
+
 def broadcast_tx():
     #import pdb; pdb.set_trace()
-        
+
     try:
         events = EconomicEvent.objects.filter(
             digital_currency_tx_state="new").order_by('pk')
@@ -104,7 +115,7 @@ def broadcast_tx():
         lock.release()
         logger.debug("released.")
         return "failed to get events"
-        
+
     try:
         #import pdb; pdb.set_trace()
         successful_events = 0
@@ -139,7 +150,7 @@ def broadcast_tx():
                 except Exception:
                     _, e, _ = sys.exc_info()
                     logger.critical("an exception occurred in make_transaction_from_address: {0}".format(e))
-                
+
                 if (tx_hash == "ERROR") or (not tx_hash):
                     logger.warning("ERROR tx_hash, make tx failed without raising Exception")
                     failed_events += 1
@@ -166,12 +177,12 @@ def broadcast_tx():
         logger.debug("released.")
         """
         return "failed to process events"
-    """    
+    """
     logger.debug("releasing lock normally...")
     lock.release()
     logger.debug("released.")
     """
-    
+
     if events:
         msg = " ".join(["Broadcast", str(successful_events), "new faircoin tx."])
         if failed_events:

@@ -93,7 +93,9 @@ class MembershipRequestForm(forms.ModelForm):
 
 
 class WorkProjectSelectionFormOptional(forms.Form):
-    context_agent = forms.ChoiceField()
+    context_agent = forms.ChoiceField(
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}))
 
     def __init__(self, context_agents, *args, **kwargs):
         super(WorkProjectSelectionFormOptional, self).__init__(*args, **kwargs)

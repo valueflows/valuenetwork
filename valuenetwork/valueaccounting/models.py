@@ -4382,14 +4382,62 @@ class EconomicResource(models.Model):
                 bal = "Not accessible now"
         return bal
 
+    def digital_currency_balance_unconfirmed(self):
+        bal = 0
+        unconfirmed = 0
+        address = self.digital_currency_address
+        if address:
+            try:
+                from valuenetwork.valueaccounting.faircoin_utils import get_address_balance
+                balance = get_address_balance(address)
+                balance1 = balance[0]
+                unconfirmed = balance[1]+balance[2] # the response is triple with unmature and unconfirmed (negative)
+                newtxs = self.events.filter(digital_currency_tx_state="new")
+                newadd = 0
+                for ev in newtxs:
+                  if Decimal(ev.quantity):
+                    if ev.from_agent == self.owner(): # sended fairs
+                        newadd -= Decimal(ev.quantity)
+                    else: # new received fairs
+                        newadd += Decimal(ev.quantity)
+                bal = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
+                if newadd:
+                    bal += newadd
+            except InvalidOperation:
+                bal = "Not accessible now"
+        return bal
+
+    def is_wallet_address(self):
+        address = self.digital_currency_address
+        if address:
+          if self.is_address_requested():
+            return True
+          else:
+            try:
+                from valuenetwork.valueaccounting.faircoin_utils import is_mine
+                return is_mine(address)
+            except:
+                pass
+
+    def is_address_requested(self):
+        address = self.digital_currency_address
+        if address == "address_requested":
+            return True
+        else:
+            return False
+
     def spending_limit(self):
         limit = 0
         address = self.digital_currency_address
         if address:
-            from valuenetwork.valueaccounting.faircoin_utils import get_address_balance, network_fee
-            balance = get_address_balance(address)
+            from valuenetwork.valueaccounting.faircoin_utils import network_fee
+            balance = self.digital_currency_balance() #get_address_balance(address)
+            newbalance = self.digital_currency_balance_unconfirmed()
             if balance:
-                bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
+                if newbalance < balance:
+                    bal = newbalance
+                else:
+                    bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
                 fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
                 limit = bal - fee
         return limit

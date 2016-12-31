@@ -74,8 +74,8 @@
       <div class="subnav">
         <a class="indent" href="{% url "faircoin_history" resource_id=resource.id %}">{% trans "Account history" %}</a>
         <a class="indent" href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Follow Chain" %}</a>
-        {% if agent.is_context %}
-          <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{% trans "View Project" %}</a>
+        {% if resource.owner %}
+          <a class="indent" href="{% url 'members_agent' agent_id=resource.owner.id %}">{% trans "View Owner" %}</a>
         {% endif %}
       </div>
 		</legend>
@@ -128,7 +128,11 @@
 	            <table class="table table-bordered" >
 	                <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
+                        {% if not resource.digital_currency_balance = resource.digital_currency_balance_unconfirmed %}
+                            <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
+                        {% else %}
+                            <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
+                        {% endif %}
                     </tr>
 {% comment %}
                     <tr>
@@ -158,7 +162,12 @@
                     {% if resource.digital_currency_address %}
                         <tr>
                             <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
-                            <td>{{ resource.digital_currency_address }}</td>
+                            <td>{% if resource.is_wallet_address %}
+                                {{ resource.digital_currency_address }}
+                                {% else %}
+                                <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
                     {% if resource.notes %}
@@ -250,6 +259,10 @@
                         {% if payment_due %}
                           {{ send_coins_form|as_bootstrap }}
                           <em>{% trans "(available when full member)" %}</em>
+                        {% elif not resource.is_wallet_address %}
+                          <em>{% trans "(available when the address pertains to this wallet)" %}</em>
+                        {% elif resource.is_address_requested %}
+                          <em>{% trans "(please wait about a minute to have a new fair-address and refresh the page)" %}</em>
                         {% else %}
                           {% csrf_token %}
                           {{ send_coins_form|as_bootstrap }}

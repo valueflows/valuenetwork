@@ -97,7 +97,7 @@ span.error {
   font-size: 13px;
 }
 .pagination a {
-  border-left-width: 1;
+  border-left-width: 1px;
 }
 .pagination span.current {
   line-height: 34px;

@@ -960,22 +960,46 @@ class EconomicAgent(models.Model):
         #return list(set(cas))
         return [a for a in agents if a.is_context]
 
-    def related_all_contexts(self):
+    def related_all_contexts(self, childs=True):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         # bumbum get also parents of parents contexts
         grand_parents = []
         for agn in agents:
           grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
         agents.extend(grand_parents)
-        agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if childs:
+          agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        return list(set([a for a in agents if a.is_context]))
+
+    def related_all_agents(self, childs=True):
+        agents = [ag.has_associate for ag in self.is_associate_of.all()]
+        # bumbum get also parents of parents contexts
+        grand_parents = []
+        for agn in agents:
+          grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+        agents.extend(grand_parents)
+        if childs:
+          agents.extend([ag.is_associate for ag in self.has_associates.all()])
         return list(set(agents))
 
     def related_context_queryset(self):
         ctx_ids = [ctx.id for ctx in self.related_contexts()]
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
-    def related_all_contexts_queryset(self):
-        ctx_ids = [ctx.id for ctx in self.related_all_contexts()]
+    def related_agents_queryset(self):
+        ctx_ids = [ctx.id for ctx in self.related_contexts()]
+        return EconomicAgent.objects.filter(id__in=ctx_ids, is_context=True)
+
+    def related_all_contexts_queryset(self, agent=None, childs=True):
+        ctx_ids = [ctx.id for ctx in self.related_all_contexts(childs)]
+        if agent:
+          ctx_ids.append(agent.id)
+        return EconomicAgent.objects.filter(id__in=ctx_ids)
+
+    def related_all_agents_queryset(self, agent=None, childs=True):
+        ctx_ids = [ctx.id for ctx in self.related_all_agents(childs)]
+        if agent:
+          ctx_ids.append(agent.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
     def invoicing_candidates(self):
@@ -7195,7 +7219,7 @@ class TransferType(models.Model):
         if self.receive_agent_association_type:
             return context_agent.has_associates_self_or_inherited(self.receive_agent_association_type.identifier)
         else:
-            return context_agent.related_all_contexts_queryset() #EconomicAgent.objects.all()
+            return context_agent.related_all_agents_queryset() #EconomicAgent.objects.all()
 
     def from_agents(self, context_agent):
         if self.give_agent_association_type:
@@ -7207,7 +7231,7 @@ class TransferType(models.Model):
         if self.give_agent_association_type:
             return context_agent.has_associates_self_or_inherited(self.give_agent_association_type.identifier)
         else:
-            return context_agent.related_all_contexts_queryset() #EconomicAgent.objects.all()
+            return context_agent.related_all_agents_queryset() #EconomicAgent.objects.all()
 
     def form_prefix(self):
         return "-".join(["TT", str(self.id)])

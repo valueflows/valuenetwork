@@ -3903,9 +3903,9 @@ def project_resource(request, agent_id, resource_id):
             if is_owner:
                 if resource.address_is_activated():
                     send_coins_form = SendFairCoinsForm()
-                    from faircoin_utils import network_fee
+                    from valuenetwork.valueaccounting.faircoin_utils import network_fee
                     limit = resource.spending_limit()
-        return render_to_response("valueaccounting/digital_currency_resource.html", {
+        return render_to_response("work/faircoin_account.html", {
             "resource": resource,
             "photo_size": (128, 128),
             "role_formset": role_formset,

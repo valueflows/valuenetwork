@@ -175,6 +175,11 @@ img {
             <li><a href="#by_type"><b>by Type</b></a></li>
             <li><a href="#by_relation"><b>by Relation</b></a></li>
         </ul>
+
+        <a href="#newResourceForm" role="button" class="btn btn-primary" data-toggle="modal" style="float:right; color:#fff;">
+          {% trans "New Resource" %}
+        </a>
+
         <div id="by_type" class="infobox">
           <ul class="root">
             {% for rt in resource_types %}

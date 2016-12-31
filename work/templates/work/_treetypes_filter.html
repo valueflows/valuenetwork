@@ -1,0 +1,102 @@
+{% load i18n %}
+{% load mptt_tags %}
+
+<h3>{% trans "Resource Types:" %}</h3>
+<form id="category-form" action="." method="POST">
+	{% csrf_token %}
+	<p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All" %}
+
+    &nbsp; <input type="submit" name="submit" class="btn btn-info" value="{% trans 'Filter the list' %}" /> </p>
+
+        <div class="" id="material">
+          <p class="facet">
+            {% trans "Material resources:" %} <a href="#addMaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="margin: -6px 0px -5px 20px;">{% trans "Add new Material type" %}</a>
+          </p>
+          <ul class="root" id="treeData" style="/*display: none;*/">
+            {% recursetree Mtype_tree %}
+                <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+                    {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
+                    {% if not node.is_leaf_node %}
+                        <ul class="children">
+                            {{ children }}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endrecursetree %}
+          </ul>
+        </div>
+
+        <div class="" id="nonmaterial">
+          <p class="facet">
+            {% trans "Non-material resources:" %} <a href="#addNonmaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new non-material resource type" style="margin: -6px 0px -5px 20px;">{% trans "Add new Non-material type" %}</a>
+          </p>
+          <ul class="root" style="/*display: none;*/">
+              {% recursetree Ntype_tree %}
+                <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+                    {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
+                    {% if not node.is_leaf_node %}
+                        <ul class="children">
+                            {{ children }}
+                        </ul>
+                    {% endif %}
+                </li>
+              {% endrecursetree %}
+          </ul>
+        </div>
+
+        <div class="" id="services">
+          <p class="facet">
+            {% trans "Skill related the resource above:" %}
+          </p>
+          <ul class="root" style="/*display: none;*/">
+              {% recursetree Stype_tree %}
+                <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.get_gerund }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+                    {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
+                    {% if not node.is_leaf_node %}
+                        <ul class="children">
+                            {{ children }}
+                        </ul>
+                    {% endif %}
+                </li>
+              {% endrecursetree %}
+          </ul>
+        </div>
+        {% if request.user.is_staff %}
+        <div class="" id="contexts">
+          <p class="facet">
+            {% trans "Related contexts:" %}
+          </p>
+          <ul class="root">
+          {% for ag in agent.related_all_contexts %}
+            <li>{{ ag.name }}</li>
+          {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+	<input type='hidden' id='categories' name='categories' value='' />
+	{% for facet in facets %}
+        <!-- <p class="facet"> {{ facet.name }} </p>
+        {% for val in facet.values.all %}
+	        <p><input type="checkbox" class="category" id="{{ val }}" name="{{ val }}" value="{{ val }}" /> {{ val.value }}</p>
+	    {% endfor %} -->
+	{% endfor %}
+</form>
+<div class="modal hide fade" id="addMaterialModal" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true"  style="width:590px;">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>{% trans "Add a new Material Resource Type:" %}</h3>
+  </div>
+  <div class="modal-body">
+    <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url 'new_resource_type' agent_id=agent.id Rtype='material' %}" method="POST" >
+      {% csrf_token %}
+      {{ Mtype_form }}
+
+      <input type="hidden" id="next" name="next" value="project-resources" />
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+        <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+      </div>
+    </form>
+  </div>
+</div>

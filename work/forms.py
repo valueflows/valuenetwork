@@ -354,11 +354,11 @@ class ExchangeNavForm(forms.Form):
         try:
             gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
             if agent:
-                context_ids = [c.id for c in agent.related_all_contexts()]
+                context_ids = [c.id for c in agent.related_all_agents()]
                 if not agent.id in context_ids:
                     context_ids.append(agent.id)
                 if gen_et:
-                    self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_contexts())
+                    self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
                     self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
 
         except:
@@ -435,7 +435,7 @@ class WorkEventContextAgentForm(forms.ModelForm):
         #import pdb; pdb.set_trace()
         if context_agent:
             self.context_agent = context_agent
-            self.fields["from_agent"].queryset = context_agent.related_all_contexts_queryset()
+            self.fields["from_agent"].queryset = context_agent.related_all_agents_queryset()
 
 
 from general.models import Material_Type, Nonmaterial_Type, Artwork_Type
@@ -585,6 +585,12 @@ class ContextTransferForm(forms.Form):
                 except:
                     pass
 
+                try:
+                    gtyp = Ocp_Skill_Type.objects.get(facet_value__value=fv)
+                    self.fields["ocp_resource_type"].label += " S:"+str(gtyp.name)
+                except:
+                    pass
+
 
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type":
@@ -621,6 +627,23 @@ class ContextTransferForm(forms.Form):
                              self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
                           except:
                              self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+
+                elif facet.clas == "Skill_Type":
+                    gen_sts = Job.objects.all()
+                    ocp_sts =  Ocp_Skill_Type.objects.all()
+                    if not gen_sts.count() == ocp_sts.count():
+                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpST:"+str(ocp_sts.count())+" gen:"+str(gen_sts.count())+")"
+                       update = update_from_general(facet.clas)
+                       self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
+
+                    if resource_type:
+                       try:
+                          self.fields["ocp_resource_type"].initial = Ocp_Skill_Type.objects.get(resource_type=resource_type)
+                       except:
+                          #try:
+                          #   self.fields["ocp_resource_type"].initial = Ocp_Skill_Type.objects.get(resource_type=resource_type)
+                          #except:
+                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
 
                 else:
                   pass
@@ -785,7 +808,7 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
     def __init__(self, context_agent=None, *args, **kwargs):
         super(ResourceRoleContextAgentForm, self).__init__(*args, **kwargs)
         if context_agent:
-          context_agents = context_agent.related_all_contexts_queryset() # EconomicAgent.objects.context_agents() #
+          context_agents = context_agent.related_all_agents_queryset() # EconomicAgent.objects.context_agents() #
           self.fields["agent"].queryset = context_agents
 
 
@@ -801,4 +824,79 @@ class NewContextExchangeTypeForm(forms.ModelForm):
         model = ExchangeType
         fields = ('use_case', 'name')
 
+
+class NewMaterialTypeForm(forms.Form):
+    name = forms.CharField(
+        label=_("Name of the material resource type"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
+    )
+    parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Material_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        level_indicator='. ',
+        label=_("Parent resource type"),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+    )
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
+    )
+    context_agent = forms.ModelChoiceField(
+        empty_label=None,
+        queryset=EconomicAgent.objects.none(),
+        help_text=_('If the resource type can be useful for other projects, choose a broader context here.'),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
+    substitutable = forms.BooleanField(
+        required=False,
+        help_text=_('Can any resource of this type be substituted for any other resource of this type?'),
+        widget=forms.CheckboxInput()
+    )
+    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Nonmaterial_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        level_indicator='. ',
+        label=_("Main related non-material resource type"),
+        help_text=_('If this material type is very related a non-material resource, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+    )
+    parent = forms.ModelChoiceField(
+        empty_label=_('. . .'),
+        queryset=EconomicResourceType.objects.none(),
+        help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
+    url = forms.CharField(
+        required=False,
+        label=_("Any related URL for the type?"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+    photo_url = forms.CharField(
+        required=False,
+        label=_("Photo URL of the resource type"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+    '''unit = forms.ModelChoiceField(
+        empty_label=_('. . .'),
+        queryset=Unit.objects.all(),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
+    price_per_unit = forms.DecimalField(
+        max_digits=8, decimal_places=2,
+        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
+        label=_("Price per unit (in Faircoin)"),
+    )'''
+
+    def __init__(self, agent=None, *args, **kwargs):
+        super(NewMaterialTypeForm, self).__init__(*args, **kwargs)
+        self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
+        self.fields["parent"].queryset = possible_parent_resource_types()
+        if agent:
+            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
+            self.fields["context_agent"].initial = agent
 

@@ -1922,6 +1922,8 @@ def create_your_project(request):
     return HttpResponseRedirect("/work/your-projects/")
 
 
+from general.models import Artwork_Type
+
 # bum2
 @login_required
 def members_agent(request, agent_id):
@@ -2050,6 +2052,8 @@ def members_agent(request, agent_id):
             member_hours_roles.sort(lambda x, y: cmp(x[0], y[0]))
             roles_height = len(member_hours_roles) * 20
 
+    #artwork = get_object_or_404(Artwork_Type, clas="Material")
+
     return render_to_response("work/members_agent.html", {
         "agent": agent,
         "membership_request": membership_request,
@@ -2070,6 +2074,7 @@ def members_agent(request, agent_id):
         "help": get_help("members_agent"),
         "form_entries": entries,
         "fobi_name": fobi_name,
+        #"artwork_pk": artwork.pk,
     }, context_instance=RequestContext(request))
 
 
@@ -3540,7 +3545,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 }
                 slot.add_xfer_form = ContextTransferForm(initial=xfer_init, prefix="ATR" + str(slot.id), context_agent=context_agent, transfer_type=slot)
                 slot.create_role_formset = resource_role_context_agent_formset(prefix=str(slot.id))
-                ctx_qs = context_agent.related_all_contexts_queryset()
+                ctx_qs = context_agent.related_all_agents_queryset()
                 for form in slot.create_role_formset.forms:
                     form.fields["agent"].queryset = ctx_qs
 
@@ -3592,7 +3597,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     dt_selection_form = DateSelectionForm(initial=init, data=request.POST or None)
     et_give = EventType.objects.get(name="Give")
     et_receive = EventType.objects.get(name="Receive")
-    context_ids = [c.id for c in agent.related_all_contexts()]
+    context_ids = [c.id for c in agent.related_all_agents()]
     context_ids.append(agent.id)
     ets = ExchangeType.objects.filter(context_agent__id__in=context_ids) #all()
     event_ids = ""
@@ -3600,7 +3605,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     selected_values = "all"
 
     nav_form = ExchangeNavForm(agent=agent, data=request.POST or None)
-    usecases = UseCase.objects.filter(identifier__icontains='_xfer')
+    gen_ext = Ocp_Record_Type.objects.get(clas='ocp_exchange')
+    usecases = Ocp_Record_Type.objects.filter(parent__id=gen_ext.id) #UseCase.objects.filter(identifier__icontains='_xfer')
+
     #new_form = NewContextExchangeTypeForm(data=request.POST or None)
 
     if request.method == "POST":
@@ -3711,3 +3718,230 @@ def resource_role_context_agent_formset(prefix, data=None):
     return formset
 
 
+from mptt.exceptions import InvalidMove
+from mptt.forms import MoveNodeForm
+
+def project_all_resources(request, agent_id):
+    #import pdb; pdb.set_trace()
+    agent = get_object_or_404(EconomicAgent, id=agent_id)
+    contexts = agent.related_all_contexts()
+    contexts.append(agent)
+    #context_ids = [c.id for c in contexts]
+    #other_contexts = EconomicAgent.objects.all().exclude(id__in=context_ids)
+    rts = list(set([arr.resource.resource_type for arr in agent.resource_relationships()]))
+    rt_ids = [arr.resource.id for arr in agent.resource_relationships()]
+    fcr = agent.faircoin_resource()
+    if fcr:
+      rt_ids.append(fcr.id)
+      rts.append(fcr.resource_type)
+    #rts = list(set([arr.resource.resource_type for arr in AgentResourceRole.objects.filter(agent=agent)])) #__in=contexts)]))
+    #resources = EconomicResource.objects.select_related().filter(quantity__gt=0).order_by('resource_type')
+    #rts = EconomicResourceType.objects.all().exclude(context_agent__in=other_contexts)
+    for rt in rts:
+      rt.items = []
+      for r in rt.resources.filter(pk__in=rt_ids):
+        #if r.agent_resource_roles.all()[0].agent == agent: #in contexts:
+          rt.items.append(r)
+
+    resource_types = []
+    facets = Facet.objects.all()
+    select_all = True
+    selected_values = "all"
+    if request.method == "POST":
+        selected_values = request.POST.get("categories", "all");
+        if selected_values:
+            vals = selected_values.split(",")
+            if vals[0] == "all":
+                select_all = True
+                #resources = EconomicResource.objects.select_related().filter(quantity__gt=0).order_by('resource_type')
+                for rt in rts:
+                    if rt.onhand_qty()>0:
+                        resource_types.append(rt)
+                if fcr and not fcr.resource_type in resource_types:
+                    resource_types.append(fcr.resource_type)
+            else:
+                select_all = False
+                #resources = EconomicResource.objects.select_related().filter(quantity__gt=0, resource_type__category__name__in=vals).order_by('resource_type')
+                fvs = []
+                for val in vals:
+                    val_split = val.split("_")
+                    tide = val_split[1]
+                    otyp = None
+                    try:
+                        otyp = Ocp_Material_Type.objects.get(id=tide)
+                    except:
+                      try:
+                          otyp = Ocp_Nonmaterial_Type.objects.get(id=tide)
+                      except:
+                        try:
+                            otyp = Ocp_Skill_Type.objects.get(id=tide)
+                        except:
+                          pass
+                    if otyp:
+                        if otyp.facet_value:
+                           fvs.append(otyp.facet_value)
+                        elif otyp.resource_type:
+                           fv = otyp.resource_type.facets.all()[0].facet_value
+                           fvs.append(fv)
+
+                rts = select_resource_types(fvs)
+                for rt in rts:
+                    if rt.onhand_qty()>0:
+                        rt.items = []
+                        for r in rt.resources.filter(pk__in=rt_ids):
+                            rt.items.append(r)
+                        if rt.items:
+                            resource_types.append(rt)
+                #resource_types.sort(key=lambda rt: rt.label())
+    else:
+        for rt in rts:
+            if rt.onhand_qty()>0:
+                resource_types.append(rt)
+        if fcr and not fcr.resource_type in resource_types:
+            resource_types.append(fcr.resource_type)
+
+    Mtype_form = NewMaterialTypeForm(agent=agent, data=request.POST or None)
+
+    return render_to_response("work/project_resources.html", {
+        #"resources": resources,
+        "resource_types": resource_types,
+        "facets": facets,
+        "select_all": select_all,
+        "selected_values": selected_values,
+        "photo_size": (128, 128),
+        "help": get_help("inventory"),
+        'agent': agent,
+        'Mtype_tree': Ocp_Material_Type.objects.all(),
+        'Mtype_form': Mtype_form,
+        'Ntype_tree': Ocp_Nonmaterial_Type.objects.all(),
+        'Stype_tree': Ocp_Skill_Type.objects.all(),
+    }, context_instance=RequestContext(request))
+
+
+def new_resource_type(request, agent_id, Rtype):
+    agent = get_object_or_404(EconomicAgent, id=agent_id)
+    user_agent = get_agent(request)
+    if not (agent == user_agent or user_agent in agent.managers()):
+        return render_to_response('work/no_permission.html')
+
+    # process savings TODO
+
+    return HttpResponseRedirect('/%s/%s/%s/'
+        % ('work/agent', agent.id, 'resources'))
+
+
+
+def project_resource(request, agent_id, resource_id):
+    #import pdb; pdb.set_trace()
+    resource = get_object_or_404(EconomicResource, id=resource_id)
+    agent = get_object_or_404(EconomicAgent, id=agent_id)
+    user_agent = get_agent(request)
+    if not (agent == user_agent or user_agent in agent.managers()):
+        return render_to_response('work/no_permission.html')
+
+    RraFormSet = modelformset_factory(
+        AgentResourceRole,
+        form=ResourceRoleAgentForm,
+        can_delete=True,
+        extra=4,
+        )
+    role_formset = RraFormSet(
+        prefix="role",
+        queryset=resource.agent_resource_roles.all()
+        )
+
+    if not resource.is_digital_currency_resource():
+        process_add_form = None
+        order_form = None
+        process = None
+        pattern = None
+        if resource.producing_events():
+            process = resource.producing_events()[0].process
+            pattern = None
+            if process:
+                pattern = process.process_pattern
+        else:
+            if agent:
+                form_data = {'name': 'Create ' + resource.identifier, 'start_date': resource.created_date, 'end_date': resource.created_date}
+                process_add_form = AddProcessFromResourceForm(form_data)
+                if resource.resource_type.recipe_is_staged():
+                    init={"start_date": datetime.date.today(),}
+                    order_form = StartDateAndNameForm(initial=init)
+
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        process_save = request.POST.get("process-save")
+        if process_save:
+            process_add_form = AddProcessFromResourceForm(data=request.POST)
+            if process_add_form.is_valid():
+                process = process_add_form.save(commit=False)
+                process.started = process.start_date
+                process.finished = True
+                process.created_by = request.user
+                process.save()
+                event = EconomicEvent()
+                event.context_agent = process.context_agent
+                event.event_date = process.end_date
+                event.event_type = process.process_pattern.event_type_for_resource_type("out", resource.resource_type)
+                event.process = process
+                event.resource_type = resource.resource_type
+                event.quantity = resource.quantity
+                event.unit_of_quantity = resource.unit_of_quantity()
+                event.resource = resource
+                event.to_agent = event.context_agent
+                event.from_agent = event.context_agent
+                event.created_by = request.user
+                event.save()
+                return HttpResponseRedirect('/%s/%s/'
+                    % ('accounting/resource', resource.id))
+    if resource.is_digital_currency_resource():
+        send_coins_form = None
+        is_owner=False
+        limit = 0
+        if agent:
+            is_owner = agent.owns(resource)
+            if is_owner:
+                if resource.address_is_activated():
+                    send_coins_form = SendFairCoinsForm()
+                    from faircoin_utils import network_fee
+                    limit = resource.spending_limit()
+        return render_to_response("valueaccounting/digital_currency_resource.html", {
+            "resource": resource,
+            "photo_size": (128, 128),
+            "role_formset": role_formset,
+            "agent": agent,
+            "is_owner": is_owner,
+            "send_coins_form": send_coins_form,
+            "limit": limit,
+        }, context_instance=RequestContext(request))
+    else:
+        return render_to_response("work/project_resource.html", {
+            "resource": resource,
+            "photo_size": (128, 128),
+            "process_add_form": process_add_form,
+            "order_form": order_form,
+            "role_formset": role_formset,
+            "agent": agent,
+        }, context_instance=RequestContext(request))
+
+
+def movenode(request, node_id):
+    rtype = get_object_or_404(Artwork_Type, pk=node_id)
+    if request.method == 'POST':
+        form = MoveNodeForm(rtype, request.POST)
+        if form.is_valid():
+            try:
+                rtype = form.save()
+                return HttpResponseRedirect(rtype.get_absolute_url())
+            except InvalidMove:
+                pass
+    else:
+        form = MoveNodeForm(rtype)
+
+    return render_to_response('work/project_resources.html', {
+        'form': form,
+        'rtype': rtype,
+        'Mtype_tree': Ocp_Material_Type.objects.all(),
+        'Ntype_tree': Ocp_Nonmaterial_Type.objects.all(),
+        #'agent': agent,
+    }, context_instance=RequestContext(request))

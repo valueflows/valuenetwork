@@ -317,6 +317,12 @@ class Ocp_Record_Type(Record_Type):
         verbose_name= _(u'Type of General Record')
         verbose_name_plural= _(u'o-> Types of General Records')
 
+    def __unicode__(self):
+      if self.exchange_type:
+        return '> '+self.name #+'  ('+self.resource_type.name+')'
+      else:
+        return self.name
+
     def get_ocp_resource_types(self, transfer_type=None):
         answer = False
         if transfer_type:
@@ -331,6 +337,7 @@ class Ocp_Record_Type(Record_Type):
 
             Mids = []
             Nids = []
+            Sids = []
             for fv in facetvalues:
                 #self.fields["ocp_resource_type"].label += " FV:"+fv
                 try:
@@ -347,6 +354,14 @@ class Ocp_Record_Type(Record_Type):
                     #self.fields["ocp_resource_type"].label += " N-"+str(gtyp.name)
                     subids = [typ.id for typ in Ocp_Nonmaterial_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
                     Nids += subids+[gtyp.id]
+                except:
+                    pass
+
+                try:
+                    gtyp = Ocp_Skill_Type.objects.get(facet_value__value=fv)
+                    #self.fields["ocp_resource_type"].label += " N-"+str(gtyp.name)
+                    subids = [typ.id for typ in Ocp_Skill_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
+                    Sids += subids+[gtyp.id]
                 except:
                     pass
             #answer = Ocp_Material_Type.objects.filter(id__in=Mids)
@@ -367,12 +382,20 @@ class Ocp_Record_Type(Record_Type):
                         answer = Ntys
                     else:
                         answer = Ocp_Nonmaterial_Type.objects.all()
+                elif facet.clas == "Skill_Type":
+                    if Sids:
+                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids)
+                        #if Mids: # and Mtyp:
+                        #    Ntys = Artwork_Type.objects.filter(id__in=Mids+Nids) #+[Ntyp.id, Mtyp.id])
+                        answer = Stys
+                    else:
+                        answer = Ocp_Skill_Type.objects.all()
                 else:
                     pass
 
         return answer
 
-from general.models import Material_Type, Nonmaterial_Type
+from general.models import Material_Type, Nonmaterial_Type, Job
 
 class Ocp_Material_Type(Material_Type):
     material_type = models.OneToOneField(
@@ -397,13 +420,14 @@ class Ocp_Material_Type(Material_Type):
       blank=True, null=True,
       help_text=_("a related OCP FacetValue")
     )
+
     class Meta:
       verbose_name= _(u'Type of General Material Resources')
       verbose_name_plural= _(u'o-> Types of General Material Resources')
 
     def __unicode__(self):
       if self.resource_type:
-        return self.name+'  ('+self.resource_type.name+')'
+        return '> '+self.name #+'  ('+self.resource_type.name+')'
       elif self.facet_value:
         return self.name+'  ('+self.facet_value.value+')'
       else:
@@ -433,6 +457,63 @@ class Ocp_Nonmaterial_Type(Nonmaterial_Type):
       blank=True, null=True,
       help_text=_("a related OCP FacetValue")
     )
+
     class Meta:
       verbose_name= _(u'Type of General Non-material Resources')
       verbose_name_plural= _(u'o-> Types of General Non-material Resources')
+
+    def __unicode__(self):
+      if self.resource_type:
+        return '> '+self.name #+'  ('+self.resource_type.name+')'
+      elif self.facet_value:
+        return self.name+'  ('+self.facet_value.value+')'
+      else:
+        return self.name
+
+
+
+class Ocp_Skill_Type(Job):
+    job = models.OneToOneField(
+      Job,
+      on_delete=models.CASCADE,
+      primary_key=True,
+      parent_link=True
+    )
+    resource_type = models.OneToOneField(
+      EconomicResourceType,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp resource_type'),
+      related_name='ocp_skill_type',
+      blank=True, null=True,
+      help_text=_("a related OCP ResourceType")
+    )
+    facet_value = models.OneToOneField(
+      FacetValue,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet_value'),
+      related_name='ocp_skill_type',
+      blank=True, null=True,
+      help_text=_("a related OCP FacetValue")
+    )
+
+    class Meta:
+      verbose_name= _(u'Type of General Skill Resources')
+      verbose_name_plural= _(u'o-> Types of General Skill Resources')
+
+    def __unicode__(self):
+      if self.resource_type:
+        return '> '+self.name #+'  ('+self.resource_type.name+')'
+      elif self.facet_value:
+        return self.gerund+'  ('+self.facet_value.value+')'
+      elif self.gerund:
+        return self.gerund.title()
+      else:
+        return self.name
+
+    def get_gerund(self):
+      if self.gerund:
+        return self.gerund.title()
+      elif self.verb:
+        return self.verb
+      else:
+        return self.name

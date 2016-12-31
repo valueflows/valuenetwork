@@ -96,7 +96,13 @@ span.error {
 .link-normal {
   font-size: 13px;
 }
-
+.pagination a {
+  border-left-width: 1;
+}
+.pagination span.current {
+  line-height: 34px;
+  margin: 0px 1em;
+}
 
 /*   M E M B E R S H I P   P R O C E S S   P A G E   */
 

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from work.models import *
 from valuenetwork.valueaccounting.actions import export_as_csv
+#from django_mptt_admin.admin import DjangoMpttAdmin
 
 admin.site.add_action(export_as_csv, 'export_selected objects')
 
@@ -57,8 +58,9 @@ admin.site.register(Ocp_Record_Type, Ocp_Type_RecordAdmin)
 from general.models import Artwork_Type
 
 class Ocp_Type_MaterialAdmin(MPTTModelAdmin):
+  pass
   model = Ocp_Material_Type
-  list_display = ['name', 'clas', 'resource_type', 'facet_value']
+  list_display = ['name', 'clas', 'facet_value', 'resource_type']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     if db_field.name == 'parent':
       try:
@@ -72,7 +74,7 @@ admin.site.register(Ocp_Material_Type, Ocp_Type_MaterialAdmin)
 
 class Ocp_Type_NonmaterialAdmin(MPTTModelAdmin):
   model = Ocp_Nonmaterial_Type
-  list_display = ['name', 'clas', 'resource_type', 'facet_value']
+  list_display = ['name', 'clas', 'facet_value', 'resource_type']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     if db_field.name == 'parent':
       try:
@@ -83,3 +85,9 @@ class Ocp_Type_NonmaterialAdmin(MPTTModelAdmin):
     return super(Ocp_Type_NonmaterialAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 admin.site.register(Ocp_Nonmaterial_Type, Ocp_Type_NonmaterialAdmin)
+
+class Ocp_Type_SkillAdmin(MPTTModelAdmin):
+  model = Ocp_Skill_Type
+  list_display = ['name', 'verb', 'gerund', 'clas', 'facet_value', 'resource_type']
+
+admin.site.register(Ocp_Skill_Type, Ocp_Type_SkillAdmin)

@@ -15,6 +15,7 @@
 ul, li {
   min-height: 23px;
 }
+
 .totals {
     /*border: solid 2px firebrick;
     background-color: oldlace;
@@ -80,7 +81,7 @@ span.total {
   margin-left: 0px;
   max-height: 97px;
 }
-.span9 {
+.span8 {
   margin-left: 0px;
 }
 #exchangeForm p {
@@ -88,8 +89,9 @@ span.total {
 }
 .filter {
   float: right;
-  width: 230px;
+  width: 310px;
 }
+
 
 </style>
 
@@ -100,9 +102,12 @@ span.total {
 {% block body_base %}
     <div class="container">
         {% include "_messages.html" %}
-		<legend>{% trans "Exchanges" %} for {{ project.name }}
+		<legend>
+        <a class="indent" href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a>: {% trans "Exchanges" %}
             <div class="subnav">
-                <a class="indent" href="../{{ agent.id }}">{% trans "View Project" %}</a>
+                {% if request.user.is_staff or request.user.agent.agent in project.managers %}
+                   <a class="indent" href="{% url "project_resources" agent_id=project.id %}">{% trans "Resource Types" %}</a>
+                {% endif %}
                 <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             </div>
         </legend>
@@ -138,7 +143,7 @@ span.total {
           </div>
           <br />
         </div>
-      <div class="span9">
+      <div class="span8">
 		  {% if exchanges %}
         <h3>
           {% trans "List of Exchanges" %}:
@@ -181,7 +186,7 @@ span.total {
 			</ul>
 		  {% endif %}
         </div>
-        <div class="span2 filter miniform">
+        <div class="span3 filter miniform">
 {% comment %}
             {% if exchanges %}
                 <div>
@@ -211,9 +216,9 @@ span.total {
 	            <p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All in the date range" %}</p>
                 <p class="title"> {% trans "Filter by Type" %} </p>
                 {% for uc in usecases %}
-                  <h5>{{ uc.name }}:</h5>
+                  <h5>{{ uc.name }}</h5>
                   {% for et in ets %}
-                    {% if et.use_case = uc %}
+                    {% if et.ocp_record_type.parent.parent.id = uc.id or et.ocp_record_type.parent.id = uc.id %}
                       <p><input type="checkbox" class="category" id="{{ et.id }}" name="{{ et.id }}" value="{{ et.id }}" /> {{ et.name }}</p>
                     {% endif %}
                   {% endfor %}
@@ -263,7 +268,7 @@ span.total {
 
 		$('.category').each(function(){
 			var cat = $(this)[0];
-      if (selectedCats.indexOf(cat.name) > -1) {
+      if (selectedCats.indexOf(cat.name+',') > -1 || selectedCats.indexOf(','+cat.name) > -1 || selectedCats == cat.name ) {
 				$(this).prop('checked', true);
 			}
 		});

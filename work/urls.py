@@ -94,4 +94,9 @@ urlpatterns = patterns("",
 
     url(r"^invoice-number/$", 'work.views.invoice_number', name="invoice_number"),
 
+    url(r"^agent/(?P<agent_id>\d+)/resources/$", "work.views.project_all_resources", name="project_resources"),
+    url(r"^agent/(?P<agent_id>\d+)/resources/(?P<resource_id>\d+)/$", "work.views.project_resource", name="project_resource"),
+    url(r"^agent/(?P<agent_id>\d+)/resources/new/(?P<Rtype>[\w-]+)/$", "work.views.new_resource_type", name="new_resource_type"),
+
+
 )

@@ -117,7 +117,9 @@ legend {
             <a class="indent smaller" href="{% url "agents" %}">{% trans "All Agents" %}</a> -->
         {% endif %}
         <div class="subnav">
-               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Project Exchanges" %}</a>
+               {% if user_agent.is_staff or user_agent in agent.managers %}
+                   <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+               {% endif %}
                {% if user_agent in agent.managers and agent.project.fobi_slug and agent.project.join_requests %}
                   <a class="indent" href="join-requests">{% trans "Join Requests" %}</a>
                {% elif agent.project in user_agent.joinaproject_requests_projects %}
@@ -126,6 +128,9 @@ legend {
                      <a class="indent" href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">{% trans "Your Joining Feedback" %}</a>
                    {% endif %}
                  {% endfor %}
+               {% endif %}
+               {% if user_agent.is_staff or user_agent in agent.managers %}
+                   <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
                {% endif %}
                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>

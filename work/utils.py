@@ -1,5 +1,5 @@
-from work.models import Ocp_Material_Type, Ocp_Nonmaterial_Type
-from general.models import Artwork_Type
+from work.models import Ocp_Material_Type, Ocp_Nonmaterial_Type, Ocp_Skill_Type
+from general.models import Artwork_Type, Job
 
 def get_rt_from_ocp_rt(gen_rt):
     rt = None
@@ -94,5 +94,36 @@ def update_from_general(clas=None):
       return news.append(updt)
     except:
       return 'error'
+  elif clas == "Skill_Type":
+    #try:
+      gen_sts = Job.objects.all() #filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
+      ocp_sts = Ocp_Skill_Type.objects.all() #filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
+      for st in gen_sts:
+        if not st in ocp_sts:
+          obj = Ocp_Skill_Type.objects.create(#st).get()
+            #job_id=st.pk,
+            id=st.id,
+            name=st.name,
+            description=st.description,
+            parent=st.parent,
+            verb=st.verb,
+            gerund=st.gerund
+          ).get()
+          news.append(obj)
+          #break
+        else:
+          #pass
+          obj = Ocp_Skill_Type.objects.filter(id=st.id).update( #st )
+            #id=st.id,
+            name=st.name,
+            description=st.description,
+            parent=st.parent,
+            verb=st.verb,
+            gerund=st.gerund
+          ).get()
+          updt.append(obj)
+      return news.append(updt)
+    #except:
+    #  return 'error'
   else:
     return clas

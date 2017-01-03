@@ -450,10 +450,35 @@ legend {
               <p>&nbsp;</p>
             </div>
           {% endif %}
+
 	        <div class="assoc infobox" style="width:95%;">
             <h3>
               {% trans "Relations:" %}
             </h3>
+
+                {% if user_agent in agent.managers or user_agent.is_staff %}
+                 {% if agent.is_context %}
+                  <a href="#agentAssnForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Membership Associations" %}</a>
+                  <div class="modal hide fade" id="agentAssnForm" tabindex="-1" role="dialog" aria-labelledby="assn-label" aria-hidden="true">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h3 id="assn-label">{% trans "Maintain Associations" %}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <form id="assnForm" enctype="multipart/form-data" action="{% url "edit_relations" agent_id=agent.id %}" method="POST" >
+                            {% csrf_token %}
+                            {{ assn_form|as_bootstrap }}
+
+                            <div class="modal-footer">
+                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                            <button class="btn btn-primary">{% trans "Save" %}</button>
+                            </div>
+                        </form>
+                    </div>
+                  </div>
+                 {% endif %}
+                {% endif %}
+
                 <h4 class="hdg"> {{ agent.name }} {% trans "is associated with" %}: </h4>
                 <ul>
                 {% for assoc in is_associated_with  %}

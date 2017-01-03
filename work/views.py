@@ -1965,6 +1965,7 @@ def members_agent(request, agent_id):
         user_form = UserCreationForm(initial=init)
     has_associations = agent.all_has_associates()
     is_associated_with = agent.all_is_associates()
+    assn_form = AssociationForm(agent=agent)
 
     headings = []
     member_hours_recent = []
@@ -2056,6 +2057,7 @@ def members_agent(request, agent_id):
         "change_form": change_form,
         "user_form": user_form,
         "nav_form": nav_form,
+        "assn_form": assn_form,
         "user_agent": user_agent,
         "user_is_agent": user_is_agent,
         "has_associations": has_associations,
@@ -2072,6 +2074,21 @@ def members_agent(request, agent_id):
         #"artwork_pk": artwork.pk,
     }, context_instance=RequestContext(request))
 
+@login_required
+def edit_relations(request, agent_id):
+    agent = get_object_or_404(EconomicAgent, id=agent_id)
+    user_agent = get_agent(request)
+    #import pdb; pdb.set_trace()
+    if user_agent in agent.managers():
+        assn_form = AssociationForm(agent=agent,data=request.POST)
+        if assn_form.is_valid():
+            member_assn = AgentAssociation.objects.get(id=int(request.POST.get("member")))
+            assn_type = AgentAssociationType.objects.get(id=int(request.POST.get("new_association_type")))
+            member_assn.association_type = assn_type
+            member_assn.save()       
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/agent', agent.id))
 
 @login_required
 def change_your_project(request, agent_id):

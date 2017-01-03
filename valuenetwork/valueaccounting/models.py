@@ -1148,6 +1148,12 @@ class EconomicAgent(models.Model):
             ).filter(state="active").values_list('is_associate')
         return EconomicAgent.objects.filter(pk__in=agent_ids)
 
+    def member_associations(self):
+        #import pdb; pdb.set_trace()
+        return AgentAssociation.objects.filter(has_associate=self).filter(
+            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")            
+            ).filter(state="active")
+    
     def individual_members(self):
         return self.members().filter(agent_type__party_type="individual")
 
@@ -1491,6 +1497,12 @@ ASSOCIATION_BEHAVIOR_CHOICES = (
     ('peer', _('peer'))
 )
 
+class AgentAssociationTypeManager(models.Manager):
+
+    def member_types(self):
+        #import pdb; pdb.set_trace()
+        return AgentAssociationType.objects.filter(Q(association_behavior='member')|Q(association_behavior='manager'))
+        
 class AgentAssociationType(models.Model):
     identifier = models.CharField(_('identifier'), max_length=12, unique=True)
     name = models.CharField(_('name'), max_length=128)
@@ -1501,6 +1513,8 @@ class AgentAssociationType(models.Model):
     description = models.TextField(_('description'), blank=True, null=True)
     label = models.CharField(_('label'), max_length=32, null=True)
     inverse_label = models.CharField(_('inverse label'), max_length=40, null=True)
+    
+    objects = AgentAssociationTypeManager()
 
     def __unicode__(self):
         return self.name

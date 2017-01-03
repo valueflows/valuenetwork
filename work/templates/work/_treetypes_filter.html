@@ -14,14 +14,16 @@
           </p>
           <ul class="root" id="treeData" style="/*display: none;*/">
             {% recursetree Mtype_tree %}
-                <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+              {% if node.resource_type in resource_types or node.facet_value in facetvalues or request.user.is_staff %}
+                  <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
                     {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
                     {% if not node.is_leaf_node %}
                         <ul class="children">
                             {{ children }}
                         </ul>
                     {% endif %}
-                </li>
+                  </li>
+              {% endif %}
             {% endrecursetree %}
           </ul>
         </div>
@@ -32,14 +34,16 @@
           </p>
           <ul class="root" style="/*display: none;*/">
               {% recursetree Ntype_tree %}
-                <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+                {% if node.resource_type in resource_types or node.facet_value in facetvalues or request.user.is_staff %}
+                  <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
                     {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
                     {% if not node.is_leaf_node %}
                         <ul class="children">
                             {{ children }}
                         </ul>
                     {% endif %}
-                </li>
+                  </li>
+                {% endif %}
               {% endrecursetree %}
           </ul>
         </div>
@@ -50,14 +54,16 @@
           </p>
           <ul class="root" style="/*display: none;*/">
               {% recursetree Stype_tree %}
-                <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.get_gerund }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+                {% if node.resource_type in resource_types or node.facet_value in facetvalues or request.user.is_staff %}
+                  <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.get_gerund }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
                     {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
                     {% if not node.is_leaf_node %}
                         <ul class="children">
                             {{ children }}
                         </ul>
                     {% endif %}
-                </li>
+                  </li>
+                {% endif %}
               {% endrecursetree %}
           </ul>
         </div>

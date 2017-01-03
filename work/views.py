@@ -3742,6 +3742,7 @@ def project_all_resources(request, agent_id):
     facets = Facet.objects.all()
     select_all = True
     selected_values = "all"
+    fvs = []
     if request.method == "POST":
         selected_values = request.POST.get("categories", "all");
         if selected_values:
@@ -3757,7 +3758,7 @@ def project_all_resources(request, agent_id):
             else:
                 select_all = False
                 #resources = EconomicResource.objects.select_related().filter(quantity__gt=0, resource_type__category__name__in=vals).order_by('resource_type')
-                fvs = []
+
                 for val in vals:
                     val_split = val.split("_")
                     tide = val_split[1]
@@ -3792,6 +3793,7 @@ def project_all_resources(request, agent_id):
         for rt in rts:
             if rt.onhand_qty()>0:
                 resource_types.append(rt)
+                fvs.append(rt.facets.all()[0].facet_value) # add first facetvalue
         if fcr and not fcr.resource_type in resource_types:
             resource_types.append(fcr.resource_type)
 
@@ -3801,6 +3803,7 @@ def project_all_resources(request, agent_id):
         #"resources": resources,
         "resource_types": resource_types,
         "facets": facets,
+        "facetvalues": fvs,
         "select_all": select_all,
         "selected_values": selected_values,
         "photo_size": (128, 128),

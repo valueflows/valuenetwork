@@ -660,12 +660,15 @@ class ContextTransferForm(forms.Form):
         data = super(ContextTransferForm, self).clean()
         ocp_rt = data["ocp_resource_type"]
         ini_rt = data["resource_type"]
-        if ocp_rt and not ini_rt:
+        if ocp_rt:
+          if not ini_rt:
             rt = get_rt_from_ocp_rt(ocp_rt)
             if rt:
               data["resource_type"] = rt
             else:
               self.add_error('ocp_resource_type', "This type is too general, try a more specific")
+        else:
+          self.add_error('ocp_resource_type', "There is a problem with this ocp_resource_type!")
         return data
 
 
@@ -785,6 +788,20 @@ class ContextTransferCommitmentForm(forms.Form):
 
             #import pdb; pdb.set_trace()
 
+    def clean(self):
+        data = super(ContextTransferCommitmentForm, self).clean()
+        ocp_rt = data["ocp_resource_type"]
+        ini_rt = data["resource_type"]
+        if ocp_rt:
+          if not ini_rt:
+            rt = get_rt_from_ocp_rt(ocp_rt)
+            if rt:
+              data["resource_type"] = rt
+            else:
+              self.add_error('ocp_resource_type', "This type is too general, try a more specific")
+        else:
+          self.add_error('ocp_resource_type', "There is a problem with this ocp_resource_type!")
+        return data
 
 
 class ResourceRoleContextAgentForm(forms.ModelForm):

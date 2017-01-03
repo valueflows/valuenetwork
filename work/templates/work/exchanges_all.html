@@ -103,10 +103,10 @@ span.total {
     <div class="container">
         {% include "_messages.html" %}
 		<legend>
-        <a class="indent" href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a>: {% trans "Exchanges" %}
+        <a class="indent" href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a> > {% trans "Exchanges" %}
             <div class="subnav">
                 {% if request.user.is_staff or request.user.agent.agent in project.managers %}
-                   <a class="indent" href="{% url "project_resources" agent_id=project.id %}">{% trans "Resource Types" %}</a>
+                   <a class="indent" href="{% url "project_resources" agent_id=project.id %}">{% trans "Resources" %}</a>
                 {% endif %}
                 <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             </div>

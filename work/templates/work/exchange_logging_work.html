@@ -157,13 +157,14 @@ li {
     {% include "_messages.html" %}
 	<div>
 	<legend>
-    <span style="font-size:90%;">
+    <span style="/*font-size:90%;*/">
+    <a href="{% url 'members_agent' agent_id=context_agent.id %}">{{ context_agent.name }}</a> > <a href="{% url "exchanges_all" agent_id=context_agent.id %}">{% trans "Exchanges" %}</a> >
       {% if exchange %}
-        {% trans "Exchange:" %} <span style="font-size:85%; color:#555;">{{ exchange }}</span>
+         <span style="">{{ exchange }}</span>
       {% else %}
         {% trans "New" %} {{ exchange_type.name }}
       {% endif %}
-      <span style="font-size:85%; color:#555;">for {{ context_agent.name }}</span>
+      <!-- <span style="font-size:85%; color:#555;">for {{ context_agent.name }}</span> -->
     </span>
 {% comment %}
         {% if exchange.order %}
@@ -177,8 +178,8 @@ li {
         {% endif %}
 {% endcomment %}
         <div class="subnav">
-            <a class="indent" href="{% url "exchanges_all" agent_id=context_agent.id %}">{% trans "All Exchanges" %}</a>
-            <a class="indent" href="{% url 'members_agent' agent_id=context_agent.id %}">{% trans "View Project" %}</a>
+            <!-- <a class="indent" href="{% url "exchanges_all" agent_id=context_agent.id %}">{% trans "All Exchanges" %}</a>
+            <a class="indent" href="{% url 'members_agent' agent_id=context_agent.id %}">{% trans "View Project" %}</a> -->
             <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
         </div>
 	</legend>

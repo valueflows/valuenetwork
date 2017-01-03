@@ -1,5 +1,6 @@
 {% extends "work_base.html" %}
 
+{% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load thumbnail %}
@@ -88,6 +89,17 @@ legend {
 .action-form {
     display: inline;
 }
+
+  fieldset {
+    border: 0;
+  }
+  label {
+    display: block;
+    margin: 30px 0 0 0;
+  }
+  .overflow {
+    height: 200px;
+  }
 
 </style>
 
@@ -407,7 +419,7 @@ legend {
                     <ul>
                         {% for resource in agent.resources_created %}
                             <li>
-                                <a href="{{ resource.get_absolute_url }}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
+                                <a href="{% url "project_resource" agent_id=agent.id resource_id=resource.id %}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -420,7 +432,7 @@ legend {
                                 <h4>{{ rel.role.name }} </h4>
                             {% endifchanged %}
                             <li>
-                                <a href="{{ rel.resource.get_absolute_url }}"> {{ rel.resource }}</a>
+                                <a href="{% url "project_resource" agent_id=agent.id resource_id=rel.resource.id %}"> {{ rel.resource }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -456,29 +468,6 @@ legend {
               {% trans "Relations:" %}
             </h3>
 
-                {% if user_agent in agent.managers or user_agent.is_staff %}
-                 {% if agent.is_context %}
-                  <a href="#agentAssnForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Membership Associations" %}</a>
-                  <div class="modal hide fade" id="agentAssnForm" tabindex="-1" role="dialog" aria-labelledby="assn-label" aria-hidden="true">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h3 id="assn-label">{% trans "Maintain Associations" %}</h3>
-                    </div>
-                    <div class="modal-body">
-                        <form id="assnForm" enctype="multipart/form-data" action="{% url "edit_relations" agent_id=agent.id %}" method="POST" >
-                            {% csrf_token %}
-                            {{ assn_form|as_bootstrap }}
-
-                            <div class="modal-footer">
-                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
-                            <button class="btn btn-primary">{% trans "Save" %}</button>
-                            </div>
-                        </form>
-                    </div>
-                  </div>
-                 {% endif %}
-                {% endif %}
-
                 <h4 class="hdg"> {{ agent.name }} {% trans "is associated with" %}: </h4>
                 <ul>
                 {% for assoc in is_associated_with  %}
@@ -491,7 +480,30 @@ legend {
                 {% endfor %}
                 </ul>
                 {% if has_associations %}
-                    <h4 class="hdg">{{ agent.name }} {% trans "has these associates" %}: </h4>
+                    <h4 class="hdg">{{ agent.name }} {% trans "has these associates" %}: &nbsp; &nbsp;
+                    {% if user_agent in agent.managers or user_agent.is_staff %}
+                      {% if agent.is_context %}
+                        <a href="#agentAssnForm" role="button" class="btn btn-primary btn-mini" data-toggle="modal">{% trans "Edit member relations" %}</a>
+                        <div class="modal hide fade" id="agentAssnForm" tabindex="-1" role="dialog" aria-labelledby="assn-label" aria-hidden="true">
+                          <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                              <h3 id="assn-label">{% trans "Maintain Associates for" %} {{ agent }}</h3>
+                          </div>
+                          <div class="modal-body">
+                              <form id="assnForm" enctype="multipart/form-data" action="{% url "edit_relations" agent_id=agent.id %}" method="POST" >
+                                  {% csrf_token %}
+                                  {{ assn_form|as_bootstrap }}
+
+                                  <div class="modal-footer">
+                                  <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                  <button class="btn btn-primary">{% trans "Save" %}</button>
+                                  </div>
+                              </form>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                    </h4>
                     <ul>
                     {% for assoc in has_associations %}
                         {% ifchanged assoc.association_type %}
@@ -613,9 +625,11 @@ legend {
 {% endblock %}
 
 {% block extra_script %}
+  <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
 	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 {% endblock %}
 
 
@@ -625,6 +639,8 @@ legend {
     <script type="text/javascript">
 
     $(document).ready(function(){
+
+        //$(".chzn-select").selectmenu();//chosen();
 
         $('#projects').addClass('active');
 
@@ -710,7 +726,7 @@ legend {
                 chart.draw(data, options);
             }
         {% else %}
-            google.setOnLoadCallback(drawChart_recent);
+            if(typeof drawChart_recent != 'undefined') google.setOnLoadCallback(drawChart_recent);
             function drawChart_recent() {
                 var data = google.visualization.arrayToDataTable([
                 ['Member', 'Hours'],
@@ -728,7 +744,7 @@ legend {
                 chart.draw(data, options);
             }
 
-            google.setOnLoadCallback(drawChart_stats);
+            if(typeof drawChart_stats != 'undefined') google.setOnLoadCallback(drawChart_stats);
             function drawChart_stats() {
                 var data = google.visualization.arrayToDataTable([
                 ['Member', 'Hours'],
@@ -746,7 +762,7 @@ legend {
                 chart.draw(data, options);
             }
 
-            google.setOnLoadCallback(drawChart_roles);
+            if(typeof drawChart_roles != 'undefined') google.setOnLoadCallback(drawChart_roles);
             function drawChart_roles() {
                 var data = new google.visualization.DataTable();
                 {% for head in headings %}

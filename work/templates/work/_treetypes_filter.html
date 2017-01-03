@@ -3,6 +3,8 @@
 
 <h3>{% trans "Resource Types:" %}</h3>
 <form id="category-form" action="." method="POST">
+  {% if request.user.is_staff %}<p><em>(full trees only shown to admins)</em></p>{% endif %}
+
 	{% csrf_token %}
 	<p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All" %}
 

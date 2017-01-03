@@ -911,7 +911,9 @@ class AssociationForm(forms.Form):
         queryset=AgentAssociationType.objects.member_types(),
         label=_("Choose a new relationship"),
         empty_label=None,
-        )
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
 
     def __init__(self, agent, *args, **kwargs):
         super(AssociationForm, self).__init__(*args, **kwargs)

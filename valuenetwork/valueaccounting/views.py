@@ -28,7 +28,7 @@ from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
 from valuenetwork.valueaccounting.utils import *
 from work.models import MembershipRequest, SkillSuggestion, Ocp_Material_Type, Ocp_Nonmaterial_Type
-from work.forms import ContextTransferForm, ContextTransferCommitmentForm
+from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
 from work.utils import *
 
 if "notification" in settings.INSTALLED_APPS:
@@ -13543,3 +13543,15 @@ def connect_agent_to_request(request, membership_request_id):
 
     return HttpResponseRedirect('/%s/'
         % ('accounting/membership-requests'))
+
+
+def resource_role_context_agent_formset(prefix, data=None):
+    #import pdb; pdb.set_trace()
+    RraFormSet = modelformset_factory(
+        AgentResourceRole,
+        form=ResourceRoleContextAgentForm,
+        can_delete=True,
+        extra=4,
+        )
+    formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
+    return formset

@@ -2085,7 +2085,7 @@ def edit_relations(request, agent_id):
             member_assn = AgentAssociation.objects.get(id=int(request.POST.get("member")))
             assn_type = AgentAssociationType.objects.get(id=int(request.POST.get("new_association_type")))
             member_assn.association_type = assn_type
-            member_assn.save()       
+            member_assn.save()
 
     return HttpResponseRedirect('/%s/%s/'
         % ('work/agent', agent.id))
@@ -3718,6 +3718,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
 
 
+"""
 def resource_role_context_agent_formset(prefix, data=None):
     #import pdb; pdb.set_trace()
     RraFormSet = modelformset_factory(
@@ -3728,7 +3729,7 @@ def resource_role_context_agent_formset(prefix, data=None):
         )
     formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
     return formset
-
+"""
 
 from mptt.exceptions import InvalidMove
 from mptt.forms import MoveNodeForm

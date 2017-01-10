@@ -466,7 +466,7 @@ class ContextTransferForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
 
     ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Material_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
         widget=forms.Select(
@@ -573,19 +573,16 @@ class ContextTransferForm(forms.Form):
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
             self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
 
+            #self.fields["ocp_resource_type"].label += init_resource_types()
+
             for fv in facetvalues:
                 #self.fields["ocp_resource_type"].label += " FV:"+fv
                 try:
-                    gtyp = Ocp_Material_Type.objects.get(facet_value__value=fv)
-                    self.fields["ocp_resource_type"].label += " M:"+str(gtyp.name)
+                    gtyp = Ocp_Artwork_Type.objects.get(facet_value__value=fv)
+                    self.fields["ocp_resource_type"].label += " R:"+str(gtyp.name)
                 except:
                     pass
                 #self.fields["ocp_resource_type"].label += " FV:"+fv
-                try:
-                    gtyp = Ocp_Nonmaterial_Type.objects.get(facet_value__value=fv)
-                    self.fields["ocp_resource_type"].label += " N:"+str(gtyp.name)
-                except:
-                    pass
 
                 try:
                     gtyp = Ocp_Skill_Type.objects.get(facet_value__value=fv)
@@ -596,55 +593,46 @@ class ContextTransferForm(forms.Form):
 
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type":
-                    gen_mts = Material_Type.objects.all()
-                    ocp_mts =  Ocp_Material_Type.objects.all()
-                    if not gen_mts.count() == ocp_mts.count():
-                      self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_mts.count())+" gen:"+str(gen_mts.count())+")"
-                      update = update_from_general(facet.clas)
-                      self.fields["ocp_resource_type"].label += "UPDATE: "+str(update)
+                    #gen_mts = Material_Type.objects.all()
+                    #ocp_mts =  Ocp_Material_Type.objects.all()
+                    #if not gen_mts.count() == ocp_mts.count():
+                    #  self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_mts.count())+" gen:"+str(gen_mts.count())+")"
+                    #  update = update_from_general(facet.clas)
+                    #  self.fields["ocp_resource_type"].label += "UPDATE: "+str(update)
 
                     if resource_type:
                        try:
-                          self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
+                          self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
                        except:
-                          try:
-                             self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
-                          except:
-                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
 
 
                 elif facet.clas == "Nonmaterial_Type":
-                    gen_nts = Nonmaterial_Type.objects.all()
-                    ocp_nts =  Ocp_Nonmaterial_Type.objects.all()
-                    if not gen_nts.count() == ocp_nts.count():
-                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_nts.count())+" gen:"+str(gen_nts.count())+")"
-                       update = update_from_general(facet.clas)
-                       self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
+                    #gen_nts = Nonmaterial_Type.objects.all()
+                    #ocp_nts =  Ocp_Nonmaterial_Type.objects.all()
+                    #if not gen_nts.count() == ocp_nts.count():
+                    #   self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_nts.count())+" gen:"+str(gen_nts.count())+")"
+                    #   update = update_from_general(facet.clas)
+                    #   self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
 
                     if resource_type:
                        try:
-                          self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
+                          self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
                        except:
-                          try:
-                             self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
-                          except:
-                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
 
                 elif facet.clas == "Skill_Type":
-                    gen_sts = Job.objects.all()
-                    ocp_sts =  Ocp_Skill_Type.objects.all()
-                    if not gen_sts.count() == ocp_sts.count():
-                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpST:"+str(ocp_sts.count())+" gen:"+str(gen_sts.count())+")"
-                       update = update_from_general(facet.clas)
-                       self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
+                    #gen_sts = Job.objects.all()
+                    #ocp_sts =  Ocp_Skill_Type.objects.all()
+                    #if not gen_sts.count() == ocp_sts.count():
+                    #   self.fields["ocp_resource_type"].label += " !Needs Update! (ocpST:"+str(ocp_sts.count())+" gen:"+str(gen_sts.count())+")"
+                    #   update = update_from_general(facet.clas)
+                    #   self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
 
                     if resource_type:
                        try:
                           self.fields["ocp_resource_type"].initial = Ocp_Skill_Type.objects.get(resource_type=resource_type)
                        except:
-                          #try:
-                          #   self.fields["ocp_resource_type"].initial = Ocp_Skill_Type.objects.get(resource_type=resource_type)
-                          #except:
                           self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
 
                 else:
@@ -698,7 +686,7 @@ class ContextTransferCommitmentForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
 
     ocp_resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Material_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
         widget=forms.Select(
@@ -741,41 +729,34 @@ class ContextTransferCommitmentForm(forms.Form):
 
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type":
-                    gen_mts = Material_Type.objects.all()
-                    ocp_mts =  Ocp_Material_Type.objects.all()
-                    if not gen_mts.count() == ocp_mts.count():
-                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_mts.count())+" gen:"+str(gen_mts.count())+")"
-                       update = update_from_general(facet.clas)
-                       self.fields["ocp_resource_type"].label += "UPDATE: "+str(update)
+                    #gen_mts = Material_Type.objects.all()
+                    #ocp_mts =  Ocp_Material_Type.objects.all()
+                    #if not gen_mts.count() == ocp_mts.count():
+                    #   self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_mts.count())+" gen:"+str(gen_mts.count())+")"
+                    #   update = update_from_general(facet.clas)
+                    #   self.fields["ocp_resource_type"].label += "UPDATE: "+str(update)
 
                     if resource_type:
                        try:
-                          self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
+                          self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
                        except:
-                          try:
-                             self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
-                          except:
-                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
                     #else:
                        #self.fields["ocp_resource_type"].label += " FALTA RT! "+str(resource_type)
 
                 elif facet.clas == "Nonmaterial_Type":
-                    gen_nts = Nonmaterial_Type.objects.all()
-                    ocp_nts =  Ocp_Nonmaterial_Type.objects.all()
-                    if not gen_nts.count() == ocp_nts.count():
-                       self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_nts.count())+" gen:"+str(gen_nts.count())+")"
-                       update = update_from_general(facet.clas)
-                       self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
+                    #gen_nts = Nonmaterial_Type.objects.all()
+                    #ocp_nts =  Ocp_Nonmaterial_Type.objects.all()
+                    #if not gen_nts.count() == ocp_nts.count():
+                    #   self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_nts.count())+" gen:"+str(gen_nts.count())+")"
+                    #   update = update_from_general(facet.clas)
+                    #   self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
 
                     if resource_type:
                        try:
-                          self.fields["ocp_resource_type"].initial = Ocp_Nonmaterial_Type.objects.get(resource_type=resource_type)
+                          self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
                        except:
-                          try:
-                             self.fields["ocp_resource_type"].initial = Ocp_Material_Type.objects.get(resource_type=resource_type)
-                          except:
-                             self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
-                       #import pdb; pdb.set_trace()
+                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
                     #else:
                        #self.fields["ocp_resource_type"].label += " FALTA RT! "+str(resource_type)
                 else:
@@ -844,13 +825,13 @@ class NewContextExchangeTypeForm(forms.ModelForm):
         fields = ('use_case', 'name')
 
 
-class NewMaterialTypeForm(forms.Form):
+class NewResourceTypeForm(forms.Form):
     name = forms.CharField(
         label=_("Name of the material resource type"),
         widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
     )
     parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Material_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
         label=_("Parent resource type"),
@@ -874,7 +855,7 @@ class NewMaterialTypeForm(forms.Form):
         widget=forms.CheckboxInput()
     )
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Nonmaterial_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
         label=_("Main related non-material resource type"),
@@ -912,7 +893,7 @@ class NewMaterialTypeForm(forms.Form):
     )'''
 
     def __init__(self, agent=None, *args, **kwargs):
-        super(NewMaterialTypeForm, self).__init__(*args, **kwargs)
+        super(NewResourceTypeForm, self).__init__(*args, **kwargs)
         self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
         self.fields["parent"].queryset = possible_parent_resource_types()
         if agent:

@@ -3782,14 +3782,11 @@ def project_all_resources(request, agent_id):
                     tide = val_split[1]
                     otyp = None
                     try:
-                        otyp = Ocp_Material_Type.objects.get(id=tide)
+                        otyp = Ocp_Artwork_Type.objects.get(id=tide)
                     except:
                       try:
-                          otyp = Ocp_Nonmaterial_Type.objects.get(id=tide)
+                          otyp = Ocp_Skill_Type.objects.get(id=tide)
                       except:
-                        try:
-                            otyp = Ocp_Skill_Type.objects.get(id=tide)
-                        except:
                           pass
                     if otyp:
                         if otyp.facet_value:
@@ -3815,7 +3812,7 @@ def project_all_resources(request, agent_id):
         if fcr and not fcr.resource_type in resource_types:
             resource_types.append(fcr.resource_type)
 
-    Mtype_form = NewMaterialTypeForm(agent=agent, data=request.POST or None)
+    Rtype_form = NewResourceTypeForm(agent=agent, data=request.POST or None)
 
     return render_to_response("work/project_resources.html", {
         #"resources": resources,
@@ -3827,9 +3824,8 @@ def project_all_resources(request, agent_id):
         "photo_size": (128, 128),
         "help": get_help("inventory"),
         'agent': agent,
-        'Mtype_tree': Ocp_Material_Type.objects.all(),
-        'Mtype_form': Mtype_form,
-        'Ntype_tree': Ocp_Nonmaterial_Type.objects.all(),
+        'Rtype_tree': Ocp_Artwork_Type.objects.all(),
+        'Rtype_form': Rtype_form,
         'Stype_tree': Ocp_Skill_Type.objects.all(),
     }, context_instance=RequestContext(request))
 
@@ -3957,7 +3953,6 @@ def movenode(request, node_id):
     return render_to_response('work/project_resources.html', {
         'form': form,
         'rtype': rtype,
-        'Mtype_tree': Ocp_Material_Type.objects.all(),
-        'Ntype_tree': Ocp_Nonmaterial_Type.objects.all(),
+        'Rtype_tree': Ocp_Artwork_Type.objects.all(),
         #'agent': agent,
     }, context_instance=RequestContext(request))

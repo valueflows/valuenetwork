@@ -55,10 +55,27 @@ class Ocp_Type_RecordAdmin(MPTTModelAdmin):
 admin.site.register(Ocp_Record_Type, Ocp_Type_RecordAdmin)
 
 
+
 from general.models import Artwork_Type
 
+class Ocp_Type_Artwork_Admin(MPTTModelAdmin):
+  model = Ocp_Artwork_Type
+  list_display = ['name', 'clas', 'facet', 'facet_value', 'resource_type', 'context_agent']
+  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    if db_field.name == 'parent':
+      try:
+        typ = Artwork_Type.objects.get(clas='Resource')
+        kwargs['queryset'] = Artwork_Type.objects.filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
+      except:
+        pass
+    return super(Ocp_Type_Artwork_Admin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+admin.site.register(Ocp_Artwork_Type, Ocp_Type_Artwork_Admin)
+
+
+"""
 class Ocp_Type_MaterialAdmin(MPTTModelAdmin):
-  pass
+  #pass
   model = Ocp_Material_Type
   list_display = ['name', 'clas', 'facet_value', 'resource_type']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -85,6 +102,7 @@ class Ocp_Type_NonmaterialAdmin(MPTTModelAdmin):
     return super(Ocp_Type_NonmaterialAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 admin.site.register(Ocp_Nonmaterial_Type, Ocp_Type_NonmaterialAdmin)
+"""
 
 class Ocp_Type_SkillAdmin(MPTTModelAdmin):
   model = Ocp_Skill_Type

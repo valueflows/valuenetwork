@@ -1213,7 +1213,7 @@ admin.site.register(Job, JobAdmin)
 # ----- ARTWORKS
 
 #admin.site.register(Artwork)
-#admin.site.register(Artwork_Type, MPTTModelAdmin) # Comment this line after creating 'Unit', 'Record', 'Material' and 'Nonmaterial' inside Artwork_Types
+admin.site.register(Artwork_Type, MPTTModelAdmin) # Comment this line after creating 'Unit', 'Record', 'Material' and 'Nonmaterial' inside Artwork_Types
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Unit_Type, Type_UnitAdmin)
 

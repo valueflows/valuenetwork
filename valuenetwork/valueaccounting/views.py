@@ -27,7 +27,7 @@ from django_comments.models import Comment, CommentFlag
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
 from valuenetwork.valueaccounting.utils import *
-from work.models import MembershipRequest, SkillSuggestion, Ocp_Material_Type, Ocp_Nonmaterial_Type
+from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
 from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
 from work.utils import *
 

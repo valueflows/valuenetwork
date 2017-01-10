@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load mptt_tags %}
 
-<h3>{% trans "Resource Types:" %}</h3>
+<h3>{% trans "Filter Resource Types:" %}</h3>
 <form id="category-form" action="." method="POST">
   {% if request.user.is_staff %}<p><em>(full trees only shown to admins)</em></p>{% endif %}
 
@@ -11,14 +11,14 @@
     &nbsp; <input type="submit" name="submit" class="btn btn-info" value="{% trans 'Filter the list' %}" /> </p>
 
         <div class="" id="material">
-          <p class="facet">
-            {% trans "Material resources:" %} <a href="#addMaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="margin: -6px 0px -5px 20px;">{% trans "New Material Type" %}</a>
-          </p>
+          <!-- <p class="facet">
+            {% trans "Types of Resources:" %} --> <a href="#addMaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="margin: -6px 0px -5px 20px; float:right;">{% trans "New Resource Type" %}</a>
+          <!-- </p> -->
           <ul class="root" id="treeData" style="/*display: none;*/">
-            {% recursetree Mtype_tree %}
+            {% recursetree Rtype_tree %}
               {% if node.resource_type in resource_types or node.facet_value in facetvalues or request.user.is_staff %}
-                  <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
-                    {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
+                  <li id="Rid_{{ node.id }}">{% if not node.resource_type and not node.facet_value and not node.facet %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+                    {% if not node.resource_type and not node.facet_value and not node.facet %}</em>{% endif %}
                     {% if not node.is_leaf_node %}
                         <ul class="children">
                             {{ children }}
@@ -30,25 +30,6 @@
           </ul>
         </div>
 
-        <div class="" id="nonmaterial">
-          <p class="facet">
-            {% trans "Non-material resources:" %} <a href="#addNonmaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new non-material resource type" style="margin: -6px 0px -5px 20px;">{% trans "New Non-material Type" %}</a>
-          </p>
-          <ul class="root" style="/*display: none;*/">
-              {% recursetree Ntype_tree %}
-                {% if node.resource_type in resource_types or node.facet_value in facetvalues or request.user.is_staff %}
-                  <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
-                    {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
-                    {% if not node.is_leaf_node %}
-                        <ul class="children">
-                            {{ children }}
-                        </ul>
-                    {% endif %}
-                  </li>
-                {% endif %}
-              {% endrecursetree %}
-          </ul>
-        </div>
 
         <div class="" id="services">
           <p class="facet">
@@ -57,7 +38,7 @@
           <ul class="root" style="/*display: none;*/">
               {% recursetree Stype_tree %}
                 {% if node.resource_type in resource_types or node.facet_value in facetvalues or request.user.is_staff %}
-                  <li id="id_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.get_gerund }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
+                  <li id="Sid_{{ node.id }}">{% if not node.resource_type and not node.facet_value %}<em>{% endif %}{{ node.get_gerund }}{% if node.resource_type %} < {% endif %}{% if node.facet_value %}: {% endif %}
                     {% if not node.resource_type and not node.facet_value %}</em>{% endif %}
                     {% if not node.is_leaf_node %}
                         <ul class="children">

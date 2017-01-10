@@ -304,7 +304,7 @@ img {
         var cat = $(data.node);
         var selarr = selectedCats.split(',');
         for( var sel in selarr){
-            if (data.node.title.indexOf(selarr[sel]) != -1) {
+            if (data.node.title.indexOf(selarr[sel]) == 0) {
                 //alert(data.node.title+'  :::  '+selarr[sel]+'  :::  '+(data.node.title.indexOf(selarr[sel]) != -1));
                 cat.find('> .fancytree-checkbox').click();
             }

@@ -17,6 +17,8 @@
 
 {% block extra_head %}
 
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
 <style>
 
 .labnote {
@@ -626,10 +628,13 @@ legend {
 
 {% block extra_script %}
   <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
-	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> -->
+  <script src="https://code.jquery.com/jquery-1.12.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
 {% endblock %}
 
 
@@ -640,7 +645,12 @@ legend {
 
     $(document).ready(function(){
 
-        //$(".chzn-select").selectmenu();//chosen();
+        var ObjChosSingle = {
+          allow_single_deselect: true,
+          width: "250px",
+        };
+
+        $(".chzn-select").chosen( ObjChosSingle );
 
         $('#projects').addClass('active');
 

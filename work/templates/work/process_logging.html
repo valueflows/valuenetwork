@@ -13,6 +13,13 @@
 
 <style>
 
+select, .chzn-select, .chosen-container-single {
+  min-width: 200px;
+}
+.chosen-container-single-nosearch {
+  min-width: 150px;
+}
+
 .use {
     margin-left: 4em;
     font-style: italic;
@@ -1668,6 +1675,9 @@ hr {
 
 {% endblock %}
 {% block extra_script %}
+  <!-- <script src="https://code.jquery.com/jquery-1.12.1.min.js"></script> -->
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 	<script src="{% static 'js/chosen.jquery.js' %}"></script>
@@ -1682,14 +1692,20 @@ hr {
 
 		$('#work').addClass('active');
 
-        $('#out-info').popover();
-        $('#work-info').popover();
-        $('#cite-info').popover();
-        $('#use-info').popover();
-        $('#consume-info').popover();
+    $('#out-info').popover();
+    $('#work-info').popover();
+    $('#cite-info').popover();
+    $('#use-info').popover();
+    $('#consume-info').popover();
 
-		$(".chzn-select").chosen();
-        $(".chzn-select").trigger("liszt:updated");
+    var ObjChosSingle = {
+      allow_single_deselect: true,
+      width: "auto",
+      disable_search_threshold: 8,
+    };
+		$(".chzn-select").chosen( ObjChosSingle );
+
+    $(".chzn-select").trigger("liszt:updated");
 
 		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 

@@ -3628,11 +3628,24 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         if new_exchange:
             if nav_form.is_valid():
                 data = nav_form.cleaned_data
-                gen_ext = Ocp_Record_Type.objects.get(id=data["exchange_type"].id)
-                ext = gen_ext.exchange_type
-                if ext:
-                  return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                      % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
+                if hasattr(data["used_exchange_type"], 'id'):
+                  old_ext = ExchangeType.objects.get(id=data["used_exchange_type"].id)
+                  if old_ext.id:
+                    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                      % ('work/agent', agent.id, 'exchange-logging-work', old_ext.id, 0))
+                if hasattr(data["exchange_type"], 'id'):
+                  gen_ext = Ocp_Record_Type.objects.get(id=data["exchange_type"].id)
+                  ext = gen_ext.exchange_type
+                  if ext:
+                    if hasattr(data["resource_type"], 'id'):
+                      gen_rt = Ocp_Artwork_Type.objects.get(id=data["resource_type"].id)
+                      return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                        % ('work/agent', agent.id, 'exchange-logging-work', ext.id, gen_rt.id))
+                    else:
+                      return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                        % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
+                  else:
+                    pass
 
         '''new_exchange_type = request.POST.get("new-exchange-type") # TODO
         if new_exchange_type:
@@ -3713,6 +3726,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "project": agent,
         "nav_form": nav_form,
         "usecases": usecases,
+        "Etype_tree": Ocp_Record_Type.objects.filter(lft__gt=gen_ext.lft, rght__lt=gen_ext.rght, tree_id=gen_ext.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ),
+        "Rtype_tree": Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
+        "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         #"new_form": new_form,
     }, context_instance=RequestContext(request))
 

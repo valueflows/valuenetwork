@@ -337,19 +337,49 @@ from general.models import Record_Type
 from mptt.forms import TreeNodeChoiceField
 
 class ExchangeNavForm(forms.Form):
-    get_et = False
-    #try:
-    #gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
-    exchange_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-          queryset=Ocp_Record_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id), #ExchangeType.objects.all(),
-          empty_label=_('. . .'),
-          level_indicator='. ',
+    #get_et = False
+    used_exchange_type = forms.ModelChoiceField(
+          queryset=ExchangeType.objects.none(),  #ExchangeType.objects.all(),
+          empty_label='. . .',
+          #level_indicator='. ',
+          required=False,
           widget=forms.Select(
               attrs={'class': 'exchange-selector chzn-select'}
           )
     )
-    #except:
-    #  pass
+    exchange_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+          queryset=Ocp_Record_Type.objects.none(),  #ExchangeType.objects.all(),
+          empty_label=None, #'. . .',
+          level_indicator='. ',
+          required=False,
+          widget=forms.Select(
+              attrs={'class': 'chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Exchange type...")}
+          )
+    )
+    resource_type = TreeNodeChoiceField(
+        queryset=Ocp_Artwork_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Resource type...")}
+        )
+    )
+    skill_type = TreeNodeChoiceField(
+        queryset=Ocp_Skill_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Skill type...")}
+        )
+    )
 
     def __init__(self, agent=None, *args, **kwargs):
         super(ExchangeNavForm, self).__init__(*args, **kwargs)
@@ -363,9 +393,17 @@ class ExchangeNavForm(forms.Form):
                     self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
                     self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
 
+                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+
+                exchanges = Exchange.objects.filter(context_agent=agent)
+                ex_types = [ex.exchange_type.id for ex in exchanges]
+                self.fields["used_exchange_type"].queryset = ExchangeType.objects.filter(id__in=ex_types)
+
         except:
             #pass
-            self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.all()
+            self.fields["exchange_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
+            self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.none() #all()
 
 
 class ExchangeContextForm(forms.ModelForm):
@@ -450,14 +488,14 @@ class ContextTransferForm(forms.Form):
         required=False,
         queryset=EconomicAgent.objects.all(),
         label="Transferred to",
-        empty_label=None,
+        empty_label=_('. . .'), #None,
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
     from_agent = forms.ModelChoiceField(
         required=False,
         queryset=EconomicAgent.objects.all(),
         label="Transferred from",
-        empty_label=None,
+        empty_label=_('. . .'), #None,
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
     quantity = forms.DecimalField(
@@ -486,11 +524,13 @@ class ContextTransferForm(forms.Form):
         queryset=EconomicResource.objects.none(),
         label="Resource transferred (optional if not inventoried)",
         required=False,
+        empty_label=_('. . .'),
         widget=forms.Select(attrs={'class': 'resource input-xlarge chzn-select',}))
     from_resource = ResourceModelChoiceField(
         queryset=EconomicResource.objects.none(),
         label="Resource transferred from (optional if not inventoried)",
         required=False,
+        empty_label=_('. . .'),
         widget=forms.Select(attrs={'class': 'resource input-xlarge chzn-select',}))
     value = forms.DecimalField(
         label="Value (total, not per unit)",
@@ -498,7 +538,7 @@ class ContextTransferForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'quantity value input-small',}))
     unit_of_value = forms.ModelChoiceField(
-        empty_label=None,
+        empty_label=_('. . .'), #None,
         required=False,
         queryset=Unit.objects.filter(unit_type='value'),
         widget=forms.Select(attrs={'class': 'chzn-select',}))
@@ -533,6 +573,7 @@ class ContextTransferForm(forms.Form):
     current_location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         required=False,
+        empty_label=_('. . .'),
         label=_("Current Resource Location"),
         widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
     notes = forms.CharField(
@@ -670,14 +711,14 @@ class ContextTransferCommitmentForm(forms.Form):
         required=False,
         queryset=EconomicAgent.objects.all(),
         label="Transfer to",
-        empty_label=None,
+        empty_label=_('. . .'),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
     from_agent = forms.ModelChoiceField(
         required=False,
         queryset=EconomicAgent.objects.all(),
         label="Transfer from",
-        empty_label=None,
+        empty_label=_('. . .'),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
     quantity = forms.DecimalField(
@@ -695,7 +736,7 @@ class ContextTransferCommitmentForm(forms.Form):
 
     resource_type = forms.ModelChoiceField(
         queryset=EconomicResourceType.objects.all(),
-        #empty_label=None,
+        empty_label=_('. . .'),
         required=False,
         widget=forms.Select(
             attrs={'class': 'resource-type-for-resource chzn-select'}))
@@ -705,8 +746,8 @@ class ContextTransferCommitmentForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'value quantity input-small',}))
     unit_of_value = forms.ModelChoiceField(
-        empty_label=None,
         required=False,
+        empty_label=_('. . .'),
         queryset=Unit.objects.filter(unit_type='value'),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
@@ -790,11 +831,13 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
     role = forms.ModelChoiceField(
         queryset=AgentResourceRoleType.objects.all(),
         required=False,
+        empty_label=_('. . .'),
         widget=forms.Select(
             attrs={'class': 'select-role chzn-select'}))
     agent = AgentModelChoiceField(
         queryset=EconomicAgent.objects.resource_role_agents(),
         required=False,
+        empty_label=_('. . .'),
         widget=forms.Select(
             attrs={'class': 'select-agent chzn-select'}))
     is_contact = forms.BooleanField(

@@ -548,7 +548,13 @@ th, td {
 
 		$('#work').addClass('active');
 
-		$(".chzn-select").chosen();
+    var ObjChosSingle = {
+        allow_single_deselect: true,
+        width: "250px",
+    };
+
+		$(".chzn-select").chosen( ObjChosSingle );
+
 		$("textarea").resizable();
 
 		$( "#help" ).toggle( function(){

@@ -40,9 +40,10 @@ admin.site.register(NewFeature, NewFeatureAdmin)
 
 from mptt.admin import MPTTModelAdmin
 #from mptt.fields import TreeForeignKey, TreeManyToManyField
+
 class Ocp_Type_RecordAdmin(MPTTModelAdmin):
   model = Ocp_Record_Type
-  list_display = ['name', 'clas', 'exchange_type']
+  list_display = ['name', 'clas', 'exchange_type', 'ocp_artwork_type']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     if db_field.name == 'parent':
       try:

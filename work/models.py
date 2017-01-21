@@ -301,86 +301,8 @@ class InvoiceNumber(models.Model):
 
 from general.models import Record_Type, Artwork_Type
 
-class Ocp_Record_Type(Record_Type):
-    record_type = models.OneToOneField(
-        Record_Type,
-        on_delete=models.CASCADE,
-        primary_key=True,
-        parent_link=True
-    )
-    exchange_type = models.OneToOneField(
-        ExchangeType,
-        on_delete=models.CASCADE,
-        blank=True, null=True,
-        verbose_name=_('ocp exchange type'),
-        related_name='ocp_record_type'
-    )
-    class Meta:
-        verbose_name= _(u'Type of General Record')
-        verbose_name_plural= _(u'o-> Types of General Records')
-
-    def __unicode__(self):
-      if self.exchange_type:
-        return '> '+self.name #+'  ('+self.resource_type.name+')'
-      else:
-        return self.name
-
-    def get_ocp_resource_types(self, transfer_type=None):
-        answer = False
-        if transfer_type:
-            facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
-            Mtyp = False
-            Ntyp = False
-            try:
-                Mtyp = Artwork_Type.objects.get(clas="Material")
-                Ntyp = Artwork_Type.objects.get(clas="Nonmaterial")
-            except:
-                pass
-
-            Rids = []
-            Sids = []
-            for fv in facetvalues:
-                try:
-                    gtyps = Ocp_Artwork_Type.objects.filter(facet_value__value=fv)
-                    for gtyp in gtyps:
-                      subids = [typ.id for typ in Ocp_Artwork_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
-                      Rids += subids+[gtyp.id]
-                except:
-                    pass
-
-
-                try:
-                    gtyp = Ocp_Skill_Type.objects.get(facet_value__value=fv)
-                    subids = [typ.id for typ in Ocp_Skill_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
-                    Sids += subids+[gtyp.id]
-                except:
-                    pass
-
-            for facet in transfer_type.facets():
-                if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type":
-                    if Rids:
-                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids)
-                        #if Nids: # and Ntyp:
-                        #    Mtys = Artwork_Type.objects.filter(id__in=Nids+Mids) #+[Ntyp.id, Mtyp.id])
-                        answer = Rtys
-                    else:
-                        answer = Ocp_Artwork_Type.objects.all()
-
-                elif facet.clas == "Skill_Type":
-                    if Sids:
-                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids)
-                        #if Mids: # and Mtyp:
-                        #    Ntys = Artwork_Type.objects.filter(id__in=Mids+Nids) #+[Ntyp.id, Mtyp.id])
-                        answer = Stys
-                    else:
-                        answer = Ocp_Skill_Type.objects.all()
-                else:
-                    pass
-
-        return answer
 
 from general.models import Artwork_Type, Material_Type, Nonmaterial_Type, Job
-
 
 class Ocp_Artwork_Type(Artwork_Type):
     artwork_type = models.OneToOneField(
@@ -434,7 +356,7 @@ class Ocp_Artwork_Type(Artwork_Type):
       on_delete=models.CASCADE,
       related_name='ocp_artwork_types',
       blank=True, null=True,
-      help_text=_("a related context EconomicAgent")
+      help_text=_("a related OCP context EconomicAgent")
     )
 
     class Meta:
@@ -468,7 +390,7 @@ class Ocp_Skill_Type(Job):
       blank=True, null=True,
       help_text=_("a related OCP ResourceType")
     )
-    facet_value = models.OneToOneField(
+    facet_value = models.OneToOneField( # only some tree folders can have unique facet_values
       FacetValue,
       on_delete=models.CASCADE,
       verbose_name=_('ocp facet_value'),
@@ -476,6 +398,15 @@ class Ocp_Skill_Type(Job):
       blank=True, null=True,
       help_text=_("a related OCP FacetValue")
     )
+    ocp_artwork_type = TreeForeignKey(
+      Ocp_Artwork_Type,
+      on_delete=models.CASCADE,
+      verbose_name=_('general artwork_type'),
+      related_name='ocp_skill_types',
+      blank=True, null=True,
+      help_text=_("a related General Artwork Type")
+    )
+
 
     class Meta:
       verbose_name= _(u'Type of General Skill Resources')
@@ -483,13 +414,14 @@ class Ocp_Skill_Type(Job):
 
     def __unicode__(self):
       if self.resource_type:
-        return '> '+self.name #+'  ('+self.resource_type.name+')'
+        if self.ocp_artwork_type:
+          return '> '+self.get_gerund()+' -'
+        else:
+          return '> '+self.get_gerund() #name #+'  ('+self.resource_type.name+')'
       elif self.facet_value:
-        return self.gerund+'  ('+self.facet_value.value+')'
-      elif self.gerund:
-        return self.gerund.title()
+        return self.get_gerund()+'  ('+self.facet_value.value+')'
       else:
-        return self.name
+        return self.get_gerund()
 
     def get_gerund(self):
       if self.gerund:
@@ -498,3 +430,96 @@ class Ocp_Skill_Type(Job):
         return self.verb
       else:
         return self.name
+
+
+class Ocp_Record_Type(Record_Type):
+    record_type = models.OneToOneField(
+        Record_Type,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        parent_link=True
+    )
+    exchange_type = models.OneToOneField(
+        ExchangeType,
+        on_delete=models.CASCADE,
+        blank=True, null=True,
+        verbose_name=_('ocp exchange type'),
+        related_name='ocp_record_type'
+    )
+    ocp_artwork_type = TreeForeignKey(
+        Ocp_Artwork_Type,
+        on_delete=models.CASCADE,
+        verbose_name=_('general artwork_type'),
+        related_name='ocp_record_types',
+        blank=True, null=True,
+        help_text=_("a related General Artwork Type")
+    )
+
+    class Meta:
+        verbose_name= _(u'Type of General Record')
+        verbose_name_plural= _(u'o-> Types of General Records')
+
+    def __unicode__(self):
+      if self.exchange_type:
+        return self.name+' <' #+'  ('+self.resource_type.name+')'
+      else:
+        return self.name
+
+    def get_ocp_resource_types(self, transfer_type=None):
+        answer = None
+        if transfer_type:
+          if transfer_type.inherit_types:
+            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocp_artwork_type.lft, rght__lte=self.ocp_artwork_type.rght, tree_id=self.ocp_artwork_type.tree_id)
+          else:
+            facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
+            Mtyp = False
+            Ntyp = False
+            try:
+                Mtyp = Artwork_Type.objects.get(clas="Material")
+                Ntyp = Artwork_Type.objects.get(clas="Nonmaterial")
+            except:
+                pass
+
+            Rids = []
+            Sids = []
+            for fv in facetvalues:
+                try:
+                    gtyps = Ocp_Artwork_Type.objects.filter(facet_value__value=fv)
+                    for gtyp in gtyps:
+                      subids = [typ.id for typ in Ocp_Artwork_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
+                      Rids += subids+[gtyp.id]
+                except:
+                    pass
+
+                try:
+                    gtyp = Ocp_Skill_Type.objects.get(facet_value__value=fv)
+                    subids = [typ.id for typ in Ocp_Skill_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
+                    Sids += subids+[gtyp.id]
+                except:
+                    pass
+
+            for facet in transfer_type.facets():
+                if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type":
+                    if Rids:
+                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids)
+                        #if Nids: # and Ntyp:
+                        #    Mtys = Artwork_Type.objects.filter(id__in=Nids+Mids) #+[Ntyp.id, Mtyp.id])
+                        answer = Rtys
+                    else:
+                        answer = Ocp_Artwork_Type.objects.all()
+
+                elif facet.clas == "Skill_Type":
+                    if Sids:
+                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids)
+                        #if Mids: # and Mtyp:
+                        #    Ntys = Artwork_Type.objects.filter(id__in=Mids+Nids) #+[Ntyp.id, Mtyp.id])
+                        answer = Stys
+                    else:
+                        answer = Ocp_Skill_Type.objects.all()
+                else:
+                    pass
+
+        if not answer:
+          return Ocp_Artwork_Type.objects.none()
+
+        return answer

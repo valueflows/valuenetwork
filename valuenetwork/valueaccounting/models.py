@@ -1151,9 +1151,9 @@ class EconomicAgent(models.Model):
     def member_associations(self):
         #import pdb; pdb.set_trace()
         return AgentAssociation.objects.filter(has_associate=self).filter(
-            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")            
+            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")
             ).filter(state="active")
-    
+
     def individual_members(self):
         return self.members().filter(agent_type__party_type="individual")
 
@@ -1502,7 +1502,7 @@ class AgentAssociationTypeManager(models.Manager):
     def member_types(self):
         #import pdb; pdb.set_trace()
         return AgentAssociationType.objects.filter(Q(association_behavior='member')|Q(association_behavior='manager'))
-        
+
 class AgentAssociationType(models.Model):
     identifier = models.CharField(_('identifier'), max_length=12, unique=True)
     name = models.CharField(_('name'), max_length=128)
@@ -1513,7 +1513,7 @@ class AgentAssociationType(models.Model):
     description = models.TextField(_('description'), blank=True, null=True)
     label = models.CharField(_('label'), max_length=32, null=True)
     inverse_label = models.CharField(_('inverse label'), max_length=40, null=True)
-    
+
     objects = AgentAssociationTypeManager()
 
     def __unicode__(self):
@@ -7213,6 +7213,7 @@ class TransferType(models.Model):
         related_name='transfer_types_changed', blank=True, null=True, editable=False)
     created_date = models.DateField(auto_now_add=True, blank=True, null=True, editable=False)
     changed_date = models.DateField(auto_now=True, blank=True, null=True, editable=False)
+    inherit_types = models.BooleanField(_('inherit resource types'), default=False)
 
     def __unicode__(self):
         return self.name
@@ -7231,41 +7232,53 @@ class TransferType(models.Model):
 
     def get_resource_types(self):
         #import pdb; pdb.set_trace()
-        tt_facet_values = self.facet_values.all()
-        facet_values = [ttfv.facet_value for ttfv in tt_facet_values]
-        facets = {}
-        for fv in facet_values:
-            if fv.facet not in facets:
-                facets[fv.facet] = []
-            facets[fv.facet].append(fv.value)
+        if self.inherit_types:
+            # TODO
+            oet = self.exchange_type.ocp_record_type
+            if oet:
+              ort = oet.ocp_resource_type
+              if ort:
+                try:
+                  orts = Ocp_Artwork_Type.objects.filter(lft__gte=ort.lft, rght__lte=ort.rght, tree_id=ort.tree_id)
+                  answer_ids = [rt.resource_type.id for rt in orts]
+                except:
+                  answer_ids = []
+        else:
+            tt_facet_values = self.facet_values.all()
+            facet_values = [ttfv.facet_value for ttfv in tt_facet_values]
+            facets = {}
+            for fv in facet_values:
+                if fv.facet not in facets:
+                    facets[fv.facet] = []
+                facets[fv.facet].append(fv.value)
 
-        fv_ids = [fv.id for fv in facet_values]
-        rt_facet_values = ResourceTypeFacetValue.objects.filter(facet_value__id__in=fv_ids)
+            fv_ids = [fv.id for fv in facet_values]
+            rt_facet_values = ResourceTypeFacetValue.objects.filter(facet_value__id__in=fv_ids)
 
-        rts = {}
-        for rtfv in rt_facet_values:
-            rt = rtfv.resource_type
-            if rt not in rts:
-                rts[rt] = []
-            rts[rt].append(rtfv.facet_value)
+            rts = {}
+            for rtfv in rt_facet_values:
+                rt = rtfv.resource_type
+                if rt not in rts:
+                    rts[rt] = []
+                rts[rt].append(rtfv.facet_value)
 
-        #import pdb; pdb.set_trace()
-        matches = []
+            #import pdb; pdb.set_trace()
+            matches = []
 
-        for rt, facet_values in rts.iteritems():
-            match = True
-            for facet, values in facets.iteritems():
-                rt_fv = [fv for fv in facet_values if fv.facet == facet]
-                if rt_fv:
-                    rt_fv = rt_fv[0]
-                    if rt_fv.value not in values:
+            for rt, facet_values in rts.iteritems():
+                match = True
+                for facet, values in facets.iteritems():
+                    rt_fv = [fv for fv in facet_values if fv.facet == facet]
+                    if rt_fv:
+                        rt_fv = rt_fv[0]
+                        if rt_fv.value not in values:
+                            match = False
+                    else:
                         match = False
-                else:
-                    match = False
-            if match:
-                matches.append(rt)
+                if match:
+                    matches.append(rt)
 
-        answer_ids = [a.id for a in matches]
+            answer_ids = [a.id for a in matches]
         answer = EconomicResourceType.objects.filter(id__in=answer_ids)
         return answer
 

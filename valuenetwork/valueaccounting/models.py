@@ -7232,17 +7232,18 @@ class TransferType(models.Model):
 
     def get_resource_types(self):
         #import pdb; pdb.set_trace()
+        answer_ids = []
         if self.inherit_types:
             # TODO
             oet = self.exchange_type.ocp_record_type
-            if oet:
+            if hasattr(oet, 'ocp_resource_type'):
               ort = oet.ocp_resource_type
               if ort:
                 try:
                   orts = Ocp_Artwork_Type.objects.filter(lft__gte=ort.lft, rght__lte=ort.rght, tree_id=ort.tree_id)
                   answer_ids = [rt.resource_type.id for rt in orts]
                 except:
-                  answer_ids = []
+                  pass
         else:
             tt_facet_values = self.facet_values.all()
             facet_values = [ttfv.facet_value for ttfv in tt_facet_values]

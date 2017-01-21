@@ -248,7 +248,7 @@ li {
                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
                                             {% if ax_form.ocp_resource_type %}
                                                {% trans "Type of Resource:" %} <i>{{ ax_form.ocp_resource_type.label }}</i><br />{{ ax_form.ocp_resource_type }}
-                                          <div class='add-new-type'>{{ add_type }}<a href='#' class='btn disabled btn-mini'>{% trans "New Resource Type" %}</a></div>
+                                          <!-- <div class='add-new-type'>{{ add_type }}<a href='#' class='btn disabled btn-mini'>{% trans "New Resource Type" %}</a></div> -->
                                           <br />
                                             {% else %}
                                                <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
@@ -1097,13 +1097,14 @@ li {
     <script type="text/javascript">
 
 	$(document).ready(function(){
-      var ObjChosSingle = {
+      /*var ObjChosSingle = {
         allow_single_deselect: true,
         width: "250px",
         //no_results_text: "Oops, nothing found!",
-      };
+        disable_search_threshold: 6
+      };*/
 
-		  $(".chzn-select").chosen( ObjChosSingle );
+		  $(".chzn-select").chosen();// ObjChosSingle );
 
       //$(".chzn-results").menu();
 

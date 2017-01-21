@@ -160,13 +160,16 @@ span.total {
 }
 .ui-tabs .ui-tabs-nav li {
   margin-bottom: 1px;
-  font-size: 1.1em;
+  font-size: 1.0em;
   background-color: #f0f0da;
 }
 .ui-tabs-nav a {
   color: inherit;
 }
 .ui-widget-content a {
+  color: #fff;
+}
+.ui-widget-content a.disabled {
   color: inherit;
 }
 .ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
@@ -235,11 +238,10 @@ ul.fancytree-container {
                 <h3>{% trans "Create a new Exchange" %}</h3>
                 {% csrf_token %}
                 {% if nav_form.used_exchange_type %}
-                  <span>{% trans "Choose a previously used exchange type to copy the model:" %}</span>
+                  <span>{% trans "Choose a previously used <b>exchange type</b> to copy the model:" %}</span>
                   {{ nav_form.used_exchange_type }}<br/>
                 {% endif %}
-                <span>{% trans "Or search an available exchange type:" %} {{ nav_form.exchange_type }} &nbsp;
-                  {% trans "Or make a new one..." %}<span class="showhide" id="sh-exchange_type" >(Show)</span></span><br/>
+                <span><span>{% trans "Or search an available exchange type:" %}</span> {{ nav_form.exchange_type }}  &nbsp; <span>{% trans "Or make a new one..." %}</span><span class="showhide" id="sh-exchange_type" >(SHOW)</span></span><br/>
                 <div class="list" id="list-exchange_type" style="margin-top: 5px;">
                   <div id="tabs">
                     <ul>
@@ -256,13 +258,13 @@ ul.fancytree-container {
                           {% if nav_form.exchange_type %}
                             <span>{% trans "...choosing a <b>use case</b>:" %}</span>
                               <br/>
-                              <div id="{{ case.clas }}_tree" class="fancytree-radio" style="max-width:300px;">
+                              <div id="{{ case.clas }}_tree" class="exchange_type_tree fancytree-radio" style="max-width:300px;">
                                 <ul class="root" id="treeData" style="/*display: none;*/">
                                 {% recursetree Etype_tree %}
                                   {% if node.exchange_type or request.user.is_staff %}
-                                    {% if node.parent.clas == case.clas or node.parent.parent.clas == case.clas or node.parent.parent.parent.clas == case.clas %}
-                                      <li id="Eid_{{ node.id }}">{% if not node.exchange_type %}<em>{% endif %}{{ node.name }}{% if node.exchange_type %} < {% endif %}
-                                        {% if not node.exchange_type %}</em>{% endif %} {{ node.parents }}
+                                    {% if case.typ in node.get_ancestors %}
+                                      <li id="Eid_{{ node.id }}" {% if node.ocp_artwork_type %}data-related="Rid_{{ node.ocp_artwork_type.id }}"{% endif %} >{% if not node.exchange_type %}<em>{% endif %}{{ node.name }}{% if node.exchange_type %} < {% endif %}
+                                        {% if not node.exchange_type %}</em>{% endif %}
                                         {% if not node.is_leaf_node %}
                                           <ul class="children">
                                               {{ children }}
@@ -281,68 +283,80 @@ ul.fancytree-container {
                             <span class="error">{% trans "Not found any related exchange type! contexts:" %}</span>
                           {% endif %}
                         </div>
+                      </div>
 
-                        {% if nav_form.resource_type %}
-                           <div style="clear:left;">
-                              <span>{% trans "and/or, to narrow your options," %}</span>
-                              <span>{% trans "choose a main <b>resource type</b> branch:" %}</span>
-                              <br/>
-                              <div id="resource_type_tree" class="resource_type_tree fancytree-radio" style="max-width:300px; min-width:200px; float:left;">
-                                <ul class="root" id="treeData" style="/*display: none;*/">
-                                {% recursetree Rtype_tree %}
-                                  {% if True or node.resource_type or request.user.is_staff %}
-                                      <li id="Rid_{{ node.id }}">{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}
-                                        {% if not node.exchange_type %}</em>{% endif %} {{ node.parents }}
-                                        {% if not node.is_leaf_node %}
-                                          <ul class="children">
-                                              {{ children }}
-                                          </ul>
-                                        {% endif %}
-                                      </li>
-                                  {% endif %}
-                                {% endrecursetree %}
-                                </ul>
-                              </div>
-                              <div style="display:block;">
-                                &nbsp; {{ nav_form.resource_type }} &nbsp; <span>{% trans "if nothing fits:" %}</span>
-                              </div>
-                           </div>
-                           <div style="clear:left;">
-                              <span>{% trans "or choose a related <b>skill verb</b> (service time):" %}</span>
-                              <br/>
-                              <div id="skill_type_tree" class="skill_type_tree fancytree-radio" style="max-width:300px; min-width:200px; float:left;">
-                                <ul class="root" id="treeData" style="/*display: none;*/">
-                                  {% recursetree Stype_tree %}
-                                  {% if True or node.resource_type or request.user.is_staff %}
-                                    <li id="Sid_{{ node.id }}">{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}
-                                                {% if not node.exchange_type %}</em>{% endif %}
-                                    {% if not node.is_leaf_node %}
-                                    <ul class="children">
-                                      {{ children }}
-                                    </ul>
-                                    {% endif %}
-                                    </li>
-                                  {% endif %}
-                                  {% endrecursetree %}
-                                </ul>
-                              </div>
-                              <div style="display:block;">
-                                &nbsp; {{ nav_form.skill_type }} &nbsp; <span>{% trans "if no one fits:" %}</span>
-                              </div>
-                           </div>
-                           <div style="clear:left;">
-
-                           </div>
-                        {% else %}
-                          <div>
-                              <span class="error">{% trans "Not found any related resource type!" %}</span>
-                          </div>
-                        {% endif %}
-
-                    </div>
                   {% endfor %}
+                    <div id="resource_skill">
+                      <!-- <form id="exchangeTypeForm" style="display: inline;" method="POST" action="" >
+                        {% csrf_token %} -->
+                        {% if nav_form.resource_type %}
+                        <div style="clear:left;">
+                          <span>{% trans "and/or, to narrow your options," %}</span>
+                          <span>{% trans "choose a main <b>resource type</b> branch:" %}</span>
+                          <br/>
+                          <div id="resource_type_tree" class="resource_type_tree fancytree-radio" style="max-width:300px; min-width:200px; float:left;">
+                            <ul class="root" id="treeData" style="/*display: none;*/">
+                              {% recursetree Rtype_tree %}
+                              {% if True or node.resource_type or request.user.is_staff %}
+                              <li id="Rid_{{ node.id }}">{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}
+                                                                                                                                                      {% if not node.exchange_type %}</em>{% endif %} {{ node.parents }}
+                                {% if not node.is_leaf_node %}
+                                <ul class="children">
+                                  {{ children }}
+                                </ul>
+                                {% endif %}
+                                </li>
+                                {% endif %}
+                                {% endrecursetree %}
+                            </ul>
+                          </div>
+                          <div style="display:block;">
+                            &nbsp; {{ nav_form.resource_type }} &nbsp;
+                            <span>{% trans "if nothing fits:" %}&nbsp;
+                              <a href="#addResourceTypeModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="">{% trans "New Resource Type" %}</a></span>
+
+                          </div>
+                        </div>
+                        <div style="clear:left;">
+                          <span>{% trans "or choose a related <b>skill verb</b> (service time):" %}</span>
+                          <br/>
+                          <div id="skill_type_tree" class="skill_type_tree fancytree-radio" style="max-width:300px; min-width:200px; float:left;">
+                            <ul class="root" id="treeData" style="/*display: none;*/">
+                              {% recursetree Stype_tree %}
+                              {% if True or node.resource_type or request.user.is_staff %}
+                              <li id="Sid_{{ node.id }}">{% if not node.resource_type %}<em>{% endif %}{{ node.gerund|title }}{% if node.resource_type %} < {% endif %}
+                                                {% if not node.exchange_type %}</em>{% endif %}
+                                {% if not node.is_leaf_node %}
+                                <ul class="children">
+                                  {{ children }}
+                                </ul>
+                                {% endif %}
+                                </li>
+                                {% endif %}
+                                {% endrecursetree %}
+                            </ul>
+                          </div>
+                          <div style="display:block;">
+                            &nbsp; {{ nav_form.skill_type }} &nbsp; <span>{% trans "if no one fits:" %}&nbsp;
+                            <a href='#' class='btn disabled btn-mini'>{% trans "New Skill Service Type" %}</a></span>
+                          </div>
+                        </div>
+                        <div style="clear:left;">
+
+                        </div>
+                        {% else %}
+                        <div>
+                          <span class="error">{% trans "Not found any related resource type!" %}</span>
+                        </div>
+                        {% endif %}
+                      <!-- </form> -->
+                    </div>
                 </div>
               </div>
+              <!-- {% if request.user.is_staff %}<br/><span><b>Contexts:</b>
+                {% for ag in project.related_all_agents %} {{ ag.nick }}, {% endfor %}
+              </span>{% endif %} -->
+              <span id="new_name"></span>
               &nbsp; <input style="display:inline; vertical-align:top; float:right; margin: 0px 0px 7px 5px;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
             </form>
 
@@ -352,6 +366,25 @@ ul.fancytree-container {
                 {{ new_form.use_case }}
                 &nbsp; <input style="display: inline; vertical-align: top;" type="submit" name="new-exchange-type" value="{% trans 'New Exchange Type' %}" class="btn btn-primary btn-mini" />
             </form> -->
+
+            <div class="modal hide fade" id="addResourceTypeModal" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true"  style="width:590px;">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3>{% trans "Add a new Resource Type:" %}</h3>
+              </div>
+              <div class="modal-body">
+                <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
+                  {% csrf_token %}
+                  {{ Rtype_form }}
+
+                  <input type="hidden" id="next" name="next" value="exchanges_all" />
+                  <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                    <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                  </div>
+                </form>
+              </div>
+            </div>
 
           </div>
 
@@ -484,6 +517,22 @@ ul.fancytree-container {
       classes: {
         "ui-tabs": "",
         "ui-tabs-panel": "ui-corner-all infobox"
+      },
+      beforeActivate: function( event, ui ) {
+        //alert(ui.oldPanel.parent().html());//find('li span.fancytree-expanded').nextAll('ul').html());
+        //ui.oldPanel.find('li span.fancytree-selected .fancytree-checkbox').click();
+        //ui.oldPanel.find('li span.fancytree-expanded').nextAll('ul').hide();
+        //ui.oldPanel.find('li span.fancytree-expanded .fancytree-expander').click();
+        $('#id_exchange_type_chosen .search-choice .search-choice-close').click();
+        //$('#id_exchange_type_chosen .search-field').blur().parent().parent().blur().prev().click();//.click();
+        ui.oldPanel.parent().click();
+      },
+      activate: function( event, ui ) {
+        //alert(ui.newTab.html());
+        setTimeout( function(){
+          $('#id_exchange_type_chosen .search-field').blur().parent().parent().blur().prev().click();//.click();
+          ui.newTab.find('a').click();
+        }, 200);
       }
     });
 
@@ -492,25 +541,9 @@ ul.fancytree-container {
       var id = event.target.id;
       var listId = '#list-' + id.split('-')[1];
       $(listId).slideToggle(200);
-      $(this).text($(this).text() == '(Show)' ? '(Hide)' : '(Show)');
+      $(this).text($(this).text() == '(SHOW)' ? '(HIDE)' : '(SHOW)');
     });
 
-    {% for case in usecases %}
-        $('#{{ case.clas }}_tree').fancytree({
-          checkbox: true,
-          selectMode: 1, // 1:single, 2:multi, 3:multi-hier
-          icon: false,
-          dblclick: function(event, data) {
-            data.node.toggleSelected();
-          },
-          keydown: function(event, data) {
-            if( event.which === 32 ) {
-              data.node.toggleSelected();
-              return false;
-            }
-          },
-        });
-    {% endfor %}
 
     var ObjTree = {
       checkbox: true,
@@ -561,7 +594,25 @@ ul.fancytree-container {
       }
     };
 
-    $('.resource_type_tree, .skill_type_tree').fancytree( ObjTree );
+    $('.resource_type_tree, .skill_type_tree, .exchange_type_tree').fancytree( ObjTree );
+
+    {% for case in usecases %}
+        //$('#{{ case.clas }}_tree').fancytree( ObjTree );
+        /*{
+          checkbox: true,
+          selectMode: 1, // 1:single, 2:multi, 3:multi-hier
+          icon: false,
+          dblclick: function(event, data) {
+            data.node.toggleSelected();
+          },
+          keydown: function(event, data) {
+            if( event.which === 32 ) {
+              data.node.toggleSelected();
+              return false;
+            }
+          },
+        });*/
+    {% endfor %}
 
     function update_tree(data){
       //if(nodo){
@@ -577,11 +628,20 @@ ul.fancytree-container {
       //for(var i in tid){
       //  out += i+': '+tid[i]+', ';
       //};
-      alert('UPDATE tree tid:'+tid+' parent:'+data.tree.$div.parent().parent().attr('id'));
+
+      if( tid == "exchange_type" ){ //$tab.attr('id') == tid ){ // only the exchange type matches
+        $tab = $('#exchangeForm');
+        //ide = 'Eid';
+        //tid = 'exchange_type';
+      }
+      //alert('UPDATE tree tid:'+tid+' $tab:'+$tab.attr('id')+' ide:'+ide);
 
       var snd = data.tree.getSelectedNodes();
+
       if(snd.length > 0){  // SELECTED IN TREE
-        if( data.tree.hasFocus() && $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length == 0 ){
+
+        if(data.tree.hasFocus() && $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length == 0){  // TREE HAS FOCUS
+
           if(snd[0].key != data.node.key || snd.length > 1){
             alert('EIN? snd[0]:'+snd[0].key+' node:'+data.node.key);
           };
@@ -593,15 +653,39 @@ ul.fancytree-container {
 
             $tab.find("#id_"+tid).trigger("chosen:updated");
 
-            $tab.find('#id_'+tid).find('option').each(function(){
+            opts = $tab.find('#id_'+tid).find('option').each(function(){
               //$(this).removeAttr('selected'); //alert(karr[1]);
               if( $(this).attr('value') == karr[1] ){
                 $(this).attr('selected','selected');
               };
             });
-            //alert(opts);
+            //alert(opts.length);
+            if( tid == "exchange_type" ){
+                if(!$.isEmptyObject(data.node.data)){
+                  var rel = data.node.data.related; //$tab.find('li#'+data.node.key).first().attr('related');//data.node.related;
+                  var rar = rel.split('_');
+                  if( rar[0] == 'Rid' ) {
+                    var rtree = $('#resource_type_tree').first();//resource_skill').find('#'+rel);
+                    rtree.fancytree("getTree").activateKey('Rid_'+rar[1]);
+                    var node = rtree.fancytree("getTree").getActiveNode();
+                    node.setSelected(true);//toggleSelected();
+                    //node.setFocus(true);
+                    node.setActive(false);
+                    node.setFocus(false);
+                    rtree.fancytree("getRootNode").visit(function(node){
+                      //node.setExpanded(false);
+                      // TODO deactivate other not related branches
+                      // mptt: get_ancestors(ascending=False, include_self=False)
+                      //var anc = node.get_ancestors(true);
+                    });
+                    rtree.fancytree("getTree").setFocus(false);
+                  }
+                  //alert('rel: '+rel+' rtree:'+rtree.length);
+                }
+            }
+
           } else {
-            alert('KARR'+karr[0]);
+            alert('KARR: '+karr[0]);
           }
           //alert('UpdateTree Put / tid:'+tid+' xid:'+karr[0]+' id:'+karr[1]+' SCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length );//nodo.key);
 
@@ -677,7 +761,7 @@ ul.fancytree-container {
 
                 $tab.find("#id_"+tid).trigger("chosen:updated");
               };
-            }, 1000);
+            }, 500);
 
             //alert('CHS?!: '+$('#id_'+tid+'_chosen').find('li.result-selected').length+' != '+$('#id_'+tid).find('option[selected]').length+' ind:'+ind+' ('+$('#id_'+tid+'_chosen').find('.chosen-drop li').length+') / key:'+data.node.key+' tid:'+tid);//+' fancy:'+$("#id_"+tid).fancytree);
 
@@ -695,8 +779,8 @@ ul.fancytree-container {
           //$("#id_"+tid).trigger("chosen:activate");
           //$("#id_"+tid+'_chosen').find('.search-field input').focus().blur();
 
-          data.tree.$div.focus();
-          data.tree.setFocus();
+          //data.tree.$div.focus();
+          //data.tree.setFocus();
 
         } else { // either tree has focus or there's a choice in chosen
 
@@ -710,7 +794,7 @@ ul.fancytree-container {
           }
         }
 
-      } else { // No selection in tree
+      } else { // No selections in tree
 
         if( data.tree.hasFocus() ) { //&& $('#id_'+tid+'_chosen').find('li.search-choice').length > 0 ){
 
@@ -723,17 +807,21 @@ ul.fancytree-container {
           //$("#id_"+tid).trigger("chosen:updated");
 
           if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0){
-
+            //alert('UpdateTree: Nothing selected, repair chosen? sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' oCH:'+$tab.find('#id_'+tid).find('option[selected]').length);
             //var yd = $('#id_'+tid+'_chosen').find('li.result-selected').first().attr('data-option-array-index');
             //$('#id_'+tid).find('option[selected]').removeAttr('selected');
             //$('#id_'+tid).find('option:eq('+yd+')').first().attr('selected','selected');
 
-            $tab.find('#id_'+tid+'_chosen').find('li.search-choice').find('.search-choice-close').click(); // close choices clicking
+            $tab.find('#id_'+tid+'_chosen').find('li.search-choice').find('a.search-choice-close').click(); // close choices clicking
 
             //$("#id_"+tid).trigger("chosen:updated");
 
             if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('#id_'+tid).find('option[selected]').length){
-              alert('UpdateTree? / Nothing s:'+s.length+' tid:'+tid+' oCH:'+$tab.find('#id_'+tid).find('option[selected]').length);
+              //alert('UpdateTree? / Nothing s:'+s.length+' tid:'+tid+' oCH:'+$tab.find('#id_'+tid).find('option[selected]').length);
+              $('#id_'+tid).find('option[selected]').removeAttr('selected');
+              if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('#id_'+tid).find('option[selected]').length){
+                alert('UpdateTree?? / Nothing s:'+s.length+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length);
+              }
             }
           }
           //$("#id_"+tid).trigger("chosen:activate");
@@ -750,11 +838,16 @@ ul.fancytree-container {
 
           if($tab.find('#id_'+tid+'_chosen').find('li.result-selected').length || $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length || $tab.find('#id_'+tid+'_chosen').find('li.result-selected').length){
 
-            //alert('tree no focus, no selections? yd:'+yd+' node:'+data.node.key+' rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().html()+')');
+            //alert('tree no focus, no selections? yd:'+yd+' rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().html()+')');
           }
         }
       }
+      if( $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
+        var htm = $tab.find('#id_'+tid+'_chosen').find('li.search-choice').html();
+        $tab.find('#id_'+tid+'_chosen').find('li.search-choice span').html( htm.split( '. ' ).join('') );
+      }
       //$("#id_"+tid).trigger("chosen:updated");
+
     };
 
 
@@ -763,7 +856,8 @@ ul.fancytree-container {
       //allow_single_deselect: true,
       width: "290px",
       no_results_text: "Oops, nothing found!",
-      max_selected_options: 1
+      max_selected_options: 1,
+      disable_search_threshold: 6,
     };
 
     function ChosChange($this, params){
@@ -775,17 +869,31 @@ ul.fancytree-container {
       var $tab = $this.parent().parent().parent();
       var tree = $tab.find('#'+tarr[1]+'_'+tarr[2]+'_tree');//.fancytree("getTree");
       var ide = tarr[1].split('')[0].toUpperCase()+'id_';
-      //alert('Chosen Change / tab:'+$tab.attr('id')+' tid:'+tid+' sel:'+sels+' des:'+dess+' tree:'+tree.length+' tarr:'+tarr.join('_'));
+      var $nav = false;
 
-      /*$this.on('chosen:ready', function(evt, params){
-          alert('Chosen READY: '+params['chosen']);
-      });*/
+      if( tid == "exchange_type" ){
+        //$tab = $('#'+$('li.ui-tabs-active').attr('aria-controls')).first();
+        //tree = $tab.find('#'+$tab.attr('id')+'_tree');
+        if( typeof sels != 'undefined' && sels ){
+          tree = $('#'+ide+sels).parentsUntil('div').last().parent();
+          $tab = tree.parent().parent();
+          $nav = $('.ui-tabs .ui-tabs-nav li[aria-controls='+$tab.attr('id')+'] a').click();
+        }
+        if( typeof dess != 'undefined' && dess ){
+          tree = $('#'+ide+dess).parentsUntil('div').last().parent();
+          $tab = tree.parent().parent();
+          //$this.blur();
+          //tree.fancytree("getTree").setFocus(true);
+          //$nav = $('.ui-tabs .ui-tabs-nav li[aria-controls='+$tab.attr('id')+'] a');//.click();
+        }
+      };
+      //alert('Chosen Change / tab:'+$tab.attr('id')+' tid:'+tid+' sel:'+sels+' des:'+dess+' ('+$('#'+ide+dess).length+') tree:'+tree.attr('id')+' ('+tree.length+') ide:'+ide+' nav:'+$nav.length+' tarr:'+tarr.join('_'));
+
+
       //tree.fancytree("getTree").setFocus(false);
 
       if( $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
         $tab.find('#id_'+tid+'_chosen').find('li.search-field').hide()
-        var htm = $tab.find('#id_'+tid+'_chosen').find('li.search-choice').html();
-        $tab.find('#id_'+tid+'_chosen').find('li.search-choice span').html( htm.split( '. ' ).join('') );
       } else {
         $tab.find('#id_'+tid+'_chosen').find('li.search-field').show()
       }
@@ -793,10 +901,10 @@ ul.fancytree-container {
       //if(!tree.fancytree("getTree").hasFocus()){
       if(typeof dess != 'undefined' && dess){
 
-        if(!tree.length || ide == 'Eid_'){
-          //alert('NO TREE! dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option[selected]').text()+' tree:'+tree.length);
+        $tab.find('#id_'+tid+'_chosen').find('li.search-field').show()
 
-          $tab.find('#id_'+tid+'_chosen').find('li.search-field').show()
+        if(!tree.length){// || ide == 'Eid_'){
+          alert('NO TREE! dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option[selected]').text()+' tree:'+tree.length);
 
           if( $tab.find('#id_'+tid).find('option[selected]').length && !$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
             alert('NO TREE: repair select... dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option[selected]').text()+' tree:'+tree.length);
@@ -828,13 +936,13 @@ ul.fancytree-container {
 
           //$('#id_'+tid+'_chosen').find('li.search-choice').find('.search-choice-close').click();
 
-          if( $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length || $tab.find('#id_'+tid+'_chosen').find('li.result-selected').length || $tab.find('#id_'+tid).find('option[selected]').length ) {
+          //if( $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length || $tab.find('#id_'+tid+'_chosen').find('li.result-selected').length || $tab.find('#id_'+tid).find('option[selected]').length ) {
 
               $tab.find('#id_'+tid+'_chosen').find('li.result-selected').each(function(){
-                  $(this).removeClass('result-selected').addClass('active-result');
+                  //$(this).removeClass('result-selected').addClass('active-result');
               });
               $tab.find('#id_'+tid).find('option').each(function(){
-                  $(this).removeAttr('selected');
+                  //$(this).removeAttr('selected');
               });
 
               tree.fancytree("getTree").activateKey(ide+dess);
@@ -846,13 +954,16 @@ ul.fancytree-container {
                 //node.setExpanded(false);
               });
               tree.fancytree("getTree").setFocus(false);
+              //$this.blur().mouseout().parent().find('span').first().focus().mousedown().mouseup().click();
+              //$this.blur().mouseout().next().next().mouseover().focus().mousedown().mouseup().click();
 
-              //alert('CH DESS tree has focus (node:'+node.key+'), dess:'+dess+' tid:'+tid+' sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().html()+')');
-          } else {
-              alert('CH DESS tree has focus (node:'+node.key+') tab:'+$tab.attr('id')+', dess:'+dess+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') oCH:'+$tab.find('#id_'+tid).find('option[selected]').length+' ('+$tab.find('#id_'+tid).find('option[selected]').first().html()+')');
-          }
+              //alert('CH DESS tree has focus this:'+$this.parent().find('span').first().html()+' (node:'+node.key+'), dess:'+dess+' tid:'+tid+' sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().html()+')');
+          //}
+        } else {
+            alert('CH DESS there is no tree! tab:'+$tab.attr('id')+', dess:'+dess+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') oCH:'+$tab.find('#id_'+tid).find('option[selected]').length+' ('+$tab.find('#id_'+tid).find('option[selected]').first().html()+')');
         }
-      };
+
+      }; // end DESS
 
       if(typeof sels != 'undefined' && sels){
 
@@ -873,7 +984,9 @@ ul.fancytree-container {
             var id = '';
             if(act){
               id = act.key.split('_')[1];
-              alert('act: '+typeof(act)+': '+act.key+' == sel[0]:'+sel[0].key+' OBs:'+$this.current_selectedIndex);
+              if( act.key != sel[0].key ) {
+                alert('act: '+typeof(act)+': '+act.key+' == sel[0]:'+sel[0].key+' OBs:'+$this.chosen.current_selectedIndex);
+              }
             }
             //if(id == '' || sels != id){
             $tab.find('#id_'+tid).find('option').each(function(){
@@ -926,11 +1039,10 @@ ul.fancytree-container {
         }
       }
 
-
-      var out = 'PARAMS - ';
-      for(var i in params){
-        out += i+': '+params[i]+', ';
-      };
+      //var out = 'PARAMS - ';
+      //for(var i in params){
+      //  out += i+': '+params[i]+', ';
+      //};
       //alert(out);//node.selector+' '+node.key);
       //if(str[0]) alert($(str[0]).attr('id')+' :: '+str.length);
       //$this.next().focus();//blur();
@@ -939,9 +1051,9 @@ ul.fancytree-container {
     };
 
     $(".chzn-select").each(function(){
-      $(this).chosen(ObjChos).change(function(evt, params){
-        ChosChange($(this), params);
-      }).ready(function(evt, params){
+      $(this).chosen( ObjChos ).change( function(evt, params){
+        ChosChange( $(this), params );
+      }).ready( function(evt, params){
           //alert('Chosen READY: params:'+params+' this:'+$(this).text());//+params['chosen']);
       });
     });

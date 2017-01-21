@@ -358,6 +358,7 @@ class ExchangeNavForm(forms.Form):
                      'data-placeholder':_("search Exchange type...")}
           )
     )
+
     resource_type = TreeNodeChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(),
         empty_label=None,
@@ -393,8 +394,8 @@ class ExchangeNavForm(forms.Form):
                     self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
                     self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
 
-                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
-                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ) #| Q(resource_type__context_agent__isnull=True) )
+                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ) #| Q(resource_type__context_agent__isnull=True) )
 
                 exchanges = Exchange.objects.filter(context_agent=agent)
                 ex_types = [ex.exchange_type.id for ex in exchanges]
@@ -684,6 +685,8 @@ class ContextTransferForm(forms.Form):
             except:
               self.fields["ocp_resource_type"].label = "  Sorry, this exchange type is not yet related to any resource types..."
 
+        else: # no transfer type, rise error TODO
+          pass
 
     def clean(self):
         data = super(ContextTransferForm, self).clean()
@@ -855,17 +858,76 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
           self.fields["agent"].queryset = context_agents
 
 
-class NewContextExchangeTypeForm(forms.ModelForm):
+class NewContextExchangeTypeForm(forms.Form):  # still not used !
+    parent_exchange_type = TreeNodeChoiceField(
+        queryset=Ocp_Record_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Exchange type...")}
+        )
+    )
+    resource_type = TreeNodeChoiceField(
+        queryset=Ocp_Artwork_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Resource type...")}
+        )
+    )
+    skill_type = TreeNodeChoiceField(
+        queryset=Ocp_Skill_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Skill type...")}
+        )
+    )
+
+    '''
     use_case = forms.ModelChoiceField(
         queryset=UseCase.objects.exchange_use_cases(),
         empty_label=None,
         widget=forms.Select(
             attrs={'class': 'use-case chzn-select'}))
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input-xlarge',})) # not required now, to be set in the next page
+    '''
 
     class Meta:
-        model = ExchangeType
-        fields = ('use_case', 'name')
+        fields = ('resource_type', 'skill_type')
+
+    def __init__(self, agent=None, *args, **kwargs):
+        super(NewContextExchangeTypeForm, self).__init__(*args, **kwargs)
+        try:
+            gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
+            if agent:
+                context_ids = [c.id for c in agent.related_all_agents()]
+                if not agent.id in context_ids:
+                    context_ids.append(agent.id)
+                if gen_et:
+                    self.fields["parent_exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
+                    self.fields["parent_exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+
+                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+
+                exchanges = Exchange.objects.filter(context_agent=agent)
+                ex_types = [ex.exchange_type.id for ex in exchanges]
+                #self.fields["used_exchange_type"].queryset = ExchangeType.objects.filter(id__in=ex_types)
+
+        except:
+            #pass
+            self.fields["parent_exchange_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
+            self.fields["parent_exchange_type"].queryset = Ocp_Record_Type.objects.none() #all()
 
 
 class NewResourceTypeForm(forms.Form):
@@ -894,21 +956,22 @@ class NewResourceTypeForm(forms.Form):
     )
     substitutable = forms.BooleanField(
         required=False,
-        help_text=_('Can any resource of this type be substituted for any other resource of this type?'),
+        help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
         widget=forms.CheckboxInput()
     )
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
-        label=_("Main related non-material resource type"),
-        help_text=_('If this material type is very related a non-material resource, choose it here.'),
+        label=_("Main related resource type"),
+        help_text=_('If this resource type is mainly related another resource type, choose it here.'),
         widget=forms.Select(
             attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
     )
     parent = forms.ModelChoiceField(
         empty_label=_('. . .'),
         queryset=EconomicResourceType.objects.none(),
+        label=_("Inherit a Recipe from another resource type"),
         help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}),

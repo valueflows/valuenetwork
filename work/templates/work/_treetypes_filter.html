@@ -11,9 +11,8 @@
     &nbsp; <input type="submit" name="submit" class="btn btn-info" value="{% trans 'Filter the list' %}" /> </p>
 
         <div class="" id="material">
-          <!-- <p class="facet">
-            {% trans "Types of Resources:" %} --> <a href="#addMaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="margin: -6px 0px -5px 20px; float:right;">{% trans "New Resource Type" %}</a>
-          <!-- </p> -->
+          {% if request.user.is_staff %}  <a href="#addMaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="margin: -6px 0px -5px 20px; float:right;">{% trans "New Resource Type" %}</a>
+          {% endif %}
           <ul class="root" id="treeData" style="/*display: none;*/">
             {% recursetree Rtype_tree %}
               {% if node.resource_type in resource_types or node.facet_value in facetvalues or request.user.is_staff %}
@@ -79,7 +78,7 @@
   <div class="modal-body">
     <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url 'new_resource_type' agent_id=agent.id Rtype='material' %}" method="POST" >
       {% csrf_token %}
-      {{ Mtype_form }}
+      {{ Rtype_form }}
 
       <input type="hidden" id="next" name="next" value="project-resources" />
       <div class="modal-footer">

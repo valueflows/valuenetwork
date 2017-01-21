@@ -153,9 +153,10 @@ h3 {
                         {% csrf_token %}
                         {{ change_ext_form|as_bootstrap }}
                         <input type="submit" name="save_ext" value="{% trans 'Save exchange type' %}" class="btn btn-primary" />
+                        &nbsp; ({{ exchange_type.ocp_record_type }}: {{ exchange_type.ocp_record_type.ocp_artwork_type }})
                     </form>
                 </div>
-                <div class="span7">                    
+                <div class="span7">
                     <h3>Transfer Types for this Exchange Type
                         <a href="#addTT" role="button" class="btn btn-info btn-side" data-toggle="modal" title="Add a new transfer type for this exchange type" >
                             {% trans "New Transfer Type" %}
@@ -177,17 +178,17 @@ h3 {
                             </form>
                         </div>
                     </div>
-                    
+
                     {% for slot in slots %}
                         <div class="tt">
                             ( {{ slot.sequence }} )
                             {% if slot.is_reciprocal %} {% trans "Reciprocal Transfer Type" %}: {% else %} {% trans "Transfer Type" %}: {% endif %}
-                            <span class="hdg">{{ slot.name }}</span>
-                            
+                            <span class="hdg">{{ slot.name }}</span> {% if slot.inherit_types %}<span class="">{% trans "(inherit types)" %}</span>{% endif %}
+
                             <a href="#ttModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                             <i class="icon-edit"></i>
                             </a>
-    
+
                             <div class="modal hide fade" id="ttModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="tt-label" aria-hidden="true">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -195,7 +196,7 @@ h3 {
                                 </div>
                                 <div class="modal-body">
                                     <form id="changeForm{{ slot.id }}" class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_type" transfer_type_id=slot.id %}" method="POST" >
-                                        {% csrf_token %}  
+                                        {% csrf_token %}
                                         {{ slot.change_form|as_bootstrap }}
                                         <div class="modal-footer">
                                             <button class="btn cancelBtn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -206,26 +207,26 @@ h3 {
                             </div>
                             {% if slot.is_deletable %}
                                 <form
-                                    style="display: inline;" 
-                                    class="delete-form" 
-                                    id="deleteForm{{ slot.id }}" 
-                                    action="{% url "delete_transfer_type" transfer_type_id=slot.id %}" 
+                                    style="display: inline;"
+                                    class="delete-form"
+                                    id="deleteForm{{ slot.id }}"
+                                    action="{% url "delete_transfer_type" transfer_type_id=slot.id %}"
                                     method="POST" >
                                     {% csrf_token %}
                                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer type" >X</button>
                                 </form>
                             {% endif %}
- 
-                        </div>                            
+
+                        </div>
                         {% if slot.description %}
                             <div class="notes"> {{ slot.description|urlize|linebreaks }} </div>
-                        {% endif %} 
+                        {% endif %}
                     </form>
                     {% endfor %}
                 </div>
             </div>
             <hr />
-            <h3>{% trans "Pattern for this exchange type" %}</h3>                  
+            <h3>{% trans "Pattern for this exchange type" %}</h3>
             <form id="facetsForm" action="." method="POST" >
                 {% csrf_token %}
 
@@ -236,7 +237,7 @@ h3 {
                     <div class="span6">
                         <div class="row-fluid">
                             <div class="span12">
-                                <span class="slot-label" >{{ slot.name }}</span> 
+                                <span class="slot-label" >{{ slot.name }}</span>
                                 {% trans "Selections you will see in forms" %}: </br>
                                 <span class="selections">{{ slot.rts.resource_type }}</br>
                             </div>
@@ -249,7 +250,7 @@ h3 {
                                 <h4>{% trans "Resource Type Facets" %}</h4>
                             </div>
                         </div>
-                        
+
                         {% for item in slot.get_resource_types %}
                             <div class="row-fluid {% cycle 'odd' 'even' %}">
                                 <div class="span8 resources">
@@ -279,7 +280,7 @@ h3 {
                                             <tr>
                                                 {{ form.id }}
                                                 <td>
-                                                    {{ form.facet_value }} 
+                                                    {{ form.facet_value }}
                                                 </td>
                                                 <td>
                                                     {{ form.DELETE }}
@@ -290,12 +291,12 @@ h3 {
                                 </table>
                             </div>
                             <div class="span4">
-                                <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;" 
+                                <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;"
                                     title="{% trans 'Save all changes and see results' %}" value="{% trans 'Save changes' %}" />
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
 
                 {% endfor %}
@@ -317,41 +318,47 @@ h3 {
 
 	$(document).ready(function(){
 
-		$(".chzn-select").chosen();
+    var ObjChosSingle = {
+      allow_single_deselect: true,
+      width: "250px",
+      disable_search_threshold: 6
+    };
+
+		$(".chzn-select").chosen( ObjChosSingle );
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
-        
-        $(".cancelBtn").click(function(event) 
+
+        $(".cancelBtn").click(function(event)
         {
             var target = event.target;
             var form = target.form;
             var formId = "#" + form.id;
             $(formId)[0].reset();
-            
+
         });
 
 	}); // end document.ready
-	
 
-    $(document).ajaxSend(function(event, xhr, settings) 
+
+    $(document).ajaxSend(function(event, xhr, settings)
     {
-        function getCookie(name) 
+        function getCookie(name)
         {
             var cookieValue = null;
-            if (document.cookie && document.cookie != '') 
+            if (document.cookie && document.cookie != '')
             {
                 var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) 
+                for (var i = 0; i < cookies.length; i++)
                 {
                     var cookie = jQuery.trim(cookies[i]);
                     // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) 
+                    if (cookie.substring(0, name.length + 1) == (name + '='))
                     {
                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                         break;
@@ -361,7 +368,7 @@ h3 {
             return cookieValue;
         }
 
-        function sameOrigin(url) 
+        function sameOrigin(url)
         {
             // url could be relative or scheme relative or absolute
             var host = document.location.host; // host + port
@@ -375,17 +382,17 @@ h3 {
                 !(/^(\/\/|http:|https:).*/.test(url));
         }
 
-        function safeMethod(method) 
+        function safeMethod(method)
         {
             return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
         }
 
-        if (!safeMethod(settings.type) && sameOrigin(settings.url)) 
+        if (!safeMethod(settings.type) && sameOrigin(settings.url))
         {
             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
         }
     });
-    
+
     </script>
 
 {% endblock %}

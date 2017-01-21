@@ -2605,12 +2605,16 @@ class TransferTypeForm(forms.ModelForm):
         label=_("Transfer To (optional - this will limit the choices when creating a transfer)"),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
+    inherit_types = forms.BooleanField(
+        required=False,
+        label="Inherit resource types from exchange type",
+        widget=forms.CheckboxInput())
 
     class Meta:
         model = TransferType
         fields = ('sequence', 'name', 'description', 'is_reciprocal', 'is_contribution', 'is_to_distribute',
                   'can_create_resource', 'is_currency', 'give_agent_is_context', 'give_agent_association_type',
-                  'receive_agent_is_context', 'receive_agent_association_type')
+                  'receive_agent_is_context', 'receive_agent_association_type', 'inherit_types')
 
 
 class PatternProdSelectionForm(forms.Form):

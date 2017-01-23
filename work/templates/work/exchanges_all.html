@@ -229,7 +229,7 @@ ul.fancytree-container {
             <span class="total">Incoming total: {{ total_transfers }} </span><br/>
             <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 
-            <br />{% trans "* Note these totals are meaningful only if the events selected all use the same currency. (We'll do a multi total per unit-type box soon)" %}
+            <br />{% trans "* Note these totals are meaningful only if the events selected all use the same currency. <br/>(We'll do a multi total per unit-type box soon)" %}
 
           </div>
           {% if request.user.agent.agent in project.managers or request.user.is_staff %}
@@ -261,7 +261,7 @@ ul.fancytree-container {
                               <div id="{{ case.clas }}_tree" class="exchange_type_tree fancytree-radio" style="max-width:300px;">
                                 <ul class="root" id="treeData" style="/*display: none;*/">
                                 {% recursetree Etype_tree %}
-                                  {% if node.exchange_type or request.user.is_staff %}
+                                  {% if True or node.exchange_type or request.user.is_staff or not node.is_leaf_node %}
                                     {% if case.typ in node.get_ancestors %}
                                       <li id="Eid_{{ node.id }}" {% if node.ocp_artwork_type %}data-related="Rid_{{ node.ocp_artwork_type.id }}"{% endif %} >{% if not node.exchange_type %}<em>{% endif %}{{ node.name }}{% if node.exchange_type %} < {% endif %}
                                         {% if not node.exchange_type %}</em>{% endif %}
@@ -353,9 +353,9 @@ ul.fancytree-container {
                     </div>
                 </div>
               </div>
-              <!-- {% if request.user.is_staff %}<br/><span><b>Contexts:</b>
+              {% if request.user.is_superuser %}<br/><span><b>Contexts:</b>
                 {% for ag in project.related_all_agents %} {{ ag.nick }}, {% endfor %}
-              </span>{% endif %} -->
+              </span>{% endif %}
               <span id="new_name"></span>
               &nbsp; <input style="display:inline; vertical-align:top; float:right; margin: 0px 0px 7px 5px;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
             </form>

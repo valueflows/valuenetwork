@@ -932,7 +932,7 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
 
 class NewResourceTypeForm(forms.Form):
     name = forms.CharField(
-        label=_("Name of the material resource type"),
+        label=_("Name of the new Resource Type"),
         widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
     )
     parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(

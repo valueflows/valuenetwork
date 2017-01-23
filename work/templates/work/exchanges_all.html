@@ -229,7 +229,7 @@ ul.fancytree-container {
             <span class="total">Incoming total: {{ total_transfers }} </span><br/>
             <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 
-            <br />{% trans "* Note these totals are meaningful only if the events selected all use the same currency." %}
+            <br />{% trans "* Note these totals are meaningful only if the events selected all use the same currency. (We'll do a multi total per unit-type box soon)" %}
 
           </div>
           {% if request.user.agent.agent in project.managers or request.user.is_staff %}

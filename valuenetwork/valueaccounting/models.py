@@ -7235,51 +7235,54 @@ class TransferType(models.Model):
         answer_ids = []
         if self.inherit_types:
             # TODO
-            oet = self.exchange_type.ocp_record_type
-            if hasattr(oet, 'ocp_resource_type'):
-              ort = oet.ocp_resource_type
-              if ort:
-                try:
-                  orts = Ocp_Artwork_Type.objects.filter(lft__gte=ort.lft, rght__lte=ort.rght, tree_id=ort.tree_id)
-                  answer_ids = [rt.resource_type.id for rt in orts]
-                except:
-                  pass
-        else:
-            tt_facet_values = self.facet_values.all()
-            facet_values = [ttfv.facet_value for ttfv in tt_facet_values]
-            facets = {}
-            for fv in facet_values:
-                if fv.facet not in facets:
-                    facets[fv.facet] = []
-                facets[fv.facet].append(fv.value)
+            try:
+              if hasattr(self.exchange_type, 'ocp_record_type'):
+                oet = self.exchange_type.ocp_record_type
+                if hasattr(oet, 'ocp_resource_type'):
+                  ort = oet.ocp_resource_type
+                  if ort:
+                     orts = Ocp_Artwork_Type.objects.filter(lft__gte=ort.lft, rght__lte=ort.rght, tree_id=ort.tree_id)
+                     answer_ids = [rt.resource_type.id for rt in orts]
+                     answer = EconomicResourceType.objects.filter(id__in=answer_ids)
+                     return answer
+            except:
+               pass
 
-            fv_ids = [fv.id for fv in facet_values]
-            rt_facet_values = ResourceTypeFacetValue.objects.filter(facet_value__id__in=fv_ids)
+        tt_facet_values = self.facet_values.all()
+        facet_values = [ttfv.facet_value for ttfv in tt_facet_values]
+        facets = {}
+        for fv in facet_values:
+            if fv.facet not in facets:
+                facets[fv.facet] = []
+            facets[fv.facet].append(fv.value)
 
-            rts = {}
-            for rtfv in rt_facet_values:
-                rt = rtfv.resource_type
-                if rt not in rts:
-                    rts[rt] = []
-                rts[rt].append(rtfv.facet_value)
+        fv_ids = [fv.id for fv in facet_values]
+        rt_facet_values = ResourceTypeFacetValue.objects.filter(facet_value__id__in=fv_ids)
 
-            #import pdb; pdb.set_trace()
-            matches = []
+        rts = {}
+        for rtfv in rt_facet_values:
+            rt = rtfv.resource_type
+            if rt not in rts:
+                rts[rt] = []
+            rts[rt].append(rtfv.facet_value)
 
-            for rt, facet_values in rts.iteritems():
-                match = True
-                for facet, values in facets.iteritems():
-                    rt_fv = [fv for fv in facet_values if fv.facet == facet]
-                    if rt_fv:
-                        rt_fv = rt_fv[0]
-                        if rt_fv.value not in values:
-                            match = False
-                    else:
+        #import pdb; pdb.set_trace()
+        matches = []
+
+        for rt, facet_values in rts.iteritems():
+            match = True
+            for facet, values in facets.iteritems():
+                rt_fv = [fv for fv in facet_values if fv.facet == facet]
+                if rt_fv:
+                    rt_fv = rt_fv[0]
+                    if rt_fv.value not in values:
                         match = False
-                if match:
-                    matches.append(rt)
+                else:
+                    match = False
+            if match:
+                matches.append(rt)
 
-            answer_ids = [a.id for a in matches]
+        answer_ids = [a.id for a in matches]
         answer = EconomicResourceType.objects.filter(id__in=answer_ids)
         return answer
 

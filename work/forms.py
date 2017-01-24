@@ -959,6 +959,20 @@ class NewResourceTypeForm(forms.Form):
         help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
         widget=forms.CheckboxInput()
     )
+    unit = forms.ModelChoiceField(
+        empty_label=_('. . .'),
+        queryset=Unit.objects.all(),
+        label=_("Unit of measure"),
+        help_text=_('If is normally the main used Unit of accounting or measure for the resources of this type.'),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
+    price_per_unit = forms.DecimalField(
+        max_digits=8, decimal_places=2,
+        label=_("Fixed Faircoin price per unit?"),
+        help_text=_('Set only if all the resources of this type will have a fixed Faircoin price.'),
+        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
+    )
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
@@ -978,6 +992,73 @@ class NewResourceTypeForm(forms.Form):
     )
     url = forms.CharField(
         required=False,
+        label=_("Any related page URL for the type?"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+    photo_url = forms.CharField(
+        required=False,
+        label=_("Any photo URL of the resource type?"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+
+    def __init__(self, agent=None, *args, **kwargs):
+        super(NewResourceTypeForm, self).__init__(*args, **kwargs)
+        self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
+        self.fields["parent"].queryset = possible_parent_resource_types()
+        if agent:
+            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
+            self.fields["context_agent"].initial = agent
+
+
+
+class NewSkillTypeForm(forms.Form):
+    name = forms.CharField(
+        label=_("Name of the new Skill Type"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
+    )
+    parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Skill_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        level_indicator='. ',
+        label=_("Parent skill type"),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+    )
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
+    )
+    context_agent = forms.ModelChoiceField(
+        empty_label=None,
+        queryset=EconomicAgent.objects.none(),
+        help_text=_('If the skill is only useful for your project or a parent sector collective, choose a smaller context here.'),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
+    '''substitutable = forms.BooleanField(
+        required=False,
+        help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
+        widget=forms.CheckboxInput()
+    )'''
+    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        level_indicator='. ',
+        label=_("Main related resource type"),
+        help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+    )
+    '''parent = forms.ModelChoiceField(
+        empty_label=_('. . .'),
+        queryset=EconomicResourceType.objects.none(),
+        label=_("Inherit a Recipe from another resource type"),
+        help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
+    url = forms.CharField(
+        required=False,
         label=_("Any related URL for the type?"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
     )
@@ -985,7 +1066,7 @@ class NewResourceTypeForm(forms.Form):
         required=False,
         label=_("Photo URL of the resource type"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
-    )
+    )'''
     '''unit = forms.ModelChoiceField(
         empty_label=_('. . .'),
         queryset=Unit.objects.all(),

@@ -13,7 +13,9 @@ from django.utils.translation import ugettext_lazy as _
 from valuenetwork.valueaccounting.models import *
 from work.models import *
 from valuenetwork.valueaccounting.forms import *
+from general.models import Unit_Type
 
+from django.shortcuts import get_object_or_404
 
 class ProjectAgentCreateForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required-field input-xlarge',}))
@@ -937,11 +939,11 @@ class NewResourceTypeForm(forms.Form):
     )
     parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        empty_label=_('. . .'),
+        empty_label='', #_('. . .'),
         level_indicator='. ',
         label=_("Parent resource type"),
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select', 'data-placeholder':_("search Resource type...")}),
     )
     description = forms.CharField(
         required=False,
@@ -950,7 +952,7 @@ class NewResourceTypeForm(forms.Form):
     context_agent = forms.ModelChoiceField(
         empty_label=None,
         queryset=EconomicAgent.objects.none(),
-        help_text=_('If the resource type can be useful for other projects, choose a broader context here.'),
+        help_text=_('If the resource type is only useful for your project or a parent sector collective, choose a smaller context here.'),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}),
     )
@@ -959,36 +961,38 @@ class NewResourceTypeForm(forms.Form):
         help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
         widget=forms.CheckboxInput()
     )
-    unit = forms.ModelChoiceField(
-        empty_label=_('. . .'),
-        queryset=Unit.objects.all(),
+    unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Unit_Type.objects.all(),
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
         label=_("Unit of measure"),
-        help_text=_('If is normally the main used Unit of accounting or measure for the resources of this type.'),
+        help_text=_("Choose 'Each' to refer a sigle unit as a piece, or the main used Unit of accounting or measure for the resources of this type, or leave empty if unsure."),
         widget=forms.Select(
-            attrs={'class': 'chzn-select'}),
+            attrs={'class': 'chzn-select-single', 'data-placeholder':_("search Unit type...")}
+        ) #, 'multiple': ''}),
     )
     price_per_unit = forms.DecimalField(
         max_digits=8, decimal_places=2,
-        label=_("Fixed Faircoin price per unit?"),
+        label=_("Fixed Faircoin price per each unit?"),
         help_text=_('Set only if all the resources of this type will have a fixed Faircoin price.'),
         widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
     )
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        empty_label=_('. . .'),
+        empty_label='', #_('. . .'),
         level_indicator='. ',
-        label=_("Main related resource type"),
+        label=_("Has a main related resource type?"),
         help_text=_('If this resource type is mainly related another resource type, choose it here.'),
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
     )
     parent = forms.ModelChoiceField(
-        empty_label=_('. . .'),
+        empty_label='', #_('. . .'),
         queryset=EconomicResourceType.objects.none(),
-        label=_("Inherit a Recipe from another resource type"),
+        label=_("Inherit a Recipe from another resource type?"),
         help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
         widget=forms.Select(
-            attrs={'class': 'chzn-select'}),
+            attrs={'class': 'chzn-select-single', 'data-placeholder':_("search Resource type with Recipe...")}),
     )
     url = forms.CharField(
         required=False,
@@ -1005,9 +1009,10 @@ class NewResourceTypeForm(forms.Form):
         super(NewResourceTypeForm, self).__init__(*args, **kwargs)
         self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
         self.fields["parent"].queryset = possible_parent_resource_types()
+        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
         if agent:
             self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
-            self.fields["context_agent"].initial = agent
+            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
 
 
 
@@ -1015,6 +1020,14 @@ class NewSkillTypeForm(forms.Form):
     name = forms.CharField(
         label=_("Name of the new Skill Type"),
         widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
+    )
+    verb = forms.CharField(
+        label=_("Verb of the action (infinitive)"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-large',}),
+    )
+    gerund = forms.CharField(
+        label=_("Gerund of the verb"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-large',}),
     )
     parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Skill_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
@@ -1035,57 +1048,50 @@ class NewSkillTypeForm(forms.Form):
         widget=forms.Select(
             attrs={'class': 'chzn-select'}),
     )
-    '''substitutable = forms.BooleanField(
-        required=False,
-        help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
-        widget=forms.CheckboxInput()
-    )'''
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
-        label=_("Main related resource type"),
+        label=_("Has a main related resource type?"),
         help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select', 'data-placeholder':_("search Resource type...")}),
     )
-    '''parent = forms.ModelChoiceField(
-        empty_label=_('. . .'),
-        queryset=EconomicResourceType.objects.none(),
-        label=_("Inherit a Recipe from another resource type"),
-        help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
+    unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Unit_Type.objects.all(),
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Unit of time measure"),
+        help_text=_("Choose Hours or another time related unit to measure the skill service."),
         widget=forms.Select(
-            attrs={'class': 'chzn-select'}),
+            attrs={'class': 'chzn-select-single', 'data-placeholder':_("search Unit type...")}
+        ) #, 'multiple': ''}),
+    )
+    price_per_unit = forms.DecimalField(
+        max_digits=8, decimal_places=2,
+        label=_("Fixed Faircoin price per each unit?"),
+        help_text=_('Set only if all the service time of this type will have a fixed Faircoin price.'),
+        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
     )
     url = forms.CharField(
         required=False,
-        label=_("Any related URL for the type?"),
+        label=_("Any related URL for the Skill?"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
     )
     photo_url = forms.CharField(
         required=False,
-        label=_("Photo URL of the resource type"),
+        label=_("Any photo URL of the skill type?"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
-    )'''
-    '''unit = forms.ModelChoiceField(
-        empty_label=_('. . .'),
-        queryset=Unit.objects.all(),
-        widget=forms.Select(
-            attrs={'class': 'chzn-select'}),
     )
-    price_per_unit = forms.DecimalField(
-        max_digits=8, decimal_places=2,
-        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
-        label=_("Price per unit (in Faircoin)"),
-    )'''
 
     def __init__(self, agent=None, *args, **kwargs):
-        super(NewResourceTypeForm, self).__init__(*args, **kwargs)
-        self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
-        self.fields["parent"].queryset = possible_parent_resource_types()
+        super(NewSkillTypeForm, self).__init__(*args, **kwargs)
+        time = get_object_or_404(Ocp_Unit_Type, clas='time_currency')
+        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.filter(lft__gt=time.lft, rght__lt=time.rght, tree_id=time.tree_id) #all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
         if agent:
             self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
-            self.fields["context_agent"].initial = agent
+            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
+            #self.fields["context_agent"].initial = agent
 
 
 

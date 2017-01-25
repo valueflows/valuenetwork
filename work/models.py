@@ -299,10 +299,7 @@ class InvoiceNumber(models.Model):
         super(InvoiceNumber, self).save(*args, **kwargs)
 
 
-from general.models import Record_Type, Artwork_Type
-
-
-from general.models import Artwork_Type, Material_Type, Nonmaterial_Type, Job
+from general.models import Record_Type, Artwork_Type, Material_Type, Nonmaterial_Type, Job, Unit_Type
 
 class Ocp_Artwork_Type(Artwork_Type):
     artwork_type = models.OneToOneField(
@@ -523,3 +520,70 @@ class Ocp_Record_Type(Record_Type):
           return Ocp_Artwork_Type.objects.none()
 
         return answer
+
+
+
+from general.models import Unit as Gen_Unit
+
+class Ocp_Unit_Type(Unit_Type):
+    unit_type = models.OneToOneField(
+        Unit_Type,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        parent_link=True
+    )
+    ocp_unit =  models.OneToOneField(
+        Unit,
+        on_delete=models.CASCADE,
+        verbose_name=_('ocp unit'),
+        related_name='ocp_unit_type',
+        blank=True, null=True,
+        help_text=_("a related OCP Unit")
+    )
+    unit = models.OneToOneField(
+        Gen_Unit,
+        on_delete=models.CASCADE,
+        verbose_name=_('general unit'),
+        related_name='ocp_unit_type',
+        blank=True, null=True,
+        help_text=_("a related General Unit")
+    )
+
+    class Meta:
+        verbose_name= _(u'Type of General Unit')
+        verbose_name_plural= _(u'o-> Types of General Units')
+
+    def __unicode__(self):
+      if self.children.count():
+        if self.ocp_unit:
+          return self.name+': <' #+'  ('+self.resource_type.name+')'
+        else:
+          return self.name+': '
+      else:
+        if self.ocp_unit:
+          return self.name+' <' #+'  ('+self.resource_type.name+')'
+        else:
+          return self.name
+
+
+from django.db.models.signals import post_migrate
+
+def create_unit_types(**kwargs):
+    uts = Unit_Type.objects.all()
+    outs = Ocp_Unit_Type.objects.all()
+    if uts.count() > outs.count():
+      for ut in uts:
+        if not outs or not ut in outs:
+          out = Ocp_Unit_Type(ut) # not works good, TODO ... now only via sqlite3 .read ocp_unit_types1.sql
+          #out.save()
+          print "created unit type: "+out.name
+    else:
+      print "error creating unit types: "+uts.count()
+
+#post_migrate.connect(create_unit_types)
+
+def rebuild_trees(**kwargs):
+    uts = Unit_Type.objects.rebuild()
+    print "rebuilded Unit_Type"
+
+#post_migrate.connect(rebuild_trees)

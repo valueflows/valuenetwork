@@ -206,6 +206,15 @@ ul.fancytree-container {
   /*line-height: 1.3em;*/
 }
 
+/*  MODALS  */
+
+.modal-field {
+  margin-bottom: 8px;
+}
+#new_exchange .modal-field .chosen-container {
+  margin: inherit;
+}
+
 </style>
 
 {% endblock %}
@@ -338,7 +347,7 @@ ul.fancytree-container {
                           </div>
                           <div style="display:block;">
                             &nbsp; {{ nav_form.skill_type }} &nbsp; <span>{% trans "if no one fits:" %}&nbsp;
-                            <a href='#' class='btn disabled btn-mini'>{% trans "New Skill Service Type" %}</a></span>
+                            <a href='#addSkillTypeModal' role="button" class='btn btn-primary btn-mini' data-toggle="modal" title="Create a new skill resource type">{% trans "New Skill Service Type" %}</a></span>
                           </div>
                         </div>
                         <div style="clear:left;">
@@ -375,7 +384,61 @@ ul.fancytree-container {
               <div class="modal-body">
                 <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
-                  {{ Rtype_form }}
+                  {% for fil in Rtype_form %}
+                    <div class="modal-field">
+                      <label>{{ fil.label }}:</label>
+                      {% if False and fil == Rtype_form.unit %}
+                        <select id="id_unit" class="chzn-select" name="unit">
+                          {% for ut in unit_types %}
+                            <optgroup label="{{ ut.name }}">
+                              {% for unit in ut.unit %}
+                                <option value="{{ unit.id }}">{{ unit.name }}</option>
+                              {% endfor %}
+                            </optgroup>
+                          {% endfor %}
+                        </select>
+                      {% else %}
+                        {{ fil }}
+                      {% endif %}
+                      {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
+                    </div>
+                  {% endfor %}
+
+                  <input type="hidden" id="next" name="next" value="exchanges_all" />
+                  <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                    <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="modal hide fade" id="addSkillTypeModal" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true"  style="width:590px;">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3>{% trans "Add a new Skill Type:" %}</h3>
+              </div>
+              <div class="modal-body">
+                <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
+                  {% csrf_token %}
+                  {% for fil in Stype_form %}
+                    <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
+                      <label>{{ fil.label }}:</label>
+                      {% if False and fil == Rtype_form.unit %}
+                        <select id="id_unit" class="chzn-select" name="unit">
+                          {% for ut in unit_types %}
+                            <optgroup label="{{ ut.name }}">
+                              {% for unit in ut.unit %}
+                                <option value="{{ unit.id }}">{{ unit.name }}</option>
+                              {% endfor %}
+                            </optgroup>
+                          {% endfor %}
+                        </select>
+                      {% else %}
+                        {{ fil }}
+                      {% endif %}
+                      {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
+                    </div>
+                  {% endfor %}
 
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
                   <div class="modal-footer">
@@ -1058,6 +1121,7 @@ ul.fancytree-container {
       });
     });
 
+    $(".chzn-select-single").chosen();
 
 		var selectedCats = "{{ selected_values }}";
 

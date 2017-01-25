@@ -31,6 +31,7 @@ from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
 
 from fobi.models import FormEntry
+from general.models import Artwork_Type, Unit_Type
 
 if "notification" in settings.INSTALLED_APPS:
     from notification import models as notification
@@ -1920,7 +1921,7 @@ def create_your_project(request):
     return HttpResponseRedirect("/work/your-projects/")
 
 
-from general.models import Artwork_Type
+
 
 # bum2
 @login_required
@@ -3633,8 +3634,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     #usecase_ids = [uc.id for uc in usecases]
 
     #new_form = NewContextExchangeTypeForm(agent=agent, data=request.POST or None)
+    #unit_types = Ocp_Unit_Type.objects.all()
 
     Rtype_form = NewResourceTypeForm(agent=agent, data=request.POST or None)
+    Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
 
     if request.method == "POST":
         #import pdb; pdb.set_trace()
@@ -3861,6 +3864,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "Rtype_tree": Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False),  ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Rtype_form": Rtype_form,
+        "Stype_form": Stype_form,
+        "Utype_tree": Ocp_Unit_Type.objects.all(),
+        #"unit_types": unit_types,
         #"new_form": new_form,
     }, context_instance=RequestContext(request))
 

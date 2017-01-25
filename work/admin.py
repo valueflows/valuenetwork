@@ -74,39 +74,23 @@ class Ocp_Type_Artwork_Admin(MPTTModelAdmin):
 admin.site.register(Ocp_Artwork_Type, Ocp_Type_Artwork_Admin)
 
 
-"""
-class Ocp_Type_MaterialAdmin(MPTTModelAdmin):
-  #pass
-  model = Ocp_Material_Type
-  list_display = ['name', 'clas', 'facet_value', 'resource_type']
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
-    if db_field.name == 'parent':
-      try:
-        typ = Artwork_Type.objects.get(clas='Material')
-        kwargs['queryset'] = Artwork_Type.objects.filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
-      except:
-        pass
-    return super(Ocp_Type_MaterialAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-
-admin.site.register(Ocp_Material_Type, Ocp_Type_MaterialAdmin)
-
-class Ocp_Type_NonmaterialAdmin(MPTTModelAdmin):
-  model = Ocp_Nonmaterial_Type
-  list_display = ['name', 'clas', 'facet_value', 'resource_type']
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
-    if db_field.name == 'parent':
-      try:
-        typ = Artwork_Type.objects.get(clas='Nonmaterial')
-        kwargs['queryset'] = Artwork_Type.objects.filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
-      except:
-        pass
-    return super(Ocp_Type_NonmaterialAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-
-admin.site.register(Ocp_Nonmaterial_Type, Ocp_Type_NonmaterialAdmin)
-"""
-
-class Ocp_Type_SkillAdmin(MPTTModelAdmin):
+class Ocp_Type_Skill_Admin(MPTTModelAdmin):
   model = Ocp_Skill_Type
   list_display = ['name', 'verb', 'gerund', 'clas', 'facet_value', 'resource_type']
 
-admin.site.register(Ocp_Skill_Type, Ocp_Type_SkillAdmin)
+admin.site.register(Ocp_Skill_Type, Ocp_Type_Skill_Admin)
+
+
+class Ocp_Type_Unit_Admin(MPTTModelAdmin):
+  model = Ocp_Unit_Type
+  list_display = ['name', 'unit', 'ocp_unit']
+  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    if db_field.name == 'parent':
+      try:
+        typ = Artwork_Type.objects.get(clas='Unit')
+        kwargs['queryset'] = Artwork_Type.objects.filter(lft__gte=typ.lft, rght__lte=typ.rght, tree_id=typ.tree_id)
+      except:
+        pass
+    return super(Ocp_Type_Unit_Admin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+admin.site.register(Ocp_Unit_Type, Ocp_Type_Unit_Admin)

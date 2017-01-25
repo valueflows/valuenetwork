@@ -355,5 +355,10 @@ form#stateForm {
   font-style: italic;
   padding-bottom: 10px;
   display: block;
-  font-size: 0.9em;
+  font-size: 0.95em;
+  color: #887;
+}
+.modal label {
+  /*font-weight: bold;
+  font-size: 1.05em;*/
 }

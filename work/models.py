@@ -412,9 +412,9 @@ class Ocp_Skill_Type(Job):
     def __unicode__(self):
       if self.resource_type:
         if self.ocp_artwork_type:
-          return '> '+self.get_gerund()+' -'
+          return self.get_gerund()+' '+self.ocp_artwork_type.name+' <-'
         else:
-          return '> '+self.get_gerund() #name #+'  ('+self.resource_type.name+')'
+          return self.get_gerund()+' <' #name #+'  ('+self.resource_type.name+')'
       elif self.facet_value:
         return self.get_gerund()+'  ('+self.facet_value.value+')'
       else:

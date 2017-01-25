@@ -363,7 +363,7 @@ ul.fancytree-container {
                 </div>
               </div>
               {% if request.user.is_superuser %}<br/><span><b>Contexts:</b>
-                {% for ag in project.related_all_agents %} {{ ag.nick }}, {% endfor %}
+                {% for ag in project.related_all_agents %} {{ ag.name }} ({{ ag.nick }}), {% endfor %}
               </span>{% endif %}
               <span id="new_name"></span>
               &nbsp; <input style="display:inline; vertical-align:top; float:right; margin: 0px 0px 7px 5px;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />

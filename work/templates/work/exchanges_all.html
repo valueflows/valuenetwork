@@ -108,6 +108,22 @@ span.total {
   cursor: pointer;
 }
 
+.errorlist {
+  list-style: outside none none;
+  margin: 0px;
+}
+.alert {
+  padding: 7px 13px 4px;
+  border-color: #c0a873;
+}
+
+.alert ul, .alert li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+
 /* TABS */
 .ui-tabs h4 {
   display: inline-block;
@@ -244,13 +260,22 @@ ul.fancytree-container {
           {% if request.user.agent.agent in project.managers or request.user.is_staff %}
           <div id="new_exchange" class="miniform">
             <form id="exchangeForm" style="display: inline;" method="POST" action="">
-                <h3>{% trans "Create a new Exchange" %}</h3>
+                <h3 style="display:inline-block;">{% trans "Create a new Exchange" %}:</h3> &nbsp;
+
+                <br/>
                 {% csrf_token %}
                 {% if nav_form.used_exchange_type %}
                   <span>{% trans "Choose a previously used <b>exchange type</b> to copy the model:" %}</span>
                   {{ nav_form.used_exchange_type }}<br/>
                 {% endif %}
-                <span><span>{% trans "Or search an available exchange type:" %}</span> {{ nav_form.exchange_type }}  &nbsp; <span>{% trans "Or make a new one..." %}</span><span class="showhide" id="sh-exchange_type" >(SHOW)</span></span><br/>
+                <span><span>{% trans "Or search an available exchange type:" %}</span>
+                  {% if nav_form.exchange_type.errors and request.POST.new_exchange %}<div class="alert" style="display:inline-block;">{{ nav_form.exchange_type.errors }}</div>{% endif %}
+
+                  {{ nav_form.exchange_type }}  &nbsp; <span>{% trans "Or make a new one..." %}</span><span class="showhide" id="sh-exchange_type" >(SHOW)</span></span>
+                {% if Rtype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block;"><ul><li>
+                    {% trans "The new resource type request has some errors, click 'show' to see them." %}</li></ul></div>
+                {% endif %}
+                <br/>
                 <div class="list" id="list-exchange_type" style="margin-top: 5px;">
                   <div id="tabs">
                     <ul>
@@ -322,7 +347,14 @@ ul.fancytree-container {
                           <div style="display:block;">
                             &nbsp; {{ nav_form.resource_type }} &nbsp;
                             <span>{% trans "if nothing fits:" %}&nbsp;
-                              <a href="#addResourceTypeModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="">{% trans "New Resource Type" %}</a></span>
+                              <a href="#addResourceTypeModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="">{% trans "New Resource Type" %}</a>
+                              {% if Rtype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block; float:right;">
+                                {% if Rtype_form.name.errors %}<em>{% trans "Name of the new type:" %}</em> {{ Rtype_form.name.errors }}<br>{% endif %}
+                                {% if Rtype_form.resource_type.errors %}<em>{% trans "Parent resource type:" %}</em> {{ Rtype_form.resource_type.errors }}{% endif %}
+                                {{ Rtype_form.errors }}
+                                </div><br> &nbsp; <br> &nbsp; <br>
+                              {% endif %}
+                            </span>
 
                           </div>
                         </div>
@@ -362,11 +394,11 @@ ul.fancytree-container {
                     </div>
                 </div>
               </div>
-              {% if request.user.is_superuser %}<br/><span><b>Contexts:</b>
+              {% if request.user.is_superuser %}<br/><span>(debug) <b>Contexts:</b>
                 {% for ag in project.related_all_agents %} {{ ag.name }} ({{ ag.nick }}), {% endfor %}
               </span>{% endif %}
               <span id="new_name"></span>
-              &nbsp; <input style="display:inline; vertical-align:top; float:right; margin: 0px 0px 7px 5px;" type="submit" name="new-exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
+              &nbsp; <input style="display:inline; vertical-align:top; float:right; margin: 0px 0px 7px 5px;" type="submit" name="new_exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
             </form>
 
             <!-- <form id="exchangeTypeForm" style="display: inline;" method="POST" action="" >
@@ -407,7 +439,7 @@ ul.fancytree-container {
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
                   <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
-                    <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                    <input type="submit" class="btn btn-primary" name="new_resource_type" value="{% trans 'Save' %}" />
                   </div>
                 </form>
               </div>
@@ -443,7 +475,7 @@ ul.fancytree-container {
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
                   <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
-                    <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                    <input type="submit" class="btn btn-primary" name="new_skill_type" value="{% trans 'Save' %}" />
                   </div>
                 </form>
               </div>
@@ -659,26 +691,9 @@ ul.fancytree-container {
 
     $('.resource_type_tree, .skill_type_tree, .exchange_type_tree').fancytree( ObjTree );
 
-    {% for case in usecases %}
-        //$('#{{ case.clas }}_tree').fancytree( ObjTree );
-        /*{
-          checkbox: true,
-          selectMode: 1, // 1:single, 2:multi, 3:multi-hier
-          icon: false,
-          dblclick: function(event, data) {
-            data.node.toggleSelected();
-          },
-          keydown: function(event, data) {
-            if( event.which === 32 ) {
-              data.node.toggleSelected();
-              return false;
-            }
-          },
-        });*/
-    {% endfor %}
 
     function update_tree(data){
-      //if(nodo){
+
       var tid = data.tree.$div.attr('class').split(' ')[0];
       var tarr = tid.split('_');
       tid = tarr[0]+'_'+tarr[1];
@@ -692,8 +707,8 @@ ul.fancytree-container {
       //  out += i+': '+tid[i]+', ';
       //};
 
-      if( tid == "exchange_type" ){ //$tab.attr('id') == tid ){ // only the exchange type matches
-        $tab = $('#exchangeForm');
+      if( tid == "exchange_type" || tid == "resource_type" ){ //$tab.attr('id') == tid ){ // only the exchange type matches
+        $tab = $('#new_exchange');
         //ide = 'Eid';
         //tid = 'exchange_type';
       }
@@ -750,7 +765,7 @@ ul.fancytree-container {
           } else {
             alert('KARR: '+karr[0]);
           }
-          //alert('UpdateTree Put / tid:'+tid+' xid:'+karr[0]+' id:'+karr[1]+' SCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length );//nodo.key);
+          alert('UpdateTree Put / tid:'+tid+' xid:'+karr[0]+' id:'+karr[1]+' N:'+$('.id_'+tid).length+' SCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length );//nodo.key);
 
           $tab.find("#id_"+tid).trigger("chosen:updated");
 

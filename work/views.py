@@ -3409,7 +3409,7 @@ def order_delete_confirmation_work(request, order_id):
     agent = get_agent(request)
     coordinated_projects = agent.managed_projects()
     if order.provider not in coordinated_projects:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render_to_response('work/no_permission.html')
     pcs = order.producing_commitments()
     sked = []
     reqs = []
@@ -3641,7 +3641,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
     if request.method == "POST":
         #import pdb; pdb.set_trace()
-        new_exchange = request.POST.get("new-exchange")
+        new_exchange = request.POST.get("new_exchange")
         if new_exchange:
             if nav_form.is_valid():
                 data = nav_form.cleaned_data
@@ -3753,11 +3753,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                               % ('work/agent', agent.id, 'exchange-logging-work', new_ext.id, 0))
 
                         else: # not inherited, rise error TODO
-                          pass
+                          raise ValidationError("No transfer inheriting types in this exchange type! "+ext.name)
 
                       else: # endif name and uc:
-                        # rise error TODO
-                        pass
+                        raise ValidationError("Bad new name ("+name+") or no use case in the parent exchange type! "+ext.name)
+
                     else: # endif hasattr(data["resource_type"], 'id')
                       # perhaps only skill? TODO
                       pass
@@ -3766,20 +3766,101 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
                   else: # endif ext
-                    # the ocp record type still not have am ocp exchange type, create it? TODO
+                    # the ocp record type still not have an ocp exchange type, create it? TODO
                     pass
 
                   #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                   #  % ('work/agent', agent.id, 'exchange-logging-work', ext.id, gen_rt.id)) # ¿ use the exchange id for a resource id ?
 
                 else: # endif hasattr(data["exchange_type"], 'id'):
-                  # no ocp record type
-                  pass
+                  #nav_form.add_error('exchange_type', _("No exchange type selected"))
+                  pass #raise ValidationError("No exchange type selected")
 
             else: # nav_form is not valid
-              pass
+              pass #raise ValidationError(nav_form.errors)
 
-        # there's no new_exchange = request.POST.get("new-exchange")
+        # there's no new_exchange = request.POST.get("new_exchange")
+        new_resource_type = request.POST.get("new_resource_type")
+        if new_resource_type:
+            if Rtype_form.is_valid():
+                #raise ValidationError("New resource type, valid")
+                data = Rtype_form.cleaned_data
+                if hasattr(data["resource_type"], 'id'):
+                  parent_rt = Ocp_Artwork_Type.objects.get(id=data["resource_type"].id)
+                  if parent_rt.id:
+                    out = None
+                    if hasattr(data["unit_type"], 'id'):
+                      gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
+                      out = gut.ocp_unit
+                    new_rt = EconomicResourceType(
+                      name=data["name"],
+                      description=data["description"],
+                      unit=out,
+                      price_per_unit=data["price_per_unit"],
+                      substitutable=data["substitutable"],
+                      context_agent=data["context_agent"],
+                      url=data["url"],
+                      photo_url=data["photo_url"],
+                      parent=data["parent"],
+                      created_by=request.user,
+                    )
+                    new_rt.save()
+
+                    # mptt: get_ancestors(ascending=False, include_self=False)
+                    ancs = parent_rt.get_ancestors(True, True)
+                    for an in ancs:
+                      if an.clas != 'Artwork':
+                        an = Ocp_Artwork_Type.objects.get(id=an.id)
+                        if an.resource_type:
+                          for fv in an.resource_type.facets.all():
+                            new_rtfv = ResourceTypeFacetValue(
+                              resource_type=new_rt,
+                              facet_value=fv.facet_value
+                            )
+                            new_rtfv.save()
+                          break
+                        elif an.facet_value:
+                          new_rtfv = ResourceTypeFacetValue(
+                              resource_type=new_rt,
+                              facet_value=an.facet_value
+                          )
+                          new_rtfv.save()
+                          break
+
+                    rel_material = None
+                    rel_nonmaterial = None
+                    if hasattr(data["related_type"], 'id'):
+                      rrt = Ocp_Artwork_Type.objects.get(id=data["related_type"].id)
+                      # mptt: get_ancestors(ascending=False, include_self=False)
+                      rrt_ancs = rrt.get_ancestors()
+                      for an in rrt_ancs: # see if is child of material or non-material
+                        if an.clas == 'Material':
+                          mat = Material_Type.objects.get(id=rrt.id)
+                          rel_material = mat
+                          break
+                        if an.clas == 'Nonmaterial':
+                          non = Nonmaterial_Type.objects.get(id=rrt.id)
+                          rel_nonmaterial = non
+                          break
+
+                    new_oat = Ocp_Artwork_Type(
+                      name=data["name"],
+                      description=data["description"],
+                      resource_type=new_rt,
+                      material_type=rel_material,
+                      nonmaterial_type=rel_nonmaterial,
+                    )
+                    # mptt: insert_node(node, target, position='last-child', save=False)
+                    new_res = Ocp_Artwork_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
+
+                    #raise ValidationError(data)
+
+                  else: # have no parent_type id
+                    pass
+                else: # have no parent resource field
+                  pass
+            else:
+                pass #raise ValidationError(Rtype_form.errors)
 
         '''new_exchange_type = request.POST.get("new-exchange-type") # TODO
         if new_exchange_type:

@@ -367,7 +367,7 @@ class ExchangeNavForm(forms.Form):
         level_indicator='. ',
         required=False,
         widget=forms.Select(
-          attrs={'class': 'chzn-select',
+          attrs={'class': 'id_resource_type chzn-select',
                      'multiple':'',
                      'data-placeholder':_("search Resource type...")}
         )
@@ -407,6 +407,17 @@ class ExchangeNavForm(forms.Form):
             #pass
             self.fields["exchange_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
             self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.none() #all()
+
+
+    def clean(self):
+        data = super(ExchangeNavForm, self).clean()
+        uext = data["used_exchange_type"]
+        ext = data["exchange_type"]
+        if not ext and not uext:
+          self.add_error('exchange_type', "An exchange type is required.")
+
+        return data
+
 
 
 class ExchangeContextForm(forms.ModelForm):
@@ -937,13 +948,13 @@ class NewResourceTypeForm(forms.Form):
         label=_("Name of the new Resource Type"),
         widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
     )
-    parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+    resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label='', #_('. . .'),
         level_indicator='. ',
         label=_("Parent resource type"),
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select', 'data-placeholder':_("search Resource type...")}),
+            attrs={'class': 'id_resource_type input-xlarge chzn-select', 'data-placeholder':_("search Resource type...")}),
     )
     description = forms.CharField(
         required=False,
@@ -963,6 +974,7 @@ class NewResourceTypeForm(forms.Form):
     )
     unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Unit_Type.objects.all(),
+        required=False,
         empty_label='', #_('. . .'),
         level_indicator='. ',
         label=_("Unit of measure"),
@@ -972,6 +984,7 @@ class NewResourceTypeForm(forms.Form):
         ) #, 'multiple': ''}),
     )
     price_per_unit = forms.DecimalField(
+        required=False,
         max_digits=8, decimal_places=2,
         label=_("Fixed Faircoin price per each unit?"),
         help_text=_('Set only if all the resources of this type will have a fixed Faircoin price.'),
@@ -979,6 +992,7 @@ class NewResourceTypeForm(forms.Form):
     )
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        required=False,
         empty_label='', #_('. . .'),
         level_indicator='. ',
         label=_("Has a main related resource type?"),
@@ -989,6 +1003,7 @@ class NewResourceTypeForm(forms.Form):
     parent = forms.ModelChoiceField(
         empty_label='', #_('. . .'),
         queryset=EconomicResourceType.objects.none(),
+        required=False,
         label=_("Inherit a Recipe from another resource type?"),
         help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
         widget=forms.Select(
@@ -1050,6 +1065,7 @@ class NewSkillTypeForm(forms.Form):
     )
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        required=False,
         empty_label=_('. . .'),
         level_indicator='. ',
         label=_("Has a main related resource type?"),
@@ -1059,6 +1075,7 @@ class NewSkillTypeForm(forms.Form):
     )
     unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Unit_Type.objects.all(),
+        required=False,
         empty_label='', #_('. . .'),
         level_indicator='. ',
         label=_("Unit of time measure"),
@@ -1068,6 +1085,7 @@ class NewSkillTypeForm(forms.Form):
         ) #, 'multiple': ''}),
     )
     price_per_unit = forms.DecimalField(
+        required=False,
         max_digits=8, decimal_places=2,
         label=_("Fixed Faircoin price per each unit?"),
         help_text=_('Set only if all the service time of this type will have a fixed Faircoin price.'),

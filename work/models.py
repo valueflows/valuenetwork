@@ -348,8 +348,8 @@ class Ocp_Artwork_Type(Artwork_Type):
       blank=True, null=True,
       help_text=_("a related OCP ResourceType")
     )
-    context_agent = models.ForeignKey(EconomicAgent,
-      verbose_name=_('context agent'),
+    context_agent = models.ForeignKey(EconomicAgent, # this field should be used only if there's no resource_type
+      verbose_name=_('context agent'),               # and is needed to hide the category name by context
       on_delete=models.CASCADE,
       related_name='ocp_artwork_types',
       blank=True, null=True,

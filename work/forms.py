@@ -355,7 +355,7 @@ class ExchangeNavForm(forms.Form):
           level_indicator='. ',
           required=False,
           widget=forms.Select(
-              attrs={'class': 'chzn-select',
+              attrs={'class': 'id_exchange_type chzn-select',
                      'multiple':'',
                      'data-placeholder':_("search Exchange type...")}
           )
@@ -378,7 +378,7 @@ class ExchangeNavForm(forms.Form):
         level_indicator='. ',
         required=False,
         widget=forms.Select(
-          attrs={'class': 'chzn-select',
+          attrs={'class': 'id_skill_type chzn-select',
                      'multiple':'',
                      'data-placeholder':_("search Skill type...")}
         )
@@ -885,7 +885,7 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
     )
     resource_type = TreeNodeChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(),
-        empty_label=None,
+        empty_label='',
         level_indicator='. ',
         required=False,
         widget=forms.Select(
@@ -896,7 +896,7 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
     )
     skill_type = TreeNodeChoiceField(
         queryset=Ocp_Skill_Type.objects.all(),
-        empty_label=None,
+        empty_label='',
         level_indicator='. ',
         required=False,
         widget=forms.Select(
@@ -943,9 +943,10 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
             self.fields["parent_exchange_type"].queryset = Ocp_Record_Type.objects.none() #all()
 
 
+
 class NewResourceTypeForm(forms.Form):
     name = forms.CharField(
-        label=_("Name of the new Resource Type"),
+        label=_("Name of the Resource Type"),
         widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
     )
     resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
@@ -965,7 +966,7 @@ class NewResourceTypeForm(forms.Form):
         queryset=EconomicAgent.objects.none(),
         help_text=_('If the resource type is only useful for your project or a parent sector collective, choose a smaller context here.'),
         widget=forms.Select(
-            attrs={'class': 'chzn-select'}),
+            attrs={'class': 'id_context_agent chzn-select'}),
     )
     substitutable = forms.BooleanField(
         required=False,
@@ -980,7 +981,7 @@ class NewResourceTypeForm(forms.Form):
         label=_("Unit of measure"),
         help_text=_("Choose 'Each' to refer a sigle unit as a piece, or the main used Unit of accounting or measure for the resources of this type, or leave empty if unsure."),
         widget=forms.Select(
-            attrs={'class': 'chzn-select-single', 'data-placeholder':_("search Unit type...")}
+            attrs={'class': 'id_unit_type chzn-select-single', 'data-placeholder':_("search Unit type...")}
         ) #, 'multiple': ''}),
     )
     price_per_unit = forms.DecimalField(
@@ -998,7 +999,7 @@ class NewResourceTypeForm(forms.Form):
         label=_("Has a main related resource type?"),
         help_text=_('If this resource type is mainly related another resource type, choose it here.'),
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
+            attrs={'class': 'id_related_type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
     )
     parent = forms.ModelChoiceField(
         empty_label='', #_('. . .'),
@@ -1007,7 +1008,7 @@ class NewResourceTypeForm(forms.Form):
         label=_("Inherit a Recipe from another resource type?"),
         help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
         widget=forms.Select(
-            attrs={'class': 'chzn-select-single', 'data-placeholder':_("search Resource type with Recipe...")}),
+            attrs={'class': 'id_parent chzn-select-single', 'data-placeholder':_("search Resource type with Recipe...")}),
     )
     url = forms.CharField(
         required=False,

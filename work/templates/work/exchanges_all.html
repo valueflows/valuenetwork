@@ -217,6 +217,13 @@ ul.fancytree-container {
   background: none;
   border: none;
 }
+span.fancytree-title span.edit a {
+  color: #734279;
+  cursor: pointer;
+}
+span.fancytree-title span.edit a:hover {
+  text-decoration: underline;
+}
 
 .chosen-container-multi .chosen-choices li.search-choice span {
   /*line-height: 1.3em;*/
@@ -332,26 +339,48 @@ ul.fancytree-container {
                             <ul class="root" id="treeData" style="/*display: none;*/">
                               {% recursetree Rtype_tree %}
                               {% if True or node.resource_type or request.user.is_staff %}
-                              <li id="Rid_{{ node.id }}">{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} < {% endif %}
-                                                                                                                                                      {% if not node.exchange_type %}</em>{% endif %} {{ node.parents }}
-                                {% if not node.is_leaf_node %}
-                                <ul class="children">
-                                  {{ children }}
-                                </ul>
-                                {% endif %}
+                                <li id="Rid_{{ node.id }}"><span>{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} &lt; {% endif %} {% if not node.exchange_type %}</em>{% endif %}
+                                  {% if node.resource_type.created_by == request.user %}&nbsp; <span class="edit" id="Rid_{{ node.id }}"></span>
+                                  {% endif %}
+                                  </span>
+                                  {% if not node.is_leaf_node %}
+                                    <ul class="children">
+                                      {{ children }}
+                                    </ul>
+                                  {% endif %}
                                 </li>
+                                {% if node.resource_type.created_by == request.user %}
+                                  <script type="text/javascript">
+                                    var R_{{ node.id }}_obj = {
+                                      "name":"{{ node.resource_type.name }}",
+                                      "parent":"{{ node.parent.id }}",
+                                      "description":"{{ node.resource_type.description }}",
+                                      "context":"{{ node.resource_type.context_agent.id }}",
+                                      "substi":"{{ node.resource_type.substitutable }}",
+                                      "unit":"{{ node.resource_type.unit.ocp_unit_type.id }}",
+                                      "price":"{{ node.resource_type.price_per_unit }}",
+                                      "related":"{% if node.material_type %}{{ node.material_type.id }}{% elif node.nonmaterial_type %}{{ node.nonmaterial_type.id }}{% endif %}",
+                                      "parentrecipe":"{{ node.resource_type.parent.id }}",
+                                      "url":"{{ node.resource_type.url }}",
+                                      "photo_url":"{{ node.resource_type.photo_url }}"
+                                    };
+                                  </script>
                                 {% endif %}
-                                {% endrecursetree %}
+                              {% endif %}
+                              {% endrecursetree %}
                             </ul>
                           </div>
                           <div style="display:block;">
                             &nbsp; {{ nav_form.resource_type }} &nbsp;
-                            <span>{% trans "if nothing fits:" %}&nbsp;
-                              <a href="#addResourceTypeModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="">{% trans "New Resource Type" %}</a>
+                            <span>
+                              <ul style="display:inline-table; list-style:none; margin:0;">
+                                <li>{% trans "if nothing fits:" %}&nbsp; <a href="#addResourceTypeModal" role="button" class="btn btn-primary btn-mini btn_resource_type" data-toggle="modal" title="Create a new resource type" style="">{% trans "New Resource Type" %}</a></li>
+                                <li class="edit_resource_type" style="display:none; margin-top:10px;">{% trans "...you created this type:" %}&nbsp;<a href="#addResourceTypeModal" id="edit_rt_but" role="button" class="btn btn-primary btn-mini edit_resource_type" data-toggle="modal" title="Edit a resource type">{% trans "Edit" %}</a></li>
+                              </ul>
                               {% if Rtype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block; float:right;">
                                 {% if Rtype_form.name.errors %}<em>{% trans "Name of the new type:" %}</em> {{ Rtype_form.name.errors }}<br>{% endif %}
                                 {% if Rtype_form.resource_type.errors %}<em>{% trans "Parent resource type:" %}</em> {{ Rtype_form.resource_type.errors }}{% endif %}
-                                {{ Rtype_form.errors }}
+                                <!-- {{ Rtype_form.errors }} -->
                                 </div><br> &nbsp; <br> &nbsp; <br>
                               {% endif %}
                             </span>
@@ -394,8 +423,8 @@ ul.fancytree-container {
                     </div>
                 </div>
               </div>
-              {% if request.user.is_superuser %}<br/><span>(debug) <b>Contexts:</b>
-                {% for ag in project.related_all_agents %} {{ ag.name }} ({{ ag.nick }}), {% endfor %}
+              {% if request.user.is_superuser %}<br/><span style="font-size:0.8em;color:#666;">(debug) <b>Contexts:</b>
+                {% for ag in project.related_all_agents %} {{ ag.name }} {% if not ag.nick == ag.name %}({{ ag.nick }}){% endif %}, {% endfor %}
               </span>{% endif %}
               <span id="new_name"></span>
               &nbsp; <input style="display:inline; vertical-align:top; float:right; margin: 0px 0px 7px 5px;" type="submit" name="new_exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
@@ -411,7 +440,7 @@ ul.fancytree-container {
             <div class="modal hide fade" id="addResourceTypeModal" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true"  style="width:590px;">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3>{% trans "Add a new Resource Type:" %}</h3>
+                <h3><span id="name_action">{% trans "Add a new " %}</span> {% trans "Resource Type:" %}</h3>
               </div>
               <div class="modal-body">
                 <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
@@ -435,7 +464,7 @@ ul.fancytree-container {
                       {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
                     </div>
                   {% endfor %}
-
+                  <input type="hidden" id="edid" name="edid" value="" />
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
                   <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -640,28 +669,261 @@ ul.fancytree-container {
     });
 
 
+    $('span.edit').each(function(){
+      //$(this).html('<a href="#">'+$(this).text()+'</a>')
+      //$(this).mousedown(function(){
+      //  alert('Hau! '+$(this).attr('id'));
+      //});
+    });
+
+    /*
+    var R_{{ node.id }}_obj = {
+        "name":"{{ node.resource_type.name }}",
+        "parent":"{{ node.parent.id }}",
+        "description":"{{ node.resource_type.description }}",
+        "context":"{{ node.resource_type.context_agent.id }}",
+        "substi":"{{ node.resource_type.substitutable }}",
+        "unit":"{{ node.resource_type.unit.id }}",
+        "price":"{{ node.resource_type.price_per_unit }}",
+        "related":"{{ node.resource_type.related_type.id }}",
+        "parentrecipe":"{{ node.resource_type.parent.id }}",
+        "url":"{{ node.resource_type.url }}",
+        "photo_url":"{{ node.resource_type.photo_url }}"
+    };
+    */
+
+    var old_agent = false;
+    var old_rt = false;
+    var old_unit = false;
+    var old_related = false;
+    var old_parent = false;
+
+    function rebuild_modal(tid, ide){
+      if( typeof tid == 'undefined' || typeof ide == 'undefined' ) {
+        var tree = $('#resource_type_tree').first();
+        var node = tree.fancytree("getTree").getActiveNode();
+        if(node.isSelected()){
+          ide = node.key;
+          tid = "resource_type";
+        } else {
+          tree = $('#skill_type_tree').first();
+          node = tree.fancytree("getTree").getActiveNode();
+          if(node.isSelected()){
+            ide = node.key;
+            tid = "skill_type";
+          }
+        }
+      }
+
+      var idarr = ide.split('_');
+      if( typeof eval('R_'+idarr[1]+'_obj') != "undefined" && $('input[name=new_resource_type]').length ) {
+        var obj = eval('R_'+idarr[1]+'_obj');
+        var name = obj['name'];
+        var $mod = false;
+        //alert('obj: '+obj['name']);
+        if( idarr[0] == "Rid" ) {
+          $mod = $('#addResourceTypeModal');
+        };
+        if( idarr[0] == "Sid" ) {
+          $mod = $('#addSkillTypeModal');
+        };
+        //ide = idarr[1];
+        if($mod){
+          $mod.find('#name_action').text("{% trans 'Edit' %} "+name);
+          $mod.find('#id_name').val(name);
+          $mod.find('#id_description').val(obj['description']);
+          $mod.find('#id_substitutable').val(obj['substi']);
+          $mod.find('#id_price_per_unit').val(obj['price']);
+          $mod.find('#id_url').val(obj['url']);
+          $mod.find('#id_photo_url').val(obj['photo_url']);
+
+          $mod.find('#id_resource_type option').each(function(){
+            if($(this).attr('selected')) old_rt = $(this).val();
+            $(this).removeAttr('selected');
+            if($(this).val() == obj['parent']){ //ide){
+              $(this).attr('selected','selected');
+            }
+          });
+          if(old_rt && old_rt != obj['parent']) $mod.find('#id_resource_type').trigger("chosen:updated");
+
+          $mod.find('#id_context_agent option').each(function(){
+            if($(this).attr('selected')) old_agent = $(this).val();
+            $(this).removeAttr('selected');
+            if($(this).val() == obj['context']){ //ide){
+              //alert('hey: '+$(this).val()+' context:'+obj['context']);
+              $(this).attr('selected','selected');
+            }
+          });
+          if(old_agent != obj['context']) $mod.find('#id_context_agent').trigger("chosen:updated");
+
+          $mod.find('#id_unit_type option').each(function(){
+            if($(this).attr('selected')) old_unit = $(this).val();
+            $(this).removeAttr('selected');
+            if($(this).val() == obj['unit']){ //ide){
+              //alert('hey: '+$(this).val()+' unit:'+obj['unit']);
+              $(this).attr('selected','selected');
+            }
+          });
+          if(old_unit != obj['unit']) $mod.find('#id_unit_type').trigger("chosen:updated");
+
+          //alert('related: '+obj['related']);
+          $mod.find('#id_related_type option').each(function(){
+            if($(this).attr('selected')) old_related = $(this).val();
+            $(this).removeAttr('selected');
+            if($(this).val() == obj['related']){ //ide){
+              alert('hey: '+$(this).val()+' related:'+obj['related']);
+              $(this).attr('selected','selected');
+            }
+          });
+          if(old_related != obj['related']) $mod.find('#id_related_type').trigger("chosen:updated");
+
+          $mod.find('#id_parent option').each(function(){
+            if($(this).attr('selected')) old_parent = $(this).val();
+            $(this).removeAttr('selected');
+            if($(this).val() == obj['parentrecipe']){ //ide){
+              //alert('hey: '+$(this).val()+' parent-recipe:'+obj['parentrecipe']);
+              $(this).attr('selected','selected');
+            }
+          });
+          if(old_parent != obj['parentrecipe']) $mod.find('#id_parent').trigger("chosen:updated");
+
+          $mod.find('input[name=new_resource_type]').attr('name','edit_resource_type');
+          $mod.find('#edid').attr('value', ide);
+        }
+      }
+    }
+    $('#edit_rt_but').click(function(){
+        rebuild_modal();
+    });
+
+    function reset_modal(tid){
+        if( tid == "resource_type" && $('input[name=edit_resource_type]').length) {
+          var $mod = $('#addResourceTypeModal');
+          $mod.find('#name_action').text("{% trans 'Add new' %}");
+          $mod.find('#id_name').val('');
+          $mod.find('#id_description').val('');
+          $mod.find('#id_substitutable').val(false);
+          $mod.find('#id_price_per_unit').val('');
+          $mod.find('#id_url').val('');
+          $mod.find('#id_photo_url').val('');
+          //$mod.find('option').removeAttr('selected');
+
+          var sel_rt = $mod.find('#id_resource_type').find('option[selected]').first().attr('value');
+          if(old_rt){
+            $mod.find('#id_resource_type').find('option').removeAttr('selected');
+            $mod.find('#id_resource_type').find('option[value='+old_rt+']').attr('selected','selected');
+          } else if( $('#id_resource_type').find('option[selected]').length ) {
+            //$mod.find('#id_resource_type').find("option[value='']").attr('selected','selected');
+            alert('sels:'+$('#id_resource_type').first().find('option[selected]').length+' ('+$('#id_resource_type').first().find('option[selected]').attr('value')+') clas:'+$('#id_resource_type').first().attr('class'));
+          } else {
+            $mod.find('#id_resource_type').find('option').removeAttr('selected');
+            $mod.find('#id_resource_type').find("option[value='']").attr('selected','selected');
+          }
+          var new_rt = $mod.find('#id_resource_type').first().find('option[selected]').first().attr('value');
+
+          var sel_agent = $mod.find('#id_context_agent').find('option[selected]').first().attr('value');
+          if(old_agent){
+            $mod.find('#id_context_agent').find('option').removeAttr('selected');
+            $mod.find('#id_context_agent').find('option[value='+old_agent+']').attr('selected','selected');
+          } else {
+            $mod.find('#id_context_agent').find('option').removeAttr('selected');
+            $mod.find('#id_context_agent').find("option[value='']").attr('selected','selected');
+          }
+          var new_agent = $mod.find('#id_context_agent').find('option[selected]').first().attr('value');
+
+          $mod.find('#id_unit_type_chosen').find('.search-choice-close').first().click();
+          var sel_unit = $mod.find('#id_unit_type').find('option[selected]').first().attr('value');
+          if(old_unit){
+            $mod.find('#id_unit_type').find('option').removeAttr('selected');
+            $mod.find('#id_unit_type').find('option[value='+old_unit+']').attr('selected','selected');
+          } else {
+            $mod.find('#id_unit_type').find('option').removeAttr('selected');
+            $mod.find('#id_unit_type').find("option[value='']").attr('selected','selected');
+          }
+          var new_unit = $mod.find('#id_unit_type').find('option[selected]').first().attr('value');
+
+          $mod.find('#id_related_type_chosen').find('.search-choice-close').first().click();
+          var sel_related = $mod.find('#id_related_type').find('option[selected]').first().attr('value');
+          if(old_related){
+            $mod.find('#id_related_type').find('option[value='+old_related+']').attr('selected','selected');
+          } else {
+            $mod.find('#id_related_type').find("option[value='']").attr('selected','selected');
+          }
+          var new_related = $mod.find('#id_related_type').find('option[selected]').first().attr('value');
+
+          $mod.find('#id_parent_chosen').find('.search-choice-close').first().click();
+          var sel_parent = $mod.find('#id_parent').find('option[selected]').first().attr('value');
+          if(old_parent){
+            $mod.find('#id_parent').find('option[value='+old_parent+']').attr('selected','selected');
+          } else {
+            $mod.find('#id_parent').find("option[value='']").attr('selected','selected');
+          }
+          var new_parent = $mod.find('#id_parent').find('option[selected]').first().attr('value');
+
+          if(sel_rt != new_rt){
+            $mod.find('#id_resource_type').trigger("chosen:updated");
+            if( new_rt != '' && !$mod.find('#id_resource_type_chosen').find('li.result-selected').length ) {
+              alert('Error (js bug): the parent resource type is not displayed (but is selected). Please reselect: '+$('#id_resource_type').find('option[selected]').text()+' ('+new_rt+') sel:'+sel_rt+' new:'+new_rt);
+              $mod.find('#id_resource_type').trigger("chosen:updated");
+            }
+          }
+          if(sel_agent != new_agent){
+            $mod.find('#id_context_agent').trigger("chosen:updated");
+            if( new_agent != '' && !$mod.find('#id_context_agent_chosen').find('li.result-selected').length ) {
+              alert('Error (js bug): the actual context agent is not displayed (but is selected). Please reselect: '+new_agent);
+            }
+          }
+          if(sel_unit != new_unit){
+            $mod.find('#id_unit_type').trigger("chosen:updated");
+            if( new_unit != '' && !$mod.find('#id_unit_type_chosen').find('li.result-selected').length ) {
+              alert('Error (js bug): the actual unit type is not displayed (but is selected). Please reselect: '+new_unit);
+            }
+          }
+          if(sel_related != new_related){
+            $mod.find('#id_related_type').trigger("chosen:updated");
+            if( new_related != '' && !$mod.find('#id_related_type_chosen').find('li.result-selected').length ) {
+              alert('Error (js bug): the actual related type is not displayed (but is selected). Please reselect: '+new_related);
+            }
+          }
+          if(sel_parent != new_parent){
+            $mod.find('#id_parent').trigger("chosen:updated");
+            if( new_parent != '' && !$mod.find('#id_parent_chosen').find('li.result-selected').length ) {
+              alert('Error (js bug): the actual type for inheriting a recipe is not displayed (but is selected). Please reselect: '+new_parent);
+            }
+          }
+
+          $mod.find('input[name=edit_resource_type]').attr('name','new_resource_type');
+          $mod.find('#edid').attr('value','');
+          //alert('reset tid:'+tid+' sel_rt:'+sel_rt+' new_rt:'+new_rt+' old_rt:'+old_rt);
+        };
+        //alert('reset tid:'+tid+' sel_agent:'+sel_agent+' new_agent:'+new_agent+' old_agent:'+old_agent);
+    }
+    $('a.btn_resource_type').click(function(){
+        reset_modal("resource_type");
+    });
+
     var ObjTree = {
       checkbox: true,
       selectMode: 1, // 1:single, 2:multi, 3:multi-hier
       icon: false,
       dblclick: function(event, data) {
         data.node.toggleSelected();
-        update_tree(data);
+        //update_tree(data);
       },
       keydown: function(event, data) {
         if( event.which === 32 ) {
           data.node.toggleSelected();
-          update_tree(data);
+          //update_tree(data);
           return false;
         }
       },
       select: function(event, data){
-        var s = data.tree.getSelectedNodes();
-        if(s.length > 0){
+        //var s = data.tree.getSelectedNodes();
+        //if(s.length > 0){
           update_tree(data);
-        } else {
-          update_tree(data);
-        }
+        //} else {
+        //  update_tree(data);
+        //}
       },
       beforeSelect: function(event, data){
         //update_tree(data);
@@ -682,11 +944,56 @@ ul.fancytree-container {
 
         } else {
           data.node.toggleSelected();//setSelected(true);
-          data.node.setFocus();
+          if(data.node.isSelected()){
+            data.node.setFocus();
+            data.node.setActive();
+          } else {
+            data.node.setActive(false);
+            data.node.setFocus(false);
+          }
           return false;
         }
         //update_tree(data);
-      }
+      },
+      expand: function(event, data) {
+        /*$('span.fancytree-title span.edit').each(function(){
+          $(this).html('<a href="#addResourceTypeModal" class="btn btn-primary btn-mini" data-toggle="modal" role="button">'+$(this).text()+'</a>');
+          var $but = $('a.edit_resource_type').css('display','block');
+          $(this).find('a').mouseup(function(){
+            var name = $(this).parent().parent().text().split('(edit)').join('').trim().split(' <').join('');
+            var $mod = false;
+            var parent = $(this).parent().parent().parent().attr('class');
+            var ide = $(this).parent().attr('id');
+
+            alert('data:'+data.node.key+' but:'+$but.length+' Hau! '+$(this).parent().attr('id'));//+' modal:'+$('#addResourceTypeModal').html());
+            var idarr = ide.split('_');
+            if( idarr[0] == "Rid" ) {
+              $mod = $('#addResourceTypeModal');
+            };
+            if( idarr[0] == "Sid" ) {
+              $mod = $('#addSkillTypeModal');
+            };
+            ide = idarr[1];
+            if($mod){
+              $mod.find('#name_action').text("{% trans 'Edit' %} "+name);
+              $mod.find('#id_name').val(name);
+              $mod.find('#id_resource_type option').each(function(){
+                if($(this).val() == data.node.key.split('_')[1]){ //ide){
+                  $(this).attr('selected','selected');
+                  //alert('ide: '+ide+' option: '+$(this).val()); //html());
+                }
+              });
+              $mod.find('#id_resource_type').trigger("chosen:updated");
+              $('a.btn_resource_type').focus().mouseover().mousedown().mouseup();//[href=#'+$mod.attr('id')+']').click();
+              //$mod.toggle();//show();//css('display', 'block');//dialog('open');
+            }
+            //return false;
+            //$(this).mouseup();
+          });
+        });*/
+        //logEvent(event, data, "flag=" + flag);
+      },
+
     };
 
     $('.resource_type_tree, .skill_type_tree, .exchange_type_tree').fancytree( ObjTree );
@@ -716,7 +1023,15 @@ ul.fancytree-container {
 
       var snd = data.tree.getSelectedNodes();
 
-      if(snd.length > 0){  // SELECTED IN TREE
+      if(snd.length > 0 && $('span.edit#'+snd[0].key).length){
+        $('li.edit_resource_type').show();
+        //rebuild_modal(tid, snd[0].key);
+      } else {
+        $('li.edit_resource_type').hide();
+        //reset_modal(tid);
+      }
+
+      if(snd.length > 0){  //  S E L E C T E D   I N   T R E E
 
         if(data.tree.hasFocus() && $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length == 0){  // TREE HAS FOCUS
 
@@ -726,17 +1041,19 @@ ul.fancytree-container {
           var karr = data.node.key.split('_');
           if(karr[0] == ide){
 
-            $tab.find('#id_'+tid+'_chosen').find('li.result-selected').removeClass('result-selected').addClass('active-result');
-            $tab.find('#id_'+tid).find('option').removeAttr('selected');
+            //$('#id_'+tid+'_chosen').find('li.result-selected').removeClass('result-selected').addClass('active-result');
+            $('.id_'+tid).find('option').removeAttr('selected');
+            $('.id_'+tid).find('option[value=""]').attr('selected','selected');
+            //$(".id_"+tid).trigger("chosen:updated");
 
-            $tab.find("#id_"+tid).trigger("chosen:updated");
-
-            opts = $tab.find('#id_'+tid).find('option').each(function(){
-              //$(this).removeAttr('selected'); //alert(karr[1]);
+            $('.id_'+tid).find('option').each(function(){
+              $(this).removeAttr('selected'); //alert(karr[1]);
               if( $(this).attr('value') == karr[1] ){
                 $(this).attr('selected','selected');
               };
             });
+            //$(".id_"+tid).trigger("chosen:updated");
+
             //alert(opts.length);
             if( tid == "exchange_type" ){
                 if(!$.isEmptyObject(data.node.data)){
@@ -752,29 +1069,61 @@ ul.fancytree-container {
                     node.setFocus(false);
                     rtree.fancytree("getRootNode").visit(function(node){
                       //node.setExpanded(false);
-                      // TODO deactivate other not related branches
+                      // TODO fold other not related branches
                       // mptt: get_ancestors(ascending=False, include_self=False)
                       //var anc = node.get_ancestors(true);
                     });
                     rtree.fancytree("getTree").setFocus(false);
+                  } else {
+                    var rtree = $('#resource_type_tree').first();
+                    var node = rtree.fancytree("getTree").getActiveNode();
+                    if(node.isSelected()){
+                      node.setSelected(false);
+                      node.setActive(false);
+                      node.setFocus(false);
+                    }
+                    rtree.fancytree("getTree").setFocus(false);
                   }
                   //alert('rel: '+rel+' rtree:'+rtree.length);
+                } else {
+                  var rtree = $('#resource_type_tree').first();
+                  var node = rtree.fancytree("getTree").getActiveNode();
+                  if(node.isSelected()){
+                    node.setSelected(false);
+                    node.setActive(false);
+                    node.setFocus(false);
+                  }
+                  rtree.fancytree("getTree").setFocus(false);
                 }
             }
 
           } else {
             alert('KARR: '+karr[0]);
           }
-          alert('UpdateTree Put / tid:'+tid+' xid:'+karr[0]+' id:'+karr[1]+' N:'+$('.id_'+tid).length+' SCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length );//nodo.key);
+          //alert('UpdateTree Put / tid:'+tid+' xid:'+karr[0]+' id:'+karr[1]+' N:'+$('.id_'+tid).length+' SCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length );//nodo.key);
 
-          $tab.find("#id_"+tid).trigger("chosen:updated");
+          $(".id_"+tid).each(function(){
+            $(this).trigger("chosen:updated");
+          });
+          //$("#addResourceTypeModal .id_"+tid).trigger("chosen:updated");
 
           if(!$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length && tid){
 
             //  E R R O R   the choice is not present!
+            //alert('error');
 
+            var karr = data.node.key.split('_');
+            if(karr[0] == ide){
+              $('.id_'+tid).find('option').each(function(){
+                $(this).removeAttr('selected'); //alert(karr[1]);
+                if( $(this).attr('value') == karr[1] ){
+                  $(this).attr('selected','selected');
+                };
+              });
+              $(".id_"+tid).trigger("chosen:updated");
+            }
             //$("#id_"+tid).trigger("chosen:updated");
-            var ind = $tab.find('#id_'+tid).find('option[selected]').index();
+            var ind = $tab.find('.id_'+tid).find('option[selected]').index();
 
             //$("#id_"+tid+'_chosen').chosen.destroy();
             //$("#id_"+tid).chosen.destroy();//trigger("destroy");
@@ -831,13 +1180,15 @@ ul.fancytree-container {
 
             setTimeout(function(){
 
-              $tab.find("#id_"+tid).trigger("chosen:updated");
+              //$tab.find(".id_"+tid).trigger("chosen:updated");
 
-              if(!$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length || !$tab.find('#id_'+tid).find('option[selected]').length){
+              if(!$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length){ // !$tab.find('.id_'+tid).find('option[selected]').length){
 
-                alert("Sorry, there's still a javascript bug here. The choice is not seen in the search box the second time it is selected in the tree (but it's selected, internally)... it's safe to continue.");// \n (tid:"+tid+' node:'+data.node.key+' sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().text()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().text()+'))');
+                alert("Sorry, there's still a javascript bug here. The choice is not seen in the search box the second time it is selected in the tree (but it's selected, internally)... better deselect and select again.");// \n (tid:"+tid+' node:'+data.node.key+' sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().text()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().text()+'))');
 
-                $tab.find("#id_"+tid).trigger("chosen:updated");
+                $(".id_"+tid).each(function(){
+                  //$(this).trigger("chosen:updated");
+                });
               };
             }, 500);
 
@@ -860,27 +1211,80 @@ ul.fancytree-container {
           //data.tree.$div.focus();
           //data.tree.setFocus();
 
-        } else { // either tree has focus or there's a choice in chosen
+        } else { // either tree has no focus or there's a choice in chosen
 
-          if( !$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ){
+          if( !$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ){ // no choice in chosen, so no focus
 
-            alert('tree no focus, sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') oCH:'+ $tab.find('#id_'+tid).find('option[selected]').length+' tsnd:'+snd.length+' tsnd[0]:'+snd[0].key);
+            var karr = data.node.key.split('_');
+            if(karr[0] == ide){
+              $tab.find('.id_'+tid).find('option').each(function(){
+                $(this).removeAttr('selected'); //alert(karr[1]);
+                if( $(this).attr('value') == karr[1] ){
+                  $(this).attr('selected','selected');
+                };
+              });
+              $tab.find(".id_"+tid).trigger("chosen:updated");
+            }
+            //alert('tree no focus, sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') oCHs:'+ $tab.find('.id_'+tid).find('option[selected]').length+' tsnd:'+snd.length+' tsnd[0]:'+snd[0].key);
+
 
           } else {
-            // there's a choice in chosen and tree has focus
+            // there's a choice in chosen and tree has no focus
 
           }
         }
 
-      } else { // No selections in tree
+        if( tid == "exchange_type" ){
+          if(!$.isEmptyObject(data.node.data)){
+            var rel = data.node.data.related; //$tab.find('li#'+data.node.key).first().attr('related');//data.node.related;
+            var rar = rel.split('_');
+            var rtree = $('#resource_type_tree').first();
+            if( rar[0] == 'Rid' ) {
+              rtree.fancytree("getTree").activateKey('Rid_'+rar[1]);
+              var node = rtree.fancytree("getTree").getActiveNode();
+              node.setSelected(true);//toggleSelected();
+              //node.setFocus(true);
+              node.setActive(false);
+              node.setFocus(false);
+              rtree.fancytree("getRootNode").visit(function(node){
+                //node.setExpanded(false);
+                // TODO fold other not related branches
+                // mptt: get_ancestors(ascending=False, include_self=False)
+                //var anc = node.get_ancestors(true);
+              });
+              rtree.fancytree("getTree").setFocus(false);
+            } else {
+              var node = rtree.fancytree("getTree").getActiveNode();
+              if(node.isSelected()){
+                node.setSelected(false);
+                node.setActive(false);
+                node.setFocus(false);
+              }
+              rtree.fancytree("getTree").setFocus(false);
+            }
+            //alert('rel: '+rel+' rtree:'+rtree.length);
+          } else {
+            var rtree = $('#resource_type_tree').first();
+            var node = rtree.fancytree("getTree").getActiveNode();
+            if(node.isSelected()){
+              node.setSelected(false);
+              node.setActive(false);
+              node.setFocus(false);
+            }
+            rtree.fancytree("getTree").setFocus(false);
+          }
+        }
+
+      } else { //  N O   S E L E C T I O N S   I N   T R E E
 
         if( data.tree.hasFocus() ) { //&& $('#id_'+tid+'_chosen').find('li.search-choice').length > 0 ){
 
           $tab.find('#id_'+tid+'_chosen').find('li.result-selected').each(function(){
               //$(this).removeClass('result-selected').addClass('active-result');
           });
-          var s = $tab.find('#id_'+tid).find('option').each(function(){
+          var s = $tab.find('.id_'+tid).find('option').each(function(){
               //$(this).removeAttr('selected');
+              //if($(this).attr('value') == '') $(this).attr('selected','selected');
           });
           //$("#id_"+tid).trigger("chosen:updated");
 
@@ -894,30 +1298,48 @@ ul.fancytree-container {
 
             //$("#id_"+tid).trigger("chosen:updated");
 
-            if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('#id_'+tid).find('option[selected]').length){
+            if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('.id_'+tid).find('option[selected]').length){
               //alert('UpdateTree? / Nothing s:'+s.length+' tid:'+tid+' oCH:'+$tab.find('#id_'+tid).find('option[selected]').length);
-              $('#id_'+tid).find('option[selected]').removeAttr('selected');
-              if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('#id_'+tid).find('option[selected]').length){
-                alert('UpdateTree?? / Nothing s:'+s.length+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length);
+              //$('.id_'+tid).find('option[selected]').exclude("[value='']").removeAttr('selected');
+              if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('.id_'+tid).find('option[selected]').length){
+                //alert('UpdateTree?? / Nothing s:'+s.length+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length);
               }
             }
           }
-          //$("#id_"+tid).trigger("chosen:activate");
+          $tab.find('.id_'+tid).find('option').each(function(){
+              $(this).removeAttr('selected');
+              if($(this).attr('value') == '') $(this).attr('selected','selected');
+          });
+          //$(".id_"+tid).trigger("chosen:activate");
+          $("#addResourceTypeModal .id_"+tid).trigger("chosen:updated");
           //$("#id_"+tid).trigger("chosen:updated");
           //$("#id_"+tid+'_chosen').find('.search-field input').focus();
           data.tree.setFocus();
           //data.tree.$div.focus();
-        } else {
+
+        } else { // tree has no focus
+
           var yd = $tab.find('#id_'+tid+'_chosen').find('li.result-selected').first().attr('data-option-array-index');
-          $tab.find('#id_'+tid).find('option[selected]').removeAttr('selected');
-          $tab.find('#id_'+tid).find('option:eq('+yd+')').first().attr('selected','selected');
+          $tab.find('.id_'+tid).find('option[selected]').removeAttr('selected');
+          $tab.find('.id_'+tid).find('option:eq('+yd+')').first().attr('selected','selected');
           //$('#id_'+tid+'_chosen').find('li.result-selected').removeClass('result-selected').addClass('active-result');
           //$('#id_'+tid).find('option[selected]').removeAttr('selected');
+          $(".id_"+tid).trigger("chosen:updated");
 
           if($tab.find('#id_'+tid+'_chosen').find('li.result-selected').length || $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length || $tab.find('#id_'+tid+'_chosen').find('li.result-selected').length){
 
+            $tab.find('#id_'+tid+'_chosen').find('li.search-choice').find('a.search-choice-close').click();
+
             //alert('tree no focus, no selections? yd:'+yd+' rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().html()+')');
           }
+        }
+
+        if(tid == 'exchange_type'){
+          $tab.find('#id_resource_type_chosen').find('li.search-choice').find('a.search-choice-close').click();
+          $tab.find('#id_resource_type_chosen').blur();
+          $tab.find('#id_skill_type_chosen').find('li.search-choice').find('a.search-choice-close').click();
+          $tab.find('#id_skill_type_chosen').blur();
+          $('#sh-exchange_type').focus();
         }
       }
       if( $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
@@ -964,9 +1386,10 @@ ul.fancytree-container {
           //tree.fancytree("getTree").setFocus(true);
           //$nav = $('.ui-tabs .ui-tabs-nav li[aria-controls='+$tab.attr('id')+'] a');//.click();
         }
+      } else if( !tree.length ){
+        alert('Chosen Change / modal select? $tab:'+$tab.attr('id')+' dess:'+dess+' sels:'+sels);
       };
-      //alert('Chosen Change / tab:'+$tab.attr('id')+' tid:'+tid+' sel:'+sels+' des:'+dess+' ('+$('#'+ide+dess).length+') tree:'+tree.attr('id')+' ('+tree.length+') ide:'+ide+' nav:'+$nav.length+' tarr:'+tarr.join('_'));
-
+      //alert('Chosen Change / tab:'+$tab.attr('id')+' tid:'+tid+' sel:'+sels+' des:'+dess+' ('+$('#'+ide+dess).length+') tree:'+tree.attr('id')+' ('+tree.length+') ide:'+ide+' nav:'+$nav.length+' tarr:'+tarr.join('_')+' edit:'+$('span.edit#'+ide+sels).length);
 
       //tree.fancytree("getTree").setFocus(false);
 
@@ -979,7 +1402,11 @@ ul.fancytree-container {
       //if(!tree.fancytree("getTree").hasFocus()){
       if(typeof dess != 'undefined' && dess){
 
-        $tab.find('#id_'+tid+'_chosen').find('li.search-field').show()
+        $tab.find('#id_'+tid+'_chosen').find('li.search-field').show();
+
+        $('#id_'+tid+'_chosen').find('li.result-selected').removeClass('result-selected').addClass('active-result');
+        $('.id_'+tid).find('option[selected]').removeAttr('selected');
+        $('.id_'+tid).find('option[value=""]').attr('selected','selected');
 
         if(!tree.length){// || ide == 'Eid_'){
           alert('NO TREE! dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option[selected]').text()+' tree:'+tree.length);
@@ -1002,8 +1429,8 @@ ul.fancytree-container {
             });
             tree.fancytree("getTree").setFocus(false);
             //$('input[name="new-exchange"]').focus();
-            $this.find('li.result-selected').removeClass('result-selected').addClass('active-result');
-            $tab.find('#id_'+tid).find('option[selected]').removeAttr('selected');
+            //$this.find('li.result-selected').removeClass('result-selected').addClass('active-result');
+
             //alert('Chosen Change DESS '+dess+' this:'+$this);// / ide: '+tree.find('#'+ide+dess).attr('id')+' dess:'+dess+' tid:'+tid);//+' / tree:'+tree.html())
           } else {
             for(var des in dess){
@@ -1016,11 +1443,12 @@ ul.fancytree-container {
 
           //if( $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length || $tab.find('#id_'+tid+'_chosen').find('li.result-selected').length || $tab.find('#id_'+tid).find('option[selected]').length ) {
 
-              $tab.find('#id_'+tid+'_chosen').find('li.result-selected').each(function(){
-                  //$(this).removeClass('result-selected').addClass('active-result');
+              $('#id_'+tid+'_chosen').find('li.result-selected').each(function(){
+                  $(this).removeClass('result-selected').addClass('active-result');
               });
-              $tab.find('#id_'+tid).find('option').each(function(){
-                  //$(this).removeAttr('selected');
+              $tab.find('.id_'+tid).find('option').each(function(){
+                  $(this).removeAttr('selected');
+                  if($(this).attr('value') == '') $(this).attr('selected','selected');
               });
 
               tree.fancytree("getTree").activateKey(ide+dess);
@@ -1043,12 +1471,16 @@ ul.fancytree-container {
 
       }; // end DESS
 
-      if(typeof sels != 'undefined' && sels){
+      if(typeof sels != 'undefined' && sels){ // SELECTIONS
 
-        if(!tree.length || ide == 'Eid_'){
+        if(!tree.length){ // || ide == 'Eid_'){
+
+          alert('Chosen Change / modal select? $tab:'+$tab.attr('id'));
+          $tab.find('#id_'+tid).find('option[selected]').removeAttr('selected');
+          $tab.find('#id_'+tid).find('option[value='+sels+']').attr('selected','selected');
 
           if( !$tab.find('#id_'+tid).find('option[selected]').length && $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
-            //alert('NO TREE: repair sels:'+sels+' tab:'+$tab.attr('id')+' tid:'+tid+' force select:'+$tab.find('#id_'+tid).find('option[selected]').length);
+            alert('NO TREE: repair sels:'+sels+' tab:'+$tab.attr('id')+' tid:'+tid+' force select:'+$tab.find('#id_'+tid).find('option[selected]').length);
             $tab.find('#id_'+tid).find('option[value='+sels+']').attr('selected','selected');
 
           }
@@ -1067,11 +1499,9 @@ ul.fancytree-container {
               }
             }
             //if(id == '' || sels != id){
-            $tab.find('#id_'+tid).find('option').each(function(){
-                //$(this).removeAttr('selected');
-            });
-            $tab.find('#id_'+tid+'_chosen').find('li.result-selected').each(function(){
-                //$(this).removeClass('result-selected').addClass('active-result');
+
+            $('#id_'+tid+'_chosen').find('li.result-selected').each(function(){
+                $(this).removeClass('result-selected').addClass('active-result');
             });
 
             if(sel[0]) sel[0].setSelected(false);
@@ -1084,6 +1514,12 @@ ul.fancytree-container {
               node.setFocus(false);
             }
             tree.fancytree("getTree").setFocus(false);
+
+            $('.id_'+tid).find('option').each(function(){
+                $(this).removeAttr('selected');
+                if($(this).attr('value') == sels) $(this).attr('selected','selected');
+            });
+
 
             //setTimeout(function(){
               //alert('Heloo '+tree.html());
@@ -1107,11 +1543,12 @@ ul.fancytree-container {
             }
           }
         } else if(tree.length) { // tree has focus
-          $tab.find('#id_'+tid).find('option').each(function(){
-            $(this).removeAttr('selected');
+          $tab.find('.id_'+tid).find('option').each(function(){
+            //$(this).removeAttr('selected');
+            //if($(this).attr('value') == sels) $(this).attr('selected','selected');
           });
           $tab.find('#id_'+tid+'_chosen').find('li.result-selected').each(function(){
-            $(this).removeClass('result-selected').addClass('active-result');
+            //$(this).removeClass('result-selected').addClass('active-result');
           });
           alert('CH SELS tree has focus. tid:'+tid);
         }
@@ -1126,6 +1563,9 @@ ul.fancytree-container {
       //$this.next().focus();//blur();
       //tree.fancytree("getTree").setFocus(true);
       //tree.focus();
+
+      $("#addResourceTypeModal .id_"+tid).trigger("chosen:updated");
+
     };
 
     $(".chzn-select").each(function(){

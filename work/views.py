@@ -3832,7 +3832,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     if hasattr(data["related_type"], 'id'):
                       rrt = Ocp_Artwork_Type.objects.get(id=data["related_type"].id)
                       # mptt: get_ancestors(ascending=False, include_self=False)
-                      rrt_ancs = rrt.get_ancestors()
+                      rrt_ancs = rrt.get_ancestors(False, True)
                       for an in rrt_ancs: # see if is child of material or non-material
                         if an.clas == 'Material':
                           mat = Material_Type.objects.get(id=rrt.id)
@@ -3853,7 +3853,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     # mptt: insert_node(node, target, position='last-child', save=False)
                     new_res = Ocp_Artwork_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
 
-                    #raise ValidationError(data)
+                    nav_form = ExchangeNavForm(agent=agent, data=None)
+                    Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                    Stype_form = NewSkillTypeForm(agent=agent, data=None)
 
                   else: # have no parent_type id
                     pass
@@ -3861,6 +3863,104 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   pass
             else:
                 pass #raise ValidationError(Rtype_form.errors)
+
+        edit_resource_type = request.POST.get("edit_resource_type")
+        if edit_resource_type:
+            if Rtype_form.is_valid():
+                data = Rtype_form.cleaned_data
+                if hasattr(data["resource_type"], 'id'):
+                  parent_rt = Ocp_Artwork_Type.objects.get(id=data["resource_type"].id)
+                  if parent_rt.id:
+                    out = None
+                    if hasattr(data["unit_type"], 'id'):
+                      gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
+                      out = gut.ocp_unit
+                    edid = request.POST.get("edid")
+                    if edid == '':
+                      raise ValidationError("Missing edid!")
+                    else:
+                      #raise ValidationError("Lets edit "+edid)
+                      idar = edid.split('_')
+                      if idar[0] == "Rid":
+                        grt = Ocp_Artwork_Type.objects.get(id=idar[1])
+                        grt.name = data["name"]
+                        grt.description = data["description"]
+                        moved = False
+                        if not grt.parent == parent_rt:
+                          # mptt: move_to(target, position='first-child')
+                          grt.move_to(parent_rt, 'last-child')
+                          moved = True
+
+                        rel_material = None
+                        rel_nonmaterial = None
+                        if hasattr(data["related_type"], 'id'):
+                          rrt = Ocp_Artwork_Type.objects.get(id=data["related_type"].id)
+                          # mptt: get_ancestors(ascending=False, include_self=False)
+                          rrt_ancs = rrt.get_ancestors(False, True)
+                          for an in rrt_ancs: # see if is child of material or non-material
+                            if an.clas == 'Material':
+                              mat = Material_Type.objects.get(id=rrt.id)
+                              rel_material = mat
+                              break
+                            if an.clas == 'Nonmaterial':
+                              non = Nonmaterial_Type.objects.get(id=rrt.id)
+                              rel_nonmaterial = non
+                              break
+                          grt.material_type = rel_material
+                          grt.nonmaterial_type = rel_nonmaterial
+
+                        grt.save()
+
+                        if not grt.resource_type:
+                          raise ValidationError("There's no resource type! create it?")
+                        rt = grt.resource_type;
+                        rt.name = data["name"]
+                        rt.description = data["description"]
+                        rt.unit = out
+                        rt.price_per_unit = data["price_per_unit"]
+                        rt.substitutable = data["substitutable"]
+                        rt.context_agent = data["context_agent"]
+                        rt.url = data["url"]
+                        rt.photo_url = data["photo_url"]
+                        rt.parent = data["parent"]
+                        rt.edited_by = request.user
+                        if moved:
+                          old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)
+                          for rtfv in old_rtfvs:
+                            rtfv.delete()
+                          # mptt: get_ancestors(ascending=False, include_self=False)
+                          ancs = parent_rt.get_ancestors(True, True)
+                          for an in ancs:
+                            if an.clas != 'Artwork':
+                              an = Ocp_Artwork_Type.objects.get(id=an.id)
+                              if an.resource_type:
+                                for fv in an.resource_type.facets.all():
+                                  new_rtfv = ResourceTypeFacetValue(
+                                    resource_type=rt,
+                                    facet_value=fv.facet_value
+                                  )
+                                  new_rtfv.save()
+                                break
+                              elif an.facet_value:
+                                new_rtfv = ResourceTypeFacetValue(
+                                    resource_type=rt,
+                                    facet_value=an.facet_value
+                                )
+                                new_rtfv.save()
+                                break
+                        rt.save()
+
+                        nav_form = ExchangeNavForm(agent=agent, data=None)
+                        Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                        Stype_form = NewSkillTypeForm(agent=agent, data=None)
+
+                      else: # is not Rid
+                        pass
+
+                  else: # have no parent_type id
+                    pass
+                else: # have no parent resource field
+                  pass
 
         '''new_exchange_type = request.POST.get("new-exchange-type") # TODO
         if new_exchange_type:

@@ -1906,7 +1906,7 @@ def create_your_project(request):
                 )
             fc_aa.save()
 
-            fc = EconomicAgent.objects.freedom_coop()
+            fc = EconomicAgent.objects.freedom_coop_projects()
             association_type = AgentAssociationType.objects.get(identifier="child")
             fc_aa = AgentAssociation(
                 is_associate=agent,

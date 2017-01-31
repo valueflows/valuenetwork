@@ -457,6 +457,13 @@ class AgentManager(models.Manager):
             raise ValidationError("Freedom Coop does not exist by that name")
         return fc
 
+    def freedom_coop_projects(self):
+        try:
+            fc = EconomicAgent.objects.get(nick="FC_Projects")
+        except EconomicAgent.DoesNotExist:
+            raise ValidationError("FreedomCoop Projects group does not exist by 'FC_Projects' nickname.")
+        return fc
+
     def open_projects(self):
         return EconomicAgent.objects.filter(project__visibility="public") #is_public="True")
 

@@ -1228,7 +1228,7 @@ span.fancytree-title span.edit a:hover {
           //$("#id_"+tid).trigger("chosen:updated");
 
           $('.id_'+tid).find('option').each(function(){
-              //$(this).removeAttr('selected');
+              $(this).removeAttr('selected');
               $(this).prop('selected', false);
               if($(this).attr('value') == '') $(this).prop('selected',true);
           });
@@ -1240,7 +1240,7 @@ span.fancytree-title span.edit a:hover {
             //$('.id_'+tid).find('option[selected]').removeAttr('selected');
             //$('.id_'+tid).find('option:eq('+yd+')').first().prop('selected',true);
 
-            //$tab.find('#id_'+tid+'_chosen').find('li.search-choice').find('a.search-choice-close').click(); // close choices clicking
+            $tab.find('#id_'+tid+'_chosen').find('li.search-choice').find('a.search-choice-close').click(); // close choices clicking
 
             //$("#id_"+tid).trigger("chosen:updated");
 

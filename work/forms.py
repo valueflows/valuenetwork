@@ -342,11 +342,12 @@ class ExchangeNavForm(forms.Form):
     #get_et = False
     used_exchange_type = forms.ModelChoiceField(
           queryset=ExchangeType.objects.none(),  #ExchangeType.objects.all(),
-          empty_label='. . .',
+          empty_label='', #'. . .',
           #level_indicator='. ',
           required=False,
           widget=forms.Select(
-              attrs={'class': 'exchange-selector chzn-select'}
+              attrs={'class': 'id_used_exchange_type chzn-select-single',
+                     'data-placeholder':_("used Exchange type...")}
           )
     )
     exchange_type = TreeNodeChoiceField( #forms.ModelChoiceField(

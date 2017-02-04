@@ -702,6 +702,7 @@ span.fancytree-title span.edit a:hover {
       if( typeof tid == 'undefined' || typeof ide == 'undefined' ) {
         var tree = $('#resource_type_tree').first();
         var node = tree.fancytree("getTree").getActiveNode();
+        //alert('tree:'+tree.fancytree("getTree"));//+' node:'+node.key+' sel:'+node.isSelected());
         if(node && node.isSelected()){
           ide = node.key;
           tid = "resource_type";
@@ -713,6 +714,9 @@ span.fancytree-title span.edit a:hover {
             tid = "skill_type";
           }
         }
+      }
+      if( !ide || !tid ) {
+        alert('IDE:'+ide+' tid:'+tid+' tree:'+tree.attr('class')+' node:'+node)
       }
 
       var idarr = ide.split('_');
@@ -739,17 +743,17 @@ span.fancytree-title span.edit a:hover {
 
           $mod.find('#id_resource_type option').each(function(){
             if($(this).prop('selected')) old_rt = $(this).val();
-            $(this).removeAttr('selected');
-            if($(this).val() == obj['parent']){ //ide){
-              $(this).prop('selected',true);
+            $(this).prop('selected', false);
+            if($(this).val() == obj['parent']){
+              $(this).prop('selected', true); //alert('Hau!:'+$(this).val());
             }
           });
-          if(old_rt && old_rt != obj['parent']) $mod.find('#id_resource_type').trigger("chosen:updated");
+          if(!old_rt || old_rt != obj['parent']) $mod.find('#id_resource_type').trigger("chosen:updated");
 
           $mod.find('#id_context_agent option').each(function(){
             if($(this).prop('selected')) old_agent = $(this).val();
-            $(this).removeAttr('selected');
-            if($(this).val() == obj['context']){ //ide){
+            $(this).prop('selected', false);
+            if($(this).val() == obj['context']){
               //alert('hey: '+$(this).val()+' context:'+obj['context']);
               $(this).prop('selected',true);
             }
@@ -758,8 +762,8 @@ span.fancytree-title span.edit a:hover {
 
           $mod.find('#id_unit_type option').each(function(){
             if($(this).prop('selected')) old_unit = $(this).val();
-            $(this).removeAttr('selected');
-            if($(this).val() == obj['unit']){ //ide){
+            $(this).prop('selected', false);
+            if($(this).val() == obj['unit']){
               //alert('hey: '+$(this).val()+' unit:'+obj['unit']);
               $(this).prop('selected',true);
             }
@@ -769,9 +773,9 @@ span.fancytree-title span.edit a:hover {
           //alert('related: '+obj['related']);
           $mod.find('#id_related_type option').each(function(){
             if($(this).prop('selected')) old_related = $(this).val();
-            $(this).removeAttr('selected');
-            if($(this).val() == obj['related']){ //ide){
-              alert('hey: '+$(this).val()+' related:'+obj['related']);
+            $(this).prop('selected', false);
+            if($(this).val() == obj['related']){
+              //alert('hey: '+$(this).val()+' related:'+obj['related']);
               $(this).prop('selected',true);
             }
           });
@@ -779,8 +783,8 @@ span.fancytree-title span.edit a:hover {
 
           $mod.find('#id_parent option').each(function(){
             if($(this).prop('selected')) old_parent = $(this).val();
-            $(this).removeAttr('selected');
-            if($(this).val() == obj['parentrecipe']){ //ide){
+            $(this).prop('selected', false);
+            if($(this).val() == obj['parentrecipe']){
               //alert('hey: '+$(this).val()+' parent-recipe:'+obj['parentrecipe']);
               $(this).prop('selected',true);
             }
@@ -808,62 +812,65 @@ span.fancytree-title span.edit a:hover {
           $mod.find('#id_photo_url').val('');
           //$mod.find('option').removeAttr('selected');
 
-          var sel_rt = $mod.find('#id_resource_type').find('option[selected]').first().attr('value');
+          var sel_rt = $mod.find('#id_resource_type').find('option:selected').first().attr('value');
           if(old_rt){
-            $mod.find('#id_resource_type').find('option').removeAttr('selected');
-            $mod.find('#id_resource_type').find('option[value='+old_rt+']').prop('selected',true);
-          } else if( $('#id_resource_type').find('option[selected]').length ) {
+            $mod.find('#id_resource_type').find('option').prop('selected', false);
+            $mod.find('#id_resource_type').find('option[value='+old_rt+']').prop('selected', true);
+          } else if( $('#id_resource_type').find('option:selected').length ) {
             //$mod.find('#id_resource_type').find("option[value='']").attr('selected','selected');
-            alert('sels:'+$('#id_resource_type').first().find('option[selected]').length+' ('+$('#id_resource_type').first().find('option[selected]').attr('value')+') clas:'+$('#id_resource_type').first().attr('class'));
+            var pid = $('#id_resource_type').first().find('option:selected').attr('value');
+            //alert('sels:'+$('#id_resource_type').first().find('option:selected').length+' ('+$('#id_resource_type').first().find('option:selected').attr('value')+') '+$('#id_resource_type').first().find('option:selected').text()+' clas:'+$('#id_resource_type').first().attr('class'));
+            $mod.find('#id_resource_type').find('option').prop('selected', false);
+            $mod.find('#id_resource_type').find("option[value='"+pid+"']").prop('selected', true);
           } else {
-            $mod.find('#id_resource_type').find('option').removeAttr('selected');
-            $mod.find('#id_resource_type').find("option[value='']").prop('selected',true);
+            $mod.find('#id_resource_type').find('option').prop('selected', false);
+            $mod.find('#id_resource_type').find("option[value='']").prop('selected', true);
           }
-          var new_rt = $mod.find('#id_resource_type').first().find('option[selected]').first().attr('value');
+          var new_rt = $mod.find('#id_resource_type').first().find('option:selected').first().attr('value');
 
-          var sel_agent = $mod.find('#id_context_agent').find('option[selected]').first().attr('value');
+          var sel_agent = $mod.find('#id_context_agent').find('option:selected').first().attr('value');
           if(old_agent){
-            $mod.find('#id_context_agent').find('option').removeAttr('selected');
-            $mod.find('#id_context_agent').find('option[value='+old_agent+']').prop('selected',true);
+            $mod.find('#id_context_agent').find('option').prop('selected', false);
+            $mod.find('#id_context_agent').find('option[value='+old_agent+']').prop('selected', true);
           } else {
-            $mod.find('#id_context_agent').find('option').removeAttr('selected');
-            $mod.find('#id_context_agent').find("option[value='']").prop('selected',true);
+            $mod.find('#id_context_agent').find('option').prop('selected', false);
+            $mod.find('#id_context_agent').find("option[value='']").prop('selected', true);
           }
-          var new_agent = $mod.find('#id_context_agent').find('option[selected]').first().attr('value');
+          var new_agent = $mod.find('#id_context_agent').find('option:selected').first().attr('value');
 
           $mod.find('#id_unit_type_chosen').find('.search-choice-close').first().click();
-          var sel_unit = $mod.find('#id_unit_type').find('option[selected]').first().attr('value');
+          var sel_unit = $mod.find('#id_unit_type').find('option:selected').first().attr('value');
           if(old_unit){
-            $mod.find('#id_unit_type').find('option').removeAttr('selected');
-            $mod.find('#id_unit_type').find('option[value='+old_unit+']').prop('selected',true);
+            $mod.find('#id_unit_type').find('option').prop('selected', false);
+            $mod.find('#id_unit_type').find('option[value='+old_unit+']').prop('selected', true);
           } else {
-            $mod.find('#id_unit_type').find('option').removeAttr('selected');
-            $mod.find('#id_unit_type').find("option[value='']").prop('selected',true);
+            $mod.find('#id_unit_type').find('option').prop('selected', false);
+            $mod.find('#id_unit_type').find("option[value='']").prop('selected', true);
           }
-          var new_unit = $mod.find('#id_unit_type').find('option[selected]').first().attr('value');
+          var new_unit = $mod.find('#id_unit_type').find('option:selected').first().attr('value');
 
           $mod.find('#id_related_type_chosen').find('.search-choice-close').first().click();
-          var sel_related = $mod.find('#id_related_type').find('option[selected]').first().attr('value');
+          var sel_related = $mod.find('#id_related_type').find('option:selected').first().attr('value');
           if(old_related){
-            $mod.find('#id_related_type').find('option[value='+old_related+']').prop('selected',true);
+            $mod.find('#id_related_type').find('option[value='+old_related+']').prop('selected', true);
           } else {
-            $mod.find('#id_related_type').find("option[value='']").prop('selected',true);
+            $mod.find('#id_related_type').find("option[value='']").prop('selected', true);
           }
-          var new_related = $mod.find('#id_related_type').find('option[selected]').first().attr('value');
+          var new_related = $mod.find('#id_related_type').find('option:selected').first().attr('value');
 
           $mod.find('#id_parent_chosen').find('.search-choice-close').first().click();
-          var sel_parent = $mod.find('#id_parent').find('option[selected]').first().attr('value');
+          var sel_parent = $mod.find('#id_parent').find('option:selected').first().attr('value');
           if(old_parent){
-            $mod.find('#id_parent').find('option[value='+old_parent+']').prop('selected',true);
+            $mod.find('#id_parent').find('option[value='+old_parent+']').prop('selected', true);
           } else {
-            $mod.find('#id_parent').find("option[value='']").prop('selected',true);
+            $mod.find('#id_parent').find("option[value='']").prop('selected', true);
           }
-          var new_parent = $mod.find('#id_parent').find('option[selected]').first().attr('value');
+          var new_parent = $mod.find('#id_parent').find('option:selected').first().attr('value');
 
           if(sel_rt != new_rt){
             $mod.find('#id_resource_type').trigger("chosen:updated");
             if( new_rt != '' && !$mod.find('#id_resource_type_chosen').find('li.result-selected').length ) {
-              alert('Error (js bug): the parent resource type is not displayed (but is selected). Please reselect: '+$('#id_resource_type').find('option[selected]').text()+' ('+new_rt+') sel:'+sel_rt+' new:'+new_rt);
+              //alert('Error (js bug): the parent resource type is not displayed (but is selected). Please reselect: '+$('#id_resource_type').find('option:selected').text()+' ('+new_rt+') sel:'+sel_rt+' new:'+new_rt);
               $mod.find('#id_resource_type').trigger("chosen:updated");
             }
           }
@@ -918,12 +925,12 @@ span.fancytree-title span.edit a:hover {
         }
       },
       select: function(event, data){
-        //var s = data.tree.getSelectedNodes();
-        //if(s.length > 0){
-          update_tree(data);
-        //} else {
-        //  update_tree(data);
-        //}
+        var s = data.tree.getSelectedNodes();
+        if( data.node.isSelected() && !data.node.isActive() ){
+          //data.node.setFocus();
+          data.node.setActive();
+        }
+        update_tree(data);
       },
       beforeSelect: function(event, data){
         //update_tree(data);
@@ -1042,14 +1049,14 @@ span.fancytree-title span.edit a:hover {
           if(karr[0] == ide){
 
             //$('#id_'+tid+'_chosen').find('li.result-selected').removeClass('result-selected').addClass('active-result');
-            $('.id_'+tid).find('option').removeAttr('selected');
+            $('.id_'+tid).find('option').prop('selected', false);
             $('.id_'+tid).find('option[value=""]').prop('selected',true);
             //$(".id_"+tid).trigger("chosen:updated");
 
             $('.id_'+tid).find('option').each(function(){
-              $(this).removeAttr('selected'); //alert(karr[1]);
+              $(this).prop('selected', false); //alert(karr[1]);
               if( $(this).attr('value') == karr[1] ){
-                $(this).prop('selected',true);
+                $(this).prop('selected', true);
               };
             });
             //$(".id_"+tid).trigger("chosen:updated");
@@ -1110,7 +1117,7 @@ span.fancytree-title span.edit a:hover {
           if(!$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length && tid){
 
             //  E R R O R   the choice is not present!
-            alert('error');
+            alert('js error!');
 
             var karr = data.node.key.split('_');
             if(karr[0] == ide){
@@ -1157,9 +1164,9 @@ span.fancytree-title span.edit a:hover {
             var karr = data.node.key.split('_');
             if(karr[0] == ide){
               $tab.find('.id_'+tid).find('option').each(function(){
-                $(this).removeAttr('selected'); //alert(karr[1]);
+                $(this).prop('selected', false); //alert(karr[1]);
                 if( $(this).attr('value') == karr[1] ){
-                  $(this).prop('selected',true);
+                  $(this).prop('selected', true);
                 };
               });
               $tab.find(".id_"+tid).trigger("chosen:updated");
@@ -1230,7 +1237,7 @@ span.fancytree-title span.edit a:hover {
           $('.id_'+tid).find('option').each(function(){
               $(this).removeAttr('selected');
               $(this).prop('selected', false);
-              if($(this).attr('value') == '') $(this).prop('selected',true);
+              if($(this).attr('value') == '') $(this).prop('selected', true);
           });
           $(".id_"+tid).trigger("chosen:activate");
 
@@ -1244,10 +1251,10 @@ span.fancytree-title span.edit a:hover {
 
             //$("#id_"+tid).trigger("chosen:updated");
 
-            if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('.id_'+tid).find('option[selected]').length){
+            if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('.id_'+tid).find('option:selected').length){
               //alert('UpdateTree? / Nothing s:'+s.length+' tid:'+tid+' oCH:'+$tab.find('#id_'+tid).find('option[selected]').length);
               //$('.id_'+tid).find('option[selected]').exclude("[value='']").removeAttr('selected');
-              if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('.id_'+tid).find('option[selected]').length){
+              if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0 || $tab.find('.id_'+tid).find('option:selected').length){
                 //alert('UpdateTree?? / Nothing s:'+s.length+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length);
               }
             }
@@ -1266,8 +1273,8 @@ span.fancytree-title span.edit a:hover {
         } else { // tree has no focus
 
           var yd = $tab.find('#id_'+tid+'_chosen').find('li.result-selected').first().attr('data-option-array-index');
-          $tab.find('.id_'+tid).find('option[selected]').removeAttr('selected');
-          $tab.find('.id_'+tid).find('option:eq('+yd+')').first().prop('selected',true);
+          $tab.find('.id_'+tid).find('option:selected').prop('selected', false);
+          $tab.find('.id_'+tid).find('option:eq('+yd+')').first().prop('selected', true);
           //$('#id_'+tid+'_chosen').find('li.result-selected').removeClass('result-selected').addClass('active-result');
           //$('#id_'+tid).find('option[selected]').removeAttr('selected');
           $(".id_"+tid).trigger("chosen:updated");
@@ -1353,15 +1360,15 @@ span.fancytree-title span.edit a:hover {
         $tab.find('#id_'+tid+'_chosen').find('li.search-field').show();
 
         $('#id_'+tid+'_chosen').find('li.result-selected').removeClass('result-selected').addClass('active-result');
-        $('.id_'+tid).find('option[selected]').removeAttr('selected');
-        $('.id_'+tid).find('option[value=""]').prop('selected',true);
+        $('.id_'+tid).find('option:selected').prop('selected', false);
+        $('.id_'+tid).find('option[value=""]').prop('selected', true);
 
         if(!tree.length){// || ide == 'Eid_'){
-          alert('NO TREE! dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option[selected]').text()+' tree:'+tree.length);
+          alert('NO TREE! dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option:selected').text()+' tree:'+tree.length);
 
-          if( $tab.find('#id_'+tid).find('option[selected]').length && !$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
-            alert('NO TREE: repair select... dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option[selected]').text()+' tree:'+tree.length);
-            $tab.find('#id_'+tid).find('option[value='+dess+']').removeAttr('selected');
+          if( $tab.find('#id_'+tid).find('option:selected').length && !$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
+            alert('NO TREE: repair select... dess:'+dess+' tab:'+$tab.attr('id')+' tid:'+tid+' ide:'+ide+' sel:'+$tab.find('#id_'+tid).find('option:selected').text()+' tree:'+tree.length);
+            $tab.find('#id_'+tid).find('option[value='+dess+']').prop('selected', false);
           }
         }
 
@@ -1395,8 +1402,8 @@ span.fancytree-title span.edit a:hover {
                   $(this).removeClass('result-selected').addClass('active-result');
               });
               $('.id_'+tid).find('option').each(function(){
-                  $(this).removeAttr('selected');
-                  if($(this).attr('value') == '') $(this).prop('selected',true);
+                  $(this).prop('selected', false);
+                  if($(this).attr('value') == '') $(this).prop('selected', true);
               });
 
               tree.fancytree("getTree").activateKey(ide+dess);
@@ -1414,7 +1421,7 @@ span.fancytree-title span.edit a:hover {
               //alert('CH DESS tree has focus this:'+$this.parent().find('span').first().html()+' (node:'+node.key+'), dess:'+dess+' tid:'+tid+' sCH:'+$('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') oCH:'+$('#id_'+tid).find('option[selected]').length+' ('+$('#id_'+tid).find('option[selected]').first().html()+')');
           //}
         } else {
-            alert('CH DESS there is no tree! tab:'+$tab.attr('id')+', dess:'+dess+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') oCH:'+$tab.find('#id_'+tid).find('option[selected]').length+' ('+$tab.find('#id_'+tid).find('option[selected]').first().html()+')');
+            alert('CH DESS there is no tree! tab:'+$tab.attr('id')+', dess:'+dess+' tid:'+tid+' sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').first().text()+') rCH:'+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').length+' ('+$tab.find('#id_'+tid+'_chosen').find('li.result-selected').first().html()+') oCH:'+$tab.find('#id_'+tid).find('option:selected').length+' ('+$tab.find('#id_'+tid).find('option:selected').first().html()+')');
         }
 
       }; // end DESS
@@ -1424,11 +1431,11 @@ span.fancytree-title span.edit a:hover {
         if(!tree.length){ // || ide == 'Eid_'){
 
           alert('Chosen Change / modal select? $tab:'+$tab.attr('id'));
-          $tab.find('#id_'+tid).find('option[selected]').removeAttr('selected');
-          $tab.find('#id_'+tid).find('option[value='+sels+']').prop('selected',true);
+          $tab.find('#id_'+tid).find('option:selected').prop('selected', false);
+          $tab.find('#id_'+tid).find('option[value='+sels+']').prop('selected', true);
 
-          if( !$tab.find('#id_'+tid).find('option[selected]').length && $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
-            alert('NO TREE: repair sels:'+sels+' tab:'+$tab.attr('id')+' tid:'+tid+' force select:'+$tab.find('#id_'+tid).find('option[selected]').length);
+          if( !$tab.find('#id_'+tid).find('option:selected').length && $tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ) {
+            alert('NO TREE: repair sels:'+sels+' tab:'+$tab.attr('id')+' tid:'+tid+' force select:'+$tab.find('#id_'+tid).find('option:selected').length);
             $tab.find('#id_'+tid).find('option[value='+sels+']').prop('selected',true);
 
           }
@@ -1463,8 +1470,8 @@ span.fancytree-title span.edit a:hover {
             tree.fancytree("getTree").setFocus(false);
 
             $('.id_'+tid).find('option').each(function(){
-                $(this).removeAttr('selected');
-                if($(this).attr('value') == sels) $(this).prop('selected',true);
+                $(this).prop('selected', false);
+                if($(this).attr('value') == sels) $(this).prop('selected', true);
             });
 
 
@@ -1496,6 +1503,7 @@ span.fancytree-title span.edit a:hover {
       //tree.focus();
 
       $("#addResourceTypeModal .id_"+tid).trigger("chosen:updated");
+      $("#addSkillTypeModal .id_"+tid).trigger("chosen:updated");
 
     };
 

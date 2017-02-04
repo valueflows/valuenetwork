@@ -872,6 +872,7 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
           self.fields["agent"].queryset = context_agents
 
 
+'''
 class NewContextExchangeTypeForm(forms.Form):  # still not used !
     parent_exchange_type = TreeNodeChoiceField(
         queryset=Ocp_Record_Type.objects.all(),
@@ -907,15 +908,6 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
         )
     )
 
-    '''
-    use_case = forms.ModelChoiceField(
-        queryset=UseCase.objects.exchange_use_cases(),
-        empty_label=None,
-        widget=forms.Select(
-            attrs={'class': 'use-case chzn-select'}))
-    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input-xlarge',})) # not required now, to be set in the next page
-    '''
-
     class Meta:
         fields = ('resource_type', 'skill_type')
 
@@ -942,6 +934,7 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
             #pass
             self.fields["parent_exchange_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
             self.fields["parent_exchange_type"].queryset = Ocp_Record_Type.objects.none() #all()
+'''
 
 
 
@@ -997,8 +990,8 @@ class NewResourceTypeForm(forms.Form):
         required=False,
         empty_label='', #_('. . .'),
         level_indicator='. ',
-        label=_("Has a main related resource type?"),
-        help_text=_('If this resource type is mainly related another resource type, choose it here.'),
+        label=_("Has a main related resource type from another branch?"),
+        help_text=_('If this resource type is mainly related another resource type from a different branch, choose it here.'),
         widget=forms.Select(
             attrs={'class': 'id_related_type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
     )

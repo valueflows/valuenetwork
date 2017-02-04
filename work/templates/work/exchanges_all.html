@@ -1063,8 +1063,8 @@ span.fancytree-title span.edit a:hover {
 
             //alert(opts.length);
             if( tid == "exchange_type" ){
-                if(!$.isEmptyObject(data.node.data)){
-                  var rel = data.node.data.related; //$tab.find('li#'+data.node.key).first().attr('related');//data.node.related;
+                if(!$.isEmptyObject(data.node.data)){ // when an exchange type is related a resource_type
+                  var rel = data.node.data.related;
                   var rar = rel.split('_');
                   if( rar[0] == 'Rid' ) {
                     var rtree = $('#resource_type_tree').first();//resource_skill').find('#'+rel);
@@ -1072,7 +1072,7 @@ span.fancytree-title span.edit a:hover {
                     var node = rtree.fancytree("getTree").getActiveNode();
                     node.setSelected(true);//toggleSelected();
                     //node.setFocus(true);
-                    node.setActive(false);
+                    //node.setActive(false);
                     node.setFocus(false);
                     rtree.fancytree("getRootNode").visit(function(node){
                       //node.setExpanded(false);
@@ -1082,6 +1082,7 @@ span.fancytree-title span.edit a:hover {
                     });
                     rtree.fancytree("getTree").setFocus(false);
                   } else {
+                    alert('Related? rel:'+rel);
                     var rtree = $('#resource_type_tree').first();
                     var node = rtree.fancytree("getTree").getActiveNode();
                     if(node && node.isSelected()){
@@ -1239,10 +1240,10 @@ span.fancytree-title span.edit a:hover {
               $(this).prop('selected', false);
               if($(this).attr('value') == '') $(this).prop('selected', true);
           });
-          $(".id_"+tid).trigger("chosen:activate");
+          $(".id_"+tid).trigger("chosen:updated");
 
           if($tab.find('#id_'+tid+'_chosen').find('li.search-choice').length > 0){
-            //alert('UpdateTree: Nothing selected, repair chosen? sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' oCH:'+$tab.find('#id_'+tid).find('option[selected]').length);
+            alert('UpdateTree: Nothing selected, repair chosen? sCH:'+$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length+' oCH:'+$tab.find('#id_'+tid).find('option:selected').length);
             //var yd = $('#id_'+tid+'_chosen').find('li.result-selected').first().attr('data-option-array-index');
             //$('.id_'+tid).find('option[selected]').removeAttr('selected');
             //$('.id_'+tid).find('option:eq('+yd+')').first().prop('selected',true);
@@ -1267,7 +1268,7 @@ span.fancytree-title span.edit a:hover {
           //$("#addResourceTypeModal .id_"+tid).trigger("chosen:updated");
           //$("#id_"+tid).trigger("chosen:updated");
           //$("#id_"+tid+'_chosen').find('.search-field input').focus();
-          data.tree.setFocus();
+          //data.tree.setFocus();
           //data.tree.$div.focus();
 
         } else { // tree has no focus
@@ -1342,7 +1343,7 @@ span.fancytree-title span.edit a:hover {
           //$nav = $('.ui-tabs .ui-tabs-nav li[aria-controls='+$tab.attr('id')+'] a');//.click();
         }
       } else if( !tree.length ){
-        alert('Chosen Change / modal select? $tab:'+$tab.attr('id')+' dess:'+dess+' sels:'+sels);
+        //alert('Chosen Change / modal select? $tab:'+$tab.attr('id')+' dess:'+dess+' sels:'+sels);
       };
       //alert('Chosen Change / tab:'+$tab.attr('id')+' tid:'+tid+' sel:'+sels+' des:'+dess+' ('+$('#'+ide+dess).length+') tree:'+tree.attr('id')+' ('+tree.length+') ide:'+ide+' nav:'+$nav.length+' tarr:'+tarr.join('_')+' edit:'+$('span.edit#'+ide+sels).length);
 
@@ -1458,7 +1459,7 @@ span.fancytree-title span.edit a:hover {
                 $(this).removeClass('result-selected').addClass('active-result');
             });
 
-            if(sel[0]) sel[0].setSelected(false);
+            if(typeof sel[0] != 'undefined') sel[0].setSelected(false);
             tree.fancytree("getTree").activateKey(ide+sels);
             var node = tree.fancytree("getTree").getActiveNode();
             if(node){

@@ -3738,7 +3738,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                                     ttfv, created = TransferTypeFacetValue.objects.get_or_create(
                                       transfer_type=new_tr,
                                       facet_value=pr.facet_value,
-                                      # defaults={'birthday': date(1940, 10, 9)},
+                                      # defaults={},
                                     )
                                     if ttfv:
                                       new_tr.facet_values.add(ttfv)
@@ -3748,17 +3748,17 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                               new_tr.facet_values = old_fvs
                               #import pdb; pdb.set_trace()
 
-                          # end for tr in
+                          # end for tr in ext.transfer_types.all()
                           return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                               % ('work/agent', agent.id, 'exchange-logging-work', new_ext.id, 0))
 
-                        else: # not inherited, rise error TODO
+                        else: # not inherited, rise error
                           raise ValidationError("No transfer inheriting types in this exchange type! "+ext.name)
 
-                      else: # endif name and uc:
+                      else: # end if name and uc:
                         raise ValidationError("Bad new name ("+name+") or no use case in the parent exchange type! "+ext.name)
 
-                    else: # endif hasattr(data["resource_type"], 'id')
+                    else: # end if hasattr(data["resource_type"], 'id')
                       # perhaps only skill? TODO
                       pass
 
@@ -3962,7 +3962,81 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 else: # have no parent resource field
                   pass
 
-        '''new_exchange_type = request.POST.get("new-exchange-type") # TODO
+        # there's no new_resource_type = request.POST.get("new_resource_type")
+        new_skill_type = request.POST.get("new_skill_type")
+        if new_skill_type:
+            if Stype_form.is_valid():
+                #raise ValidationError("New resource type, valid")
+                data = Stype_form.cleaned_data
+                if hasattr(data["parent_type"], 'id'):
+                  parent_rt = Ocp_Skill_Type.objects.get(id=data["parent_type"].id)
+                  if parent_rt.id:
+                    out = None
+                    if hasattr(data["unit_type"], 'id'):
+                      gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
+                      out = gut.ocp_unit
+                    new_rt = EconomicResourceType(
+                      name=data["name"],
+                      description=data["description"],
+                      unit=out,
+                      price_per_unit=data["price_per_unit"],
+                      substitutable=False, #data["substitutable"],
+                      context_agent=data["context_agent"],
+                      url=data["url"],
+                      photo_url=data["photo_url"],
+                      #parent=data["parent"],
+                      created_by=request.user,
+                      behavior="work",
+                      inventory_rule="never",
+                    )
+                    new_rt.save()
+
+                    # mptt: get_ancestors(ascending=False, include_self=False)
+                    ancs = parent_rt.get_ancestors(True, True)
+                    for an in ancs:
+                      #if an.clas != 'Artwork':
+                        an = Ocp_Skill_Type.objects.get(id=an.id)
+                        if an.resource_type:
+                          for fv in an.resource_type.facets.all():
+                            new_rtfv = ResourceTypeFacetValue(
+                              resource_type=new_rt,
+                              facet_value=fv.facet_value
+                            )
+                            new_rtfv.save()
+                          break
+                        elif an.facet_value:
+                          new_rtfv = ResourceTypeFacetValue(
+                              resource_type=new_rt,
+                              facet_value=an.facet_value
+                          )
+                          new_rtfv.save()
+                          break
+
+                    new_oat = Ocp_Skill_Type(
+                      name=data["name"],
+                      verb=data["verb"],
+                      gerund=data["gerund"],
+                      description=data["description"],
+                      resource_type=new_rt,
+                      ocp_artwork_type=data["related_type"],
+                    )
+                    # mptt: insert_node(node, target, position='last-child', save=False)
+                    new_ski = Ocp_Skill_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
+
+                    nav_form = ExchangeNavForm(agent=agent, data=None)
+                    Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                    Stype_form = NewSkillTypeForm(agent=agent, data=None)
+
+                  else: # have no parent_type id
+                    pass
+                else: # have no parent resource field
+                  pass
+            else:
+                pass #raise ValidationError(Rtype_form.errors)
+
+
+        '''
+        new_exchange_type = request.POST.get("new-exchange-type") # TODO
         if new_exchange_type:
             if new_form.is_valid():
                 data = new_form.cleaned_data

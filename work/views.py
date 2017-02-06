@@ -1197,6 +1197,7 @@ def transfer_faircoins(request, resource_id):
             data = send_coins_form.cleaned_data
             address_end = data["to_address"]
             quantity = data["quantity"]
+            notes = data["description"]
             address_origin = resource.digital_currency_address
             if address_origin and address_end:
                 from_agent = resource.owner()
@@ -1215,6 +1216,7 @@ def transfer_faircoins(request, resource_id):
                         use_case=xt.use_case,
                         name="Transfer Faircoins",
                         start_date=date,
+                        notes=notes,
                         )
                     exchange.save()
                     transfer = Transfer(
@@ -1222,6 +1224,7 @@ def transfer_faircoins(request, resource_id):
                         exchange=exchange,
                         transfer_date=date,
                         name="Transfer Faircoins",
+                        notes=notes,
                         )
                     transfer.save()
                 else:
@@ -1233,6 +1236,7 @@ def transfer_faircoins(request, resource_id):
                         use_case=xt.use_case,
                         name="Send Faircoins",
                         start_date=date,
+                        notes=notes,
                         )
                     exchange.save()
                     transfer = Transfer(
@@ -1240,6 +1244,7 @@ def transfer_faircoins(request, resource_id):
                         exchange=exchange,
                         transfer_date=date,
                         name="Send Faircoins",
+                        notes=notes,
                         )
                     transfer.save()
 
@@ -1258,6 +1263,7 @@ def transfer_faircoins(request, resource_id):
                     quantity = quantity,
                     transfer=transfer,
                     event_reference=address_end,
+                    description=notes,
                     )
                 event.save()
                 if to_agent:
@@ -1275,6 +1281,7 @@ def transfer_faircoins(request, resource_id):
                         quantity = quantity,
                         transfer=transfer,
                         event_reference=address_end,
+                        description=notes,
                         )
                     event.save()
                     #print "receive event:", event

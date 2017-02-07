@@ -36,9 +36,12 @@
             {% trans "Account History for" %} {{ resource.identifier }}&nbsp;&nbsp;
 
             <div class="subnav">
-                 {% if resource.id %}
-                     <a class="indent" href="{% url "manage_faircoin_account" resource_id=resource.id %}">Manage Account</a>
-                 {% endif %}
+                {% if resource.id %}
+                    <a class="indent" href="{% url "manage_faircoin_account" resource_id=resource.id %}">Manage Account</a>
+                {% endif %}
+                {% if resource.owner %}
+                    <a class="indent" href="{% url 'members_agent' agent_id=resource.owner.id %}">{% trans "View Owner" %}</a>
+                {% endif %}
             </div>
         </legend>
 

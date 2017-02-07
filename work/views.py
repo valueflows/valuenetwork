@@ -2948,6 +2948,22 @@ def invoice_number(request):
         "invoice_numbers": invoice_numbers,
     }, context_instance=RequestContext(request))
 
+
+@login_required
+def edit_faircoin_event_description(request, resource_id):
+    agent = get_agent(request)
+    resource = EconomicResource.objects.get(id=resource_id)
+    if request.method == "POST":
+        data = request.POST
+        evid = data['id']
+        ntext = data['value']
+        event = EconomicEvent.objects.get(id=evid)
+        event.description = ntext
+        event.save()
+        return HttpResponse("Ok", content_type="text/plain")
+    return HttpResponse("Fail", content_type="text/plain")
+
+
 '''
 @login_required
 def create_project_user_and_agent(request, agent_id):

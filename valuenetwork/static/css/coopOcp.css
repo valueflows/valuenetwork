@@ -215,7 +215,7 @@ legend a.btn {
   border-bottom: 1px #CACAC6;
   border-left: none;
 }
-.table-bordered tr:first-child th {
+/*.table-bordered tr:first-child th {
   -moz-border-radius: 7px 0 0 0;
   -webkit-border-radius: 7px 0 0 0;
   border-radius: 7px 0 0 0;
@@ -224,6 +224,26 @@ legend a.btn {
   -moz-border-radius: 0 0 0 7px;
   -webkit-border-radius: 0 0 0 7px;
   border-radius: 0 0 0 7px;
+}*/
+.table-bordered thead:first-child tr:first-child th:first-child {
+  -webkit-border-top-left-radius: 7px;
+  border-top-left-radius: 7px;
+  -moz-border-radius-topleft: 7px;
+}
+.table-bordered thead:first-child tr:first-child th:last-child {
+  -webkit-border-top-right-radius: 7px;
+  border-top-right-radius: 7px;
+  -moz-border-radius-topright: 7px;
+}
+.table-bordered tbody:last-child tr:last-child td:last-child {
+  -webkit-border-bottom-right-radius: 7px;
+  border-bottom-right-radius: 7px;
+  -moz-border-radius-bottomright: 7px;
+}
+.table-bordered tbody:last-child tr:last-child td:first-child {
+  -webkit-border-bottom-left-radius: 7px;
+  border-bottom-left-radius: 7px;
+  -moz-border-radius-bottomleft: 7px;
 }
 
 

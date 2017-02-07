@@ -156,7 +156,6 @@
                );
                posting.done(function(data){
                    if(data !== 'Ok') alert('Error saving the new description. '+data);
-
                }).fail(function(data) {
                    console.log(data['statusText']);
                    out = '';
@@ -167,10 +166,12 @@
                });
                return(value);
             }
-            //, {
-            //  submit : 'OK',
-            //  type : 'text',
-            //}
+            , {
+              //submit : 'OK',
+              //type : 'text',
+              tooltip : 'Click to edit...',
+              placeholder : '<em>...click to write</em>',
+            }
         );
        {% endif %}
     }); // end document.ready

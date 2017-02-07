@@ -144,8 +144,8 @@
 
     $(document).ready(function(){
 
-        //$('#inventory').addClass('active');
 
+      {% if resource.owner == agent or resource.owner in agent.managed_projects %}
         $('.edit').editable(
             function(value, settings) {
                //console.log(this);
@@ -172,7 +172,7 @@
             //  type : 'text',
             //}
         );
-
+       {% endif %}
     }); // end document.ready
 
 

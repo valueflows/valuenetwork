@@ -1427,13 +1427,15 @@ def faircoin_history(request, resource_id):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
-
-    return render_to_response("work/faircoin_history.html", {
-        "resource": resource,
-        "agent": agent,
-        "unit": unit,
-        "events": events,
-    }, context_instance=RequestContext(request))
+    if resource.owner() == agent or resource.owner() in agent.managed_projects() or agent.is_staff():
+        return render_to_response("work/faircoin_history.html", {
+            "resource": resource,
+            "agent": agent,
+            "unit": unit,
+            "events": events,
+        }, context_instance=RequestContext(request))
+    else:
+        return render_to_response('work/no_permission.html')
 
 def membership_request(request):
     membership_form = MembershipRequestForm(data=request.POST or None)
@@ -1551,7 +1553,7 @@ def membership_discussion(request, membership_request_id):
         if user_agent.membership_request() == mbr_req or request.user.is_staff:
             allowed = True
     if not allowed:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render_to_response('work/no_permission.html')
 
     return render_to_response("work/membership_request_with_comments.html", {
         "help": get_help("membership_request"),

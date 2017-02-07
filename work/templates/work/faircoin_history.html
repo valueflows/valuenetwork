@@ -154,8 +154,9 @@
                var posting = $.post('{% url "edit_faircoin_event_description" resource_id=resource.id %}',
                    {id:$(this).attr('id'), value:value}
                );
-              posting.done(function(data){
-                   //alert('DONE: '+data);
+               posting.done(function(data){
+                   if(data !== 'Ok') alert('Error saving the new description. '+data);
+
                }).fail(function(data) {
                    console.log(data['statusText']);
                    out = '';

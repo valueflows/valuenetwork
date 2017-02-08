@@ -3480,154 +3480,9 @@ def order_delete_confirmation_work(request, order_id):
             #        % ('work/closed-work-orders'))
 
 
-@login_required
-def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exchange_id=None):
-    #import pdb; pdb.set_trace()
-    context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
-    agent = get_agent(request)
-    logger = False
-    add_work_form = None
-    if agent:
-        if request.user.is_superuser:
-            logger = True
-
-    if exchange_type_id != "0": #new exchange
-        if agent:
-            exchange_type = get_object_or_404(ExchangeType, id=exchange_type_id)
-            use_case = exchange_type.use_case
-
-            exchange_form = ExchangeContextForm()
-            #if request.method == "POST":
-            #    exchange_form = ExchangeContextForm(data=request.POST)
-            #    if exchange_form.is_valid():
-            exchange = exchange_form.save(commit=False)
-            exchange.context_agent = context_agent
-            exchange.use_case = use_case
-            exchange.exchange_type = exchange_type
-            exchange.created_by = request.user
-            exchange.start_date = datetime.date.today()
-            exchange.save()
-
-            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                  % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
-
-            '''exchange_form = ExchangeContextForm()
-            slots = exchange_type.slots()
-            return render_to_response("work/exchange_logging_work.html", {
-                "use_case": use_case,
-                "exchange_type": exchange_type,
-                "exchange_form": exchange_form,
-                "agent": agent,
-                "context_agent": context_agent,
-                "user": request.user,
-                "logger": logger,
-                "slots": slots,
-                "total_t": 0,
-                "total_rect": 0,
-                "help": get_help("exchange"),
-            }, context_instance=RequestContext(request))'''
-        else:
-            raise ValidationError("System Error: No agent, not allowed to create exchange.")
-
-    elif exchange_id != "0": #existing exchange
-        exchange = get_object_or_404(Exchange, id=exchange_id)
-
-        if request.method == "POST":
-            #import pdb; pdb.set_trace()
-            exchange_form = ExchangeContextForm(instance=exchange, data=request.POST)
-            if exchange_form.is_valid():
-                exchange = exchange_form.save()
-                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
-
-        exchange_type = exchange.exchange_type
-        use_case = exchange_type.use_case
-        exchange_form = ExchangeContextForm(instance=exchange)
-
-        slots = []
-        total_t = 0
-        total_rect = 0
-        #import pdb; pdb.set_trace()
-        work_events = exchange.work_events()
-        slots = exchange.slots_with_detail()
-
-        for slot in slots:
-            if slot.is_reciprocal:
-                total_rect = total_rect + slot.total
-            else:
-                total_t = total_t + slot.total
-
-        if agent:
-            #import pdb; pdb.set_trace()
-            if request.user == exchange.created_by:
-                logger = True
-
-            for event in work_events:
-                event.changeform = WorkEventContextAgentForm(
-                    context_agent=context_agent,
-                    instance=event,
-                    prefix=str(event.id))
-            work_init = {
-                "from_agent": agent,
-                "event_date": datetime.date.today()
-            }
-            add_work_form = WorkEventContextAgentForm(initial=work_init, context_agent=context_agent)
-
-            #import pdb; pdb.set_trace()
-            for slot in slots:
-                ta_init = slot.default_to_agent
-                fa_init = slot.default_from_agent
-                if not ta_init:
-                    ta_init = agent
-                if not fa_init:
-                    fa_init = agent
-                xfer_init = {
-                    "from_agent": fa_init,
-                    "to_agent": ta_init,
-                    "event_date": datetime.date.today()
-                }
-                slot.add_xfer_form = ContextTransferForm(initial=xfer_init, prefix="ATR" + str(slot.id), context_agent=context_agent, transfer_type=slot)
-                slot.create_role_formset = resource_role_context_agent_formset(prefix=str(slot.id))
-                ctx_qs = context_agent.related_all_agents_queryset()
-                for form in slot.create_role_formset.forms:
-                    form.fields["agent"].queryset = ctx_qs
-
-                commit_init = {
-                    "from_agent": fa_init,
-                    "to_agent": ta_init,
-                    "commitment_date": datetime.date.today(),
-                    "due_date": exchange.start_date,
-                }
-                slot.add_commit_form = ContextTransferCommitmentForm(initial=commit_init, prefix="ACM" + str(slot.id), context_agent=context_agent, transfer_type=slot)
-
-    else:
-        raise ValidationError("System Error: No exchange or use case.")
-
-    return render_to_response("work/exchange_logging_work.html", {
-        "use_case": use_case,
-        "exchange": exchange,
-        "exchange_type": exchange_type,
-        "exchange_form": exchange_form,
-        "agent": agent,
-        "context_agent": context_agent,
-        "logger": logger,
-        "slots": slots,
-        "work_events": work_events,
-        "add_work_form": add_work_form,
-        "total_t": total_t,
-        "total_rect": total_rect,
-        "help": get_help("exchange"),
-        "add_type": add_new_type_mkp(),
-    }, context_instance=RequestContext(request))
 
 
-def add_new_type_mkp():
-    out = "" #"<div class='add-new-type'><p>"
-    out += str(_("If you don't find a type that suits, choose a subcategory and click:"))
-    #out += "</p><a href='#' class='btn-mini'>New Resource Type</a>"
-    #out += "</div>"
-    return out
-
+#    E X C H A N G E S   A L L
 
 @login_required
 def exchanges_all(request, agent_id): #all types of exchanges for one context agent
@@ -4149,6 +4004,967 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         #"unit_types": unit_types,
         #"new_form": new_form,
     }, context_instance=RequestContext(request))
+
+
+
+
+#    E X C H A N G E   L O G G I N G
+
+@login_required
+def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exchange_id=None):
+    #import pdb; pdb.set_trace()
+    context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
+    agent = get_agent(request)
+    logger = False
+    add_work_form = None
+    if agent:
+        if request.user.is_superuser:
+            logger = True
+
+    if exchange_type_id != "0": #new exchange
+        if agent:
+            exchange_type = get_object_or_404(ExchangeType, id=exchange_type_id)
+            use_case = exchange_type.use_case
+
+            exchange_form = ExchangeContextForm()
+            #if request.method == "POST":
+            #    exchange_form = ExchangeContextForm(data=request.POST)
+            #    if exchange_form.is_valid():
+            exchange = exchange_form.save(commit=False)
+            exchange.context_agent = context_agent
+            exchange.use_case = use_case
+            exchange.exchange_type = exchange_type
+            exchange.created_by = request.user
+            exchange.start_date = datetime.date.today()
+            exchange.save()
+
+            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                  % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+            '''exchange_form = ExchangeContextForm()
+            slots = exchange_type.slots()
+            return render_to_response("work/exchange_logging_work.html", {
+                "use_case": use_case,
+                "exchange_type": exchange_type,
+                "exchange_form": exchange_form,
+                "agent": agent,
+                "context_agent": context_agent,
+                "user": request.user,
+                "logger": logger,
+                "slots": slots,
+                "total_t": 0,
+                "total_rect": 0,
+                "help": get_help("exchange"),
+            }, context_instance=RequestContext(request))'''
+        else:
+            raise ValidationError("System Error: No agent, not allowed to create exchange.")
+
+    elif exchange_id != "0": #existing exchange
+        exchange = get_object_or_404(Exchange, id=exchange_id)
+
+        if request.method == "POST":
+            #import pdb; pdb.set_trace()
+            exchange_form = ExchangeContextForm(instance=exchange, data=request.POST)
+            if exchange_form.is_valid():
+                exchange = exchange_form.save()
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+        exchange_type = exchange.exchange_type
+        use_case = exchange_type.use_case
+        exchange_form = ExchangeContextForm(instance=exchange)
+
+        slots = []
+        total_t = 0
+        total_rect = 0
+        #import pdb; pdb.set_trace()
+        work_events = exchange.work_events()
+        slots = exchange.slots_with_detail()
+
+        for slot in slots:
+            if slot.is_reciprocal:
+                total_rect = total_rect + slot.total
+            else:
+                total_t = total_t + slot.total
+
+        if agent:
+            #import pdb; pdb.set_trace()
+            if request.user == exchange.created_by:
+                logger = True
+
+            for event in work_events:
+                event.changeform = WorkEventContextAgentForm(
+                    context_agent=context_agent,
+                    instance=event,
+                    prefix=str(event.id))
+            work_init = {
+                "from_agent": agent,
+                "event_date": datetime.date.today()
+            }
+            add_work_form = WorkEventContextAgentForm(initial=work_init, context_agent=context_agent)
+
+            #import pdb; pdb.set_trace()
+            for slot in slots:
+                ta_init = slot.default_to_agent
+                fa_init = slot.default_from_agent
+                if not ta_init:
+                    ta_init = agent
+                if not fa_init:
+                    fa_init = agent
+                xfer_init = {
+                    "from_agent": fa_init,
+                    "to_agent": ta_init,
+                    "event_date": datetime.date.today()
+                }
+                slot.add_xfer_form = ContextTransferForm(initial=xfer_init, prefix="ATR" + str(slot.id), context_agent=context_agent, transfer_type=slot)
+                slot.create_role_formset = resource_role_context_agent_formset(prefix=str(slot.id))
+                ctx_qs = context_agent.related_all_agents_queryset()
+                for form in slot.create_role_formset.forms:
+                    form.fields["agent"].queryset = ctx_qs
+
+                commit_init = {
+                    "from_agent": fa_init,
+                    "to_agent": ta_init,
+                    "commitment_date": datetime.date.today(),
+                    "due_date": exchange.start_date,
+                }
+                slot.add_commit_form = ContextTransferCommitmentForm(initial=commit_init, prefix="ACM" + str(slot.id), context_agent=context_agent, transfer_type=slot)
+
+    else:
+        raise ValidationError("System Error: No exchange or use case.")
+
+    return render_to_response("work/exchange_logging_work.html", {
+        "use_case": use_case,
+        "exchange": exchange,
+        "exchange_type": exchange_type,
+        "exchange_form": exchange_form,
+        "agent": agent,
+        "context_agent": context_agent,
+        "logger": logger,
+        "slots": slots,
+        "work_events": work_events,
+        "add_work_form": add_work_form,
+        "total_t": total_t,
+        "total_rect": total_rect,
+        "help": get_help("exchange"),
+        "add_type": add_new_type_mkp(),
+    }, context_instance=RequestContext(request))
+
+
+def add_new_type_mkp():
+    out = "" #"<div class='add-new-type'><p>"
+    out += str(_("If you don't find a type that suits, choose a subcategory and click:"))
+    #out += "</p><a href='#' class='btn-mini'>New Resource Type</a>"
+    #out += "</div>"
+    return out
+
+
+# functions copied from valuenetwork.views because were only running by staff
+
+@login_required
+def add_transfer(request, exchange_id, transfer_type_id):
+    #import pdb; pdb.set_trace()
+    exchange = get_object_or_404(Exchange, pk=exchange_id)
+    transfer_type = get_object_or_404(TransferType, pk=transfer_type_id)
+    if request.method == "POST":
+        exchange_type = exchange.exchange_type
+        context_agent = exchange.context_agent
+
+        form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ATR" + str(transfer_type.id))
+
+        if form.is_valid():
+            data = form.cleaned_data
+            qty = data["quantity"]
+            res = None
+            res_from = None
+            et2 = None
+            res_identifier = None
+            if qty:
+                et_give = EventType.objects.get(name="Give")
+                et_receive = EventType.objects.get(name="Receive")
+                event_date = data["event_date"]
+                if transfer_type.give_agent_is_context:
+                    from_agent = context_agent
+                else:
+                    from_agent = data["from_agent"]
+                if transfer_type.receive_agent_is_context:
+                    to_agent = context_agent
+                else:
+                    to_agent = data["to_agent"]
+
+                rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+                #import pdb; pdb.set_trace()
+                #if not transfer_type.can_create_resource:
+                res = data["resource"]
+                if transfer_type.is_currency:
+                    res_from = data["from_resource"]
+                description = data["description"]
+                if transfer_type.is_currency:
+                    value = qty
+                    unit_of_value = rt.unit
+                else:
+                    value = data["value"]
+                    if value:
+                        unit_of_value = data["unit_of_value"]
+                    else:
+                        unit_of_value = None
+                if transfer_type.is_contribution:
+                    is_contribution = data["is_contribution"]
+                else:
+                    is_contribution = False
+                if transfer_type.is_to_distribute:
+                    is_to_distribute = data["is_to_distribute"]
+                else:
+                    is_to_distribute = False
+                event_ref = data["event_reference"]
+                if transfer_type.can_create_resource:
+                    #res = data["resource"]
+                    if not res:
+                        res_identifier = data["identifier"]
+                        if res_identifier:
+                            res = EconomicResource(
+                                identifier=res_identifier,
+                                url=data["url"],
+                                photo_url=data["photo_url"],
+                                current_location=data["current_location"],
+                                notes=data["notes"],
+                                access_rules=data["access_rules"],
+                                resource_type=rt,
+                                exchange_stage=exchange_type,
+                                quantity=0,
+                                created_by=request.user,
+                                )
+                if exchange.exchange_type.use_case == UseCase.objects.get(identifier="supply_xfer"):
+                    if transfer_type.is_reciprocal:
+                        if res:
+                            res.quantity -= qty
+                        et = et_give
+                    else:
+                        if res:
+                            res.quantity += qty
+                        et = et_receive
+                elif exchange.exchange_type.use_case == UseCase.objects.get(identifier="demand_xfer"):
+                    if transfer_type.is_reciprocal:
+                        if res:
+                            res.quantity += qty
+                        et = et_receive
+                    else:
+                        if res:
+                            res.quantity -= qty
+                        et = et_give
+                else: #internal xfer use case
+                    if transfer_type.is_reciprocal:
+                        et = et_receive
+                        et2 = et_give
+                    else:
+                        et = et_give
+                        et2 = et_receive
+                    if transfer_type.is_currency:
+                        if res != res_from:
+                            if res:
+                                res.quantity += qty
+                            if res_from:
+                                res_from.quantity -= qty
+                if res:
+                    res.save()
+                if res_from:
+                    res_from.save()
+                if res_identifier: #new resource
+                    create_role_formset = resource_role_context_agent_formset(prefix=str(transfer_type.id), data=request.POST)
+                    for form_rra in create_role_formset.forms:
+                        if form_rra.is_valid():
+                            data_rra = form_rra.cleaned_data
+                            if data_rra:
+                                data_rra = form_rra.cleaned_data
+                                role = data_rra["role"]
+                                agent = data_rra["agent"]
+                                if role and agent:
+                                    rra = AgentResourceRole()
+                                    rra.agent = agent
+                                    rra.role = role
+                                    rra.resource = res
+                                    rra.is_contact = data_rra["is_contact"]
+                                    rra.save()
+
+                xfer_name = transfer_type.name
+                if transfer_type.is_reciprocal:
+                    xfer_name = xfer_name + " from " + from_agent.nick
+                else:
+                    xfer_name = xfer_name + " of " + rt.name
+                xfer = Transfer(
+                    name=xfer_name,
+                    transfer_type = transfer_type,
+                    exchange = exchange,
+                    context_agent = context_agent,
+                    transfer_date = event_date,
+                    notes = description,
+                    created_by = request.user
+                    )
+                xfer.save()
+                #import pdb; pdb.set_trace()
+                e_is_to_distribute = is_to_distribute
+                if et == et_give:
+                    e_is_to_distribute = False
+                e_is_contribution = is_contribution
+                if et == et_receive and et2:
+                    e_is_contribution = False
+                if et == et_give and res_from:
+                    event_res = res_from
+                else:
+                    event_res = res
+                event = EconomicEvent(
+                    event_type = et,
+                    event_date=event_date,
+                    resource_type=rt,
+                    resource=event_res,
+                    transfer=xfer,
+                    exchange_stage=exchange.exchange_type,
+                    context_agent = context_agent,
+                    quantity=qty,
+                    unit_of_quantity = rt.unit,
+                    value=value,
+                    unit_of_value=unit_of_value,
+                    from_agent = from_agent,
+                    to_agent = to_agent,
+                    is_contribution = e_is_contribution,
+                    is_to_distribute = e_is_to_distribute,
+                    event_reference=event_ref,
+                    created_by = request.user,
+                    )
+                event.save()
+                if et2:
+                    e2_is_to_distribute = is_to_distribute
+                    if et2 == et_give:
+                        e2_is_to_distribute = False
+                    e2_is_contribution = is_contribution
+                    if et2 == et_receive:
+                        e2_is_contribution = False
+                    if et2 == et_give and res_from:
+                        event_res = res_from
+                    else:
+                        event_res = res
+                    event2 = EconomicEvent(
+                        event_type = et2,
+                        event_date=event_date,
+                        resource_type=rt,
+                        resource=event_res,
+                        transfer=xfer,
+                        exchange_stage=exchange.exchange_type,
+                        context_agent = context_agent,
+                        quantity=qty,
+                        unit_of_quantity = rt.unit,
+                        value=value,
+                        unit_of_value=unit_of_value,
+                        from_agent = from_agent,
+                        to_agent = to_agent,
+                        is_contribution = e2_is_contribution,
+                        is_to_distribute = e2_is_to_distribute,
+                        event_reference=event_ref,
+                        created_by = request.user,
+                    )
+                    event2.save()
+
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def add_transfer_commitment(request, exchange_id, transfer_type_id):
+    transfer_type = get_object_or_404(TransferType, pk=transfer_type_id)
+    exchange = get_object_or_404(Exchange, pk=exchange_id)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        exchange_type = exchange.exchange_type
+        context_agent = exchange.context_agent
+        form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
+        if form.is_valid():
+            data = form.cleaned_data
+            qty = data["quantity"]
+            et2 = None
+            if qty:
+                commitment_date = data["commitment_date"]
+                due_date = data["due_date"]
+                if transfer_type.give_agent_is_context:
+                    from_agent = context_agent
+                else:
+                    from_agent = data["from_agent"]
+                if transfer_type.receive_agent_is_context:
+                    to_agent = context_agent
+                else:
+                    to_agent = data["to_agent"]
+
+                rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+                description = data["description"]
+                if transfer_type.is_currency:
+                    value = qty
+                    unit_of_value = rt.unit
+                else:
+                    value = data["value"]
+                    if value:
+                        unit_of_value = data["unit_of_value"]
+                    else:
+                        unit_of_value = None
+
+                xfer_name = transfer_type.name
+                if transfer_type.is_reciprocal:
+                    xfer_name = xfer_name + " from " + from_agent.nick
+                else:
+                    xfer_name = xfer_name + " of " + rt.name
+                xfer = Transfer(
+                    name=xfer_name,
+                    transfer_type = transfer_type,
+                    exchange = exchange,
+                    context_agent = context_agent,
+                    transfer_date = commitment_date,
+                    created_by = request.user
+                    )
+                xfer.save()
+
+                if exchange.exchange_type.use_case == UseCase.objects.get(identifier="supply_xfer"):
+                    if transfer_type.is_reciprocal:
+                        et = EventType.objects.get(name="Give")
+                    else:
+                        et = EventType.objects.get(name="Receive")
+                elif exchange.exchange_type.use_case == UseCase.objects.get(identifier="demand_xfer"):
+                    if transfer_type.is_reciprocal:
+                        et = EventType.objects.get(name="Receive")
+                    else:
+                        et = EventType.objects.get(name="Give")
+                else: #internal xfer use case
+                    if transfer_type.is_reciprocal:
+                        et = EventType.objects.get(name="Receive")
+                        et2 = EventType.objects.get(name="Give")
+                    else:
+                        et = EventType.objects.get(name="Give")
+                        et2 = EventType.objects.get(name="Receive")
+                commit = Commitment(
+                    event_type = et,
+                    commitment_date=commitment_date,
+                    due_date=due_date,
+                    resource_type=rt,
+                    exchange = exchange,
+                    transfer=xfer,
+                    exchange_stage=exchange.exchange_type,
+                    context_agent = context_agent,
+                    quantity=qty,
+                    unit_of_quantity = rt.unit,
+                    value=value,
+                    unit_of_value=unit_of_value,
+                    from_agent = from_agent,
+                    to_agent = to_agent,
+                    description=description,
+                    created_by = request.user,
+                    )
+                commit.save()
+                if et2:
+                    commit2 = Commitment(
+                        event_type = et2,
+                        commitment_date=commitment_date,
+                        due_date=due_date,
+                        resource_type=rt,
+                        exchange = exchange,
+                        transfer=xfer,
+                        exchange_stage=exchange.exchange_type,
+                        context_agent = context_agent,
+                        quantity=qty,
+                        unit_of_quantity = rt.unit,
+                        value=value,
+                        unit_of_value=unit_of_value,
+                        from_agent = from_agent,
+                        to_agent = to_agent,
+                        created_by = request.user,
+                    )
+                    commit2.save()
+
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def change_transfer_commitments(request, transfer_id):
+    transfer = get_object_or_404(Transfer, pk=transfer_id)
+    if request.method == "POST":
+        commits = transfer.commitments.all()
+        transfer_type = transfer.transfer_type
+        exchange = transfer.exchange
+        context_agent = transfer.context_agent
+        #import pdb; pdb.set_trace()
+        form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
+        if form.is_valid():
+            data = form.cleaned_data
+            et_give = EventType.objects.get(name="Give")
+            et_receive = EventType.objects.get(name="Receive")
+            qty = data["quantity"]
+            if qty:
+                commitment_date = data["commitment_date"]
+                due_date = data["due_date"]
+                if transfer_type.give_agent_is_context:
+                    from_agent = context_agent
+                else:
+                    from_agent = data["from_agent"]
+                if transfer_type.receive_agent_is_context:
+                    to_agent = context_agent
+                else:
+                    to_agent = data["to_agent"]
+
+                rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+
+                description = data["description"]
+                if transfer_type.is_currency:
+                    value = qty
+                    unit_of_value = rt.unit
+                else:
+                    value = data["value"]
+                    if value:
+                        unit_of_value = data["unit_of_value"]
+                    else:
+                        unit_of_value = None
+
+                for commit in commits:
+                    commit.resource_type = rt
+                    commit.from_agent = from_agent
+                    commit.to_agent = to_agent
+                    commit.commitment_date = commitment_date
+                    commit.due_date = due_date
+                    commit.quantity=qty
+                    commit.unit_of_quantity = rt.unit
+                    commit.value=value
+                    commit.unit_of_value = unit_of_value
+                    commit.description=description
+                    commit.changed_by = request.user
+                    commit.save()
+
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def delete_transfer_commitments(request, transfer_id):
+    transfer = get_object_or_404(Transfer, pk=transfer_id)
+    exchange = transfer.exchange
+    if request.method == "POST":
+        for commit in transfer.commitments.all():
+            if commit.is_deletable():
+                commit.delete()
+        if transfer.is_deletable():
+             transfer.delete()
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', transfer.context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def transfer_from_commitment(request, transfer_id):
+    transfer = get_object_or_404(Transfer, pk=transfer_id)
+    transfer_type = transfer.transfer_type
+    exchange = transfer.exchange
+    context_agent = transfer.context_agent
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        form = ContextTransferForm(data=request.POST, transfer_type=transfer.transfer_type, context_agent=transfer.context_agent, posting=True, prefix=transfer.form_prefix())
+        if form.is_valid():
+            data = form.cleaned_data
+            et_give = EventType.objects.get(name="Give")
+            et_receive = EventType.objects.get(name="Receive")
+            qty = data["quantity"]
+            event_date = data["event_date"]
+            if transfer_type.give_agent_is_context:
+                from_agent = context_agent
+            else:
+                from_agent = data["from_agent"]
+            if transfer_type.receive_agent_is_context:
+                to_agent = context_agent
+            else:
+                to_agent = data["to_agent"]
+
+            rt = data["resource_type"]
+            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                gen_rt = data["ocp_resource_type"]
+                rt = get_rt_from_ocp_rt(gen_rt)
+
+            #if not transfer_type.can_create_resource:
+            res = data["resource"]
+            description = data["description"]
+            if transfer_type.is_currency:
+                value = qty
+                unit_of_value = rt.unit
+                res_from = data["from_resource"]
+            else:
+                res_from = None
+                value = data["value"]
+                if value:
+                    unit_of_value = data["unit_of_value"]
+                else:
+                    unit_of_value = None
+            if transfer_type.is_contribution:
+                is_contribution = data["is_contribution"]
+            else:
+                is_contribution = False
+            event_ref = data["event_reference"]
+            #res = None
+            if transfer_type.can_create_resource:
+                #res = data["resource"]
+                if not res:
+                    res_identifier = data["identifier"]
+                    if res_identifier: #new resource
+                        res = EconomicResource(
+                            identifier=res_identifier,
+                            url=data["url"],
+                            photo_url=data["photo_url"],
+                            current_location=data["current_location"],
+                            notes=data["notes"],
+                            access_rules=data["access_rules"],
+                            resource_type=rt,
+                            exchange_stage=exchange.exchange_type,
+                            quantity=0,
+                            created_by=request.user,
+                            )
+                        res.save()
+                        create_role_formset = transfer.create_role_formset(data=request.POST)
+                        for form_rra in create_role_formset.forms:
+                            if form_rra.is_valid():
+                                data_rra = form_rra.cleaned_data
+                                if data_rra:
+                                    role = data_rra["role"]
+                                    agent = data_rra["agent"]
+                                    if role and agent:
+                                        rra = AgentResourceRole()
+                                        rra.agent = agent
+                                        rra.role = role
+                                        rra.resource = res
+                                        rra.is_contact = data_rra["is_contact"]
+                                        rra.save()
+            for commit in transfer.commitments.all():
+                if commit.event_type == et_give and res_from:
+                    event_res = res_from
+                else:
+                    event_res = res
+                event = EconomicEvent(
+                    event_type=commit.event_type,
+                    resource_type = rt,
+                    resource = event_res,
+                    from_agent = from_agent,
+                    to_agent = to_agent,
+                    exchange_stage=transfer.exchange.exchange_type,
+                    transfer=transfer,
+                    commitment=commit,
+                    context_agent = transfer.context_agent,
+                    event_date = event_date,
+                    quantity=qty,
+                    unit_of_quantity = rt.unit,
+                    value=value,
+                    unit_of_value = unit_of_value,
+                    description=description,
+                    event_reference=event_ref,
+                    created_by = request.user,
+                )
+                event.save()
+                if event_res:
+                    if event.event_type == et_give:
+                        event_res.quantity -= event.quantity
+                    else:
+                        event_res.quantity += event.quantity
+                    event_res.save()
+                commit.finished = True
+                commit.save()
+
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', transfer.context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def change_transfer_events(request, transfer_id):
+    transfer = get_object_or_404(Transfer, pk=transfer_id)
+    if request.method == "POST":
+        events = transfer.events.all()
+        transfer_type = transfer.transfer_type
+        exchange = transfer.exchange
+        context_agent = transfer.context_agent
+        #import pdb; pdb.set_trace()
+        form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
+        if form.is_valid():
+            data = form.cleaned_data
+            et_give = EventType.objects.get(name="Give")
+            et_receive = EventType.objects.get(name="Receive")
+            qty = data["quantity"]
+            if qty:
+                event_date = data["event_date"]
+                if transfer_type.give_agent_is_context:
+                    from_agent = context_agent
+                else:
+                    from_agent = data["from_agent"]
+                if transfer_type.receive_agent_is_context:
+                    to_agent = context_agent
+                else:
+                    to_agent = data["to_agent"]
+
+                rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+                res = data["resource"]
+                res_from = None
+                if transfer_type.is_currency:
+                    res_from = data["from_resource"]
+                description = data["description"]
+                if transfer_type.is_currency:
+                    value = qty
+                    unit_of_value = rt.unit
+                else:
+                    value = data["value"]
+                    if value:
+                        unit_of_value = data["unit_of_value"]
+                    else:
+                        unit_of_value = None
+                if transfer_type.is_contribution:
+                    is_contribution = data["is_contribution"]
+                else:
+                    is_contribution = False
+                event_ref = data["event_reference"]
+
+                #old_res = None
+                old_qty = events[0].quantity
+                old_res_from, old_res = transfer.give_and_receive_resources()
+                #if events[0].resource:
+                #    old_res = events[0].resource
+                for event in events:
+                    event.resource_type = rt
+                    event.resource = res
+                    if res_from and event.event_type == et_give:
+                        event.resource = res_from
+                    event.from_agent = from_agent
+                    event.to_agent = to_agent
+                    event.event_date = event_date
+                    event.quantity=qty
+                    event.unit_of_quantity = rt.unit
+                    event.value=value
+                    event.unit_of_value = unit_of_value
+                    event.description=description
+                    event.event_reference=event_ref
+                    event.changed_by = request.user
+                    event.save()
+                    res_to_change = event.resource
+                    if event.event_type == et_give:
+                        if old_res_from:
+                            old_res_to_change = old_res_from
+                        else:
+                            old_res_to_change = old_res
+                    else:
+                        old_res_to_change = old_res
+                    if res_to_change:
+                        if old_res_to_change:
+                            if res_to_change == old_res_to_change:
+                                if event.event_type == et_give:
+                                    res_to_change.quantity = res_to_change.quantity + old_qty - qty
+                                else:
+                                    res_to_change.quantity = res_to_change.quantity - old_qty + qty
+                                res_to_change.save()
+                            else:
+                                if event.event_type == et_give:
+                                    res_to_change.quantity = res_to_change.quantity - qty
+                                    old_res_to_change.quantity = old_res_to_change.quantity + qty
+                                else:
+                                    res_to_change.quantity = res_to_change.quantity + qty
+                                    old_res_to_change.quantity = old_res_to_change.quantity - qty
+                                res_to_change.save()
+                                old_res_to_change.save()
+                        else:
+                            if event.event_type == et_give:
+                                res_to_change.quantity = res_to_change.quantity - qty
+                            else:
+                                res_to_change.quantity = res_to_change.quantity + qty
+                            res_to_change.save()
+                    else:
+                        if old_res_to_change:
+                            if event.event_type == et_give:
+                                old_res_to_change.quantity = old_res_to_change.quantity + qty
+                            else:
+                                old_res_to_change.quantity = old_res_to_change.quantity - qty
+                            old_res_to_change.save()
+
+                transfer.transfer_date = event_date
+                transfer.save()
+
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def delete_transfer_events(request, transfer_id):
+    transfer = get_object_or_404(Transfer, pk=transfer_id)
+    exchange = transfer.exchange
+    if request.method == "POST":
+        res = None
+        events = transfer.events.all()
+        et_give = EventType.objects.get(name="Give")
+        give_res = None
+        receive_res = None
+        if events:
+            for event in events:
+                if event.event_type == et_give:
+                    give_res = event.resource
+                else:
+                    receive_res = event.resource
+                event.delete()
+            if give_res != receive_res:
+                if give_res:
+                    give_res.quantity += event.quantity
+                if receive_res:
+                    receive_res.quantity -= event.quantity
+            if give_res:
+                if give_res.is_deletable():
+                    give_res.delete()
+                else:
+                    give_res.save()
+            if receive_res:
+                if receive_res.is_deletable():
+                    receive_res.delete()
+                else:
+                    receive_res.save()
+        if transfer.is_deletable():
+             transfer.delete()
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', transfer.context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def add_work_for_exchange(request, exchange_id):
+    #import pdb; pdb.set_trace()
+    exchange = get_object_or_404(Exchange, pk=exchange_id)
+    context_agent = exchange.context_agent
+    form = WorkEventAgentForm(data=request.POST)
+    if form.is_valid():
+        event = form.save(commit=False)
+        rt = event.resource_type
+        event.event_type = EventType.objects.get(name="Time Contribution")
+        event.exchange = exchange
+        event.context_agent = context_agent
+        event.to_agent = context_agent
+        event.unit_of_quantity = rt.unit
+        event.created_by = request.user
+        event.changed_by = request.user
+        event.save()
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def change_exchange_work_event(request, event_id):
+    event = get_object_or_404(EconomicEvent, id=event_id)
+    exchange = event.exchange
+    context_agent=exchange.context_agent
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        form = WorkEventAgentForm(
+            context_agent=context_agent,
+            instance=event,
+            data=request.POST,
+            prefix=str(event.id))
+        if form.is_valid():
+            data = form.cleaned_data
+            form.save()
+
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
+
+@login_required
+def delete_event(request, event_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        event = get_object_or_404(EconomicEvent, pk=event_id)
+        agent = event.from_agent
+        process = event.process
+        exchange = event.exchange
+        distribution = event.distribution
+        resource = event.resource
+        if resource:
+            if event.consumes_resources():
+                resource.quantity += event.quantity
+            if event.creates_resources():
+                resource.quantity -= event.quantity
+            if event.changes_stage():
+                tbcs = process.to_be_changed_requirements()
+                if tbcs:
+                    tbc = tbcs[0]
+                    tbc_evts = tbc.fulfilling_events()
+                    if tbc_evts:
+                        tbc_evt = tbc_evts[0]
+                        resource.quantity = tbc_evt.quantity
+                        tbc_evt.delete()
+                    resource.stage = tbc.stage
+                else:
+                    resource.revert_to_previous_stage()
+            event.delete()
+            if resource.is_deletable():
+                resource.delete()
+            else:
+                resource.save()
+        else:
+            event.delete()
+
+    next = request.POST.get("next")
+    if next == "process":
+        return HttpResponseRedirect('/%s/%s/'
+            % ('accounting/process', process.id))
+    if next == "cleanup-processes":
+        return HttpResponseRedirect('/%s/'
+            % ('accounting/cleanup-processes'))
+    if next == "exchange":
+        return HttpResponseRedirect('/%s/%s/%s/'
+            % ('accounting/exchange', 0, exchange.id))
+    if next == "exchange-work":
+        return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+            % ('work/agent', event.context_agent.id, 'exchange-logging-work', 0, exchange.id))
+    if next == "distribution":
+        return HttpResponseRedirect('/%s/%s/'
+            % ('accounting/distribution', distribution.id))
+    if next == "resource":
+        resource_id = request.POST.get("resource_id")
+        return HttpResponseRedirect('/%s/%s/'
+            % ('accounting/resource', resource_id))
+    elif next == "contributions":
+        page = request.POST.get("page")
+
+        if page:
+            return HttpResponseRedirect('/%s/%s/?page=%s'
+                % ('accounting/contributionhistory', agent.id, page))
+        else:
+            return HttpResponseRedirect('/%s/%s/'
+                % ('accounting/contributionhistory', agent.id))
+    elif next == "work-contributions":
+        page = request.POST.get("page")
+
+        if page:
+            return HttpResponseRedirect('/%s/?page=%s'
+                % ('work/my-history', page))
+        else:
+            return HttpResponseRedirect('/%s/'
+                % ('work/my-history'))
+    elif next == "work":
+        return HttpResponseRedirect('/%s/%s/'
+            % ('work/process-logging', process.id))
 
 
 

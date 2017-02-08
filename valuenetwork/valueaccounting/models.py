@@ -8202,6 +8202,14 @@ class Transfer(models.Model):
         else:
             return None
 
+    def event_description(self):
+        #import pdb; pdb.set_trace()
+        events = self.events.all()
+        if events:
+            return events[0].description
+        else:
+            return None
+
     def save(self, *args, **kwargs):
         #import pdb; pdb.set_trace()
         if self.id:

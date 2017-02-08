@@ -4089,7 +4089,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
 
         if agent:
             #import pdb; pdb.set_trace()
-            if request.user == exchange.created_by:
+            if request.user == exchange.created_by or context_agent in agent.managed_projects():
                 logger = True
 
             for event in work_events:

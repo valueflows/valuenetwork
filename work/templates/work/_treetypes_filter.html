@@ -32,7 +32,7 @@
 
         <div class="" id="services">
           <p class="facet">
-            {% trans "Skill related the resource above:" %}
+            {% if facetvalues %}{% trans "Skill related the resource above:" %}{% endif %}
           </p>
           <ul class="root" style="/*display: none;*/">
               {% recursetree Stype_tree %}

@@ -73,6 +73,7 @@ class SendFairCoinsForm(forms.Form):
         label=_("If you send to an OCP agent, choose it here to get the address:"),
         required=None,
     )
+    description = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'input-xxlarge',}))
 
     def __init__(self, agent=None, *args, **kwargs):
         super(SendFairCoinsForm, self).__init__(*args, **kwargs)

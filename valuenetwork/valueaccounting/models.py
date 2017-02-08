@@ -10682,7 +10682,7 @@ class EconomicEvent(models.Model):
                 if confirmations > 0:
                     if state != "broadcast":
                         new_state = "broadcast"
-                if confirmations > 6:
+                if confirmations > 2:
                     new_state = "confirmed"
         if new_state:
             state = new_state

@@ -348,7 +348,7 @@ def request_faircoin_address(request, agent_id=None):
         if agent:
             agent.request_faircoin_address()
     return HttpResponseRedirect('/%s/%s/'
-        % ('accounting/agent', agent.id))
+        % ('work/agent', agent.id))
 
 @login_required
 def change_location(request, location_id, agent_id=None):
@@ -5269,6 +5269,7 @@ def add_unplanned_output(request, process_id):
                   role_formset =  resource_role_context_agent_formset(prefix="resource", data=request.POST)
                 else:
                   role_formset =  resource_role_agent_formset(prefix="resource", data=request.POST)
+
                 for form_rra in role_formset.forms:
                     if form_rra.is_valid():
                         data_rra = form_rra.cleaned_data
@@ -5844,11 +5845,13 @@ def create_production_process(request, commitment_id):
                 state=None,
                 from_agent=process.context_agent,
                 to_agent=commitment.context_agent)
+
         next = request.POST.get("next")
         if next:
             if next == "order-plan":
                 return HttpResponseRedirect('/%s/%s/'
                     % ('work/order-plan', commitment.order.id))
+
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/order-schedule', commitment.order.id))
 
@@ -6196,11 +6199,13 @@ def add_transfer(request, exchange_id, transfer_type_id):
                         created_by = request.user,
                     )
                     event2.save()
+
         next = request.POST.get("next")
         if next:
             if next == "exchange-work":
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                     % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
 
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
@@ -6323,11 +6328,13 @@ def transfer_from_commitment(request, transfer_id):
                     event_res.save()
                 commit.finished = True
                 commit.save()
+
         next = request.POST.get("next")
         if next:
             if next == "exchange-work":
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                     % ('work/agent', transfer.context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
 
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
@@ -6447,6 +6454,7 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                         created_by = request.user,
                     )
                     commit2.save()
+
         next = request.POST.get("next")
         if next:
             if next == "exchange-work":
@@ -6573,6 +6581,7 @@ def change_transfer_events(request, transfer_id):
 
                 transfer.transfer_date = event_date
                 transfer.save()
+
         next = request.POST.get("next")
         if next:
             if next == "exchange-work":
@@ -6643,6 +6652,7 @@ def change_transfer_commitments(request, transfer_id):
                     commit.description=description
                     commit.changed_by = request.user
                     commit.save()
+
         next = request.POST.get("next")
         if next:
             if next == "exchange-work":
@@ -13555,3 +13565,4 @@ def resource_role_context_agent_formset(prefix, data=None):
         )
     formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
     return formset
+

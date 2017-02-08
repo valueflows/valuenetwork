@@ -99,4 +99,6 @@ urlpatterns = patterns("",
     url(r"^agent/(?P<agent_id>\d+)/resources/(?P<resource_id>\d+)/$", "work.views.project_resource", name="project_resource"),
     url(r"^agent/(?P<agent_id>\d+)/resources/new/(?P<Rtype>[\w-]+)/$", "work.views.new_resource_type", name="new_resource_type"),
 
+    url(r"^edit_event_notes/(?P<resource_id>\d+)/$", 'work.views.edit_faircoin_event_description', name="edit_faircoin_event_description"),
+
 )

@@ -1045,7 +1045,7 @@ class NewSkillTypeForm(forms.Form):
         level_indicator='. ',
         label=_("Parent skill type"),
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select'}),
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select id_skill_type'}),
     )
     description = forms.CharField(
         required=False,

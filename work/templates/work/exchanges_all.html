@@ -284,7 +284,7 @@ span.fancytree-title span.edit a:hover {
                 {% endif %}
                 <br/>
                 <div class="list" id="list-exchange_type" style="margin-top: 5px;">
-                  <div id="tabs">
+                  <div id="tabs" style="display:none;">
                     <ul>
                         {% for case in usecases %}
                         <li><a href="#{{ case.clas }}"><b>{{ case.name }}</b></a></li>
@@ -339,7 +339,7 @@ span.fancytree-title span.edit a:hover {
                             <ul class="root" id="treeData" style="/*display: none;*/">
                               {% recursetree Rtype_tree %}
                               {% if True or node.resource_type or request.user.is_staff %}
-                                <li id="Rid_{{ node.id }}"><span>{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} &lt; {% endif %} {% if not node.exchange_type %}</em>{% endif %}
+                                <li id="Rid_{{ node.id }}"><span>{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} &lt; {% endif %} {% if not node.resource_type %}</em>{% endif %}
                                   {% if node.resource_type.created_by == request.user %}&nbsp; <span class="edit" id="Rid_{{ node.id }}"></span>
                                   {% endif %}
                                   </span>
@@ -394,21 +394,52 @@ span.fancytree-title span.edit a:hover {
                             <ul class="root" id="treeData" style="/*display: none;*/">
                               {% recursetree Stype_tree %}
                               {% if True or node.resource_type or request.user.is_staff %}
-                              <li id="Sid_{{ node.id }}">{% if not node.resource_type %}<em>{% endif %}{{ node.gerund|title }}{% if node.resource_type %} < {% endif %}
-                                                {% if not node.exchange_type %}</em>{% endif %}
+                              <li id="Sid_{{ node.id }}"><span>{% if not node.resource_type %}<em>{% endif %}{{ node.gerund|title }}{% if node.resource_type %} &lt; {% endif %}{% if not node.resource_type %}</em>{% endif %}
+                                {% if node.resource_type.created_by == request.user %}&nbsp; <span class="edit" id="Sid_{{ node.id }}"></span>
+                                {% endif %}
+                                </span>
                                 {% if not node.is_leaf_node %}
                                 <ul class="children">
                                   {{ children }}
                                 </ul>
                                 {% endif %}
-                                </li>
+                              </li>
+                                {% if node.resource_type.created_by == request.user %}
+                                  <script type="text/javascript">
+                                    var S_{{ node.id }}_obj = {
+                                      "name":"{{ node.resource_type.name }}",
+                                      "parent":"{{ node.parent.id }}",
+                                      "description":"{{ node.resource_type.description }}",
+                                      "context":"{{ node.resource_type.context_agent.id }}",
+                                      "substi":"{{ node.resource_type.substitutable }}",
+                                      "unit":"{{ node.resource_type.unit.ocp_unit_type.id }}",
+                                      "price":"{{ node.resource_type.price_per_unit }}",
+                                      "related":"{% if node.material_type %}{{ node.material_type.id }}{% elif node.nonmaterial_type %}{{ node.nonmaterial_type.id }}{% endif %}",
+                                      "parentrecipe":"{{ node.resource_type.parent.id }}",
+                                      "url":"{{ node.resource_type.url }}",
+                                      "photo_url":"{{ node.resource_type.photo_url }}",
+                                      "verb":"{{ node.verb }}",
+                                      "gerund":"{{ node.gerund }}",
+                                    };
+                                  </script>
                                 {% endif %}
-                                {% endrecursetree %}
+                              {% endif %}
+                              {% endrecursetree %}
                             </ul>
                           </div>
                           <div style="display:block;">
-                            &nbsp; {{ nav_form.skill_type }} &nbsp; <span>{% trans "if no one fits:" %}&nbsp;
-                            <a href='#addSkillTypeModal' role="button" class='btn btn-primary btn-mini' data-toggle="modal" title="Create a new skill resource type">{% trans "New Skill Service Type" %}</a></span>
+                            &nbsp; {{ nav_form.skill_type }} &nbsp;
+                            <span>
+                              <ul style="display:inline-table; list-style:none; margin:0;">
+                                <li>{% trans "if no one fits:" %}&nbsp; <a href='#addSkillTypeModal' role="button" class='btn btn-primary btn-mini btn_skill_type' data-toggle="modal" title="Create a new skill resource type">{% trans "New Skill Service Type" %}</a></li>
+                                <li class="edit_skill_type" style="display:none; margin-top:10px;">{% trans "...you created this skill:" %}&nbsp;<a href="#addSkillTypeModal" id="edit_st_but" role="button" class="btn btn-primary btn-mini edit_skill_type" data-toggle="modal" title="Edit a skill type">{% trans "Edit" %}</a></li>
+                              </ul>
+                              {% if Stype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block; float:right;">
+                                {% if Stype_form.name.errors %}<em>{% trans "Name of the new type:" %}</em> {{ Stype_form.name.errors }}<br>{% endif %}
+                                {% if Stype_form.resource_type.errors %}<em>{% trans "Parent resource type:" %}</em> {{ Stype_form.resource_type.errors }}{% endif %}
+                                </div><br> &nbsp; <br> &nbsp; <br>
+                              {% endif %}
+                            </span>
                           </div>
                         </div>
                         <div style="clear:left;">
@@ -476,7 +507,7 @@ span.fancytree-title span.edit a:hover {
             <div class="modal hide fade" id="addSkillTypeModal" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true"  style="width:590px;">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3>{% trans "Add a new Skill Type:" %}</h3>
+                <h3><span id="name_action">{% trans "Add a new" %}</span> {% trans "Skill Type:" %}</h3>
               </div>
               <div class="modal-body">
                 <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
@@ -484,7 +515,7 @@ span.fancytree-title span.edit a:hover {
                   {% for fil in Stype_form %}
                     <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
                       <label>{{ fil.label }}:</label>
-                      {% if False and fil == Rtype_form.unit %}
+                      {% if False and fil == Stype_form.unit %}
                         <select id="id_unit" class="chzn-select" name="unit">
                           {% for ut in unit_types %}
                             <optgroup label="{{ ut.name }}">
@@ -637,7 +668,7 @@ span.fancytree-title span.edit a:hover {
 
 		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
-    $('#tabs').tabs({
+    $('#tabs').removeAttr('style').tabs({
       classes: {
         "ui-tabs": "",
         "ui-tabs-panel": "ui-corner-all infobox"
@@ -720,27 +751,33 @@ span.fancytree-title span.edit a:hover {
       }
 
       var idarr = ide.split('_');
-      if( typeof eval('R_'+idarr[1]+'_obj') != "undefined" && $('input[name=new_resource_type]').length ) {
+      if( tid == "resource_type" && typeof eval('R_'+idarr[1]+'_obj') != "undefined" && $('input[name=new_resource_type]').length ) {
         var obj = eval('R_'+idarr[1]+'_obj');
-        var name = obj['name'];
-        var $mod = false;
-        //alert('obj: '+obj['name']);
-        if( idarr[0] == "Rid" ) {
-          $mod = $('#addResourceTypeModal');
-        };
-        if( idarr[0] == "Sid" ) {
-          $mod = $('#addSkillTypeModal');
-        };
-        //ide = idarr[1];
-        if($mod){
-          $mod.find('#name_action').text("{% trans 'Edit' %} "+name);
-          $mod.find('#id_name').val(name);
-          $mod.find('#id_description').val(obj['description']);
-          $mod.find('#id_substitutable').val(obj['substi']);
-          $mod.find('#id_price_per_unit').val(obj['price']);
-          $mod.find('#id_url').val(obj['url']);
-          $mod.find('#id_photo_url').val(obj['photo_url']);
+      } else if( tid == "skill_type" && typeof eval('S_'+idarr[1]+'_obj') != "undefined" && $('input[name=new_skill_type]').length ) {
+        var obj = eval('S_'+idarr[1]+'_obj');
+      } else {
+        alert("rebuild_modal: No OBJ");
+      }
+      var name = obj['name'];
+      var $mod = false;
+      //alert('obj: '+obj['name']);
+      if( idarr[0] == "Rid" ) {
+        $mod = $('#addResourceTypeModal');
+      };
+      if( idarr[0] == "Sid" ) {
+        $mod = $('#addSkillTypeModal');
+      };
+      //ide = idarr[1];
+      if($mod){
+        $mod.find('#name_action').text("{% trans 'Edit' %} "+name);
+        $mod.find('#id_name').val(name);
+        $mod.find('#id_description').val(obj['description']);
+        $mod.find('#id_substitutable').val(obj['substi']);
+        $mod.find('#id_price_per_unit').val(obj['price']);
+        $mod.find('#id_url').val(obj['url']);
+        $mod.find('#id_photo_url').val(obj['photo_url']);
 
+        if( tid == "resource_type" ) {
           $mod.find('#id_resource_type option').each(function(){
             if($(this).prop('selected')) old_rt = $(this).val();
             $(this).prop('selected', false);
@@ -749,75 +786,96 @@ span.fancytree-title span.edit a:hover {
             }
           });
           if(!old_rt || old_rt != obj['parent']) $mod.find('#id_resource_type').trigger("chosen:updated");
-
-          $mod.find('#id_context_agent option').each(function(){
-            if($(this).prop('selected')) old_agent = $(this).val();
-            $(this).prop('selected', false);
-            if($(this).val() == obj['context']){
-              //alert('hey: '+$(this).val()+' context:'+obj['context']);
-              $(this).prop('selected',true);
-            }
-          });
-          if(old_agent != obj['context']) $mod.find('#id_context_agent').trigger("chosen:updated");
-
-          $mod.find('#id_unit_type option').each(function(){
-            if($(this).prop('selected')) old_unit = $(this).val();
-            $(this).prop('selected', false);
-            if($(this).val() == obj['unit']){
-              //alert('hey: '+$(this).val()+' unit:'+obj['unit']);
-              $(this).prop('selected',true);
-            }
-          });
-          if(old_unit != obj['unit']) $mod.find('#id_unit_type').trigger("chosen:updated");
-
-          //alert('related: '+obj['related']);
-          $mod.find('#id_related_type option').each(function(){
-            if($(this).prop('selected')) old_related = $(this).val();
-            $(this).prop('selected', false);
-            if($(this).val() == obj['related']){
-              //alert('hey: '+$(this).val()+' related:'+obj['related']);
-              $(this).prop('selected',true);
-            }
-          });
-          if(old_related != obj['related']) $mod.find('#id_related_type').trigger("chosen:updated");
-
-          $mod.find('#id_parent option').each(function(){
-            if($(this).prop('selected')) old_parent = $(this).val();
-            $(this).prop('selected', false);
-            if($(this).val() == obj['parentrecipe']){
-              //alert('hey: '+$(this).val()+' parent-recipe:'+obj['parentrecipe']);
-              $(this).prop('selected',true);
-            }
-          });
-          if(old_parent != obj['parentrecipe']) $mod.find('#id_parent').trigger("chosen:updated");
-
-          $mod.find('input[name=new_resource_type]').attr('name','edit_resource_type');
-          $mod.find('#edid').attr('value', ide);
         }
+        if( tid == "skill_type" ) {
+          $mod.find('#id_verb').val(obj['verb']);
+          $mod.find('#id_gerund').val(obj['gerund']);
+          $mod.find('#id_parent_type option').each(function(){
+            if($(this).prop('selected')) old_rt = $(this).val();
+            $(this).prop('selected', false);
+            if($(this).val() == obj['parent']){
+              $(this).prop('selected', true); //alert('Hau!:'+$(this).val());
+            }
+          });
+          if(!old_rt || old_rt != obj['parent']) $mod.find('#id_parent_type').trigger("chosen:updated");
+        }
+        $mod.find('#id_context_agent option').each(function(){
+          if($(this).prop('selected')) old_agent = $(this).val();
+          $(this).prop('selected', false);
+          if($(this).val() == obj['context']){
+            //alert('hey: '+$(this).val()+' context:'+obj['context']);
+            $(this).prop('selected',true);
+          }
+        });
+        if(old_agent != obj['context']) $mod.find('#id_context_agent').trigger("chosen:updated");
+
+        $mod.find('#id_unit_type option').each(function(){
+          if($(this).prop('selected')) old_unit = $(this).val();
+          $(this).prop('selected', false);
+          if($(this).val() == obj['unit']){
+            //alert('hey: '+$(this).val()+' unit:'+obj['unit']);
+            $(this).prop('selected',true);
+          }
+        });
+        if(old_unit != obj['unit']) $mod.find('#id_unit_type').trigger("chosen:updated");
+
+        //alert('related: '+obj['related']);
+        $mod.find('#id_related_type option').each(function(){
+          if($(this).prop('selected')) old_related = $(this).val();
+          $(this).prop('selected', false);
+          if($(this).val() == obj['related']){
+            //alert('hey: '+$(this).val()+' related:'+obj['related']);
+            $(this).prop('selected',true);
+          }
+        });
+        if(old_related != obj['related']) $mod.find('#id_related_type').trigger("chosen:updated");
+
+        $mod.find('#id_parent option').each(function(){
+          if($(this).prop('selected')) old_parent = $(this).val();
+          $(this).prop('selected', false);
+          if($(this).val() == obj['parentrecipe']){
+            //alert('hey: '+$(this).val()+' parent-recipe:'+obj['parentrecipe']);
+            $(this).prop('selected',true);
+          }
+        });
+        if(old_parent != obj['parentrecipe']) $mod.find('#id_parent').trigger("chosen:updated");
+
+        if(idarr[0] == "Rid") $mod.find('input[name=new_resource_type]').attr('name','edit_resource_type');
+        if(idarr[0] == "Sid") $mod.find('input[name=new_skill_type]').attr('name','edit_skill_type');
+        $mod.find('#edid').attr('value', ide);
+
       }
     }
     $('#edit_rt_but').click(function(){
+        rebuild_modal();
+    });
+    $('#edit_st_but').click(function(){
         rebuild_modal();
     });
 
     function reset_modal(tid){
         if( tid == "resource_type" && $('input[name=edit_resource_type]').length) {
           var $mod = $('#addResourceTypeModal');
-          $mod.find('#name_action').text("{% trans 'Add new' %}");
-          $mod.find('#id_name').val('');
-          $mod.find('#id_description').val('');
-          $mod.find('#id_substitutable').val(false);
-          $mod.find('#id_price_per_unit').val('');
-          $mod.find('#id_url').val('');
-          $mod.find('#id_photo_url').val('');
-          //$mod.find('option').removeAttr('selected');
+        } else if( tid == "skill_type" && $('input[name=edit_skill_type]').length) {
+          var $mod = $('#addSkillTypeModal');
+        }
+        $mod.find('#name_action').text("{% trans 'Add new' %}");
+        $mod.find('#id_name').val('');
+        $mod.find('#id_description').val('');
+        $mod.find('#id_substitutable').val(false);
+        $mod.find('#id_price_per_unit').val('');
+        $mod.find('#id_url').val('');
+        $mod.find('#id_photo_url').val('');
+        $mod.find('#id_verb').val('');
+        $mod.find('#id_gerund').val('');
+        //$mod.find('option').removeAttr('selected');
 
+        if( tid == "resource_type" ) {
           var sel_rt = $mod.find('#id_resource_type').find('option:selected').first().attr('value');
           if(old_rt){
             $mod.find('#id_resource_type').find('option').prop('selected', false);
             $mod.find('#id_resource_type').find('option[value='+old_rt+']').prop('selected', true);
           } else if( $('#id_resource_type').find('option:selected').length ) {
-            //$mod.find('#id_resource_type').find("option[value='']").attr('selected','selected');
             var pid = $('#id_resource_type').first().find('option:selected').attr('value');
             //alert('sels:'+$('#id_resource_type').first().find('option:selected').length+' ('+$('#id_resource_type').first().find('option:selected').attr('value')+') '+$('#id_resource_type').first().find('option:selected').text()+' clas:'+$('#id_resource_type').first().attr('class'));
             $mod.find('#id_resource_type').find('option').prop('selected', false);
@@ -827,37 +885,56 @@ span.fancytree-title span.edit a:hover {
             $mod.find('#id_resource_type').find("option[value='']").prop('selected', true);
           }
           var new_rt = $mod.find('#id_resource_type').first().find('option:selected').first().attr('value');
+        }
 
-          var sel_agent = $mod.find('#id_context_agent').find('option:selected').first().attr('value');
-          if(old_agent){
-            $mod.find('#id_context_agent').find('option').prop('selected', false);
-            $mod.find('#id_context_agent').find('option[value='+old_agent+']').prop('selected', true);
+        if( tid == "skill_type" ) {
+          var sel_rt = $mod.find('#id_parent_type').find('option:selected').first().attr('value');
+          if(old_rt){
+            $mod.find('#id_parent_type').find('option').prop('selected', false);
+            $mod.find('#id_parent_type').find('option[value='+old_rt+']').prop('selected', true);
+          } else if( $('#id_skill_type').find('option:selected').length ) {
+            var pid = $('#id_skill_type').first().find('option:selected').attr('value');
+            //alert('sels:'+$('#id_skill_type').first().find('option:selected').length+' ('+$('#id_skill_type').first().find('option:selected').attr('value')+') '+$('#id_skill_type').first().find('option:selected').text()+' clas:'+$('#id_skill_type').first().attr('class'));
+            $mod.find('#id_parent_type').find('option').prop('selected', false);
+            $mod.find('#id_parent_type').find("option[value='"+pid+"']").prop('selected', true);
           } else {
-            $mod.find('#id_context_agent').find('option').prop('selected', false);
-            $mod.find('#id_context_agent').find("option[value='']").prop('selected', true);
+            $mod.find('#id_parent_type').find('option').prop('selected', false);
+            $mod.find('#id_parent_type').find("option[value='']").prop('selected', true);
           }
-          var new_agent = $mod.find('#id_context_agent').find('option:selected').first().attr('value');
+          var new_rt = $mod.find('#id_parent_type').first().find('option:selected').first().attr('value');
+        }
 
-          $mod.find('#id_unit_type_chosen').find('.search-choice-close').first().click();
-          var sel_unit = $mod.find('#id_unit_type').find('option:selected').first().attr('value');
-          if(old_unit){
-            $mod.find('#id_unit_type').find('option').prop('selected', false);
-            $mod.find('#id_unit_type').find('option[value='+old_unit+']').prop('selected', true);
-          } else {
-            $mod.find('#id_unit_type').find('option').prop('selected', false);
-            $mod.find('#id_unit_type').find("option[value='']").prop('selected', true);
-          }
-          var new_unit = $mod.find('#id_unit_type').find('option:selected').first().attr('value');
+        var sel_agent = $mod.find('#id_context_agent').find('option:selected').first().attr('value');
+        if(old_agent){
+          $mod.find('#id_context_agent').find('option').prop('selected', false);
+          $mod.find('#id_context_agent').find('option[value='+old_agent+']').prop('selected', true);
+        } else {
+          $mod.find('#id_context_agent').find('option').prop('selected', false);
+          $mod.find('#id_context_agent').find("option[value='']").prop('selected', true);
+        }
+        var new_agent = $mod.find('#id_context_agent').find('option:selected').first().attr('value');
 
-          $mod.find('#id_related_type_chosen').find('.search-choice-close').first().click();
-          var sel_related = $mod.find('#id_related_type').find('option:selected').first().attr('value');
-          if(old_related){
-            $mod.find('#id_related_type').find('option[value='+old_related+']').prop('selected', true);
-          } else {
-            $mod.find('#id_related_type').find("option[value='']").prop('selected', true);
-          }
-          var new_related = $mod.find('#id_related_type').find('option:selected').first().attr('value');
+        $mod.find('#id_unit_type_chosen').find('.search-choice-close').first().click();
+        var sel_unit = $mod.find('#id_unit_type').find('option:selected').first().attr('value');
+        if(old_unit){
+          $mod.find('#id_unit_type').find('option').prop('selected', false);
+          $mod.find('#id_unit_type').find('option[value='+old_unit+']').prop('selected', true);
+        } else {
+          $mod.find('#id_unit_type').find('option').prop('selected', false);
+          $mod.find('#id_unit_type').find("option[value='']").prop('selected', true);
+        }
+        var new_unit = $mod.find('#id_unit_type').find('option:selected').first().attr('value');
 
+        $mod.find('#id_related_type_chosen').find('.search-choice-close').first().click();
+        var sel_related = $mod.find('#id_related_type').find('option:selected').first().attr('value');
+        if(old_related){
+          $mod.find('#id_related_type').find('option[value='+old_related+']').prop('selected', true);
+        } else {
+          $mod.find('#id_related_type').find("option[value='']").prop('selected', true);
+        }
+        var new_related = $mod.find('#id_related_type').find('option:selected').first().attr('value');
+
+        if( tid == "resource_type" ) {
           $mod.find('#id_parent_chosen').find('.search-choice-close').first().click();
           var sel_parent = $mod.find('#id_parent').find('option:selected').first().attr('value');
           if(old_parent){
@@ -866,47 +943,61 @@ span.fancytree-title span.edit a:hover {
             $mod.find('#id_parent').find("option[value='']").prop('selected', true);
           }
           var new_parent = $mod.find('#id_parent').find('option:selected').first().attr('value');
+        }
 
-          if(sel_rt != new_rt){
+
+        if(sel_rt != new_rt){
+          if( tid == "resource_type" ) {
             $mod.find('#id_resource_type').trigger("chosen:updated");
             if( new_rt != '' && !$mod.find('#id_resource_type_chosen').find('li.result-selected').length ) {
               //alert('Error (js bug): the parent resource type is not displayed (but is selected). Please reselect: '+$('#id_resource_type').find('option:selected').text()+' ('+new_rt+') sel:'+sel_rt+' new:'+new_rt);
               $mod.find('#id_resource_type').trigger("chosen:updated");
             }
           }
-          if(sel_agent != new_agent){
-            $mod.find('#id_context_agent').trigger("chosen:updated");
-            if( new_agent != '' && !$mod.find('#id_context_agent_chosen').find('li.result-selected').length ) {
-              alert('Error (js bug): the actual context agent is not displayed (but is selected). Please reselect: '+new_agent);
+          if( tid == "skill_type" ) {
+            $mod.find('#id_parent_type').trigger("chosen:updated");
+            if( new_rt != '' && !$mod.find('#id_parent_type_chosen').find('li.result-selected').length ) {
+              //alert('Error (js bug): the parent skill type is not displayed (but is selected). Please reselect: '+$('#id_skill_type').find('option:selected').text()+' ('+new_rt+') sel:'+sel_rt+' new:'+new_rt);
+              $mod.find('#id_parent_type').trigger("chosen:updated");
             }
           }
-          if(sel_unit != new_unit){
-            $mod.find('#id_unit_type').trigger("chosen:updated");
-            if( new_unit != '' && !$mod.find('#id_unit_type_chosen').find('li.result-selected').length ) {
-              alert('Error (js bug): the actual unit type is not displayed (but is selected). Please reselect: '+new_unit);
-            }
+        }
+        if(sel_agent != new_agent){
+          $mod.find('#id_context_agent').trigger("chosen:updated");
+          if( new_agent != '' && !$mod.find('#id_context_agent_chosen').find('li.result-selected').length ) {
+            alert('Error (js bug): the actual context agent is not displayed (but is selected). Please reselect: '+new_agent);
           }
-          if(sel_related != new_related){
-            $mod.find('#id_related_type').trigger("chosen:updated");
-            if( new_related != '' && !$mod.find('#id_related_type_chosen').find('li.result-selected').length ) {
-              alert('Error (js bug): the actual related type is not displayed (but is selected). Please reselect: '+new_related);
-            }
+        }
+        if(sel_unit != new_unit){
+          $mod.find('#id_unit_type').trigger("chosen:updated");
+          if( new_unit != '' && !$mod.find('#id_unit_type_chosen').find('li.result-selected').length ) {
+            alert('Error (js bug): the actual unit type is not displayed (but is selected). Please reselect: '+new_unit);
           }
-          if(sel_parent != new_parent){
-            $mod.find('#id_parent').trigger("chosen:updated");
-            if( new_parent != '' && !$mod.find('#id_parent_chosen').find('li.result-selected').length ) {
-              alert('Error (js bug): the actual type for inheriting a recipe is not displayed (but is selected). Please reselect: '+new_parent);
-            }
+        }
+        if(sel_related != new_related){
+          $mod.find('#id_related_type').trigger("chosen:updated");
+          if( new_related != '' && !$mod.find('#id_related_type_chosen').find('li.result-selected').length ) {
+            alert('Error (js bug): the actual related type is not displayed (but is selected). Please reselect: '+new_related);
           }
+        }
+        if(sel_parent != new_parent){
+          $mod.find('#id_parent').trigger("chosen:updated");
+          if( new_parent != '' && !$mod.find('#id_parent_chosen').find('li.result-selected').length ) {
+            alert('Error (js bug): the actual type for inheriting a recipe is not displayed (but is selected). Please reselect: '+new_parent);
+          }
+        }
 
-          $mod.find('input[name=edit_resource_type]').attr('name','new_resource_type');
-          $mod.find('#edid').attr('value','');
-          //alert('reset tid:'+tid+' sel_rt:'+sel_rt+' new_rt:'+new_rt+' old_rt:'+old_rt);
-        };
+        if( tid == "resource_type" ) $mod.find('input[name=edit_resource_type]').attr('name','new_resource_type');
+        if( tid == "skill_type" ) $mod.find('input[name=edit_skill_type]').attr('name','new_skill_type');
+        $mod.find('#edid').attr('value','');
+        //alert('reset tid:'+tid+' sel_rt:'+sel_rt+' new_rt:'+new_rt+' old_rt:'+old_rt);
         //alert('reset tid:'+tid+' sel_agent:'+sel_agent+' new_agent:'+new_agent+' old_agent:'+old_agent);
     }
     $('a.btn_resource_type').click(function(){
         reset_modal("resource_type");
+    });
+    $('a.btn_skill_type').click(function(){
+        reset_modal("skill_type");
     });
 
     var ObjTree = {
@@ -1031,10 +1122,12 @@ span.fancytree-title span.edit a:hover {
       var snd = data.tree.getSelectedNodes();
 
       if(snd.length > 0 && $('span.edit#'+snd[0].key).length){
-        $('li.edit_resource_type').show();
+        if(ide == "Rid") $('li.edit_resource_type').show();
+        if(ide == "Sid") $('li.edit_skill_type').show();
         //rebuild_modal(tid, snd[0].key);
       } else {
         $('li.edit_resource_type').hide();
+        $('li.edit_skill_type').hide();
         //reset_modal(tid);
       }
 

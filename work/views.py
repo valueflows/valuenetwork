@@ -3976,7 +3976,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         rt.context_agent = data["context_agent"]
                         rt.url = data["url"]
                         rt.photo_url = data["photo_url"]
-                        rt.parent = data["parent"]
+                        #rt.parent = data["parent"]
                         rt.edited_by = request.user
                         if moved:
                           old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)

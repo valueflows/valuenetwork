@@ -532,6 +532,7 @@ span.fancytree-title span.edit a:hover {
                     </div>
                   {% endfor %}
 
+                  <input type="hidden" id="edid" name="edid" value="" />
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
                   <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1524,7 +1525,7 @@ span.fancytree-title span.edit a:hover {
 
         if(!tree.length){ // || ide == 'Eid_'){
 
-          alert('Chosen Change / modal select? $tab:'+$tab.attr('id'));
+          //alert('Chosen Change / modal select? $tab:'+$tab.attr('id'));
           $tab.find('#id_'+tid).find('option:selected').prop('selected', false);
           $tab.find('#id_'+tid).find('option[value='+sels+']').prop('selected', true);
 

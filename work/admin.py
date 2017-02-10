@@ -76,7 +76,7 @@ admin.site.register(Ocp_Artwork_Type, Ocp_Type_Artwork_Admin)
 
 class Ocp_Type_Skill_Admin(MPTTModelAdmin):
   model = Ocp_Skill_Type
-  list_display = ['name', 'verb', 'gerund', 'clas', 'facet_value', 'resource_type']
+  list_display = ['name', 'verb', 'gerund', 'clas', 'facet', 'facet_value', 'resource_type']
 
 admin.site.register(Ocp_Skill_Type, Ocp_Type_Skill_Admin)
 

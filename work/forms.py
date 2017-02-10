@@ -1021,9 +1021,21 @@ class NewResourceTypeForm(forms.Form):
         self.fields["parent"].queryset = possible_parent_resource_types()
         self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
         if agent:
+            context_ids = [c.id for c in agent.related_all_agents()]
+            if not agent.id in context_ids:
+                context_ids.append(agent.id)
             self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
             self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
 
+            self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+
+    def clean(self):
+        data = super(NewResourceTypeForm, self).clean()
+        price = data["price_per_unit"]
+        if not price:
+          data["price_per_unit"] = "0.0"
+        return data
 
 
 class NewSkillTypeForm(forms.Form):
@@ -1061,12 +1073,12 @@ class NewSkillTypeForm(forms.Form):
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         required=False,
-        empty_label=_('. . .'),
+        empty_label='', #_('. . .'),
         level_indicator='. ',
         label=_("Has a main related resource type?"),
         help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select', 'data-placeholder':_("search Resource type...")}),
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
     )
     unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Unit_Type.objects.all(),
@@ -1102,10 +1114,21 @@ class NewSkillTypeForm(forms.Form):
         time = get_object_or_404(Ocp_Unit_Type, clas='time_currency')
         self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.filter(lft__gt=time.lft, rght__lt=time.rght, tree_id=time.tree_id) #all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
         if agent:
+            context_ids = [c.id for c in agent.related_all_agents()]
+            if not agent.id in context_ids:
+                context_ids.append(agent.id)
             self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
             self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
-            #self.fields["context_agent"].initial = agent
 
+            self.fields["parent_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+
+    def clean(self):
+        data = super(NewSkillTypeForm, self).clean()
+        price = data["price_per_unit"]
+        if not price:
+          data["price_per_unit"] = "0.0"
+        return data
 
 
 class AssociationForm(forms.Form):

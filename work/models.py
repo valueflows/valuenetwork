@@ -387,6 +387,14 @@ class Ocp_Skill_Type(Job):
       blank=True, null=True,
       help_text=_("a related OCP ResourceType")
     )
+    facet = models.OneToOneField( # only root nodes can have unique facets
+      Facet,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet'),
+      related_name='ocp_skill_type',
+      blank=True, null=True,
+      help_text=_("a related OCP Facet")
+    )
     facet_value = models.OneToOneField( # only some tree folders can have unique facet_values
       FacetValue,
       on_delete=models.CASCADE,
@@ -412,7 +420,7 @@ class Ocp_Skill_Type(Job):
     def __unicode__(self):
       if self.resource_type:
         if self.ocp_artwork_type:
-          return self.get_gerund()+' '+self.ocp_artwork_type.name+' <-'
+          return self.get_gerund()+' - '+self.ocp_artwork_type.name.lower()+' <'
         else:
           return self.get_gerund()+' <' #name #+'  ('+self.resource_type.name+')'
       elif self.facet_value:

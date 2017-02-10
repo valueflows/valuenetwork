@@ -340,7 +340,7 @@ span.fancytree-title span.edit a:hover {
                               {% recursetree Rtype_tree %}
                               {% if True or node.resource_type or request.user.is_staff %}
                                 <li id="Rid_{{ node.id }}"><span>{% if not node.resource_type %}<em>{% endif %}{{ node.name }}{% if node.resource_type %} &lt; {% endif %} {% if not node.resource_type %}</em>{% endif %}
-                                  {% if node.resource_type.created_by == request.user %}&nbsp; <span class="edit" id="Rid_{{ node.id }}"></span>
+                                  {% if node.resource_type.created_by == request.user or request.user.is_superuser %}&nbsp; <span class="edit" id="Rid_{{ node.id }}"></span>
                                   {% endif %}
                                   </span>
                                   {% if not node.is_leaf_node %}
@@ -349,16 +349,16 @@ span.fancytree-title span.edit a:hover {
                                     </ul>
                                   {% endif %}
                                 </li>
-                                {% if node.resource_type.created_by == request.user %}
+                                {% if node.resource_type.created_by == request.user or request.user.is_superuser %}
                                   <script type="text/javascript">
                                     var R_{{ node.id }}_obj = {
-                                      "name":"{{ node.resource_type.name }}",
+                                      "name":"{% if node.resource_type %}{{ node.resource_type.name }}{% else %}{{ node.name }}{% endif %}",
                                       "parent":"{{ node.parent.id }}",
                                       "description":"{{ node.resource_type.description }}",
                                       "context":"{{ node.resource_type.context_agent.id }}",
                                       "substi":"{{ node.resource_type.substitutable }}",
                                       "unit":"{{ node.resource_type.unit.ocp_unit_type.id }}",
-                                      "price":"{{ node.resource_type.price_per_unit }}",
+                                      "price":"{% if node.resource_type.price_per_unit %}{{ node.resource_type.price_per_unit }}{% endif %}",
                                       "related":"{% if node.material_type %}{{ node.material_type.id }}{% elif node.nonmaterial_type %}{{ node.nonmaterial_type.id }}{% endif %}",
                                       "parentrecipe":"{{ node.resource_type.parent.id }}",
                                       "url":"{{ node.resource_type.url }}",
@@ -372,7 +372,7 @@ span.fancytree-title span.edit a:hover {
                           </div>
                           <div style="display:block;">
                             &nbsp; {{ nav_form.resource_type }} &nbsp;
-                            <span>
+                            <span style="float:right">
                               <ul style="display:inline-table; list-style:none; margin:0;">
                                 <li>{% trans "if nothing fits:" %}&nbsp; <a href="#addResourceTypeModal" role="button" class="btn btn-primary btn-mini btn_resource_type" data-toggle="modal" title="Create a new resource type" style="">{% trans "New Resource Type" %}</a></li>
                                 <li class="edit_resource_type" style="display:none; margin-top:10px;">{% trans "...you created this type:" %}&nbsp;<a href="#addResourceTypeModal" id="edit_rt_but" role="button" class="btn btn-primary btn-mini edit_resource_type" data-toggle="modal" title="Edit a resource type">{% trans "Edit" %}</a></li>
@@ -394,8 +394,8 @@ span.fancytree-title span.edit a:hover {
                             <ul class="root" id="treeData" style="/*display: none;*/">
                               {% recursetree Stype_tree %}
                               {% if True or node.resource_type or request.user.is_staff %}
-                              <li id="Sid_{{ node.id }}"><span>{% if not node.resource_type %}<em>{% endif %}{{ node.gerund|title }}{% if node.resource_type %} &lt; {% endif %}{% if not node.resource_type %}</em>{% endif %}
-                                {% if node.resource_type.created_by == request.user %}&nbsp; <span class="edit" id="Sid_{{ node.id }}"></span>
+                              <li id="Sid_{{ node.id }}"><span>{% if not node.resource_type %}<em>{% endif %}{{ node }}{% if node.resource_type %} {% endif %}{% if not node.resource_type %}</em>{% endif %}
+                                {% if node.resource_type.created_by == request.user or request.user.is_superuser %}&nbsp; <span class="edit" id="Sid_{{ node.id }}"></span>
                                 {% endif %}
                                 </span>
                                 {% if not node.is_leaf_node %}
@@ -404,18 +404,18 @@ span.fancytree-title span.edit a:hover {
                                 </ul>
                                 {% endif %}
                               </li>
-                                {% if node.resource_type.created_by == request.user %}
+                                {% if node.resource_type.created_by == request.user or request.user.is_superuser %}
                                   <script type="text/javascript">
                                     var S_{{ node.id }}_obj = {
-                                      "name":"{{ node.resource_type.name }}",
+                                      "name":"{% if node.resource_type %}{{ node.resource_type.name }}{% else %}{{ node.name }}{% endif %}",
                                       "parent":"{{ node.parent.id }}",
                                       "description":"{{ node.resource_type.description }}",
                                       "context":"{{ node.resource_type.context_agent.id }}",
-                                      "substi":"{{ node.resource_type.substitutable }}",
+                                      //"substi":"{{ node.resource_type.substitutable }}",
                                       "unit":"{{ node.resource_type.unit.ocp_unit_type.id }}",
-                                      "price":"{{ node.resource_type.price_per_unit }}",
-                                      "related":"{% if node.material_type %}{{ node.material_type.id }}{% elif node.nonmaterial_type %}{{ node.nonmaterial_type.id }}{% endif %}",
-                                      "parentrecipe":"{{ node.resource_type.parent.id }}",
+                                      "price":"{% if node.resource_type.price_per_unit %}{{ node.resource_type.price_per_unit }}{% endif %}",
+                                      "related":"{{ node.ocp_artwork_type.id }}",
+                                      //"parentrecipe":"{{ node.resource_type.parent.id }}",
                                       "url":"{{ node.resource_type.url }}",
                                       "photo_url":"{{ node.resource_type.photo_url }}",
                                       "verb":"{{ node.verb }}",
@@ -429,14 +429,14 @@ span.fancytree-title span.edit a:hover {
                           </div>
                           <div style="display:block;">
                             &nbsp; {{ nav_form.skill_type }} &nbsp;
-                            <span>
+                            <span style="float:right">
                               <ul style="display:inline-table; list-style:none; margin:0;">
                                 <li>{% trans "if no one fits:" %}&nbsp; <a href='#addSkillTypeModal' role="button" class='btn btn-primary btn-mini btn_skill_type' data-toggle="modal" title="Create a new skill resource type">{% trans "New Skill Service Type" %}</a></li>
                                 <li class="edit_skill_type" style="display:none; margin-top:10px;">{% trans "...you created this skill:" %}&nbsp;<a href="#addSkillTypeModal" id="edit_st_but" role="button" class="btn btn-primary btn-mini edit_skill_type" data-toggle="modal" title="Edit a skill type">{% trans "Edit" %}</a></li>
                               </ul>
                               {% if Stype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block; float:right;">
                                 {% if Stype_form.name.errors %}<em>{% trans "Name of the new type:" %}</em> {{ Stype_form.name.errors }}<br>{% endif %}
-                                {% if Stype_form.resource_type.errors %}<em>{% trans "Parent resource type:" %}</em> {{ Stype_form.resource_type.errors }}{% endif %}
+                                {% if Stype_form.parent_type.errors %}<em>{% trans "Parent skill type:" %}</em> {{ Stype_form.parent_type.errors }}{% endif %}
                                 </div><br> &nbsp; <br> &nbsp; <br>
                               {% endif %}
                             </span>
@@ -730,21 +730,26 @@ span.fancytree-title span.edit a:hover {
     var old_related = false;
     var old_parent = false;
 
-    function rebuild_modal(tid, ide){
-      if( typeof tid == 'undefined' || typeof ide == 'undefined' ) {
+    function rebuild_modal(tid){
+      var ide = false;
+      if( typeof tid == 'undefined' ) { alert("rebuild_modal: No tid"); }
+      else if( tid == "resource_type" ) {
         var tree = $('#resource_type_tree').first();
         var node = tree.fancytree("getTree").getActiveNode();
         //alert('tree:'+tree.fancytree("getTree"));//+' node:'+node.key+' sel:'+node.isSelected());
         if(node && node.isSelected()){
           ide = node.key;
-          tid = "resource_type";
         } else {
-          tree = $('#skill_type_tree').first();
-          node = tree.fancytree("getTree").getActiveNode();
-          if(node && node.isSelected()){
-            ide = node.key;
-            tid = "skill_type";
-          }
+          alert("rebuild_modal: No ide found! tid:"+tid);
+        }
+      } else if( tid == "skill_type" ) {
+        tree = $('#skill_type_tree').first();
+        node = tree.fancytree("getTree").getActiveNode();
+        if(node && node.isSelected()){
+          ide = node.key;
+          tid = "skill_type";
+        } else {
+          alert("rebuild_modal: No ide found! tid:"+tid);
         }
       }
       if( !ide || !tid ) {
@@ -752,12 +757,12 @@ span.fancytree-title span.edit a:hover {
       }
 
       var idarr = ide.split('_');
-      if( tid == "resource_type" && typeof eval('R_'+idarr[1]+'_obj') != "undefined" && $('input[name=new_resource_type]').length ) {
+      if( tid == "resource_type" && typeof eval('R_'+idarr[1]+'_obj') != "undefined" ){//&& $('input[name=new_resource_type]').length ) {
         var obj = eval('R_'+idarr[1]+'_obj');
-      } else if( tid == "skill_type" && typeof eval('S_'+idarr[1]+'_obj') != "undefined" && $('input[name=new_skill_type]').length ) {
+      } else if( tid == "skill_type" && typeof eval('S_'+idarr[1]+'_obj') != "undefined" ){//&& $('input[name=new_skill_type]').length ) {
         var obj = eval('S_'+idarr[1]+'_obj');
       } else {
-        alert("rebuild_modal: No OBJ");
+        alert("rebuild_modal: No OBJ! tid:"+tid+" ide:"+ide);
       }
       var name = obj['name'];
       var $mod = false;
@@ -801,14 +806,17 @@ span.fancytree-title span.edit a:hover {
           if(!old_rt || old_rt != obj['parent']) $mod.find('#id_parent_type').trigger("chosen:updated");
         }
         $mod.find('#id_context_agent option').each(function(){
-          if($(this).prop('selected')) old_agent = $(this).val();
-          $(this).prop('selected', false);
-          if($(this).val() == obj['context']){
+          if(obj['context']){
+            if($(this).prop('selected')) old_agent = $(this).val();
+            $(this).prop('selected', false);
             //alert('hey: '+$(this).val()+' context:'+obj['context']);
-            $(this).prop('selected',true);
+            if($(this).val() == obj['context']){
+              $(this).prop('selected',true);
+            }
           }
+          //alert('context: '+obj['context']);
         });
-        if(old_agent != obj['context']) $mod.find('#id_context_agent').trigger("chosen:updated");
+        if(!old_agent || old_agent != obj['context']) $mod.find('#id_context_agent').trigger("chosen:updated");
 
         $mod.find('#id_unit_type option').each(function(){
           if($(this).prop('selected')) old_unit = $(this).val();
@@ -818,7 +826,7 @@ span.fancytree-title span.edit a:hover {
             $(this).prop('selected',true);
           }
         });
-        if(old_unit != obj['unit']) $mod.find('#id_unit_type').trigger("chosen:updated");
+        if(!old_unit || old_unit != obj['unit']) $mod.find('#id_unit_type').trigger("chosen:updated");
 
         //alert('related: '+obj['related']);
         $mod.find('#id_related_type option').each(function(){
@@ -829,7 +837,7 @@ span.fancytree-title span.edit a:hover {
             $(this).prop('selected',true);
           }
         });
-        if(old_related != obj['related']) $mod.find('#id_related_type').trigger("chosen:updated");
+        if(!old_related || old_related != obj['related']) $mod.find('#id_related_type').trigger("chosen:updated");
 
         $mod.find('#id_parent option').each(function(){
           if($(this).prop('selected')) old_parent = $(this).val();
@@ -839,7 +847,7 @@ span.fancytree-title span.edit a:hover {
             $(this).prop('selected',true);
           }
         });
-        if(old_parent != obj['parentrecipe']) $mod.find('#id_parent').trigger("chosen:updated");
+        if(!old_parent || old_parent != obj['parentrecipe']) $mod.find('#id_parent').trigger("chosen:updated");
 
         if(idarr[0] == "Rid") $mod.find('input[name=new_resource_type]').attr('name','edit_resource_type');
         if(idarr[0] == "Sid") $mod.find('input[name=new_skill_type]').attr('name','edit_skill_type');
@@ -848,10 +856,10 @@ span.fancytree-title span.edit a:hover {
       }
     }
     $('#edit_rt_but').click(function(){
-        rebuild_modal();
+        rebuild_modal('resource_type');
     });
     $('#edit_st_but').click(function(){
-        rebuild_modal();
+        rebuild_modal('skill_type');
     });
 
     function reset_modal(tid){
@@ -909,9 +917,9 @@ span.fancytree-title span.edit a:hover {
         if(old_agent){
           $mod.find('#id_context_agent').find('option').prop('selected', false);
           $mod.find('#id_context_agent').find('option[value='+old_agent+']').prop('selected', true);
-        } else {
-          $mod.find('#id_context_agent').find('option').prop('selected', false);
-          $mod.find('#id_context_agent').find("option[value='']").prop('selected', true);
+        } else { // context agent can't be empty
+          //$mod.find('#id_context_agent').find('option').prop('selected', false);
+          //$mod.find('#id_context_agent').find("option[value='']").prop('selected', true);
         }
         var new_agent = $mod.find('#id_context_agent').find('option:selected').first().attr('value');
 
@@ -963,10 +971,11 @@ span.fancytree-title span.edit a:hover {
             }
           }
         }
-        if(sel_agent != new_agent){
+        if(sel_agent != new_agent){ //alert('diff agent sel:'+sel_agent+' new:'+new_agent);
           $mod.find('#id_context_agent').trigger("chosen:updated");
           if( new_agent != '' && !$mod.find('#id_context_agent_chosen').find('li.result-selected').length ) {
             alert('Error (js bug): the actual context agent is not displayed (but is selected). Please reselect: '+new_agent);
+            //$mod.find('#id_context_agent').trigger("chosen:updated");
           }
         }
         if(sel_unit != new_unit){

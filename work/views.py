@@ -3659,7 +3659,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
             else: # nav_form is not valid
               pass #raise ValidationError(nav_form.errors)
 
-        # there's no new_exchange = request.POST.get("new_exchange")
+        # there's no new_exchange, is it a new resource type?
         new_resource_type = request.POST.get("new_resource_type")
         if new_resource_type:
             if Rtype_form.is_valid():
@@ -3945,23 +3945,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                           grt.move_to(parent_st, 'last-child')
                           moved = True
 
-                        rel_material = None
-                        rel_nonmaterial = None
-                        if hasattr(data["related_type"], 'id'):
-                          rrt = Ocp_Artwork_Type.objects.get(id=data["related_type"].id)
-                          # mptt: get_ancestors(ascending=False, include_self=False)
-                          rrt_ancs = rrt.get_ancestors(False, True)
-                          for an in rrt_ancs: # see if is child of material or non-material
-                            if an.clas == 'Material':
-                              mat = Material_Type.objects.get(id=rrt.id)
-                              rel_material = mat
-                              break
-                            if an.clas == 'Nonmaterial':
-                              non = Nonmaterial_Type.objects.get(id=rrt.id)
-                              rel_nonmaterial = non
-                              break
-                          grt.material_type = rel_material
-                          grt.nonmaterial_type = rel_nonmaterial
+                        grt.ocp_artwork_type = data["related_type"]
 
                         grt.save()
 

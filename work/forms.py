@@ -1014,6 +1014,7 @@ class NewResourceTypeForm(forms.Form):
         label=_("Any photo URL of the resource type?"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
     )
+    edid = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, agent=None, *args, **kwargs):
         super(NewResourceTypeForm, self).__init__(*args, **kwargs)
@@ -1035,6 +1036,12 @@ class NewResourceTypeForm(forms.Form):
         price = data["price_per_unit"]
         if not price:
           data["price_per_unit"] = "0.0"
+        edid = data['edid']
+        name_rts = Ocp_Artwork_Type.objects.filter(name=data["name"])
+        if name_rts.count() and edid == '':
+          self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
+        elif edid.split('_')[1] != str(name_rts[0].id):
+          self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+edid.split('_')[1]+' = '+str(name_rts[0].id))
         return data
 
 
@@ -1052,7 +1059,7 @@ class NewSkillTypeForm(forms.Form):
         widget=forms.TextInput(attrs={'class': 'unique-name input-large',}),
     )
     parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Skill_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        queryset=Ocp_Skill_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         empty_label=_('. . .'),
         level_indicator='. ',
         label=_("Parent skill type"),
@@ -1071,7 +1078,7 @@ class NewSkillTypeForm(forms.Form):
             attrs={'class': 'chzn-select'}),
     )
     related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
         required=False,
         empty_label='', #_('. . .'),
         level_indicator='. ',
@@ -1108,6 +1115,7 @@ class NewSkillTypeForm(forms.Form):
         label=_("Any photo URL of the skill type?"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
     )
+    edid = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, agent=None, *args, **kwargs):
         super(NewSkillTypeForm, self).__init__(*args, **kwargs)
@@ -1128,6 +1136,12 @@ class NewSkillTypeForm(forms.Form):
         price = data["price_per_unit"]
         if not price:
           data["price_per_unit"] = "0.0"
+        edid = data['edid']
+        name_sts = Ocp_Skill_Type.objects.filter(name=data["name"])
+        if name_sts.count() and edid == '':
+          self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
+        elif edid.split('_')[1] != name_sts[0].id:
+          self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+str(data['edid'])+' = '+str(name_sts[0].id))
         return data
 
 

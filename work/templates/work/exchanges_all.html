@@ -279,8 +279,8 @@ span.fancytree-title span.edit a:hover {
                   {% if nav_form.exchange_type.errors and request.POST.new_exchange %}<div class="alert" style="display:inline-block;">{{ nav_form.exchange_type.errors }}</div>{% endif %}
 
                   {{ nav_form.exchange_type }}  &nbsp; <span>{% trans "Or make a new one..." %}</span><span class="showhide" id="sh-exchange_type" >(SHOW)</span></span>
-                {% if Rtype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block;"><ul><li>
-                    {% trans "The new resource type request has some errors, click 'show' to see them." %}</li></ul></div>
+                {% if Rtype_form.errors or Stype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block;"><ul><li>
+                    {% trans "The new resource type request has some errors, click 'SHOW' to see them." %}</li></ul></div>
                 {% endif %}
                 <br/>
                 <div class="list" id="list-exchange_type" style="margin-top: 5px;">
@@ -372,17 +372,18 @@ span.fancytree-title span.edit a:hover {
                           </div>
                           <div style="display:block;">
                             &nbsp; {{ nav_form.resource_type }} &nbsp;
-                            <span style="float:right">
-                              <ul style="display:inline-table; list-style:none; margin:0;">
+                            <span>
+                              <ul style="display:inline-table; list-style:none; margin:7px 0; float:right;">
                                 <li>{% trans "if nothing fits:" %}&nbsp; <a href="#addResourceTypeModal" role="button" class="btn btn-primary btn-mini btn_resource_type" data-toggle="modal" title="Create a new resource type" style="">{% trans "New Resource Type" %}</a></li>
                                 <li class="edit_resource_type" style="display:none; margin-top:10px;">{% trans "...you created this type:" %}&nbsp;<a href="#addResourceTypeModal" id="edit_rt_but" role="button" class="btn btn-primary btn-mini edit_resource_type" data-toggle="modal" title="Edit a resource type">{% trans "Edit" %}</a></li>
                               </ul>
-                              {% if Rtype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block; float:right;">
-                                {% if Rtype_form.name.errors %}<em>{% trans "Name of the new type:" %}</em> {{ Rtype_form.name.errors }}<br>{% endif %}
-                                {% if Rtype_form.resource_type.errors %}<em>{% trans "Parent resource type:" %}</em> {{ Rtype_form.resource_type.errors }}{% endif %}
-                                <!-- {{ Rtype_form.errors }} -->
-                                </div><br> &nbsp; <br> &nbsp; <br>
-                              {% endif %}
+                              {% if Rtype_form.errors %}{% if request.POST.new_resource_type or request.POST.edit_resource_type %}<br>
+                              <div class="alert" style="display:inline-block; float:right;"><ul>
+                                {% for fil in Rtype_form %}
+                                  {% if fil.errors %}<li><em>{{ fil.label }}:</em> {{ fil.errors|first|safe }}</li>{% endif %}
+                                {% endfor %}
+                              </ul></div><br> &nbsp; <br> &nbsp; <br>
+                              {% endif %}{% endif %}
                             </span>
 
                           </div>
@@ -429,16 +430,18 @@ span.fancytree-title span.edit a:hover {
                           </div>
                           <div style="display:block;">
                             &nbsp; {{ nav_form.skill_type }} &nbsp;
-                            <span style="float:right">
-                              <ul style="display:inline-table; list-style:none; margin:0;">
+                            <span>
+                              <ul style="display:inline-table; list-style:none; margin:7px 0; float:right;">
                                 <li>{% trans "if no one fits:" %}&nbsp; <a href='#addSkillTypeModal' role="button" class='btn btn-primary btn-mini btn_skill_type' data-toggle="modal" title="Create a new skill resource type">{% trans "New Skill Service Type" %}</a></li>
                                 <li class="edit_skill_type" style="display:none; margin-top:10px;">{% trans "...you created this skill:" %}&nbsp;<a href="#addSkillTypeModal" id="edit_st_but" role="button" class="btn btn-primary btn-mini edit_skill_type" data-toggle="modal" title="Edit a skill type">{% trans "Edit" %}</a></li>
                               </ul>
-                              {% if Stype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block; float:right;">
-                                {% if Stype_form.name.errors %}<em>{% trans "Name of the new type:" %}</em> {{ Stype_form.name.errors }}<br>{% endif %}
-                                {% if Stype_form.parent_type.errors %}<em>{% trans "Parent skill type:" %}</em> {{ Stype_form.parent_type.errors }}{% endif %}
-                                </div><br> &nbsp; <br> &nbsp; <br>
-                              {% endif %}
+                              {% if Stype_form.errors %}{% if request.POST.new_skill_type or request.POST.edit_skill_type %}<br>
+                               <div class="alert" style="display:inline-block; float:right;"><ul>
+                                {% for fil in Stype_form %}
+                                  {% if fil.errors %}<li><em>{{ fil.label }}:</em> {{ fil.errors|first|safe }}</li>{% endif %}
+                                {% endfor %}
+                               </ul></div><br> &nbsp; <br> &nbsp; <br>
+                              {% endif %}{% endif %}
                             </span>
                           </div>
                         </div>
@@ -477,25 +480,15 @@ span.fancytree-title span.edit a:hover {
                 <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in Rtype_form %}
+                    {% if not fil.name == 'edid' %}
                     <div class="modal-field">
                       <label>{{ fil.label }}:</label>
-                      {% if False and fil == Rtype_form.unit %}
-                        <select id="id_unit" class="chzn-select" name="unit">
-                          {% for ut in unit_types %}
-                            <optgroup label="{{ ut.name }}">
-                              {% for unit in ut.unit %}
-                                <option value="{{ unit.id }}">{{ unit.name }}</option>
-                              {% endfor %}
-                            </optgroup>
-                          {% endfor %}
-                        </select>
-                      {% else %}
                         {{ fil }}
-                      {% endif %}
                       {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
                     </div>
+                    {% endif %}
                   {% endfor %}
-                  <input type="hidden" id="edid" name="edid" value="" />
+                  <!-- <input type="hidden" id="edid" name="edid" value="" /> -->
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
                   <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -513,26 +506,16 @@ span.fancytree-title span.edit a:hover {
                 <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in Stype_form %}
+                    {% if not fil.name == 'edid' %}
                     <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
                       <label>{{ fil.label }}:</label>
-                      {% if False and fil == Stype_form.unit %}
-                        <select id="id_unit" class="chzn-select" name="unit">
-                          {% for ut in unit_types %}
-                            <optgroup label="{{ ut.name }}">
-                              {% for unit in ut.unit %}
-                                <option value="{{ unit.id }}">{{ unit.name }}</option>
-                              {% endfor %}
-                            </optgroup>
-                          {% endfor %}
-                        </select>
-                      {% else %}
                         {{ fil }}
-                      {% endif %}
                       {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
                     </div>
+                    {% endif %}
                   {% endfor %}
 
-                  <input type="hidden" id="edid" name="edid" value="" />
+                  <!-- <input type="hidden" id="edid" name="edid" value="" /> -->
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
                   <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -675,19 +658,28 @@ span.fancytree-title span.edit a:hover {
         "ui-tabs-panel": "ui-corner-all infobox"
       },
       beforeActivate: function( event, ui ) {
-        //alert(ui.oldPanel.parent().html());//find('li span.fancytree-expanded').nextAll('ul').html());
+        //alert(ui.oldPanel.find('.exchange_type_tree').length);//find('li span.fancytree-expanded').nextAll('ul').html());
         //ui.oldPanel.find('li span.fancytree-selected .fancytree-checkbox').click();
         //ui.oldPanel.find('li span.fancytree-expanded').nextAll('ul').hide();
         //ui.oldPanel.find('li span.fancytree-expanded .fancytree-expander').click();
         $('#id_exchange_type_chosen .search-choice .search-choice-close').click();
         //$('#id_exchange_type_chosen .search-field').blur().parent().parent().blur().prev().click();//.click();
         ui.oldPanel.parent().click();
+
+        ui.oldPanel.find('.exchange_type_tree').first().fancytree("getRootNode").visit(function(node){
+          if(node.isExpanded()){
+            node.setExpanded(false, {noAnimation: true, noEvents: true}); //alert('node:'+node.title);
+          }
+          //return 'skip';
+        });
       },
       activate: function( event, ui ) {
         //alert(ui.newTab.html());
         setTimeout( function(){
-          $('#id_exchange_type_chosen .search-field').blur().parent().parent().blur().prev().click();//.click();
-          ui.newTab.find('a').click();
+          //$('#id_exchange_type_chosen .search-field').blur().parent().parent().blur().prev().click();//.click();
+          //ui.newTab.find('a').click();
+          //alert('oldPanel:'+ui.oldPanel.find('.exchange_type_tree').first().fancytree("getRootNode"));
+
         }, 200);
       }
     });
@@ -851,7 +843,7 @@ span.fancytree-title span.edit a:hover {
 
         if(idarr[0] == "Rid") $mod.find('input[name=new_resource_type]').attr('name','edit_resource_type');
         if(idarr[0] == "Sid") $mod.find('input[name=new_skill_type]').attr('name','edit_skill_type');
-        $mod.find('#edid').attr('value', ide);
+        $mod.find('#id_edid').attr('value', ide);
 
       }
     }
@@ -999,16 +991,19 @@ span.fancytree-title span.edit a:hover {
 
         if( tid == "resource_type" ) $mod.find('input[name=edit_resource_type]').attr('name','new_resource_type');
         if( tid == "skill_type" ) $mod.find('input[name=edit_skill_type]').attr('name','new_skill_type');
-        $mod.find('#edid').attr('value','');
+        $mod.find('#id_edid').attr('value','');
         //alert('reset tid:'+tid+' sel_rt:'+sel_rt+' new_rt:'+new_rt+' old_rt:'+old_rt);
         //alert('reset tid:'+tid+' sel_agent:'+sel_agent+' new_agent:'+new_agent+' old_agent:'+old_agent);
     }
+
     $('a.btn_resource_type').click(function(){
         reset_modal("resource_type");
     });
     $('a.btn_skill_type').click(function(){
         reset_modal("skill_type");
     });
+
+
 
     var ObjTree = {
       checkbox: true,
@@ -1063,7 +1058,10 @@ span.fancytree-title span.edit a:hover {
         }
         //update_tree(data);
       },
-      expand: function(event, data) {
+      beforeExpand: function(event, data) {
+        if(data.node.isExpanded() && !data.tree.hasFocus()){ //node.isActive()){
+          //return false;
+        }
         /*$('span.fancytree-title span.edit').each(function(){
           $(this).html('<a href="#addResourceTypeModal" class="btn btn-primary btn-mini" data-toggle="modal" role="button">'+$(this).text()+'</a>');
           var $but = $('a.edit_resource_type').css('display','block');
@@ -1172,16 +1170,19 @@ span.fancytree-title span.edit a:hover {
                   if( rar[0] == 'Rid' ) {
                     var rtree = $('#resource_type_tree').first();//resource_skill').find('#'+rel);
                     rtree.fancytree("getTree").activateKey('Rid_'+rar[1]);
-                    var node = rtree.fancytree("getTree").getActiveNode();
-                    node.setSelected(true);//toggleSelected();
+                    var nod = rtree.fancytree("getTree").getActiveNode();
+                    nod.setSelected(true);//toggleSelected();
                     //node.setFocus(true);
                     //node.setActive(false);
-                    node.setFocus(false);
+                    nod.setFocus(false);
                     rtree.fancytree("getRootNode").visit(function(node){
                       //node.setExpanded(false);
                       // TODO fold other not related branches
                       // mptt: get_ancestors(ascending=False, include_self=False)
-                      //var anc = node.get_ancestors(true);
+                      //var ancs = node.getParentList(true); //alert('ancs:'+ancs);
+                      if( node.isExpanded() && !nod.isDescendantOf(node) ) {
+                        node.setExpanded(false);
+                      }
                     });
                     rtree.fancytree("getTree").setFocus(false);
                   } else {
@@ -1261,7 +1262,7 @@ span.fancytree-title span.edit a:hover {
           //data.tree.$div.focus();
           //data.tree.setFocus();
 
-        } else { // either tree has no focus or there's a choice in chosen
+        } else { // selecting: either tree has no focus or there's a choice in chosen
 
           if( !$tab.find('#id_'+tid+'_chosen').find('li.search-choice').length ){ // no choice in chosen, so no focus
 
@@ -1279,7 +1280,7 @@ span.fancytree-title span.edit a:hover {
 
 
           } else {
-            // there's a choice in chosen and tree has no focus
+            // selecting: there's a choice in chosen and tree has no focus
 
           }
         }
@@ -1291,16 +1292,19 @@ span.fancytree-title span.edit a:hover {
             var rtree = $('#resource_type_tree').first();
             if( rar[0] == 'Rid' ) {
               rtree.fancytree("getTree").activateKey('Rid_'+rar[1]);
-              var node = rtree.fancytree("getTree").getActiveNode();
-              node.setSelected(true);//toggleSelected();
+              var nod = rtree.fancytree("getTree").getActiveNode();
+              nod.setSelected(true);//toggleSelected();
               //node.setFocus(true);
-              node.setActive(false);
-              node.setFocus(false);
+              nod.setActive(false);
+              nod.setFocus(false);
               rtree.fancytree("getRootNode").visit(function(node){
                 //node.setExpanded(false);
                 // TODO fold other not related branches
                 // mptt: get_ancestors(ascending=False, include_self=False)
                 //var anc = node.get_ancestors(true);
+                if( node.isExpanded() && !nod.isDescendantOf(node) ) {
+                  node.setExpanded(false);
+                }
               });
               rtree.fancytree("getTree").setFocus(false);
             } else {
@@ -1459,7 +1463,7 @@ span.fancytree-title span.edit a:hover {
       }
 
       //if(!tree.fancytree("getTree").hasFocus()){
-      if(typeof dess != 'undefined' && dess){
+      if(typeof dess != 'undefined' && dess){     //   D E S S E L E C T
 
         $tab.find('#id_'+tid+'_chosen').find('li.search-field').show();
 
@@ -1476,15 +1480,18 @@ span.fancytree-title span.edit a:hover {
           }
         }
 
-        if(tree.length && !tree.fancytree("getTree").hasFocus()){
+        if(tree.length && !tree.fancytree("getTree").hasFocus() && tree.parent('div:visible').length){ // tree has no focus
           if(typeof dess == 'string'){
             tree.fancytree("getTree").activateKey(ide+dess);
-            var node = tree.fancytree("getTree").getActiveNode();
-            node.setSelected(false);//toggleSelected();
-            node.setFocus(false);
-            node.setActive(false);
+            var nod = tree.fancytree("getTree").getActiveNode();
+            nod.setSelected(false);//toggleSelected();
+            nod.setFocus(false);
+            nod.setActive(false);
             tree.fancytree("getRootNode").visit(function(node){
-              node.setExpanded(false);
+              if( node.isExpanded() && !tree.fancytree("getTree").getSelectedNodes().length ) { //!nod.isDescendantOf(node) ) {
+                node.setExpanded(false, {noAnimation: false, noEvents: false}); //alert('close:'+node.title);
+              }
+              //return 'skip';
             });
             tree.fancytree("getTree").setFocus(false);
             //$('input[name="new-exchange"]').focus();
@@ -1515,9 +1522,9 @@ span.fancytree-title span.edit a:hover {
               node.setSelected(false);//toggleSelected();
               node.setFocus(false);
               node.setActive(false);
-              tree.fancytree("getRootNode").visit(function(node){
+              //tree.fancytree("getRootNode").visit(function(node){
                 //node.setExpanded(false);
-              });
+              //});
               tree.fancytree("getTree").setFocus(false);
               //$this.blur().mouseout().parent().find('span').first().focus().mousedown().mouseup().click();
               //$this.blur().mouseout().next().next().mouseover().focus().mousedown().mouseup().click();
@@ -1530,7 +1537,7 @@ span.fancytree-title span.edit a:hover {
 
       }; // end DESS
 
-      if(typeof sels != 'undefined' && sels){ // SELECTIONS
+      if(typeof sels != 'undefined' && sels){      //     S E L E C T I O N S
 
         if(!tree.length){ // || ide == 'Eid_'){
 

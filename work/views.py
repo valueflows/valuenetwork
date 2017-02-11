@@ -3792,43 +3792,44 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         grt.save()
 
                         if not grt.resource_type:
-                          raise ValidationError("There's no resource type! create it?")
-                        rt = grt.resource_type;
-                        rt.name = data["name"]
-                        rt.description = data["description"]
-                        rt.unit = out
-                        rt.price_per_unit = data["price_per_unit"]
-                        rt.substitutable = data["substitutable"]
-                        rt.context_agent = data["context_agent"]
-                        rt.url = data["url"]
-                        rt.photo_url = data["photo_url"]
-                        rt.parent = data["parent"]
-                        rt.edited_by = request.user
-                        if moved:
-                          old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)
-                          for rtfv in old_rtfvs:
-                            rtfv.delete()
-                          # mptt: get_ancestors(ascending=False, include_self=False)
-                          ancs = parent_rt.get_ancestors(True, True)
-                          for an in ancs:
-                            if an.clas != 'Artwork':
-                              an = Ocp_Artwork_Type.objects.get(id=an.id)
-                              if an.resource_type:
-                                for fv in an.resource_type.facets.all():
+                          pass #raise ValidationError("There's no resource type! create it?")
+                        else:
+                          rt = grt.resource_type;
+                          rt.name = data["name"]
+                          rt.description = data["description"]
+                          rt.unit = out
+                          rt.price_per_unit = data["price_per_unit"]
+                          rt.substitutable = data["substitutable"]
+                          rt.context_agent = data["context_agent"]
+                          rt.url = data["url"]
+                          rt.photo_url = data["photo_url"]
+                          rt.parent = data["parent"]
+                          rt.edited_by = request.user
+                          if moved:
+                            old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)
+                            for rtfv in old_rtfvs:
+                              rtfv.delete()
+                            # mptt: get_ancestors(ascending=False, include_self=False)
+                            ancs = parent_rt.get_ancestors(True, True)
+                            for an in ancs:
+                              if an.clas != 'Artwork':
+                                an = Ocp_Artwork_Type.objects.get(id=an.id)
+                                if an.resource_type:
+                                  for fv in an.resource_type.facets.all():
+                                    new_rtfv = ResourceTypeFacetValue(
+                                      resource_type=rt,
+                                      facet_value=fv.facet_value
+                                    )
+                                    new_rtfv.save()
+                                  break
+                                elif an.facet_value:
                                   new_rtfv = ResourceTypeFacetValue(
-                                    resource_type=rt,
-                                    facet_value=fv.facet_value
+                                      resource_type=rt,
+                                      facet_value=an.facet_value
                                   )
                                   new_rtfv.save()
-                                break
-                              elif an.facet_value:
-                                new_rtfv = ResourceTypeFacetValue(
-                                    resource_type=rt,
-                                    facet_value=an.facet_value
-                                )
-                                new_rtfv.save()
-                                break
-                        rt.save()
+                                  break
+                          rt.save()
 
                         nav_form = ExchangeNavForm(agent=agent, data=None)
                         Rtype_form = NewResourceTypeForm(agent=agent, data=None)
@@ -3928,7 +3929,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       out = gut.ocp_unit
                     edid = request.POST.get("edid")
                     if edid == '':
-                      raise ValidationError("Missing edid!")
+                      raise ValidationError("Missing id of the edited skill! (edid)")
                     else:
                       #raise ValidationError("Lets edit "+edid)
                       idar = edid.split('_')
@@ -3946,47 +3947,50 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                           moved = True
 
                         grt.ocp_artwork_type = data["related_type"]
-
-                        grt.save()
+                        try:
+                          grt.save()
+                        except:
+                          raise ValidationError("The skill name already exists and they are unique")
 
                         if not grt.resource_type:
-                          raise ValidationError("There's no resource type! create it?")
-                        rt = grt.resource_type;
-                        rt.name = data["name"]
-                        rt.description = data["description"]
-                        rt.unit = out
-                        rt.price_per_unit = data["price_per_unit"]
-                        rt.substitutable = False #data["substitutable"]
-                        rt.context_agent = data["context_agent"]
-                        rt.url = data["url"]
-                        rt.photo_url = data["photo_url"]
-                        #rt.parent = data["parent"]
-                        rt.edited_by = request.user
-                        if moved:
-                          old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)
-                          for rtfv in old_rtfvs:
-                            rtfv.delete()
-                          # mptt: get_ancestors(ascending=False, include_self=False)
-                          ancs = parent_st.get_ancestors(True, True)
-                          for an in ancs:
-                            #if an.clas != 'Artwork':
-                              an = Ocp_Skill_Type.objects.get(id=an.id)
-                              if an.resource_type:
-                                for fv in an.resource_type.facets.all():
+                          pass #raise ValidationError("There's no resource type! create it?")
+                        else:
+                          rt = grt.resource_type;
+                          rt.name = data["name"]
+                          rt.description = data["description"]
+                          rt.unit = out
+                          rt.price_per_unit = data["price_per_unit"]
+                          rt.substitutable = False #data["substitutable"]
+                          rt.context_agent = data["context_agent"]
+                          rt.url = data["url"]
+                          rt.photo_url = data["photo_url"]
+                          #rt.parent = data["parent"]
+                          rt.edited_by = request.user
+                          if moved:
+                            old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)
+                            for rtfv in old_rtfvs:
+                              rtfv.delete()
+                            # mptt: get_ancestors(ascending=False, include_self=False)
+                            ancs = parent_st.get_ancestors(True, True)
+                            for an in ancs:
+                              #if an.clas != 'Artwork':
+                                an = Ocp_Skill_Type.objects.get(id=an.id)
+                                if an.resource_type:
+                                  for fv in an.resource_type.facets.all():
+                                    new_rtfv = ResourceTypeFacetValue(
+                                      resource_type=rt,
+                                      facet_value=fv.facet_value
+                                    )
+                                    new_rtfv.save()
+                                  break
+                                elif an.facet_value:
                                   new_rtfv = ResourceTypeFacetValue(
-                                    resource_type=rt,
-                                    facet_value=fv.facet_value
+                                      resource_type=rt,
+                                      facet_value=an.facet_value
                                   )
                                   new_rtfv.save()
-                                break
-                              elif an.facet_value:
-                                new_rtfv = ResourceTypeFacetValue(
-                                    resource_type=rt,
-                                    facet_value=an.facet_value
-                                )
-                                new_rtfv.save()
-                                break
-                        rt.save()
+                                  break
+                          rt.save()
 
                         nav_form = ExchangeNavForm(agent=agent, data=None)
                         Rtype_form = NewResourceTypeForm(agent=agent, data=None)

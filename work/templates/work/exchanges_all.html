@@ -28,6 +28,7 @@ ul, li {
   max-width: 300px;
   float: left;
   width: 295px;
+  margin-right: 13px;
 }
 span.total {
   font-weight: bold;
@@ -50,8 +51,8 @@ span.total {
 
 #new_exchange {
   float: left;
-  margin-left: 13px;
-  width: 794px;
+  /*margin-left: 13px;*/
+  max-width: 797px;
   /*text-align: right;*/
 }
 
@@ -92,6 +93,7 @@ span.total {
 }
 .span8 {
   margin-left: 0px;
+  float: left;
 }
 #exchangeForm p {
   margin: 3px 0 0 9px;
@@ -480,13 +482,13 @@ span.fancytree-title span.edit a:hover {
                 <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in Rtype_form %}
-                    {% if not fil.name == 'edid' %}
                     <div class="modal-field">
-                      <label>{{ fil.label }}:</label>
+                      {% if not fil.name == 'edid' %}
+                        <label>{{ fil.label }}:</label>
+                      {% endif %}
                         {{ fil }}
                       {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
                     </div>
-                    {% endif %}
                   {% endfor %}
                   <!-- <input type="hidden" id="edid" name="edid" value="" /> -->
                   <input type="hidden" id="next" name="next" value="exchanges_all" />
@@ -506,13 +508,13 @@ span.fancytree-title span.edit a:hover {
                 <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in Stype_form %}
-                    {% if not fil.name == 'edid' %}
                     <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
-                      <label>{{ fil.label }}:</label>
+                      {% if not fil.name == 'edid' %}
+                        <label>{{ fil.label }}:</label>
+                      {% endif %}
                         {{ fil }}
                       {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
                     </div>
-                    {% endif %}
                   {% endfor %}
 
                   <!-- <input type="hidden" id="edid" name="edid" value="" /> -->
@@ -769,8 +771,8 @@ span.fancytree-title span.edit a:hover {
       if($mod){
         $mod.find('#name_action').text("{% trans 'Edit' %} "+name);
         $mod.find('#id_name').val(name);
-        $mod.find('#id_description').val(obj['description']);
-        $mod.find('#id_substitutable').val(obj['substi']);
+        if(obj['description']) $mod.find('#id_description').val(obj['description']);
+        if(obj['substi'] == 'False') $mod.find('#id_substitutable').val(obj['substi']).prop('checked', false);
         $mod.find('#id_price_per_unit').val(obj['price']);
         $mod.find('#id_url').val(obj['url']);
         $mod.find('#id_photo_url').val(obj['photo_url']);
@@ -860,10 +862,11 @@ span.fancytree-title span.edit a:hover {
         } else if( tid == "skill_type" && $('input[name=edit_skill_type]').length) {
           var $mod = $('#addSkillTypeModal');
         }
+        if(typeof $mod == 'undefined') return;
         $mod.find('#name_action').text("{% trans 'Add new' %}");
         $mod.find('#id_name').val('');
         $mod.find('#id_description').val('');
-        $mod.find('#id_substitutable').val(false);
+        $mod.find('#id_substitutable').val(false).prop('checked', false);
         $mod.find('#id_price_per_unit').val('');
         $mod.find('#id_url').val('');
         $mod.find('#id_photo_url').val('');

@@ -1014,7 +1014,10 @@ class NewResourceTypeForm(forms.Form):
         label=_("Any photo URL of the resource type?"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
     )
-    edid = forms.CharField(widget=forms.HiddenInput())
+    edid = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
 
     def __init__(self, agent=None, *args, **kwargs):
         super(NewResourceTypeForm, self).__init__(*args, **kwargs)
@@ -1036,11 +1039,14 @@ class NewResourceTypeForm(forms.Form):
         price = data["price_per_unit"]
         if not price:
           data["price_per_unit"] = "0.0"
-        edid = data['edid']
+        if hasattr(data, 'edid'):
+          edid = data['edid']
+        else:
+          edid = ''
         name_rts = Ocp_Artwork_Type.objects.filter(name=data["name"])
         if name_rts.count() and edid == '':
           self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
-        elif edid.split('_')[1] != str(name_rts[0].id):
+        elif not edid == '' and edid.split('_')[1] != str(name_rts[0].id):
           self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+edid.split('_')[1]+' = '+str(name_rts[0].id))
         return data
 
@@ -1115,7 +1121,10 @@ class NewSkillTypeForm(forms.Form):
         label=_("Any photo URL of the skill type?"),
         widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
     )
-    edid = forms.CharField(widget=forms.HiddenInput())
+    edid = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
 
     def __init__(self, agent=None, *args, **kwargs):
         super(NewSkillTypeForm, self).__init__(*args, **kwargs)
@@ -1136,11 +1145,14 @@ class NewSkillTypeForm(forms.Form):
         price = data["price_per_unit"]
         if not price:
           data["price_per_unit"] = "0.0"
-        edid = data['edid']
+        if hasattr(data, 'edid'):
+          edid = data['edid']
+        else:
+          edid = ''
         name_sts = Ocp_Skill_Type.objects.filter(name=data["name"])
         if name_sts.count() and edid == '':
           self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
-        elif edid.split('_')[1] != name_sts[0].id:
+        elif not edid == '' and edid.split('_')[1] != name_sts[0].id:
           self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+str(data['edid'])+' = '+str(name_sts[0].id))
         return data
 

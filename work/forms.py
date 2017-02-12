@@ -455,11 +455,23 @@ class InvoiceNumberForm(forms.ModelForm):
 
 
 class WorkEventContextAgentForm(forms.ModelForm):
-    event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
+    event_date = forms.DateField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'input-small date-entry',})
+    )
+    ocp_skill_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Skill_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        label="Type of work done",
+        level_indicator='. ',
+        widget=forms.Select(
+            attrs={'class': 'ocp-skill-type input-xlarge chzn-select'})
+    )
     resource_type = WorkModelChoiceField(
         queryset=EconomicResourceType.objects.filter(behavior="work"),
         label="Type of work done",
         #empty_label=None,
+        required=False,
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
     quantity = forms.DecimalField(required=True,
@@ -483,14 +495,42 @@ class WorkEventContextAgentForm(forms.ModelForm):
 
     class Meta:
         model = EconomicEvent
-        fields = ('event_date', 'resource_type','quantity', 'description', 'from_agent', 'is_contribution')
+        fields = ('event_date', 'ocp_skill_type', 'resource_type','quantity', 'description', 'from_agent', 'is_contribution')
 
     def __init__(self, context_agent=None, *args, **kwargs):
         super(WorkEventContextAgentForm, self).__init__(*args, **kwargs)
         #import pdb; pdb.set_trace()
         if context_agent:
-            self.context_agent = context_agent
+            #self.context_agent = context_agent
             self.fields["from_agent"].queryset = context_agent.related_all_agents_queryset()
+            context_ids = [c.id for c in context_agent.related_all_agents()]
+            if not context_agent.id in context_ids:
+                context_ids.append(context_agent.id)
+            self.fields["ocp_skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+        if kwargs.items():
+            for name, value in kwargs.items():
+              if name == 'instance':
+                self.fields["ocp_skill_type"].initial = get_ocp_st_from_rt(value.resource_type)
+                #self.fields["ocp_skill_type"].label += " :"+str(value.from_agent) #get_ocp_st_from_rt(kwargs.items()[0][1])) #str(kwargs.items())
+                self.fields["from_agent"].initial = value.from_agent
+                #break #kwargs['instance'])
+
+    def clean(self):
+        data = super(WorkEventContextAgentForm, self).clean()
+        ocp_st = data["ocp_skill_type"]
+        ini_rt = data["resource_type"]
+        if ocp_st:
+          if not ini_rt:
+            rt = get_rt_from_ocp_st(ocp_st)
+            if rt:
+              data["resource_type"] = rt
+              del data["ocp_skill_type"]
+            else:
+              self.add_error('ocp_skill_type', "This type is too general, try a more specific")
+        else:
+          self.add_error('ocp_skill_type', "There is a problem with this ocp_skill_type!")
+        return data
+
 
 
 from general.models import Material_Type, Nonmaterial_Type, Artwork_Type
@@ -1149,11 +1189,12 @@ class NewSkillTypeForm(forms.Form):
           edid = data['edid']
         else:
           edid = ''
-        name_sts = Ocp_Skill_Type.objects.filter(name=data["name"])
-        if name_sts.count() and edid == '':
-          self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
-        elif not edid == '' and edid.split('_')[1] != name_sts[0].id:
-          self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+str(data['edid'])+' = '+str(name_sts[0].id))
+        if hasattr(data, 'name'):
+          name_sts = Ocp_Skill_Type.objects.filter(name=data["name"])
+          if name_sts.count() and edid == '':
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
+          elif not edid == '' and edid.split('_')[1] != name_sts[0].id:
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+str(data['edid'])+' = '+str(name_sts[0].id))
         return data
 
 

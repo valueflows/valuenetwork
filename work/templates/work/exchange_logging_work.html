@@ -211,7 +211,7 @@ li {
         <div class="span8">
           {% if exchange %}
             <div class="trt infobox">
-                <h3 class="trtheading">Transfers
+                <h3 class="trtheading">Outgoing Transfers
                 <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
                     data-content="Log the planned and actual transfers for this exchange.  The types of transfers are determined by the type of exchange,
                     as defined by your network.">
@@ -348,7 +348,7 @@ li {
                                     {% if xfer.commitments.all %}
                                         <span class="event-label">{% trans "Commitment" %}: </span>
                                         {{ xfer.commit_text }}
-                                        {% if logger  %}
+                                        {% if logger or xfer.commitments.first.created_by == request.user or xfer.commitments.first.to_agent == request.user.agent.agent or xfer.commitments.first.to_agent in request.user.agent.agent.managed_projects %}
                                             <a href="#cmitModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
                                             </a>
@@ -359,6 +359,8 @@ li {
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments" transfer_id=xfer.id %}" method="POST" >
+                                                        {% if xfer.commitments.first.created_by == request.user %}<div style="float:right">
+                                                        {% trans "...created by you" %}</div>{% endif %}
                                                         {% csrf_token %}
                                                         {% with xfer.change_commitments_context_form as cc_form %}
                                                         Commitment date:<br />{{ cc_form.commitment_date }}<br />
@@ -471,7 +473,7 @@ li {
                                         {% endif %}
                                         {% if xfer.events.all %}
                                             <div class="ce">>&nbsp;<span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.commit_event_text }}
-                                                {% if logger  %}
+                                                {% if logger or xfer.events.first.created_by == request.user or xfer.events.first.to_agent == request.user.agent.agent or xfer.events.first.to_agent in request.user.agent.agent.managed_projects %}
                                                     <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                         <i class="icon-edit"></i>
                                                     </a>
@@ -483,6 +485,9 @@ li {
                                                         </div>
                                                         <div class="modal-body">
                                                             <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                                {% if xfer.events.first.created_by == request.user %}<div style="float:right">
+                                                                {% trans "...created by you" %}</div>{% endif %}
+
                                                                 {% csrf_token %}
                                                                 {% with xfer.change_events_context_form as ce_form %}
                                                                 Event date:<br />{{ ce_form.event_date }}<br />
@@ -536,7 +541,7 @@ li {
                                         {% endif %}
                                     {% else %}
                                         <span class="event-label">{% trans "Transfer" %}:</span> {{ xfer.event_text }}
-                                        {% if logger  %}
+                                        {% if logger or xfer.events.first.created_by == request.user or xfer.events.first.to_agent == request.user.agent.agent or xfer.events.first.to_agent in request.user.agent.agent.managed_projects %}
                                             <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
                                             </a>
@@ -547,6 +552,9 @@ li {
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                        {% if xfer.events.first.created_by == request.user %}<div style="float:right">
+                                                        {% trans "...created by you" %}</div>{% endif %}
+
                                                         {% csrf_token %}
                                                         {% with xfer.change_events_context_form as cev_form %}
                                                         Event date:<br />{{ cev_form.event_date }}<br />
@@ -607,7 +615,7 @@ li {
             </div>
             {% if exchange.can_have_reciprocal_transfers %}
             <div class="trt infobox">
-                <h3 CLASS="trtheading">Reciprocal Transfers
+                <h3 CLASS="trtheading">Incoming Transfers
                 <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"
                     data-content="Log the planned and actual reciprocal transfers for this exchange.  The types of reciprocal transfers are determined by the type of exchange,
                     as defined by your network.  They are in return for the primary transfers above.">
@@ -744,7 +752,7 @@ li {
                                     {% if xfer.commitments.all %}
                                         <span class="event-label">{% trans "Commitment" %}: </span>
                                         {{ xfer.commit_text }}
-                                        {% if logger  %}
+                                        {% if logger or xfer.commitments.first.created_by == request.user or xfer.commitments.first.from_agent == request.user.agent.agent or xfer.commitments.first.from_agent in request.user.agent.agent.managed_projects %}
                                             <a href="#cmitModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
                                             </a>
@@ -755,6 +763,9 @@ li {
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments" transfer_id=xfer.id %}" method="POST" >
+                                                        {% if xfer.commitments.first.created_by == request.user %}<div style="float:right">
+                                                        {% trans "...created by you" %}</div>{% endif %}
+
                                                         {% csrf_token %}
                                                         {% with xfer.change_commitments_context_form as cc_form %}
                                                         Commitment date:<br />{{ cc_form.commitment_date }}<br />
@@ -867,7 +878,7 @@ li {
                                         {% endif %}
                                         {% if xfer.events.all %}
                                             <div class="ce">>&nbsp;<span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.commit_event_text }}
-                                                {% if logger  %}
+                                                {% if logger or xfer.events.first.created_by == request.user or xfer.events.first.from_agent == request.user.agent.agent or xfer.events.first.from_agent in request.user.agent.agent.managed_projects %}
                                                     <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                         <i class="icon-edit"></i>
                                                     </a>
@@ -879,6 +890,9 @@ li {
                                                         </div>
                                                         <div class="modal-body">
                                                             <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                                {% if xfer.events.first.created_by == request.user %}<div style="float:right">
+                                                                {% trans "...created by you" %}</div>{% endif %}
+
                                                                 {% csrf_token %}
                                                                 {% with xfer.change_events_context_form as ce_form %}
                                                                 Event date:<br />{{ ce_form.event_date }}<br />
@@ -933,7 +947,7 @@ li {
                                         {% endif %}
                                     {% else %}
                                         <span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.event_text }}
-                                        {% if logger  %}
+                                        {% if logger or xfer.events.first.created_by == request.user or xfer.events.first.from_agent == request.user.agent.agent or xfer.events.first.from_agent in request.user.agent.agent.managed_projects  %}
                                             <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
                                             </a>
@@ -944,6 +958,9 @@ li {
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                        {% if xfer.events.first.created_by == request.user %}<div style="float:right">
+                                                        {% trans "...created by you" %}</div>{% endif %}
+
                                                         {% csrf_token %}
                                                         {% with xfer.change_events_context_form as cev_form %}
                                                         Event date:<br />{{ cev_form.event_date }}<br />
@@ -1028,7 +1045,18 @@ li {
                             <form class="validateMe" id="workForm" enctype="multipart/form-data" action="{% url "add_work_for_exchange" exchange_id=exchange.id %}" method="POST" >
                                 <input type="hidden" id="next" name="next" value="exchange-work" />
                                 {% csrf_token %}
-                                {{ add_work_form }}
+                                <label>{{ add_work_form.event_date.label }}:</label> {{ add_work_form.event_date }}
+                                {% if add_work_form.event_date.help_text %}<br/><span class="helptext">{{ add_work_form.event_date.help_text }}</span>{% endif %}
+                                <label>{{ add_work_form.ocp_skill_type.label }}:</label> {{ add_work_form.ocp_skill_type }}
+                                {% if add_work_form.ocp_skill_type.help_text %}<br/><span class="helptext">{{ add_work_form.ocp_skill_type.help_text }}</span>{% endif %}
+                                <label>{{ add_work_form.from_agent.label }}:</label> {{ add_work_form.from_agent }}
+                                {% if add_work_form.from_agent.help_text %}<br/><span class="helptext">{{ add_work_form.from_agent.help_text }}</span>{% endif %}
+                                <label>{{ add_work_form.quantity.label }}:</label> {{ add_work_form.quantity }}
+                                {% if add_work_form.quantity.help_text %}<br/><span class="helptext">{{ add_work_form.quantity.help_text }}</span>{% endif %}
+                                <label>{{ add_work_form.is_contribution.label }}:</label> {{ add_work_form.is_contribution }}
+                                {% if add_work_form.is_contribution.help_text %}<br/><span class="helptext">{{ add_work_form.is_contribution.help_text }}</span>{% endif %}
+                                <label>{{ add_work_form.description.label }}:</label> {{ add_work_form.description }}
+                                {% if add_work_form.description.help_text %}<br/><span class="helptext">{{ add_work_form.description.help_text }}</span>{% endif %}
                                 <div class="modal-footer">
                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                     <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
@@ -1041,7 +1069,7 @@ li {
                 {% for event in work_events %}
                     <div class="event" >
                         <span ><span class="event-label">{% trans "Work event" %}: </span><b> {{ event.resource_type.name }}</b> {{ event.quantity }} {{ event.unit_of_quantity }} {{ event.event_date }} <span class="taken">{% trans "Done by" %} {{ event.from_agent.nick }}</span></span>
-                        {% if agent == event.from_agent or logger  %}
+                        {% if agent == event.from_agent or logger or event.created_by == request.user %}
 
                             <a href="#eventModal{{ event.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                 <i class="icon-edit"></i>
@@ -1055,7 +1083,21 @@ li {
                                 <div class="modal-body">
                                     <form class="validateMe"  class="eventForm{{ event.id }} validateMe" enctype="multipart/form-data" action="{% url "change_exchange_work_event" event_id=event.id %}" method="POST" >
                                         {% csrf_token %}
-                                        {{ event.changeform|as_bootstrap }}
+                                        {% with event.changeform as form %}
+                                          <label>{{ form.event_date.label }}:</label> {{ form.event_date }}
+                                          {% if form.event_date.help_text %}<br/><span class="helptext">{{ form.event_date.help_text }}</span>{% endif %}
+                                          <label>{{ form.ocp_skill_type.label }}:</label> {{ form.ocp_skill_type }}
+                                          {% if form.ocp_skill_type.help_text %}<br/><span class="helptext">{{ form.ocp_skill_type.help_text }}</span>{% endif %}
+                                          <label>{{ form.from_agent.label }}:</label> {{ form.from_agent }}
+                                          {% if form.from_agent.help_text %}<br/><span class="helptext">{{ form.from_agent.help_text }}</span>{% endif %}
+                                          <label>{{ form.quantity.label }}:</label> {{ form.quantity }}
+                                          {% if form.quantity.help_text %}<br/><span class="helptext">{{ form.quantity.help_text }}</span>{% endif %}
+                                          <label>{{ form.is_contribution.label }}:</label> {{ form.is_contribution }}
+                                          {% if form.is_contribution.help_text %}<br/><span class="helptext">{{ form.is_contribution.help_text }}</span>{% endif %}
+                                          <label>{{ form.description.label }}:</label> {{ form.description }}
+                                        {% if form.description.help_text %}<br/><span class="helptext">{{ form.description.help_text }}</span>{% endif %}
+                                        {% endwith %}
+
                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                         <div class="modal-footer">
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

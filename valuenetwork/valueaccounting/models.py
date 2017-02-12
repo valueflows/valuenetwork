@@ -1169,6 +1169,10 @@ class EconomicAgent(models.Model):
         agent_ids = self.has_associates.filter(association_type__association_behavior="manager").filter(state="active").values_list('is_associate')
         return EconomicAgent.objects.filter(pk__in=agent_ids)
 
+    def participants(self): #returns a list or None
+        agent_ids = self.has_associates.filter(association_type__association_behavior="member").filter(state="active").values_list('is_associate')
+        return EconomicAgent.objects.filter(pk__in=agent_ids)
+
     #def affiliates(self):
     #    #import pdb; pdb.set_trace()
     #    agent_ids = self.has_associates.filter(association_type__identifier="affiliate").filter(state="active").values_list('is_associate')
@@ -7375,6 +7379,10 @@ class ExchangeManager(models.Manager):
     def exchanges_by_date_and_context(self, start, end, agent):
         return Exchange.objects.filter(start_date__range=[start, end]).filter(context_agent=agent)
 
+    def exchanges_by_type(self, agent):
+        return Exchange.objects.filter(context_agent=agent).order_by('exchange_type__ocp_record_type')
+
+
 class Exchange(models.Model):
     name = models.CharField(_('name'), blank=True, max_length=128)
     process_pattern = models.ForeignKey(ProcessPattern,
@@ -7969,6 +7977,26 @@ class Exchange(models.Model):
                 #local_total = sum(lo.share for lo in locals)
                 #print "local_total:", local_total
 
+    def related_agents(self):
+        evts = self.events.all()
+        coms = self.commitments.all()
+        agents = []
+        for ev in evts:
+          if not ev.to_agent in agents:
+            agents.append(ev.to_agent)
+          if not ev.from_agent in agents:
+            agents.append(ev.from_agent)
+          if not ev.created_by.agent.agent in agents:
+            agents.append(ev.created_by.agent.agent)
+        for cm in coms:
+          if not cm.to_agent in agents:
+            agents.append(cm.to_agent)
+          if not cm.from_agent in agents:
+            agents.append(cm.from_agent)
+          if not cm.created_by.agent.agent in agents:
+            agents.append(cm.created_by.agent.agent)
+        #import pdb; pdb.set_trace()
+        return agents
 
 class Transfer(models.Model):
     name = models.CharField(_('name'), blank=True, max_length=128)

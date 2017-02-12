@@ -122,4 +122,7 @@ urlpatterns = patterns("",
         name="change_exchange_work_event"),
     url(r"^delete-event/(?P<event_id>\d+)/$", 'work.views.delete_event',
         name="delete_event"),
+
+    url(r'^delete-exchange/(?P<exchange_id>\d+)/$', 'work.views.delete_exchange',
+        name="delete_exchange"),
 )

@@ -4044,6 +4044,8 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     else:
         exchanges = Exchange.objects.exchanges_by_date_and_context(start, end, agent)
 
+    exchanges_by_type = Exchange.objects.exchanges_by_type(agent)
+
     total_transfers = 0
     total_rec_transfers = 0
     comma = ""
@@ -4073,6 +4075,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
     return render_to_response("work/exchanges_all.html", {
         "exchanges": exchanges,
+        "exchanges_by_type": exchanges_by_type,
         "dt_selection_form": dt_selection_form,
         "total_transfers": total_transfers,
         "total_rec_transfers": total_rec_transfers,
@@ -4092,6 +4095,33 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         #"unit_types": unit_types,
         #"new_form": new_form,
     }, context_instance=RequestContext(request))
+
+
+@login_required
+def delete_exchange(request, exchange_id):
+    #import pdb; pdb.set_trace()
+    #todo: Lynn needs lots of work
+    if request.method == "POST":
+        exchange = get_object_or_404(Exchange, pk=exchange_id)
+        if exchange.is_deletable:
+            exchange.delete()
+        next = request.POST.get("next")
+        """if next == "exchanges":
+            return HttpResponseRedirect('/%s/'
+                % ('accounting/exchanges'))
+        if next == "demand_transfers":
+            return HttpResponseRedirect('/%s/'
+                % ('accounting/sales-and-distributions')) #obsolete
+        if next == "material_contributions":
+            return HttpResponseRedirect('/%s/'
+                % ('accounting/material-contributions')) #obsolete
+        if next == "distributions":
+            return HttpResponseRedirect('/%s/'
+                % ('accounting/distributions'))"""
+        if next == "exchanges-all":
+            return HttpResponseRedirect('/%s/%s/%s/'
+                % ('work/agent', exchange.context_agent.id, 'exchanges'))
+       #todo: needs a fall-through if next is none of the above
 
 
 
@@ -4939,7 +4969,7 @@ def add_work_for_exchange(request, exchange_id):
     #import pdb; pdb.set_trace()
     exchange = get_object_or_404(Exchange, pk=exchange_id)
     context_agent = exchange.context_agent
-    form = WorkEventAgentForm(data=request.POST)
+    form = WorkEventContextAgentForm(context_agent=context_agent, data=request.POST)
     if form.is_valid():
         event = form.save(commit=False)
         rt = event.resource_type
@@ -4963,13 +4993,14 @@ def change_exchange_work_event(request, event_id):
     context_agent=exchange.context_agent
     #import pdb; pdb.set_trace()
     if request.method == "POST":
-        form = WorkEventAgentForm(
+        form = WorkEventContextAgentForm(
             context_agent=context_agent,
             instance=event,
             data=request.POST,
             prefix=str(event.id))
         if form.is_valid():
             data = form.cleaned_data
+            #import pdb; pdb.set_trace()
             form.save()
 
     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -5013,7 +5044,7 @@ def delete_event(request, event_id):
             event.delete()
 
     next = request.POST.get("next")
-    if next == "process":
+    """if next == "process":
         return HttpResponseRedirect('/%s/%s/'
             % ('accounting/process', process.id))
     if next == "cleanup-processes":
@@ -5021,11 +5052,11 @@ def delete_event(request, event_id):
             % ('accounting/cleanup-processes'))
     if next == "exchange":
         return HttpResponseRedirect('/%s/%s/%s/'
-            % ('accounting/exchange', 0, exchange.id))
+            % ('accounting/exchange', 0, exchange.id))"""
     if next == "exchange-work":
         return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
             % ('work/agent', event.context_agent.id, 'exchange-logging-work', 0, exchange.id))
-    if next == "distribution":
+    """if next == "distribution":
         return HttpResponseRedirect('/%s/%s/'
             % ('accounting/distribution', distribution.id))
     if next == "resource":
@@ -5052,7 +5083,7 @@ def delete_event(request, event_id):
                 % ('work/my-history'))
     elif next == "work":
         return HttpResponseRedirect('/%s/%s/'
-            % ('work/process-logging', process.id))
+            % ('work/process-logging', process.id))"""
 
 
 

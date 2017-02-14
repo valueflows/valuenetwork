@@ -362,7 +362,7 @@ class Ocp_Artwork_Type(Artwork_Type):
 
     def __unicode__(self):
       if self.resource_type:
-        return '> '+self.name #+'  ('+self.resource_type.name+')'
+        return self.name+' <' #+'  ('+self.resource_type.name+')'
       elif self.facet_value:
         return self.name #+'  ('+self.facet_value.value+')'
       elif self.facet:
@@ -458,6 +458,14 @@ class Ocp_Record_Type(Record_Type):
         related_name='ocp_record_types',
         blank=True, null=True,
         help_text=_("a related General Artwork Type")
+    )
+    ocp_skill_type = TreeForeignKey(
+        Ocp_Skill_Type,
+        on_delete=models.CASCADE,
+        verbose_name=_('general skill_type'),
+        related_name='ocp_record_types',
+        blank=True, null=True,
+        help_text=_("a related General Skill Type")
     )
 
     class Meta:

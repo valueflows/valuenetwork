@@ -98,7 +98,7 @@ hr {
   margin-left: 0px;
   /*max-height: 97px;*/
 }
-.span8 {
+.miniform {
   margin-left: 0px;
   float: left;
 }
@@ -290,8 +290,8 @@ span.fancytree-title span.edit a:hover {
                   {% if nav_form.exchange_type.errors and request.POST.new_exchange %}<div class="alert" style="display:inline-block;">{{ nav_form.exchange_type.errors }}</div>{% endif %}
 
                   {{ nav_form.exchange_type }}  &nbsp; <span>{% trans "Or make a new one..." %}</span><span class="showhide" id="sh-exchange_type" >(SHOW)</span></p>
-                {% if Rtype_form.errors or Stype_form.errors and not request.POST.new_exchange %}<div class="alert" style="display:inline-block;"><ul><li>
-                    {% trans "The new resource type request has some errors, click 'SHOW' to see them." %}</li></ul></div>
+                {% if Rtype_form.errors or Stype_form.errors and not request.POST.new_exchange and not request.POST.edit_exchange_type %}<div class="alert" style="display:inline-block;"><ul><li>
+                    {% trans "The new resource type request has some errors, click 'SHOW' to see them." %}</li></ul></div>{{ Stype_form.errors }}
                 {% endif %}
                 <div class="list" id="list-exchange_type" style="margin-top: 5px;">
                   <div id="tabs" style="display:none;">
@@ -313,14 +313,29 @@ span.fancytree-title span.edit a:hover {
                                 {% recursetree Etype_tree %}
                                   {% if True or node.exchange_type or request.user.is_staff or not node.is_leaf_node %}
                                     {% if case.typ in node.get_ancestors %}
-                                      <li id="Eid_{{ node.id }}" {% if node.ocp_artwork_type %}data-related="Rid_{{ node.ocp_artwork_type.id }}"{% endif %} >{% if not node.exchange_type %}<em>{% endif %}{{ node.name }}{% if node.exchange_type %} < {% endif %}
-                                        {% if not node.exchange_type %}</em>{% endif %}
+                                      <li id="Eid_{{ node.id }}" {% if node.ocp_artwork_type %}data-related="Rid_{{ node.ocp_artwork_type.id }}"{% endif %} {% if node.ocp_skill_type %}data-related="Sid_{{ node.ocp_skill_type.id }}"{% endif %} ><span>{% if not node.exchange_type %}<em>{% endif %}{{ node.name }}{% if node.exchange_type %} &lt; {% else %}</em>{% endif %}
+
+                                        {% if node.exchange_type.created_by == request.user or request.user.is_superuser %} &nbsp; <span class="edit" id="Eid_{{ node.id }}"></span>
+                                        {% endif %}
+                                        </span>
                                         {% if not node.is_leaf_node %}
                                           <ul class="children">
                                               {{ children }}
                                           </ul>
                                         {% endif %}
                                       </li>
+                                      {% if node.exchange_type.created_by == request.user or request.user.is_superuser %}
+                                        <script type="text/javascript">
+                                          var E_{{ node.id }}_obj = {
+                                            "name":"{% if node.exchange_type %}{{ node.exchange_type.name }}{% else %}{{ node.name }}{% endif %}",
+                                            "parent":"{{ node.parent.id }}",
+                                            "description":"{{ node.exchange_type.description }}",
+                                            "context":"{{ node.exchange_type.context_agent.id }}",
+                                            "resource_type":"{{ node.ocp_artwork_type.id }}",
+                                            "skill_type":"{{ node.ocp_skill_type.id }}",
+                                          };
+                                        </script>
+                                      {% endif %}
                                     {% elif node.clas == case.clas %}
                                         {{ children }}
                                     {% endif %}
@@ -328,6 +343,20 @@ span.fancytree-title span.edit a:hover {
                                 {% endrecursetree %}
                                 </ul>
                               </div>
+
+                              <span style="float:right;">
+                                <ul style="display:inline-table; list-style:none; margin:7px 0;">
+                                  <li class="edit_exchange_type" style="display:none;">{% trans "...you created this type:" %}&nbsp;<a href="#editExchangeTypeModal" id="edit_et_but" role="button" class="btn btn-primary btn-mini edit_exchange_type" data-toggle="modal" title="Edit a exchange type">{% trans "Edit" %}</a></li>
+                                </ul>
+                                {% if ext_form.errors %}{% if request.POST.edit_exchange_type %}<br>
+                                <div class="alert" style="display:inline-block; float:right;"><ul>
+                                  {% for fil in ext_form %}
+                                  {% if fil.errors %}<li><em>{{ fil.label }}:</em> {{ fil.errors|first|safe }}</li>{% endif %}
+                                  {% endfor %}
+                                  </ul></div><br> &nbsp; <br> &nbsp; <br>
+                                {% endif %}{% endif %}
+                                <br> &nbsp;
+                              </span>
 
                           {% else %}
                             <span class="error">{% trans "Not found any related exchange type! contexts:" %}</span>
@@ -466,7 +495,7 @@ span.fancytree-title span.edit a:hover {
                     {% endif %}
                 </div> <!-- end tabs -->
               </div>
-              {% if request.user.is_superuser %}<br/><span style="font-size:0.8em;color:#666;">(debug) <b>Contexts:</b>
+              {% if request.user.is_superuser %}<span style="font-size:0.8em;color:#666;">(debug) <b>Contexts:</b>
                 {% for ag in project.related_all_agents %} {{ ag.name }} {% if not ag.nick == ag.name %}({{ ag.nick }}){% endif %}, {% endfor %}
               </span>{% endif %}
               <span id="new_name"></span>
@@ -529,6 +558,32 @@ span.fancytree-title span.edit a:hover {
                   <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                     <input type="submit" class="btn btn-primary" name="new_skill_type" value="{% trans 'Save' %}" />
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="modal hide fade" id="editExchangeTypeModal" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true"  style="width:590px;">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3><span id="name_action">{% trans "Edit an " %}</span> {% trans "Exchange Type:" %}</h3>
+              </div>
+              <div class="modal-body">
+                <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
+                  {% csrf_token %}
+                  {% for fil in ext_form %}
+                    <div class="modal-field">
+                      {% if not fil.name == 'edid' %}
+                        <label>{{ fil.label }}:</label>
+                      {% endif %}
+                        {{ fil }}
+                      {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
+                    </div>
+                  {% endfor %}
+                  <!-- <input type="hidden" id="edid" name="edid" value="" /> -->
+                  <input type="hidden" id="next" name="next" value="exchanges_all" />
+                  <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                    <input type="submit" class="btn btn-primary" name="edit_exchange_type" value="{% trans 'Save' %}" />
                   </div>
                 </form>
               </div>
@@ -739,9 +794,11 @@ span.fancytree-title span.edit a:hover {
 
     var old_agent = false;
     var old_rt = false;
+    var old_st = false;
     var old_unit = false;
     var old_related = false;
     var old_parent = false;
+    var old_et = false;
 
     function rebuild_modal(tid){
       var ide = false;
@@ -752,21 +809,22 @@ span.fancytree-title span.edit a:hover {
         //alert('tree:'+tree.fancytree("getTree"));//+' node:'+node.key+' sel:'+node.isSelected());
         if(node && node.isSelected()){
           ide = node.key;
-        } else {
-          alert("rebuild_modal: No ide found! tid:"+tid);
         }
       } else if( tid == "skill_type" ) {
         tree = $('#skill_type_tree').first();
         node = tree.fancytree("getTree").getActiveNode();
         if(node && node.isSelected()){
           ide = node.key;
-          tid = "skill_type";
-        } else {
-          alert("rebuild_modal: No ide found! tid:"+tid);
+        }
+      } else if( tid == "exchange_type" ) {
+        tree = $('.exchange_type_tree:visible').first();
+        node = tree.fancytree("getTree").getActiveNode();
+        if(node && node.isSelected()){
+          ide = node.key;
         }
       }
       if( !ide || !tid ) {
-        alert('IDE:'+ide+' tid:'+tid+' tree:'+tree.attr('class')+' node:'+node)
+        alert('rebuild_modal: IDE:'+ide+' tid:'+tid+' tree:'+tree.attr('class')+' node:'+node)
       }
 
       var idarr = ide.split('_');
@@ -774,6 +832,8 @@ span.fancytree-title span.edit a:hover {
         var obj = eval('R_'+idarr[1]+'_obj');
       } else if( tid == "skill_type" && typeof eval('S_'+idarr[1]+'_obj') != "undefined" ){//&& $('input[name=new_skill_type]').length ) {
         var obj = eval('S_'+idarr[1]+'_obj');
+      } else if( tid == "exchange_type" && typeof eval('E_'+idarr[1]+'_obj') != "undefined" ){//&& $('input[name=new_skill_type]').length ) {
+        var obj = eval('E_'+idarr[1]+'_obj');
       } else {
         alert("rebuild_modal: No OBJ! tid:"+tid+" ide:"+ide);
       }
@@ -786,9 +846,12 @@ span.fancytree-title span.edit a:hover {
       if( idarr[0] == "Sid" ) {
         $mod = $('#addSkillTypeModal');
       };
+      if( idarr[0] == "Eid" ) {
+        $mod = $('#editExchangeTypeModal');
+      };
       //ide = idarr[1];
       if($mod){
-        $mod.find('#name_action').text("{% trans 'Edit' %} "+name);
+        $mod.find('#name_action').text("{% trans 'Edit' %} \""+name+'"');
         $mod.find('#id_name').val(name);
         if(obj['description']) $mod.find('#id_description').val(obj['description']);
         if(obj['substi'] == 'False') $mod.find('#id_substitutable').val(obj['substi']).prop('checked', false);
@@ -796,27 +859,38 @@ span.fancytree-title span.edit a:hover {
         $mod.find('#id_url').val(obj['url']);
         $mod.find('#id_photo_url').val(obj['photo_url']);
 
-        if( tid == "resource_type" ) {
+        var restyp = tid=="exchange_type" ? obj['resource_type'] : obj['parent'];
+        if( tid == "resource_type" || tid == "exchange_type" ) {
           $mod.find('#id_resource_type option').each(function(){
             if($(this).prop('selected')) old_rt = $(this).val();
             $(this).prop('selected', false);
-            if($(this).val() == obj['parent']){
+            if($(this).val() == restyp){
               $(this).prop('selected', true); //alert('Hau!:'+$(this).val());
             }
           });
           if(!old_rt || old_rt != obj['parent']) $mod.find('#id_resource_type').trigger("chosen:updated");
         }
+        var skityp = tid=="exchange_type" ? obj['skill_type'] : obj['parent'];
         if( tid == "skill_type" ) {
           $mod.find('#id_verb').val(obj['verb']);
           $mod.find('#id_gerund').val(obj['gerund']);
           $mod.find('#id_parent_type option').each(function(){
-            if($(this).prop('selected')) old_rt = $(this).val();
+            if($(this).prop('selected')) old_st = $(this).val();
             $(this).prop('selected', false);
-            if($(this).val() == obj['parent']){
+            if($(this).val() == skityp){
               $(this).prop('selected', true); //alert('Hau!:'+$(this).val());
             }
           });
-          if(!old_rt || old_rt != obj['parent']) $mod.find('#id_parent_type').trigger("chosen:updated");
+          if(!old_st || old_st != skityp) $mod.find('#id_parent_type').trigger("chosen:updated");
+        } else if( tid == "exchange_type" ) {
+          $mod.find('#id_skill_type option').each(function(){
+            if($(this).prop('selected')) old_st = $(this).val();
+            $(this).prop('selected', false);
+            if($(this).val() == skityp){
+              $(this).prop('selected', true); //alert('Hau!:'+$(this).val());
+            }
+          });
+          if(!old_st || old_st != skityp) $mod.find('#id_skill_type').trigger("chosen:updated");
         }
         $mod.find('#id_context_agent option').each(function(){
           if(obj['context']){
@@ -866,6 +940,19 @@ span.fancytree-title span.edit a:hover {
         if(idarr[0] == "Sid") $mod.find('input[name=new_skill_type]').attr('name','edit_skill_type');
         $mod.find('#id_edid').attr('value', ide);
 
+
+        if( tid == "exchange_type" ) {
+          //alert(obj);
+          $mod.find('#id_parent_type option').each(function(){
+            if($(this).prop('selected')) old_et = $(this).val();
+            $(this).prop('selected', false);
+            if($(this).val() == obj['parent']){
+              $(this).prop('selected', true); //alert('Hau!:'+$(this).val());
+            }
+          });
+          if(!old_et || old_et != obj['parent']) $mod.find('#id_parent_type').trigger("chosen:updated");
+        }
+
       }
     }
     $('#edit_rt_but').click(function(){
@@ -874,6 +961,10 @@ span.fancytree-title span.edit a:hover {
     $('#edit_st_but').click(function(){
         rebuild_modal('skill_type');
     });
+    $('.edit_exchange_type').click(function(){
+        rebuild_modal('exchange_type');
+    });
+    //alert($('#edit_et_but').length);
 
     function reset_modal(tid){
         if( tid == "resource_type" && $('input[name=edit_resource_type]').length) {
@@ -1154,10 +1245,12 @@ span.fancytree-title span.edit a:hover {
       if(snd.length > 0 && $('span.edit#'+snd[0].key).length){
         if(ide == "Rid") $('li.edit_resource_type').show();
         if(ide == "Sid") $('li.edit_skill_type').show();
+        if(ide == "Eid") $('li.edit_exchange_type').show();
         //rebuild_modal(tid, snd[0].key);
       } else {
         $('li.edit_resource_type').hide();
         $('li.edit_skill_type').hide();
+        $('li.edit_exchange_type').hide();
         //reset_modal(tid);
       }
 
@@ -1193,15 +1286,21 @@ span.fancytree-title span.edit a:hover {
                     var rtree = $('#resource_type_tree').first();//resource_skill').find('#'+rel);
                     rtree.fancytree("getTree").activateKey('Rid_'+rar[1]);
                     var nod = rtree.fancytree("getTree").getActiveNode();
-                    nod.setSelected(true);//toggleSelected();
-                    //node.setFocus(true);
-                    //node.setActive(false);
+                    nod.setSelected(true);
                     nod.setFocus(false);
                     rtree.fancytree("getRootNode").visit(function(node){
-                      //node.setExpanded(false);
-                      // TODO fold other not related branches
-                      // mptt: get_ancestors(ascending=False, include_self=False)
-                      //var ancs = node.getParentList(true); //alert('ancs:'+ancs);
+                      if( node.isExpanded() && !nod.isDescendantOf(node) ) {
+                        node.setExpanded(false);
+                      }
+                    });
+                    rtree.fancytree("getTree").setFocus(false);
+                  } else if( rar[0] == 'Sid' ) {
+                    var rtree = $('#skill_type_tree').first();
+                    rtree.fancytree("getTree").activateKey('Sid_'+rar[1]);
+                    var nod = rtree.fancytree("getTree").getActiveNode();
+                    nod.setSelected(true);
+                    nod.setFocus(false);
+                    rtree.fancytree("getRootNode").visit(function(node){
                       if( node.isExpanded() && !nod.isDescendantOf(node) ) {
                         node.setExpanded(false);
                       }
@@ -1209,14 +1308,6 @@ span.fancytree-title span.edit a:hover {
                     rtree.fancytree("getTree").setFocus(false);
                   } else {
                     alert('Related? rel:'+rel);
-                    var rtree = $('#resource_type_tree').first();
-                    var node = rtree.fancytree("getTree").getActiveNode();
-                    if(node && node.isSelected()){
-                      node.setSelected(false);
-                      node.setActive(false);
-                      node.setFocus(false);
-                    }
-                    rtree.fancytree("getTree").setFocus(false);
                   }
                   //alert('rel: '+rel+' rtree:'+rtree.length);
                 } else {
@@ -1472,9 +1563,24 @@ span.fancytree-title span.edit a:hover {
           //$nav = $('.ui-tabs .ui-tabs-nav li[aria-controls='+$tab.attr('id')+'] a');//.click();
         }
       } else if( !tree.length ){
-        //alert('Chosen Change / modal select? $tab:'+$tab.attr('id')+' dess:'+dess+' sels:'+sels);
+        if( $tab.attr('class') == 'modal-body' ){ // in the edit of exchange types
+          var name = $tab.find('#id_name').val()
+          var old = $tab.find('#id_'+tid).find('option:selected').text().trim().split('. ').join('');
+          var narr = name.split(' ');
+          if( tid == 'resource_type' ) {
+            if(dess){
+              alert('Chosen Change / modal select? $tab:'+$tab.attr('class')+' dess:'+dess+' sels:'+sels+' tid:'+tid);
+            }
+            if(sels){
+              var nou = $tab.find('#id_'+tid).find('option[value='+sels+']').text().split('. ').join('').trim();
+              $tab.find('#id_name').val(narr.slice(0, 1)+' '+nou)
+            }
+          }
+        } //else {
+          //alert('Chosen Change / modal select? $tab:'+$tab.attr('class')+' dess:'+dess+' sels:'+sels+' tid:'+tid+' name:'+narr.slice(0,-1)+' old:'+old);
+        //}
       };
-      //alert('Chosen Change / tab:'+$tab.attr('id')+' tid:'+tid+' sel:'+sels+' des:'+dess+' ('+$('#'+ide+dess).length+') tree:'+tree.attr('id')+' ('+tree.length+') ide:'+ide+' nav:'+$nav.length+' tarr:'+tarr.join('_')+' edit:'+$('span.edit#'+ide+sels).length);
+      //alert('Chosen Change / tab:'+$tab.attr('class')+' tid:'+tid+' sel:'+sels+' des:'+dess+' ('+$('#'+ide+dess).length+') tree:'+tree.attr('id')+' ('+tree.length+') ide:'+ide+' nav:'+$nav.length+' tarr:'+tarr.join('_')+' edit:'+$('span.edit#'+ide+sels).length);
 
       //tree.fancytree("getTree").setFocus(false);
 

@@ -11,7 +11,7 @@
     &nbsp; <input type="submit" name="submit" class="btn btn-info" value="{% trans 'Filter the list' %}" /> </p>
 
         <div class="" id="material">
-          {% if request.user.is_staff %}  <a href="#addMaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="margin: -6px 0px -5px 20px; float:right;">{% trans "New Resource Type" %}</a>
+          {% if False and request.user.is_staff %}  <a href="#addMaterialModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Create a new physical resource type" style="margin: -6px 0px -5px 20px; float:right;">{% trans "New Resource Type" %}</a>
           {% endif %}
           <ul class="root" id="treeData" style="/*display: none;*/">
             {% recursetree Rtype_tree %}

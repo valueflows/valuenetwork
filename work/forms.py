@@ -667,7 +667,7 @@ class ContextTransferForm(forms.Form):
                 self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
 
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
-            self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
+            #self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
 
             #self.fields["ocp_resource_type"].label += init_resource_types()
 
@@ -822,8 +822,8 @@ class ContextTransferCommitmentForm(forms.Form):
                 self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
 
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
-            if facetvalues:
-              self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
+            #if facetvalues:
+              #self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
 
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type":
@@ -912,16 +912,21 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
           self.fields["agent"].queryset = context_agents
 
 
-'''
-class NewContextExchangeTypeForm(forms.Form):  # still not used !
-    parent_exchange_type = TreeNodeChoiceField(
+
+class ContextExchangeTypeForm(forms.Form):  # still not used !
+    name = forms.CharField(
+        required=False,
+        label=_("Name (automatic)"),
+        #editable=False,
+        widget=forms.TextInput(attrs={'class': 'url input-xlarge', 'readonly':''}),
+    )
+    parent_type = TreeNodeChoiceField(
         queryset=Ocp_Record_Type.objects.all(),
         empty_label=None,
         level_indicator='. ',
         required=False,
         widget=forms.Select(
           attrs={'class': 'chzn-select',
-                     'multiple':'',
                      'data-placeholder':_("search Exchange type...")}
         )
     )
@@ -930,9 +935,9 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
         empty_label='',
         level_indicator='. ',
         required=False,
+        label=_("Related Resource type"),
         widget=forms.Select(
           attrs={'class': 'chzn-select',
-                     'multiple':'',
                      'data-placeholder':_("search Resource type...")}
         )
     )
@@ -941,18 +946,29 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
         empty_label='',
         level_indicator='. ',
         required=False,
+        label=_("Related skill Service time"),
         widget=forms.Select(
           attrs={'class': 'chzn-select',
-                     'multiple':'',
-                     'data-placeholder':_("search Skill type...")}
+                     'data-placeholder':_("search Skill service...")}
         )
     )
+    context_agent = forms.ModelChoiceField(
+        empty_label=None,
+        queryset=EconomicAgent.objects.none(),
+        help_text=_('If the exchange type is only useful for your project or a parent sector collective, choose a smaller context here.'),
+        widget=forms.Select(
+            attrs={'class': 'id_context_agent chzn-select-single'}),
+    )
+    edid = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
 
-    class Meta:
-        fields = ('resource_type', 'skill_type')
+    #class Meta:
+    #    fields = ('resource_type', 'skill_type')
 
     def __init__(self, agent=None, *args, **kwargs):
-        super(NewContextExchangeTypeForm, self).__init__(*args, **kwargs)
+        super(ContextExchangeTypeForm, self).__init__(*args, **kwargs)
         try:
             gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
             if agent:
@@ -960,21 +976,23 @@ class NewContextExchangeTypeForm(forms.Form):  # still not used !
                 if not agent.id in context_ids:
                     context_ids.append(agent.id)
                 if gen_et:
-                    self.fields["parent_exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
-                    self.fields["parent_exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+                    #self.fields["parent_exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
+                    self.fields["parent_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
 
                     self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
                     self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
 
-                exchanges = Exchange.objects.filter(context_agent=agent)
-                ex_types = [ex.exchange_type.id for ex in exchanges]
+                    self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
+                    #self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
+                #exchanges = Exchange.objects.filter(context_agent=agent)
+                #ex_types = [ex.exchange_type.id for ex in exchanges]
                 #self.fields["used_exchange_type"].queryset = ExchangeType.objects.filter(id__in=ex_types)
 
         except:
             #pass
-            self.fields["parent_exchange_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
-            self.fields["parent_exchange_type"].queryset = Ocp_Record_Type.objects.none() #all()
-'''
+            self.fields["parent_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
+            self.fields["parent_type"].queryset = Ocp_Record_Type.objects.none() #all()
+
 
 
 

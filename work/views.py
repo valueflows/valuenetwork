@@ -3513,7 +3513,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     exchange_types = Ocp_Record_Type.objects.filter(lft__gt=gen_ext.lft, rght__lt=gen_ext.rght, tree_id=gen_ext.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ).exclude(id__in=outchilds_ids)
     #usecase_ids = [uc.id for uc in usecases]
 
-    #new_form = NewContextExchangeTypeForm(agent=agent, data=request.POST or None)
+    ext_form = ContextExchangeTypeForm(agent=agent, data=request.POST or None)
     #unit_types = Ocp_Unit_Type.objects.all()
 
     Rtype_form = NewResourceTypeForm(agent=agent, data=request.POST or None)
@@ -4003,14 +4003,33 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 else: # have no parent resource field
                   pass
 
-        '''
-        new_exchange_type = request.POST.get("new-exchange-type") # TODO
-        if new_exchange_type:
-            if new_form.is_valid():
-                data = new_form.cleaned_data
-                uca = data["use_case"]
-                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type'''
+
+        edit_exchange_type = request.POST.get("edit_exchange_type") # TODO
+        if edit_exchange_type:
+            if ext_form.is_valid():
+                data = ext_form.cleaned_data
+                etid = data["edid"].split('_')[1]
+                gen_ext = Ocp_Record_Type.objects.get(id=etid)
+                ext = gen_ext.exchange_type
+                new_parent = Ocp_Record_Type.objects.get(id=data["parent_type"].id)
+
+                ext.name = data['name']
+                ext.context_agent = data['context_agent']
+                gen_ext.name = data['name']
+                gen_ext.ocp_artwork_type = data['resource_type']
+                gen_ext.ocp_skill_type = data['skill_type']
+                moved = False
+                if not gen_ext.parent.id == new_parent.id:
+                  moved = True
+                  raise ValidationError("Editing Exchange Type! Changed Parent TODO: "+data['parent_type'].name+' ext:'+str(new_parent)+' moved:'+str(moved))
+                else:
+                  ext.save()
+                  gen_ext.save()
+
+                #raise ValidationError("Editing Exchange Type! "+data['parent_type'].name+' ext:'+str(new_parent)+' moved:'+str(moved))
+                #uca = data["use_case"]
+                #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                #    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type
 
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
@@ -4093,7 +4112,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "Stype_form": Stype_form,
         "Utype_tree": Ocp_Unit_Type.objects.all(),
         #"unit_types": unit_types,
-        #"new_form": new_form,
+        "ext_form": ext_form,
     }, context_instance=RequestContext(request))
 
 

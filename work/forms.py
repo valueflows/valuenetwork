@@ -913,7 +913,7 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
 
 
 
-class ContextExchangeTypeForm(forms.Form):  # still not used !
+class ContextExchangeTypeForm(forms.Form):  # used only for editing
     name = forms.CharField(
         required=False,
         label=_("Name (automatic)"),
@@ -932,7 +932,7 @@ class ContextExchangeTypeForm(forms.Form):  # still not used !
     )
     resource_type = TreeNodeChoiceField(
         queryset=Ocp_Artwork_Type.objects.all(),
-        empty_label='',
+        empty_label='. . .',
         level_indicator='. ',
         required=False,
         label=_("Related Resource type"),
@@ -943,7 +943,7 @@ class ContextExchangeTypeForm(forms.Form):  # still not used !
     )
     skill_type = TreeNodeChoiceField(
         queryset=Ocp_Skill_Type.objects.all(),
-        empty_label='',
+        empty_label='. . .',
         level_indicator='. ',
         required=False,
         label=_("Related skill Service time"),

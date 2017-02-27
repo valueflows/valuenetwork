@@ -58,6 +58,9 @@ h3 {
 	            <ul>
 	            {% for ext in supply_exchange_types %}
 	                <li>
+                      {% if not ext.ocp_record_type %}
+                         <span class="small">(!)</span>
+                      {% endif %}
 	                    <a href="{% url "change_exchange_type" exchange_type_id=ext.id %}">{{ ext }}</a>
 	                    {% if ext.is_deletable %}
                         <form
@@ -82,6 +85,9 @@ h3 {
                 <ul>
                 {% for ext in internal_exchange_types %}
                     <li>
+                        {% if not ext.ocp_record_type %}
+                           <span class="small">(!)</span>
+                        {% endif %}
                         <a href="{% url "change_exchange_type" exchange_type_id=ext.id %}">{{ ext }}</a>
                         {% if ext.is_deletable %}
                             <form
@@ -106,6 +112,9 @@ h3 {
                 <ul>
                 {% for ext in demand_exchange_types %}
                     <li>
+                        {% if not ext.ocp_record_type %}
+                           <span class="small">(!)</span>
+                        {% endif %}
                         <a href="{% url "change_exchange_type" exchange_type_id=ext.id %}">{{ ext }}</a>
                         {% if ext.is_deletable %}
                             <form

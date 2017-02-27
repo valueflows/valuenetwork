@@ -43,7 +43,7 @@ from mptt.admin import MPTTModelAdmin
 
 class Ocp_Type_RecordAdmin(MPTTModelAdmin):
   model = Ocp_Record_Type
-  list_display = ['name', 'clas', 'exchange_type', 'ocp_artwork_type', 'ocp_skill_type']
+  list_display = ['name', 'clas', 'exchange_type', 'context_agent', 'ocp_artwork_type', 'ocp_skill_type']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     if db_field.name == 'parent':
       try:

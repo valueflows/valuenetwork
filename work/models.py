@@ -478,6 +478,12 @@ class Ocp_Record_Type(Record_Type):
       else:
         return self.name
 
+    def context_agent(self):
+      if self.exchange_type:
+        if self.exchange_type.context_agent:
+          return self.exchange_type.context_agent
+      return None
+
     def get_ocp_resource_types(self, transfer_type=None):
         answer = None
         if transfer_type:

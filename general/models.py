@@ -53,6 +53,8 @@ class Type(Concept):	# Create own ID's (TREE)
 	#concept = models.OneToOneField('Concept', primary_key=True, parent_link=True)
 	clas = models.CharField(blank=True, verbose_name=_(u"Class"), max_length=200,
 													help_text=_(u"Django model or python class associated to the Type"))
+  #types = TreeManyToManyField('self', through='rel_Type_Types', verbose_name=_(u"Related Types"), blank=True)
+
 	class Meta:
 		verbose_name = _(u"c- Type")
 		#verbose_name_plural = _(u"c- Types")
@@ -63,6 +65,20 @@ class Type(Concept):	# Create own ID's (TREE)
 		else:
 			return self.name+' ('+self.clas+')'
 
+"""
+class rel_Type_Types(models.Model):
+	typ = TreeForeignKey('Type')
+	typ2 = TreeForeignKey('Type', verbose_name=_(u"related Type"))
+	relation = TreeForeignKey('Relation', related_name='ty_typ+', blank=True, null=True, verbose_name=_(u"relation"))
+	class Meta:
+		verbose_name = _(u"T_type")
+		verbose_name_plural = _(u"Types related the Type")
+	def __unicode__(self):
+		if self.relation.gerund is None or self.relation.gerund == '':
+			return self.typ2.__unicode__()
+		else:
+			return self.relation.gerund+' > '+self.typ2.__unicode__()
+"""
 
 
 #	 B E I N G S - (Éssers, Entitats, Projectes...)

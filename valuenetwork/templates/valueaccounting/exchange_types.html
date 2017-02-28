@@ -58,6 +58,9 @@ h3 {
 	            <ul>
 	            {% for ext in supply_exchange_types %}
 	                <li>
+                      {% if not ext.transfer_types_inheriting %}
+                         <span class="small">! </span>
+                      {% endif %}
                       {% if not ext.ocp_record_type %}
                          <span class="small">(!)</span>
                       {% endif %}
@@ -85,6 +88,9 @@ h3 {
                 <ul>
                 {% for ext in internal_exchange_types %}
                     <li>
+                        {% if not ext.transfer_types_inheriting %}
+                           <span class="small">! </span>
+                        {% endif %}
                         {% if not ext.ocp_record_type %}
                            <span class="small">(!)</span>
                         {% endif %}
@@ -112,6 +118,9 @@ h3 {
                 <ul>
                 {% for ext in demand_exchange_types %}
                     <li>
+                        {% if not ext.transfer_types_inheriting %}
+                           <span class="small">! </span>
+                        {% endif %}
                         {% if not ext.ocp_record_type %}
                            <span class="small">(!)</span>
                         {% endif %}

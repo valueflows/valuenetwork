@@ -153,7 +153,7 @@ h3 {
                         {% csrf_token %}
                         {{ change_ext_form|as_bootstrap }}
                         <input type="submit" name="save_ext" value="{% trans 'Save exchange type' %}" class="btn btn-primary" />
-                        {% if exchange_type.ocp_record_type %} &nbsp; ({{ exchange_type.ocp_record_type }}: {{ exchange_type.ocp_record_type.ocp_artwork_type }}) {% else %} <span class="alert">Not connected to the General type trees!</span> {% endif %}
+                        {% if exchange_type.ocp_record_type %} &nbsp; (E:{{ exchange_type.ocp_record_type }}, R:{{ exchange_type.ocp_record_type.ocp_artwork_type }}, S:{{ exchange_type.ocp_record_type.ocp_skill_type }}) {% else %} <span class="alert">Not connected to the General type trees!</span> {% endif %}
                     </form>
                 </div>
                 <div class="span7">

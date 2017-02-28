@@ -370,8 +370,6 @@ span.fancytree-selected span.fancytree-title {
                   {% endfor %}
                   {% if nav_form.resource_type %}
                     <div id="resource_skill" style="display:inline-block; width:100%;">
-                      <!-- <form id="exchangeTypeForm" style="display: inline;" method="POST" action="" >
-                        {% csrf_token %} -->
                         <div style="clear:left;">
                           <p><span>{% trans "If you want to narrow your options," %}</span>
                           <span>{% trans "choose a main <b>Resource Type</b> branch:" %}</span>
@@ -488,7 +486,6 @@ span.fancytree-selected span.fancytree-title {
                             <br> &nbsp; <br> &nbsp;
                           </div>
                         </div>
-                      <!-- </form> -->
                     </div> <!-- end resource_skill -->
                     <hr>
                     {% else %}
@@ -518,7 +515,7 @@ span.fancytree-selected span.fancytree-title {
                 <h3><span id="name_action">{% trans "Add a new " %}</span> {% trans "Resource Type:" %}</h3>
               </div>
               <div class="modal-body">
-                <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
+                <form class="validateMe" id="resourceForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in Rtype_form %}
                     <div class="modal-field">
@@ -544,7 +541,7 @@ span.fancytree-selected span.fancytree-title {
                 <h3><span id="name_action">{% trans "Add a new" %}</span> {% trans "Skill Type:" %}</h3>
               </div>
               <div class="modal-body">
-                <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
+                <form class="validateMe" id="skillForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in Stype_form %}
                     <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
@@ -571,7 +568,7 @@ span.fancytree-selected span.fancytree-title {
                 <h3><span id="name_action">{% trans "Edit an " %}</span> {% trans "Exchange Type:" %}</h3>
               </div>
               <div class="modal-body">
-                <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="" method="POST" >
+                <form class="validateMe" id="exchangeTypeForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in ext_form %}
                     <div class="modal-field">

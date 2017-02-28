@@ -3506,11 +3506,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     gen_ext = Ocp_Record_Type.objects.get(clas='ocp_exchange')
     usecases = Ocp_Record_Type.objects.filter(parent__id=gen_ext.id).exclude( Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ) #UseCase.objects.filter(identifier__icontains='_xfer')
     outypes = Ocp_Record_Type.objects.filter( Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
-    outchilds_ids = [tp.id for tp in outypes]
+    outchilds_ids = []
     for tp in outypes:
-      desc = tp.get_descendants()
+      desc = tp.get_descendants(True)
       outchilds_ids.extend([ds.id for ds in desc])
-    exchange_types = Ocp_Record_Type.objects.filter(lft__gt=gen_ext.lft, rght__lt=gen_ext.rght, tree_id=gen_ext.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ).exclude(id__in=outchilds_ids)
+    exchange_types = Ocp_Record_Type.objects.filter(lft__gt=gen_ext.lft, rght__lt=gen_ext.rght, tree_id=gen_ext.tree_id).exclude(id__in=outchilds_ids) #.exclude(Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids))
     #usecase_ids = [uc.id for uc in usecases]
 
     ext_form = ContextExchangeTypeForm(agent=agent, data=request.POST or None)
@@ -3535,80 +3535,94 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   gen_ext = Ocp_Record_Type.objects.get(id=data["exchange_type"].id)
                   ext = gen_ext.exchange_type
                   if ext:
-                    if hasattr(data["resource_type"], 'id'): # we are creating a new exchange type and ext is the parent
+                    gen_rt = None
+                    gen_sk = None
+
+                    if hasattr(data["resource_type"], 'id'): # we are creating a new exchange type and ext is the parent?
                       gen_rt = Ocp_Artwork_Type.objects.get(id=data["resource_type"].id)
-                      if gen_ext.ocp_artwork_type == gen_rt: # we have the related RT in the ET! do nothing.
-                        return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                            % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
-                      gen_sk = None
-                      if hasattr(data["skill_type"], 'id'):
-                        gen_sk = Ocp_Skill_Type.objects.get(id=data["skill_type"].id)
+                    if hasattr(data["skill_type"], 'id'):
+                      gen_sk = Ocp_Skill_Type.objects.get(id=data["skill_type"].id)
 
-                      name = None
-                      narr = gen_ext.name.split(' ')
-                      if len(narr) > 0:
-                        name = narr[0] # get only first word of general record type ?
-                      if gen_sk:
-                        if gen_sk.gerund:
-                          name += ' '+gen_sk.gerund
-                        else:
-                          name += ' '+gen_sk.name
-                      if gen_rt:
-                        name += ' '+gen_rt.name
+                    #import pdb; pdb.set_trace()
 
-                      agnt = None
-                      if hasattr(gen_rt.resource_type, 'context_agent'):
-                        agnt = gen_rt.resource_type.context_agent
-                      elif ext.context_agent:
-                        agnt = ext.context_agent
+                    if gen_rt and gen_ext.ocp_artwork_type and gen_ext.ocp_artwork_type == gen_rt: # we have the related RT in the ET! do nothing.
+                      return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                              % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
+                    if gen_sk and gen_ext.ocp_skill_type and gen_ext.ocp_skill_type == gen_sk: # we have the related RT in the ET! do nothing.
+                      return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                              % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
+
+                    name = None
+                    narr = gen_ext.name.split(' ')
+                    if len(narr) > 0:
+                      name = narr[0] # get only first word of general record type ?
+                    if gen_sk:
+                      if gen_sk.gerund:
+                        name += ' '+gen_sk.gerund.title()
                       else:
-                        agnt = agent
+                        name += ' '+gen_sk.name
+                    if gen_rt:
+                      name += ' '+gen_rt.name
 
-                      uc = ext.use_case
-                      if name and uc:
-                        new_ext = ExchangeType(
-                          name=name,
-                          use_case=uc,
-                          created_by=request.user,
-                          created_date=datetime.date.today(),
-                          context_agent=agnt
-                        )
-                        new_ext.save() # here we get an id
+                    agnt = None
+                    if gen_rt and hasattr(gen_rt.resource_type, 'context_agent'):
+                      agnt = gen_rt.resource_type.context_agent
+                    elif gen_sk and hasattr(gen_sk.resource_type, 'context_agent'):
+                      agnt = gen_sk.resource_type.context_agent
+                    elif ext.context_agent:
+                      agnt = ext.context_agent
+                    else:
+                      agnt = agent
 
-                        new_rec = Ocp_Record_Type(gen_ext)
-                        new_rec.pk = None
-                        new_rec.id = None
-                        new_rec.name = name
-                        new_rec.exchange_type = new_ext
-                        new_rec.ocp_artwork_type = gen_rt
-                        # mptt: insert_node(node, target, position='last-child', save=False)
-                        new_rec = Ocp_Record_Type.objects.insert_node(new_rec, gen_ext, 'last-child', True)
+                    uc = ext.use_case
+                    if name and uc:
+                      new_ext = ExchangeType(
+                        name=name,
+                        use_case=uc,
+                        created_by=request.user,
+                        created_date=datetime.date.today(),
+                        context_agent=agnt
+                      )
+                      new_ext.save() # here we get an id
 
-                        inherited = False
+                      new_rec = Ocp_Record_Type(gen_ext)
+                      new_rec.pk = None
+                      new_rec.id = None
+                      new_rec.name = name
+                      new_rec.exchange_type = new_ext
+                      new_rec.ocp_artwork_type = gen_rt
+                      new_rec.ocp_skill_type = gen_sk
+                      # mptt: insert_node(node, target, position='last-child', save=False)
+                      new_rec = Ocp_Record_Type.objects.insert_node(new_rec, gen_ext, 'last-child', True)
+
+                      inherited = False
+                      for tr in ext.transfer_types.all():
+                        if tr.inherit_types == True:
+                          inherited = True
+                      if inherited: # any of the transfer_types has inherit_types?
                         for tr in ext.transfer_types.all():
-                          if tr.inherit_types == True:
-                            inherited = True
-                        if inherited: # any of the transfer_types has inherit_types?
-                          for tr in ext.transfer_types.all():
-                            new_tr = TransferType.objects.get(pk=tr.pk)
-                            new_tr.pk = None
-                            new_tr.id = None
-                            new_tr.exchange_type = new_ext
-                            new_tr.created_by = request.user
-                            new_tr.created_date = datetime.date.today()
-                            narr = tr.name.split(' ')
-                            nam = ' '.join(narr[:-1]) # substitute the last word in transfer name for the resource type name
-                            new_tr.name = nam+' - '+gen_rt.name
-                            new_tr.save()
+                          new_tr = TransferType.objects.get(pk=tr.pk)
+                          new_tr.pk = None
+                          new_tr.id = None
+                          new_tr.exchange_type = new_ext
+                          new_tr.created_by = request.user
+                          new_tr.created_date = datetime.date.today()
+                          narr = tr.name.split(' ')
+                          nam = ' '.join(narr[:-1]) # substitute the last word in transfer name for the resource type name
+                          new_tr.name = nam
+                          if gen_sk:
+                            new_tr.name += ' - '+gen_sk.name
+                          if gen_rt:
+                            new_tr.name += ' - '+gen_rt.name
 
-                            if tr.inherit_types == True: # provisional inheriting of the facet_value assigned in ocp_artwork_type tree
-                              inherited = True
-                              # its just-in-case as a fail saver (the resource types will be retrieved via exchange_type)
-                              #if gen_rt.facet_value:
-                              #  new_tr.facet_values.add(gen_rt.facet_value)
-                              #else:
-                              # mptt: get_ancestors(ascending=False, include_self=False)
+                          new_tr.save()
+
+                          if tr.inherit_types == True: # provisional inheriting of the facet_value assigned in ocp_artwork_type tree
+                            inherited = True
+                            # its just-in-case as a fail saver (the resource types will be retrieved via exchange_type)
+                            # mptt: get_ancestors(ascending=False, include_self=False)
+                            if gen_rt:
                               parids = [p.id for p in gen_rt.get_ancestors(True, True)] # careful! these are general.Type and the upper level
                               pars = gen_rt.get_ancestors(True)                   # 'Artwork' is not in Artwork_Type nor Ocp_Artwork_Type
                               for par in pars:
@@ -3623,24 +3637,35 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                                     if ttfv:
                                       new_tr.facet_values.add(ttfv)
                                       break
-                            else:
-                              old_fvs = tr.facet_values.all()
-                              new_tr.facet_values = old_fvs
-                              #import pdb; pdb.set_trace()
+                            if gen_sk:
+                              parids = [p.id for p in gen_sk.get_ancestors(True, True)] # careful! these are general.Type and the upper level
+                              pars = gen_sk.get_ancestors(True)                   # 'Artwork' is not in Artwork_Type nor Ocp_Artwork_Type
+                              for par in pars:
+                                #if par.clas != 'Artwork':
+                                  pr = Ocp_Skill_Type.objects.get(id=par.id)
+                                  if pr.facet_value:
+                                    ttfv, created = TransferTypeFacetValue.objects.get_or_create(
+                                      transfer_type=new_tr,
+                                      facet_value=pr.facet_value,
+                                      # defaults={},
+                                    )
+                                    if ttfv:
+                                      new_tr.facet_values.add(ttfv)
+                                      break
+                          else:
+                            old_fvs = tr.facet_values.all()
+                            new_tr.facet_values = old_fvs
+                            #import pdb; pdb.set_trace()
 
-                          # end for tr in ext.transfer_types.all()
-                          return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                        # end for tr in ext.transfer_types.all()
+                        return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                               % ('work/agent', agent.id, 'exchange-logging-work', new_ext.id, 0))
 
-                        else: # not inherited, rise error
-                          raise ValidationError("No transfer inheriting types in this exchange type! "+ext.name)
+                      else: # not inherited, rise error
+                        raise ValidationError("No transfer inheriting types in this exchange type! "+ext.name)
 
-                      else: # end if name and uc:
-                        raise ValidationError("Bad new name ("+name+") or no use case in the parent exchange type! "+ext.name)
-
-                    else: # end if hasattr(data["resource_type"], 'id')
-                      # perhaps only skill? TODO
-                      pass
+                    else: # end if name and uc:
+                      raise ValidationError("Bad new name ("+name+") or no use case in the parent exchange type! "+ext.name)
 
                     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                         % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))

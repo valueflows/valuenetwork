@@ -233,6 +233,9 @@ span.fancytree-title span.edit a {
 span.fancytree-title span.edit a:hover {
   text-decoration: underline;
 }
+span.fancytree-selected span.fancytree-title {
+    font-style: inherit;
+}
 
 .chosen-container-multi .chosen-choices li.search-choice span {
   /*line-height: 1.3em;*/
@@ -291,7 +294,7 @@ span.fancytree-title span.edit a:hover {
 
                   {{ nav_form.exchange_type }}  &nbsp; <span>{% trans "Or make a new one..." %}</span><span class="showhide" id="sh-exchange_type" >(SHOW)</span></p>
                 {% if Rtype_form.errors or Stype_form.errors and not request.POST.new_exchange and not request.POST.edit_exchange_type %}<div class="alert" style="display:inline-block;"><ul><li>
-                    {% trans "The new resource type request has some errors, click 'SHOW' to see them." %}</li></ul></div>{{ Stype_form.errors }}
+                    {% trans "The new resource type request has some errors, click 'SHOW' to see them." %}</li></ul></div>
                 {% endif %}
                 <div class="list" id="list-exchange_type" style="margin-top: 5px;">
                   <div id="tabs" style="display:none;">
@@ -792,6 +795,8 @@ span.fancytree-title span.edit a:hover {
     };
     */
 
+    //   M O D A L S
+
     var old_agent = false;
     var old_rt = false;
     var old_st = false;
@@ -1117,6 +1122,7 @@ span.fancytree-title span.edit a:hover {
     });
 
 
+    //   T R E E S
 
     var ObjTree = {
       checkbox: true,
@@ -1175,47 +1181,17 @@ span.fancytree-title span.edit a:hover {
         if(data.node.isExpanded() && !data.tree.hasFocus()){ //node.isActive()){
           //return false;
         }
-        /*$('span.fancytree-title span.edit').each(function(){
-          $(this).html('<a href="#addResourceTypeModal" class="btn btn-primary btn-mini" data-toggle="modal" role="button">'+$(this).text()+'</a>');
-          var $but = $('a.edit_resource_type').css('display','block');
-          $(this).find('a').mouseup(function(){
-            var name = $(this).parent().parent().text().split('(edit)').join('').trim().split(' <').join('');
-            var $mod = false;
-            var parent = $(this).parent().parent().parent().attr('class');
-            var ide = $(this).parent().attr('id');
-
-            alert('data:'+data.node.key+' but:'+$but.length+' Hau! '+$(this).parent().attr('id'));//+' modal:'+$('#addResourceTypeModal').html());
-            var idarr = ide.split('_');
-            if( idarr[0] == "Rid" ) {
-              $mod = $('#addResourceTypeModal');
-            };
-            if( idarr[0] == "Sid" ) {
-              $mod = $('#addSkillTypeModal');
-            };
-            ide = idarr[1];
-            if($mod){
-              $mod.find('#name_action').text("{% trans 'Edit' %} "+name);
-              $mod.find('#id_name').val(name);
-              $mod.find('#id_resource_type option').each(function(){
-                if($(this).val() == data.node.key.split('_')[1]){ //ide){
-                  $(this).attr('selected','selected');
-                  //alert('ide: '+ide+' option: '+$(this).val()); //html());
-                }
-              });
-              $mod.find('#id_resource_type').trigger("chosen:updated");
-              $('a.btn_resource_type').focus().mouseover().mousedown().mouseup();//[href=#'+$mod.attr('id')+']').click();
-              //$mod.toggle();//show();//css('display', 'block');//dialog('open');
-            }
-            //return false;
-            //$(this).mouseup();
-          });
-        });*/
         //logEvent(event, data, "flag=" + flag);
       },
 
     };
 
-    $('.resource_type_tree, .skill_type_tree, .exchange_type_tree').fancytree( ObjTree );
+    // Deep copy
+    var MultiObjTree = jQuery.extend(true, {}, ObjTree);
+    MultiObjTree['selectMode'] = 3;
+
+    $('.exchange_type_tree').fancytree( ObjTree );
+    $('.resource_type_tree, .skill_type_tree').fancytree( ObjTree );//MultiObjTree );
 
 
     function update_tree(data){
@@ -1527,6 +1503,7 @@ span.fancytree-title span.edit a:hover {
     };
 
 
+    //   D R O P D O W N S
 
     var ObjChos = {
       //allow_single_deselect: true,
@@ -1535,6 +1512,9 @@ span.fancytree-title span.edit a:hover {
       max_selected_options: 1,
       disable_search_threshold: 6,
     };
+    // Deep copy
+    var ObjChosMulti = jQuery.extend(true, {}, ObjChos);
+    ObjChosMulti['max_selected_options'] = 0;
 
     function ChosChange($this, params){
       var tid = $this.attr('id');
@@ -1753,8 +1733,21 @@ span.fancytree-title span.edit a:hover {
           //alert('Chosen READY: params:'+params+' this:'+$(this).text());//+params['chosen']);
       });
     });
+    $(".chzn-select-multi").each(function(){
+      $(this).chosen( ObjChosMulti ).change( function(evt, params){
+        ChosChange( $(this), params );
+      }).ready( function(evt, params){
+          //alert('Chosen READY: params:'+params+' this:'+$(this).text());//+params['chosen']);
+      });
+    });
 
     $(".chzn-select-single").chosen();
+
+    // clean selections
+    $('li.search-choice').find('a.search-choice-close').click();
+
+
+    //   C A T E G O R I E S
 
 		var selectedCats = "{{ selected_values }}";
 

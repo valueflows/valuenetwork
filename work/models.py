@@ -424,7 +424,7 @@ class Ocp_Skill_Type(Job):
         else:
           return self.get_gerund()+' <' #name #+'  ('+self.resource_type.name+')'
       elif self.facet_value:
-        return self.get_gerund()+'  ('+self.facet_value.value+')'
+        return self.get_gerund() #+'  ('+self.facet_value.value+')'
       else:
         return self.get_gerund()
 

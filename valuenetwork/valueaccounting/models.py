@@ -4246,6 +4246,9 @@ class ExchangeType(models.Model):
     def transfer_types_inheriting(self):
         return self.transfer_types.filter(inherit_types=True)
 
+    def transfer_types_creating(self):
+        return self.transfer_types.filter(can_create_resource=True)
+
 
 class GoodResourceManager(models.Manager):
     def get_queryset(self):

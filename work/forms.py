@@ -395,7 +395,17 @@ class ExchangeNavForm(forms.Form):
                     context_ids.append(agent.id)
                 if gen_et:
                     self.fields["exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
-                    self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+
+                    hidden_ets = Ocp_Record_Type.objects.filter( Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False),  ~Q(exchange_type__context_agent__id__in=context_ids) )
+                    hidden_etids = []
+                    for het in hidden_ets:
+                      dhets = het.get_descendants(True) # true = include self
+                      for det in dhets:
+                        hidden_etids.append(det.id)
+
+
+                    self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(id__in=hidden_etids) ) #Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+
 
                     self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ) #| Q(resource_type__context_agent__isnull=True) )
                     self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ) #| Q(resource_type__context_agent__isnull=True) )
@@ -915,10 +925,10 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
 
 class ContextExchangeTypeForm(forms.Form):  # used only for editing
     name = forms.CharField(
-        required=False,
-        label=_("Name (automatic)"),
+        #required=False,
+        label=_("Name (automatic?)"),
         #editable=False,
-        widget=forms.TextInput(attrs={'class': 'url input-xlarge', 'readonly':''}),
+        widget=forms.TextInput(attrs={'class': 'url input-xlarge', }), #'disabled':''}),
     )
     parent_type = TreeNodeChoiceField(
         queryset=Ocp_Record_Type.objects.all(),

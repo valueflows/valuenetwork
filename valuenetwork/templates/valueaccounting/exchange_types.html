@@ -47,7 +47,7 @@ h3 {
                     Use Case: <span style="display: inline; vertical-align: top;"> {{ new_form.use_case }}</span>
                     Name: {{ new_form.name }}
                     <input type="submit" name="new-exchange-type" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'Create exchange type' %}" />
-                    <div class="expl">(After creating your exchange type, please click on it below to finish defining it.)</div>
+                    <div class="expl">(After creating your exchange type, please click on it below to finish defining it.) &nbsp; Legend: &nbsp; (!) = NoTree &nbsp; , &nbsp; ! = NoInherit &nbsp; , &nbsp; + = NewResource &nbsp;</div>
                 </form>
 
             </div>
@@ -59,7 +59,7 @@ h3 {
 	            {% for ext in supply_exchange_types %}
 	                <li>
                       {% if ext.transfer_types_creating %}
-                        <span class="small">&gt; </span>
+                        <span class="small">+</span>
                       {% endif %}
                       {% if not ext.transfer_types_inheriting %}
                          <span class="small">! </span>
@@ -92,7 +92,7 @@ h3 {
                 {% for ext in internal_exchange_types %}
                     <li>
                         {% if ext.transfer_types_creating %}
-                          <span class="small">&gt; </span>
+                          <span class="small">+</span>
                         {% endif %}
                         {% if not ext.transfer_types_inheriting %}
                            <span class="small">! </span>
@@ -125,7 +125,7 @@ h3 {
                 {% for ext in demand_exchange_types %}
                     <li>
                         {% if ext.transfer_types_creating %}
-                          <span class="small">&gt; </span>
+                          <span class="small">+</span>
                         {% endif %}
                         {% if not ext.transfer_types_inheriting %}
                            <span class="small">! </span>

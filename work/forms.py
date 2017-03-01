@@ -1111,11 +1111,12 @@ class NewResourceTypeForm(forms.Form):
           edid = data['edid']
         else:
           edid = ''
-        name_rts = Ocp_Artwork_Type.objects.filter(name=data["name"])
-        if name_rts.count() and edid == '':
-          self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
-        elif not edid == '' and edid.split('_')[1] != str(name_rts[0].id):
-          self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+edid.split('_')[1]+' = '+str(name_rts[0].id))
+        if hasattr(data, 'name'):
+          name_rts = Ocp_Artwork_Type.objects.filter(name=data["name"])
+          if name_rts.count() and edid == '':
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
+          elif not edid == '' and edid.split('_')[1] != str(name_rts[0].id):
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+edid.split('_')[1]+' = '+str(name_rts[0].id))
         return data
 
 

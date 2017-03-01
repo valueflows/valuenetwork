@@ -3624,7 +3624,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                             # mptt: get_ancestors(ascending=False, include_self=False)
                             if gen_rt:
                               parids = [p.id for p in gen_rt.get_ancestors(True, True)] # careful! these are general.Type and the upper level
-                              pars = gen_rt.get_ancestors(True)                   # 'Artwork' is not in Artwork_Type nor Ocp_Artwork_Type
+                              pars = gen_rt.get_ancestors(True)                         # 'Artwork' is not in Artwork_Type nor Ocp_Artwork_Type
                               for par in pars:
                                 if par.clas != 'Artwork':
                                   pr = Ocp_Artwork_Type.objects.get(id=par.id)
@@ -3638,10 +3638,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                                       new_tr.facet_values.add(ttfv)
                                       break
                             if gen_sk:
-                              parids = [p.id for p in gen_sk.get_ancestors(True, True)] # careful! these are general.Type and the upper level
-                              pars = gen_sk.get_ancestors(True)                   # 'Artwork' is not in Artwork_Type nor Ocp_Artwork_Type
+                              parids = [p.id for p in gen_sk.get_ancestors(True, True)] # careful! these are general.Job
+                              pars = gen_sk.get_ancestors(True)
                               for par in pars:
-                                #if par.clas != 'Artwork':
                                   pr = Ocp_Skill_Type.objects.get(id=par.id)
                                   if pr.facet_value:
                                     ttfv, created = TransferTypeFacetValue.objects.get_or_create(
@@ -3665,7 +3664,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         raise ValidationError("No transfer inheriting types in this exchange type! "+ext.name)
 
                     else: # end if name and uc:
-                      raise ValidationError("Bad new name ("+name+") or no use case in the parent exchange type! "+ext.name)
+                      raise ValidationError("Bad new name ("+name+") or no use-case in the parent exchange type! "+ext.name)
 
                     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                         % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
@@ -3688,7 +3687,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         new_resource_type = request.POST.get("new_resource_type")
         if new_resource_type:
             if Rtype_form.is_valid():
-                #raise ValidationError("New resource type, valid")
                 data = Rtype_form.cleaned_data
                 if hasattr(data["resource_type"], 'id'):
                   parent_rt = Ocp_Artwork_Type.objects.get(id=data["resource_type"].id)

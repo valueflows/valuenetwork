@@ -401,7 +401,12 @@ span.fancytree-selected span.fancytree-title {
                                       "related":"{% if node.material_type %}{{ node.material_type.id }}{% elif node.nonmaterial_type %}{{ node.nonmaterial_type.id }}{% endif %}",
                                       "parentrecipe":"{{ node.resource_type.parent.id }}",
                                       "url":"{{ node.resource_type.url }}",
-                                      "photo_url":"{{ node.resource_type.photo_url }}"
+                                      "photo_url":"{{ node.resource_type.photo_url }}",
+                                      {% if request.user.is_staff %}
+                                        {% if not node.facet_value and not node.facet %}"n_desc" : "{{ node.get_descendant_count }}",{% endif %}
+                                        {% if node.facet_value %}"fv" : "{{ node.facet_value }}",{% endif %}
+                                        {% if node.facet %}"fv" : "{{ node.facet }}",{% endif %}
+                                      {% endif %}
                                     };
                                   </script>
                                 {% endif %}
@@ -776,6 +781,9 @@ span.fancytree-selected span.fancytree-title {
       //});
     });
 
+    function cleantypename(str){
+      return str.split('. ').join('');
+    }
     /*
     var R_{{ node.id }}_obj = {
         "name":"{{ node.resource_type.name }}",
@@ -955,6 +963,13 @@ span.fancytree-selected span.fancytree-title {
           if(!old_et || old_et != obj['parent']) $mod.find('#id_parent_type').trigger("chosen:updated");
         }
 
+        $mod.find('.facet-box').remove();
+        if(typeof(obj['n_desc'] !== 'undefined') && obj['n_desc'] && obj['n_desc']*1 > 0){
+          $mod.find('.modal-field').last().after('<div class="modal-field facet-box"><label>Create a new FacetValue named "'+name+'" under "'+cleantypename($mod.find('#id_resource_type option:selected').text()).trim()+'"?</label><input id="id_facetvalue" name="facetvalue" type="checkbox"></div>');
+        }
+        if(typeof(obj['fv'] !== 'undefined') && obj['fv']){
+          $mod.find('.modal-footer').first().prepend('<span class="facet-box">'+obj['fv']+'</span> &nbsp; ');
+        }
       }
     }
     $('#edit_rt_but').click(function(){

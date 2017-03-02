@@ -31,4 +31,4 @@ EXPOSE 8000
 
 VOLUME /var/www/valuenetwork
 
-CMD ["./manage.py", "runserver"]
+CMD ["./manage.py", "runserver", "0.0.0.0:8000"]

@@ -70,109 +70,6 @@ def new_features(request):
         "photo_size": (256, 256),
     }, context_instance=RequestContext(request))
 
-@login_required
-def my_tasks(request):
-    #import pdb; pdb.set_trace()
-    my_work = []
-    #my_skillz = []
-    other_wip = []
-    agent = get_agent(request)
-    #if agent:
-    context_ids = [c.id for c in agent.related_contexts()]
-    my_work = Commitment.objects.unfinished().filter(
-        event_type__relationship="work",
-        from_agent=agent)
-    #skill_ids = agent.resource_types.values_list('resource_type__id', flat=True)
-    #my_skillz = Commitment.objects.unfinished().filter(
-    #    from_agent=None,
-    #    context_agent__id__in=context_ids,
-    #    event_type__relationship="todo",
-    #    resource_type__id__in=skill_ids)
-    #other_unassigned = Commitment.objects.unfinished().filter(
-    #    from_agent=None,
-    #    context_agent__id__in=context_ids,
-    #    event_type__relationship="work").exclude(resource_type__id__in=skill_ids)
-    todos = Commitment.objects.unfinished().filter(
-        from_agent=None,
-        context_agent__id__in=context_ids,
-        event_type__relationship="todo")
-    #else:
-    #    other_unassigned = Commitment.objects.unfinished().filter(
-    #        from_agent=None,
-    #        event_type__relationship="work")
-    #import pdb; pdb.set_trace()
-    my_todos = Commitment.objects.todos().filter(from_agent=agent)
-    init = {"from_agent": agent,}
-    patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
-    if patterns:
-        pattern = patterns[0].pattern
-        todo_form = WorkTodoForm(agent=agent, pattern=pattern, initial=init)
-    else:
-        todo_form = WorkTodoForm(agent=agent, initial=init)
-    #work_now = settings.USE_WORK_NOW
-    #import pdb; pdb.set_trace()
-    return render_to_response("work/my_tasks.html", {
-        "agent": agent,
-        "my_work": my_work,
-        #"my_skillz": my_skillz,
-        #"other_unassigned": other_unassigned,
-        "my_todos": my_todos,
-        "todo_form": todo_form,
-        #"work_now": work_now,
-        "help": get_help("proc_log"),
-    }, context_instance=RequestContext(request))
-
-@login_required
-def take_new_tasks(request):
-    #import pdb; pdb.set_trace()
-    #my_work = []
-    my_skillz = []
-    other_wip = []
-    agent = get_agent(request)
-    #if agent:
-    context_ids = [c.id for c in agent.related_contexts()]
-    #my_work = Commitment.objects.unfinished().filter(
-    #    event_type__relationship="todo",
-    #    from_agent=agent)
-    skill_ids = agent.resource_types.values_list('resource_type__id', flat=True)
-    my_skillz = Commitment.objects.unfinished().filter(
-        from_agent=None,
-        context_agent__id__in=context_ids,
-        event_type__relationship="work",
-        resource_type__id__in=skill_ids)
-    #other_unassigned = Commitment.objects.unfinished().filter(
-    #    from_agent=None,
-    #    context_agent__id__in=context_ids,
-    #    event_type__relationship="work").exclude(resource_type__id__in=skill_ids)
-    todos = Commitment.objects.unfinished().filter(
-        from_agent=None,
-        context_agent__id__in=context_ids,
-        event_type__relationship="todo")
-    #else:
-    #    other_unassigned = Commitment.objects.unfinished().filter(
-    #        from_agent=None,
-    #        event_type__relationship="work")
-    #import pdb; pdb.set_trace()
-    my_todos = Commitment.objects.todos().filter(from_agent=agent)
-    init = {"from_agent": agent,}
-    patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
-    if patterns:
-        pattern = patterns[0].pattern
-        todo_form = WorkTodoForm(agent=agent, pattern=pattern, initial=init)
-    else:
-        todo_form = WorkTodoForm(agent=agent, initial=init)
-    #work_now = settings.USE_WORK_NOW
-    return render_to_response("work/take_new_tasks.html", {
-        "agent": agent,
-        #"my_work": my_work,
-        "my_skillz": my_skillz,
-        #"other_unassigned": other_unassigned,
-        #"my_todos": my_todos,
-        #"todo_form": todo_form,
-        #"work_now": work_now,
-        "help": get_help("proc_log"),
-    }, context_instance=RequestContext(request))
-
 def map(request):
     agent = get_agent(request)
     locations = Location.objects.all()
@@ -189,6 +86,10 @@ def map(request):
         "zoom": zoom,
         "help": get_help("work_map"),
     }, context_instance=RequestContext(request))
+
+
+
+#    P R O F I L E
 
 @login_required
 def profile(request):
@@ -245,221 +146,6 @@ def profile(request):
         #"can_pay": can_pay,
     }, context_instance=RequestContext(request))
 
-@login_required
-def share_payment(request, agent_id):
-    #import pdb; pdb.set_trace()
-    agent = get_object_or_404(EconomicAgent, id=agent_id)
-    agent_account = agent.faircoin_resource()
-    balance = agent_account.digital_currency_balance()
-    #balance = 2
-    candidate_membership = agent.candidate_membership()
-    share = EconomicResourceType.objects.membership_share()
-    share_price = share.price_per_unit
-    number_of_shares = agent.number_of_shares()
-    share_price = share_price * number_of_shares
-
-    if share_price <= balance:
-        pay_to_id = settings.SEND_MEMBERSHIP_PAYMENT_TO
-        pay_to_agent = EconomicAgent.objects.get(nick=pay_to_id)
-        pay_to_account = pay_to_agent.faircoin_resource()
-        quantity = Decimal(share_price)
-        address_origin = agent_account.digital_currency_address
-        address_end = pay_to_account.digital_currency_address
-        xt = ExchangeType.objects.membership_share_exchange_type()
-        tts = xt.transfer_types.all()
-        tt_share = tts.get(name__contains="Share")
-        tt_fee = tts.get(name__contains="Fee")
-        from_agent = agent
-        to_resource = pay_to_account
-        to_agent = pay_to_agent
-        et_give = EventType.objects.get(name="Give")
-        et_receive = EventType.objects.get(name="Receive")
-        date = datetime.date.today()
-        fc = EconomicAgent.objects.freedom_coop()
-
-        exchange = Exchange(
-            exchange_type=xt,
-            use_case=xt.use_case,
-            name="Transfer Faircoins",
-            start_date=date,
-            )
-        exchange.save()
-
-        transfer_fee = Transfer(
-            transfer_type=tt_fee,
-            exchange=exchange,
-            transfer_date=date,
-            name="Transfer Faircoins",
-            )
-        transfer_fee.save()
-
-        transfer_membership = Transfer(
-            transfer_type=tt_share,
-            exchange=exchange,
-            transfer_date=date,
-            name="Transfer Membership",
-            )
-        transfer_membership.save()
-
-        # network_fee is subtracted from quantity
-        # so quantity is correct for the giving event
-        # but receiving event will get quantity - network_fee
-        state =  "new"
-        resource = agent_account
-        event = EconomicEvent(
-            event_type = et_give,
-            event_date = date,
-            from_agent=from_agent,
-            to_agent=to_agent,
-            resource_type=resource.resource_type,
-            resource=resource,
-            digital_currency_tx_state = state,
-            quantity = quantity,
-            transfer=transfer_fee,
-            event_reference=address_end,
-            )
-        event.save()
-
-        from valuenetwork.valueaccounting.faircoin_utils import network_fee
-        quantity = quantity - Decimal(float(network_fee()) / 1.e6)
-
-        event = EconomicEvent(
-            event_type = et_receive,
-            event_date = date,
-            from_agent=from_agent,
-            to_agent=to_agent,
-            resource_type=to_resource.resource_type,
-            resource=to_resource,
-            digital_currency_tx_state = state,
-            quantity = quantity,
-            transfer=transfer_fee,
-            event_reference=address_end,
-            )
-        event.save()
-
-        #import pdb; pdb.set_trace()
-        quantity = Decimal(number_of_shares)
-        resource = EconomicResource(
-            resource_type=share,
-            quantity=quantity,
-            identifier=" ".join([from_agent.name, share.name]),
-            )
-        resource.save()
-
-        owner_role = AgentResourceRoleType.objects.owner_role()
-
-        arr = AgentResourceRole(
-            agent=from_agent,
-            resource=resource,
-            role=owner_role,
-            is_contact=True,
-            )
-        arr.save()
-
-        event = EconomicEvent(
-            event_type = et_give,
-            event_date = date,
-            from_agent=to_agent,
-            to_agent=from_agent,
-            resource_type=resource.resource_type,
-            resource=resource,
-            quantity = quantity,
-            transfer=transfer_membership,
-            )
-        event.save()
-
-        event = EconomicEvent(
-            event_type = et_receive,
-            event_date = date,
-            from_agent=to_agent,
-            to_agent=from_agent,
-            resource_type=resource.resource_type,
-            resource=resource,
-            quantity = quantity,
-            transfer=transfer_membership,
-            )
-        event.save()
-
-        #import pdb; pdb.set_trace()
-        aa = agent.candidate_association()
-
-        if aa:
-            if aa.has_associate == pay_to_agent:
-                aa.delete()
-
-        association_type = AgentAssociationType.objects.get(name="Member")
-        fc_aa = AgentAssociation(
-            is_associate=agent,
-            has_associate=fc,
-            association_type=association_type,
-            state="active",
-            )
-        fc_aa.save()
-
-    return HttpResponseRedirect('/%s/'
-        % ('work/home'))
-
-@login_required
-def project_work(request):
-    #import pdb; pdb.set_trace()
-    agent = get_agent(request)
-    projects = agent.managed_projects()  #related_contexts()
-    if not agent or agent.is_participant_candidate():
-        return render_to_response('work/no_permission.html')
-    next = "/work/project-work/"
-    context_id = 0
-    start = datetime.date.today() - datetime.timedelta(days=30)
-    end = datetime.date.today() + datetime.timedelta(days=90)
-    init = {"start_date": start, "end_date": end}
-    date_form = DateSelectionForm(initial=init, data=request.POST or None)
-    ca_form = WorkProjectSelectionFormOptional(data=request.POST or None, context_agents=projects)
-    chosen_context_agent = None
-    patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
-    if patterns:
-        pattern = patterns[0].pattern
-        todo_form = WorkTodoForm(pattern=pattern, agent=agent)
-    else:
-        todo_form = WorkTodoForm(agent=agent)
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        if date_form.is_valid():
-            dates = date_form.cleaned_data
-            start = dates["start_date"]
-            end = dates["end_date"]
-            if ca_form.is_valid():
-                proj_data = ca_form.cleaned_data
-                proj_id = proj_data["context_agent"]
-                if proj_id.isdigit:
-                    context_id = proj_id
-                    chosen_context_agent = EconomicAgent.objects.get(id=proj_id)
-
-    start_date = start.strftime('%Y_%m_%d')
-    end_date = end.strftime('%Y_%m_%d')
-    processes, context_agents = assemble_schedule(start, end, chosen_context_agent)
-
-    todos = Commitment.objects.todos().filter(due_date__range=(start, end))
-    if chosen_context_agent:
-        todos = todos.filter(context_agent=chosen_context_agent)
-    my_project_todos = []
-    for todo in todos:
-        if todo.context_agent in projects:
-            my_project_todos.append(todo)
-    #import pdb; pdb.set_trace()
-    return render_to_response("work/project_work.html", {
-        "agent": agent,
-        "context_agents": context_agents,
-        "all_processes": projects,
-        "date_form": date_form,
-        "start_date": start_date,
-        "end_date": end_date,
-        "context_id": context_id,
-        "todo_form": todo_form,
-        "ca_form": ca_form,
-        "todos": my_project_todos,
-        "next": next,
-        "help": get_help("project_work"),
-    }, context_instance=RequestContext(request))
-
 
 @login_required
 def change_personal_info(request, agent_id):
@@ -490,6 +176,46 @@ def upload_picture(request, agent_id):
 
     return HttpResponseRedirect('/%s/'
         % ('work/profile'))
+
+@login_required
+def add_worker_to_location(request, location_id, agent_id):
+    if location_id and agent_id:
+        location = get_object_or_404(Location, id=location_id)
+        agent = get_object_or_404(EconomicAgent, id=agent_id)
+        agent.primary_location = location
+        agent.save()
+        return HttpResponseRedirect('/%s/'
+            % ('work/profile'))
+    else:
+        return HttpResponseRedirect('/%s/'
+            % ('work/map'))
+
+@login_required
+def add_location_to_worker(request, agent_id):
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        agent = get_object_or_404(EconomicAgent, id=agent_id)
+        data = request.POST
+        address = data["address"]
+        longitude = data["agentLongitude"]
+        latitude = data["agentLatitude"]
+        location, created = Location.objects.get_or_create(
+            latitude=latitude,
+            longitude=longitude,
+            address=address)
+        if created:
+            location.name = address
+            location.save()
+        agent.primary_location = location
+        agent.save()
+        return HttpResponseRedirect('/%s/'
+            % ('work/profile'))
+    else:
+        return HttpResponseRedirect('/%s/'
+            % ('work/map'))
+
+
+#   P R O F I L E   S K I L L S
 
 @login_required
 def update_skills(request, agent_id):
@@ -551,411 +277,6 @@ def update_skills(request, agent_id):
     return HttpResponseRedirect('/%s/'
         % ('work/profile'))
 
-@login_required
-def add_worker_to_location(request, location_id, agent_id):
-    if location_id and agent_id:
-        location = get_object_or_404(Location, id=location_id)
-        agent = get_object_or_404(EconomicAgent, id=agent_id)
-        agent.primary_location = location
-        agent.save()
-        return HttpResponseRedirect('/%s/'
-            % ('work/profile'))
-    else:
-        return HttpResponseRedirect('/%s/'
-            % ('work/map'))
-
-@login_required
-def add_location_to_worker(request, agent_id):
-    if request.method == "POST":
-        #import pdb; pdb.set_trace()
-        agent = get_object_or_404(EconomicAgent, id=agent_id)
-        data = request.POST
-        address = data["address"]
-        longitude = data["agentLongitude"]
-        latitude = data["agentLatitude"]
-        location, created = Location.objects.get_or_create(
-            latitude=latitude,
-            longitude=longitude,
-            address=address)
-        if created:
-            location.name = address
-            location.save()
-        agent.primary_location = location
-        agent.save()
-        return HttpResponseRedirect('/%s/'
-            % ('work/profile'))
-    else:
-        return HttpResponseRedirect('/%s/'
-            % ('work/map'))
-
-@login_required
-def process_logging(request, process_id):
-    process = get_object_or_404(Process, id=process_id)
-    pattern = process.process_pattern
-    context_agent = process.context_agent
-    #import pdb; pdb.set_trace()
-    agent = get_agent(request)
-    user = request.user
-    agent_projects = agent.related_contexts()
-    if process.context_agent not in agent_projects:
-        return render_to_response('valueaccounting/no_permission.html')
-    logger = False
-    worker = False
-    super_logger = False
-    todays_date = datetime.date.today()
-    change_process_form = ProcessForm(instance=process)
-    add_output_form = None
-    add_citation_form = None
-    add_consumable_form = None
-    add_usable_form = None
-    add_work_form = None
-    unplanned_work_form = None
-    unplanned_cite_form = None
-    unplanned_consumption_form = None
-    unplanned_use_form = None
-    unplanned_output_form = None
-    process_expense_form = None
-    role_formset = None
-    slots = []
-    event_types = []
-    work_now = settings.USE_WORK_NOW
-    to_be_changed_requirement = None
-    changeable_requirement = None
-
-    work_reqs = process.work_requirements()
-    consume_reqs = process.consumed_input_requirements()
-    use_reqs = process.used_input_requirements()
-    unplanned_work = process.uncommitted_work_events()
-
-    if agent and pattern:
-        slots = pattern.slots()
-        event_types = pattern.event_types()
-        #if request.user.is_superuser or request.user == process.created_by:
-        if request.user.is_staff or request.user == process.created_by:
-            logger = True
-            super_logger = True
-        #import pdb; pdb.set_trace()
-        for req in work_reqs:
-            req.changeform = req.change_work_form()
-            if agent == req.from_agent:
-                logger = True
-                worker = True
-            init = {"from_agent": agent,
-                "event_date": todays_date,
-                "is_contribution": True,}
-            req.input_work_form_init = req.input_event_form_init(init=init)
-        for req in consume_reqs:
-            req.changeform = req.change_form()
-        for req in use_reqs:
-            req.changeform = req.change_form()
-        for event in unplanned_work:
-            event.changeform = UnplannedWorkEventForm(
-                pattern=pattern,
-                context_agent=context_agent,
-                instance=event,
-                prefix=str(event.id))
-        output_resource_types = pattern.output_resource_types()
-        unplanned_output_form = UnplannedOutputForm(prefix='unplannedoutput')
-        unplanned_output_form.fields["resource_type"].queryset = output_resource_types
-        role_formset = resource_role_context_agent_formset(prefix="resource")
-        produce_et = EventType.objects.get(name="Resource Production")
-        change_et = EventType.objects.get(name="Change")
-        #import pdb; pdb.set_trace()
-        if "out" in slots:
-            if logger:
-                if change_et in event_types:
-                    to_be_changed_requirement = process.to_be_changed_requirements()
-                    if to_be_changed_requirement:
-                        to_be_changed_requirement = to_be_changed_requirement[0]
-                    changeable_requirement = process.changeable_requirements()
-                    if changeable_requirement:
-                        changeable_requirement = changeable_requirement[0]
-                else:
-                    add_output_form = ProcessOutputForm(prefix='output')
-                    add_output_form.fields["resource_type"].queryset = output_resource_types
-        if "work" in slots:
-            if agent:
-                work_init = {
-                    "from_agent": agent,
-                    "is_contribution": True,
-                }
-                work_resource_types = pattern.work_resource_types()
-                if work_resource_types:
-                    work_unit = work_resource_types[0].unit
-                    #work_init = {"unit_of_quantity": work_unit,}
-                    work_init = {
-                        "from_agent": agent,
-                        "unit_of_quantity": work_unit,
-                        "is_contribution": True,
-                    }
-                    unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", context_agent=context_agent, initial=work_init)
-                    unplanned_work_form.fields["resource_type"].queryset = work_resource_types
-                    #if logger:
-                    #    add_work_form = WorkCommitmentForm(initial=work_init, prefix='work', pattern=pattern)
-                else:
-                    unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", pattern=pattern, context_agent=context_agent, initial=work_init)
-                    #is this correct? see commented-out lines above
-                if logger:
-                    date_init = {"due_date": process.end_date,}
-                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=date_init)
-
-        if "cite" in slots:
-            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=pattern)
-            if context_agent.unit_of_claim_value:
-                cite_unit = context_agent.unit_of_claim_value
-            if logger:
-                add_citation_form = ProcessCitationForm(prefix='citation', pattern=pattern)
-        if "consume" in slots:
-            unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=pattern)
-            if logger:
-                add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=pattern)
-        if "use" in slots:
-            unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=pattern)
-            if logger:
-                add_usable_form = ProcessUsableForm(prefix='usable', pattern=pattern)
-        if "payexpense" in slots:
-            process_expense_form = ProcessExpenseEventForm(prefix='processexpense', pattern=pattern)
-
-    cited_ids = [c.resource.id for c in process.citations()]
-    #import pdb; pdb.set_trace()
-    citation_requirements = process.citation_requirements()
-    for cr in citation_requirements:
-        cr.resources = []
-        for evt in cr.fulfilling_events():
-            resource = evt.resource
-            resource.event = evt
-            cr.resources.append(resource)
-
-    output_resource_ids = [e.resource.id for e in process.production_events() if e.resource]
-
-    return render_to_response("work/process_logging.html", {
-        "process": process,
-        "change_process_form": change_process_form,
-        "cited_ids": cited_ids,
-        "citation_requirements": citation_requirements,
-        "output_resource_ids": output_resource_ids,
-        "agent": agent,
-        "user": user,
-        "logger": logger,
-        "worker": worker,
-        "super_logger": super_logger,
-        "add_output_form": add_output_form,
-        "add_citation_form": add_citation_form,
-        "add_consumable_form": add_consumable_form,
-        "add_usable_form": add_usable_form,
-        "add_work_form": add_work_form,
-        "unplanned_work_form": unplanned_work_form,
-        "unplanned_cite_form": unplanned_cite_form,
-        "unplanned_consumption_form": unplanned_consumption_form,
-        "unplanned_use_form": unplanned_use_form,
-        "unplanned_output_form": unplanned_output_form,
-        "role_formset": role_formset,
-        "process_expense_form": process_expense_form,
-        "slots": slots,
-        "to_be_changed_requirement": to_be_changed_requirement,
-        "changeable_requirement": changeable_requirement,
-        "work_reqs": work_reqs,
-        "consume_reqs": consume_reqs,
-        "uncommitted_consumption": process.uncommitted_consumption_events(),
-        "use_reqs": use_reqs,
-        "uncommitted_use": process.uncommitted_use_events(),
-        "uncommitted_process_expenses": process.uncommitted_process_expense_events(),
-        "unplanned_work": unplanned_work,
-        "work_now": work_now,
-        "help": get_help("process_work"),
-    }, context_instance=RequestContext(request))
-
-
-from functools import partial, wraps
-
-@login_required
-def non_process_logging(request):
-    member = get_agent(request)
-    if not member:
-        return HttpResponseRedirect('/%s/'
-            % ('work/work-home'))
-
-    TimeFormSet = modelformset_factory(
-        EconomicEvent,
-        form=WorkCasualTimeContributionForm,
-        can_delete=False,
-        extra=4,
-        max_num=8,
-        )
-
-    init = []
-    for i in range(0, 4):
-        init.append({"is_contribution": False,})
-    time_formset = TimeFormSet(
-        queryset=EconomicEvent.objects.none(),
-        initial = init,
-        data=request.POST or None)
-    #import pdb; pdb.set_trace()
-    ctx_qs = member.related_context_queryset()
-    for form in time_formset.forms:
-        form.fields["context_agent"].queryset = ctx_qs
-        #form.fields["context_agent"].empty_label = "choose...";
-    if request.method == "POST":
-        #import pdb; pdb.set_trace()
-        keep_going = request.POST.get("keep-going")
-        just_save = request.POST.get("save")
-        if time_formset.is_valid():
-            events = time_formset.save(commit=False)
-            pattern = None
-            patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
-            if patterns:
-                pattern = patterns[0].pattern
-            else:
-                raise ValidationError("no non-production ProcessPattern")
-            if pattern:
-                unit = Unit.objects.filter(
-                    unit_type="time",
-                    name__icontains="Hour")[0]
-                for event in events:
-                    if event.event_date and event.quantity:
-                        event.from_agent=member
-                        event.to_agent = event.context_agent.default_agent()
-                        #event.is_contribution=True
-                        rt = event.resource_type
-                        event_type = pattern.event_type_for_resource_type("work", rt)
-                        event.event_type=event_type
-                        event.unit_of_quantity=unit
-                        event.created_by=request.user
-                        event.save()
-            if keep_going:
-                return HttpResponseRedirect('/%s/'
-                    % ('work/non-process-logging'))
-            else:
-                return HttpResponseRedirect('/%s/'
-                    % ('work/my-history'))
-
-    return render_to_response("work/non_process_logging.html", {
-        "member": member,
-        "time_formset": time_formset,
-        "help": get_help("non_proc_log"),
-    }, context_instance=RequestContext(request))
-
-
-@login_required
-def my_history(request):
-    #import pdb; pdb.set_trace()
-    #agent = get_object_or_404(EconomicAgent, pk=agent_id)
-    user_agent = get_agent(request)
-    agent = user_agent
-    user_is_agent = False
-    if agent == user_agent:
-        user_is_agent = True
-    event_list = agent.contributions()
-    no_bucket = 0
-    with_bucket = 0
-    event_value = Decimal("0.0")
-    claim_value = Decimal("0.0")
-    outstanding_claims = Decimal("0.0")
-    claim_distributions = Decimal("0.0")
-    claim_distro_events = []
-    event_types = {e.event_type for e in event_list}
-    filter_form = EventTypeFilterForm(event_types=event_types, data=request.POST or None)
-    paid_filter = "U"
-    if request.method == "POST":
-        if filter_form.is_valid():
-            #import pdb; pdb.set_trace()
-            data = filter_form.cleaned_data
-            et_ids = data["event_types"]
-            start = data["start_date"]
-            end = data["end_date"]
-            paid_filter = data["paid_filter"]
-            if start:
-                event_list = event_list.filter(event_date__gte=start)
-            if end:
-                event_list = event_list.filter(event_date__lte=end)
-            #belt and suspenders: if no et_ids, form is not valid
-            if et_ids:
-                event_list = event_list.filter(event_type__id__in=et_ids)
-
-    for event in event_list:
-        if event.bucket_rule_for_context_agent():
-            with_bucket += 1
-        else:
-            no_bucket += 1
-        for claim in event.claims():
-            claim_value += claim.original_value
-            outstanding_claims += claim.value
-            for de in claim.distribution_events():
-                claim_distributions += de.value
-                claim_distro_events.append(de.event)
-    et = EventType.objects.get(name="Distribution")
-    all_distro_evts = EconomicEvent.objects.filter(to_agent=agent, event_type=et)
-    other_distro_evts = [d for d in all_distro_evts if d not in claim_distro_events]
-    other_distributions = sum(de.quantity for de in other_distro_evts)
-    #took off csv export for now
-    #event_ids = ",".join([str(event.id) for event in event_list])
-
-    if paid_filter == "U":
-        event_list = list(event_list)
-        for evnt in event_list:
-            if evnt.owed_amount() == 0:
-                    event_list.remove(evnt)
-
-    paginator = Paginator(event_list, 25)
-    page = request.GET.get('page')
-    try:
-        events = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        events = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        events = paginator.page(paginator.num_pages)
-
-    #import pdb; pdb.set_trace()
-    return render_to_response("work/my_history.html", {
-        "agent": agent,
-        "user_is_agent": user_is_agent,
-        "events": events,
-        "filter_form": filter_form,
-        #"event_ids": event_ids,
-        "no_bucket": no_bucket,
-        "with_bucket": with_bucket,
-        "claim_value": format(claim_value, ",.2f"),
-        "outstanding_claims": format(outstanding_claims, ",.2f"),
-        "claim_distributions": format(claim_distributions, ",.2f"),
-        "other_distributions": format(other_distributions, ",.2f"),
-        "help": get_help("my_history"),
-    }, context_instance=RequestContext(request))
-
-@login_required
-def change_history_event(request, event_id):
-    event = get_object_or_404(EconomicEvent, pk=event_id)
-    page = request.GET.get("page")
-    #import pdb; pdb.set_trace()
-    event_form = event.change_form(data=request.POST or None)
-    if request.method == "POST":
-        #import pdb; pdb.set_trace()
-        page = request.POST.get("page")
-        if event_form.is_valid():
-            event = event_form.save(commit=False)
-            event.changed_by = request.user
-            event.save()
-        agent = event.from_agent
-        #next = request.POST.get("next")
-        if page:
-            #if next:
-            #    if next == "work-contributions":
-            #        return HttpResponseRedirect('/%s/'
-            #            % ('work/my-history', page))
-            return HttpResponseRedirect('/%s/'
-                % ('work/my-history', page))
-        else:
-            #if next:
-            #    if next == "work-contributions":
-            #        return HttpResponseRedirect('/%s/'
-            #            % ('work/my-history'))
-            return HttpResponseRedirect('/%s/'
-                % ('work/my-history'))
-    return render_to_response("work/change_history_event.html", {
-        "event_form": event_form,
-        "page": page,
-    }, context_instance=RequestContext(request))
 
 '''
 @login_required
@@ -970,126 +291,8 @@ def register_skills(request):
     }, context_instance=RequestContext(request))
 '''
 
-def create_worktimer_context(
-        request,
-        process,
-        agent,
-        commitment):
-    prev = ""
-    today = datetime.date.today()
-    #todo: will not now handle lack of commitment
-    event = EconomicEvent(
-        event_date=today,
-        from_agent=agent,
-        to_agent=process.default_agent(),
-        process=process,
-        context_agent=process.context_agent,
-        quantity=Decimal("0"),
-        is_contribution=True,
-        created_by = request.user,
-    )
 
-    if commitment:
-        event.commitment = commitment
-        event.event_type = commitment.event_type
-        event.resource_type = commitment.resource_type
-        event.unit_of_quantity = commitment.resource_type.unit
-        init = {
-            "work_done": commitment.finished,
-            "process_done": commitment.process.finished,
-        }
-        wb_form = WorkbookForm(initial=init)
-        prev_events = commitment.fulfillment_events.filter(event_date__lt=today)
-        if prev_events:
-            prev_dur = sum(prev.quantity for prev in prev_events)
-            unit = ""
-            if commitment.unit_of_quantity:
-                unit = commitment.unit_of_quantity.abbrev
-            prev = " ".join([str(prev_dur), unit])
-    else:
-        wb_form = WorkbookForm()
-    #if event.quantity > 0:
-    event.save()
-    others_working = []
-    other_work_reqs = []
-    wrqs = process.work_requirements()
-    if wrqs.count() > 1:
-        for wrq in wrqs:
-            if wrq.from_agent != commitment.from_agent:
-                if wrq.from_agent:
-                    wrq.has_labnotes = wrq.agent_has_labnotes(wrq.from_agent)
-                    others_working.append(wrq)
-                else:
-                    other_work_reqs.append(wrq)
-    return {
-        "commitment": commitment,
-        "process": process,
-        "wb_form": wb_form,
-        "others_working": others_working,
-        "other_work_reqs": other_work_reqs,
-        "today": today,
-        "prev": prev,
-        "event": event,
-        "help": get_help("work_timer"),
-    }
-
-@login_required
-def work_timer(
-        request,
-        process_id,
-        commitment_id=None):
-    process = get_object_or_404(Process, id=process_id)
-    agent = get_agent(request)
-    ct = None
-    if commitment_id:
-        ct = get_object_or_404(Commitment, id=commitment_id)
-        #if not request.user.is_superuser:
-        #    if agent != ct.from_agent:
-        #        return render_to_response('valueaccounting/no_permission.html')
-    template_params = create_worktimer_context(
-        request,
-        process,
-        agent,
-        ct,
-    )
-    return render_to_response("work/work_timer.html",
-        template_params,
-        context_instance=RequestContext(request))
-
-@login_required
-def save_timed_work_now(request, event_id):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        event = get_object_or_404(EconomicEvent, id=event_id)
-        form = WorkbookForm(instance=event, data=request.POST)
-        if form.is_valid():
-            data = form.cleaned_data
-            event = form.save(commit=False)
-            event.changed_by = request.user
-            process = event.process
-            event.save()
-            if not process.started:
-                process.started = event.event_date
-                process.changed_by=request.user
-                process.save()
-            data = "ok"
-        else:
-            data = form.errors
-        return HttpResponse(data, content_type="text/plain")
-
-@login_required
-def work_process_finished(request, process_id):
-    #import pdb; pdb.set_trace()
-    process = get_object_or_404(Process, pk=process_id)
-    if not process.finished:
-        process.finished = True
-        process.save()
-    else:
-        if process.finished:
-            process.finished = False
-            process.save()
-    return HttpResponseRedirect('/%s/%s/'
-        % ('work/process-logging', process_id))
+#    F A I R C O I N
 
 @login_required
 def manage_faircoin_account(request, resource_id):
@@ -1415,6 +618,7 @@ def transfer_faircoins_old(request, resource_id):
             return HttpResponseRedirect('/%s/%s/'
                     % ('work/manage-faircoin-account', resource.id))
 
+@login_required
 def faircoin_history(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     event_list = resource.events.all()
@@ -1442,6 +646,179 @@ def faircoin_history(request, resource_id):
         }, context_instance=RequestContext(request))
     else:
         return render_to_response('work/no_permission.html')
+
+@login_required
+def edit_faircoin_event_description(request, resource_id):
+    agent = get_agent(request)
+    resource = EconomicResource.objects.get(id=resource_id)
+    if request.method == "POST":
+        data = request.POST
+        evid = data['id']
+        ntext = data['value']
+        event = EconomicEvent.objects.get(id=evid)
+        event.description = ntext
+        event.save()
+        return HttpResponse("Ok", content_type="text/plain")
+    return HttpResponse("Fail", content_type="text/plain")
+
+
+
+#    M E M B E R S H I P
+
+@login_required
+def share_payment(request, agent_id):
+    #import pdb; pdb.set_trace()
+    agent = get_object_or_404(EconomicAgent, id=agent_id)
+    agent_account = agent.faircoin_resource()
+    balance = agent_account.digital_currency_balance()
+    #balance = 2
+    candidate_membership = agent.candidate_membership()
+    share = EconomicResourceType.objects.membership_share()
+    share_price = share.price_per_unit
+    number_of_shares = agent.number_of_shares()
+    share_price = share_price * number_of_shares
+
+    if share_price <= balance:
+        pay_to_id = settings.SEND_MEMBERSHIP_PAYMENT_TO
+        pay_to_agent = EconomicAgent.objects.get(nick=pay_to_id)
+        pay_to_account = pay_to_agent.faircoin_resource()
+        quantity = Decimal(share_price)
+        address_origin = agent_account.digital_currency_address
+        address_end = pay_to_account.digital_currency_address
+        xt = ExchangeType.objects.membership_share_exchange_type()
+        tts = xt.transfer_types.all()
+        tt_share = tts.get(name__contains="Share")
+        tt_fee = tts.get(name__contains="Fee")
+        from_agent = agent
+        to_resource = pay_to_account
+        to_agent = pay_to_agent
+        et_give = EventType.objects.get(name="Give")
+        et_receive = EventType.objects.get(name="Receive")
+        date = datetime.date.today()
+        fc = EconomicAgent.objects.freedom_coop()
+
+        exchange = Exchange(
+            exchange_type=xt,
+            use_case=xt.use_case,
+            name="Transfer Faircoins",
+            start_date=date,
+            )
+        exchange.save()
+
+        transfer_fee = Transfer(
+            transfer_type=tt_fee,
+            exchange=exchange,
+            transfer_date=date,
+            name="Transfer Faircoins",
+            )
+        transfer_fee.save()
+
+        transfer_membership = Transfer(
+            transfer_type=tt_share,
+            exchange=exchange,
+            transfer_date=date,
+            name="Transfer Membership",
+            )
+        transfer_membership.save()
+
+        # network_fee is subtracted from quantity
+        # so quantity is correct for the giving event
+        # but receiving event will get quantity - network_fee
+        state =  "new"
+        resource = agent_account
+        event = EconomicEvent(
+            event_type = et_give,
+            event_date = date,
+            from_agent=from_agent,
+            to_agent=to_agent,
+            resource_type=resource.resource_type,
+            resource=resource,
+            digital_currency_tx_state = state,
+            quantity = quantity,
+            transfer=transfer_fee,
+            event_reference=address_end,
+            )
+        event.save()
+
+        from valuenetwork.valueaccounting.faircoin_utils import network_fee
+        quantity = quantity - Decimal(float(network_fee()) / 1.e6)
+
+        event = EconomicEvent(
+            event_type = et_receive,
+            event_date = date,
+            from_agent=from_agent,
+            to_agent=to_agent,
+            resource_type=to_resource.resource_type,
+            resource=to_resource,
+            digital_currency_tx_state = state,
+            quantity = quantity,
+            transfer=transfer_fee,
+            event_reference=address_end,
+            )
+        event.save()
+
+        #import pdb; pdb.set_trace()
+        quantity = Decimal(number_of_shares)
+        resource = EconomicResource(
+            resource_type=share,
+            quantity=quantity,
+            identifier=" ".join([from_agent.name, share.name]),
+            )
+        resource.save()
+
+        owner_role = AgentResourceRoleType.objects.owner_role()
+
+        arr = AgentResourceRole(
+            agent=from_agent,
+            resource=resource,
+            role=owner_role,
+            is_contact=True,
+            )
+        arr.save()
+
+        event = EconomicEvent(
+            event_type = et_give,
+            event_date = date,
+            from_agent=to_agent,
+            to_agent=from_agent,
+            resource_type=resource.resource_type,
+            resource=resource,
+            quantity = quantity,
+            transfer=transfer_membership,
+            )
+        event.save()
+
+        event = EconomicEvent(
+            event_type = et_receive,
+            event_date = date,
+            from_agent=to_agent,
+            to_agent=from_agent,
+            resource_type=resource.resource_type,
+            resource=resource,
+            quantity = quantity,
+            transfer=transfer_membership,
+            )
+        event.save()
+
+        #import pdb; pdb.set_trace()
+        aa = agent.candidate_association()
+
+        if aa:
+            if aa.has_associate == pay_to_agent:
+                aa.delete()
+
+        association_type = AgentAssociationType.objects.get(name="Member")
+        fc_aa = AgentAssociation(
+            is_associate=agent,
+            has_associate=fc,
+            association_type=association_type,
+            state="active",
+            )
+        fc_aa.save()
+
+    return HttpResponseRedirect('/%s/'
+        % ('work/home'))
+
 
 def membership_request(request):
     membership_form = MembershipRequestForm(data=request.POST or None)
@@ -1507,49 +884,6 @@ def membership_request(request):
         "membership_form": membership_form,
     }, context_instance=RequestContext(request))
 
-@login_required
-def add_todo(request):
-    if request.method == "POST":
-        #import pdb; pdb.set_trace()
-        patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
-        if patterns:
-            pattern = patterns[0].pattern
-            form = TodoForm(data=request.POST, pattern=pattern)
-        else:
-            form = TodoForm(request.POST)
-        next = request.POST.get("next")
-        agent = get_agent(request)
-        et = None
-        ets = EventType.objects.filter(
-            relationship='todo')
-        if ets:
-            et = ets[0]
-        if et:
-            if form.is_valid():
-                data = form.cleaned_data
-                todo = form.save(commit=False)
-                todo.to_agent=agent
-                todo.event_type=et
-                todo.quantity = Decimal("0")
-                todo.unit_of_quantity=todo.resource_type.unit
-                todo.save()
-                if notification:
-                    if todo.from_agent:
-                        if todo.from_agent != agent:
-                            site_name = get_site_name()
-                            user = todo.from_agent.user()
-                            if user:
-                                #import pdb; pdb.set_trace()
-                                notification.send(
-                                    [user.user,],
-                                    "valnet_new_todo",
-                                    {"description": todo.description,
-                                    "creator": agent,
-                                    "site_name": site_name,
-                                    }
-                                )
-
-    return HttpResponseRedirect(next)
 
 def membership_discussion(request, membership_request_id):
     user_agent = get_agent(request)
@@ -1567,267 +901,13 @@ def membership_discussion(request, membership_request_id):
         "user_agent": user_agent,
     }, context_instance=RequestContext(request))
 
-@login_required
-def work_todo_done(request, todo_id):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        try:
-            todo = Commitment.objects.get(id=todo_id)
-        except Commitment.DoesNotExist:
-            todo = None
-        if todo:
-            todo.finished = True
-            todo.save()
-            event = todo.todo_event()
-            if not event:
-                event = create_event_from_todo(todo)
-                event.save()
-    next = request.POST.get("next")
-    return HttpResponseRedirect(next)
 
-@login_required
-def work_add_todo(request):
-    if request.method == "POST":
-        #import pdb; pdb.set_trace()
-        agent = get_agent(request)
-        patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
-        if patterns:
-            pattern = patterns[0].pattern
-            form = WorkTodoForm(agent=agent, pattern=pattern, data=request.POST)
-        else:
-            form = WorkTodoForm(agent=agent, data=request.POST)
-        next = request.POST.get("next")
-        et = None
-        ets = EventType.objects.filter(
-            relationship='todo')
-        if ets:
-            et = ets[0]
-        if et:
-            if form.is_valid():
-                data = form.cleaned_data
-                todo = form.save(commit=False)
-                todo.to_agent=agent
-                todo.event_type=et
-                todo.quantity = Decimal("0")
-                todo.unit_of_quantity=todo.resource_type.unit
-                todo.save()
-                if notification:
-                    if todo.from_agent:
-                        if todo.from_agent != agent:
-                            site_name = get_site_name()
-                            user = todo.from_agent.user()
-                            if user:
-                                #import pdb; pdb.set_trace()
-                                notification.send(
-                                    [user.user,],
-                                    "valnet_new_todo",
-                                    {"description": todo.description,
-                                    "creator": agent,
-                                    "site_name": site_name,
-                                    }
-                                )
 
-    return HttpResponseRedirect(next)
 
-@login_required
-def work_todo_delete(request, todo_id):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        try:
-            todo = Commitment.objects.get(id=todo_id)
-        except Commitment.DoesNotExist:
-            todo = None
-        if todo:
-            if notification:
-                if todo.from_agent:
-                    agent = get_agent(request)
-                    if todo.from_agent != agent:
-                        site_name = get_site_name()
-                        user = todo.from_agent.user()
-                        if user:
-                            #import pdb; pdb.set_trace()
-                            notification.send(
-                                [user.user,],
-                                "valnet_deleted_todo",
-                                {"description": todo.description,
-                                "creator": agent,
-                                "site_name": site_name,
-                                }
-                            )
-            todo.delete()
-    next = request.POST.get("next")
-    return HttpResponseRedirect(next)
 
-@login_required
-def work_todo_change(request, todo_id):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        try:
-            todo = Commitment.objects.get(id=todo_id)
-        except Commitment.DoesNotExist:
-            todo = None
-        if todo:
-            agent = get_agent(request)
-            prefix = todo.form_prefix()
-            form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
-            if form.is_valid():
-                todo = form.save()
 
-    next = request.POST.get("next")
-    return HttpResponseRedirect(next)
+#    P R O J E C T S
 
-@login_required
-def work_todo_decline(request, todo_id):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        try:
-            todo = Commitment.objects.get(id=todo_id)
-        except Commitment.DoesNotExist:
-            todo = None
-        if todo:
-            todo.from_agent=None
-            todo.save()
-    next = request.POST.get("next")
-    return HttpResponseRedirect(next)
-
-@login_required
-def work_todo_time(request):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        todo_id = request.POST.get("todoId")
-        try:
-            todo = Commitment.objects.get(id=todo_id)
-        except Commitment.DoesNotExist:
-            todo = None
-        if todo:
-            hours = request.POST.get("hours")
-            if hours:
-                qty = Decimal(hours)
-            else:
-                qty = Decimal("0.0")
-            event = todo.todo_event()
-            if event:
-                event.quantity = qty
-                event.save()
-            else:
-                event = create_event_from_todo(todo)
-                event.quantity = qty
-                event.save()
-    return HttpResponse("Ok", content_type="text/plain")
-
-@login_required
-def work_todo_mine(request, todo_id):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        try:
-            todo = Commitment.objects.get(id=todo_id)
-        except Commitment.DoesNotExist:
-            todo = None
-        if todo:
-            agent = get_agent(request)
-            todo.from_agent = agent
-            todo.save()
-    next = request.POST.get("next")
-    if next:
-        return HttpResponseRedirect(next)
-    return HttpResponseRedirect('/%s/'
-        % ('work/my-dashboard'))
-
-@login_required
-def work_todo_description(request):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        todo_id = request.POST.get("todoId")
-        try:
-            todo = Commitment.objects.get(id=todo_id)
-        except Commitment.DoesNotExist:
-            todo = None
-        if todo:
-            did = request.POST.get("did")
-            event = todo.todo_event()
-            if event:
-                event.description = did
-                event.save()
-            else:
-                event = create_event_from_todo(todo)
-                event.description = did
-                event.save()
-    return HttpResponse("Ok", content_type="text/plain")
-
-@login_required
-def work_commit_to_task(request, commitment_id):
-    if request.method == "POST":
-        ct = get_object_or_404(Commitment, id=commitment_id)
-        process = ct.process
-        agent = get_agent(request)
-        prefix = ct.form_prefix()
-        form = CommitmentForm(data=request.POST, prefix=prefix)
-        next = None
-        next = request.POST.get("next")
-        #import pdb; pdb.set_trace()
-        if form.is_valid():
-            data = form.cleaned_data
-            #todo: next line did not work, don't want to take time to figure out why right now
-            #probly form shd have ct as instance.
-            #ct = form.save(commit=False)
-            start_date = data["start_date"]
-            description = data["description"]
-            quantity = data["quantity"]
-            unit_of_quantity = data["unit_of_quantity"]
-            ct.start_date=start_date
-            ct.quantity=quantity
-            ct.unit_of_quantity=unit_of_quantity
-            ct.description=description
-            ct.from_agent = agent
-            ct.changed_by=request.user
-            ct.save()
-    if next:
-        return HttpResponseRedirect(next)
-    return HttpResponseRedirect('/%s/'
-        % ('work/my-dashboard'))
-
-@login_required
-def work_delete_event(request, event_id):
-    #import pdb; pdb.set_trace()
-    if request.method == "POST":
-        event = get_object_or_404(EconomicEvent, pk=event_id)
-        agent = event.from_agent
-        process = event.process
-        exchange = event.exchange
-        distribution = event.distribution
-        resource = event.resource
-        if resource:
-            if event.consumes_resources():
-                resource.quantity += event.quantity
-            if event.creates_resources():
-                resource.quantity -= event.quantity
-            if event.changes_stage():
-                tbcs = process.to_be_changed_requirements()
-                if tbcs:
-                    tbc = tbcs[0]
-                    tbc_evts = tbc.fulfilling_events()
-                    if tbc_evts:
-                        tbc_evt = tbc_evts[0]
-                        resource.quantity = tbc_evt.quantity
-                        tbc_evt.delete()
-                    resource.stage = tbc.stage
-                else:
-                    resource.revert_to_previous_stage()
-            event.delete()
-            if resource.is_deletable():
-                resource.delete()
-            else:
-                resource.save()
-        else:
-            event.delete()
-
-    next = request.POST.get("next")
-    if next:
-        return HttpResponseRedirect(next)
-    return HttpResponseRedirect('/%s/'
-        % ('work/my-history'))
-
-# bum2
 @login_required
 def your_projects(request):
     #import pdb; pdb.set_trace()
@@ -1930,9 +1010,6 @@ def create_your_project(request):
     return HttpResponseRedirect("/work/your-projects/")
 
 
-
-
-# bum2
 @login_required
 def members_agent(request, agent_id):
     #import pdb; pdb.set_trace()
@@ -2087,6 +1164,7 @@ def members_agent(request, agent_id):
         #"artwork_pk": artwork.pk,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def edit_relations(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
@@ -2102,6 +1180,7 @@ def edit_relations(request, agent_id):
 
     return HttpResponseRedirect('/%s/%s/'
         % ('work/agent', agent.id))
+
 
 @login_required
 def change_your_project(request, agent_id):
@@ -2141,6 +1220,8 @@ def change_your_project(request, agent_id):
         % ('work/agent', agent.id))
 
 
+
+#   J O I N A P R O J E C T
 
 from fobi.dynamic import assemble_form_class
 from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
@@ -2965,49 +2046,6 @@ def project_feedback(request, agent_id, join_request_id):
         "fobi_headers": fobi_headers,
     }, context_instance=RequestContext(request))
 
-@login_required
-def invoice_number(request):
-    agent = get_agent(request)
-    invoice_numbers = InvoiceNumber.objects.filter(
-        created_by=request.user)
-    form = InvoiceNumberForm(agent=agent, data=request.POST or None)
-    if request.method == "POST":
-        if form.is_valid():
-            data = form.cleaned_data
-            member = data["member"]
-            nbr = form.save(commit=False)
-            idate = datetime.date.today()
-            nbr.invoice_date = idate
-            nbr.created_date = idate
-            nbr.created_by = request.user
-            nbr.save()
-
-        return HttpResponseRedirect('/%s/'
-            % ('work/invoice-number',))
-
-
-    return render_to_response("work/invoice_number.html", {
-        "help": get_help("invoice_number"),
-        "agent": agent,
-        "form": form,
-        "invoice_numbers": invoice_numbers,
-    }, context_instance=RequestContext(request))
-
-
-@login_required
-def edit_faircoin_event_description(request, resource_id):
-    agent = get_agent(request)
-    resource = EconomicResource.objects.get(id=resource_id)
-    if request.method == "POST":
-        data = request.POST
-        evid = data['id']
-        ntext = data['value']
-        event = EconomicEvent.objects.get(id=evid)
-        event.description = ntext
-        event.save()
-        return HttpResponse("Ok", content_type="text/plain")
-    return HttpResponse("Fail", content_type="text/plain")
-
 
 '''
 @login_required
@@ -3098,387 +2136,6 @@ def create_project_user_and_agent(request, agent_id):
     }, context_instance=RequestContext(request))
 
 '''
-
-@login_required
-def order_list(request):
-    agent = get_agent(request)
-    help = get_help("order_list")
-    #import pdb; pdb.set_trace()
-    projects = agent.managed_projects()
-
-    return render_to_response("work/order_list.html", {
-        "projects": projects,
-        "agent": agent,
-        "help": help,
-    }, context_instance=RequestContext(request))
-
-
-@login_required
-def order_plan(request, order_id):
-    agent = get_agent(request)
-    order = get_object_or_404(Order, pk=order_id)
-    #import pdb; pdb.set_trace()
-    coordinated_projects = agent.managed_projects()
-    if order.provider not in coordinated_projects:
-        return render_to_response('valueaccounting/no_permission.html')
-    error_message = ""
-    order_items = order.order_items()
-    rts = None
-    add_order_item_form = None
-    if agent:
-        if order.order_type == "customer":
-            patterns = PatternUseCase.objects.filter(use_case__identifier='cust_orders')
-            if patterns:
-                pattern = patterns[0].pattern
-            else:
-                raise ValidationError("no Customer Order ProcessPattern")
-            rts = pattern.all_resource_types()
-        else:
-            rts = ProcessPattern.objects.all_production_resource_types()
-        if rts:
-            add_order_item_form = AddOrderItemForm(resource_types=rts)
-        #import pdb; pdb.set_trace()
-        visited = set()
-        for order_item in order_items:
-            order_item.processes = order_item.unique_processes_for_order_item(visited)
-            if order_item.is_workflow_order_item():
-                #import pdb; pdb.set_trace()
-                init = {'quantity': order_item.quantity,}
-                order_item.resource_qty_form = ResourceQuantityForm(prefix=str(order_item.id), initial=init)
-                init = {'context_agent': order_item.context_agent,}
-                order_item.project_form = ProjectSelectionForm(prefix=str(order_item.id), initial=init)
-                last_date = order_item.process.end_date
-                next_date = last_date + datetime.timedelta(days=1)
-                init = {"start_date": next_date, "end_date": next_date}
-                order_item.add_process_form = WorkflowProcessForm(prefix=str(order_item.id), initial=init, order_item=order_item)
-    return render_to_response("work/order_plan.html", {
-        "order": order,
-        "agent": agent,
-        "order_items": order_items,
-        "add_order_item_form": add_order_item_form,
-        "error_message": error_message,
-    }, context_instance=RequestContext(request))
-
-
-@login_required
-def change_project_order(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    agent = get_agent(request)
-    coordinated_projects = agent.managed_projects()
-    if order.provider not in coordinated_projects:
-        return render_to_response('valueaccounting/no_permission.html')
-    #import pdb; pdb.set_trace()
-    order_form = OrderChangeForm(instance=order, data=request.POST or None)
-    if request.method == "POST":
-        if order_form.is_valid():
-            order = order_form.save()
-            return HttpResponseRedirect('/%s/'
-                % ('work/order-list'))
-
-    return render_to_response("work/change_project_order.html", {
-        "order_form": order_form,
-        "order": order,
-        "next": next,
-    }, context_instance=RequestContext(request))
-
-
-@login_required
-def plan_work(request, rand=0):
-    #import pdb; pdb.set_trace()
-    agent = get_agent(request)
-    slots = []
-    resource_types = []
-    selected_pattern = None
-    selected_context_agent = None
-    pattern_form = PatternProdSelectionForm()
-    #import pdb; pdb.set_trace()
-    ca_form = ProjectSelectionFilteredForm(agent=agent)
-    init = {"start_date": datetime.date.today(), "end_date": datetime.date.today()}
-    process_form = DateAndNameForm(data=request.POST or None)
-    #demand_form = OrderSelectionFilteredForm(data=request.POST or None)
-    if request.method == "POST":
-        input_resource_types = []
-        input_process_types = []
-        done_process = request.POST.get("create-process")
-        add_another = request.POST.get("add-another")
-        edit_process = request.POST.get("edit-process")
-        get_related = request.POST.get("get-related")
-        if get_related:
-            #import pdb; pdb.set_trace()
-            selected_pattern = ProcessPattern.objects.get(id=request.POST.get("pattern"))
-            selected_context_agent = EconomicAgent.objects.get(id=request.POST.get("context_agent"))
-            if selected_pattern:
-                slots = selected_pattern.event_types()
-                for slot in slots:
-                    slot.resource_types = selected_pattern.get_resource_types(slot)
-            process_form = DateAndNameForm(initial=init)
-            #demand_form = OrderSelectionFilteredForm(provider=selected_context_agent)
-        else:
-            #import pdb; pdb.set_trace()
-            rp = request.POST
-            today = datetime.date.today()
-            if process_form.is_valid():
-                start_date = process_form.cleaned_data["start_date"]
-                end_date = process_form.cleaned_data["end_date"]
-                process_name = process_form.cleaned_data["process_name"]
-            else:
-                start_date = today
-                end_date = today
-            demand = None
-            added_to_order = False
-            #if demand_form.is_valid():
-            #    demand = demand_form.cleaned_data["demand"]
-            #    if demand:
-            #        added_to_order = True
-            produced_rts = []
-            cited_rts = []
-            consumed_rts = []
-            used_rts = []
-            work_rts = []
-            #import pdb; pdb.set_trace()
-            for key, value in dict(rp).iteritems():
-                if "selected-context-agent" in key:
-                    context_agent_id = key.split("~")[1]
-                    selected_context_agent = EconomicAgent.objects.get(id=context_agent_id)
-                    continue
-                if "selected-pattern" in key:
-                    pattern_id = key.split("~")[1]
-                    selected_pattern = ProcessPattern.objects.get(id=pattern_id)
-                    continue
-                et = None
-                action = ""
-                try:
-                    #import pdb; pdb.set_trace()
-                    et_name = key.split("~")[0]
-                    et = EventType.objects.get(name=et_name)
-                    action = et.relationship
-                except EventType.DoesNotExist:
-                    pass
-                if action == "consume":
-                    consumed_id = int(value[0])
-                    consumed_rt = EconomicResourceType.objects.get(id=consumed_id)
-                    consumed_rts.append(consumed_rt)
-                    continue
-                if action == "use":
-                    used_id = int(value[0])
-                    used_rt = EconomicResourceType.objects.get(id=used_id)
-                    used_rts.append(used_rt)
-                    continue
-                if action == "cite":
-                    cited_id = int(value[0])
-                    cited_rt = EconomicResourceType.objects.get(id=cited_id)
-                    cited_rts.append(cited_rt)
-                    continue
-                if action == "out":
-                    produced_id = int(value[0])
-                    produced_rt = EconomicResourceType.objects.get(id=produced_id)
-                    produced_rts.append(produced_rt)
-                    continue
-                if action == "work":
-                    work_id = int(value[0])
-                    work_rt = EconomicResourceType.objects.get(id=work_id)
-                    work_rts.append(work_rt)
-                    continue
-
-            if rand:
-                if not demand:
-                    demand = Order(
-                        order_type="rand",
-                        order_date=today,
-                        due_date=end_date,
-                        provider=selected_context_agent,
-                        created_by=request.user)
-                    demand.save()
-            if not process_name:
-                process_name = "Make something"
-                if produced_rts:
-                    process_name = " ".join([
-                        "Make",
-                        produced_rts[0].name,
-                    ])
-
-            process = Process(
-                name=process_name,
-                end_date=end_date,
-                start_date=start_date,
-                process_pattern=selected_pattern,
-                created_by=request.user,
-                context_agent=selected_context_agent
-            )
-            process.save()
-
-            #import pdb; pdb.set_trace()
-            for rt in produced_rts:
-                #import pdb; pdb.set_trace()
-                resource_types.append(rt)
-                et = selected_pattern.event_type_for_resource_type("out", rt)
-                if et:
-                    commitment = process.add_commitment(
-                        resource_type= rt,
-                        demand=demand,
-                        quantity=Decimal("1"),
-                        event_type=et,
-                        unit=rt.unit,
-                        description="",
-                        user=request.user)
-                    if rand:
-                        if not added_to_order: #add to order feature removed, didn't work, no simple solution
-                            commitment.order = demand
-                            commitment.order_item = commitment
-                            commitment.save()
-
-            for rt in cited_rts:
-                et = selected_pattern.event_type_for_resource_type("cite", rt)
-                if et:
-                    commitment = process.add_commitment(
-                        resource_type= rt,
-                        demand=demand,
-                        order_item = process.order_item(),
-                        quantity=Decimal("1"),
-                        event_type=et,
-                        unit=rt.unit,
-                        description="",
-                        user=request.user)
-            for rt in used_rts:
-                if rt not in resource_types:
-                    resource_types.append(rt)
-                    et = selected_pattern.event_type_for_resource_type("use", rt)
-                    if et:
-                        commitment = process.add_commitment(
-                            resource_type= rt,
-                            demand=demand,
-                            order_item = process.order_item(),
-                            quantity=Decimal("1"),
-                            event_type=et,
-                            unit=rt.unit,
-                            description="",
-                            user=request.user)
-
-            for rt in consumed_rts:
-                if rt not in resource_types:
-                    resource_types.append(rt)
-                    et = selected_pattern.event_type_for_resource_type("consume", rt)
-                    if et:
-                        commitment = process.add_commitment(
-                            resource_type= rt,
-                            demand=demand,
-                            order_item = process.order_item(),
-                            quantity=Decimal("1"),
-                            event_type=et,
-                            unit=rt.unit,
-                            description="",
-                            user=request.user)
-
-            for rt in work_rts:
-                #import pdb; pdb.set_trace()
-                agent = None
-                et = selected_pattern.event_type_for_resource_type("work", rt)
-                if et:
-                    work_commitment = process.add_commitment(
-                        resource_type= rt,
-                        demand=demand,
-                        order_item = process.order_item(),
-                        quantity=Decimal("1"),
-                        event_type=et,
-                        unit=rt.unit,
-                        from_agent=agent,
-                        description="",
-                        user=request.user)
-                    if notification:
-                        #import pdb; pdb.set_trace()
-                        if not work_commitment.from_agent:
-                            agent = get_agent(request)
-                            users = work_commitment.possible_work_users()
-                            site_name = get_site_name()
-                            if users:
-                                notification.send(
-                                    users,
-                                    "valnet_new_task",
-                                    {"resource_type": work_commitment.resource_type,
-                                    "due_date": work_commitment.due_date,
-                                    "hours": work_commitment.quantity,
-                                    "unit": work_commitment.resource_type.unit,
-                                    "description": work_commitment.description or "",
-                                    "process": work_commitment.process,
-                                    "creator": agent,
-                                    "site_name": site_name,
-                                    }
-                                )
-
-            if done_process:
-                return HttpResponseRedirect('/%s/'
-                    % ('work/order-list'))
-            #if add_another:
-            #    return HttpResponseRedirect('/%s/%s/'
-            #        % ('work/plan-work', rand))
-            if edit_process:
-                return HttpResponseRedirect('/%s/%s/'
-                    % ('work/process-logging', process.id))
-
-    return render_to_response("work/plan_work.html", {
-        "slots": slots,
-        "selected_pattern": selected_pattern,
-        "selected_context_agent": selected_context_agent,
-        "ca_form": ca_form,
-        "pattern_form": pattern_form,
-        "process_form": process_form,
-        #"demand_form": demand_form,
-        "rand": rand,
-        "help": get_help("process_select"),
-    }, context_instance=RequestContext(request))
-
-
-@login_required
-def order_delete_confirmation_work(request, order_id):
-    order = get_object_or_404(Order, pk=order_id)
-    agent = get_agent(request)
-    coordinated_projects = agent.managed_projects()
-    if order.provider not in coordinated_projects:
-        return render_to_response('work/no_permission.html')
-    pcs = order.producing_commitments()
-    sked = []
-    reqs = []
-    work = []
-    tools = []
-    #import pdb; pdb.set_trace()
-    next = "order-list"
-    if pcs:
-        visited_resources = set()
-        for ct in pcs:
-            #visited_resources.add(ct.resource_type)
-            schedule_commitment(ct, sked, reqs, work, tools, visited_resources, 0)
-        return render_to_response('work/order_delete_confirmation_work.html', {
-            "order": order,
-            "sked": sked,
-            "reqs": reqs,
-            "work": work,
-            "tools": tools,
-            "next": next,
-        }, context_instance=RequestContext(request))
-    else:
-        commitments = Commitment.objects.filter(independent_demand=order)
-        if commitments:
-            for ct in commitments:
-                sked.append(ct)
-                if ct.process not in sked:
-                    sked.append(ct.process)
-            return render_to_response('work/order_delete_confirmation_work.html', {
-                "order": order,
-                "sked": sked,
-                "reqs": reqs,
-                "work": work,
-                "tools": tools,
-                "next": next,
-            }, context_instance=RequestContext(request))
-        else:
-            order.delete()
-            if next == "order-list":
-                return HttpResponseRedirect('/%s/'
-                    % ('work/order-list'))
-            #if next == "closed_work_orders":
-            #    return HttpResponseRedirect('/%s/'
-            #        % ('work/closed-work-orders'))
-
 
 
 
@@ -5142,8 +3799,6 @@ def resource_role_context_agent_formset(prefix, data=None):
     return formset
 """
 
-from mptt.exceptions import InvalidMove
-from mptt.forms import MoveNodeForm
 
 def project_all_resources(request, agent_id):
     #import pdb; pdb.set_trace()
@@ -5348,7 +4003,11 @@ def project_resource(request, agent_id, resource_id):
         }, context_instance=RequestContext(request))
 
 
-def movenode(request, node_id):
+
+from mptt.exceptions import InvalidMove
+from mptt.forms import MoveNodeForm
+
+def movenode(request, node_id): # still not used
     rtype = get_object_or_404(Artwork_Type, pk=node_id)
     if request.method == 'POST':
         form = MoveNodeForm(rtype, request.POST)
@@ -5367,3 +4026,1405 @@ def movenode(request, node_id):
         'Rtype_tree': Ocp_Artwork_Type.objects.all(),
         #'agent': agent,
     }, context_instance=RequestContext(request))
+
+
+
+
+
+
+
+#    T A S K S
+
+@login_required
+def my_tasks(request):
+    #import pdb; pdb.set_trace()
+    my_work = []
+    #my_skillz = []
+    other_wip = []
+    agent = get_agent(request)
+    #if agent:
+    context_ids = [c.id for c in agent.related_contexts()]
+    my_work = Commitment.objects.unfinished().filter(
+        event_type__relationship="work",
+        from_agent=agent)
+    #skill_ids = agent.resource_types.values_list('resource_type__id', flat=True)
+    #my_skillz = Commitment.objects.unfinished().filter(
+    #    from_agent=None,
+    #    context_agent__id__in=context_ids,
+    #    event_type__relationship="todo",
+    #    resource_type__id__in=skill_ids)
+    #other_unassigned = Commitment.objects.unfinished().filter(
+    #    from_agent=None,
+    #    context_agent__id__in=context_ids,
+    #    event_type__relationship="work").exclude(resource_type__id__in=skill_ids)
+    todos = Commitment.objects.unfinished().filter(
+        from_agent=None,
+        context_agent__id__in=context_ids,
+        event_type__relationship="todo")
+    #else:
+    #    other_unassigned = Commitment.objects.unfinished().filter(
+    #        from_agent=None,
+    #        event_type__relationship="work")
+    #import pdb; pdb.set_trace()
+    my_todos = Commitment.objects.todos().filter(from_agent=agent)
+    init = {"from_agent": agent,}
+    patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    if patterns:
+        pattern = patterns[0].pattern
+        todo_form = WorkTodoForm(agent=agent, pattern=pattern, initial=init)
+    else:
+        todo_form = WorkTodoForm(agent=agent, initial=init)
+    #work_now = settings.USE_WORK_NOW
+    #import pdb; pdb.set_trace()
+    return render_to_response("work/my_tasks.html", {
+        "agent": agent,
+        "my_work": my_work,
+        #"my_skillz": my_skillz,
+        #"other_unassigned": other_unassigned,
+        "my_todos": my_todos,
+        "todo_form": todo_form,
+        #"work_now": work_now,
+        "help": get_help("proc_log"),
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def take_new_tasks(request):
+    #import pdb; pdb.set_trace()
+    #my_work = []
+    my_skillz = []
+    other_wip = []
+    agent = get_agent(request)
+    #if agent:
+    context_ids = [c.id for c in agent.related_contexts()]
+    #my_work = Commitment.objects.unfinished().filter(
+    #    event_type__relationship="todo",
+    #    from_agent=agent)
+    skill_ids = agent.resource_types.values_list('resource_type__id', flat=True)
+    my_skillz = Commitment.objects.unfinished().filter(
+        from_agent=None,
+        context_agent__id__in=context_ids,
+        event_type__relationship="work",
+        resource_type__id__in=skill_ids)
+    #other_unassigned = Commitment.objects.unfinished().filter(
+    #    from_agent=None,
+    #    context_agent__id__in=context_ids,
+    #    event_type__relationship="work").exclude(resource_type__id__in=skill_ids)
+    todos = Commitment.objects.unfinished().filter(
+        from_agent=None,
+        context_agent__id__in=context_ids,
+        event_type__relationship="todo")
+    #else:
+    #    other_unassigned = Commitment.objects.unfinished().filter(
+    #        from_agent=None,
+    #        event_type__relationship="work")
+    #import pdb; pdb.set_trace()
+    my_todos = Commitment.objects.todos().filter(from_agent=agent)
+    init = {"from_agent": agent,}
+    patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    if patterns:
+        pattern = patterns[0].pattern
+        todo_form = WorkTodoForm(agent=agent, pattern=pattern, initial=init)
+    else:
+        todo_form = WorkTodoForm(agent=agent, initial=init)
+    #work_now = settings.USE_WORK_NOW
+    return render_to_response("work/take_new_tasks.html", {
+        "agent": agent,
+        #"my_work": my_work,
+        "my_skillz": my_skillz,
+        #"other_unassigned": other_unassigned,
+        #"my_todos": my_todos,
+        #"todo_form": todo_form,
+        #"work_now": work_now,
+        "help": get_help("proc_log"),
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def add_todo(request):
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+        if patterns:
+            pattern = patterns[0].pattern
+            form = TodoForm(data=request.POST, pattern=pattern)
+        else:
+            form = TodoForm(request.POST)
+        next = request.POST.get("next")
+        agent = get_agent(request)
+        et = None
+        ets = EventType.objects.filter(
+            relationship='todo')
+        if ets:
+            et = ets[0]
+        if et:
+            if form.is_valid():
+                data = form.cleaned_data
+                todo = form.save(commit=False)
+                todo.to_agent=agent
+                todo.event_type=et
+                todo.quantity = Decimal("0")
+                todo.unit_of_quantity=todo.resource_type.unit
+                todo.save()
+                if notification:
+                    if todo.from_agent:
+                        if todo.from_agent != agent:
+                            site_name = get_site_name()
+                            user = todo.from_agent.user()
+                            if user:
+                                #import pdb; pdb.set_trace()
+                                notification.send(
+                                    [user.user,],
+                                    "valnet_new_todo",
+                                    {"description": todo.description,
+                                    "creator": agent,
+                                    "site_name": site_name,
+                                    }
+                                )
+
+    return HttpResponseRedirect(next)
+
+
+
+@login_required
+def project_work(request):
+    #import pdb; pdb.set_trace()
+    agent = get_agent(request)
+    projects = agent.managed_projects()  #related_contexts()
+    if not agent or agent.is_participant_candidate():
+        return render_to_response('work/no_permission.html')
+    next = "/work/project-work/"
+    context_id = 0
+    start = datetime.date.today() - datetime.timedelta(days=30)
+    end = datetime.date.today() + datetime.timedelta(days=90)
+    init = {"start_date": start, "end_date": end}
+    date_form = DateSelectionForm(initial=init, data=request.POST or None)
+    ca_form = WorkProjectSelectionFormOptional(data=request.POST or None, context_agents=projects)
+    chosen_context_agent = None
+    patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    if patterns:
+        pattern = patterns[0].pattern
+        todo_form = WorkTodoForm(pattern=pattern, agent=agent)
+    else:
+        todo_form = WorkTodoForm(agent=agent)
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        if date_form.is_valid():
+            dates = date_form.cleaned_data
+            start = dates["start_date"]
+            end = dates["end_date"]
+            if ca_form.is_valid():
+                proj_data = ca_form.cleaned_data
+                proj_id = proj_data["context_agent"]
+                if proj_id.isdigit:
+                    context_id = proj_id
+                    chosen_context_agent = EconomicAgent.objects.get(id=proj_id)
+
+    start_date = start.strftime('%Y_%m_%d')
+    end_date = end.strftime('%Y_%m_%d')
+    processes, context_agents = assemble_schedule(start, end, chosen_context_agent)
+
+    todos = Commitment.objects.todos().filter(due_date__range=(start, end))
+    if chosen_context_agent:
+        todos = todos.filter(context_agent=chosen_context_agent)
+    my_project_todos = []
+    for todo in todos:
+        if todo.context_agent in projects:
+            my_project_todos.append(todo)
+    #import pdb; pdb.set_trace()
+    return render_to_response("work/project_work.html", {
+        "agent": agent,
+        "context_agents": context_agents,
+        "all_processes": projects,
+        "date_form": date_form,
+        "start_date": start_date,
+        "end_date": end_date,
+        "context_id": context_id,
+        "todo_form": todo_form,
+        "ca_form": ca_form,
+        "todos": my_project_todos,
+        "next": next,
+        "help": get_help("project_work"),
+    }, context_instance=RequestContext(request))
+
+
+
+
+
+@login_required
+def process_logging(request, process_id):
+    process = get_object_or_404(Process, id=process_id)
+    pattern = process.process_pattern
+    context_agent = process.context_agent
+    #import pdb; pdb.set_trace()
+    agent = get_agent(request)
+    user = request.user
+    agent_projects = agent.related_contexts()
+    if process.context_agent not in agent_projects:
+        return render_to_response('valueaccounting/no_permission.html')
+    logger = False
+    worker = False
+    super_logger = False
+    todays_date = datetime.date.today()
+    change_process_form = ProcessForm(instance=process)
+    add_output_form = None
+    add_citation_form = None
+    add_consumable_form = None
+    add_usable_form = None
+    add_work_form = None
+    unplanned_work_form = None
+    unplanned_cite_form = None
+    unplanned_consumption_form = None
+    unplanned_use_form = None
+    unplanned_output_form = None
+    process_expense_form = None
+    role_formset = None
+    slots = []
+    event_types = []
+    work_now = settings.USE_WORK_NOW
+    to_be_changed_requirement = None
+    changeable_requirement = None
+
+    work_reqs = process.work_requirements()
+    consume_reqs = process.consumed_input_requirements()
+    use_reqs = process.used_input_requirements()
+    unplanned_work = process.uncommitted_work_events()
+
+    if agent and pattern:
+        slots = pattern.slots()
+        event_types = pattern.event_types()
+        #if request.user.is_superuser or request.user == process.created_by:
+        if request.user.is_staff or request.user == process.created_by:
+            logger = True
+            super_logger = True
+        #import pdb; pdb.set_trace()
+        for req in work_reqs:
+            req.changeform = req.change_work_form()
+            if agent == req.from_agent:
+                logger = True
+                worker = True
+            init = {"from_agent": agent,
+                "event_date": todays_date,
+                "is_contribution": True,}
+            req.input_work_form_init = req.input_event_form_init(init=init)
+        for req in consume_reqs:
+            req.changeform = req.change_form()
+        for req in use_reqs:
+            req.changeform = req.change_form()
+        for event in unplanned_work:
+            event.changeform = UnplannedWorkEventForm(
+                pattern=pattern,
+                context_agent=context_agent,
+                instance=event,
+                prefix=str(event.id))
+        output_resource_types = pattern.output_resource_types()
+        unplanned_output_form = UnplannedOutputForm(prefix='unplannedoutput')
+        unplanned_output_form.fields["resource_type"].queryset = output_resource_types
+        role_formset = resource_role_context_agent_formset(prefix="resource")
+        produce_et = EventType.objects.get(name="Resource Production")
+        change_et = EventType.objects.get(name="Change")
+        #import pdb; pdb.set_trace()
+        if "out" in slots:
+            if logger:
+                if change_et in event_types:
+                    to_be_changed_requirement = process.to_be_changed_requirements()
+                    if to_be_changed_requirement:
+                        to_be_changed_requirement = to_be_changed_requirement[0]
+                    changeable_requirement = process.changeable_requirements()
+                    if changeable_requirement:
+                        changeable_requirement = changeable_requirement[0]
+                else:
+                    add_output_form = ProcessOutputForm(prefix='output')
+                    add_output_form.fields["resource_type"].queryset = output_resource_types
+        if "work" in slots:
+            if agent:
+                work_init = {
+                    "from_agent": agent,
+                    "is_contribution": True,
+                }
+                work_resource_types = pattern.work_resource_types()
+                if work_resource_types:
+                    work_unit = work_resource_types[0].unit
+                    #work_init = {"unit_of_quantity": work_unit,}
+                    work_init = {
+                        "from_agent": agent,
+                        "unit_of_quantity": work_unit,
+                        "is_contribution": True,
+                    }
+                    unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", context_agent=context_agent, initial=work_init)
+                    unplanned_work_form.fields["resource_type"].queryset = work_resource_types
+                    #if logger:
+                    #    add_work_form = WorkCommitmentForm(initial=work_init, prefix='work', pattern=pattern)
+                else:
+                    unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", pattern=pattern, context_agent=context_agent, initial=work_init)
+                    #is this correct? see commented-out lines above
+                if logger:
+                    date_init = {"due_date": process.end_date,}
+                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=date_init)
+
+        if "cite" in slots:
+            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=pattern)
+            if context_agent.unit_of_claim_value:
+                cite_unit = context_agent.unit_of_claim_value
+            if logger:
+                add_citation_form = ProcessCitationForm(prefix='citation', pattern=pattern)
+        if "consume" in slots:
+            unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=pattern)
+            if logger:
+                add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=pattern)
+        if "use" in slots:
+            unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=pattern)
+            if logger:
+                add_usable_form = ProcessUsableForm(prefix='usable', pattern=pattern)
+        if "payexpense" in slots:
+            process_expense_form = ProcessExpenseEventForm(prefix='processexpense', pattern=pattern)
+
+    cited_ids = [c.resource.id for c in process.citations()]
+    #import pdb; pdb.set_trace()
+    citation_requirements = process.citation_requirements()
+    for cr in citation_requirements:
+        cr.resources = []
+        for evt in cr.fulfilling_events():
+            resource = evt.resource
+            resource.event = evt
+            cr.resources.append(resource)
+
+    output_resource_ids = [e.resource.id for e in process.production_events() if e.resource]
+
+    return render_to_response("work/process_logging.html", {
+        "process": process,
+        "change_process_form": change_process_form,
+        "cited_ids": cited_ids,
+        "citation_requirements": citation_requirements,
+        "output_resource_ids": output_resource_ids,
+        "agent": agent,
+        "user": user,
+        "logger": logger,
+        "worker": worker,
+        "super_logger": super_logger,
+        "add_output_form": add_output_form,
+        "add_citation_form": add_citation_form,
+        "add_consumable_form": add_consumable_form,
+        "add_usable_form": add_usable_form,
+        "add_work_form": add_work_form,
+        "unplanned_work_form": unplanned_work_form,
+        "unplanned_cite_form": unplanned_cite_form,
+        "unplanned_consumption_form": unplanned_consumption_form,
+        "unplanned_use_form": unplanned_use_form,
+        "unplanned_output_form": unplanned_output_form,
+        "role_formset": role_formset,
+        "process_expense_form": process_expense_form,
+        "slots": slots,
+        "to_be_changed_requirement": to_be_changed_requirement,
+        "changeable_requirement": changeable_requirement,
+        "work_reqs": work_reqs,
+        "consume_reqs": consume_reqs,
+        "uncommitted_consumption": process.uncommitted_consumption_events(),
+        "use_reqs": use_reqs,
+        "uncommitted_use": process.uncommitted_use_events(),
+        "uncommitted_process_expenses": process.uncommitted_process_expense_events(),
+        "unplanned_work": unplanned_work,
+        "work_now": work_now,
+        "help": get_help("process_work"),
+    }, context_instance=RequestContext(request))
+
+
+from functools import partial, wraps
+
+@login_required
+def non_process_logging(request):
+    member = get_agent(request)
+    if not member:
+        return HttpResponseRedirect('/%s/'
+            % ('work/work-home'))
+
+    TimeFormSet = modelformset_factory(
+        EconomicEvent,
+        form=WorkCasualTimeContributionForm,
+        can_delete=False,
+        extra=4,
+        max_num=8,
+        )
+
+    init = []
+    for i in range(0, 4):
+        init.append({"is_contribution": False,})
+    time_formset = TimeFormSet(
+        queryset=EconomicEvent.objects.none(),
+        initial = init,
+        data=request.POST or None)
+    #import pdb; pdb.set_trace()
+    ctx_qs = member.related_context_queryset()
+    for form in time_formset.forms:
+        form.fields["context_agent"].queryset = ctx_qs
+        #form.fields["context_agent"].empty_label = "choose...";
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        keep_going = request.POST.get("keep-going")
+        just_save = request.POST.get("save")
+        if time_formset.is_valid():
+            events = time_formset.save(commit=False)
+            pattern = None
+            patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
+            if patterns:
+                pattern = patterns[0].pattern
+            else:
+                raise ValidationError("no non-production ProcessPattern")
+            if pattern:
+                unit = Unit.objects.filter(
+                    unit_type="time",
+                    name__icontains="Hour")[0]
+                for event in events:
+                    if event.event_date and event.quantity:
+                        event.from_agent=member
+                        event.to_agent = event.context_agent.default_agent()
+                        #event.is_contribution=True
+                        rt = event.resource_type
+                        event_type = pattern.event_type_for_resource_type("work", rt)
+                        event.event_type=event_type
+                        event.unit_of_quantity=unit
+                        event.created_by=request.user
+                        event.save()
+            if keep_going:
+                return HttpResponseRedirect('/%s/'
+                    % ('work/non-process-logging'))
+            else:
+                return HttpResponseRedirect('/%s/'
+                    % ('work/my-history'))
+
+    return render_to_response("work/non_process_logging.html", {
+        "member": member,
+        "time_formset": time_formset,
+        "help": get_help("non_proc_log"),
+    }, context_instance=RequestContext(request))
+
+
+
+@login_required
+def work_todo_done(request, todo_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        try:
+            todo = Commitment.objects.get(id=todo_id)
+        except Commitment.DoesNotExist:
+            todo = None
+        if todo:
+            todo.finished = True
+            todo.save()
+            event = todo.todo_event()
+            if not event:
+                event = create_event_from_todo(todo)
+                event.save()
+    next = request.POST.get("next")
+    return HttpResponseRedirect(next)
+
+@login_required
+def work_add_todo(request):
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        agent = get_agent(request)
+        patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+        if patterns:
+            pattern = patterns[0].pattern
+            form = WorkTodoForm(agent=agent, pattern=pattern, data=request.POST)
+        else:
+            form = WorkTodoForm(agent=agent, data=request.POST)
+        next = request.POST.get("next")
+        et = None
+        ets = EventType.objects.filter(
+            relationship='todo')
+        if ets:
+            et = ets[0]
+        if et:
+            if form.is_valid():
+                data = form.cleaned_data
+                todo = form.save(commit=False)
+                todo.to_agent=agent
+                todo.event_type=et
+                todo.quantity = Decimal("0")
+                todo.unit_of_quantity=todo.resource_type.unit
+                todo.save()
+                if notification:
+                    if todo.from_agent:
+                        if todo.from_agent != agent:
+                            site_name = get_site_name()
+                            user = todo.from_agent.user()
+                            if user:
+                                #import pdb; pdb.set_trace()
+                                notification.send(
+                                    [user.user,],
+                                    "valnet_new_todo",
+                                    {"description": todo.description,
+                                    "creator": agent,
+                                    "site_name": site_name,
+                                    }
+                                )
+
+    return HttpResponseRedirect(next)
+
+@login_required
+def work_todo_delete(request, todo_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        try:
+            todo = Commitment.objects.get(id=todo_id)
+        except Commitment.DoesNotExist:
+            todo = None
+        if todo:
+            if notification:
+                if todo.from_agent:
+                    agent = get_agent(request)
+                    if todo.from_agent != agent:
+                        site_name = get_site_name()
+                        user = todo.from_agent.user()
+                        if user:
+                            #import pdb; pdb.set_trace()
+                            notification.send(
+                                [user.user,],
+                                "valnet_deleted_todo",
+                                {"description": todo.description,
+                                "creator": agent,
+                                "site_name": site_name,
+                                }
+                            )
+            todo.delete()
+    next = request.POST.get("next")
+    return HttpResponseRedirect(next)
+
+@login_required
+def work_todo_change(request, todo_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        try:
+            todo = Commitment.objects.get(id=todo_id)
+        except Commitment.DoesNotExist:
+            todo = None
+        if todo:
+            agent = get_agent(request)
+            prefix = todo.form_prefix()
+            form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
+            if form.is_valid():
+                todo = form.save()
+
+    next = request.POST.get("next")
+    return HttpResponseRedirect(next)
+
+@login_required
+def work_todo_decline(request, todo_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        try:
+            todo = Commitment.objects.get(id=todo_id)
+        except Commitment.DoesNotExist:
+            todo = None
+        if todo:
+            todo.from_agent=None
+            todo.save()
+    next = request.POST.get("next")
+    return HttpResponseRedirect(next)
+
+@login_required
+def work_todo_time(request):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        todo_id = request.POST.get("todoId")
+        try:
+            todo = Commitment.objects.get(id=todo_id)
+        except Commitment.DoesNotExist:
+            todo = None
+        if todo:
+            hours = request.POST.get("hours")
+            if hours:
+                qty = Decimal(hours)
+            else:
+                qty = Decimal("0.0")
+            event = todo.todo_event()
+            if event:
+                event.quantity = qty
+                event.save()
+            else:
+                event = create_event_from_todo(todo)
+                event.quantity = qty
+                event.save()
+    return HttpResponse("Ok", content_type="text/plain")
+
+@login_required
+def work_todo_mine(request, todo_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        try:
+            todo = Commitment.objects.get(id=todo_id)
+        except Commitment.DoesNotExist:
+            todo = None
+        if todo:
+            agent = get_agent(request)
+            todo.from_agent = agent
+            todo.save()
+    next = request.POST.get("next")
+    if next:
+        return HttpResponseRedirect(next)
+    return HttpResponseRedirect('/%s/'
+        % ('work/my-dashboard'))
+
+@login_required
+def work_todo_description(request):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        todo_id = request.POST.get("todoId")
+        try:
+            todo = Commitment.objects.get(id=todo_id)
+        except Commitment.DoesNotExist:
+            todo = None
+        if todo:
+            did = request.POST.get("did")
+            event = todo.todo_event()
+            if event:
+                event.description = did
+                event.save()
+            else:
+                event = create_event_from_todo(todo)
+                event.description = did
+                event.save()
+    return HttpResponse("Ok", content_type="text/plain")
+
+@login_required
+def work_commit_to_task(request, commitment_id):
+    if request.method == "POST":
+        ct = get_object_or_404(Commitment, id=commitment_id)
+        process = ct.process
+        agent = get_agent(request)
+        prefix = ct.form_prefix()
+        form = CommitmentForm(data=request.POST, prefix=prefix)
+        next = None
+        next = request.POST.get("next")
+        #import pdb; pdb.set_trace()
+        if form.is_valid():
+            data = form.cleaned_data
+            #todo: next line did not work, don't want to take time to figure out why right now
+            #probly form shd have ct as instance.
+            #ct = form.save(commit=False)
+            start_date = data["start_date"]
+            description = data["description"]
+            quantity = data["quantity"]
+            unit_of_quantity = data["unit_of_quantity"]
+            ct.start_date=start_date
+            ct.quantity=quantity
+            ct.unit_of_quantity=unit_of_quantity
+            ct.description=description
+            ct.from_agent = agent
+            ct.changed_by=request.user
+            ct.save()
+    if next:
+        return HttpResponseRedirect(next)
+    return HttpResponseRedirect('/%s/'
+        % ('work/my-dashboard'))
+
+@login_required
+def work_delete_event(request, event_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        event = get_object_or_404(EconomicEvent, pk=event_id)
+        agent = event.from_agent
+        process = event.process
+        exchange = event.exchange
+        distribution = event.distribution
+        resource = event.resource
+        if resource:
+            if event.consumes_resources():
+                resource.quantity += event.quantity
+            if event.creates_resources():
+                resource.quantity -= event.quantity
+            if event.changes_stage():
+                tbcs = process.to_be_changed_requirements()
+                if tbcs:
+                    tbc = tbcs[0]
+                    tbc_evts = tbc.fulfilling_events()
+                    if tbc_evts:
+                        tbc_evt = tbc_evts[0]
+                        resource.quantity = tbc_evt.quantity
+                        tbc_evt.delete()
+                    resource.stage = tbc.stage
+                else:
+                    resource.revert_to_previous_stage()
+            event.delete()
+            if resource.is_deletable():
+                resource.delete()
+            else:
+                resource.save()
+        else:
+            event.delete()
+
+    next = request.POST.get("next")
+    if next:
+        return HttpResponseRedirect(next)
+    return HttpResponseRedirect('/%s/'
+        % ('work/my-history'))
+
+
+#    H I S T O R Y
+
+@login_required
+def my_history(request): # not used?
+    #import pdb; pdb.set_trace()
+    #agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    user_agent = get_agent(request)
+    agent = user_agent
+    user_is_agent = False
+    if agent == user_agent:
+        user_is_agent = True
+    event_list = agent.contributions()
+    no_bucket = 0
+    with_bucket = 0
+    event_value = Decimal("0.0")
+    claim_value = Decimal("0.0")
+    outstanding_claims = Decimal("0.0")
+    claim_distributions = Decimal("0.0")
+    claim_distro_events = []
+    event_types = {e.event_type for e in event_list}
+    filter_form = EventTypeFilterForm(event_types=event_types, data=request.POST or None)
+    paid_filter = "U"
+    if request.method == "POST":
+        if filter_form.is_valid():
+            #import pdb; pdb.set_trace()
+            data = filter_form.cleaned_data
+            et_ids = data["event_types"]
+            start = data["start_date"]
+            end = data["end_date"]
+            paid_filter = data["paid_filter"]
+            if start:
+                event_list = event_list.filter(event_date__gte=start)
+            if end:
+                event_list = event_list.filter(event_date__lte=end)
+            #belt and suspenders: if no et_ids, form is not valid
+            if et_ids:
+                event_list = event_list.filter(event_type__id__in=et_ids)
+
+    for event in event_list:
+        if event.bucket_rule_for_context_agent():
+            with_bucket += 1
+        else:
+            no_bucket += 1
+        for claim in event.claims():
+            claim_value += claim.original_value
+            outstanding_claims += claim.value
+            for de in claim.distribution_events():
+                claim_distributions += de.value
+                claim_distro_events.append(de.event)
+    et = EventType.objects.get(name="Distribution")
+    all_distro_evts = EconomicEvent.objects.filter(to_agent=agent, event_type=et)
+    other_distro_evts = [d for d in all_distro_evts if d not in claim_distro_events]
+    other_distributions = sum(de.quantity for de in other_distro_evts)
+    #took off csv export for now
+    #event_ids = ",".join([str(event.id) for event in event_list])
+
+    if paid_filter == "U":
+        event_list = list(event_list)
+        for evnt in event_list:
+            if evnt.owed_amount() == 0:
+                    event_list.remove(evnt)
+
+    paginator = Paginator(event_list, 25)
+    page = request.GET.get('page')
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        events = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        events = paginator.page(paginator.num_pages)
+
+    #import pdb; pdb.set_trace()
+    return render_to_response("work/my_history.html", {
+        "agent": agent,
+        "user_is_agent": user_is_agent,
+        "events": events,
+        "filter_form": filter_form,
+        #"event_ids": event_ids,
+        "no_bucket": no_bucket,
+        "with_bucket": with_bucket,
+        "claim_value": format(claim_value, ",.2f"),
+        "outstanding_claims": format(outstanding_claims, ",.2f"),
+        "claim_distributions": format(claim_distributions, ",.2f"),
+        "other_distributions": format(other_distributions, ",.2f"),
+        "help": get_help("my_history"),
+    }, context_instance=RequestContext(request))
+
+@login_required
+def change_history_event(request, event_id): # not used ?
+    event = get_object_or_404(EconomicEvent, pk=event_id)
+    page = request.GET.get("page")
+    #import pdb; pdb.set_trace()
+    event_form = event.change_form(data=request.POST or None)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        page = request.POST.get("page")
+        if event_form.is_valid():
+            event = event_form.save(commit=False)
+            event.changed_by = request.user
+            event.save()
+        agent = event.from_agent
+        #next = request.POST.get("next")
+        if page:
+            #if next:
+            #    if next == "work-contributions":
+            #        return HttpResponseRedirect('/%s/'
+            #            % ('work/my-history', page))
+            return HttpResponseRedirect('/%s/'
+                % ('work/my-history', page))
+        else:
+            #if next:
+            #    if next == "work-contributions":
+            #        return HttpResponseRedirect('/%s/'
+            #            % ('work/my-history'))
+            return HttpResponseRedirect('/%s/'
+                % ('work/my-history'))
+    return render_to_response("work/change_history_event.html", {
+        "event_form": event_form,
+        "page": page,
+    }, context_instance=RequestContext(request))
+
+
+
+def create_worktimer_context(
+        request,
+        process,
+        agent,
+        commitment):
+    prev = ""
+    today = datetime.date.today()
+    #todo: will not now handle lack of commitment
+    event = EconomicEvent(
+        event_date=today,
+        from_agent=agent,
+        to_agent=process.default_agent(),
+        process=process,
+        context_agent=process.context_agent,
+        quantity=Decimal("0"),
+        is_contribution=True,
+        created_by = request.user,
+    )
+
+    if commitment:
+        event.commitment = commitment
+        event.event_type = commitment.event_type
+        event.resource_type = commitment.resource_type
+        event.unit_of_quantity = commitment.resource_type.unit
+        init = {
+            "work_done": commitment.finished,
+            "process_done": commitment.process.finished,
+        }
+        wb_form = WorkbookForm(initial=init)
+        prev_events = commitment.fulfillment_events.filter(event_date__lt=today)
+        if prev_events:
+            prev_dur = sum(prev.quantity for prev in prev_events)
+            unit = ""
+            if commitment.unit_of_quantity:
+                unit = commitment.unit_of_quantity.abbrev
+            prev = " ".join([str(prev_dur), unit])
+    else:
+        wb_form = WorkbookForm()
+    #if event.quantity > 0:
+    event.save()
+    others_working = []
+    other_work_reqs = []
+    wrqs = process.work_requirements()
+    if wrqs.count() > 1:
+        for wrq in wrqs:
+            if wrq.from_agent != commitment.from_agent:
+                if wrq.from_agent:
+                    wrq.has_labnotes = wrq.agent_has_labnotes(wrq.from_agent)
+                    others_working.append(wrq)
+                else:
+                    other_work_reqs.append(wrq)
+    return {
+        "commitment": commitment,
+        "process": process,
+        "wb_form": wb_form,
+        "others_working": others_working,
+        "other_work_reqs": other_work_reqs,
+        "today": today,
+        "prev": prev,
+        "event": event,
+        "help": get_help("work_timer"),
+    }
+
+@login_required
+def work_timer(
+        request,
+        process_id,
+        commitment_id=None):
+    process = get_object_or_404(Process, id=process_id)
+    agent = get_agent(request)
+    ct = None
+    if commitment_id:
+        ct = get_object_or_404(Commitment, id=commitment_id)
+        #if not request.user.is_superuser:
+        #    if agent != ct.from_agent:
+        #        return render_to_response('valueaccounting/no_permission.html')
+    template_params = create_worktimer_context(
+        request,
+        process,
+        agent,
+        ct,
+    )
+    return render_to_response("work/work_timer.html",
+        template_params,
+        context_instance=RequestContext(request))
+
+@login_required
+def save_timed_work_now(request, event_id):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        event = get_object_or_404(EconomicEvent, id=event_id)
+        form = WorkbookForm(instance=event, data=request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            event = form.save(commit=False)
+            event.changed_by = request.user
+            process = event.process
+            event.save()
+            if not process.started:
+                process.started = event.event_date
+                process.changed_by=request.user
+                process.save()
+            data = "ok"
+        else:
+            data = form.errors
+        return HttpResponse(data, content_type="text/plain")
+
+@login_required
+def work_process_finished(request, process_id):
+    #import pdb; pdb.set_trace()
+    process = get_object_or_404(Process, pk=process_id)
+    if not process.finished:
+        process.finished = True
+        process.save()
+    else:
+        if process.finished:
+            process.finished = False
+            process.save()
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process_id))
+
+
+
+
+
+
+#    O R D E R   P L A N S
+
+@login_required
+def order_list(request):
+    agent = get_agent(request)
+    help = get_help("order_list")
+    #import pdb; pdb.set_trace()
+    projects = agent.managed_projects()
+
+    return render_to_response("work/order_list.html", {
+        "projects": projects,
+        "agent": agent,
+        "help": help,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def order_plan(request, order_id):
+    agent = get_agent(request)
+    order = get_object_or_404(Order, pk=order_id)
+    #import pdb; pdb.set_trace()
+    coordinated_projects = agent.managed_projects()
+    if order.provider not in coordinated_projects:
+        return render_to_response('valueaccounting/no_permission.html')
+    error_message = ""
+    order_items = order.order_items()
+    rts = None
+    add_order_item_form = None
+    if agent:
+        if order.order_type == "customer":
+            patterns = PatternUseCase.objects.filter(use_case__identifier='cust_orders')
+            if patterns:
+                pattern = patterns[0].pattern
+            else:
+                raise ValidationError("no Customer Order ProcessPattern")
+            rts = pattern.all_resource_types()
+        else:
+            rts = ProcessPattern.objects.all_production_resource_types()
+        if rts:
+            add_order_item_form = AddOrderItemForm(resource_types=rts)
+        #import pdb; pdb.set_trace()
+        visited = set()
+        for order_item in order_items:
+            order_item.processes = order_item.unique_processes_for_order_item(visited)
+            if order_item.is_workflow_order_item():
+                #import pdb; pdb.set_trace()
+                init = {'quantity': order_item.quantity,}
+                order_item.resource_qty_form = ResourceQuantityForm(prefix=str(order_item.id), initial=init)
+                init = {'context_agent': order_item.context_agent,}
+                order_item.project_form = ProjectSelectionForm(prefix=str(order_item.id), initial=init)
+                last_date = order_item.process.end_date
+                next_date = last_date + datetime.timedelta(days=1)
+                init = {"start_date": next_date, "end_date": next_date}
+                order_item.add_process_form = WorkflowProcessForm(prefix=str(order_item.id), initial=init, order_item=order_item)
+    return render_to_response("work/order_plan.html", {
+        "order": order,
+        "agent": agent,
+        "order_items": order_items,
+        "add_order_item_form": add_order_item_form,
+        "error_message": error_message,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def change_project_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    agent = get_agent(request)
+    coordinated_projects = agent.managed_projects()
+    if order.provider not in coordinated_projects:
+        return render_to_response('valueaccounting/no_permission.html')
+    #import pdb; pdb.set_trace()
+    order_form = OrderChangeForm(instance=order, data=request.POST or None)
+    if request.method == "POST":
+        if order_form.is_valid():
+            order = order_form.save()
+            return HttpResponseRedirect('/%s/'
+                % ('work/order-list'))
+
+    return render_to_response("work/change_project_order.html", {
+        "order_form": order_form,
+        "order": order,
+        "next": next,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def plan_work(request, rand=0):
+    #import pdb; pdb.set_trace()
+    agent = get_agent(request)
+    slots = []
+    resource_types = []
+    selected_pattern = None
+    selected_context_agent = None
+    pattern_form = PatternProdSelectionForm()
+    #import pdb; pdb.set_trace()
+    ca_form = ProjectSelectionFilteredForm(agent=agent)
+    init = {"start_date": datetime.date.today(), "end_date": datetime.date.today()}
+    process_form = DateAndNameForm(data=request.POST or None)
+    #demand_form = OrderSelectionFilteredForm(data=request.POST or None)
+    if request.method == "POST":
+        input_resource_types = []
+        input_process_types = []
+        done_process = request.POST.get("create-process")
+        add_another = request.POST.get("add-another")
+        edit_process = request.POST.get("edit-process")
+        get_related = request.POST.get("get-related")
+        if get_related:
+            #import pdb; pdb.set_trace()
+            selected_pattern = ProcessPattern.objects.get(id=request.POST.get("pattern"))
+            selected_context_agent = EconomicAgent.objects.get(id=request.POST.get("context_agent"))
+            if selected_pattern:
+                slots = selected_pattern.event_types()
+                for slot in slots:
+                    slot.resource_types = selected_pattern.get_resource_types(slot)
+            process_form = DateAndNameForm(initial=init)
+            #demand_form = OrderSelectionFilteredForm(provider=selected_context_agent)
+        else:
+            #import pdb; pdb.set_trace()
+            rp = request.POST
+            today = datetime.date.today()
+            if process_form.is_valid():
+                start_date = process_form.cleaned_data["start_date"]
+                end_date = process_form.cleaned_data["end_date"]
+                process_name = process_form.cleaned_data["process_name"]
+            else:
+                start_date = today
+                end_date = today
+            demand = None
+            added_to_order = False
+            #if demand_form.is_valid():
+            #    demand = demand_form.cleaned_data["demand"]
+            #    if demand:
+            #        added_to_order = True
+            produced_rts = []
+            cited_rts = []
+            consumed_rts = []
+            used_rts = []
+            work_rts = []
+            #import pdb; pdb.set_trace()
+            for key, value in dict(rp).iteritems():
+                if "selected-context-agent" in key:
+                    context_agent_id = key.split("~")[1]
+                    selected_context_agent = EconomicAgent.objects.get(id=context_agent_id)
+                    continue
+                if "selected-pattern" in key:
+                    pattern_id = key.split("~")[1]
+                    selected_pattern = ProcessPattern.objects.get(id=pattern_id)
+                    continue
+                et = None
+                action = ""
+                try:
+                    #import pdb; pdb.set_trace()
+                    et_name = key.split("~")[0]
+                    et = EventType.objects.get(name=et_name)
+                    action = et.relationship
+                except EventType.DoesNotExist:
+                    pass
+                if action == "consume":
+                    consumed_id = int(value[0])
+                    consumed_rt = EconomicResourceType.objects.get(id=consumed_id)
+                    consumed_rts.append(consumed_rt)
+                    continue
+                if action == "use":
+                    used_id = int(value[0])
+                    used_rt = EconomicResourceType.objects.get(id=used_id)
+                    used_rts.append(used_rt)
+                    continue
+                if action == "cite":
+                    cited_id = int(value[0])
+                    cited_rt = EconomicResourceType.objects.get(id=cited_id)
+                    cited_rts.append(cited_rt)
+                    continue
+                if action == "out":
+                    produced_id = int(value[0])
+                    produced_rt = EconomicResourceType.objects.get(id=produced_id)
+                    produced_rts.append(produced_rt)
+                    continue
+                if action == "work":
+                    work_id = int(value[0])
+                    work_rt = EconomicResourceType.objects.get(id=work_id)
+                    work_rts.append(work_rt)
+                    continue
+
+            if rand:
+                if not demand:
+                    demand = Order(
+                        order_type="rand",
+                        order_date=today,
+                        due_date=end_date,
+                        provider=selected_context_agent,
+                        created_by=request.user)
+                    demand.save()
+            if not process_name:
+                process_name = "Make something"
+                if produced_rts:
+                    process_name = " ".join([
+                        "Make",
+                        produced_rts[0].name,
+                    ])
+
+            process = Process(
+                name=process_name,
+                end_date=end_date,
+                start_date=start_date,
+                process_pattern=selected_pattern,
+                created_by=request.user,
+                context_agent=selected_context_agent
+            )
+            process.save()
+
+            #import pdb; pdb.set_trace()
+            for rt in produced_rts:
+                #import pdb; pdb.set_trace()
+                resource_types.append(rt)
+                et = selected_pattern.event_type_for_resource_type("out", rt)
+                if et:
+                    commitment = process.add_commitment(
+                        resource_type= rt,
+                        demand=demand,
+                        quantity=Decimal("1"),
+                        event_type=et,
+                        unit=rt.unit,
+                        description="",
+                        user=request.user)
+                    if rand:
+                        if not added_to_order: #add to order feature removed, didn't work, no simple solution
+                            commitment.order = demand
+                            commitment.order_item = commitment
+                            commitment.save()
+
+            for rt in cited_rts:
+                et = selected_pattern.event_type_for_resource_type("cite", rt)
+                if et:
+                    commitment = process.add_commitment(
+                        resource_type= rt,
+                        demand=demand,
+                        order_item = process.order_item(),
+                        quantity=Decimal("1"),
+                        event_type=et,
+                        unit=rt.unit,
+                        description="",
+                        user=request.user)
+            for rt in used_rts:
+                if rt not in resource_types:
+                    resource_types.append(rt)
+                    et = selected_pattern.event_type_for_resource_type("use", rt)
+                    if et:
+                        commitment = process.add_commitment(
+                            resource_type= rt,
+                            demand=demand,
+                            order_item = process.order_item(),
+                            quantity=Decimal("1"),
+                            event_type=et,
+                            unit=rt.unit,
+                            description="",
+                            user=request.user)
+
+            for rt in consumed_rts:
+                if rt not in resource_types:
+                    resource_types.append(rt)
+                    et = selected_pattern.event_type_for_resource_type("consume", rt)
+                    if et:
+                        commitment = process.add_commitment(
+                            resource_type= rt,
+                            demand=demand,
+                            order_item = process.order_item(),
+                            quantity=Decimal("1"),
+                            event_type=et,
+                            unit=rt.unit,
+                            description="",
+                            user=request.user)
+
+            for rt in work_rts:
+                #import pdb; pdb.set_trace()
+                agent = None
+                et = selected_pattern.event_type_for_resource_type("work", rt)
+                if et:
+                    work_commitment = process.add_commitment(
+                        resource_type= rt,
+                        demand=demand,
+                        order_item = process.order_item(),
+                        quantity=Decimal("1"),
+                        event_type=et,
+                        unit=rt.unit,
+                        from_agent=agent,
+                        description="",
+                        user=request.user)
+                    if notification:
+                        #import pdb; pdb.set_trace()
+                        if not work_commitment.from_agent:
+                            agent = get_agent(request)
+                            users = work_commitment.possible_work_users()
+                            site_name = get_site_name()
+                            if users:
+                                notification.send(
+                                    users,
+                                    "valnet_new_task",
+                                    {"resource_type": work_commitment.resource_type,
+                                    "due_date": work_commitment.due_date,
+                                    "hours": work_commitment.quantity,
+                                    "unit": work_commitment.resource_type.unit,
+                                    "description": work_commitment.description or "",
+                                    "process": work_commitment.process,
+                                    "creator": agent,
+                                    "site_name": site_name,
+                                    }
+                                )
+
+            if done_process:
+                return HttpResponseRedirect('/%s/'
+                    % ('work/order-list'))
+            #if add_another:
+            #    return HttpResponseRedirect('/%s/%s/'
+            #        % ('work/plan-work', rand))
+            if edit_process:
+                return HttpResponseRedirect('/%s/%s/'
+                    % ('work/process-logging', process.id))
+
+    return render_to_response("work/plan_work.html", {
+        "slots": slots,
+        "selected_pattern": selected_pattern,
+        "selected_context_agent": selected_context_agent,
+        "ca_form": ca_form,
+        "pattern_form": pattern_form,
+        "process_form": process_form,
+        #"demand_form": demand_form,
+        "rand": rand,
+        "help": get_help("process_select"),
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def order_delete_confirmation_work(request, order_id):
+    order = get_object_or_404(Order, pk=order_id)
+    agent = get_agent(request)
+    coordinated_projects = agent.managed_projects()
+    if order.provider not in coordinated_projects:
+        return render_to_response('work/no_permission.html')
+    pcs = order.producing_commitments()
+    sked = []
+    reqs = []
+    work = []
+    tools = []
+    #import pdb; pdb.set_trace()
+    next = "order-list"
+    if pcs:
+        visited_resources = set()
+        for ct in pcs:
+            #visited_resources.add(ct.resource_type)
+            schedule_commitment(ct, sked, reqs, work, tools, visited_resources, 0)
+        return render_to_response('work/order_delete_confirmation_work.html', {
+            "order": order,
+            "sked": sked,
+            "reqs": reqs,
+            "work": work,
+            "tools": tools,
+            "next": next,
+        }, context_instance=RequestContext(request))
+    else:
+        commitments = Commitment.objects.filter(independent_demand=order)
+        if commitments:
+            for ct in commitments:
+                sked.append(ct)
+                if ct.process not in sked:
+                    sked.append(ct.process)
+            return render_to_response('work/order_delete_confirmation_work.html', {
+                "order": order,
+                "sked": sked,
+                "reqs": reqs,
+                "work": work,
+                "tools": tools,
+                "next": next,
+            }, context_instance=RequestContext(request))
+        else:
+            order.delete()
+            if next == "order-list":
+                return HttpResponseRedirect('/%s/'
+                    % ('work/order-list'))
+            #if next == "closed_work_orders":
+            #    return HttpResponseRedirect('/%s/'
+            #        % ('work/closed-work-orders'))
+
+
+
+
+#   I N V O I C E
+
+@login_required
+def invoice_number(request):
+    agent = get_agent(request)
+    invoice_numbers = InvoiceNumber.objects.filter(
+        created_by=request.user)
+    form = InvoiceNumberForm(agent=agent, data=request.POST or None)
+    if request.method == "POST":
+        if form.is_valid():
+            data = form.cleaned_data
+            member = data["member"]
+            nbr = form.save(commit=False)
+            idate = datetime.date.today()
+            nbr.invoice_date = idate
+            nbr.created_date = idate
+            nbr.created_by = request.user
+            nbr.save()
+
+        return HttpResponseRedirect('/%s/'
+            % ('work/invoice-number',))
+
+
+    return render_to_response("work/invoice_number.html", {
+        "help": get_help("invoice_number"),
+        "agent": agent,
+        "form": form,
+        "invoice_numbers": invoice_numbers,
+    }, context_instance=RequestContext(request))
+
+

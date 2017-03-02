@@ -663,6 +663,7 @@ def edit_faircoin_event_description(request, resource_id):
 
 
 
+
 #    M E M B E R S H I P
 
 @login_required
@@ -900,8 +901,6 @@ def membership_discussion(request, membership_request_id):
         "mbr_req": mbr_req,
         "user_agent": user_agent,
     }, context_instance=RequestContext(request))
-
-
 
 
 
@@ -1218,6 +1217,7 @@ def change_your_project(request, agent_id):
 
     return HttpResponseRedirect('/%s/%s/'
         % ('work/agent', agent.id))
+
 
 
 
@@ -1892,6 +1892,53 @@ def join_project(request, project_id):
     return HttpResponseRedirect("/work/your-projects/")
 
 
+@login_required
+def project_feedback(request, agent_id, join_request_id):
+    user_agent = get_agent(request)
+    agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    jn_req = get_object_or_404(JoinRequest, pk=join_request_id)
+    project = agent.project
+    allowed = False
+    if user_agent and jn_req:
+      if user_agent.is_staff() or user_agent in agent.managers():
+        allowed = True
+      elif jn_req.agent == request.user.agent.agent: #in user_agent.joinaproject_requests():
+        allowed = True
+    if not allowed:
+        return render_to_response('work/no_permission.html')
+
+    fobi_slug = project.fobi_slug
+    fobi_headers = []
+    fobi_keys = []
+
+    if fobi_slug:
+        form_entry = FormEntry.objects.get(slug=fobi_slug)
+        #req = jn_req
+        if jn_req.fobi_data:
+            jn_req.entries = jn_req.fobi_data._default_manager.filter(pk=jn_req.fobi_data.pk) #.select_related('form_entry')
+            jn_req.entry = jn_req.entries[0]
+            jn_req.form_headers = json.loads(jn_req.entry.form_data_headers)
+            for val in jn_req.form_headers:
+                fobi_headers.append(jn_req.form_headers[val])
+                fobi_keys.append(val)
+
+            jn_req.data = json.loads(jn_req.entry.saved_data)
+            #jn_req.tworows = two_dicts_to_string(jn_req.form_headers, jn_req.data, 'th', 'td')
+            jn_req.items = jn_req.data.items()
+            jn_req.items_data = []
+            for key in fobi_keys:
+              jn_req.items_data.append({"key": jn_req.form_headers[key], "val": jn_req.data.get(key)})
+
+    return render_to_response("work/join_request_with_comments.html", {
+        "help": get_help("project_feedback"),
+        "jn_req": jn_req,
+        "user_agent": user_agent,
+        "agent": agent,
+        "fobi_headers": fobi_headers,
+    }, context_instance=RequestContext(request))
+
+
+
 
 def validate_nick(request):
     #import pdb; pdb.set_trace()
@@ -2001,50 +2048,6 @@ def two_dicts_to_string(headers, data, html_element1='th', html_element2='td'):
          for key, value in formatted_data]
         )
 
-@login_required
-def project_feedback(request, agent_id, join_request_id):
-    user_agent = get_agent(request)
-    agent = get_object_or_404(EconomicAgent, pk=agent_id)
-    jn_req = get_object_or_404(JoinRequest, pk=join_request_id)
-    project = agent.project
-    allowed = False
-    if user_agent and jn_req:
-      if user_agent.is_staff() or user_agent in agent.managers():
-        allowed = True
-      elif jn_req.agent == request.user.agent.agent: #in user_agent.joinaproject_requests():
-        allowed = True
-    if not allowed:
-        return render_to_response('work/no_permission.html')
-
-    fobi_slug = project.fobi_slug
-    fobi_headers = []
-    fobi_keys = []
-
-    if fobi_slug:
-        form_entry = FormEntry.objects.get(slug=fobi_slug)
-        #req = jn_req
-        if jn_req.fobi_data:
-            jn_req.entries = jn_req.fobi_data._default_manager.filter(pk=jn_req.fobi_data.pk) #.select_related('form_entry')
-            jn_req.entry = jn_req.entries[0]
-            jn_req.form_headers = json.loads(jn_req.entry.form_data_headers)
-            for val in jn_req.form_headers:
-                fobi_headers.append(jn_req.form_headers[val])
-                fobi_keys.append(val)
-
-            jn_req.data = json.loads(jn_req.entry.saved_data)
-            #jn_req.tworows = two_dicts_to_string(jn_req.form_headers, jn_req.data, 'th', 'td')
-            jn_req.items = jn_req.data.items()
-            jn_req.items_data = []
-            for key in fobi_keys:
-              jn_req.items_data.append({"key": jn_req.form_headers[key], "val": jn_req.data.get(key)})
-
-    return render_to_response("work/join_request_with_comments.html", {
-        "help": get_help("project_feedback"),
-        "jn_req": jn_req,
-        "user_agent": user_agent,
-        "agent": agent,
-        "fobi_headers": fobi_headers,
-    }, context_instance=RequestContext(request))
 
 
 '''
@@ -3800,6 +3803,8 @@ def resource_role_context_agent_formset(prefix, data=None):
 """
 
 
+#    P R O J E C T   R E S O U R C E S
+
 def project_all_resources(request, agent_id):
     #import pdb; pdb.set_trace()
     agent = get_object_or_404(EconomicAgent, id=agent_id)
@@ -4033,7 +4038,7 @@ def movenode(request, node_id): # still not used
 
 
 
-#    T A S K S
+#    S I M P L E   T A S K S
 
 @login_required
 def my_tasks(request):
@@ -4185,6 +4190,7 @@ def add_todo(request):
     return HttpResponseRedirect(next)
 
 
+#    P R O C E S S   T A S K S
 
 @login_required
 def project_work(request):

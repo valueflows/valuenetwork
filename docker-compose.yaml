@@ -1,0 +1,15 @@
+version: '2.1'
+services:
+
+  valuenetwork:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image:
+      freedomcoop/valuenetwork:dev
+    network_mode: bridge
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - ./:/var/www/valuenetwork
+    command: ./manage.py runserver

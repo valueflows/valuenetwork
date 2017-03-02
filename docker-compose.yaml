@@ -12,4 +12,3 @@ services:
       - "${WEB_PORT:-8000}:8000"
     volumes:
       - ./:/var/www/valuenetwork
-    command: ./manage.py runserver

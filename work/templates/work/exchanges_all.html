@@ -90,6 +90,10 @@ span.total {
   float: left;
 }
 
+#new_exchange .chosen-choices li.search-choice {
+  width: 88%;
+}
+
 hr {
   margin: 5px 0 12px;
 }
@@ -791,6 +795,11 @@ span.fancytree-selected span.fancytree-title {
     function cleantypename(str){
       return str.split('. ').join('');
     }
+
+
+
+    //   M O D A L S
+
     /*
     var R_{{ node.id }}_obj = {
         "name":"{{ node.resource_type.name }}",
@@ -804,10 +813,14 @@ span.fancytree-selected span.fancytree-title {
         "parentrecipe":"{{ node.resource_type.parent.id }}",
         "url":"{{ node.resource_type.url }}",
         "photo_url":"{{ node.resource_type.photo_url }}"
+        {% if request.user.is_staff %}
+          {% if not node.facet_value and not node.facet %}"n_desc" : "{{ node.get_descendant_count }}",{% endif %}
+          {% if node.facet_value %}"fv" : "{{ node.facet_value.value|upper }}",
+          {% elif node.facet %}"fv" : "{{ node.facet|upper }}",
+          {% elif node.resource_type.facets %}"fv" : "{{ node.resource_type.facet_values_list }}",{% endif %}
+        {% endif %}
     };
     */
-
-    //   M O D A L S
 
     var old_agent = false;
     var old_rt = false;
@@ -992,6 +1005,7 @@ span.fancytree-selected span.fancytree-title {
     //alert($('#edit_et_but').length);
 
     function reset_modal(tid){
+        $('.facet-box').remove();
         if( tid == "resource_type" && $('input[name=edit_resource_type]').length) {
           var $mod = $('#addResourceTypeModal');
         } else if( tid == "skill_type" && $('input[name=edit_skill_type]').length) {
@@ -1213,6 +1227,9 @@ span.fancytree-selected span.fancytree-title {
     $('.exchange_type_tree').fancytree( ObjTree );
     $('.resource_type_tree, .skill_type_tree').fancytree( ObjTree );//MultiObjTree );
 
+    $('.exchange_type_tree').find('.fancytree-node > .fancytree-title > em').each(function(){
+      $(this).parent().parent().find('.fancytree-checkbox').hide();
+    });
 
     function update_tree(data){
 
@@ -1521,6 +1538,7 @@ span.fancytree-selected span.fancytree-title {
       //$("#id_"+tid).trigger("chosen:updated");
 
     };
+
 
 
     //   D R O P D O W N S

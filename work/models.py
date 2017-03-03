@@ -301,6 +301,8 @@ class InvoiceNumber(models.Model):
 
 from general.models import Record_Type, Artwork_Type, Material_Type, Nonmaterial_Type, Job, Unit_Type
 
+# TODO: make a manager and a method to review and import general.types not in ocp_artwork_type
+
 class Ocp_Artwork_Type(Artwork_Type):
     artwork_type = models.OneToOneField(
       Artwork_Type,

@@ -1032,6 +1032,7 @@ class NewResourceTypeForm(forms.Form):
     )
     substitutable = forms.BooleanField(
         required=False,
+        initial=False,
         help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
         widget=forms.CheckboxInput()
     )

@@ -2355,19 +2355,26 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     if hasattr(data["unit_type"], 'id'):
                       gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
                       out = gut.ocp_unit
+                    if hasattr(data, "substitutable"):
+                      substi = data["substitutable"]
+                    else:
+                      substi = False
                     new_rt = EconomicResourceType(
                       name=data["name"],
                       description=data["description"],
                       unit=out,
                       price_per_unit=data["price_per_unit"],
-                      substitutable=data["substitutable"],
+                      substitutable=substi,
                       context_agent=data["context_agent"],
                       url=data["url"],
                       photo_url=data["photo_url"],
                       parent=data["parent"],
                       created_by=request.user,
                     )
+                    #try:
                     new_rt.save()
+                    #except:
+                    #  raise ValidationError('Cannot save new resource type:'+str(new_oat)+' Parent:'+str(parent_rt))
 
                     # mptt: get_ancestors(ascending=False, include_self=False)
                     ancs = parent_rt.get_ancestors(True, True)
@@ -2414,7 +2421,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       nonmaterial_type=rel_nonmaterial,
                     )
                     # mptt: insert_node(node, target, position='last-child', save=False)
-                    new_res = Ocp_Artwork_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
+                    try:
+                      new_res = Ocp_Artwork_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
+                    except:
+                      raise ValidationError('Cannot insert node:'+str(new_oat)+' Parent:'+str(parent_rt))
+
 
                     nav_form = ExchangeNavForm(agent=agent, data=None)
                     Rtype_form = NewResourceTypeForm(agent=agent, data=None)
@@ -2475,7 +2486,48 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         grt.save()
 
                         if not grt.resource_type:
-                          pass #raise ValidationError("There's no resource type! create it?")
+                          #pass #raise ValidationError("There's no resource type! create it?")
+                          if hasattr(data, "substitutable"):
+                            substi = data["substitutable"]
+                          else:
+                            substi = False
+                          new_rt = EconomicResourceType(
+                            name=data["name"],
+                            description=data["description"],
+                            unit=out,
+                            price_per_unit=data["price_per_unit"],
+                            substitutable=substi,
+                            context_agent=data["context_agent"],
+                            url=data["url"],
+                            photo_url=data["photo_url"],
+                            parent=data["parent"],
+                            created_by=request.user,
+                          )
+                          new_rt.save()
+                          grt.resource_type = new_rt
+                          grt.save()
+
+                          # mptt: get_ancestors(ascending=False, include_self=False)
+                          ancs = parent_rt.get_ancestors(True, True)
+                          for an in ancs:
+                            if an.clas != 'Artwork':
+                              an = Ocp_Artwork_Type.objects.get(id=an.id)
+                              if an.resource_type:
+                                for fv in an.resource_type.facets.all():
+                                  new_rtfv = ResourceTypeFacetValue(
+                                    resource_type=new_rt,
+                                    facet_value=fv.facet_value
+                                  )
+                                  new_rtfv.save()
+                                break
+                              elif an.facet_value:
+                                new_rtfv = ResourceTypeFacetValue(
+                                    resource_type=new_rt,
+                                    facet_value=an.facet_value
+                                )
+                                new_rtfv.save()
+                                break
+
                         else:
                           rt = grt.resource_type;
                           rt.name = data["name"]
@@ -2636,7 +2688,45 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                           raise ValidationError("The skill name already exists and they are unique")
 
                         if not grt.resource_type:
-                          pass #raise ValidationError("There's no resource type! create it?")
+                          #pass #raise ValidationError("There's no resource type! create it?")
+                          new_rt = EconomicResourceType(
+                            name=data["name"],
+                            description=data["description"],
+                            unit=out,
+                            price_per_unit=data["price_per_unit"],
+                            substitutable=False, #data["substitutable"],
+                            context_agent=data["context_agent"],
+                            url=data["url"],
+                            photo_url=data["photo_url"],
+                            created_by=request.user,
+                            behavior="work",
+                            inventory_rule="never",
+                          )
+                          new_rt.save()
+                          grt.resource_type = new_rt
+                          grt.save()
+
+                          # mptt: get_ancestors(ascending=False, include_self=False)
+                          ancs = parent_rt.get_ancestors(True, True)
+                          for an in ancs:
+                            #if an.clas != 'Artwork':
+                              an = Ocp_Skill_Type.objects.get(id=an.id)
+                              if an.resource_type:
+                                for fv in an.resource_type.facets.all():
+                                  new_rtfv = ResourceTypeFacetValue(
+                                    resource_type=new_rt,
+                                    facet_value=fv.facet_value
+                                  )
+                                  new_rtfv.save()
+                                break
+                              elif an.facet_value:
+                                new_rtfv = ResourceTypeFacetValue(
+                                    resource_type=new_rt,
+                                    facet_value=an.facet_value
+                                )
+                                new_rtfv.save()
+                                break
+
                         else:
                           rt = grt.resource_type;
                           rt.name = data["name"]
@@ -4770,7 +4860,7 @@ def work_delete_event(request, event_id):
 #    H I S T O R Y
 
 @login_required
-def my_history(request): # not used?
+def my_history(request): # tasks history
     #import pdb; pdb.set_trace()
     #agent = get_object_or_404(EconomicAgent, pk=agent_id)
     user_agent = get_agent(request)
@@ -4857,7 +4947,7 @@ def my_history(request): # not used?
     }, context_instance=RequestContext(request))
 
 @login_required
-def change_history_event(request, event_id): # not used ?
+def change_history_event(request, event_id):
     event = get_object_or_404(EconomicEvent, pk=event_id)
     page = request.GET.get("page")
     #import pdb; pdb.set_trace()

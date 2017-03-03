@@ -7386,7 +7386,7 @@ class ExchangeManager(models.Manager):
         return Exchange.objects.filter(start_date__range=[start, end]).filter(context_agent=agent)
 
     def exchanges_by_type(self, agent):
-        return Exchange.objects.filter(context_agent=agent).order_by('exchange_type__ocp_record_type')
+        return Exchange.objects.filter(context_agent=agent).order_by('exchange_type__ocp_record_type__name')
 
 
 class Exchange(models.Model):

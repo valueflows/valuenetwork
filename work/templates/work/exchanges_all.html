@@ -693,7 +693,7 @@ span.fancytree-selected span.fancytree-title {
                         {% endifchanged %}
                       {% endwith %}
                       {% ifchanged et.ocp_record_type and et.ocp_record_type.name %}
-                        <p><input type="checkbox" class="category" id="{{ et.id }}" name="{{ et.id }}" value="{{ et.id }}" /> {{ et.ocp_record_type.name }}</p>
+                        <p><input type="checkbox" class="category" id="{{ et.id }}" name="{{ et.id }}" value="{{ et.id }}" /> {% if not et.ocp_record_type %}{{ et }} (!){% else %}{{ et.ocp_record_type.name }}{% endif %}</p>
                       {% endifchanged %}
                     {% endwith %}
                   {% endif %}

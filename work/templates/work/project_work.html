@@ -197,7 +197,7 @@ th, td {
 
                 <div class="subnav">
 
-                    <!-- <a class="indent" href="{% url "order_list" %}">{% trans "Open Orders" %}</a> -->
+                    {% if request.user.is_staff %}<a class="indent" href="{% url "order_list" %}">{% trans "Open Orders" %}</a>{% endif %}
                     <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                 </div>
             </legend>

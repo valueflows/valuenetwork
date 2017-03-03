@@ -227,12 +227,13 @@ th, td {
         <li><h3><a href="{% url 'project_work' %}">{% trans 'Your project tasks' %}</a></h3>
           {% trans "A complete list of tasks related to the projects you are involved in." %}
         </li>
-        <li><h3><a href="{% url 'order_list' %}">{% trans 'Your project open work orders' %}</a> </h3>
-          {% trans "A complete list of open work orders related your projects." %}
-        </li>
-        <li><h3><a href="{% url "plan_work" rand=1 %}">{% trans 'Plan project proceses' %}</a> </h3>
-          {% trans "Here you can define a work plan for your managed project and setup the needed process with work orders and tasks." %}
-        </li>
+        {% if request.user.is_staff %}<li><h3><a href="{% url 'order_list' %}">{% trans 'Your project open work orders' %}</a> </h3>
+            {% trans "A complete list of open work orders related your projects." %}
+          </li>
+          <li><h3><a href="{% url "plan_work" rand=1 %}">{% trans 'Plan project proceses' %}</a> </h3>
+            {% trans "Here you can define a work plan for your managed project and setup the needed process with work orders and tasks." %}
+          </li>
+        {% endif %}
         <li><h3><a href="#">{% trans "OCP project's tutorial" %}</a> <small><em>{% trans "(coming soon)" %}</em></small></h3>
           {% trans "To learn how to use OCP and structure your project and create process plans for it" %}
         </li>

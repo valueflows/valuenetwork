@@ -2231,7 +2231,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     elif gen_sk and hasattr(gen_sk.resource_type, 'context_agent'):
                       agnt = gen_sk.resource_type.context_agent
                     elif ext.context_agent:
-                      agnt = ext.context_agent
+                      agnt = agent #ext.context_agent
                     else:
                       agnt = agent
 

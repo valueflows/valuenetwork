@@ -17,39 +17,42 @@ from general.models import Unit_Type
 
 from django.shortcuts import get_object_or_404
 
-class ProjectAgentCreateForm(forms.ModelForm):
-    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required-field input-xlarge',}))
-    nick = forms.CharField(
-        label="ID",
-        help_text="Must be unique, and no more than 32 characters",
-        widget=forms.TextInput(attrs={'class': 'nick required-field',}))
-    email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'class': 'email input-xxlarge',}))
-    #address = forms.CharField(
-    #    required=False,
-    #    label="Work location",
-    #    help_text="Enter address for a new work location. Otherwise, select existing location on map.",
-    #    widget=forms.TextInput(attrs={'class': 'input-xxlarge',}))
-    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
-    description = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
+from general.models import Record_Type, Material_Type, Nonmaterial_Type, Artwork_Type
+from mptt.forms import TreeNodeChoiceField
+from work.utils import *
+
+
+
+
+#     P R O F I L E
+
+
+class WorkAgentCreateForm(AgentCreateForm):
+    # override fields for EconomicAgent model
     agent_type = forms.ModelChoiceField(
-        queryset=AgentType.objects.all(),
+        queryset=AgentType.objects.all(), #filter(is_context=True),
         empty_label=None,
         widget=forms.Select(
         attrs={'class': 'chzn-select'}))
-    #is_context = forms.BooleanField(
-    #    required=False,
-    #    label="Is a context agent",
-    #    widget=forms.CheckboxInput())
-    password = forms.CharField(label=_("Password"),
-        help_text=_("Login password"),
-        widget=forms.PasswordInput(attrs={'class': 'password',}))
 
-    class Meta:
+    is_context = None # projects are always context_agents, hide the field
+    nick = None
+    # fields for Project model
+    #joining_style = forms.ChoiceField()
+    #visibility = forms.ChoiceField()
+
+    def __init__(self, *args, **kwargs):
+        super(WorkAgentCreateForm, self).__init__(*args, **kwargs)
+        #self.fields["joining_style"].choices = [(js[0], js[1]) for js in JOINING_STYLE_CHOICES]
+        #self.fields["visibility"].choices = [(vi[0], vi[1]) for vi in VISIBILITY_CHOICES]
+
+
+    class Meta: #(AgentCreateForm.Meta):
         model = EconomicAgent
         #removed address and is_context
-        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email')
+        fields = ('name', 'agent_type', 'description', 'url', 'email', 'address', 'phone_primary',)
+        #exclude = ('is_context',)
+
 
 
 class UploadAgentForm(forms.ModelForm):
@@ -58,6 +61,7 @@ class UploadAgentForm(forms.ModelForm):
     class Meta:
         model = EconomicAgent
         fields = ('photo', 'photo_url')
+
 
 
 class SkillSuggestionForm(forms.ModelForm):
@@ -69,6 +73,12 @@ class SkillSuggestionForm(forms.ModelForm):
     class Meta:
         model = SkillSuggestion
         fields = ('skill',)
+
+
+
+
+
+#     M E M B E R S H I P
 
 
 class MembershipRequestForm(forms.ModelForm):
@@ -94,64 +104,10 @@ class MembershipRequestForm(forms.ModelForm):
             self.cleaned_data[name] = bleach.clean(value)
 
 
-class WorkProjectSelectionFormOptional(forms.Form):
-    context_agent = forms.ChoiceField(
-        widget=forms.Select(
-            attrs={'class': 'chzn-select'}))
 
-    def __init__(self, context_agents, *args, **kwargs):
-        super(WorkProjectSelectionFormOptional, self).__init__(*args, **kwargs)
-        self.fields["context_agent"].choices = [('', '--All My Projects--')] + [(proj.id, proj.name) for proj in context_agents]
 
-class WorkTodoForm(forms.ModelForm):
-    from_agent = forms.ModelChoiceField(
-        required=False,
-        #queryset=EconomicAgent.objects.individuals(),
-        queryset=EconomicAgent.objects.with_user(),
-        label="Assigned to",
-        widget=forms.Select(
-            attrs={'class': 'chzn-select'}))
-    resource_type = WorkModelChoiceField(
-        queryset=EconomicResourceType.objects.filter(behavior="work"),
-        label="Type of work",
-        empty_label=None,
-        widget=forms.Select(
-            attrs={'class': 'chzn-select'}))
-    context_agent = forms.ModelChoiceField(
-        queryset=EconomicAgent.objects.context_agents(),
-        label=_("Context"),
-        empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
-    due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
-    description = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'todo-description input-xlarge',}))
-    url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xlarge',}))
 
-    class Meta:
-        model = Commitment
-        fields = ('from_agent', 'context_agent', 'resource_type', 'due_date', 'description', 'url')
-
-    def __init__(self, agent, pattern=None, *args, **kwargs): #agent is posting agent
-        super(WorkTodoForm, self).__init__(*args, **kwargs)
-        contexts = agent.related_contexts()
-        self.fields["context_agent"].choices = list(set([(ct.id, ct) for ct in contexts]))
-        peeps = [agent,]
-        from_agent_choices = [('', 'Unassigned'), (agent.id, agent),]
-        #import pdb; pdb.set_trace()
-        for context in contexts:
-            if agent.is_manager_of(context):
-                peeps.extend(context.task_assignment_candidates())
-        if len(peeps) > 1:
-            peeps = list(OrderedDict.fromkeys(peeps))
-        from_agent_choices = [('', 'Unassigned')] + [(peep.id, peep) for peep in peeps]
-
-        self.fields["from_agent"].choices = from_agent_choices
-        #import pdb; pdb.set_trace()
-        if pattern:
-            self.pattern = pattern
-            #self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
-            self.fields["resource_type"].queryset = pattern.todo_resource_types()
+#     P R O J E C T
 
 
 class ProjectCreateForm(AgentCreateForm):
@@ -196,53 +152,27 @@ class ProjectCreateForm(AgentCreateForm):
         #exclude = ('is_context',)
 
 
-class WorkAgentCreateForm(AgentCreateForm):
-    # override fields for EconomicAgent model
-    agent_type = forms.ModelChoiceField(
-        queryset=AgentType.objects.all(), #filter(is_context=True),
+
+class AssociationForm(forms.Form):
+    member = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'chzn-select input-xlarge'}))
+    new_association_type = forms.ModelChoiceField(
+        queryset=AgentAssociationType.objects.member_types(),
+        label=_("Choose a new relationship"),
         empty_label=None,
         widget=forms.Select(
-        attrs={'class': 'chzn-select'}))
+            attrs={'class': 'chzn-select'}),
+    )
 
-    is_context = None # projects are always context_agents, hide the field
-    nick = None
-    # fields for Project model
-    #joining_style = forms.ChoiceField()
-    #visibility = forms.ChoiceField()
-
-    def __init__(self, *args, **kwargs):
-        super(WorkAgentCreateForm, self).__init__(*args, **kwargs)
-        #self.fields["joining_style"].choices = [(js[0], js[1]) for js in JOINING_STYLE_CHOICES]
-        #self.fields["visibility"].choices = [(vi[0], vi[1]) for vi in VISIBILITY_CHOICES]
+    def __init__(self, agent, *args, **kwargs):
+        super(AssociationForm, self).__init__(*args, **kwargs)
+        self.fields["member"].choices = [(assoc.id, assoc.is_associate.name + ' - ' + assoc.association_type.name) for assoc in agent.member_associations()]
 
 
-    class Meta: #(AgentCreateForm.Meta):
-        model = EconomicAgent
-        #removed address and is_context
-        fields = ('name', 'agent_type', 'description', 'url', 'email', 'address', 'phone_primary',)
-        #exclude = ('is_context',)
 
 
-class WorkCasualTimeContributionForm(forms.ModelForm):
-    resource_type = WorkModelChoiceField(
-        queryset=EconomicResourceType.objects.filter(behavior="work"),
-        empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
-    context_agent = forms.ModelChoiceField(
-        queryset=EconomicAgent.objects.open_projects(),
-        label=_("Context"),
-        empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
-    event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
-    description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
-    url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
-    quantity = forms.DecimalField(required=False,
-        widget=DecimalDurationWidget,
-        help_text="hrs, mins")
 
-    class Meta:
-        model = EconomicEvent
-        fields = ('event_date', 'resource_type', 'context_agent', 'quantity', 'is_contribution', 'url', 'description')
+#     J O I N   R E Q U E S T S
 
 
 # public join form
@@ -276,6 +206,7 @@ class JoinRequestForm(forms.ModelForm):
             self.cleaned_data[name] = bleach.clean(value)
 
 
+
 class JoinRequestInternalForm(forms.ModelForm):
     captcha = None #CaptchaField()
 
@@ -306,37 +237,58 @@ class JoinRequestInternalForm(forms.ModelForm):
             self.cleaned_data[name] = bleach.clean(value)
 
 
+
 class JoinAgentSelectionForm(forms.Form):
     created_agent = AgentModelChoiceField(
         queryset=EconomicAgent.objects.without_join_request(),
         required=False)
 
 
-class ProjectSelectionFilteredForm(forms.Form):
-    context_agent = forms.ChoiceField()
 
-    def __init__(self, agent, *args, **kwargs):
-        super(ProjectSelectionFilteredForm, self).__init__(*args, **kwargs)
-        projects = agent.managed_projects()
-        if projects:
-            self.fields["context_agent"].choices = [(proj.id, proj.name) for proj in projects]
+class ProjectAgentCreateForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required-field input-xlarge',}))
+    nick = forms.CharField(
+        label="ID",
+        help_text="Must be unique, and no more than 32 characters",
+        widget=forms.TextInput(attrs={'class': 'nick required-field',}))
+    email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'class': 'email input-xxlarge',}))
+    #address = forms.CharField(
+    #    required=False,
+    #    label="Work location",
+    #    help_text="Enter address for a new work location. Otherwise, select existing location on map.",
+    #    widget=forms.TextInput(attrs={'class': 'input-xxlarge',}))
+    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
+    agent_type = forms.ModelChoiceField(
+        queryset=AgentType.objects.all(),
+        empty_label=None,
+        widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    #is_context = forms.BooleanField(
+    #    required=False,
+    #    label="Is a context agent",
+    #    widget=forms.CheckboxInput())
+    password = forms.CharField(label=_("Password"),
+        help_text=_("Login password"),
+        widget=forms.PasswordInput(attrs={'class': 'password',}))
+
+    class Meta:
+        model = EconomicAgent
+        #removed address and is_context
+        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email')
 
 
-class OrderSelectionFilteredForm(forms.Form):
-    demand = forms.ModelChoiceField(
-        queryset=Order.objects.exclude(order_type="holder"),
-        label="Add to an existing order (optional)",
-        required=False)
-
-    def __init__(self, provider=None, *args, **kwargs):
-        super(OrderSelectionFilteredForm, self).__init__(*args, **kwargs)
-        if provider:
-            self.fields["demand"].queryset = provider.sales_orders.all()
 
 
 
-from general.models import Record_Type
-from mptt.forms import TreeNodeChoiceField
+
+
+
+
+#     E X C H A N G E S
+
 
 class ExchangeNavForm(forms.Form):
     #get_et = False
@@ -431,7 +383,322 @@ class ExchangeNavForm(forms.Form):
 
 
 
-class ExchangeContextForm(forms.ModelForm):
+class ContextExchangeTypeForm(forms.Form):  # used only for editing
+    name = forms.CharField(
+        #required=False,
+        label=_("Name (automatic?)"),
+        #editable=False,
+        widget=forms.TextInput(attrs={'class': 'url input-xlarge', }), #'disabled':''}),
+    )
+    parent_type = TreeNodeChoiceField(
+        queryset=Ocp_Record_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'data-placeholder':_("search Exchange type...")}
+        )
+    )
+    resource_type = TreeNodeChoiceField(
+        queryset=Ocp_Artwork_Type.objects.all(),
+        empty_label='. . .',
+        level_indicator='. ',
+        required=False,
+        label=_("Related Resource type"),
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'data-placeholder':_("search Resource type...")}
+        )
+    )
+    skill_type = TreeNodeChoiceField(
+        queryset=Ocp_Skill_Type.objects.all(),
+        empty_label='. . .',
+        level_indicator='. ',
+        required=False,
+        label=_("Related skill Service time"),
+        widget=forms.Select(
+          attrs={'class': 'chzn-select',
+                     'data-placeholder':_("search Skill service...")}
+        )
+    )
+    context_agent = forms.ModelChoiceField(
+        empty_label=None,
+        queryset=EconomicAgent.objects.none(),
+        help_text=_('If the exchange type is only useful for your project or a parent sector collective, choose a smaller context here.'),
+        widget=forms.Select(
+            attrs={'class': 'id_context_agent chzn-select-single'}),
+    )
+    edid = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+    #class Meta:
+    #    fields = ('resource_type', 'skill_type')
+
+    def __init__(self, agent=None, *args, **kwargs):
+        super(ContextExchangeTypeForm, self).__init__(*args, **kwargs)
+        try:
+            gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
+            if agent:
+                context_ids = [c.id for c in agent.related_all_agents()]
+                if not agent.id in context_ids:
+                    context_ids.append(agent.id)
+                if gen_et:
+                    #self.fields["parent_exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
+                    self.fields["parent_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+
+                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+
+                    self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
+                    #self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
+                #exchanges = Exchange.objects.filter(context_agent=agent)
+                #ex_types = [ex.exchange_type.id for ex in exchanges]
+                #self.fields["used_exchange_type"].queryset = ExchangeType.objects.filter(id__in=ex_types)
+
+        except:
+            #pass
+            self.fields["parent_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
+            self.fields["parent_type"].queryset = Ocp_Record_Type.objects.none() #all()
+
+
+
+class NewResourceTypeForm(forms.Form):
+    name = forms.CharField(
+        label=_("Name of the Resource Type"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
+    )
+    resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Parent resource type"),
+        widget=forms.Select(
+            attrs={'class': 'id_resource_type input-xlarge chzn-select', 'data-placeholder':_("search Resource type...")}),
+    )
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
+    )
+    context_agent = forms.ModelChoiceField(
+        empty_label=None,
+        queryset=EconomicAgent.objects.none(),
+        help_text=_('If the resource type is only useful for your project or a parent sector collective, choose a smaller context here.'),
+        widget=forms.Select(
+            attrs={'class': 'id_context_agent chzn-select'}),
+    )
+    substitutable = forms.BooleanField(
+        required=False,
+        initial=False,
+        help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
+        widget=forms.CheckboxInput()
+    )
+    unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Unit_Type.objects.all(),
+        required=False,
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Unit of measure"),
+        help_text=_("Choose 'Each' to refer a sigle unit as a piece, or the main used Unit of accounting or measure for the resources of this type, or leave empty if unsure."),
+        widget=forms.Select(
+            attrs={'class': 'id_unit_type chzn-select-single', 'data-placeholder':_("search Unit type...")}
+        ) #, 'multiple': ''}),
+    )
+    price_per_unit = forms.DecimalField(
+        required=False,
+        max_digits=8, decimal_places=2,
+        label=_("Fixed Faircoin price per each unit?"),
+        help_text=_('Set only if all the resources of this type will have a fixed Faircoin price.'),
+        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
+    )
+    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        required=False,
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Has a main related resource type from another branch?"),
+        help_text=_('If this resource type is mainly related another resource type from a different branch, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'id_related_type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
+    )
+    parent = forms.ModelChoiceField(
+        empty_label='', #_('. . .'),
+        queryset=EconomicResourceType.objects.none(),
+        required=False,
+        label=_("Inherit a Recipe from another resource type?"),
+        help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'id_parent chzn-select-single', 'data-placeholder':_("search Resource type with Recipe...")}),
+    )
+    url = forms.CharField(
+        required=False,
+        label=_("Any related page URL for the type?"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+    photo_url = forms.CharField(
+        required=False,
+        label=_("Any photo URL of the resource type?"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+    edid = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+    def __init__(self, agent=None, *args, **kwargs):
+        super(NewResourceTypeForm, self).__init__(*args, **kwargs)
+        self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
+        self.fields["parent"].queryset = possible_parent_resource_types()
+        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
+        if agent:
+            context_ids = [c.id for c in agent.related_all_agents()]
+            if not agent.id in context_ids:
+                context_ids.append(agent.id)
+            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
+            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
+
+            self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+
+    def clean(self):
+        data = super(NewResourceTypeForm, self).clean()
+        price = data["price_per_unit"]
+        if not price:
+          data["price_per_unit"] = "0.0"
+        if hasattr(data, 'edid'):
+          edid = data['edid']
+        else:
+          edid = ''
+        if hasattr(data, 'name'):
+          name_rts = Ocp_Artwork_Type.objects.filter(name=data["name"])
+          if name_rts.count() and edid == '':
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
+          elif not edid == '' and edid.split('_')[1] != str(name_rts[0].id):
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+edid.split('_')[1]+' = '+str(name_rts[0].id))
+        return data
+
+
+
+class NewSkillTypeForm(forms.Form):
+    name = forms.CharField(
+        label=_("Name of the new Skill Type"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
+    )
+    verb = forms.CharField(
+        label=_("Verb of the action (infinitive)"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-large',}),
+    )
+    gerund = forms.CharField(
+        label=_("Gerund of the verb"),
+        widget=forms.TextInput(attrs={'class': 'unique-name input-large',}),
+    )
+    parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Skill_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        empty_label=_('. . .'),
+        level_indicator='. ',
+        label=_("Parent skill type"),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select id_skill_type'}),
+    )
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
+    )
+    context_agent = forms.ModelChoiceField(
+        empty_label=None,
+        queryset=EconomicAgent.objects.none(),
+        help_text=_('If the skill is only useful for your project or a parent sector collective, choose a smaller context here.'),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}),
+    )
+    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        required=False,
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Has a main related resource type?"),
+        help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
+    )
+    unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Unit_Type.objects.all(),
+        required=False,
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Unit of time measure"),
+        help_text=_("Choose Hours or another time related unit to measure the skill service."),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select-single', 'data-placeholder':_("search Unit type...")}
+        ) #, 'multiple': ''}),
+    )
+    price_per_unit = forms.DecimalField(
+        required=False,
+        max_digits=8, decimal_places=2,
+        label=_("Fixed Faircoin price per each unit?"),
+        help_text=_('Set only if all the service time of this type will have a fixed Faircoin price.'),
+        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
+    )
+    url = forms.CharField(
+        required=False,
+        label=_("Any related URL for the Skill?"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+    photo_url = forms.CharField(
+        required=False,
+        label=_("Any photo URL of the skill type?"),
+        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
+    )
+    edid = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput()
+    )
+
+    def __init__(self, agent=None, *args, **kwargs):
+        super(NewSkillTypeForm, self).__init__(*args, **kwargs)
+        time = get_object_or_404(Ocp_Unit_Type, clas='time_currency')
+        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.filter(lft__gt=time.lft, rght__lt=time.rght, tree_id=time.tree_id) #all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
+        if agent:
+            context_ids = [c.id for c in agent.related_all_agents()]
+            if not agent.id in context_ids:
+                context_ids.append(agent.id)
+            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
+            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
+
+            self.fields["parent_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+
+    def clean(self):
+        data = super(NewSkillTypeForm, self).clean()
+        price = data["price_per_unit"]
+        if not price:
+          data["price_per_unit"] = "0.0"
+        if hasattr(data, 'edid'):
+          edid = data['edid']
+        else:
+          edid = ''
+        if hasattr(data, 'name'):
+          name_sts = Ocp_Skill_Type.objects.filter(name=data["name"])
+          if name_sts.count() and edid == '':
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
+          elif not edid == '' and edid.split('_')[1] != name_sts[0].id:
+            self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+str(data['edid'])+' = '+str(name_sts[0].id))
+        return data
+
+
+
+
+
+
+
+
+
+#     E X C H A N G E   L O G G I N G
+
+
+class ExchangeContextForm(forms.ModelForm): # used in exchange-logging page
     start_date = forms.DateField(required=True,
         label=_("Date"),
         widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
@@ -446,22 +713,6 @@ class ExchangeContextForm(forms.ModelForm):
         model = Exchange
         fields = ('start_date', 'url', 'notes')
 
-
-class InvoiceNumberForm(forms.ModelForm):
-    member = forms.ModelChoiceField(
-        queryset=EconomicAgent.objects.none(),
-        label=_("for Freedom Coop Member:"),
-        empty_label=None,
-        )
-
-    class Meta:
-        model = InvoiceNumber
-        fields = ('member', 'description', )
-
-    def __init__(self, agent, *args, **kwargs):
-        super(InvoiceNumberForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
-        self.fields["member"].queryset = agent.invoicing_candidates()
 
 
 class WorkEventContextAgentForm(forms.ModelForm):
@@ -542,9 +793,6 @@ class WorkEventContextAgentForm(forms.ModelForm):
         return data
 
 
-
-from general.models import Material_Type, Nonmaterial_Type, Artwork_Type
-from work.utils import *
 
 class ContextTransferForm(forms.Form):
     event_date = forms.DateField(required=True,
@@ -896,6 +1144,7 @@ class ContextTransferCommitmentForm(forms.Form):
         return data
 
 
+
 class ResourceRoleContextAgentForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput)
     role = forms.ModelChoiceField(
@@ -926,323 +1175,159 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
 
 
 
-class ContextExchangeTypeForm(forms.Form):  # used only for editing
-    name = forms.CharField(
-        #required=False,
-        label=_("Name (automatic?)"),
-        #editable=False,
-        widget=forms.TextInput(attrs={'class': 'url input-xlarge', }), #'disabled':''}),
-    )
-    parent_type = TreeNodeChoiceField(
-        queryset=Ocp_Record_Type.objects.all(),
+
+
+
+#    T A S K S
+
+
+class WorkTodoForm(forms.ModelForm):
+    from_agent = forms.ModelChoiceField(
+        required=False,
+        #queryset=EconomicAgent.objects.individuals(),
+        queryset=EconomicAgent.objects.with_user(),
+        label="Assigned to",
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}))
+    resource_type = WorkModelChoiceField(
+        queryset=EconomicResourceType.objects.filter(behavior="work"),
+        label="Type of work",
         empty_label=None,
-        level_indicator='. ',
-        required=False,
         widget=forms.Select(
-          attrs={'class': 'chzn-select',
-                     'data-placeholder':_("search Exchange type...")}
-        )
-    )
-    resource_type = TreeNodeChoiceField(
-        queryset=Ocp_Artwork_Type.objects.all(),
-        empty_label='. . .',
-        level_indicator='. ',
-        required=False,
-        label=_("Related Resource type"),
-        widget=forms.Select(
-          attrs={'class': 'chzn-select',
-                     'data-placeholder':_("search Resource type...")}
-        )
-    )
-    skill_type = TreeNodeChoiceField(
-        queryset=Ocp_Skill_Type.objects.all(),
-        empty_label='. . .',
-        level_indicator='. ',
-        required=False,
-        label=_("Related skill Service time"),
-        widget=forms.Select(
-          attrs={'class': 'chzn-select',
-                     'data-placeholder':_("search Skill service...")}
-        )
-    )
+            attrs={'class': 'chzn-select'}))
     context_agent = forms.ModelChoiceField(
+        queryset=EconomicAgent.objects.context_agents(),
+        label=_("Context"),
         empty_label=None,
-        queryset=EconomicAgent.objects.none(),
-        help_text=_('If the exchange type is only useful for your project or a parent sector collective, choose a smaller context here.'),
-        widget=forms.Select(
-            attrs={'class': 'id_context_agent chzn-select-single'}),
-    )
-    edid = forms.CharField(
-        required=False,
-        widget=forms.HiddenInput()
-    )
-
-    #class Meta:
-    #    fields = ('resource_type', 'skill_type')
-
-    def __init__(self, agent=None, *args, **kwargs):
-        super(ContextExchangeTypeForm, self).__init__(*args, **kwargs)
-        try:
-            gen_et = Ocp_Record_Type.objects.get(clas='ocp_exchange')
-            if agent:
-                context_ids = [c.id for c in agent.related_all_agents()]
-                if not agent.id in context_ids:
-                    context_ids.append(agent.id)
-                if gen_et:
-                    #self.fields["parent_exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
-                    self.fields["parent_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
-
-                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
-                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
-
-                    self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
-                    #self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
-                #exchanges = Exchange.objects.filter(context_agent=agent)
-                #ex_types = [ex.exchange_type.id for ex in exchanges]
-                #self.fields["used_exchange_type"].queryset = ExchangeType.objects.filter(id__in=ex_types)
-
-        except:
-            #pass
-            self.fields["parent_type"].label = 'ERROR! contexts: '+str(agent.related_all_agents())
-            self.fields["parent_type"].queryset = Ocp_Record_Type.objects.none() #all()
-
-
-
-
-class NewResourceTypeForm(forms.Form):
-    name = forms.CharField(
-        label=_("Name of the Resource Type"),
-        widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
-    )
-    resource_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        empty_label='', #_('. . .'),
-        level_indicator='. ',
-        label=_("Parent resource type"),
-        widget=forms.Select(
-            attrs={'class': 'id_resource_type input-xlarge chzn-select', 'data-placeholder':_("search Resource type...")}),
-    )
+        widget=forms.Select(attrs={'class': 'chzn-select'}))
+    due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
     description = forms.CharField(
         required=False,
-        widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
-    )
+        widget=forms.Textarea(attrs={'class': 'todo-description input-xlarge',}))
+    url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xlarge',}))
+
+    class Meta:
+        model = Commitment
+        fields = ('from_agent', 'context_agent', 'resource_type', 'due_date', 'description', 'url')
+
+    def __init__(self, agent, pattern=None, *args, **kwargs): #agent is posting agent
+        super(WorkTodoForm, self).__init__(*args, **kwargs)
+        contexts = agent.related_contexts()
+        self.fields["context_agent"].choices = list(set([(ct.id, ct) for ct in contexts]))
+        peeps = [agent,]
+        from_agent_choices = [('', 'Unassigned'), (agent.id, agent),]
+        #import pdb; pdb.set_trace()
+        for context in contexts:
+            if agent.is_manager_of(context):
+                peeps.extend(context.task_assignment_candidates())
+        if len(peeps) > 1:
+            peeps = list(OrderedDict.fromkeys(peeps))
+        from_agent_choices = [('', 'Unassigned')] + [(peep.id, peep) for peep in peeps]
+
+        self.fields["from_agent"].choices = from_agent_choices
+        #import pdb; pdb.set_trace()
+        if pattern:
+            self.pattern = pattern
+            #self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
+            self.fields["resource_type"].queryset = pattern.todo_resource_types()
+
+
+
+
+
+
+
+class WorkCasualTimeContributionForm(forms.ModelForm):
+    resource_type = WorkModelChoiceField(
+        queryset=EconomicResourceType.objects.filter(behavior="work"),
+        empty_label=None,
+        widget=forms.Select(attrs={'class': 'chzn-select'}))
     context_agent = forms.ModelChoiceField(
+        queryset=EconomicAgent.objects.open_projects(),
+        label=_("Context"),
         empty_label=None,
-        queryset=EconomicAgent.objects.none(),
-        help_text=_('If the resource type is only useful for your project or a parent sector collective, choose a smaller context here.'),
+        widget=forms.Select(attrs={'class': 'chzn-select'}))
+    event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
+    description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
+    url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
+    quantity = forms.DecimalField(required=False,
+        widget=DecimalDurationWidget,
+        help_text="hrs, mins")
+
+    class Meta:
+        model = EconomicEvent
+        fields = ('event_date', 'resource_type', 'context_agent', 'quantity', 'is_contribution', 'url', 'description')
+
+
+
+
+
+
+
+
+
+
+
+#    W O R K   O R D E R   P L A N
+
+
+class WorkProjectSelectionFormOptional(forms.Form):
+    context_agent = forms.ChoiceField(
         widget=forms.Select(
-            attrs={'class': 'id_context_agent chzn-select'}),
-    )
-    substitutable = forms.BooleanField(
-        required=False,
-        initial=False,
-        help_text=_('Check this if any resource of this type can be substituted for any other resource of this same type.'),
-        widget=forms.CheckboxInput()
-    )
-    unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Unit_Type.objects.all(),
-        required=False,
-        empty_label='', #_('. . .'),
-        level_indicator='. ',
-        label=_("Unit of measure"),
-        help_text=_("Choose 'Each' to refer a sigle unit as a piece, or the main used Unit of accounting or measure for the resources of this type, or leave empty if unsure."),
-        widget=forms.Select(
-            attrs={'class': 'id_unit_type chzn-select-single', 'data-placeholder':_("search Unit type...")}
-        ) #, 'multiple': ''}),
-    )
-    price_per_unit = forms.DecimalField(
-        required=False,
-        max_digits=8, decimal_places=2,
-        label=_("Fixed Faircoin price per each unit?"),
-        help_text=_('Set only if all the resources of this type will have a fixed Faircoin price.'),
-        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
-    )
-    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Artwork_Type.objects.all(), #none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        required=False,
-        empty_label='', #_('. . .'),
-        level_indicator='. ',
-        label=_("Has a main related resource type from another branch?"),
-        help_text=_('If this resource type is mainly related another resource type from a different branch, choose it here.'),
-        widget=forms.Select(
-            attrs={'class': 'id_related_type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
-    )
-    parent = forms.ModelChoiceField(
-        empty_label='', #_('. . .'),
-        queryset=EconomicResourceType.objects.none(),
-        required=False,
-        label=_("Inherit a Recipe from another resource type?"),
-        help_text=_('If the resource type must inherit a Recipe from another resource type, choose it here.'),
-        widget=forms.Select(
-            attrs={'class': 'id_parent chzn-select-single', 'data-placeholder':_("search Resource type with Recipe...")}),
-    )
-    url = forms.CharField(
-        required=False,
-        label=_("Any related page URL for the type?"),
-        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
-    )
-    photo_url = forms.CharField(
-        required=False,
-        label=_("Any photo URL of the resource type?"),
-        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
-    )
-    edid = forms.CharField(
-        required=False,
-        widget=forms.HiddenInput()
-    )
+            attrs={'class': 'chzn-select'}))
 
-    def __init__(self, agent=None, *args, **kwargs):
-        super(NewResourceTypeForm, self).__init__(*args, **kwargs)
-        self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
-        self.fields["parent"].queryset = possible_parent_resource_types()
-        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
-        if agent:
-            context_ids = [c.id for c in agent.related_all_agents()]
-            if not agent.id in context_ids:
-                context_ids.append(agent.id)
-            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
-            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
-
-            self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
-            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
-
-    def clean(self):
-        data = super(NewResourceTypeForm, self).clean()
-        price = data["price_per_unit"]
-        if not price:
-          data["price_per_unit"] = "0.0"
-        if hasattr(data, 'edid'):
-          edid = data['edid']
-        else:
-          edid = ''
-        if hasattr(data, 'name'):
-          name_rts = Ocp_Artwork_Type.objects.filter(name=data["name"])
-          if name_rts.count() and edid == '':
-            self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
-          elif not edid == '' and edid.split('_')[1] != str(name_rts[0].id):
-            self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+edid.split('_')[1]+' = '+str(name_rts[0].id))
-        return data
+    def __init__(self, context_agents, *args, **kwargs):
+        super(WorkProjectSelectionFormOptional, self).__init__(*args, **kwargs)
+        self.fields["context_agent"].choices = [('', '--All My Projects--')] + [(proj.id, proj.name) for proj in context_agents]
 
 
-class NewSkillTypeForm(forms.Form):
-    name = forms.CharField(
-        label=_("Name of the new Skill Type"),
-        widget=forms.TextInput(attrs={'class': 'unique-name input-xxlarge',}),
-    )
-    verb = forms.CharField(
-        label=_("Verb of the action (infinitive)"),
-        widget=forms.TextInput(attrs={'class': 'unique-name input-large',}),
-    )
-    gerund = forms.CharField(
-        label=_("Gerund of the verb"),
-        widget=forms.TextInput(attrs={'class': 'unique-name input-large',}),
-    )
-    parent_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Skill_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        empty_label=_('. . .'),
-        level_indicator='. ',
-        label=_("Parent skill type"),
-        widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select id_skill_type'}),
-    )
-    description = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
-    )
-    context_agent = forms.ModelChoiceField(
-        empty_label=None,
-        queryset=EconomicAgent.objects.none(),
-        help_text=_('If the skill is only useful for your project or a parent sector collective, choose a smaller context here.'),
-        widget=forms.Select(
-            attrs={'class': 'chzn-select'}),
-    )
-    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        required=False,
-        empty_label='', #_('. . .'),
-        level_indicator='. ',
-        label=_("Has a main related resource type?"),
-        help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
-        widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
-    )
-    unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Unit_Type.objects.all(),
-        required=False,
-        empty_label='', #_('. . .'),
-        level_indicator='. ',
-        label=_("Unit of time measure"),
-        help_text=_("Choose Hours or another time related unit to measure the skill service."),
-        widget=forms.Select(
-            attrs={'class': 'chzn-select-single', 'data-placeholder':_("search Unit type...")}
-        ) #, 'multiple': ''}),
-    )
-    price_per_unit = forms.DecimalField(
-        required=False,
-        max_digits=8, decimal_places=2,
-        label=_("Fixed Faircoin price per each unit?"),
-        help_text=_('Set only if all the service time of this type will have a fixed Faircoin price.'),
-        widget=forms.TextInput(attrs={'value': '0.0', 'class': 'price'}),
-    )
-    url = forms.CharField(
-        required=False,
-        label=_("Any related URL for the Skill?"),
-        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
-    )
-    photo_url = forms.CharField(
-        required=False,
-        label=_("Any photo URL of the skill type?"),
-        widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}),
-    )
-    edid = forms.CharField(
-        required=False,
-        widget=forms.HiddenInput()
-    )
-
-    def __init__(self, agent=None, *args, **kwargs):
-        super(NewSkillTypeForm, self).__init__(*args, **kwargs)
-        time = get_object_or_404(Ocp_Unit_Type, clas='time_currency')
-        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.filter(lft__gt=time.lft, rght__lt=time.rght, tree_id=time.tree_id) #all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
-        if agent:
-            context_ids = [c.id for c in agent.related_all_agents()]
-            if not agent.id in context_ids:
-                context_ids.append(agent.id)
-            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
-            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
-
-            self.fields["parent_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
-            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
-
-    def clean(self):
-        data = super(NewSkillTypeForm, self).clean()
-        price = data["price_per_unit"]
-        if not price:
-          data["price_per_unit"] = "0.0"
-        if hasattr(data, 'edid'):
-          edid = data['edid']
-        else:
-          edid = ''
-        if hasattr(data, 'name'):
-          name_sts = Ocp_Skill_Type.objects.filter(name=data["name"])
-          if name_sts.count() and edid == '':
-            self.add_error('name', "<b>"+data["name"]+"</b> already exists!")
-          elif not edid == '' and edid.split('_')[1] != name_sts[0].id:
-            self.add_error('name', "<b>"+data["name"]+"</b> already exists! "+str(data['edid'])+' = '+str(name_sts[0].id))
-        return data
 
 
-class AssociationForm(forms.Form):
-    member = forms.ChoiceField(
-        widget=forms.Select(attrs={'class': 'chzn-select input-xlarge'}))
-    new_association_type = forms.ModelChoiceField(
-        queryset=AgentAssociationType.objects.member_types(),
-        label=_("Choose a new relationship"),
-        empty_label=None,
-        widget=forms.Select(
-            attrs={'class': 'chzn-select'}),
-    )
+
+
+
+class ProjectSelectionFilteredForm(forms.Form):
+    context_agent = forms.ChoiceField()
 
     def __init__(self, agent, *args, **kwargs):
-        super(AssociationForm, self).__init__(*args, **kwargs)
-        self.fields["member"].choices = [(assoc.id, assoc.is_associate.name + ' - ' + assoc.association_type.name) for assoc in agent.member_associations()]
+        super(ProjectSelectionFilteredForm, self).__init__(*args, **kwargs)
+        projects = agent.managed_projects()
+        if projects:
+            self.fields["context_agent"].choices = [(proj.id, proj.name) for proj in projects]
+
+
+
+class OrderSelectionFilteredForm(forms.Form):
+    demand = forms.ModelChoiceField(
+        queryset=Order.objects.exclude(order_type="holder"),
+        label="Add to an existing order (optional)",
+        required=False)
+
+    def __init__(self, provider=None, *args, **kwargs):
+        super(OrderSelectionFilteredForm, self).__init__(*args, **kwargs)
+        if provider:
+            self.fields["demand"].queryset = provider.sales_orders.all()
+
+
+
+
+
+#     I N V O I C E
+
+
+class InvoiceNumberForm(forms.ModelForm):
+    member = forms.ModelChoiceField(
+        queryset=EconomicAgent.objects.none(),
+        label=_("for Freedom Coop Member:"),
+        empty_label=None,
+        )
+
+    class Meta:
+        model = InvoiceNumber
+        fields = ('member', 'description', )
+
+    def __init__(self, agent, *args, **kwargs):
+        super(InvoiceNumberForm, self).__init__(*args, **kwargs)
+        #import pdb; pdb.set_trace()
+        self.fields["member"].queryset = agent.invoicing_candidates()
 

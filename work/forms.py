@@ -754,6 +754,9 @@ class ContextTransferForm(forms.Form):
 
     def clean(self):
         data = super(ContextTransferForm, self).clean()
+        if not hasattr(data, 'ocp_resource_type'):
+          self.add_error('ocp_resource_type', "There's no resource_type?")
+          return data
         ocp_rt = data["ocp_resource_type"]
         ini_rt = data["resource_type"]
         if ocp_rt:

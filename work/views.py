@@ -2783,12 +2783,15 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 data = ext_form.cleaned_data
                 etid = data["edid"].split('_')[1]
                 gen_ext = Ocp_Record_Type.objects.get(id=etid)
-                ext = gen_ext.exchange_type
                 new_parent = Ocp_Record_Type.objects.get(id=data["parent_type"].id)
 
-                ext.name = data['name']
-                ext.context_agent = data['context_agent']
-                gen_ext.name = data['name']
+                ext = gen_ext.exchange_type
+                if ext:
+                  ext.name = data["name"]
+                  ext.context_agent = data['context_agent']
+                else:
+                  raise ValidationError("Editing Exchange Type! Without internal exchange_type TODO: "+gen_ext.name)
+                gen_ext.name = data["name"]
                 gen_ext.ocp_artwork_type = data['resource_type']
                 gen_ext.ocp_skill_type = data['skill_type']
                 moved = False
@@ -2796,9 +2799,13 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   moved = True
                   raise ValidationError("Editing Exchange Type! Changed Parent TODO: "+data['parent_type'].name+' ext:'+str(new_parent)+' moved:'+str(moved))
                 else:
-                  ext.save()
                   gen_ext.save()
+                  if ext:
+                    ext.save()
 
+                nav_form = ExchangeNavForm(agent=agent, data=None)
+                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                Stype_form = NewSkillTypeForm(agent=agent, data=None)
                 #raise ValidationError("Editing Exchange Type! "+data['parent_type'].name+' ext:'+str(new_parent)+' moved:'+str(moved))
                 #uca = data["use_case"]
                 #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -2830,6 +2837,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         if str(ex.exchange_type.id) in vals:
                             exchanges_included.append(ex)
                     exchanges = exchanges_included
+
+                nav_form = ExchangeNavForm(agent=agent, data=None)
+                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                Stype_form = NewSkillTypeForm(agent=agent, data=None)
         else:
           exchanges = Exchange.objects.filter(context_agent=agent) #.none()
           selected_values = "all"
@@ -2883,7 +2894,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Rtype_form": Rtype_form,
         "Stype_form": Stype_form,
-        "Utype_tree": Ocp_Unit_Type.objects.all(),
+        "Utype_tree": Ocp_Unit_Type.objects.filter(id__in=agent.project.used_units_ids()), #all(),
         #"unit_types": unit_types,
         "ext_form": ext_form,
     }, context_instance=RequestContext(request))

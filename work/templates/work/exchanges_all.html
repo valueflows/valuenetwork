@@ -274,11 +274,40 @@ span.fancytree-selected span.fancytree-title {
         </legend>
         <div class="span12">
           {% if request.user.agent.agent in project.managers or request.user.is_staff %}
-            <div class="totals infobox">
-              <span class="total">Incoming total: {{ total_transfers }} </span><br/>
+            <div class="totals infobox"><h3>
+              {% trans "Totals:" %}
+              </h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>{% trans "Unit" %}: &nbsp; </th>
+                    <th><h4>
+                      {% trans "Incoming" %}: &nbsp;
+                      </h4></th>
+                    <th><h4>
+                      {% trans "Outgoing" %}: &nbsp;
+                      </h4></th>
+                    <th><h4>
+                      {% trans "Balance" %}:
+                      </h4></th>
+                    <th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for unit in Utype_tree %}
+                    <tr>
+                      <td>{{ unit }}</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              <!-- <span class="total">Incoming total: {{ total_transfers }} </span><br/>
               <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 
-              <br />{% trans "* Note these totals are meaningful only if the events selected all use the same currency. <br/>(We'll do a multi total per unit-type box soon)" %}
+              <br />{% trans "* Note these totals are meaningful only if the events selected all use the same currency. <br/>(We'll do a multi total per unit-type box soon)" %} -->
 
             </div>
           {% endif %}
@@ -438,6 +467,7 @@ span.fancytree-selected span.fancytree-title {
                           </div>
                         </div>
                         <!--<hr>-->
+                        {% if False and request.user.is_superuser %}
                         <div style="clear:left; ">
                           <p>{% trans "Or choose a related <b>Skill Verb</b> (service time):" %}</p>
 
@@ -502,6 +532,7 @@ span.fancytree-selected span.fancytree-title {
                             <br> &nbsp; <br> &nbsp;
                           </div>
                         </div>
+                        {% endif %}
                     </div> <!-- end resource_skill -->
                     <hr>
                     {% else %}
@@ -993,6 +1024,7 @@ span.fancytree-selected span.fancytree-title {
         }
       }
     }
+
     $('#edit_rt_but').click(function(){
         rebuild_modal('resource_type');
     });
@@ -1228,7 +1260,7 @@ span.fancytree-selected span.fancytree-title {
     $('.resource_type_tree, .skill_type_tree').fancytree( ObjTree );//MultiObjTree );
 
     $('.exchange_type_tree').find('.fancytree-node > .fancytree-title > em').each(function(){
-      $(this).parent().parent().find('.fancytree-checkbox').hide();
+      //$(this).parent().parent().find('.fancytree-checkbox').hide();
     });
 
     function update_tree(data){

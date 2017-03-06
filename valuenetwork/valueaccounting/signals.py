@@ -20,7 +20,7 @@ if "notification" in settings.INSTALLED_APPS:
         notification.create_notice_type("comment_join_request", _("Comment in Project Join Request"), _("we have received a new comment in a join request"), default=2)
         notification.create_notice_type("work_skill_suggestion", _("Skill suggestion"), _("we have received a new skill suggestion"), default=2)
         print "created valueaccounting notice types"
-    signals.post_syncdb.connect(create_notice_types, sender=notification)
+    signals.post_migrate.connect(create_notice_types, sender=notification)
 else:
     print "Skipping creation of valueaccounting NoticeTypes as notification app not found"
 

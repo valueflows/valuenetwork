@@ -187,12 +187,12 @@ INSTALLED_APPS = [
     #'work.fobi_form_callbacks',
 
     # project
-    'valuenetwork.valueaccounting',
+    'valuenetwork.valueaccounting.apps.ValueAccountingAppConfig',
     'valuenetwork.equipment',
     'valuenetwork.board',
     'valuenetwork.api',
     'account',
-    'work',
+    'work.apps.WorkAppConfig',
 
 
 ]

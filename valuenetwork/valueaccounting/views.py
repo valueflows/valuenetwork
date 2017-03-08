@@ -18,7 +18,7 @@ from django.core import validators
 from django.forms.models import formset_factory, modelformset_factory, inlineformset_factory, BaseModelFormSet
 from django.forms import ValidationError
 import json as simplejson
-from django.utils.datastructures import SortedDict
+from collections import OrderedDict
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -69,7 +69,7 @@ def home(request):
         if layout.use_needs_panel:
             #todo: reqs needs a lot of work
             reqs = Commitment.objects.to_buy()
-            stuff = SortedDict()
+            stuff = OrderedDict()
             for req in reqs:
                 if req.resource_type not in stuff:
                     stuff[req.resource_type] = Decimal("0")
@@ -3912,7 +3912,7 @@ def supply_older(request):
     mrqs = Commitment.objects.unfinished().filter(
         event_type__resource_effect="-",
         event_type__relationship="in").order_by("resource_type__name")
-    suppliers = SortedDict()
+    suppliers = OrderedDict()
     for commitment in mrqs:
         if not commitment.resource_type.producing_commitments():
             if not commitment.fulfilling_events():
@@ -3921,7 +3921,7 @@ def supply_older(request):
                 for source in sources:
                     agent = source.agent
                     if agent not in suppliers:
-                        suppliers[agent] = SortedDict()
+                        suppliers[agent] = OrderedDict()
                     if source not in suppliers[agent]:
                         suppliers[agent][source] = []
                     suppliers[agent][source].append(commitment)
@@ -3937,7 +3937,7 @@ def supply_older(request):
                 for source in sources:
                     agent = source.agent
                     if agent not in suppliers:
-                        suppliers[agent] = SortedDict()
+                        suppliers[agent] = OrderedDict()
                     if source not in suppliers[agent]:
                         suppliers[agent][source] = []
                     suppliers[agent][source].append(commitment)
@@ -3952,7 +3952,7 @@ def supply_old(request):
     agent = get_agent(request)
     mreqs = []
     mrqs = Commitment.objects.to_buy()
-    suppliers = SortedDict()
+    suppliers = OrderedDict()
     #supplier_form = AgentSupplierForm(prefix="supplier")
     for commitment in mrqs:
         if not commitment.fulfilling_events():
@@ -3961,7 +3961,7 @@ def supply_old(request):
             for source in sources:
                 agent = source.agent
                 if agent not in suppliers:
-                    suppliers[agent] = SortedDict()
+                    suppliers[agent] = OrderedDict()
                 if source not in suppliers[agent]:
                     suppliers[agent][source] = []
                 suppliers[agent][source].append(commitment)
@@ -3979,7 +3979,7 @@ def supply(request):
     agent = get_agent(request)
     mrqs = Commitment.objects.filter(
         Q(event_type__relationship='consume')|Q(event_type__relationship='use')).order_by("resource_type__name")
-    suppliers = SortedDict()
+    suppliers = OrderedDict()
     supply = EventType.objects.get(name="Supply")
     mreqs = [ct for ct in mrqs if ct.quantity_to_buy()]
     for commitment in mreqs:
@@ -3989,7 +3989,7 @@ def supply(request):
         for source in sources:
             agent = source.agent
             if agent not in suppliers:
-                suppliers[agent] = SortedDict()
+                suppliers[agent] = OrderedDict()
             if source not in suppliers[agent]:
                 suppliers[agent][source] = []
             suppliers[agent][source].append(commitment)
@@ -4037,7 +4037,7 @@ def assemble_schedule(start, end, context_agent=None):
             Q(start_date__range=(start, end)) | Q(end_date__range=(start, end)) |
             Q(start_date__lt=start, end_date__gt=end))
     processes = processes.order_by("context_agent__name", "end_date", "start_date")
-    context_agents = SortedDict()
+    context_agents = OrderedDict()
     for proc in processes:
         if context_agent == None:
             if proc.context_agent not in context_agents:

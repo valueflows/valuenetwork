@@ -335,7 +335,7 @@ span.fancytree-selected span.fancytree-title {
                 <tbody>
                   {% for tt in total_transfers %}
                     {% if tt.name %}
-                      {% if tt.clas == 'each' and not request.user.is_superuser %}
+                      {% if tt.clas == 'each' %}
 
                       {% else %}
                           <tr>

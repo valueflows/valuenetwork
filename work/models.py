@@ -586,7 +586,7 @@ class Ocp_Record_Type(Record_Type):
                     pass
 
             for facet in transfer_type.facets():
-                if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type":
+                if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type" or facet.clas == "Currency_Type":
                     if Rids:
                         Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids)#.order_by('tree_id','lft')
                         #if Nids: # and Ntyp:
@@ -603,6 +603,9 @@ class Ocp_Record_Type(Record_Type):
                         answer = Stys
                     else:
                         answer = Ocp_Skill_Type.objects.all()
+
+                #elif facet.clas == "Currency_Type":
+                #    pass
                 else:
                     pass
 

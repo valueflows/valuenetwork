@@ -990,15 +990,21 @@ class ContextTransferForm(forms.Form):
                        except:
                           self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
 
+                elif facet.clas == "Currency_Type":
+                    if resource_type:
+                       try:
+                          self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
+                       except:
+                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
                 else:
-                  pass
+                    self.fields['quantity'].label += " ERROR: this facet is what? "+str(facet) #pass
             else:
-              self.fields['quantity'].label += " ERROR: this form has not ocp_resource_type field"
+                self.fields['quantity'].label += " ERROR: this form has not ocp_resource_type field"
 
             try:
-              self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+                self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
             except:
-              self.fields["ocp_resource_type"].label = "  Sorry, this exchange type is not yet related to any resource types..."
+                self.fields["ocp_resource_type"].label = "  Sorry, this exchange type is not yet related to any resource types..."
 
         else: # no transfer type, rise error TODO
           pass

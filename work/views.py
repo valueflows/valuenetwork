@@ -3145,7 +3145,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
     }, context_instance=RequestContext(request))
 
 
-def add_new_type_mkp():
+def add_new_type_mkp(): # not used now
     out = "" #"<div class='add-new-type'><p>"
     out += str(_("If you don't find a type that suits, choose a subcategory and click:"))
     #out += "</p><a href='#' class='btn-mini'>New Resource Type</a>"

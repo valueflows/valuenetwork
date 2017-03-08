@@ -247,7 +247,7 @@ li {
                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ax_form.from_agent }}<br />{% endif %}
                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
                                             {% if ax_form.ocp_resource_type %}
-                                               {% trans "Type of Resource:" %} <i>{{ ax_form.ocp_resource_type.label }}</i><br />{{ ax_form.ocp_resource_type }}
+                                               {% trans "Type of Resource:" %} <!-- <i>{{ ax_form.ocp_resource_type.label }}</i> --><br />{{ ax_form.ocp_resource_type }}
                                           <!-- <div class='add-new-type'>{{ add_type }}<a href='#' class='btn disabled btn-mini'>{% trans "New Resource Type" %}</a></div> -->
                                           <br />
                                             {% else %}
@@ -322,7 +322,7 @@ li {
                                             {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ ac_form.to_agent }}<br />{% endif %}
                                             Quantity:<br />{{ ac_form.quantity }}<br />
                                             {% if ac_form.ocp_resource_type %}
-                                               {% trans "Type of Resource:" %} <i>{{ ac_form.ocp_resource_type.label }}</i><br />{{ ac_form.ocp_resource_type }}<br />
+                                               {% trans "Type of Resource:" %} <!-- <i>{{ ac_form.ocp_resource_type.label }}</i> --> <br />{{ ac_form.ocp_resource_type }}<br />
                                             {% else %}
                                                <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />
                                                 Resource type:<br />{{ ac_form.resource_type }}<br />
@@ -651,9 +651,9 @@ li {
                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
                                             Quantity transferred:<br />{{ ax_form.quantity }}<br />
                                             {% if ax_form.ocp_resource_type %}
-                                              {% trans "Type of Resource:" %} <i>{{ ax_form.ocp_resource_type.label }}</i><br />
+                                              {% trans "Type of Resource:" %} <!--<i>{{ ax_form.ocp_resource_type.label }}</i> --><br />
                                               {{ ax_form.ocp_resource_type }}
-                                              <div class='add-new-type'>{{ add_type }}<a href='#' class='btn disabled btn-mini'>{% trans "New Resource Type" %}</a></div>
+                                              <!-- <div class='add-new-type'>{{ add_type }}<a href='#' class='btn disabled btn-mini'>{% trans "New Resource Type" %}</a></div> -->
                                               <br />
                                             {% else %}
                                               <span class="error">{% trans "Can't retrieve General types, try choosing a resource type below:" %}</span><br />

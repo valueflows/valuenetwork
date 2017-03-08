@@ -118,7 +118,7 @@ class Project(models.Model):
         exs = Exchange.objects.exchanges_by_type(self.agent)
         uids = []
         for ex in exs:
-          txs = ex.transfers.filter(events__unit_of_value__ocp_unit_type__isnull=False) #exchange_type.transfer_types.all()
+          txs = ex.transfers.all()#filter(events__unit_of_value__ocp_unit_type__isnull=False) #exchange_type.transfer_types.all()
           for tx in txs:
             uv = tx.unit_of_value()
             if uv and not uv.ocp_unit_type.id in uids:
@@ -128,13 +128,36 @@ class Project(models.Model):
               #  if not an.id in uids:
               #    uids.append(an.id)
               uids.append(uv.ocp_unit_type.id)
-            rt = tx.resource_type()
-            if rt.unit_of_value and rt.unit_of_value.ocp_unit_type:
+            #rt = tx.resource_type()
+            #if rt.unit_of_value and rt.unit_of_value.ocp_unit_type:
               #ancs = rt.unit_of_value.ocp_unit_type.get_ancestors(False, True)
               #for an in ancs:
               #  if not an.id in uids:
               #    uids.append(an.id)
-              uids.append(rt.unit_of_value.ocp_unit_type.id)
+              #pass #uids.append(rt.unit_of_value.ocp_unit_type.id)
+            uq = tx.unit_of_quantity()
+            if uq:
+              if not hasattr(uq, 'ocp_unit_type'):
+                raise ValidationError("The unit has not ocp_unit_type! "+str(uq))
+              else:
+                if uq.ocp_unit_type.clas == 'each':
+                  rt = tx.resource_type()
+                  if hasattr(rt, 'ocp_artwork_type') and rt.ocp_artwork_type:
+                    ancs = rt.ocp_artwork_type.get_ancestors(False,True)
+                    cur = False
+                    for an in ancs:
+                      if an.clas == "currency":
+                        cur = True
+                    if cur:
+                      if hasattr(rt.ocp_artwork_type, 'unit_type') and rt.ocp_artwork_type.unit_type.id:
+                        if rt.ocp_artwork_type.unit_type.ocp_unit_type:
+                          if not rt.ocp_artwork_type.unit_type.ocp_unit_type.id in uids:
+                            uids.append(rt.ocp_artwork_type.unit_type.ocp_unit_type.id)
+                        #pass
+
+                      #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.unit_type))
+
+
 
         return uids
 
@@ -325,6 +348,15 @@ class InvoiceNumber(models.Model):
 from general.models import Record_Type, Artwork_Type, Material_Type, Nonmaterial_Type, Job, Unit_Type
 
 # TODO: make a manager and a method to review and import general.types not in ocp_artwork_type
+class Ocp_Artwork_TypeManager(models.Manager):
+
+    def update_from_general(self):
+        #try:
+        #    share = EconomicResourceType.objects.get(name="Membership Share")
+        #except EconomicResourceType.DoesNotExist:
+        #    raise ValidationError("Membership Share does not exist by that name")
+        return False #share
+
 
 class Ocp_Artwork_Type(Artwork_Type):
     artwork_type = models.OneToOneField(
@@ -380,6 +412,16 @@ class Ocp_Artwork_Type(Artwork_Type):
       blank=True, null=True,
       help_text=_("a related OCP context EconomicAgent")
     )
+    unit_type = TreeForeignKey(
+        Unit_Type,
+        on_delete=models.CASCADE,
+        verbose_name=_('general unit_type'),
+        related_name='ocp_artwork_types',
+        blank=True, null=True,
+        help_text=_("a related General Unit Type")
+    )
+
+    objects = Ocp_Artwork_TypeManager()
 
     class Meta:
       verbose_name= _(u'Type of General Artwork/Resource')
@@ -513,7 +555,7 @@ class Ocp_Record_Type(Record_Type):
         answer = None
         if transfer_type:
           if transfer_type.inherit_types:
-            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocp_artwork_type.lft, rght__lte=self.ocp_artwork_type.rght, tree_id=self.ocp_artwork_type.tree_id)
+            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocp_artwork_type.lft, rght__lte=self.ocp_artwork_type.rght, tree_id=self.ocp_artwork_type.tree_id).order_by('lft')
           else:
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
             Mtyp = False
@@ -545,7 +587,7 @@ class Ocp_Record_Type(Record_Type):
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type":
                     if Rids:
-                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids)
+                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids)#.order_by('tree_id','lft')
                         #if Nids: # and Ntyp:
                         #    Mtys = Artwork_Type.objects.filter(id__in=Nids+Mids) #+[Ntyp.id, Mtyp.id])
                         answer = Rtys

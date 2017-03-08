@@ -925,11 +925,12 @@ class ContextTransferForm(forms.Form):
                 self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
 
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
-            #self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
+            #self.fields["ocp_resource_type"].label += "(Facets: "+', '.join(facetvalues)+")"
 
             #self.fields["ocp_resource_type"].label += init_resource_types()
 
-            for fv in facetvalues:
+            if hasattr(self.fields, 'ocp_resource_type'):
+              for fv in facetvalues:
                 #self.fields["ocp_resource_type"].label += " FV:"+fv
                 try:
                     gtyp = Ocp_Artwork_Type.objects.get(facet_value__value=fv)
@@ -945,7 +946,7 @@ class ContextTransferForm(forms.Form):
                     pass
 
 
-            for facet in transfer_type.facets():
+              for facet in transfer_type.facets():
                 if facet.clas == "Material_Type":
                     #gen_mts = Material_Type.objects.all()
                     #ocp_mts =  Ocp_Material_Type.objects.all()
@@ -991,6 +992,8 @@ class ContextTransferForm(forms.Form):
 
                 else:
                   pass
+            else:
+              self.fields['quantity'].label += " ERROR: this form has not ocp_resource_type field"
 
             try:
               self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
@@ -1086,45 +1089,20 @@ class ContextTransferCommitmentForm(forms.Form):
             #if facetvalues:
               #self.fields["ocp_resource_type"].label = "(Facets: "+', '.join(facetvalues)+")"
 
-            for facet in transfer_type.facets():
-                if facet.clas == "Material_Type":
-                    #gen_mts = Material_Type.objects.all()
-                    #ocp_mts =  Ocp_Material_Type.objects.all()
-                    #if not gen_mts.count() == ocp_mts.count():
-                    #   self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_mts.count())+" gen:"+str(gen_mts.count())+")"
-                    #   update = update_from_general(facet.clas)
-                    #   self.fields["ocp_resource_type"].label += "UPDATE: "+str(update)
-
-                    if resource_type:
-                       try:
-                          self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
-                       except:
-                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
-                    #else:
-                       #self.fields["ocp_resource_type"].label += " FALTA RT! "+str(resource_type)
-
-                elif facet.clas == "Nonmaterial_Type":
-                    #gen_nts = Nonmaterial_Type.objects.all()
-                    #ocp_nts =  Ocp_Nonmaterial_Type.objects.all()
-                    #if not gen_nts.count() == ocp_nts.count():
-                    #   self.fields["ocp_resource_type"].label += " !Needs Update! (ocpMT:"+str(ocp_nts.count())+" gen:"+str(gen_nts.count())+")"
-                    #   update = update_from_general(facet.clas)
-                    #   self.fields["ocp_resource_type"].label += " UPDATE: "+str(update)
-
-                    if resource_type:
-                       try:
-                          self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
-                       except:
-                          self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
-                    #else:
-                       #self.fields["ocp_resource_type"].label += " FALTA RT! "+str(resource_type)
-                else:
-                  pass
-
             try:
               self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
             except:
               self.fields["ocp_resource_type"].label = "  Sorry, this exchange type is not yet related to any resource types..."
+
+            if resource_type:
+                try:
+                    self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
+                except:
+                  if hasattr(self.fields, 'ocp_resource_type'):
+                    self.fields["ocp_resource_type"].label += " INITIAL? "+str(self.fields["ocp_resource_type"].initial)
+            else:
+                if hasattr(self.fields, 'ocp_resource_type'):
+                  self.fields["ocp_resource_type"].label += " FALTA RT! " #+str(resource_type)
 
             #import pdb; pdb.set_trace()
 

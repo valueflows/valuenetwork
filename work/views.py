@@ -2849,22 +2849,94 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
     exchanges_by_type = Exchange.objects.exchanges_by_type(agent)
 
-    total_transfers = 0
+    total_transfers = [{'unit':u,'name':'','clas':'','income':0,'incommit':0,'outgo':0,'outcommit':0, 'balance':0,'debug':''} for u in agent.project.used_units_ids()]
     total_rec_transfers = 0
     comma = ""
+
+    nunit = None
     #import pdb; pdb.set_trace()
     for x in exchanges:
-        try:
-            xx = list(x.transfer_list)
-        except AttributeError:
-            x.transfer_list = list(x.transfers.all())
+        #try:
+        #    xx = list(x.transfer_list)
+        #except AttributeError:
+        x.transfer_list = list(x.transfers.all())
+
         for transfer in x.transfer_list:
-            if not transfer.transfer_type.is_reciprocal:
-                if transfer.quantity():
-                    total_transfers = total_transfers + transfer.quantity()
-            else:
-                if transfer.quantity():
-                    total_rec_transfers = total_rec_transfers + transfer.quantity()
+            if transfer.quantity():
+              if transfer.transfer_type.is_reciprocal:
+                sign = '<'
+              else:
+                sign = '>'
+              uq = transfer.unit_of_quantity()
+              if uq:
+                if not hasattr(uq, 'ocp_unit_type'):
+                  raise ValidationError("The unit has not ocp_unit_type! "+str(uq))
+                for to in total_transfers:
+                  if to['unit'] == uq.ocp_unit_type.id:
+
+                    to['name'] = uq.ocp_unit_type.name
+                    to['clas'] = uq.ocp_unit_type.clas
+
+                    if transfer.transfer_type.is_reciprocal:
+                      if transfer.events.all():
+                        to['income'] = (to['income']*1) + (transfer.quantity()*1)
+                      else:
+                        to['incommit'] = (to['incommit']*1) + (transfer.quantity()*1)
+                      #to['debug'] += str(x.id)+':'+str([ev.event_type.name+':'+str(ev.quantity)+':'+ev.resource_type.name+':'+ev.resource_type.ocp_artwork_type.name for ev in x.transfer_give_events()])+sign+' - '
+                    else:
+                      if transfer.events.all():
+                        to['outgo'] = (to['outgo']*1) + (transfer.quantity()*1)
+                      else:
+                        to['outcommit'] = (to['outcommit']*1) + (transfer.quantity()*1)
+                      #to['debug'] += str(x.id)+':'+str([str(ev.event_type.name)+':'+str(ev.quantity)+':'+ev.resource_type.name+':'+ev.resource_type.ocp_artwork_type.name for ev in x.transfer_receive_events()])+sign+' - '
+
+                    if uq.ocp_unit_type.clas == 'each':
+                      rt = transfer.resource_type()
+                      rt.cur = False
+                      if hasattr(rt, 'ocp_artwork_type') and rt.ocp_artwork_type:
+                        ancs = rt.ocp_artwork_type.get_ancestors(False,True)
+                        for an in ancs:
+                          if an.clas == "currency":
+                            rt.cur = True
+                        if rt.cur:
+                          to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type.unit_type.ocp_unit_type.name)+sign+' - '
+                          for ttr in total_transfers:
+                            if ttr['unit'] == rt.ocp_artwork_type.unit_type.ocp_unit_type.id:
+                              ttr['name'] = rt.ocp_artwork_type.unit_type.ocp_unit_type.name
+                              ttr['clas'] = rt.ocp_artwork_type.unit_type.ocp_unit_type.clas
+
+                              if transfer.events.all():
+                                if sign == '<':
+                                  ttr['income'] = (ttr['income']*1) + (transfer.quantity()*1)
+                                if sign == '>':
+                                  ttr['outgo'] = (ttr['outgo']*1) + (transfer.quantity()*1)
+                              else:
+                                if sign == '<':
+                                  ttr['incommit'] = (ttr['incommit']*1) + (transfer.quantity()*1)
+                                if sign == '>':
+                                  ttr['outcommit'] = (ttr['outcommit']*1) + (transfer.quantity()*1)
+                              break
+                      elif rt:
+                        to['debug'] += '::'+str(rt)+'!!'+sign+'::'
+
+                      #to['debug'] += str(x.transfer_give_events())+':'
+                    elif uq.ocp_unit_type.clas == 'faircoin':
+                      wal = agent.faircoin_resource()
+                      if wal:
+                        to['balance'] = str(wal.digital_currency_balance())
+                        #to['debug'] += str(x.transfer_give_events())+':'
+
+                    elif uq.ocp_unit_type.clas == 'euro':
+                      to['balance'] = (to['income']*1) - (to['outgo']*1)
+
+                      to['debug'] += str([ev.event_type.name+':'+str(ev.quantity)+':'+ev.resource_type.name for ev in transfer.events.all()])+sign+' - '
+                    else:
+                      to['debug'] += 'U:'+str(uq.ocp_unit_type)+sign
+
+              else:
+                pass #total_transfers[1]['debug'] += ' :: '+str(transfer.name)+sign
+
+
             for event in transfer.events.all():
                 event_ids = event_ids + comma + str(event.id)
                 comma = ","

@@ -30,6 +30,37 @@ ul, li {
   /*width: 295px;*/
   margin-right: 13px;
 }
+.totals table {
+  position: relative;
+}
+.totals table thead {
+  border-bottom: 1px solid #ddd;
+}
+.totals table tr {
+  border-bottom: 1px solid #ddd;
+}
+.totals table tr:last-child {
+  border-bottom: none;
+}
+.totals table tr td {
+  border-left: 1px solid #ddd;
+  padding: 5px;
+  text-align: right;
+  /*font-weight: bold;*/
+}
+.totals table tr th {
+  text-align: right;
+  padding: 5px;
+  color: #476B6B;
+  border-right: 1px solid #ddd;
+  font-weight: normal;
+}
+.totals table tr th:last-child {
+  border-right: none;
+}
+.totals table tr th h4 {
+  line-height: 9px;
+}
 span.total {
   font-weight: bold;
   font-size: 105%;
@@ -43,6 +74,10 @@ span.total {
     font-size: 1.1em;
     font-weight: bold;
   color: #476B6B;
+}
+
+small {
+  font-size: 90%;
 }
 
 #exchangeTypeForm {
@@ -280,27 +315,41 @@ span.fancytree-selected span.fancytree-title {
               <table>
                 <thead>
                   <tr>
-                    <th>{% trans "Unit" %}: &nbsp; </th>
-                    <th><h4>
-                      {% trans "Incoming" %}: &nbsp;
-                      </h4></th>
-                    <th><h4>
-                      {% trans "Outgoing" %}: &nbsp;
-                      </h4></th>
-                    <th><h4>
-                      {% trans "Balance" %}:
-                      </h4></th>
+                    <th>{% trans "" %} &nbsp; </th>
                     <th>
+                      <b>{% trans "Incoming:" %}</b>
+                    </th>
+                    <th>
+                      <b>{% trans "Outgoing:" %}</b>
+                    </th>
+                    <th>
+                      <b style="font-size:110%">{% trans "Balance:" %}</b>
+                    </th>
+                    {% if request.user.is_superuser %}
+                      <th>
+                         {% trans "(superusers debug)" %}
+                      </th>
+                    {% endif %}
                   </tr>
                 </thead>
                 <tbody>
-                  {% for unit in Utype_tree %}
-                    <tr>
-                      <td>{{ unit }}</td>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
-                    </tr>
+                  {% for tt in total_transfers %}
+                    {% if tt.name %}
+                      {% if tt.clas == 'each' and not request.user.is_superuser %}
+
+                      {% else %}
+                          <tr>
+                            <th><b>{{ tt.name }}:</b><br/><small>{% trans "commited" %}</small></th>
+
+                            <td>{{ tt.income }}<br/>{% if tt.incommit %}(+{{ tt.incommit }}){% else %}&nbsp;{% endif %}</td>
+                            <td>{{ tt.outgo }}<br/>{% if tt.outcommit %}(-{{ tt.outcommit }}){% else %}&nbsp;{% endif %}</td>
+                            <td><b>{{ tt.balance }}</b><br/>&nbsp;</td>
+                            {% if request.user.is_superuser %}
+                              <td><small>{{ tt.debug }}</small></td>
+                            {% endif %}
+                          </tr>
+                      {% endif %}
+                    {% endif %}
                   {% endfor %}
                 </tbody>
               </table>

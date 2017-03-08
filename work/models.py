@@ -346,9 +346,10 @@ class InvoiceNumber(models.Model):
 
 
 from general.models import Record_Type, Artwork_Type, Material_Type, Nonmaterial_Type, Job, Unit_Type
+from mptt.models import TreeManager
 
 # TODO: make a manager and a method to review and import general.types not in ocp_artwork_type
-class Ocp_Artwork_TypeManager(models.Manager):
+class Ocp_Artwork_TypeManager(TreeManager):
 
     def update_from_general(self):
         #try:

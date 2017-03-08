@@ -2940,6 +2940,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
             for event in transfer.events.all():
                 event_ids = event_ids + comma + str(event.id)
                 comma = ","
+
         #import pdb; pdb.set_trace()
         for event in x.events.all():
             event_ids = event_ids + comma + str(event.id)

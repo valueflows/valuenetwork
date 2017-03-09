@@ -2777,7 +2777,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   pass
 
 
-        edit_exchange_type = request.POST.get("edit_exchange_type") # TODO
+        edit_exchange_type = request.POST.get("edit_exchange_type") # TODO the detail about transfertypes
         if edit_exchange_type:
             if ext_form.is_valid():
                 data = ext_form.cleaned_data
@@ -2849,7 +2849,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
     exchanges_by_type = Exchange.objects.exchanges_by_type(agent)
 
-    total_transfers = [{'unit':u,'name':'','clas':'','income':0,'incommit':0,'outgo':0,'outcommit':0, 'balance':0,'debug':''} for u in agent.project.used_units_ids()]
+    total_transfers = [{'unit':u,'name':'','clas':'','income':0,'incommit':0,'outgo':0,'outcommit':0, 'balance':0,'balnote':'','debug':''} for u in agent.project.used_units_ids()]
     total_rec_transfers = 0
     comma = ""
 
@@ -2925,10 +2925,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       wal = agent.faircoin_resource()
                       if wal:
                         bal = wal.digital_currency_balance()
-                        if type(bal*1) == 'float':
+                        if type(bal*1) == float or type(bal*1) == int:
                           to['balance'] = '{0:.2f}'.format(bal*1)
                         else:
                           to['balance'] = bal
+                        to['balnote'] = '('+str((to['income']*1) - (to['outgo']*1))+')'
                         #to['debug'] += str(x.transfer_give_events())+':'
 
                     elif uq.ocp_unit_type.clas == 'euro':

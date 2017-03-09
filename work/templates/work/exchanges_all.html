@@ -346,7 +346,7 @@ span.fancytree-selected span.fancytree-title {
 
                             <td>{{ tt.income }}<br/>{% if tt.incommit %}(+{{ tt.incommit }}){% else %}&nbsp;{% endif %}</td>
                             <td>{{ tt.outgo }}<br/>{% if tt.outcommit %}(-{{ tt.outcommit }}){% else %}&nbsp;{% endif %}</td>
-                            <td><b>{{ tt.balance }}</b><br/>&nbsp;</td>
+                            <td><b>{{ tt.balance }}</b><br/>{% if tt.balnote %}{{ tt.balnote }}{% else %}&nbsp;{% endif %}</td>
                             {% if request.user.is_superuser %}
                               <td><small>{{ tt.debug }}</small></td>
                             {% endif %}

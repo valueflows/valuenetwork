@@ -2910,6 +2910,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                                   ttr['income'] = (ttr['income']*1) + (transfer.quantity()*1)
                                 if sign == '>':
                                   ttr['outgo'] = (ttr['outgo']*1) + (transfer.quantity()*1)
+                                ttr['balance'] = (ttr['income']*1) - (ttr['outgo']*1)
                               else:
                                 if sign == '<':
                                   ttr['incommit'] = (ttr['incommit']*1) + (transfer.quantity()*1)
@@ -2924,8 +2925,8 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       wal = agent.faircoin_resource()
                       if wal:
                         bal = wal.digital_currency_balance()
-                        if type(bal) == 'float':
-                          to['balance'] = '{0:.2f}'.format(bal)
+                        if type(bal*1) == 'float':
+                          to['balance'] = '{0:.2f}'.format(bal*1)
                         else:
                           to['balance'] = bal
                         #to['debug'] += str(x.transfer_give_events())+':'

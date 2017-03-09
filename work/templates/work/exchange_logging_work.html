@@ -178,7 +178,7 @@ li {
         {% endif %}
 {% endcomment %}
         <div class="subnav">
-            {% if context_agent.faircoin_resource %}
+            {% if request.user.agent.agent in context_agent.managers and context_agent.faircoin_resource %}
                 <a class="indent" href="{% url "manage_faircoin_account" resource_id=context_agent.faircoin_resource.id %}">{% trans "Wallet" %}</a>
             {% endif %}
             <!-- <a class="indent" href="{% url "exchanges_all" agent_id=context_agent.id %}">{% trans "All Exchanges" %}</a>

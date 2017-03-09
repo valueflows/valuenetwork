@@ -301,10 +301,13 @@ span.fancytree-selected span.fancytree-title {
 		<legend>
         <a class="indent" href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a> > {% trans "Exchanges" %}
             <div class="subnav">
-                {% if request.user.is_staff or request.user.agent.agent in project.managers %}
-                   <a class="indent" href="{% url "project_resources" agent_id=project.id %}">{% trans "Resources" %}</a>
+              {% if request.user.is_staff or request.user.agent.agent in project.managers %}
+                {% if project.faircoin_resource %}
+                  <a class="indent" href="{% url "manage_faircoin_account" resource_id=project.faircoin_resource.id %}">{% trans "Wallet" %}</a>
                 {% endif %}
-                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+                <a class="indent" href="{% url "project_resources" agent_id=project.id %}">{% trans "Resources" %}</a>
+              {% endif %}
+              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             </div>
         </legend>
         <div class="span12">

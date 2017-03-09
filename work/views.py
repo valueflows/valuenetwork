@@ -2923,7 +2923,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     elif uq.ocp_unit_type.clas == 'faircoin':
                       wal = agent.faircoin_resource()
                       if wal:
-                        to['balance'] = str(wal.digital_currency_balance())
+                        bal = wal.digital_currency_balance()
+                        if type(bal) == 'float':
+                          to['balance'] = '{0:.2f}'.format(bal)
+                        else:
+                          to['balance'] = bal
                         #to['debug'] += str(x.transfer_give_events())+':'
 
                     elif uq.ocp_unit_type.clas == 'euro':
@@ -3141,7 +3145,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
         "total_t": total_t,
         "total_rect": total_rect,
         "help": get_help("exchange"),
-        "add_type": add_new_type_mkp(),
+        #"add_type": add_new_type_mkp(),
     }, context_instance=RequestContext(request))
 
 

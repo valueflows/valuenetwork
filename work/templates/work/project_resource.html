@@ -22,7 +22,7 @@
     margin-left: 10px;
 }
 .hdg {
-    color: firebrick;
+    /*color: firebrick;*/
 }
 .btn {
     margin-top: 1px;
@@ -219,7 +219,7 @@
 	        <div class="span6 info">
 
 	            {% if resource.demands %}
-	                <h4 class="hdg">{% trans "Demands" %}:</h4>
+	                <h4 class="">{% trans "Demands" %}:</h4>
 	                <ul>
 	                {% for ct in resource.demands %}
 	                    <li><a href="{{ ct.process.get_absolute_url }}">{{ ct }}</a></li>
@@ -233,7 +233,7 @@
 
         <div class="row-fluid" tyle="margin-top: 1em;">
             <div class="span6">
-                <h3 class="hdg">{% trans "Where from" %}:</h3>
+                <h3 class="">{% trans "Where from" %}:</h3>
                 {% if resource.where_from_events %}
                     <ul>
                         {% for event in resource.where_from_events %}
@@ -303,7 +303,7 @@
             </div>
 
             <div class="span6">
-              <h3 class="hdg">{% trans "Where to" %}:</h3>
+              <h3 class="">{% trans "Where to" %}:</h3>
 
               {% if resource.where_to_events %}
                 <ul>

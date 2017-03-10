@@ -2925,11 +2925,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       wal = agent.faircoin_resource()
                       if wal:
                         bal = wal.digital_currency_balance()
-                        if type(bal*1) == float or type(bal*1) == int:
-                          to['balance'] = '{0:.2f}'.format(bal*1)
+                        if type(bal*1) == float:
+                          to['balance'] = '{0:.2f}'.format(float(bal*1))
                         else:
                           to['balance'] = bal
-                        to['balnote'] = '('+str((to['income']*1) - (to['outgo']*1))+')'
+                        to['balnote'] = (to['income']*1) - (to['outgo']*1)
                         #to['debug'] += str(x.transfer_give_events())+':'
 
                     elif uq.ocp_unit_type.clas == 'euro':

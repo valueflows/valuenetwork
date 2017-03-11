@@ -2251,7 +2251,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       new_rec.id = None
                       new_rec.name = name
                       new_rec.exchange_type = new_ext
-                      new_rec.ocp_artwork_type = gen_rt
+                      new_rec.ocpRecordType_ocp_artwork_type = gen_rt
                       new_rec.ocp_skill_type = gen_sk
                       # mptt: insert_node(node, target, position='last-child', save=False)
                       new_rec = Ocp_Record_Type.objects.insert_node(new_rec, gen_ext, 'last-child', True)

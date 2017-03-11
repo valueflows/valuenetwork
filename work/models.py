@@ -360,13 +360,13 @@ class Ocp_Artwork_TypeManager(TreeManager):
 
 
 class Ocp_Artwork_Type(Artwork_Type):
-    artwork_type = models.OneToOneField(
+    ocpArtworkType_artwork_type = models.OneToOneField(
       Artwork_Type,
       on_delete=models.CASCADE,
       primary_key=True,
       parent_link=True
     )
-    material_type = TreeForeignKey(
+    ocpArtworkType_material_type = TreeForeignKey(
       Material_Type,
       on_delete=models.CASCADE,
       verbose_name=_('general material_type'),
@@ -374,7 +374,7 @@ class Ocp_Artwork_Type(Artwork_Type):
       blank=True, null=True,
       help_text=_("a related General Material Type")
     )
-    nonmaterial_type = TreeForeignKey(
+    ocpArtworkType_nonmaterial_type = TreeForeignKey(
       Nonmaterial_Type,
       on_delete=models.CASCADE,
       verbose_name=_('general nonmaterial_type'),
@@ -413,7 +413,7 @@ class Ocp_Artwork_Type(Artwork_Type):
       blank=True, null=True,
       help_text=_("a related OCP context EconomicAgent")
     )
-    unit_type = TreeForeignKey(
+    ocpArtworkType_unit_type = TreeForeignKey(
         Unit_Type,
         on_delete=models.CASCADE,
         verbose_name=_('general unit_type'),
@@ -506,7 +506,7 @@ class Ocp_Skill_Type(Job):
 
 
 class Ocp_Record_Type(Record_Type):
-    record_type = models.OneToOneField(
+    ocpRecordType_record_type = models.OneToOneField(
         Record_Type,
         on_delete=models.CASCADE,
         primary_key=True,
@@ -519,7 +519,7 @@ class Ocp_Record_Type(Record_Type):
         verbose_name=_('ocp exchange type'),
         related_name='ocp_record_type'
     )
-    ocp_artwork_type = TreeForeignKey(
+    ocpRecordType_ocp_artwork_type = TreeForeignKey(
         Ocp_Artwork_Type,
         on_delete=models.CASCADE,
         verbose_name=_('general artwork_type'),
@@ -556,7 +556,7 @@ class Ocp_Record_Type(Record_Type):
         answer = None
         if transfer_type:
           if transfer_type.inherit_types:
-            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocp_artwork_type.lft, rght__lte=self.ocp_artwork_type.rght, tree_id=self.ocp_artwork_type.tree_id).order_by('lft')
+            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocpRecordType_ocp_artwork_type.lft, rght__lte=self.ocpRecordType_ocp_artwork_type.rght, tree_id=self.ocpRecordType_ocp_artwork_type.tree_id).order_by('lft')
           else:
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
             Mtyp = False
@@ -619,13 +619,13 @@ class Ocp_Record_Type(Record_Type):
 from general.models import Unit as Gen_Unit
 
 class Ocp_Unit_Type(Unit_Type):
-    unit_type = models.OneToOneField(
+    ocpUnitType_unit_type = models.OneToOneField(
         Unit_Type,
         on_delete=models.CASCADE,
         primary_key=True,
         parent_link=True
     )
-    ocp_unit =  models.OneToOneField(
+    ocpUnitType_ocp_unit =  models.OneToOneField(
         Unit,
         on_delete=models.CASCADE,
         verbose_name=_('ocp unit'),
@@ -633,7 +633,7 @@ class Ocp_Unit_Type(Unit_Type):
         blank=True, null=True,
         help_text=_("a related OCP Unit")
     )
-    unit = models.OneToOneField(
+    ocpUnitType_unit = models.OneToOneField(
         Gen_Unit,
         on_delete=models.CASCADE,
         verbose_name=_('general unit'),
@@ -648,12 +648,12 @@ class Ocp_Unit_Type(Unit_Type):
 
     def __unicode__(self):
       if self.children.count():
-        if self.ocp_unit:
+        if self.ocpUnitType_ocp_unit:
           return self.name+': <' #+'  ('+self.resource_type.name+')'
         else:
           return self.name+': '
       else:
-        if self.ocp_unit:
+        if self.ocpUnitType_ocp_unit:
           return self.name+' <' #+'  ('+self.resource_type.name+')'
         else:
           return self.name

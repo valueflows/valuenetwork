@@ -170,7 +170,7 @@ class H_addressInline(admin.StackedInline):
       }),
     )
     #formset = H_addressInlineSet
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         if '/general/project/' in request.path:
           rel = Relation.objects.get(clas='rel_proj_addr')
@@ -191,7 +191,7 @@ class H_jobInline(admin.StackedInline):
         'fields': (('job','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_hum_art')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -206,7 +206,7 @@ class H_recordInline(admin.StackedInline):
         'fields': (('record','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_hum_reco')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -221,7 +221,7 @@ class H_regionInline(admin.StackedInline):
         'fields': (('region','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_hum_regi')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -237,7 +237,7 @@ class H_materialInline(admin.StackedInline):
         'fields': (('material','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_hum_mate')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -253,7 +253,7 @@ class H_nonmaterialInline(admin.StackedInline):
         'fields': (('nonmaterial','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_hum_nonm')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -271,7 +271,7 @@ class H_projectInline(admin.StackedInline):
         'fields': (('project','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_pers_proj')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -288,7 +288,7 @@ class H_companyInline(admin.StackedInline):
         'fields': (('company','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_pers_comp')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -305,7 +305,7 @@ class H_personInline(admin.StackedInline):
         'fields': (('person','relation'),)
       }),
     )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
       if db_field.name == 'relation':
         rel = Relation.objects.get(clas='rel_proj_pers')
         kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -364,7 +364,7 @@ class Proj_personInline(admin.StackedInline):
   )
   verbose_name = _(u"related Person")
   verbose_name_plural = _(u"other related persons")
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_proj_pers')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id).exclude(clas='reference')
@@ -374,7 +374,7 @@ class Proj_personInline(admin.StackedInline):
 class H_accountCesInline(admin.StackedInline):
   model = AccountCes
   extra = 0
-  fk_name = 'human'
+  fk_name = 'accCes_human'
   fieldsets = (
     (' ', {
       'classes': ('collapse',),
@@ -383,7 +383,7 @@ class H_accountCesInline(admin.StackedInline):
       )
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'unit':
       typ = Unit_Type.objects.get(clas='social_currency')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
@@ -395,7 +395,7 @@ class H_accountCesInline(admin.StackedInline):
 class H_accountBankInline(admin.StackedInline):
   model = AccountBank
   extra = 0
-  fk_name = 'human'
+  fk_name = 'accBnk_human'
   fieldsets = (
     (' ', {
       'classes': ('collapse',),
@@ -404,7 +404,7 @@ class H_accountBankInline(admin.StackedInline):
       )
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'unit':
       typ = Unit_Type.objects.get(clas='fiat_currency')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
@@ -413,7 +413,7 @@ class H_accountBankInline(admin.StackedInline):
 class H_accountCryptoInline(admin.StackedInline):
   model = AccountCrypto
   extra = 0
-  fk_name = 'human'
+  fk_name = 'accCrypt_human'
   fieldsets = (
     (' ', {
       'classes': ('collapse',),
@@ -422,7 +422,7 @@ class H_accountCryptoInline(admin.StackedInline):
       )
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'unit':
       typ = Unit_Type.objects.get(clas='crypto_currency')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
@@ -432,7 +432,7 @@ class H_assetInline(admin.StackedInline):
   #model = rel_Human_Material
   model = Asset
   extra = 0
-  fk_name = 'human'
+  fk_name = 'asset_human'
   readonly_fields = ('_addresses_list', '_jobs_list', '_selflink',)
   fieldsets = (
     (' ', {
@@ -744,7 +744,7 @@ class Public_AddressAdmin(admin.ModelAdmin):
       )
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'size_unit':
       typ = Unit_Type.objects.get(clas='area')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
@@ -812,7 +812,7 @@ class AccountCesAdmin(AutoNameMixin):
 
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'unit':
       typ = Unit_Type.objects.get(clas='social_currency')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
@@ -831,7 +831,7 @@ class AccountBankAdmin(AutoNameMixin):
 
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'unit':
       typ = Unit_Type.objects.get(clas='fiat_currency')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
@@ -847,7 +847,7 @@ class AccountCryptoAdmin(AutoNameMixin):
 
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'unit':
       typ = Unit_Type.objects.get(clas='crypto_currency')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
@@ -888,7 +888,7 @@ class N_nonmaterialInline(admin.StackedInline):
       'fields': (('nonmaterial2', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_non_nonm')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -905,7 +905,7 @@ class N_recordInline(admin.StackedInline):
       'fields': (('record', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_non_reco')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -922,7 +922,7 @@ class N_addressInline(admin.StackedInline):
       'fields': (('address', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_non_addr')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -939,7 +939,7 @@ class N_jobInline(admin.StackedInline):
       'fields': (('job', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_non_jobs')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -980,7 +980,7 @@ class M_nonmaterialInline(admin.StackedInline):
       'fields': (('nonmaterial', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_mat_nonm')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -997,7 +997,7 @@ class M_recordInline(admin.StackedInline):
       'fields': (('record', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_mat_reco')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -1014,7 +1014,7 @@ class M_addressInline(admin.StackedInline):
       'fields': (('address', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_mat_addr')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -1031,7 +1031,7 @@ class M_jobInline(admin.StackedInline):
       'fields': (('job', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_mat_jobs')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -1048,7 +1048,7 @@ class M_materialInline(admin.StackedInline):
       'fields': (('material2', 'relation'),)
     }),
   )
-  def formfield_for_foreignkey(self, db_field, request, **kwargs):
+  def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
     if db_field.name == 'relation':
       rel = Relation.objects.get(clas='rel_mat_mate')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id)
@@ -1082,13 +1082,13 @@ class MaterialAdmin(Public_MaterialAdmin):
 
 class Public_AssetAdmin(Public_MaterialAdmin):
   model = Asset
-  list_display = ['name', 'human', 'material_type', 'reciprocity',]
+  list_display = ['name', 'asset_human', 'material_type', 'reciprocity',]
   #readonly_fields = ('_addresses_list',)
-  raw_id_fields = ('human',)
+  raw_id_fields = ('asset_human',)
   fieldsets = MaterialAdmin.fieldsets + (
     (None, {
       'fields': (
-        ('human',),# '_addresses_list',),
+        ('asset_human',),# '_addresses_list',),
         ('reciprocity',))
     }),
   )

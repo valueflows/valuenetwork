@@ -3,9 +3,9 @@ from __future__ import unicode_literals
 import datetime
 
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
-from django.contrib.admin.util import lookup_field, display_for_field, display_for_value, label_for_field
+from django.contrib.admin.utils import lookup_field, display_for_field, display_for_value, label_for_field
 
-from django.contrib.admin.views.main import (ALL_VAR, EMPTY_CHANGELIST_VALUE,
+from django.contrib.admin.views.main import (ALL_VAR, ERROR_FLAG,
     ORDER_VAR, PAGE_VAR, SEARCH_VAR)
 from django.contrib.admin.templatetags.admin_static import static
 from django.core.exceptions import ObjectDoesNotExist
@@ -197,7 +197,7 @@ def items_for_result(cl, result, form):
         try:
             f, attr, value = lookup_field(field_name, result, cl.model_admin)
         except ObjectDoesNotExist:
-            result_repr = EMPTY_CHANGELIST_VALUE
+            result_repr = ERROR_FLAG
         else:
             if f is None:
                 if field_name == 'action_checkbox':
@@ -218,7 +218,7 @@ def items_for_result(cl, result, form):
                 if isinstance(f.rel, models.ManyToOneRel):
                     field_val = getattr(result, f.name)
                     if field_val is None:
-                        result_repr = EMPTY_CHANGELIST_VALUE
+                        result_repr = ERROR_FLAG
                     else:
                         result_repr = field_val
                 else:

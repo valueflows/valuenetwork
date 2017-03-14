@@ -14,11 +14,11 @@ To install within Docker for development:
     docker-compose up
     ```
 3. Now you have a running instance but the DB is still empty or copied from testOCP. To run locally you will need to run the DB migrations and create a new superadmin user to login with so you can access the admin backend.
-    a. Run DB migrations:  
+    - Run DB migrations:  
     ```
     docker-compose exec valuenetwork ./docker/valuenetwork/run-db-migrations.sh
     ```
-    b. Create new superuser account (feel free to use your own details if you wish):  
+    - Create new superuser account (feel free to use your own details if you wish):  
     ```
     docker-compose exec valuenetwork ./docker/valuenetwork/create-superuser.sh valuenetwork_user admin@example.com mrY7rZZ6ztjN90fN6hy6
     ```

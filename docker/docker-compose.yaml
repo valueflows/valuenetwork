@@ -13,3 +13,17 @@ services:
       - "${WEB_PORT:-8000}:8000"
     volumes:
       - ../:/var/www/valuenetwork
+      - electrumwallet:/home/ocp/.electrum-fair/wallets/
+
+  electrum:
+    build:
+      context: ../
+      dockerfile: ./docker/electrum/dev.Dockerfile
+    image:
+      faircoin/electrum:dev
+    network_mode: bridge
+    volumes:
+      - electrumwallet:/root/.electrum-fair/wallets
+
+volumes:
+  electrumwallet:

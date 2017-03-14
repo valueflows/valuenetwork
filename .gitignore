@@ -25,6 +25,5 @@ valuenetwork/site_media/media/photos/*.PNG
 faircoin_nrp/daemon/daemon.conf
 faircoin_nrp/daemon/daemon.py
 faircoin_nrp/daemon/daemon_service
-docker/electrum/wallets/
 *.json
 

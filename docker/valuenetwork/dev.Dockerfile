@@ -5,6 +5,13 @@ RUN apt-get -yq install libjpeg-dev zlib1g-dev
 
 RUN pip install -U setuptools
 
+# we need sudo command installed (even though it's not necessary) for compatibility with some daemon scripts
+RUN apt-get update && \
+  apt-get -y install sudo
+
+# install electrum libs first (needed by FairCoin daemon)
+RUN pip install https://electrum.fair-coin.org/download/Electrum-fair-2.3.3.tar.gz
+
 # copy only the requirements file for getting dependencies preinstalled
 # (note: path is relative to build context specified in docker-compose.yaml, not Dockerfile)
 RUN mkdir -p /var/www/valuenetwork
@@ -18,6 +25,9 @@ RUN pip install -r requirements.txt --trusted-host dist.pinaxproject.com
 
 EXPOSE 8000
 
+# volume to mount the local app code into
 VOLUME /var/www/valuenetwork
+# volume to mount electrum wallet files in to share with the app
+VOLUME /home/ocp/.electrum-fair/wallets/
 
-CMD ["./manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["./docker/valuenetwork/run-all-services.sh"]

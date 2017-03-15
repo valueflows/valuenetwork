@@ -426,7 +426,8 @@ def transfer_faircoins(request, resource_id):
                         name="Transfer Faircoins",
                         start_date=date,
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     exchange.save()
                     transfer = Transfer(
                         transfer_type=tt,
@@ -434,7 +435,8 @@ def transfer_faircoins(request, resource_id):
                         transfer_date=date,
                         name="Transfer Faircoins",
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     transfer.save()
                 else:
                     tt = faircoin_outgoing_transfer_type()
@@ -446,7 +448,8 @@ def transfer_faircoins(request, resource_id):
                         name="Send Faircoins",
                         start_date=date,
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     exchange.save()
                     transfer = Transfer(
                         transfer_type=tt,
@@ -454,7 +457,8 @@ def transfer_faircoins(request, resource_id):
                         transfer_date=date,
                         name="Send Faircoins",
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     transfer.save()
 
                 # network_fee is subtracted from quantity

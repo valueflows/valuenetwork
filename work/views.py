@@ -26,6 +26,7 @@ from valuenetwork.valueaccounting.forms import *
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
+import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
 
 from fobi.models import FormEntry
 
@@ -1415,6 +1416,17 @@ def faircoin_history(request, resource_id):
     agent = get_agent(request)
     init = {"quantity": resource.quantity,}
     unit = resource.resource_type.unit
+    blockchain_info = faircoin_utils.get_address_history(resource.digital_currency_address)
+
+    tx_in_ocp = []
+    for event in event_list:
+        tx_in_ocp.append(event.digital_currency_tx_hash)
+
+    for tx in blockchain_info:
+        if str(tx[0]) not in tx_in_ocp:
+            pass
+            # TODO: str(tx[0]) is a transaction in the blockchain, but not in ocp.
+            # Here we can setup a EconomicEvent or whatever.
 
     paginator = Paginator(event_list, 25)
 

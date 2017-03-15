@@ -70,7 +70,8 @@ class SkillSuggestionForm(forms.ModelForm):
 
 
 class MembershipRequestForm(forms.ModelForm):
-    captcha = CaptchaField()
+    if not settings.TESTING:
+        captcha = CaptchaField()
 
     class Meta:
         model = MembershipRequest

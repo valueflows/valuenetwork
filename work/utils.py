@@ -1,5 +1,5 @@
 from work.models import Ocp_Skill_Type, Ocp_Artwork_Type
-from general.models import Artwork_Type, Job
+from general.models import Artwork_Type, Skill_Type, Job
 
 def get_rt_from_ocp_rt(gen_rt):
     rt = None

@@ -23,6 +23,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
+from valuenetwork.valueaccounting.service import ExchangeService
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
@@ -1202,90 +1203,14 @@ def transfer_faircoins(request, resource_id):
             address_origin = resource.digital_currency_address
             if address_origin and address_end:
                 from_agent = resource.owner()
-                to_resources = EconomicResource.objects.filter(digital_currency_address=address_end)
-                to_agent = None
-                if to_resources:
-                    to_resource = to_resources[0] #shd be only one
-                    to_agent = to_resource.owner()
-                et_give = EventType.objects.get(name="Give")
-                if to_agent:
-                    tt = faircoin_internal_transfer_type()
-                    xt = tt.exchange_type
-                    date = datetime.date.today()
-                    exchange = Exchange(
-                        exchange_type=xt,
-                        use_case=xt.use_case,
-                        name="Transfer Faircoins",
-                        start_date=date,
-                        notes=notes,
-                        )
-                    exchange.save()
-                    transfer = Transfer(
-                        transfer_type=tt,
-                        exchange=exchange,
-                        transfer_date=date,
-                        name="Transfer Faircoins",
-                        notes=notes,
-                        )
-                    transfer.save()
-                else:
-                    tt = faircoin_outgoing_transfer_type()
-                    xt = tt.exchange_type
-                    date = datetime.date.today()
-                    exchange = Exchange(
-                        exchange_type=xt,
-                        use_case=xt.use_case,
-                        name="Send Faircoins",
-                        start_date=date,
-                        notes=notes,
-                        )
-                    exchange.save()
-                    transfer = Transfer(
-                        transfer_type=tt,
-                        exchange=exchange,
-                        transfer_date=date,
-                        name="Send Faircoins",
-                        notes=notes,
-                        )
-                    transfer.save()
-
-                # network_fee is subtracted from quantity
-                # so quantity is correct for the giving event
-                # but receiving event will get quantity - network_fee
-                state =  "new"
-                event = EconomicEvent(
-                    event_type = et_give,
-                    event_date = date,
-                    from_agent=from_agent,
-                    to_agent=to_agent,
-                    resource_type=resource.resource_type,
-                    resource=resource,
-                    digital_currency_tx_state = state,
-                    quantity = quantity,
-                    transfer=transfer,
-                    event_reference=address_end,
-                    description=notes,
-                    )
-                event.save()
-                if to_agent:
-                    from valuenetwork.valueaccounting.faircoin_utils import network_fee
-                    quantity = quantity - Decimal(float(network_fee()) / 1.e6)
-                    et_receive = EventType.objects.get(name="Receive")
-                    event = EconomicEvent(
-                        event_type = et_receive,
-                        event_date = date,
-                        from_agent=from_agent,
-                        to_agent=to_agent,
-                        resource_type=to_resource.resource_type,
-                        resource=to_resource,
-                        digital_currency_tx_state = state,
-                        quantity = quantity,
-                        transfer=transfer,
-                        event_reference=address_end,
-                        description=notes,
-                        )
-                    event.save()
-                    #print "receive event:", event
+                exchange_service = ExchangeService.get()
+                exchange_service.send_faircoins(
+                    from_agent,
+                    address_end,
+                    quantity,
+                    resource,
+                    notes=notes
+                )
 
                 return HttpResponseRedirect('/%s/%s/'
                     % ('work/faircoin-history', resource.id))
@@ -1317,7 +1242,7 @@ def transfer_faircoins_old(request, resource_id):
                         to_agent = to_resource.owner()
                     et_give = EventType.objects.get(name="Give")
                     if to_agent:
-                        tt = faircoin_internal_transfer_type()
+                        tt = ExchangeService.faircoin_internal_transfer_type()
                         xt = tt.exchange_type
                         date = datetime.date.today()
                         exchange = Exchange(
@@ -1335,7 +1260,7 @@ def transfer_faircoins_old(request, resource_id):
                             )
                         transfer.save()
                     else:
-                        tt = faircoin_outgoing_transfer_type()
+                        tt = ExchangeService.faircoin_outgoing_transfer_type()
                         xt = tt.exchange_type
                         date = datetime.date.today()
                         exchange = Exchange(

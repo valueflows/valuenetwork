@@ -2011,6 +2011,8 @@ def validate_username(request):
     return HttpResponse(response, content_type="text/json-comment-filtered")
 
 
+
+
 def faircoin_history_chain(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     event_list = resource.events.all()
@@ -2028,6 +2030,8 @@ def faircoin_history_chain(request, resource_id):
             pass
             # TODO: str(tx[0]) is a transaction in the blockchain, but not in ocp.
             # Here we can setup a EconomicEvent or whatever
+
+
 
 
 @login_required

@@ -1116,14 +1116,14 @@ class ContextTransferCommitmentForm(forms.Form):
 
     def clean(self):
         data = super(ContextTransferCommitmentForm, self).clean()
-        if not hasattr(data, 'ocp_resource_type'):
-          ocp_rt = None
-        else:
-          ocp_rt = data["ocp_resource_type"]
-        if not hasattr(data, 'resource_type'):
-          ini_rt = None
-        else:
-          ini_rt = data["resource_type"]
+        #if not hasattr(data, 'ocp_resource_type'):
+        #  ocp_rt = None
+        #else:
+        ocp_rt = data["ocp_resource_type"]
+        #if not hasattr(data, 'resource_type'):
+        #  ini_rt = None
+        #else:
+        ini_rt = data["resource_type"]
         if ocp_rt:
           if not ini_rt:
             rt = get_rt_from_ocp_rt(ocp_rt)

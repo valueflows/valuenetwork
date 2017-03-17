@@ -8110,15 +8110,23 @@ class Transfer(models.Model):
             if either.unit_of_quantity:
                 unit = either.unit_of_quantity.abbrev
             if give:
-                if give.to_agent:
+                if give.to_agent and give.from_agent:
                     give_text = "GIVE to " + give.to_agent.nick
-                    if not give.from_agent:
-                        give_text = "FROM?"
+                elif give.to_agent and not give.from_agent:
+                    give_text = "FROM?"
+                elif not give.to_agent and give.from_agent:
+                    give_text = "GIVE from " + give.from_agent.nick
+                else:
+                    give_text = "??"
             if receive:
-                if receive.from_agent:
+                if receive.from_agent and receive.to_agent:
                     receive_text = "RECEIVE from " + receive.from_agent.nick
-                    if not receive.to_agent:
-                        receive_text = "TO?"
+                elif receive.from_agent and not receive.to_agent:
+                    receive_text = "TO?"
+                elif not receive.from_agent and receive.to_agent:
+                    receive_text = "RECEIVE at " + receive.to_agent.nick
+                else:
+                    give_text = "??"
             if give:
                 from_to = give_text
                 if receive:

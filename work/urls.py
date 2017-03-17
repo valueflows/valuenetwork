@@ -103,10 +103,10 @@ urlpatterns = patterns("",
 
     url(r'^add-transfer/(?P<exchange_id>\d+)/(?P<transfer_type_id>\d+)/$', 'work.views.add_transfer',
         name="add_transfer"),
-    url(r'^add-transfer-commitment/(?P<exchange_id>\d+)/(?P<transfer_type_id>\d+)/$', 'work.views.add_transfer_commitment',
-        name="add_transfer_commitment"),
-    url(r'^change-transfer-commitments/(?P<transfer_id>\d+)/$', 'work.views.change_transfer_commitments',
-        name="change_transfer_commitments"),
+    url(r'^add-transfer-commitment-work/(?P<exchange_id>\d+)/(?P<transfer_type_id>\d+)/$', 'work.views.add_transfer_commitment_work',
+        name="add_transfer_commitment_work"),
+    url(r'^change-transfer-commitments-work/(?P<transfer_id>\d+)/$', 'work.views.change_transfer_commitments_work',
+        name="change_transfer_commitments_work"),
     url(r'^delete-transfer-commitments/(?P<transfer_id>\d+)/$', 'work.views.delete_transfer_commitments',
         name="delete_transfer_commitments"),
     url(r'^transfer-from-commitment/(?P<transfer_id>\d+)/$', 'work.views.transfer_from_commitment',
@@ -125,4 +125,8 @@ urlpatterns = patterns("",
 
     url(r'^delete-exchange/(?P<exchange_id>\d+)/$', 'work.views.delete_exchange',
         name="delete_exchange"),
+
+    url(r'^add-transfer-external-agent/(?P<commitment_id>\d+)/(?P<context_agent_id>\d+)/$', 'work.views.add_transfer_external_agent',
+        name="add_transfer_external_agent"),
+
 )

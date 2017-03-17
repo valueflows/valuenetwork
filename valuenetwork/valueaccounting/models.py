@@ -283,6 +283,7 @@ SIZE_CHOICES = (
     ('network', _('network')),
     ('team', _('project')),
     ('community', _('community')),
+    ('company', _('company')), # bumbum fast hack (all this types can be handled flexible via general app)
 )
 
 
@@ -8111,9 +8112,13 @@ class Transfer(models.Model):
             if give:
                 if give.to_agent:
                     give_text = "GIVE to " + give.to_agent.nick
+                    if not give.from_agent:
+                        give_text = "FROM?"
             if receive:
                 if receive.from_agent:
                     receive_text = "RECEIVE from " + receive.from_agent.nick
+                    if not receive.to_agent:
+                        receive_text = "TO?"
             if give:
                 from_to = give_text
                 if receive:
@@ -8461,6 +8466,7 @@ class Transfer(models.Model):
     def change_commitments_context_form(self): # bumbum
         from work.forms import ContextTransferCommitmentForm
         prefix = self.form_prefix() + "C"
+        #prefix = "ACM" + str(self.transfer_type.id) #self.form_prefix() + "C"
         commits = self.commitments.all()
         if commits:
             commit = commits[0]

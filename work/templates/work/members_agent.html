@@ -1,5 +1,6 @@
 {% extends "work_base.html" %}
 
+{% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load thumbnail %}
@@ -16,6 +17,8 @@
 
 {% block extra_head %}
 
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
 <style>
 
 .labnote {
@@ -26,9 +29,7 @@
 .btn-info {
     margin-left: 10px;
 }
-.hdg {
-    /*color: firebrick;*/
-}
+
 .btn {
     margin-top: 1px;
     margin-bottom: 1px;
@@ -91,6 +92,17 @@ legend {
     display: inline;
 }
 
+  fieldset {
+    border: 0;
+  }
+  label {
+    display: block;
+    margin: 30px 0 0 0;
+  }
+  .overflow {
+    height: 200px;
+  }
+
 </style>
 
 {% endblock %}
@@ -119,6 +131,12 @@ legend {
             <a class="indent smaller" href="{% url "agents" %}">{% trans "All Agents" %}</a> -->
         {% endif %}
         <div class="subnav">
+               {% if user_agent in agent.managers and agent.faircoin_resource %}
+                  <a class="indent" href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">{% trans "Wallet" %}</a>
+               {% endif %}
+               {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants %}
+                   <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+               {% endif %}
                {% if user_agent in agent.managers and agent.project.fobi_slug and agent.project.join_requests %}
                   <a class="indent" href="join-requests">{% trans "Join Requests" %}</a>
                {% elif agent.project in user_agent.joinaproject_requests_projects %}
@@ -127,6 +145,9 @@ legend {
                      <a class="indent" href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">{% trans "Your Joining Feedback" %}</a>
                    {% endif %}
                  {% endfor %}
+               {% endif %}
+               {% if user_agent.is_staff or user_agent in agent.managers %}
+                   <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
                {% endif %}
                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
@@ -148,7 +169,7 @@ legend {
                   </div>
                   {% endif %}
                 {% endif %}
-                {% if not agent.faircoin_address and user_agent.is_staff%}
+                {% if not agent.faircoin_address%}
                     <form
                         style="display: inline;"
                         class="faircoin-form indent"
@@ -394,11 +415,45 @@ legend {
 
 	            </table>
 
+              {% if user.is_staff or user_agent in agent.managers %}
+              <!-- <div class="row-fluid" tyle="margin-top:2em;"> -->
+                <div class="span6 infobox" style="width:100%;">
+                  <h3 class="">{% trans "Resources" %}:</h3>
+                  {% if agent.resources_created %}
+                    <h4 class="hdg">{% trans "Resources Created" %}:</h4>
+                    <ul>
+                        {% for resource in agent.resources_created %}
+                            <li>
+                                <a href="{% url "project_resource" agent_id=agent.id resource_id=resource.id %}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                  {% if agent.resource_relationships %}
+                    <h4 class="hdg">{% trans "Resource Relationships" %}:</h4>
+                    <ul>
+                        {% for rel in agent.resource_relationships %}
+                            {% ifchanged rel.role %}
+                                <h4>{{ rel.role.name }} </h4>
+                            {% endifchanged %}
+                            <li>
+                                <a href="{% url "project_resource" agent_id=agent.id resource_id=rel.resource.id %}"> {{ rel.resource }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+
+
+              <!-- </div> -->
+              {% endif %}
+
 	        </div>
 
         {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+          <div class="span6">
           {% if agent.project and form_entries and fobi_name and user_agent in agent.managers %}
-            <div class="span5 requests">
+            <div class="requests">
               <h3>
                 {% trans "Pending to create user+agent:" %} <!-- <span style="font-weight:normal;">{{ fobi_name }}</span> -->
               </h3>
@@ -412,7 +467,12 @@ legend {
               <p>&nbsp;</p>
             </div>
           {% endif %}
-	        <div class="span4 assoc">
+
+	        <div class="assoc infobox" style="width:95%;">
+            <h3>
+              {% trans "Relations:" %}
+            </h3>
+
                 <h4 class="hdg"> {{ agent.name }} {% trans "is associated with" %}: </h4>
                 <ul>
                 {% for assoc in is_associated_with  %}
@@ -425,7 +485,30 @@ legend {
                 {% endfor %}
                 </ul>
                 {% if has_associations %}
-                    <h4 class="hdg">{{ agent.name }} {% trans "has these associates" %}: </h4>
+                    <h4 class="hdg">{{ agent.name }} {% trans "has these associates" %}: &nbsp; &nbsp;
+                    {% if user_agent in agent.managers or user_agent.is_staff %}
+                      {% if agent.is_context %}
+                        <a href="#agentAssnForm" role="button" class="btn btn-primary btn-mini" data-toggle="modal">{% trans "Edit member relations" %}</a>
+                        <div class="modal hide fade" id="agentAssnForm" tabindex="-1" role="dialog" aria-labelledby="assn-label" aria-hidden="true">
+                          <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                              <h3 id="assn-label">{% trans "Maintain Associates for" %} {{ agent }}</h3>
+                          </div>
+                          <div class="modal-body">
+                              <form id="assnForm" enctype="multipart/form-data" action="{% url "edit_relations" agent_id=agent.id %}" method="POST" >
+                                  {% csrf_token %}
+                                  {{ assn_form|as_bootstrap }}
+
+                                  <div class="modal-footer">
+                                  <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                  <button class="btn btn-primary">{% trans "Save" %}</button>
+                                  </div>
+                              </form>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                    </h4>
                     <ul>
                     {% for assoc in has_associations %}
                         {% ifchanged assoc.association_type %}
@@ -462,6 +545,23 @@ legend {
                 {% endif %}
 
 	          </div>
+            <div class="infobox" style="width:95%;">
+                  <h3 class="">{% trans "Active Processes" %}:</h3>
+                  {% if agent.active_processes %}
+                    <ul>
+                        {% for process in agent.active_processes %}
+                            <li>
+                                <a href="{% url "process_logging" process_id=process.id %}"><b>{{ process }}</b></a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% else %}
+                        <p>{% trans "None" %}</p>
+                  {% endif %}
+            </div>
+          </div>
+
+		    </div>
 
 
             {% if agent.is_individual and user.is_staff %}
@@ -471,59 +571,6 @@ legend {
                 </div>
             {% endif %}
 
-		      </div>
-        {% if user.is_staff %}
-          <div class="row-fluid" tyle="margin-top:2em;">
-            <div class="span6">
-              <h3 class="hdg">{% trans "Resources" %}:</h3>
-              {% if agent.resources_created %}
-                <h4 class="hdg">{% trans "Resources Created" %}:</h4>
-                <ul>
-                    {% for resource in agent.resources_created %}
-                        <li>
-                            <a href="{{ resource.get_absolute_url }}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
-                        </li>
-
-                    {% endfor %}
-                </ul>
-              {% endif %}
-              {% if agent.resource_relationships %}
-                <h4 class="hdg">{% trans "Resource Relationships" %}:</h4>
-                <ul>
-                    {% for rel in agent.resource_relationships %}
-                        {% ifchanged rel.role %}
-                            <h4>{{ rel.role.name }} </h4>
-                        {% endifchanged %}
-                        <li>
-                            <a href="{{ rel.resource.get_absolute_url }}"> {{ rel.resource }}</a>
-                        </li>
-
-                    {% endfor %}
-                </ul>
-              {% endif %}
-
-            </div>
-
-            <div class="span6">
-              <h3 class="hdg">{% trans "Active Processes" %}:</h3>
-
-              {% if agent.active_processes %}
-                <ul>
-                    {% for process in agent.active_processes %}
-                        <li>
-                            <a href="{{ process.get_absolute_url }}"> {{ process }}</a>
-                        </li>
-
-                    {% endfor %}
-                </ul>
-              {% else %}
-                    <p>{% trans "None" %}</p>
-
-              {% endif %}
-
-            </div>
-          </div>
-          {% endif %}
          <div class="row-fluid" tyle="margin-bottom:2em;">
         <hr />
         <h3>{% trans "Cumulative Time" %}</h3>
@@ -583,9 +630,14 @@ legend {
 {% endblock %}
 
 {% block extra_script %}
-	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+  <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> -->
+  <script src="https://code.jquery.com/jquery-1.12.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
 {% endblock %}
 
 
@@ -596,56 +648,64 @@ legend {
 
     $(document).ready(function(){
 
-		$('#projects').addClass('active');
+        var ObjChosSingle = {
+          allow_single_deselect: true,
+          width: "250px",
+          disable_search_threshold: 6
+        };
 
-		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help");
-        }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow");
-            $( "#help" ).text("Show Help");
-        })
+        $(".chzn-select").chosen( ObjChosSingle );
+
+        $('#projects').addClass('active');
+
+        $( "#help" ).toggle( function(){
+                $('#help-content').show("slide", { direction: "right" }, "slow" );
+                $( "#help" ).text("Hide Help");
+            }, function() {
+                $('#help-content').hide("slide", { direction: "right" }, "slow");
+                $( "#help" ).text("Show Help");
+        });
 
         $('td.td-role > select').addClass('select-role');
         $('td.td-agent > select').addClass('select-agent');
 
-        $.validator.addMethod("agentRequired", function (value, element) {
+        if(typeof($.validator) != "undefined"){
+          $.validator.addMethod("agentRequired", function (value, element) {
             alert("value " + value + " element " + element);
             //agent = element.closest(".select-agent");
             //alert("agent " + agent);
 
             return true;
-        }, "Both role and agent must be entered.");
+          }, "Both role and agent must be entered.");
 
-        $.validator.addClassRules("select-role", { agentRequired: true });
+          $.validator.addClassRules("select-role", { agentRequired: true });
 
-        jQuery.validator.setDefaults({
+          jQuery.validator.setDefaults({
             success: function(label) {
-                label
-                    .text('').addClass('valid')
-                    .closest('.control-group').addClass('success');
+              label
+              .text('').addClass('valid')
+              .closest('.control-group').addClass('success');
             }
-        });
+          });
 
-
-        $( "#userForm" ).validate({
-            rules: {
-                username: {
-                    required: true
-                },
-                password1: {
-                    required: true
-                },
-                password2: {
-                    required: true,
-                    equalTo: "#id_password1"
-                },
-            },
-            highlight: function(label) {
-                $(label).closest('.control-group').addClass('error');
-            },
-        });
-
+          $( "#userForm" ).validate({
+              rules: {
+                  username: {
+                      required: true
+                  },
+                  password1: {
+                      required: true
+                  },
+                  password2: {
+                      required: true,
+                      equalTo: "#id_password1"
+                  },
+              },
+              highlight: function(label) {
+                  $(label).closest('.control-group').addClass('error');
+              },
+          });
+        }
 
     }); // end document.ready
 
@@ -659,7 +719,7 @@ legend {
 		});
 	});
 
-
+  if(typeof(google) != "undefined"){
         google.load("visualization", "1", {packages:["corechart"]});
         {% if agent.is_individual %}
             google.setOnLoadCallback(drawChartIndividualStats);
@@ -680,7 +740,7 @@ legend {
                 chart.draw(data, options);
             }
         {% else %}
-            google.setOnLoadCallback(drawChart_recent);
+            if(typeof drawChart_recent != 'undefined') google.setOnLoadCallback(drawChart_recent);
             function drawChart_recent() {
                 var data = google.visualization.arrayToDataTable([
                 ['Member', 'Hours'],
@@ -698,7 +758,7 @@ legend {
                 chart.draw(data, options);
             }
 
-            google.setOnLoadCallback(drawChart_stats);
+            if(typeof drawChart_stats != 'undefined') google.setOnLoadCallback(drawChart_stats);
             function drawChart_stats() {
                 var data = google.visualization.arrayToDataTable([
                 ['Member', 'Hours'],
@@ -716,7 +776,7 @@ legend {
                 chart.draw(data, options);
             }
 
-            google.setOnLoadCallback(drawChart_roles);
+            if(typeof drawChart_roles != 'undefined') google.setOnLoadCallback(drawChart_roles);
             function drawChart_roles() {
                 var data = new google.visualization.DataTable();
                 {% for head in headings %}
@@ -752,7 +812,7 @@ legend {
                 );
             }
             {% endif %}
-
+    }
     </script>
 
 {% endblock %}

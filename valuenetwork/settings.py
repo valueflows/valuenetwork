@@ -196,7 +196,9 @@ INSTALLED_APPS = [
     'account',
     'work.apps.WorkAppConfig',
 
-
+    # general
+    'general',
+    'mptt', # This provide Tree management in a 'nested set' style
 ]
 
 REST_FRAMEWORK = {

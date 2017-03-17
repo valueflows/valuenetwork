@@ -94,11 +94,18 @@
                           title="{% trans 'List of project related tasks' %}"
                           >{% trans 'Your project tasks' %}</a>
                         </li>
-                        <li id="project-tasks" >
-                          <a href="#" class="disabled"
-                          title="{% trans 'Plan process tasks for your project' %}"
+                        {% if request.user.is_staff %}
+                        <li id="project-orders" >
+                          <a href="{% url 'order_list' %}"
+                          title="{% trans 'Open orders in your projects' %}"
+                          >{% trans 'Your project open orders' %}</a>
+                        </li>
+                        <li id="project-process" >
+                          <a href="{% url "plan_work" rand=1 %}"
+                          title="{% trans 'Plan process tasks for a project' %}"
                           >{% trans 'Plan project process' %}</a>
                         </li>
+                        {% endif %}
                         <li id="tutorial" >
                           <a href="#" class="disabled"
                           title="{% trans 'How to create a project in OCP' %}"
@@ -183,7 +190,7 @@
                     {% endif %}
 
                     {% if request.user.agent.agent.is_active_freedom_coop_member %}
-                    <li id="my-services" class="dropdown">
+                    <!-- <li id="my-services" class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% trans 'Member Options' %} <b class="caret"></b></a>
                       <ul class="subnav dropdown-menu" id="tasks-menu">
 
@@ -192,7 +199,7 @@
                         </li>
 
                       </ul>
-                    </li>
+                    </li> -->
                     {% endif %}
 
                     {% if not request.user.agent.agent.is_active_freedom_coop_member and request.user.agent.agent.membership_request %}

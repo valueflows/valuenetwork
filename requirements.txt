@@ -20,5 +20,6 @@ django-contrib-comments
 html5lib==0.99999999
 bleach
 django-simple-captcha
+django-mptt
 django-fobi==0.6.10
 pytz

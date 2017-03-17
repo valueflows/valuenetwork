@@ -204,9 +204,20 @@ class Help(models.Model):
         return self.get_page_display()
 
 
+GENERAL_CLASS_CHOICES = (
+    ('Material_Type', _('Material_Type')),
+    ('Nonmaterial_Type', _('Nonmaterial_Type')),
+)
+
 class Facet(models.Model):
     name = models.CharField(_('name'), max_length=32, unique=True)
     description = models.TextField(_('description'), blank=True, null=True)
+
+    clas = models.CharField(_('clas'),
+        max_length=20,
+        blank=True, null=True,
+        #choices=GENERAL_CLASS_CHOICES
+    )
 
     class Meta:
         ordering = ('name',)
@@ -952,24 +963,50 @@ class EconomicAgent(models.Model):
     def related_contexts(self):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        #cas = [a for a in agents if a.is_context]
+        #return list(set(cas))
         return [a for a in agents if a.is_context]
 
-    def related_all_contexts(self):
+    def related_all_contexts(self, childs=True):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         # bumbum get also parents of parents contexts
         grand_parents = []
         for agn in agents:
           grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
         agents.extend(grand_parents)
-        agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if childs:
+          agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        return list(set([a for a in agents if a.is_context]))
+
+    def related_all_agents(self, childs=True):
+        agents = [ag.has_associate for ag in self.is_associate_of.all()]
+        # bumbum get also parents of parents contexts
+        grand_parents = []
+        for agn in agents:
+          grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+        agents.extend(grand_parents)
+        if childs:
+          agents.extend([ag.is_associate for ag in self.has_associates.all()])
         return list(set(agents))
 
     def related_context_queryset(self):
         ctx_ids = [ctx.id for ctx in self.related_contexts()]
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
-    def related_all_contexts_queryset(self):
-        ctx_ids = [ctx.id for ctx in self.related_all_contexts()]
+    def related_agents_queryset(self):
+        ctx_ids = [ctx.id for ctx in self.related_contexts()]
+        return EconomicAgent.objects.filter(id__in=ctx_ids, is_context=True)
+
+    def related_all_contexts_queryset(self, agent=None, childs=True):
+        ctx_ids = [ctx.id for ctx in self.related_all_contexts(childs)]
+        if agent:
+          ctx_ids.append(agent.id)
+        return EconomicAgent.objects.filter(id__in=ctx_ids)
+
+    def related_all_agents_queryset(self, agent=None, childs=True):
+        ctx_ids = [ctx.id for ctx in self.related_all_agents(childs)]
+        if agent:
+          ctx_ids.append(agent.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
     def invoicing_candidates(self):
@@ -978,6 +1015,7 @@ class EconomicAgent(models.Model):
         if self.is_active_freedom_coop_member():
             ids.insert(0, self.id)
         return EconomicAgent.objects.filter(id__in=ids)
+
 
     #  bum2
     def managed_projects(self): #returns a list or None
@@ -1056,6 +1094,19 @@ class EconomicAgent(models.Model):
             parent = associations[0].has_associate
         return parent
 
+    def context_parents(self):
+        #assumes multiple parents
+        #import pdb; pdb.set_trace()
+        associations = self.is_associate_of.filter(association_type__association_behavior="child").filter(state="active")
+        parents = None
+        if associations.count() > 0:
+            parents = associations #.has_associate
+        else:
+          associations = self.is_associate_of.filter(association_type__association_behavior="member").filter(state="active")
+          if associations.count() > 0:
+            parents = associations
+        return parents
+
     def all_ancestors(self):
         parent_ids = []
         parent_ids.append(self.id)
@@ -1081,6 +1132,12 @@ class EconomicAgent(models.Model):
         else:
             return True
 
+    def is_context_root(self):
+        if self.context_parents(): #.count() > 0:
+            return False
+        else:
+            return True
+
     def suppliers(self):
         #import pdb; pdb.set_trace()
         agent_ids = self.has_associates.filter(association_type__association_behavior="supplier").filter(state="active").values_list('is_associate')
@@ -1098,12 +1155,22 @@ class EconomicAgent(models.Model):
             ).filter(state="active").values_list('is_associate')
         return EconomicAgent.objects.filter(pk__in=agent_ids)
 
+    def member_associations(self):
+        #import pdb; pdb.set_trace()
+        return AgentAssociation.objects.filter(has_associate=self).filter(
+            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")
+            ).filter(state="active")
+
     def individual_members(self):
         return self.members().filter(agent_type__party_type="individual")
 
     #  bum2
     def managers(self): #returns a list or None
         agent_ids = self.has_associates.filter(association_type__association_behavior="manager").filter(state="active").values_list('is_associate')
+        return EconomicAgent.objects.filter(pk__in=agent_ids)
+
+    def participants(self): #returns a list or None
+        agent_ids = self.has_associates.filter(association_type__association_behavior="member").filter(state="active").values_list('is_associate')
         return EconomicAgent.objects.filter(pk__in=agent_ids)
 
     #def affiliates(self):
@@ -1441,6 +1508,12 @@ ASSOCIATION_BEHAVIOR_CHOICES = (
     ('peer', _('peer'))
 )
 
+class AgentAssociationTypeManager(models.Manager):
+
+    def member_types(self):
+        #import pdb; pdb.set_trace()
+        return AgentAssociationType.objects.filter(Q(association_behavior='member')|Q(association_behavior='manager'))
+
 class AgentAssociationType(models.Model):
     identifier = models.CharField(_('identifier'), max_length=12, unique=True)
     name = models.CharField(_('name'), max_length=128)
@@ -1451,6 +1524,8 @@ class AgentAssociationType(models.Model):
     description = models.TextField(_('description'), blank=True, null=True)
     label = models.CharField(_('label'), max_length=32, null=True)
     inverse_label = models.CharField(_('inverse label'), max_length=40, null=True)
+
+    objects = AgentAssociationTypeManager()
 
     def __unicode__(self):
         return self.name
@@ -1868,6 +1943,11 @@ class EconomicResourceType(models.Model):
     created_date = models.DateField(auto_now_add=True, blank=True, null=True, editable=False)
     changed_date = models.DateField(auto_now=True, blank=True, null=True, editable=False)
     slug = models.SlugField(_("Page name"), editable=False)
+
+    context_agent = models.ForeignKey(EconomicAgent,
+        blank=True, null=True,
+        limit_choices_to={"is_context": True,},
+        verbose_name=_('context agent'), related_name='context_resource_types')
 
     objects = EconomicResourceTypeManager()
 
@@ -2764,6 +2844,12 @@ class ProcessPatternManager(models.Manager):
 
 class ProcessPattern(models.Model):
     name = models.CharField(_('name'), max_length=32)
+
+    context_agent = models.ForeignKey(EconomicAgent,
+        blank=True, null=True,
+        limit_choices_to={"is_context": True,},
+        verbose_name=_('context agent'), related_name='process_patterns')
+
     objects = ProcessPatternManager()
 
     class Meta:
@@ -3414,7 +3500,7 @@ class Order(models.Model):
         if process:
             process_name = ", " + process.name
         if self.name:
-            process_name = " ".join(["for", self.name])
+            process_name = " ".join([" for", self.name])
         if self.provider:
             provider_name = self.provider.nick
             provider_label = ", provider:"
@@ -3428,7 +3514,7 @@ class Order(models.Model):
         due_label = " due:"
         if provider_name or receiver_name:
             due_label = ", due:"
-        return " ".join(
+        return "".join(
             [self.get_order_type_display(),
             str(self.id),
             process_name,
@@ -4125,6 +4211,11 @@ class ExchangeType(models.Model):
     changed_date = models.DateField(auto_now=True, blank=True, null=True, editable=False)
     slug = models.SlugField(_("Page name"), editable=False)
 
+    context_agent = models.ForeignKey(EconomicAgent,
+        blank=True, null=True,
+        limit_choices_to={"is_context": True,},
+        verbose_name=_('context agent'), related_name='exchange_types')
+
     objects = ExchangeTypeManager()
 
     class Meta:
@@ -4151,6 +4242,12 @@ class ExchangeType(models.Model):
 
     def transfer_types_reciprocal(self):
         return self.transfer_types.filter(is_reciprocal=True)
+
+    def transfer_types_inheriting(self):
+        return self.transfer_types.filter(inherit_types=True)
+
+    def transfer_types_creating(self):
+        return self.transfer_types.filter(can_create_resource=True)
 
 
 class GoodResourceManager(models.Manager):
@@ -7105,6 +7202,9 @@ class Process(models.Model):
                                 ip.resource.compute_income_shares_for_use(value_equation, ip, ip_value, resource_value, events, visited)
 
 
+#from general.models import Material_Type, Nonmaterial_Type, Artwork_Type
+#from work.models import Ocp_Material_Type, Ocp_Nonmaterial_Type
+
 class TransferType(models.Model):
     name = models.CharField(_('name'), max_length=128)
     sequence = models.IntegerField(_('sequence'), default=0)
@@ -7130,6 +7230,7 @@ class TransferType(models.Model):
         related_name='transfer_types_changed', blank=True, null=True, editable=False)
     created_date = models.DateField(auto_now_add=True, blank=True, null=True, editable=False)
     changed_date = models.DateField(auto_now=True, blank=True, null=True, editable=False)
+    inherit_types = models.BooleanField(_('inherit resource types'), default=False)
 
     def __unicode__(self):
         return self.name
@@ -7148,6 +7249,22 @@ class TransferType(models.Model):
 
     def get_resource_types(self):
         #import pdb; pdb.set_trace()
+        answer_ids = []
+        if self.inherit_types:
+            # TODO
+            try:
+              if hasattr(self.exchange_type, 'ocp_record_type'):
+                oet = self.exchange_type.ocp_record_type
+                if hasattr(oet, 'ocp_resource_type'):
+                  ort = oet.ocp_resource_type
+                  if ort:
+                     orts = Ocp_Artwork_Type.objects.filter(lft__gte=ort.lft, rght__lte=ort.rght, tree_id=ort.tree_id)
+                     answer_ids = [rt.resource_type.id for rt in orts]
+                     answer = EconomicResourceType.objects.filter(id__in=answer_ids)
+                     return answer
+            except:
+               pass
+
         tt_facet_values = self.facet_values.all()
         facet_values = [ttfv.facet_value for ttfv in tt_facet_values]
         facets = {}
@@ -7193,11 +7310,24 @@ class TransferType(models.Model):
         else:
             return EconomicAgent.objects.all()
 
+    def to_context_agents(self, context_agent):
+        #import pdb; pdb.set_trace()
+        if self.receive_agent_association_type:
+            return context_agent.has_associates_self_or_inherited(self.receive_agent_association_type.identifier)
+        else:
+            return context_agent.related_all_agents_queryset() #EconomicAgent.objects.all()
+
     def from_agents(self, context_agent):
         if self.give_agent_association_type:
             return context_agent.has_associates_self_or_inherited(self.give_agent_association_type.identifier)
         else:
             return EconomicAgent.objects.all()
+
+    def from_context_agents(self, context_agent):
+        if self.give_agent_association_type:
+            return context_agent.has_associates_self_or_inherited(self.give_agent_association_type.identifier)
+        else:
+            return context_agent.related_all_agents_queryset() #EconomicAgent.objects.all()
 
     def form_prefix(self):
         return "-".join(["TT", str(self.id)])
@@ -7251,6 +7381,13 @@ class ExchangeManager(models.Manager):
         else:
             exchanges = Exchange.objects.filter(use_case__identifier="intrnl_xfer")
         return exchanges
+
+    def exchanges_by_date_and_context(self, start, end, agent):
+        return Exchange.objects.filter(start_date__range=[start, end]).filter( Q(context_agent__isnull=False, context_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__from_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__to_agent=agent) ).distinct() # | Q(context_agent__isnull=False, context_agent=agent) ) # bumbum add Q's from and to agent
+
+    def exchanges_by_type(self, agent):
+        return Exchange.objects.filter( Q(context_agent__isnull=False, context_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__from_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__to_agent=agent) ).distinct().order_by('exchange_type__ocp_record_type__name') # bumbum add Q's from and to agent
+
 
 class Exchange(models.Model):
     name = models.CharField(_('name'), blank=True, max_length=128)
@@ -7846,6 +7983,26 @@ class Exchange(models.Model):
                 #local_total = sum(lo.share for lo in locals)
                 #print "local_total:", local_total
 
+    def related_agents(self):
+        evts = self.events.all()
+        coms = self.commitments.all()
+        agents = []
+        for ev in evts:
+          if not ev.to_agent in agents:
+            agents.append(ev.to_agent)
+          if not ev.from_agent in agents:
+            agents.append(ev.from_agent)
+          if not ev.created_by.agent.agent in agents:
+            agents.append(ev.created_by.agent.agent)
+        for cm in coms:
+          if not cm.to_agent in agents:
+            agents.append(cm.to_agent)
+          if not cm.from_agent in agents:
+            agents.append(cm.from_agent)
+          if not cm.created_by.agent.agent in agents:
+            agents.append(cm.created_by.agent.agent)
+        #import pdb; pdb.set_trace()
+        return agents
 
 class Transfer(models.Model):
     name = models.CharField(_('name'), blank=True, max_length=128)
@@ -8079,12 +8236,22 @@ class Transfer(models.Model):
         else:
             return None
 
+    def event_description(self):
+        #import pdb; pdb.set_trace()
+        events = self.events.all()
+        if events:
+            return events[0].description
+        else:
+            return None
+
     def save(self, *args, **kwargs):
+        #import pdb; pdb.set_trace()
         if self.id:
             if not self.transfer_type:
                 msg = " ".join(["No transfer type on transfer: ", str(self.id)])
                 assert False, msg
         if self.transfer_type:
+            #if self.events. # try to reach the ocp_resource_type and save the related resource_type
             super(Transfer, self).save(*args, **kwargs)
 
     def is_reciprocal(self):
@@ -8250,10 +8417,26 @@ class Transfer(models.Model):
             }
         return TransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, posting=False, prefix=prefix)
 
+    def commit_transfer_context_form(self): # bumbum
+        from work.forms import ContextTransferForm
+        prefix=self.form_prefix()
+        #import pdb; pdb.set_trace()
+        init = {
+            "event_date": datetime.date.today(),
+            "resource_type": self.resource_type(),
+            "quantity": self.quantity(),
+            "value": self.value(),
+            "unit_of_value": self.unit_of_value(),
+            "from_agent": self.from_agent(),
+            "to_agent": self.to_agent(),
+            }
+        return ContextTransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=self.resource_type(), posting=False, prefix=prefix)
+
     def create_role_formset(self, data=None):
         #import pdb; pdb.set_trace()
         from valuenetwork.valueaccounting.views import resource_role_agent_formset
         return resource_role_agent_formset(prefix=self.form_prefix(), data=data)
+
 
     def change_commitments_form(self):
         from valuenetwork.valueaccounting.forms import TransferCommitmentForm
@@ -8273,6 +8456,26 @@ class Transfer(models.Model):
                 "to_agent": commit.to_agent,
                 }
             return TransferCommitmentForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, posting=False, prefix=prefix)
+        return None
+
+    def change_commitments_context_form(self): # bumbum
+        from work.forms import ContextTransferCommitmentForm
+        prefix = self.form_prefix() + "C"
+        commits = self.commitments.all()
+        if commits:
+            commit = commits[0]
+            init = {
+                "commitment_date": commit.commitment_date,
+                "due_date": commit.due_date,
+                "description":commit.description,
+                "resource_type": commit.resource_type,
+                "quantity": commit.quantity,
+                "value": commit.value,
+                "unit_of_value": commit.unit_of_value,
+                "from_agent": commit.from_agent,
+                "to_agent": commit.to_agent,
+                }
+            return ContextTransferCommitmentForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=commit.resource_type, posting=False, prefix=prefix)
         return None
 
     def change_events_form(self):
@@ -8301,6 +8504,34 @@ class Transfer(models.Model):
                 "to_agent": event.to_agent,
                 }
             return TransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=event.resource_type, posting=False, prefix=prefix)
+        return None
+
+    def change_events_context_form(self):
+        #import pdb; pdb.set_trace()
+        from work.forms import ContextTransferForm
+        prefix = self.form_prefix() + "E"
+        events = self.events.all()
+        if events:
+            event = events[0]
+            from_resource, resource = self.give_and_receive_resources()
+            if from_resource and not resource:
+                resource = from_resource
+            init = {
+                "resource": resource,
+                "from_resource": from_resource,
+                "description": event.description,
+                "is_contribution": event.is_contribution,
+                "event_reference": event.event_reference,
+                "event_date": event.event_date,
+                "description":event.description,
+                "resource_type": event.resource_type,
+                "quantity": event.quantity,
+                "value": event.value,
+                "unit_of_value": event.unit_of_value,
+                "from_agent": event.from_agent,
+                "to_agent": event.to_agent,
+                }
+            return ContextTransferForm(initial=init, transfer_type=self.transfer_type, context_agent=self.context_agent, resource_type=event.resource_type, posting=False, prefix=prefix)
         return None
 
 

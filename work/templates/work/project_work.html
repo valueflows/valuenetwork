@@ -196,7 +196,8 @@ th, td {
 		        {% trans "Your projects tasks" %}
 
                 <div class="subnav">
-                    <!-- <a class="indent" href="#">{% trans "Open Orders" %}</a> -->
+
+                    {% if request.user.is_staff %}<a class="indent" href="{% url "order_list" %}">{% trans "Open Orders" %}</a>{% endif %}
                     <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                 </div>
             </legend>
@@ -547,7 +548,14 @@ th, td {
 
 		$('#work').addClass('active');
 
-		$(".chzn-select").chosen();
+    var ObjChosSingle = {
+        allow_single_deselect: true,
+        width: "250px",
+        disable_search_threshold: 6,
+    };
+
+		$(".chzn-select").chosen( ObjChosSingle );
+
 		$("textarea").resizable();
 
 		$( "#help" ).toggle( function(){

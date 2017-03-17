@@ -27,7 +27,9 @@ from django_comments.models import Comment, CommentFlag
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
 from valuenetwork.valueaccounting.utils import *
-from work.models import MembershipRequest, SkillSuggestion
+from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
+from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
+from work.utils import *
 
 if "notification" in settings.INSTALLED_APPS:
     from notification import models as notification
@@ -133,6 +135,7 @@ def create_user(request, agent_id):
             agent.request_faircoin_address()
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/agent', agent.id))
+
 
 @login_required
 def create_user_and_agent(request):
@@ -2405,6 +2408,9 @@ def delete_order(request, order_id):
         if next == "closed_work_orders":
             return HttpResponseRedirect('/%s/'
                 % ('accounting/closed-work-orders'))
+        if next == "order-list":
+            return HttpResponseRedirect('/%s/'
+                % ('work/order-list'))
 
 @login_required
 def delete_process_input(request,
@@ -5258,7 +5264,12 @@ def add_unplanned_output(request, process_id):
                 event.save()
                 process.set_started(event.event_date, request.user)
 
-                role_formset =  resource_role_agent_formset(prefix="resource", data=request.POST)
+                next = request.POST.get("next")
+                if next and next == "exchange-work":
+                  role_formset =  resource_role_context_agent_formset(prefix="resource", data=request.POST)
+                else:
+                  role_formset =  resource_role_agent_formset(prefix="resource", data=request.POST)
+
                 for form_rra in role_formset.forms:
                     if form_rra.is_valid():
                         data_rra = form_rra.cleaned_data
@@ -5810,7 +5821,7 @@ def add_uninventoried_shipment(request, exchange_id):
 @login_required
 def create_production_process(request, commitment_id):
     """ this creates a production process for a shipment commitment
-        on the order_schedule page
+        on the order_schedule page (order_plan page in work app)
     """
     commitment = get_object_or_404(Commitment, pk=commitment_id)
     if request.method == "POST":
@@ -5834,6 +5845,12 @@ def create_production_process(request, commitment_id):
                 state=None,
                 from_agent=process.context_agent,
                 to_agent=commitment.context_agent)
+
+        next = request.POST.get("next")
+        if next:
+            if next == "order-plan":
+                return HttpResponseRedirect('/%s/%s/'
+                    % ('work/order-plan', commitment.order.id))
 
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/order-schedule', commitment.order.id))
@@ -5978,7 +5995,12 @@ def add_transfer(request, exchange_id, transfer_type_id):
     if request.method == "POST":
         exchange_type = exchange.exchange_type
         context_agent = exchange.context_agent
-        form = TransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ATR" + str(transfer_type.id))
+        next = request.POST.get("next")
+        if next and next == "exchange-work":
+            form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ATR" + str(transfer_type.id))
+            #import pdb; pdb.set_trace()
+        else:
+            form = TransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ATR" + str(transfer_type.id))
         if form.is_valid():
             data = form.cleaned_data
             qty = data["quantity"]
@@ -5998,7 +6020,13 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+                #import pdb; pdb.set_trace()
                 #if not transfer_type.can_create_resource:
                 res = data["resource"]
                 if transfer_type.is_currency:
@@ -6075,7 +6103,10 @@ def add_transfer(request, exchange_id, transfer_type_id):
                 if res_from:
                     res_from.save()
                 if res_identifier: #new resource
-                    create_role_formset = resource_role_agent_formset(prefix=str(transfer_type.id), data=request.POST)
+                    if next and next == "exchange-work":
+                      create_role_formset = resource_role_context_agent_formset(prefix=str(transfer_type.id), data=request.POST)
+                    else:
+                      create_role_formset = resource_role_agent_formset(prefix=str(transfer_type.id), data=request.POST)
                     for form_rra in create_role_formset.forms:
                         if form_rra.is_valid():
                             data_rra = form_rra.cleaned_data
@@ -6169,6 +6200,13 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     )
                     event2.save()
 
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6180,7 +6218,11 @@ def transfer_from_commitment(request, transfer_id):
     context_agent = transfer.context_agent
     if request.method == "POST":
         #import pdb; pdb.set_trace()
-        form = TransferForm(data=request.POST, transfer_type=transfer.transfer_type, context_agent=transfer.context_agent, posting=True, prefix=transfer.form_prefix())
+        next = request.POST.get("next")
+        if next and next == "exchange-work":
+            form = ContextTransferForm(data=request.POST, transfer_type=transfer.transfer_type, context_agent=transfer.context_agent, posting=True, prefix=transfer.form_prefix())
+        else:
+            form = TransferForm(data=request.POST, transfer_type=transfer.transfer_type, context_agent=transfer.context_agent, posting=True, prefix=transfer.form_prefix())
         if form.is_valid():
             data = form.cleaned_data
             et_give = EventType.objects.get(name="Give")
@@ -6195,7 +6237,12 @@ def transfer_from_commitment(request, transfer_id):
                 to_agent = context_agent
             else:
                 to_agent = data["to_agent"]
+
             rt = data["resource_type"]
+            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                gen_rt = data["ocp_resource_type"]
+                rt = get_rt_from_ocp_rt(gen_rt)
+
             #if not transfer_type.can_create_resource:
             res = data["resource"]
             description = data["description"]
@@ -6282,6 +6329,13 @@ def transfer_from_commitment(request, transfer_id):
                 commit.finished = True
                 commit.save()
 
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', transfer.context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
+
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6293,7 +6347,11 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
         #import pdb; pdb.set_trace()
         exchange_type = exchange.exchange_type
         context_agent = exchange.context_agent
-        form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
+        next = request.POST.get("next")
+        if next and next == "exchange-work":
+            form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
+        else:
+            form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
         if form.is_valid():
             data = form.cleaned_data
             qty = data["quantity"]
@@ -6309,7 +6367,12 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
                 description = data["description"]
                 if transfer_type.is_currency:
                     value = qty
@@ -6392,6 +6455,12 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                     )
                     commit2.save()
 
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6404,7 +6473,11 @@ def change_transfer_events(request, transfer_id):
         exchange = transfer.exchange
         context_agent = transfer.context_agent
         #import pdb; pdb.set_trace()
-        form = TransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
+        next = request.POST.get("next")
+        if next and next == "exchange-work":
+            form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
+        else:
+            form = TransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
         if form.is_valid():
             data = form.cleaned_data
             et_give = EventType.objects.get(name="Give")
@@ -6420,7 +6493,12 @@ def change_transfer_events(request, transfer_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
                 res = data["resource"]
                 res_from = None
                 if transfer_type.is_currency:
@@ -6504,6 +6582,12 @@ def change_transfer_events(request, transfer_id):
                 transfer.transfer_date = event_date
                 transfer.save()
 
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6516,7 +6600,11 @@ def change_transfer_commitments(request, transfer_id):
         exchange = transfer.exchange
         context_agent = transfer.context_agent
         #import pdb; pdb.set_trace()
-        form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
+        next = request.POST.get("next")
+        if next and next == "exchange-work":
+            form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
+        else:
+            form = TransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
         if form.is_valid():
             data = form.cleaned_data
             et_give = EventType.objects.get(name="Give")
@@ -6533,7 +6621,13 @@ def change_transfer_commitments(request, transfer_id):
                     to_agent = context_agent
                 else:
                     to_agent = data["to_agent"]
+
                 rt = data["resource_type"]
+                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+                    gen_rt = data["ocp_resource_type"]
+                    rt = get_rt_from_ocp_rt(gen_rt)
+
+
                 description = data["description"]
                 if transfer_type.is_currency:
                     value = qty
@@ -6559,6 +6653,12 @@ def change_transfer_commitments(request, transfer_id):
                     commit.changed_by = request.user
                     commit.save()
 
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6572,6 +6672,11 @@ def delete_transfer_commitments(request, transfer_id):
                 commit.delete()
         if transfer.is_deletable():
              transfer.delete()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', transfer.context_agent.id, 'exchange-logging-work', 0, exchange.id))
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6609,6 +6714,12 @@ def delete_transfer_events(request, transfer_id):
                     receive_res.save()
         if transfer.is_deletable():
              transfer.delete()
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', transfer.context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -6930,6 +7041,9 @@ def delete_event(request, event_id):
     if next == "exchange":
         return HttpResponseRedirect('/%s/%s/%s/'
             % ('accounting/exchange', 0, exchange.id))
+    if next == "exchange-work":
+        return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+            % ('work/agent', event.context_agent.id, 'exchange-logging-work', 0, exchange.id))
     if next == "distribution":
         return HttpResponseRedirect('/%s/%s/'
             % ('accounting/distribution', distribution.id))
@@ -7000,7 +7114,10 @@ def delete_exchange(request, exchange_id):
         if next == "distributions":
             return HttpResponseRedirect('/%s/'
                 % ('accounting/distributions'))
-       #needs a fall-through if next is none of the above
+        if next == "exchanges-all":
+            return HttpResponseRedirect('/%s/%s/%s/'
+                % ('work/agent', exchange.context_agent.id, 'exchanges'))
+       #todo: needs a fall-through if next is none of the above
 
 
 @login_required
@@ -8121,6 +8238,11 @@ def add_work_for_exchange(request, exchange_id):
         event.created_by = request.user
         event.changed_by = request.user
         event.save()
+    next = request.POST.get("next")
+    if next:
+        if next == "exchange-work":
+            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
@@ -9115,9 +9237,17 @@ def change_exchange_work_event(request, event_id):
         if form.is_valid():
             data = form.cleaned_data
             form.save()
+
+        next = request.POST.get("next")
+        if next:
+            if next == "exchange-work":
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('accounting/exchange', 0, exchange.id))
 
+#obsolete?
 @login_required
 def change_unplanned_payment_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)
@@ -9160,6 +9290,7 @@ def change_unplanned_payment_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_receipt_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)
@@ -9179,6 +9310,7 @@ def change_receipt_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_cash_receipt_event(request, event_id):
     #import pdb; pdb.set_trace()
@@ -9221,6 +9353,7 @@ def change_cash_receipt_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_shipment_event(request, event_id):
     #import pdb; pdb.set_trace()
@@ -9255,6 +9388,7 @@ def change_shipment_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#obsolete?
 @login_required
 def change_uninventoried_shipment_event(request, event_id):
     #import pdb; pdb.set_trace()
@@ -9358,6 +9492,7 @@ def change_disbursement_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/distribution', distribution.id))
 
+#obsolete?
 @login_required
 def change_expense_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)
@@ -13418,3 +13553,16 @@ def connect_agent_to_request(request, membership_request_id):
 
     return HttpResponseRedirect('/%s/'
         % ('accounting/membership-requests'))
+
+
+def resource_role_context_agent_formset(prefix, data=None):
+    #import pdb; pdb.set_trace()
+    RraFormSet = modelformset_factory(
+        AgentResourceRole,
+        form=ResourceRoleContextAgentForm,
+        can_delete=True,
+        extra=4,
+        )
+    formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
+    return formset
+

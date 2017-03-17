@@ -8,6 +8,8 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from valuenetwork.valueaccounting.models import *
 #from fobi.models import FormEntry
 
+from mptt.fields import TreeForeignKey
+
 MEMBERSHIP_TYPE_CHOICES = (
     #('participant', _('project participant (no membership)')),
     ('individual', _('individual membership (min 1 share)')),
@@ -112,6 +114,52 @@ class Project(models.Model):
     def is_public(self):
         return self.visibility == 'public'
 
+    def used_units_ids(self):
+        exs = Exchange.objects.exchanges_by_type(self.agent)
+        uids = []
+        for ex in exs:
+          txs = ex.transfers.all()#filter(events__unit_of_value__ocp_unit_type__isnull=False) #exchange_type.transfer_types.all()
+          for tx in txs:
+            uv = tx.unit_of_value()
+            if uv and not uv.ocp_unit_type.id in uids:
+              # mptt: get_ancestors(ascending=False, include_self=False)
+              #ancs = uv.ocp_unit_type.get_ancestors(False, True)
+              #for an in ancs:
+              #  if not an.id in uids:
+              #    uids.append(an.id)
+              uids.append(uv.ocp_unit_type.id)
+            #rt = tx.resource_type()
+            #if rt.unit_of_value and rt.unit_of_value.ocp_unit_type:
+              #ancs = rt.unit_of_value.ocp_unit_type.get_ancestors(False, True)
+              #for an in ancs:
+              #  if not an.id in uids:
+              #    uids.append(an.id)
+              #pass #uids.append(rt.unit_of_value.ocp_unit_type.id)
+            uq = tx.unit_of_quantity()
+            if uq:
+              if not hasattr(uq, 'ocp_unit_type'):
+                raise ValidationError("The unit has not ocp_unit_type! "+str(uq))
+              else:
+                if uq.ocp_unit_type.clas == 'each':
+                  rt = tx.resource_type()
+                  if hasattr(rt, 'ocp_artwork_type') and rt.ocp_artwork_type:
+                    ancs = rt.ocp_artwork_type.get_ancestors(False,True)
+                    cur = False
+                    for an in ancs:
+                      if an.clas == "currency":
+                        cur = True
+                    if cur:
+                      if hasattr(rt.ocp_artwork_type, 'unit_type') and rt.ocp_artwork_type.unit_type.id:
+                        if rt.ocp_artwork_type.unit_type.ocp_unit_type:
+                          if not rt.ocp_artwork_type.unit_type.ocp_unit_type.id in uids:
+                            uids.append(rt.ocp_artwork_type.unit_type.ocp_unit_type.id)
+                        #pass
+
+                      #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.unit_type))
+
+
+
+        return uids
 
 class SkillSuggestion(models.Model):
     skill = models.CharField(_('skill'), max_length=128,
@@ -130,7 +178,7 @@ class SkillSuggestion(models.Model):
 
     def __unicode__(self):
         return self.skill
-       
+
     def form_prefix(self):
         return "".join(["SS", str(self.id)])
 
@@ -195,17 +243,17 @@ class JoinRequest(models.Model):
 
     def __unicode__(self):
         return self.name
-        
+
     def form_prefix(self):
         return "".join(["JR", str(self.id)])
-        
+
     def full_name(self):
         if self.surname:
             answer = " ".join([self.name, self.surname])
         else:
             answer = self.name
         return answer
-        
+
     def agent_type(self):
         if self.type_of_user == "individual":
             answer = AgentType.objects.individual_type()
@@ -235,13 +283,13 @@ class NewFeature(models.Model):
     url = models.CharField(_('url'), max_length=255, blank=True,)
     screenshot = ThumbnailerImageField(_("screenshot"),
         upload_to='photos', blank=True, null=True,)
-    
+
     class Meta:
         ordering = ('-deployment_date',)
-    
+
     def __unicode__(self):
         return self.name
-        
+
 
 class InvoiceNumber(models.Model):
     invoice_number = models.CharField(_('invoice number'), max_length=128)
@@ -258,13 +306,13 @@ class InvoiceNumber(models.Model):
     created_by = models.ForeignKey(User, verbose_name=_('created by'),
         related_name='invoice_numbers_created', editable=False)
     created_date = models.DateField(auto_now_add=True, editable=False)
-        
+
     class Meta:
         ordering = ('-invoice_date', "-sequence",)
-    
+
     def __unicode__(self):
         return self.invoice_number
-        
+
     def save(self, *args, **kwargs):
         if self.year:
             year = self.year
@@ -295,4 +343,340 @@ class InvoiceNumber(models.Model):
             unicode(self.member.id),
             ])
         super(InvoiceNumber, self).save(*args, **kwargs)
-    
+
+
+from general.models import Record_Type, Artwork_Type, Material_Type, Nonmaterial_Type, Job, Unit_Type
+from mptt.models import TreeManager
+
+# TODO: make a manager and a method to review and import general.types not in ocp_artwork_type
+class Ocp_Artwork_TypeManager(TreeManager):
+
+    def update_from_general(self):
+        #try:
+        #    share = EconomicResourceType.objects.get(name="Membership Share")
+        #except EconomicResourceType.DoesNotExist:
+        #    raise ValidationError("Membership Share does not exist by that name")
+        return False #share
+
+
+class Ocp_Artwork_Type(Artwork_Type):
+    artwork_type = models.OneToOneField(
+      Artwork_Type,
+      on_delete=models.CASCADE,
+      primary_key=True,
+      parent_link=True
+    )
+    material_type = TreeForeignKey(
+      Material_Type,
+      on_delete=models.CASCADE,
+      verbose_name=_('general material_type'),
+      related_name='ocp_artwork_types',
+      blank=True, null=True,
+      help_text=_("a related General Material Type")
+    )
+    nonmaterial_type = TreeForeignKey(
+      Nonmaterial_Type,
+      on_delete=models.CASCADE,
+      verbose_name=_('general nonmaterial_type'),
+      related_name='ocp_artwork_types',
+      blank=True, null=True,
+      help_text=_("a related General Non-material Type")
+    )
+    facet = models.OneToOneField(
+      Facet,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet'),
+      related_name='ocp_artwork_type',
+      blank=True, null=True,
+      help_text=_("a related OCP Facet")
+    )
+    facet_value = models.ForeignKey(
+      FacetValue,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet_value'),
+      related_name='ocp_artwork_type',
+      blank=True, null=True,
+      help_text=_("a related OCP FacetValue")
+    )
+    resource_type = models.OneToOneField(
+      EconomicResourceType,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp resource_type'),
+      related_name='ocp_artwork_type',
+      blank=True, null=True,
+      help_text=_("a related OCP ResourceType")
+    )
+    context_agent = models.ForeignKey(EconomicAgent, # this field should be used only if there's no resource_type
+      verbose_name=_('context agent'),               # and is needed to hide the category name by context
+      on_delete=models.CASCADE,
+      related_name='ocp_artwork_types',
+      blank=True, null=True,
+      help_text=_("a related OCP context EconomicAgent")
+    )
+    unit_type = TreeForeignKey(
+        Unit_Type,
+        on_delete=models.CASCADE,
+        verbose_name=_('general unit_type'),
+        related_name='ocp_artwork_types',
+        blank=True, null=True,
+        help_text=_("a related General Unit Type")
+    )
+
+    objects = Ocp_Artwork_TypeManager()
+
+    class Meta:
+      verbose_name= _(u'Type of General Artwork/Resource')
+      verbose_name_plural= _(u'o-> Types of General Artworks/Resources')
+
+    def __unicode__(self):
+      if self.resource_type:
+        return self.name+' <' #+'  ('+self.resource_type.name+')'
+      elif self.facet_value:
+        return self.name #+'  ('+self.facet_value.value+')'
+      elif self.facet:
+        return self.name+'  ('+self.facet.name+')'
+      else:
+        return self.name
+
+
+
+class Ocp_Skill_Type(Job):
+    job = models.OneToOneField(
+      Job,
+      on_delete=models.CASCADE,
+      primary_key=True,
+      parent_link=True
+    )
+    resource_type = models.OneToOneField(
+      EconomicResourceType,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp resource_type'),
+      related_name='ocp_skill_type',
+      blank=True, null=True,
+      help_text=_("a related OCP ResourceType")
+    )
+    facet = models.OneToOneField( # only root nodes can have unique facets
+      Facet,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet'),
+      related_name='ocp_skill_type',
+      blank=True, null=True,
+      help_text=_("a related OCP Facet")
+    )
+    facet_value = models.OneToOneField( # only some tree folders can have unique facet_values
+      FacetValue,
+      on_delete=models.CASCADE,
+      verbose_name=_('ocp facet_value'),
+      related_name='ocp_skill_type',
+      blank=True, null=True,
+      help_text=_("a related OCP FacetValue")
+    )
+    ocp_artwork_type = TreeForeignKey(
+      Ocp_Artwork_Type,
+      on_delete=models.CASCADE,
+      verbose_name=_('general artwork_type'),
+      related_name='ocp_skill_types',
+      blank=True, null=True,
+      help_text=_("a related General Artwork Type")
+    )
+
+
+    class Meta:
+      verbose_name= _(u'Type of General Skill Resources')
+      verbose_name_plural= _(u'o-> Types of General Skill Resources')
+
+    def __unicode__(self):
+      if self.resource_type:
+        if self.ocp_artwork_type:
+          return self.get_gerund()+' - '+self.ocp_artwork_type.name.lower()+' <'
+        else:
+          return self.get_gerund()+' <' #name #+'  ('+self.resource_type.name+')'
+      elif self.facet_value:
+        return self.get_gerund() #+'  ('+self.facet_value.value+')'
+      else:
+        return self.get_gerund()
+
+    def get_gerund(self):
+      if self.gerund:
+        return self.gerund.title()
+      elif self.verb:
+        return self.verb
+      else:
+        return self.name
+
+
+class Ocp_Record_Type(Record_Type):
+    record_type = models.OneToOneField(
+        Record_Type,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        parent_link=True
+    )
+    exchange_type = models.OneToOneField(
+        ExchangeType,
+        on_delete=models.CASCADE,
+        blank=True, null=True,
+        verbose_name=_('ocp exchange type'),
+        related_name='ocp_record_type'
+    )
+    ocp_artwork_type = TreeForeignKey(
+        Ocp_Artwork_Type,
+        on_delete=models.CASCADE,
+        verbose_name=_('general artwork_type'),
+        related_name='ocp_record_types',
+        blank=True, null=True,
+        help_text=_("a related General Artwork Type")
+    )
+    ocp_skill_type = TreeForeignKey(
+        Ocp_Skill_Type,
+        on_delete=models.CASCADE,
+        verbose_name=_('general skill_type'),
+        related_name='ocp_record_types',
+        blank=True, null=True,
+        help_text=_("a related General Skill Type")
+    )
+
+    class Meta:
+        verbose_name= _(u'Type of General Record')
+        verbose_name_plural= _(u'o-> Types of General Records')
+
+    def __unicode__(self):
+      if self.exchange_type:
+        return self.name+' <' #+'  ('+self.resource_type.name+')'
+      else:
+        return self.name
+
+    def context_agent(self):
+      if self.exchange_type:
+        if self.exchange_type.context_agent:
+          return self.exchange_type.context_agent
+      return None
+
+    def get_ocp_resource_types(self, transfer_type=None):
+        answer = None
+        if transfer_type:
+          if transfer_type.inherit_types:
+            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocp_artwork_type.lft, rght__lte=self.ocp_artwork_type.rght, tree_id=self.ocp_artwork_type.tree_id).order_by('lft')
+          else:
+            facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
+            Mtyp = False
+            Ntyp = False
+            try:
+                Mtyp = Artwork_Type.objects.get(clas="Material")
+                Ntyp = Artwork_Type.objects.get(clas="Nonmaterial")
+            except:
+                pass
+
+            Rids = []
+            Sids = []
+            for fv in facetvalues:
+                try:
+                    gtyps = Ocp_Artwork_Type.objects.filter(facet_value__value=fv)
+                    for gtyp in gtyps:
+                      subids = [typ.id for typ in Ocp_Artwork_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
+                      Rids += subids+[gtyp.id]
+                except:
+                    pass
+
+                try:
+                    gtyp = Ocp_Skill_Type.objects.get(facet_value__value=fv)
+                    subids = [typ.id for typ in Ocp_Skill_Type.objects.filter(lft__gt=gtyp.lft, rght__lt=gtyp.rght, tree_id=gtyp.tree_id)]
+                    Sids += subids+[gtyp.id]
+                except:
+                    pass
+
+            for facet in transfer_type.facets():
+                if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type" or facet.clas == "Currency_Type":
+                    if Rids:
+                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids)#.order_by('tree_id','lft')
+                        #if Nids: # and Ntyp:
+                        #    Mtys = Artwork_Type.objects.filter(id__in=Nids+Mids) #+[Ntyp.id, Mtyp.id])
+                        answer = Rtys
+                    else:
+                        answer = Ocp_Artwork_Type.objects.all()
+
+                elif facet.clas == "Skill_Type":
+                    if Sids:
+                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids)
+                        #if Mids: # and Mtyp:
+                        #    Ntys = Artwork_Type.objects.filter(id__in=Mids+Nids) #+[Ntyp.id, Mtyp.id])
+                        answer = Stys
+                    else:
+                        answer = Ocp_Skill_Type.objects.all()
+
+                #elif facet.clas == "Currency_Type":
+                #    pass
+                else:
+                    pass
+
+        if not answer:
+          return Ocp_Artwork_Type.objects.none()
+
+        return answer
+
+
+
+from general.models import Unit as Gen_Unit
+
+class Ocp_Unit_Type(Unit_Type):
+    unit_type = models.OneToOneField(
+        Unit_Type,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        parent_link=True
+    )
+    ocp_unit =  models.OneToOneField(
+        Unit,
+        on_delete=models.CASCADE,
+        verbose_name=_('ocp unit'),
+        related_name='ocp_unit_type',
+        blank=True, null=True,
+        help_text=_("a related OCP Unit")
+    )
+    unit = models.OneToOneField(
+        Gen_Unit,
+        on_delete=models.CASCADE,
+        verbose_name=_('general unit'),
+        related_name='ocp_unit_type',
+        blank=True, null=True,
+        help_text=_("a related General Unit")
+    )
+
+    class Meta:
+        verbose_name= _(u'Type of General Unit')
+        verbose_name_plural= _(u'o-> Types of General Units')
+
+    def __unicode__(self):
+      if self.children.count():
+        if self.ocp_unit:
+          return self.name+': <' #+'  ('+self.resource_type.name+')'
+        else:
+          return self.name+': '
+      else:
+        if self.ocp_unit:
+          return self.name+' <' #+'  ('+self.resource_type.name+')'
+        else:
+          return self.name
+
+
+from django.db.models.signals import post_migrate
+
+def create_unit_types(**kwargs):
+    uts = Unit_Type.objects.all()
+    outs = Ocp_Unit_Type.objects.all()
+    if uts.count() > outs.count():
+      for ut in uts:
+        if not outs or not ut in outs:
+          out = Ocp_Unit_Type(ut) # not works good, TODO ... now only via sqlite3 .read ocp_unit_types1.sql
+          #out.save()
+          print "created unit type: "+out.name
+    else:
+      print "error creating unit types: "+uts.count()
+
+#post_migrate.connect(create_unit_types)
+
+def rebuild_trees(**kwargs):
+    uts = Unit_Type.objects.rebuild()
+    print "rebuilded Unit_Type"
+
+#post_migrate.connect(rebuild_trees)

@@ -99,22 +99,23 @@
         </legend>
 
 
-      {% if roots %}
+      {% if projects %}
        {% if managed_projects %}
         <h3>
           {% trans "Projects coordinated by you:" %}
         </h3>
         <ul class="managed-project">
-        {% for root in roots %}
-          {% for node in root.nodes %}
+        {% for node in projects %}
             {% if not node.name == 'Freedom Coop' %}
-              {% if agent in node.managers %}
+              {% if node in agent.managed_projects %}
                   <li><h4><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b></h4>
-                    <!-- <a class="indent" href="{% url "contributions" project_id=node.id %}">{% trans "Contributions" %}: {{ node.contributions_count }}</a>
-                    {% if node.wip %}
+                    {% if node.supply_exchange_count > 0 or node.demand_exchange_count > 0 or node.internal_exchange_count > 0 %}&nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>{% endif %}
+                    {% if False and node.contributions_count and agent.is_staff %}<a class="indent" href="{% url "contributions" project_id=node.id %}">{% trans "Contributions" %}: {{ node.contributions_count }}</a>
+                    {% endif %}
+                    {% if False and node.wip and agent.is_staff %}
                     <a class="indent" href="{% url "project_wip" project_id=node.id %}">{% trans "Work in process" %}: {{ node.wip.count }}</a>
                     {% endif %}
-                    {% if node.supply_exchange_count > 0 %}
+                    <!-- {% if node.supply_exchange_count > 0 %}
                     <a class="indent" href="{% url "exchanges" agent_id=node.id %}">{% trans "Incoming Exchanges" %}: {{ node.supply_exchange_count }}</a>
                     {% endif %}
                     {% if node.demand_exchange_count > 0 %}
@@ -127,7 +128,8 @@
                     <a class="indent" href="{% url "distributions" agent_id=node.id %}">{% trans "Distributions" %}: {{ node.distributions_count }}</a>
                     {% endif %} -->
                     {% if node.description %}
-                    <div class="description" >{{ node.description|urlize|linebreaks }}</div>
+                        <span class="showhide" id="sh-{{ root.id }}{{ node.id }}" >(Show)</span>
+                        <div class="description list" id="list-{{ root.id }}{{ node.id }}">{{ node.description|urlize|linebreaks }}</div>
                     {% endif %}
                     {% for aat in node.aats %}
                       {% if aat.identifier != "child" %}
@@ -165,10 +167,11 @@
                         </div>
                       {% endif %}
                     {% endfor %}
+
                    </li>
               {% endif %}
             {% endif %}
-          {% endfor %}
+
         {% endfor %}
        </ul>
        {% endif %}
@@ -202,12 +205,14 @@
             {% endif %}
         {% endwith %}
 
-        {% for root in roots %}
-          {% for node in root.nodes %}
+        {% for node in projects %}
+
             {% if not node.name = 'Freedom Coop' and not agent in node.managers and agent in node.members %}
             <li><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b>
+              &nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>
               {% if node.description %}
-                <div class="description" >{{ node.description|urlize|linebreaks }}</div>
+                <span class="showhide" id="sh-{{ node.id }}" >(Show)</span>
+                <div class="description list" id="list-{{ node.id }}">{{ node.description|urlize|linebreaks }}</div>
               {% endif %}
               {% for aat in node.aats %}
                 {% if aat.identifier != "child" %}
@@ -226,7 +231,7 @@
               {% endfor %}
             </li>
             {% endif %}
-          {% endfor %}
+
         {% endfor %}
       </ul>
 
@@ -254,7 +259,8 @@
                       {% endif %}
                     {% endif %}
                     {% if proj.agent.description %}
-                      <div class="description" >{{ proj.agent.description|urlize|linebreaks }}</div>
+                        <span class="showhide" id="sh-{{ proj.agent.id }}" >(Show)</span>
+                        <div class="description list" id="list-{{ proj.agent.id }}">{{ proj.agent.description|urlize|linebreaks }}</div>
                     {% endif %}
 
                   </li>

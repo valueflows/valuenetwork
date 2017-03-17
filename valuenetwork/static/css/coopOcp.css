@@ -367,3 +367,18 @@ form#stateForm {
   border-radius: 7px;
   margin-bottom: 13px;
 }
+
+
+/*   M O D A L S   */
+
+.modal .helptext {
+  font-style: italic;
+  padding-bottom: 10px;
+  display: block;
+  font-size: 0.9em;
+  color: #887;
+}
+.modal label {
+  /*font-weight: bold;
+  font-size: 1.05em;*/
+}

@@ -553,7 +553,8 @@ li {
                                                             </form>
                                                         </div>
                                                     </div>
-                                                    <form
+                                                    {% if not slot.is_currency %}
+                                                      <form
                                                         style="display: inline;"
                                                         class="delete-form"
                                                         id="deleteForm{{ event.id }}"
@@ -562,7 +563,8 @@ li {
                                                         {% csrf_token %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                         <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                                    </form>
+                                                      </form>
+                                                    {% endif %}
                                                 {% endif %}
                                                 {% if event.description %}
                                                     <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
@@ -621,7 +623,8 @@ li {
                                                     </form>
                                                 </div>
                                             </div>
-                                            <form
+                                            {% if not slot.is_currency %}
+                                              <form
                                                 style="display: inline;"
                                                 class="delete-form"
                                                 id="deleteForm{{ xfer.id }}"
@@ -630,7 +633,8 @@ li {
                                                 {% csrf_token %}
                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
                                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                            </form>
+                                              </form>
+                                            {% endif %}
                                         {% endif %}
                                         {% if xfer.event_description %}
                                             <div class="notes"> {{ xfer.event_description|urlize|linebreaks }} </div>
@@ -959,7 +963,8 @@ li {
                                                             </form>
                                                         </div>
                                                     </div>
-                                                    <form
+                                                    {% if not slot.is_currency %}
+                                                      <form
                                                         style="display: inline;"
                                                         class="delete-form"
                                                         id="deleteForm{{ event.id }}"
@@ -968,7 +973,8 @@ li {
                                                         {% csrf_token %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                         <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                                    </form>
+                                                      </form>
+                                                    {% endif %}
                                                 {% endif %}
                                                 {% if event.description %}
                                                     <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
@@ -1026,7 +1032,8 @@ li {
                                                     </form>
                                                 </div>
                                             </div>
-                                            <form
+                                            {% if not slot.is_currency %}
+                                              <form
                                                 style="display: inline;"
                                                 class="delete-form"
                                                 id="deleteForm{{ xfer.id }}"
@@ -1035,7 +1042,8 @@ li {
                                                 {% csrf_token %}
                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
                                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                            </form>
+                                              </form>
+                                            {% endif %}
                                         {% endif %}
                                         {% if xfer.event_description %}
                                             <div class="notes"> {{ xfer.event_description|urlize|linebreaks }} </div>

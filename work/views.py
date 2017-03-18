@@ -654,6 +654,8 @@ def faircoin_history(request, resource_id):
     else:
         return render_to_response('work/no_permission.html')
 
+
+
 @login_required
 def edit_faircoin_event_description(request, resource_id):
     agent = get_agent(request)
@@ -670,8 +672,32 @@ def edit_faircoin_event_description(request, resource_id):
 
 
 
+def faircoin_history_chain(request, resource_id):
+    resource = get_object_or_404(EconomicResource, id=resource_id)
+    event_list = resource.events.all()
+    agent = get_agent(request)
+    init = {"quantity": resource.quantity,}
+    unit = resource.resource_type.unit
+    blockchain_info = faircoin_utils.get_address_history(resource.digital_currency_address)
+
+    tx_in_ocp = []
+    for event in event_list:
+        tx_in_ocp.append(event.digital_currency_tx_hash)
+
+    for tx in blockchain_info:
+        if str(tx[0]) not in tx_in_ocp:
+            pass
+            # TODO: str(tx[0]) is a transaction in the blockchain, but not in ocp.
+            # Here we can setup a EconomicEvent or whatever
+
+
+
+
+
 
 #    M E M B E R S H I P
+
+
 
 @login_required
 def share_payment(request, agent_id):
@@ -2012,28 +2038,6 @@ def validate_username(request):
 
 
 
-
-def faircoin_history_chain(request, resource_id):
-    resource = get_object_or_404(EconomicResource, id=resource_id)
-    event_list = resource.events.all()
-    agent = get_agent(request)
-    init = {"quantity": resource.quantity,}
-    unit = resource.resource_type.unit
-    blockchain_info = faircoin_utils.get_address_history(resource.digital_currency_address)
-
-    tx_in_ocp = []
-    for event in event_list:
-        tx_in_ocp.append(event.digital_currency_tx_hash)
-
-    for tx in blockchain_info:
-        if str(tx[0]) not in tx_in_ocp:
-            pass
-            # TODO: str(tx[0]) is a transaction in the blockchain, but not in ocp.
-            # Here we can setup a EconomicEvent or whatever
-
-
-
-
 @login_required
 def connect_agent_to_join_request(request, agent_id, join_request_id):
     mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
@@ -2249,7 +2253,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     name = None
                     narr = gen_ext.name.split(' ')
                     if len(narr) > 0:
-                      name = narr[0] # get only first word of general record type ?
+                      name = narr[0]+' '+narr[1] # get only first word of general record type ?
                     if gen_sk:
                       if gen_sk.gerund:
                         name += ' '+gen_sk.gerund.title()
@@ -2270,14 +2274,24 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
                     uc = ext.use_case
                     if name and uc:
-                      new_ext = ExchangeType(
-                        name=name,
-                        use_case=uc,
-                        created_by=request.user,
-                        created_date=datetime.date.today(),
-                        context_agent=agnt
-                      )
-                      new_ext.save() # here we get an id
+                      try:
+                        new_ext = ExchangeType.objects.get(name=name)
+                        if not new_ext.context_agent == agnt and agnt.parent():
+                          new_ext.context_agent = agnt.parent()
+                          new_ext.edited_by = request.user
+                          new_ext.save() # TODO check if the new_ext is reached by the agent related contexts
+                          return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                            % ('work/agent', agent.id, 'exchange-logging-work', new_ext.id, 0))
+                      except:
+                        #pass
+                        new_ext = ExchangeType(
+                          name=name,
+                          use_case=uc,
+                          created_by=request.user,
+                          created_date=datetime.date.today(),
+                          context_agent=agnt
+                        )
+                        new_ext.save() # here we get an id
 
                       new_rec = Ocp_Record_Type(gen_ext)
                       new_rec.pk = None
@@ -3207,16 +3221,17 @@ def add_transfer_external_agent(request, commitment_id, context_agent_id):
         if form.is_valid():
             new_agent = form.save(commit=False)
             new_agent.created_by=request.user
-            # TODO add to commitment and relate the context_agent
-            #agent.save()
+            new_agent.save()
+            if not commitment.to_agent and commitment.from_agent == context_agent:
+                commitment.to_agent = new_agent
+                commitment.save()
+            elif not commitment.from_agent and commitment.to_agent == context_agent:
+                commitment.from_agent = new_agent
+                commitment.save()
+            # TODO relate the context_agent
 
-    #if request.method == "POST":
-    #  form = ContextExternalAgent(data=request.POST) #, commitment=commitment, context_agent=context_agent)
-    #  if form.is_valid():
-    #    data = form.cleaned_data
 
-
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
         % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
 

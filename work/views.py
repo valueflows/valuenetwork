@@ -2276,10 +2276,15 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     if name and uc:
                       try:
                         new_ext = ExchangeType.objects.get(name=name)
-                        if not new_ext.context_agent == agnt and agnt.parent():
-                          new_ext.context_agent = agnt.parent()
-                          new_ext.edited_by = request.user
-                          new_ext.save() # TODO check if the new_ext is reached by the agent related contexts
+                        if new_ext:
+                          if new_ext.context_agent and not new_ext.context_agent == agnt:
+                            if agnt.parent():
+                              new_ext.context_agent = agnt.parent()
+                            else:
+                              new_ext.context_agent = agnt
+
+                            new_ext.edited_by = request.user
+                            new_ext.save() # TODO check if the new_ext is reached by the agent related contexts
                           return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                             % ('work/agent', agent.id, 'exchange-logging-work', new_ext.id, 0))
                       except:

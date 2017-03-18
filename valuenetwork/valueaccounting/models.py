@@ -8133,7 +8133,7 @@ class Transfer(models.Model):
                     from_to += " "
             if receive:
                 from_to = from_to + receive_text
-            if either.unit_of_quantity.name == either.resource_type.name:
+            if either.resource_type and either.unit_of_quantity and either.unit_of_quantity.name == either.resource_type.name:
                 text = " ".join([
                   qty,
                   resource,

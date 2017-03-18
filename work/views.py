@@ -26,6 +26,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
+from valuenetwork.valueaccounting.service import ExchangeService
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task

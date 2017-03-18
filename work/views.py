@@ -2253,7 +2253,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     name = None
                     narr = gen_ext.name.split(' ')
                     if len(narr) > 0:
-                      name = narr[0]+' '+narr[1] # get only first word of general record type ?
+                      name = narr[0] # get only first word of general record type ?
                     if gen_sk:
                       if gen_sk.gerund:
                         name += ' '+gen_sk.gerund.title()

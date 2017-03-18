@@ -8133,11 +8133,18 @@ class Transfer(models.Model):
                     from_to += " "
             if receive:
                 from_to = from_to + receive_text
-            text = " ".join([
-                qty,
-                unit,
-                resource,
-                from_to,
+            if unit == resource:
+                text = " ".join([
+                  qty,
+                  resource,
+                  from_to,
+                ])
+            else:
+                text = " ".join([
+                  qty,
+                  unit,
+                  resource,
+                  from_to,
                 ])
         return text
 

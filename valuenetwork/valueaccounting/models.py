@@ -964,6 +964,8 @@ class EconomicAgent(models.Model):
     def related_contexts(self):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if self.is_context and not self in agents:
+          agents.extend([self])
         #cas = [a for a in agents if a.is_context]
         #return list(set(cas))
         return [a for a in agents if a.is_context]
@@ -977,6 +979,8 @@ class EconomicAgent(models.Model):
         agents.extend(grand_parents)
         if childs:
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if self.is_context and not self in agents:
+          agents.extend([self])
         return list(set([a for a in agents if a.is_context]))
 
     def related_all_agents(self, childs=True):
@@ -988,6 +992,8 @@ class EconomicAgent(models.Model):
         agents.extend(grand_parents)
         if childs:
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if self.is_context and not self in agents:
+          agents.extend([self])
         return list(set(agents))
 
     def related_context_queryset(self):
@@ -1021,6 +1027,8 @@ class EconomicAgent(models.Model):
     #  bum2
     def managed_projects(self): #returns a list or None
         agents = [ag.has_associate for ag in self.is_associate_of.filter(association_type__association_behavior="manager")]
+        if self.is_context and not self in agents:
+          agents.extend([self])
         return [a for a in agents if a.is_context] #EconomicAgent.objects.filter(pk__in=agent_ids)
 
     def is_public(self):

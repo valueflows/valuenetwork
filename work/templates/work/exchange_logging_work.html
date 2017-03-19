@@ -217,7 +217,7 @@ li {
                 <h3 class="trtheading">Outgoing Transfers
                 <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
                     data-content="Log the planned and actual transfers for this exchange.  The types of transfers are determined by the type of exchange,
-                    as defined by your network.">
+                    as defined by your previous selections.">
                     <img src="{% static 'img/information-icon.png' %}" /></a>
                 </span>
                 </h3>
@@ -787,6 +787,29 @@ li {
                                         <span class="event-label">{% trans "Commitment" %}: </span>
                                         {{ xfer.commit_text }}
                                         {% if logger or xfer.commitments.first.created_by == request.user or xfer.commitments.first.from_agent == request.user.agent.agent or xfer.commitments.first.from_agent in request.user.agent.agent.managed_projects %}
+
+                                            {% if not xfer.commitments.first.from_agent %}
+                                               <a href="#agentModal{{ xfer.id }}" class="btn btn-primary btn-mini" role="button" data-toggle="modal" alt="Create a new external agent (without a OCP user)">New External Agent?</a>
+                                               <div class="modal hide fade" id="agentModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                  <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h3 id="xfer-label">{% trans "Create an external economic agent" %}</h3>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "add_transfer_external_agent" commitment_id=xfer.commitments.first.id context_agent_id=context_agent.id %}" method="POST" >
+                                                        {% csrf_token %}
+                                                        {% with slot.add_ext_agent as ag_form %}
+                                                          {{ ag_form|as_bootstrap }}
+                                                        {% endwith %}
+                                                        <input type="hidden" id="next" name="next" value="exchange-work" />
+                                                      <div class="modal-footer">
+                                                        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                        <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                      </div>
+                                                    </form>
+                                                  </div>
+                                               </div>
+                                            {% endif %}
                                             <a href="#cmitModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
                                             </a>

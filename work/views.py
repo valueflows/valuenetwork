@@ -3500,7 +3500,10 @@ def add_transfer_commitment_work(request, exchange_id, transfer_type_id):
 
                 xfer_name = transfer_type.name
                 if transfer_type.is_reciprocal:
-                    xfer_name = xfer_name + " from " + from_agent.nick
+                    if from_agent:
+                      xfer_name = xfer_name + " from " + from_agent.nick
+                    else:
+                      xfer_name = xfer_name + " from ?"
                 else:
                     xfer_name = xfer_name + " of " + rt.name
                 xfer = Transfer(

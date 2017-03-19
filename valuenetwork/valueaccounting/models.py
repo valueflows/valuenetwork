@@ -8123,7 +8123,7 @@ class Transfer(models.Model):
                 elif give.to_agent and not give.from_agent:
                     give_text = "FROM?"
                 elif not give.to_agent and give.from_agent:
-                    give_text = "GIVE from " + give.from_agent.nick
+                    give_text = "GIVE to ??" #from " + give.from_agent.nick
                 else:
                     give_text = "??"
             if receive:
@@ -8132,7 +8132,7 @@ class Transfer(models.Model):
                 elif receive.from_agent and not receive.to_agent:
                     receive_text = "TO?"
                 elif not receive.from_agent and receive.to_agent:
-                    receive_text = "RECEIVE at " + receive.to_agent.nick
+                    receive_text = "RECEIVE from ??" # + receive.to_agent.nick
                 else:
                     give_text = "??"
             if give:

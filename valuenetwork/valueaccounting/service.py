@@ -12,6 +12,7 @@ from valuenetwork.valueaccounting.models import (
     EconomicEvent,
 )
 
+import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
 
 class ExchangeService(object):
     @classmethod
@@ -83,6 +84,40 @@ class ExchangeService(object):
             )
             tt.save()
         return tt
+
+    @classmethod
+    def faircoin_incoming_exchange_type(cls):
+        use_case = UseCase.objects.get(name="Incoming Exchange")
+        xt = ExchangeType.objects.filter(
+            use_case=use_case,
+            name="Receive FairCoins")
+        if xt: 
+            xt = xt[0]
+        else:
+            xt = ExchangeType(
+                use_case=use_case,
+                name="Receive FairCoins")
+            xt.save()
+        return xt
+
+    @classmethod
+    def faircoin_incoming_transfer_type(cls):
+        xt = cls.faircoin_incoming_exchange_type()
+        tt = TransferType.objects.filter(
+            exchange_type=xt,
+            name="Receive FairCoins")
+        if tt: 
+            tt = tt[0]
+        else:
+            tt = TransferType(
+                exchange_type=xt,
+                name="Receive FairCoins",
+                sequence=1,
+                is_currency=True,
+            )
+            tt.save()
+        return tt
+
 
     def send_faircoins(self, from_agent, recipient, qty, resource, notes=None):
         to_resources = EconomicResource.objects.filter(digital_currency_address=recipient)
@@ -164,3 +199,52 @@ class ExchangeService(object):
             )
             event.save()
         return exchange
+
+    def include_blockchain_tx_as_event(self, agent, resource):
+        faircoin_address = str(resource.digital_currency_address)
+        tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
+
+        event_list = resource.events.all()
+        tx_in_ocp = []
+        for event in event_list:
+            tx_in_ocp.append(str(event.digital_currency_tx_hash))
+
+        tx_included = []
+        for tx in tx_in_blockchain:
+            if str(tx[0]) not in tx_in_ocp:
+                (qty, time) = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
+                date = datetime.date.fromtimestamp(time)
+                tt = ExchangeService.faircoin_incoming_transfer_type()
+                xt = tt.exchange_type
+                exchange = Exchange(
+                    exchange_type=xt,
+                    use_case=xt.use_case,
+                    name="Receive Faircoins",
+                    start_date=date,
+                )
+                #exchange.save()
+                transfer = Transfer(
+                    transfer_type=tt,
+                    exchange=exchange,
+                    transfer_date=date,
+                    name="Receive Faircoins",
+                )
+                #transfer.save()
+
+                et_receive = EventType.objects.get(name="Receive") 
+                state = "new"
+                event = EconomicEvent(
+                    event_type=et_receive,
+                    event_date=date,
+                    to_agent=agent,
+                    resource_type=resource.resource_type,
+                    resource=resource,
+                    digital_currency_tx_state=state,
+                    quantity=qty,
+                    transfer=transfer,
+                )
+                #event.save()
+                
+                tx_included.append(str(tx[0]))
+
+        return tx_included

@@ -113,6 +113,11 @@ def get_confirmations(tx):
     response = send_command('get_confirmations', format_dict)
     return response
 
+def get_transaction(tx_hash):
+    format_dict = [tx_hash]
+    response = send_command('get_transaction', format_dict)
+    return response
+
 #Check if it is connected to the electum network
 def is_connected():
     response = send_command('is_connected', '')

@@ -47,6 +47,17 @@ def get_confirmations(tx):
     init_electrum_fair()
     return efn.get_confirmations(tx)
 
+def get_transaction_info(tx_hash, address):
+    init_electrum_fair()
+    transaction = efn.get_transaction(tx_hash)
+    amount = 0
+    for output in transaction['outputs']:
+        if str(output['address']) == address:
+            amount += int(output['value'])
+
+    time = transaction['time']
+    return (amount, time)
+
 def is_mine(address):
     init_electrum_fair()
     return efn.is_mine(address)

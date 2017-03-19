@@ -426,7 +426,8 @@ def transfer_faircoins(request, resource_id):
                         name="Transfer Faircoins",
                         start_date=date,
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     exchange.save()
                     transfer = Transfer(
                         transfer_type=tt,
@@ -434,7 +435,8 @@ def transfer_faircoins(request, resource_id):
                         transfer_date=date,
                         name="Transfer Faircoins",
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     transfer.save()
                 else:
                     tt = faircoin_outgoing_transfer_type()
@@ -446,7 +448,8 @@ def transfer_faircoins(request, resource_id):
                         name="Send Faircoins",
                         start_date=date,
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     exchange.save()
                     transfer = Transfer(
                         transfer_type=tt,
@@ -454,7 +457,8 @@ def transfer_faircoins(request, resource_id):
                         transfer_date=date,
                         name="Send Faircoins",
                         notes=notes,
-                        )
+                        context_agent=from_agent,
+                    )
                     transfer.save()
 
                 # network_fee is subtracted from quantity
@@ -501,6 +505,7 @@ def transfer_faircoins(request, resource_id):
         return HttpResponseRedirect('/%s/%s/'
                 % ('work/manage-faircoin-account', resource.id))
 
+"""
 @login_required
 def transfer_faircoins_old(request, resource_id):
     if request.method == "POST":
@@ -617,6 +622,7 @@ def transfer_faircoins_old(request, resource_id):
 
             return HttpResponseRedirect('/%s/%s/'
                     % ('work/manage-faircoin-account', resource.id))
+"""
 
 @login_required
 def faircoin_history(request, resource_id):
@@ -2163,6 +2169,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     selected_values = "all"
 
     nav_form = ExchangeNavForm(agent=agent, data=request.POST or None)
+
     gen_ext = Ocp_Record_Type.objects.get(clas='ocp_exchange')
     usecases = Ocp_Record_Type.objects.filter(parent__id=gen_ext.id).exclude( Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ) #UseCase.objects.filter(identifier__icontains='_xfer')
     outypes = Ocp_Record_Type.objects.filter( Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
@@ -2925,9 +2932,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       wal = agent.faircoin_resource()
                       if wal:
                         bal = wal.digital_currency_balance()
-                        if type(bal*1) == float:
-                          to['balance'] = '{0:.2f}'.format(float(bal*1))
-                        else:
+                        try:
+                          to['balance'] = '{0:.2f}'.format(float(bal))
+                        except ValueError:
                           to['balance'] = bal
                         to['balnote'] = (to['income']*1) - (to['outgo']*1)
                         #to['debug'] += str(x.transfer_give_events())+':'

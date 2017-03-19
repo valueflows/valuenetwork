@@ -7383,10 +7383,10 @@ class ExchangeManager(models.Manager):
         return exchanges
 
     def exchanges_by_date_and_context(self, start, end, agent):
-        return Exchange.objects.filter(start_date__range=[start, end]).filter(context_agent=agent)
+        return Exchange.objects.filter(start_date__range=[start, end]).filter( Q(context_agent__isnull=False, context_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__from_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__to_agent=agent) ).distinct() # | Q(context_agent__isnull=False, context_agent=agent) ) # bumbum add Q's from and to agent
 
     def exchanges_by_type(self, agent):
-        return Exchange.objects.filter(context_agent=agent).order_by('exchange_type__ocp_record_type__name')
+        return Exchange.objects.filter( Q(context_agent__isnull=False, context_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__from_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__to_agent=agent) ).distinct().order_by('exchange_type__ocp_record_type__name') # bumbum add Q's from and to agent
 
 
 class Exchange(models.Model):

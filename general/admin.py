@@ -370,7 +370,7 @@ class Proj_personInline(admin.StackedInline):
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id).exclude(clas='reference')
     return super(Proj_personInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
-
+"""
 class H_accountCesInline(admin.StackedInline):
   model = AccountCes
   extra = 0
@@ -447,8 +447,8 @@ class H_assetInline(admin.StackedInline):
   )
   #inlines = [  # TODO inlines into inlines didn't appear
   #  M_addressInline,
-  #]'''
-
+  #]
+"""
 
 
 
@@ -495,10 +495,8 @@ class HumanAdmin(Css_Mixin):
     def set_nothing(instance):
       instance.save()
 
-    if formset.model == AccountCes or formset.model == AccountBank or formset.model == AccountCrypto or formset.model == rel_Human_Persons:
+    """if formset.model == AccountCes or formset.model == AccountBank or formset.model == AccountCrypto:
       instances = formset.save(commit=False)
-      if not formset.model == rel_Human_Persons:
-        map(set_human_name, instances)
 
       if formset.model == AccountCes:
         map(set_accountCes_recordtype, instances)
@@ -507,14 +505,22 @@ class HumanAdmin(Css_Mixin):
       if formset.model == AccountCrypto:
         map(set_accountCrypto_recordtype, instances)
 
-      if formset.model == rel_Human_Persons:
-        if hasattr(formset, 'klass') and formset.klass == 'Proj_refPersonInline':
+      formset.save_m2m()
+      return instances
+    """
+    if formset.model == rel_Human_Persons:
+      instances = formset.save(commit=False)
+      if not formset.model == rel_Human_Persons:
+        map(set_human_name, instances)
+
+      if hasattr(formset, 'klass') and formset.klass == 'Proj_refPersonInline':
           map(set_proj_refPerson_relation, instances)
-        else:
+      else:
           map(set_nothing, instances)
 
       formset.save_m2m()
       return instances
+
     else:
       return formset.save()
 
@@ -545,7 +551,7 @@ class Public_ProjectAdmin(MPTTModelAdmin, HumanAdmin):
     Proj_refPersonInline,
     H_addressInline,
     H_jobInline,
-    H_assetInline,
+    #H_assetInline,
 
     Proj_personInline,
     #H_personInline,
@@ -556,9 +562,9 @@ class Public_ProjectAdmin(MPTTModelAdmin, HumanAdmin):
     #H_materialInline,
     #H_nonmaterialInline,
     #H_recordInline,
-    H_accountCesInline,
-    H_accountBankInline,
-    H_accountCryptoInline,
+    #H_accountCesInline,
+    #H_accountBankInline,
+    #H_accountCryptoInline,
   ]
 
 class ProjectAdmin(Public_ProjectAdmin): # admin.ModelAdmin):
@@ -571,7 +577,7 @@ class ProjectAdmin(Public_ProjectAdmin): # admin.ModelAdmin):
     Proj_refPersonInline,
     H_addressInline,
     H_jobInline,
-    H_assetInline,
+    #H_assetInline,
 
     Proj_personInline,
     H_personInline,
@@ -582,9 +588,9 @@ class ProjectAdmin(Public_ProjectAdmin): # admin.ModelAdmin):
     H_materialInline,
     H_nonmaterialInline,
     H_recordInline,
-    H_accountCesInline,
-    H_accountBankInline,
-    H_accountCryptoInline,
+    #H_accountCesInline,
+    #H_accountBankInline,
+    #H_accountCryptoInline,
   ]
 
 
@@ -611,7 +617,7 @@ class Public_PersonAdmin(HumanAdmin):
   inlines = [
     H_addressInline,
     H_jobInline,
-    H_assetInline,
+    #H_assetInline,
 
     #H_personInline,
     H_projectInline,
@@ -622,9 +628,9 @@ class Public_PersonAdmin(HumanAdmin):
     #H_nonmaterialInline,
     #H_recordInline,
 
-    H_accountCesInline,
+    #H_accountCesInline,
     #H_accountBankInline,
-    H_accountCryptoInline,
+    #H_accountCryptoInline,
   ]
 
 class PersonAdmin(Public_PersonAdmin):
@@ -635,7 +641,7 @@ class PersonAdmin(Public_PersonAdmin):
   inlines = [
     H_addressInline,
     H_jobInline,
-    H_assetInline,
+    #H_assetInline,
 
     H_personInline,
     H_projectInline,
@@ -646,9 +652,9 @@ class PersonAdmin(Public_PersonAdmin):
     H_nonmaterialInline,
     H_recordInline,
 
-    H_accountCesInline,
-    H_accountBankInline,
-    H_accountCryptoInline,
+    #H_accountCesInline,
+    #H_accountBankInline,
+    #H_accountCryptoInline,
   ]
 
 
@@ -671,7 +677,7 @@ class Public_CompanyAdmin(HumanAdmin):
   inlines = [
     H_addressInline,
     H_jobInline,
-    H_assetInline,
+    #H_assetInline,
 
     H_personInline,
     #H_projectInline,
@@ -682,9 +688,9 @@ class Public_CompanyAdmin(HumanAdmin):
     #H_regionInline,
     #H_recordInline,
 
-    H_accountCesInline,
-    H_accountBankInline,
-    H_accountCryptoInline,
+    #H_accountCesInline,
+    #H_accountBankInline,
+    #H_accountCryptoInline,
   ]
 
 class CompanyAdmin(Public_CompanyAdmin): # admin.ModelAdmin):
@@ -702,7 +708,7 @@ class CompanyAdmin(Public_CompanyAdmin): # admin.ModelAdmin):
   inlines = [
     H_addressInline,
     H_jobInline,
-    H_assetInline,
+    #H_assetInline,
 
     H_personInline,
     H_projectInline,
@@ -713,9 +719,9 @@ class CompanyAdmin(Public_CompanyAdmin): # admin.ModelAdmin):
     H_regionInline,
     H_recordInline,
 
-    H_accountCesInline,
-    H_accountBankInline,
-    H_accountCryptoInline,
+    #H_accountCesInline,
+    #H_accountBankInline,
+    #H_accountCryptoInline,
   ]
 
 
@@ -801,7 +807,7 @@ class RecordAdmin(admin.ModelAdmin):
   list_display = ['name', 'record_type',]
   list_filter = ('record_type',)
 
-
+"""
 class AccountCesAdmin(AutoNameMixin):
   model = AccountCes
   list_display = ['name', 'human', 'entity', 'code', 'number', 'unit']
@@ -852,7 +858,7 @@ class AccountCryptoAdmin(AutoNameMixin):
       typ = Unit_Type.objects.get(clas='crypto_currency')
       kwargs['queryset'] = Unit.objects.filter(unit_type=typ)
     return super(AccountCryptoAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-
+"""
 
 class UnitRatioAdmin(AutoNameMixin):
   model = UnitRatio
@@ -1079,7 +1085,7 @@ class MaterialAdmin(Public_MaterialAdmin):
     M_materialInline,
   ]
 
-
+"""
 class Public_AssetAdmin(Public_MaterialAdmin):
   model = Asset
   list_display = ['name', 'asset_human', 'material_type', 'reciprocity',]
@@ -1099,7 +1105,7 @@ class Public_AssetAdmin(Public_MaterialAdmin):
 
 class AssetAdmin(Public_MaterialAdmin):
   inlines = MaterialAdmin.inlines
-
+"""
 
 
 
@@ -1227,7 +1233,7 @@ admin.site.register(Material_Type, Type_MaterialAdmin)
 admin.site.register(Material, Public_MaterialAdmin)    # public comentable
 #admin.site.register(Material, MaterialAdmin)
 
-admin.site.register(Asset, Public_AssetAdmin)    # public comentable
+#admin.site.register(Asset, Public_AssetAdmin)    # public comentable
 #admin.site.register(Asset, AssetAdmin)
 
 #---------- Records
@@ -1235,9 +1241,9 @@ admin.site.register(Record_Type, Type_RecordAdmin)
 #admin.site.register(Record, RecordAdmin) # Comment this line to avoid a common record list and use only the ones below
 
 admin.site.register(UnitRatio, UnitRatioAdmin)
-admin.site.register(AccountCes, AccountCesAdmin)
-admin.site.register(AccountBank, AccountBankAdmin)
-admin.site.register(AccountCrypto, AccountCryptoAdmin)
+#admin.site.register(AccountCes, AccountCesAdmin)
+#admin.site.register(AccountBank, AccountBankAdmin)
+#admin.site.register(AccountCrypto, AccountCryptoAdmin)
 
 
 # ---- SPACES

@@ -36,6 +36,7 @@ def erase_id_link(field, id):
 	print(out)
 	return out
 
+
 #	 C O N C E P T S - (Concepts, Ideas...)
 @python_2_unicode_compatible
 class Concept(MPTTModel):	# Abstract
@@ -83,6 +84,7 @@ class rel_Type_Types(models.Model):
 		else:
 			return self.relation.gerund+' > '+self.typ2.__str__()
 """
+
 
 
 #	 B E I N G S - (Éssers, Entitats, Projectes...)
@@ -198,7 +200,8 @@ class Human(Being):	# Create own ID's
 
 		#print 'I N I T	 H U M A N :	'+self.name
 
-		if hasattr(self, 'accountsCes') and self.accountsCes.count() > 0:
+
+		"""if hasattr(self, 'accountsCes') and self.accountsCes.count() > 0:
 			recrels = rel_Human_Records.objects.filter(human=self, record__in=self.accountsCes.all())
 			if recrels.count() == 0:
 				for acc in self.accountsCes.all():
@@ -217,13 +220,8 @@ class Human(Being):	# Create own ID's
 			if recrels.count() == 0:
 				for acc in self.accountsCrypto.all():
 					newrec, created = rel_Human_Records.objects.get_or_create(human=self, record=acc, relation=rel_tit)
-					print('- new_REC acc_Crypto: CREATED:' + str(created) + ' :: ' + str(newrec))
-
-			#print 'recrels: '+str(recrels)
-			#print self.accountsCes.all()
-			#print self.records.all()
-			#if hasattr(self.records)
-			#self.project = Project.objects.get(nickname='CIC')
+					print '- new_REC acc_Crypto: CREATED:'+str(created)+' :: '+str(newrec)
+    """
 
 
 @python_2_unicode_compatible
@@ -908,6 +906,7 @@ class Material_Type(Artwork_Type):
 		verbose_name_plural= _(u"o-> Types of Material artworks")
 
 
+"""
 @python_2_unicode_compatible
 class Asset(Material):
 	asset_material = models.OneToOneField('Material', primary_key=True, parent_link=True, on_delete=models.CASCADE)
@@ -926,10 +925,11 @@ class Asset(Material):
 				return "Not present"
 	_selflink.allow_tags = True
 	_selflink.short_description = ''
-
+"""
 
 
 # - - - - - U N I T S
+
 @python_2_unicode_compatible
 class Unit(Artwork):	# Create own ID's
 	unit_type = TreeForeignKey('Unit_Type', blank=True, null=True, verbose_name=_(u"Type of Unit"))
@@ -955,6 +955,7 @@ class Unit_Type(Artwork_Type):
 
 
 # - - - - - R E C O R D
+
 @python_2_unicode_compatible
 class Record(Artwork):	# Create own ID's
 	record_type = TreeForeignKey('Record_Type', blank=True, null=True, verbose_name=_(u"Type of Record"))
@@ -995,6 +996,7 @@ class UnitRatio(Record):
 		return self.in_unit.name+' * '+str(self.rate)+' = '+self.out_unit.name
 
 
+"""
 @python_2_unicode_compatible
 class AccountCes(Record):
 	record = models.OneToOneField('Record', primary_key=True, parent_link=True, on_delete=models.CASCADE)
@@ -1044,9 +1046,11 @@ class AccountCrypto(Record):
 	class Meta:
 		verbose_name = _(u"Cryptocurrency Account")
 		verbose_name_plural = _(u"o- Cryptocurrency Accounts")
+    
 	def __str__(self):
 		return '('+self.unit.code+') '+self.accCrypt_human.nickname + ' ' + self.number # +' '+self.name
 
+"""
 
 
 

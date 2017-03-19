@@ -82,7 +82,8 @@ class SkillSuggestionForm(forms.ModelForm):
 
 
 class MembershipRequestForm(forms.ModelForm):
-    captcha = CaptchaField()
+    if not settings.TESTING:
+        captcha = CaptchaField()
 
     class Meta:
         model = MembershipRequest
@@ -248,8 +249,8 @@ class JoinAgentSelectionForm(forms.Form):
 class ProjectAgentCreateForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required-field input-xlarge',}))
     nick = forms.CharField(
-        label="ID",
-        help_text="Must be unique, and no more than 32 characters",
+        label=_("Nickname"),
+        help_text=_("Must be unique, and no more than 32 characters"),
         widget=forms.TextInput(attrs={'class': 'nick required-field',}))
     email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'class': 'email input-xxlarge',}))
     #address = forms.CharField(
@@ -1067,6 +1068,7 @@ class ContextTransferCommitmentForm(forms.Form):
         required=False,
         widget=forms.Select(
             attrs={'class': 'resource-type-for-resource chzn-select'}))
+
     value = forms.DecimalField(
         label="Value (total, not per unit)",
         initial=0,
@@ -1087,9 +1089,9 @@ class ContextTransferCommitmentForm(forms.Form):
         #import pdb; pdb.set_trace()
         if transfer_type:
             self.fields["resource_type"].queryset = transfer_type.get_resource_types()
-            if context_agent:
-                self.fields["to_agent"].queryset = transfer_type.to_context_agents(context_agent)
-                self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
+            #if context_agent:
+            #    self.fields["to_agent"].queryset = transfer_type.to_context_agents(context_agent)
+            #    self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
 
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
             #if facetvalues:
@@ -1114,7 +1116,13 @@ class ContextTransferCommitmentForm(forms.Form):
 
     def clean(self):
         data = super(ContextTransferCommitmentForm, self).clean()
+        #if not hasattr(data, 'ocp_resource_type'):
+        #  ocp_rt = None
+        #else:
         ocp_rt = data["ocp_resource_type"]
+        #if not hasattr(data, 'resource_type'):
+        #  ini_rt = None
+        #else:
         ini_rt = data["resource_type"]
         if ocp_rt:
           if not ini_rt:
@@ -1124,7 +1132,8 @@ class ContextTransferCommitmentForm(forms.Form):
             else:
               self.add_error('ocp_resource_type', "This type is too general, try a more specific")
         else:
-          self.add_error('ocp_resource_type', "There is a problem with this ocp_resource_type!")
+          self.add_error('ocp_resource_type', "There is not resource_type, it is a required field")
+        #import pdb; pdb.set_trace()
         return data
 
 
@@ -1156,6 +1165,34 @@ class ResourceRoleContextAgentForm(forms.ModelForm):
         if context_agent:
           context_agents = context_agent.related_all_agents_queryset() # EconomicAgent.objects.context_agents() #
           self.fields["agent"].queryset = context_agents
+
+
+class ContextExternalAgent(AgentCreateForm): #forms.ModelForm):
+    # tune model fields
+    address = forms.CharField(
+        required=False,
+        #label="Address",
+        #help_text="Enter address for a new work location. Otherwise, select existing location on map.",
+        widget=forms.TextInput(attrs={'class': 'input-xxlarge',})
+    )
+    url = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'input-xxlarge',})
+    )
+    agent_type = forms.ModelChoiceField(
+        queryset=AgentType.objects.all(),
+        #required=False,
+        empty_label='. . .',
+        label=_("Agent type (required)"),
+        widget=forms.Select(
+        attrs={'class': 'chzn-select'})
+    )
+
+    is_context = None
+
+    class Meta:
+        model = EconomicAgent
+        fields = ('name', 'nick', 'description', 'agent_type', 'url', 'email', 'address', 'phone_primary')
 
 
 

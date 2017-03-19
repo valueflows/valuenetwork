@@ -315,6 +315,11 @@ span.fancytree-selected span.fancytree-title {
             <div class="totals infobox"><h3>
               {% trans "Totals:" %}
               </h3>
+              {% if not exchanges %}
+                <p>
+                  {% trans "There are no exchanges to count..." %}
+                </p>
+              {% else %}
               <table>
                 <thead>
                   <tr>
@@ -356,6 +361,7 @@ span.fancytree-selected span.fancytree-title {
                   {% endfor %}
                 </tbody>
               </table>
+              {% endif %}
               <!-- <span class="total">Incoming total: {{ total_transfers }} </span><br/>
               <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 
@@ -705,9 +711,9 @@ span.fancytree-selected span.fancytree-title {
 
             {% if user.is_staff or request.user.agent.agent in project.managers or request.user.agent.agent in x.related_agents %}
                     <li>
-                        <a href="{% url "exchange_logging_work" context_agent_id=x.context_agent.id exchange_type_id=0 exchange_id=x.id %}"><b>{{ x }}</b></a>  {% trans "created by" %} {{ x.created_by }}
+                        <a href="{% url "exchange_logging_work" context_agent_id=project.id exchange_type_id=0 exchange_id=x.id %}"><b>{{ x }}</b></a>  {% trans "created by" %} {{ x.created_by }}
                         {% if user = x.created_by or user.is_superuser%}
-                            <a class="btn btn-info btn-mini" href="{% url "exchange_logging_work" context_agent_id=x.context_agent.id exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a>
+                            <a class="btn btn-info btn-mini" href="{% url "exchange_logging_work" context_agent_id=project.id exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a>
                             {% if x.is_deletable %}
                                 <form
                                     style="display: inline;"

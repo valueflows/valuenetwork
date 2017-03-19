@@ -64,7 +64,7 @@ li {
 .unplanned {
     color: 	#7D1818;
 }
-#id_notes, #id_url {
+#exchangeForm #id_notes, #exchangeForm #id_url {
     width: 328px;
 }
 .notes {
@@ -227,12 +227,15 @@ li {
                             <h3>
                                 {{ slot.name }}
                                 {% if agent and exchange %}
-                                    <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
+                                    <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
                                         {% trans "New Commitment" %}
                                     </a>
-                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
+                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
                                         {% trans "New Transfer" %}
                                     </a>
+                                {% endif %}
+                                {% if False and slot.add_xfer_form.errors %}<br>
+                                  errors: {{ slot.add_xfer_form.errors }}
                                 {% endif %}
                                 <span class="total">Total: {{ slot.total }}</span>
                             </h3>
@@ -316,7 +319,7 @@ li {
                                         <h3 id="commit">{% trans "Log a new Commitment:" %} {{ slot.name }}</h3>
                                     </div>
                                     <div class="modal-body">
-                                        <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url "add_transfer_commitment" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
+                                        <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url "add_transfer_commitment_work" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
                                             {% csrf_token %}
                                             {% with slot.add_commit_form as ac_form %}
                                             Commitment date:<br />{{ ac_form.commitment_date }}<br />
@@ -352,6 +355,29 @@ li {
                                         <span class="event-label">{% trans "Commitment" %}: </span>
                                         {{ xfer.commit_text }}
                                         {% if logger or xfer.commitments.first.created_by == request.user or xfer.commitments.first.to_agent == request.user.agent.agent or xfer.commitments.first.to_agent in request.user.agent.agent.managed_projects %}
+
+                                            {% if not xfer.commitments.first.to_agent %}
+                                               <a href="#agentModal{{ xfer.id }}" class="btn btn-primary btn-mini" role="button" data-toggle="modal" alt="Create a new external agent (without a OCP user)">New External Agent?</a>
+                                               <div class="modal hide fade" id="agentModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                  <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h3 id="xfer-label">{% trans "Create an external economic agent" %}</h3>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "add_transfer_external_agent" commitment_id=xfer.commitments.first.id context_agent_id=context_agent.id %}" method="POST" >
+                                                        {% csrf_token %}
+                                                        {% with slot.add_ext_agent as ag_form %}
+                                                          {{ ag_form|as_bootstrap }}
+                                                        {% endwith %}
+                                                        <input type="hidden" id="next" name="next" value="exchange-work" />
+                                                      <div class="modal-footer">
+                                                        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                        <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                      </div>
+                                                    </form>
+                                                  </div>
+                                               </div>
+                                            {% endif %}
                                             <a href="#cmitModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
                                             </a>
@@ -361,7 +387,7 @@ li {
                                                     <h3 id="cmit-label">{% trans "Change Transfer Commitment" %}</h3>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments" transfer_id=xfer.id %}" method="POST" >
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments_work" transfer_id=xfer.id %}" method="POST" >
                                                         {% if xfer.commitments.first.created_by == request.user %}<div style="float:right">
                                                         {% trans "...created by you" %}</div>{% endif %}
                                                         {% csrf_token %}
@@ -404,7 +430,7 @@ li {
                                                     <input type="hidden" id="next" name="next" value="exchange-work" />
                                                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
                                                 </form>
-                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
+                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
                                                 <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -471,6 +497,7 @@ li {
                                                 </div>
                                             {% endif %}
                                         {% endif %}
+
                                         {% if xfer.commit_description %}
                                             <div class="notes"> {{ xfer.commit_description|urlize|linebreaks }} </div>
                                         {% endif %}
@@ -526,7 +553,8 @@ li {
                                                             </form>
                                                         </div>
                                                     </div>
-                                                    <form
+                                                    {% if not slot.is_currency %}
+                                                      <form
                                                         style="display: inline;"
                                                         class="delete-form"
                                                         id="deleteForm{{ event.id }}"
@@ -535,7 +563,8 @@ li {
                                                         {% csrf_token %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                         <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                                    </form>
+                                                      </form>
+                                                    {% endif %}
                                                 {% endif %}
                                                 {% if event.description %}
                                                     <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
@@ -594,7 +623,8 @@ li {
                                                     </form>
                                                 </div>
                                             </div>
-                                            <form
+                                            {% if not slot.is_currency %}
+                                              <form
                                                 style="display: inline;"
                                                 class="delete-form"
                                                 id="deleteForm{{ xfer.id }}"
@@ -603,7 +633,8 @@ li {
                                                 {% csrf_token %}
                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
                                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                            </form>
+                                              </form>
+                                            {% endif %}
                                         {% endif %}
                                         {% if xfer.event_description %}
                                             <div class="notes"> {{ xfer.event_description|urlize|linebreaks }} </div>
@@ -621,7 +652,7 @@ li {
                 <h3 CLASS="trtheading">Incoming Transfers
                 <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"
                     data-content="Log the planned and actual reciprocal transfers for this exchange.  The types of reciprocal transfers are determined by the type of exchange,
-                    as defined by your network.  They are in return for the primary transfers above.">
+                    as defined by your previous selections.  They are in return for the primary transfers above.">
                     <img src="{% static 'img/information-icon.png' %}" /></a>
                 </span></h3>
                 {% for slot in slots %}
@@ -630,10 +661,10 @@ li {
                             <h3>
                                 {{ slot.name }}
                                 {% if agent and exchange %}
-                                    <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
+                                    <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
                                         {% trans "New Commitment" %}
                                     </a>
-                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
+                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
                                         {% trans "New Transfer" %}
                                     </a>
                                 {% endif %}
@@ -719,7 +750,7 @@ li {
                                         <h3 id="commit">{% trans "Log a new Commitment:" %} {{ slot.name }}</h3>
                                     </div>
                                     <div class="modal-body">
-                                        <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url "add_transfer_commitment" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
+                                        <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url "add_transfer_commitment_work" exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
                                             {% csrf_token %}
                                             {% with slot.add_commit_form as ac_form %}
                                             Commitment date:<br />{{ ac_form.commitment_date }}<br />
@@ -765,7 +796,7 @@ li {
                                                     <h3 id="cmit-label">{% trans "Change Transfer Commitment" %}</h3>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments" transfer_id=xfer.id %}" method="POST" >
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_commitments_work" transfer_id=xfer.id %}" method="POST" >
                                                         {% if xfer.commitments.first.created_by == request.user %}<div style="float:right">
                                                         {% trans "...created by you" %}</div>{% endif %}
 
@@ -809,7 +840,7 @@ li {
                                                     <input type="hidden" id="next" name="next" value="exchange-work" />
                                                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
                                                 </form>
-                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
+                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
                                                 <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -932,7 +963,8 @@ li {
                                                             </form>
                                                         </div>
                                                     </div>
-                                                    <form
+                                                    {% if not slot.is_currency %}
+                                                      <form
                                                         style="display: inline;"
                                                         class="delete-form"
                                                         id="deleteForm{{ event.id }}"
@@ -941,7 +973,8 @@ li {
                                                         {% csrf_token %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                         <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                                    </form>
+                                                      </form>
+                                                    {% endif %}
                                                 {% endif %}
                                                 {% if event.description %}
                                                     <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
@@ -999,7 +1032,8 @@ li {
                                                     </form>
                                                 </div>
                                             </div>
-                                            <form
+                                            {% if not slot.is_currency %}
+                                              <form
                                                 style="display: inline;"
                                                 class="delete-form"
                                                 id="deleteForm{{ xfer.id }}"
@@ -1008,7 +1042,8 @@ li {
                                                 {% csrf_token %}
                                                 <input type="hidden" id="next" name="next" value="exchange-work" />
                                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
-                                            </form>
+                                              </form>
+                                            {% endif %}
                                         {% endif %}
                                         {% if xfer.event_description %}
                                             <div class="notes"> {{ xfer.event_description|urlize|linebreaks }} </div>
@@ -1162,6 +1197,8 @@ li {
       $('#xfer-info').popover();
       $('#rxfer-info').popover();
 
+      $('.modal').find('select[name$=to_agent]').add('select[name$=from_agent]').addClass('related_agent');
+
 		  jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
@@ -1183,20 +1220,22 @@ li {
 		    $.validator.addClassRules("url", { url: true });
         $.validator.addClassRules("resourceType", { required: true});
         $.validator.addClassRules("hours", {
-			  required: true,
-			  number: true,
-			  min: 0,
-			  max: 24
-		});
-		$.validator.addClassRules("minutes", {
-			  required: true,
-			  number: true,
-			  min: 0,
-			  max: 60
-		});
-    $.validator.addClassRules("date-entry", { required: true, date: true });
+			    required: true,
+			    number: true,
+			    min: 0,
+			    max: 24
+		    });
+		    $.validator.addClassRules("minutes", {
+			    required: true,
+			    number: true,
+			    min: 0,
+			    max: 60
+		    });
+        $.validator.addClassRules("date-entry", { required: true, date: true });
 
-    $.validator.addMethod("agentRequired", function (value, element) {
+        //$.validator.addClassRules("related_agent", { required: true });
+
+        $.validator.addMethod("agentRequired", function (value, element) {
             var form_id = element.form.id;
             form_id = "#" + form_id;
             var parent = element.parentElement;

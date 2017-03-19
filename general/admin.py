@@ -94,69 +94,11 @@ class AutoSaveFK_mixinline(admin.StackedInline):
     js = ('saveOnFKchange.js',)
 
 
-'''
-class AutoRecordRelationMixin(admin.ModelAdmin):
-  def save_model(self, request, obj, form, change):
-    instance = form.save(commit=False)
-    if hasattr(instance, 'name'):
-      print 'AUTO NAME SAVE hasnot name!! '+str(obj)
-    if instance.name is None or instance.name == '':
-      instance.name = instance.__unicode__()
-    instance.save()
-    form.save_m2m()
-    return instance
-'''
-
-'''
-class accountForm(forms.ModelForm):
-  model = AccountCes
-
-  def clean_human(self):
-    if self.cleaned_data['human'] is None or self.cleaned_data['human'] == '':
-      print '>>> human is NONE'
-    else:
-      #self.initial['human'] = self.cleaned_data['human']
-      print '<<< human: '+self.cleaned_data['human'].__unicode__()
-      #print '<<< name: '+self.cleaned_data['name']
-      #self.clean_name()
-      return self.cleaned_data['human']
-
-  def clean_name(self):
-    out = self.cleaned_data['unit'].code+': '+self.cleaned_data['human'].__unicode__()+' '+self.cleaned_data['code']+self.cleaned_data['number']
-    if self.cleaned_data['name'] == '' or self.cleaned_data['name'] is None:
-      print '---- name is NONE, out:'+out
-      self.cleaned_data['name'] = out
-      return out
-    else:
-      print '---- name:'+self.cleaned_data['name']
-      return self.cleaned_data['name']
-
-
-  def __init__(self, *args, **kwargs):
-
-    super(accountForm, self).__init__(*args, **kwargs)
-
-    if hasattr(self.instance, 'human'):
-      self.initial['human'] = self.instance.human
-      print ':::: jelow: '+str(self.instance.human)
-      print ':::: name: '+str(self.instance.name)
-    else:
-      #self.initial['human'] = self.instance
-      #print ':::: sin human: '+str(self.initial['human'])
-      #self.clean_name()
-      print ':::: sin human: '
-      print ':::: name: '+str(self.instance.name)
-      #print ':::: cleaned:'+self.cleaned_data
-      #print ':::: '+str(self.instance)#.__unicode__()
-
-      #print ':::: jelow: '+self.instance.human
-'''
-
 
 
 # ----------  H U M A N
 
-
+"""
 class H_addressInline(admin.StackedInline):
     model = rel_Human_Addresses
     extra = 0
@@ -369,6 +311,7 @@ class Proj_personInline(admin.StackedInline):
       rel = Relation.objects.get(clas='rel_proj_pers')
       kwargs['queryset'] = Relation.objects.filter(lft__gt=rel.lft, rght__lt=rel.rght, tree_id=rel.tree_id).exclude(clas='reference')
     return super(Proj_personInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+"""
 
 """
 class H_accountCesInline(admin.StackedInline):
@@ -452,7 +395,7 @@ class H_assetInline(admin.StackedInline):
 
 
 
-
+"""
 class HumanAdmin(Css_Mixin):
   list_display = ['name', 'nickname', 'email']
   search_fields = ('name','nickname','email',)
@@ -495,7 +438,7 @@ class HumanAdmin(Css_Mixin):
     def set_nothing(instance):
       instance.save()
 
-    """if formset.model == AccountCes or formset.model == AccountBank or formset.model == AccountCrypto:
+    '''if formset.model == AccountCes or formset.model == AccountBank or formset.model == AccountCrypto:
       instances = formset.save(commit=False)
 
       if formset.model == AccountCes:
@@ -507,7 +450,7 @@ class HumanAdmin(Css_Mixin):
 
       formset.save_m2m()
       return instances
-    """
+    '''
     if formset.model == rel_Human_Persons:
       instances = formset.save(commit=False)
       if not formset.model == rel_Human_Persons:
@@ -723,7 +666,7 @@ class CompanyAdmin(Public_CompanyAdmin): # admin.ModelAdmin):
     #H_accountBankInline,
     #H_accountCryptoInline,
   ]
-
+"""
 
 
 #---------  S P A C E
@@ -882,7 +825,7 @@ class UnitRatioAdmin(AutoNameMixin):
 
 # - - - - - - - - - N O N - M A T E R I A L
 
-
+"""
 class N_nonmaterialInline(admin.StackedInline):
   model = rel_Nonmaterial_Nonmaterials
   extra = 0
@@ -971,10 +914,11 @@ class NonmaterialAdmin(Public_NonmaterialAdmin):
     N_nonmaterialInline,
     N_jobInline,
   ]
+"""
 
 
 # - - - - - - - - - M A T E R I A L
-
+"""
 class M_nonmaterialInline(admin.StackedInline):
   model = rel_Material_Nonmaterials
   extra = 0
@@ -1084,6 +1028,7 @@ class MaterialAdmin(Public_MaterialAdmin):
     M_jobInline,
     M_materialInline,
   ]
+"""
 
 """
 class Public_AssetAdmin(Public_MaterialAdmin):
@@ -1193,65 +1138,65 @@ class Type_RegionAdmin(MPTTModelAdmin):
 
 # ----- BEINGS
 
-#admin.site.register(Being)
-#admin.site.register(Being_Type, MPTTModelAdmin) # Comment this line after creating 'Human', then 'Person', 'Project' and 'Company' under Human, inside Being_Types.
-#admin.site.register(Human, HumanAdmin) # Comment once created the subtypes
+##admin.site.register(Being)
+##admin.site.register(Being_Type, MPTTModelAdmin) # Comment this line after creating 'Human', then 'Person', 'Project' and 'Company' under Human, inside Being_Types.
+##admin.site.register(Human, HumanAdmin) # Comment once created the subtypes
 
-#admin.site.register(Person, PersonAdmin)
-admin.site.register(Person, Public_PersonAdmin)  # public comentable
+##admin.site.register(Person, PersonAdmin)
+#admin.site.register(Person, Public_PersonAdmin)  # public comentable
 
-#admin.site.register(Project, ProjectAdmin)
-admin.site.register(Project, Public_ProjectAdmin)  # public comentable
+##admin.site.register(Project, ProjectAdmin)
+#admin.site.register(Project, Public_ProjectAdmin)  # public comentable
 admin.site.register(Project_Type, Type_ProjectAdmin)
 
-#admin.site.register(Company, CompanyAdmin)
-admin.site.register(Company, Public_CompanyAdmin)   # public comentable
+##admin.site.register(Company, CompanyAdmin)
+#admin.site.register(Company, Public_CompanyAdmin)   # public comentable
 admin.site.register(Company_Type, Type_CompanyAdmin)
 
 
 # ----- ARTS
 
-#admin.site.register(Art, MPTTModelAdmin) # Comment this line after creating 'Relation' and 'Job' inside Arts.
+##admin.site.register(Art, MPTTModelAdmin) # Comment this line after creating 'Relation' and 'Job' inside Arts.
 admin.site.register(Relation, RelationAdmin)
 admin.site.register(Job, JobAdmin)
 
 
 # ----- ARTWORKS
 
-#admin.site.register(Artwork)
+##admin.site.register(Artwork)
 admin.site.register(Artwork_Type, MPTTModelAdmin) # Comment this line after creating 'Unit', 'Record', 'Material' and 'Nonmaterial' inside Artwork_Types
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Unit_Type, Type_UnitAdmin)
 
 #--------- Nonmaterial
 admin.site.register(Nonmaterial_Type, Type_NonmaterialAdmin)
-admin.site.register(Nonmaterial, Public_NonmaterialAdmin)    # public comentable
-#admin.site.register(Nonmaterial, NonmaterialAdmin)
+#admin.site.register(Nonmaterial, Public_NonmaterialAdmin)    # public comentable
+##admin.site.register(Nonmaterial, NonmaterialAdmin)
 
 #--------- Material
 admin.site.register(Material_Type, Type_MaterialAdmin)
-admin.site.register(Material, Public_MaterialAdmin)    # public comentable
-#admin.site.register(Material, MaterialAdmin)
+#admin.site.register(Material, Public_MaterialAdmin)    # public comentable
+##admin.site.register(Material, MaterialAdmin)
 
-#admin.site.register(Asset, Public_AssetAdmin)    # public comentable
-#admin.site.register(Asset, AssetAdmin)
+##admin.site.register(Asset, Public_AssetAdmin)    # public comentable
+##admin.site.register(Asset, AssetAdmin)
 
 #---------- Records
 admin.site.register(Record_Type, Type_RecordAdmin)
-#admin.site.register(Record, RecordAdmin) # Comment this line to avoid a common record list and use only the ones below
+##admin.site.register(Record, RecordAdmin) # Comment this line to avoid a common record list and use only the ones below
 
 admin.site.register(UnitRatio, UnitRatioAdmin)
-#admin.site.register(AccountCes, AccountCesAdmin)
-#admin.site.register(AccountBank, AccountBankAdmin)
-#admin.site.register(AccountCrypto, AccountCryptoAdmin)
+##admin.site.register(AccountCes, AccountCesAdmin)
+##admin.site.register(AccountBank, AccountBankAdmin)
+##admin.site.register(AccountCrypto, AccountCryptoAdmin)
 
 
 # ---- SPACES
 
-#admin.site.register(Space)
-#admin.site.register(Space_Type, MPTTModelAdmin) # Comment this line after creating 'Address' and 'Region' inside Space_Types
+##admin.site.register(Space)
+##admin.site.register(Space_Type, MPTTModelAdmin) # Comment this line after creating 'Address' and 'Region' inside Space_Types
 admin.site.register(Address, Public_AddressAdmin)
-#admin.site.register(Address, AddressAdmin)
+##admin.site.register(Address, AddressAdmin)
 admin.site.register(Address_Type, Type_AddressAdmin)
 
 admin.site.register(Region, MPTTModelAdmin)
@@ -1260,5 +1205,5 @@ admin.site.register(Region_Type, Type_RegionAdmin)
 
 # ----- CONCEPTS
 
-#admin.site.register(Concept, MPTTModelAdmin)
+##admin.site.register(Concept, MPTTModelAdmin)
 admin.site.register(Type, MPTTModelAdmin) # Comment this line whenever you don't need to edit the main whole Types tree

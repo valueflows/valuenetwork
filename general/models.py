@@ -84,7 +84,7 @@ class rel_Type_Types(models.Model):
 
 
 #	 B E I N G S - (Éssers, Entitats, Projectes...)
-
+"""
 class Being(models.Model):	# Abstract
 	name = models.CharField(verbose_name=_(u"Name"), max_length=200, help_text=_(u"The name of the Entity"))
 	#being_type = TreeForeignKey('Being_Type', blank=True, null=True, verbose_name=_(u"Tipus d'entitat"))
@@ -96,14 +96,14 @@ class Being(models.Model):	# Abstract
 
 	def __unicode__(self):
 		return self.name.encode("utf-8")
-
+"""
 class Being_Type(Type):
 	typ = models.OneToOneField('Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name= _(u"Type of entity")
 		verbose_name_plural = _(u"e--> Types of entities")
 
-
+"""
 class Human(Being):	# Create own ID's
 	nickname = models.CharField(max_length=50, blank=True, verbose_name=_(u"Nickname"), help_text=_(u"The nickname most used of the human entity"))
 	email = models.EmailField(max_length=100, blank=True, verbose_name=_(u"Email"), help_text=_(u"The main email address of the human entity"))
@@ -196,7 +196,7 @@ class Human(Being):	# Create own ID's
 		#print 'I N I T	 H U M A N :	'+self.name
 
 
-		"""if hasattr(self, 'accountsCes') and self.accountsCes.count() > 0:
+		'''if hasattr(self, 'accountsCes') and self.accountsCes.count() > 0:
 			recrels = rel_Human_Records.objects.filter(human=self, record__in=self.accountsCes.all())
 			if recrels.count() == 0:
 				for acc in self.accountsCes.all():
@@ -216,7 +216,7 @@ class Human(Being):	# Create own ID's
 				for acc in self.accountsCrypto.all():
 					newrec, created = rel_Human_Records.objects.get_or_create(human=self, record=acc, relation=rel_tit)
 					print '- new_REC acc_Crypto: CREATED:'+str(created)+' :: '+str(newrec)
-    """
+    '''
 
 
 class Person(Human):
@@ -291,7 +291,7 @@ class Project(MPTTModel, Human):
 				return self.name
 		else:
 			return self.nickname+' ('+self.name+')'
-
+"""
 
 class Project_Type(Being_Type):
 	being_type = models.OneToOneField('Being_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
@@ -300,7 +300,7 @@ class Project_Type(Being_Type):
 		verbose_name_plural = _(u"e-> Types of Projects")
 
 
-
+"""
 class Company(Human):
 	human = models.OneToOneField('Human', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	company_type = TreeForeignKey('Company_Type', null=True, blank=True, verbose_name=_(u"Type of company"))
@@ -309,7 +309,7 @@ class Company(Human):
 	class Meta:
 		verbose_name = _(u"Company")
 		verbose_name_plural = _(u"e- Companies")
-
+"""
 class Company_Type(Being_Type):
 	being_type = models.OneToOneField('Being_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
@@ -317,7 +317,7 @@ class Company_Type(Being_Type):
 		verbose_name_plural = _(u"e-> Types of Companies")
 
 
-
+"""
 class rel_Human_Jobs(models.Model):
 	human = models.ForeignKey('Human')
 	job = TreeForeignKey('Job', verbose_name=_(u"Job"))
@@ -468,7 +468,7 @@ class rel_Human_Companies(models.Model):
 		else:
 			return '('+self.company.company_type.being_type.name+') '+self.relation.gerund+' > '+self.company.__unicode__()
 
-
+"""
 
 '''
 class rel_Address_Jobs(models.Model):
@@ -592,11 +592,11 @@ class Address(Space):	# Create own ID's
 	description = models.TextField(blank=True, null=True, verbose_name=_(u"Description of the Address"), help_text=_(u"Exact localization, indications to arrive or comments"))
 
 	def _main_addr_of(self):
-		rel = rel_Human_Addresses.objects.filter(address=self, main_address=True).first() #TODO accept various and make a list
+		'''rel = rel_Human_Addresses.objects.filter(address=self, main_address=True).first() #TODO accept various and make a list
 		if rel:
 			return rel.human
-		else:
-			return _(u'ningú')
+		else:'''
+		return _(u'nobody')
 	_main_addr_of.allow_tags = True
 	_main_addr_of.short_description = _(u"Main address of")
 	main_addr_of = property(_main_addr_of)
@@ -675,7 +675,7 @@ class Artwork_Type(Type):
 
 
 # - - - - - N O N - M A T E R I A L
-
+"""
 class rel_Nonmaterial_Records(models.Model):
 	nonmaterial = models.ForeignKey('Nonmaterial')
 	record = models.ForeignKey('Record', verbose_name=_(u"related Record"))
@@ -740,6 +740,7 @@ class Nonmaterial(Artwork):	# Create own ID's
 	class Meta:
 		verbose_name = _(u"Non-material Artwork")
 		verbose_name_plural = _(u"o- Non-material Artworks")
+"""
 
 class Nonmaterial_Type(Artwork_Type):
 	artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
@@ -748,7 +749,7 @@ class Nonmaterial_Type(Artwork_Type):
 		verbose_name_plural= _(u"o-> Types of Non-material artworks")
 
 
-
+"""
 class Image(Nonmaterial):
 	nonmaterial = models.OneToOneField('Nonmaterial', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	image = models.ImageField(upload_to='files/images', height_field='height', width_field='width',
@@ -762,11 +763,11 @@ class Image(Nonmaterial):
 	class Meta:
 		verbose_name = _(u"Image")
 		verbose_name_plural = _(u"o- Images")
-
+"""
 
 
 # - - - - - M A T E R I A L
-
+"""
 class rel_Material_Nonmaterials(models.Model):
 	material = models.ForeignKey('Material')
 	nonmaterial = models.ForeignKey('Nonmaterial', verbose_name=_(u"related Non-material"))
@@ -869,7 +870,7 @@ class Material(Artwork): # Create own ID's
 		return str_none
 	_jobs_list.allow_tags = True
 	_jobs_list.short_description = _(u"related Arts/Jobs?")
-
+"""
 
 class Material_Type(Artwork_Type):
 	artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
@@ -906,7 +907,7 @@ class Unit(Artwork):	# Create own ID's
 	code = models.CharField(max_length=4, verbose_name=_(u"Code or Symbol"))
 
 	region = TreeForeignKey('Region', blank=True, null=True, verbose_name=_(u"related use Region"))
-	human = models.ForeignKey('Human', blank=True, null=True, verbose_name=_(u"related Entity"))
+	#human = models.ForeignKey('Human', blank=True, null=True, verbose_name=_(u"related Entity"))
 
 	class Meta:
 		verbose_name= _(u'Unit')

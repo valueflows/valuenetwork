@@ -187,6 +187,11 @@ def get_confirmations(tx):
     and the timestamp of the last confirmation (or None if not confirmed)."""
     return wallet.get_confirmations(tx)
 
+def get_transaction(tx_hash):
+    raw_transaction = cmd_wallet.gettransaction(tx_hash)
+    transaction = raw_transaction.deserialize()
+    return transaction
+
 #Check if it is connected to the electum network
 def is_connected():
     return network.is_connected()
@@ -245,6 +250,7 @@ if __name__ == '__main__':
     server.register_function(daemon_is_up,'daemon_is_up')
     server.register_function(get_wallet_info,'get_wallet_info')
     server.register_function(get_confirmations,'get_confirmations')
+    server.register_function(get_transaction,'get_transaction')
     server.register_function(new_fair_address,'new_fair_address')
     server.register_function(address_history_info,'address_history_info')
     server.register_function(make_transaction_from_address,'make_transaction_from_address')

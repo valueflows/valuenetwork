@@ -629,8 +629,10 @@ def transfer_faircoins_old(request, resource_id):
 @login_required
 def faircoin_history(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
-    event_list = resource.events.all()
     agent = get_agent(request)
+    exchange_service = ExchangeService.get()
+    exchange_service.include_blockchain_tx_as_event(agent, resource)
+    event_list = resource.events.all()
     init = {"quantity": resource.quantity,}
     unit = resource.resource_type.unit
 

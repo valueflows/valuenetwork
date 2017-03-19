@@ -929,6 +929,7 @@ class Asset(Material):
 
 
 # - - - - - U N I T S
+
 @python_2_unicode_compatible
 class Unit(Artwork):	# Create own ID's
 	unit_type = TreeForeignKey('Unit_Type', blank=True, null=True, verbose_name=_(u"Type of Unit"))
@@ -954,6 +955,7 @@ class Unit_Type(Artwork_Type):
 
 
 # - - - - - R E C O R D
+
 @python_2_unicode_compatible
 class Record(Artwork):	# Create own ID's
 	record_type = TreeForeignKey('Record_Type', blank=True, null=True, verbose_name=_(u"Type of Record"))
@@ -1044,8 +1046,10 @@ class AccountCrypto(Record):
 	class Meta:
 		verbose_name = _(u"Cryptocurrency Account")
 		verbose_name_plural = _(u"o- Cryptocurrency Accounts")
+
 	def __str__(self):
 		return '('+self.unit.code+') '+self.accCrypt_human.nickname + ' ' + self.number # +' '+self.name
+
 """
 
 

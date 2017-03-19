@@ -675,26 +675,6 @@ def edit_faircoin_event_description(request, resource_id):
 
 
 
-def faircoin_history_chain(request, resource_id):
-    resource = get_object_or_404(EconomicResource, id=resource_id)
-    event_list = resource.events.all()
-    agent = get_agent(request)
-    init = {"quantity": resource.quantity,}
-    unit = resource.resource_type.unit
-    blockchain_info = faircoin_utils.get_address_history(resource.digital_currency_address)
-
-    tx_in_ocp = []
-    for event in event_list:
-        tx_in_ocp.append(event.digital_currency_tx_hash)
-
-    for tx in blockchain_info:
-        if str(tx[0]) not in tx_in_ocp:
-            pass
-            # TODO: str(tx[0]) is a transaction in the blockchain, but not in ocp.
-            # Here we can setup a EconomicEvent or whatever
-
-
-
 
 
 

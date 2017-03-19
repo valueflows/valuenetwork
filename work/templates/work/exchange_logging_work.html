@@ -230,9 +230,11 @@ li {
                                     <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
                                         {% trans "New Commitment" %}
                                     </a>
-                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
+                                    {% if not slot.is_currency %}
+                                      <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
                                         {% trans "New Transfer" %}
                                     </a>
+                                    {% endif %}
                                 {% endif %}
                                 {% if False and slot.add_xfer_form.errors %}<br>
                                   errors: {{ slot.add_xfer_form.errors }}
@@ -240,7 +242,8 @@ li {
                                 <span class="total">Total: {{ slot.total }}</span>
                             </h3>
                             {% if agent and exchange %}
-                                <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
+                                {% if not slot.is_currency %}
+                                  <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="xfer{{ slot.id }}">{% trans "Log a new " %}{{ slot.name }}</h3>
@@ -312,7 +315,8 @@ li {
                                             </div>
                                         </form>
                                     </div>
-                                </div>
+                                  </div>
+                                {% endif %}
                                 <div class="modal hide fade" id="addCommitModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -430,8 +434,9 @@ li {
                                                     <input type="hidden" id="next" name="next" value="exchange-work" />
                                                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
                                                 </form>
-                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
-                                                <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                {% if xfer.commitments.first.to_agent %}
+                                                  <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
+                                                  <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                         <h3 id="xfer-label">{% trans "Make Transfer from Commitment" %}</h3>
@@ -494,7 +499,8 @@ li {
                                                             </div>
                                                         </form>
                                                     </div>
-                                                </div>
+                                                  </div>
+                                                {% endif %}
                                             {% endif %}
                                         {% endif %}
 
@@ -664,14 +670,17 @@ li {
                                     <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
                                         {% trans "New Commitment" %}
                                     </a>
-                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
+                                    {% if not slot.is_currency %}
+                                      <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
                                         {% trans "New Transfer" %}
-                                    </a>
+                                      </a>
+                                    {% endif %}
                                 {% endif %}
                                 <span class="total">Total: {{ slot.total }}</span>
                             </h3>
                             {% if agent and exchange %}
-                                <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
+                                {% if not slot.is_currency %}
+                                  <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="xfer{{ slot.id }}">{% trans "Log a new:" %} {{ slot.name }}</h3>
@@ -743,7 +752,8 @@ li {
                                             </div>
                                         </form>
                                     </div>
-                                </div>
+                                  </div>
+                                {% endif %}
                                 <div class="modal hide fade" id="addCommitModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -863,8 +873,9 @@ li {
                                                     <input type="hidden" id="next" name="next" value="exchange-work" />
                                                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
                                                 </form>
-                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
-                                                <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                {% if xfer.commitments.first.from_agent %}
+                                                  <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" alt="Record transfer based on commitment">{% trans "Transfer This" %}</a>
+                                                  <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                         <h3 id="xfer-label">{% trans "Make Transfer from Commitment" %}</h3>
@@ -927,7 +938,8 @@ li {
                                                             </div>
                                                         </form>
                                                     </div>
-                                                </div>
+                                                  </div>
+                                                {% endif %}
                                             {% endif %}
                                         {% endif %}
                                         {% if xfer.commit_description %}

@@ -1,5 +1,5 @@
 from work.models import Ocp_Skill_Type, Ocp_Artwork_Type
-from general.models import Artwork_Type, Skill_Type, Job
+from general.models import Artwork_Type, Job
 
 def get_rt_from_ocp_rt(gen_rt):
     rt = None
@@ -31,7 +31,7 @@ def get_rt_from_ocp_st(gen_st):
     if hasattr(gen_st, 'resource_type') and gen_st.resource_type:
         rt = gen_st.resource_type
     else:
-        if isinstance(gen_st, Skill_Type):
+        if isinstance(gen_st, Ocp_Skill_Type):
             try:
                 gst = Ocp_Skill_Type.objects.get(id=gen_st.id)
                 rt = gst.resource_type

@@ -315,6 +315,11 @@ span.fancytree-selected span.fancytree-title {
             <div class="totals infobox"><h3>
               {% trans "Totals:" %}
               </h3>
+              {% if not exchanges %}
+                <p>
+                  {% trans "There are no exchanges to count..." %}
+                </p>
+              {% else %}
               <table>
                 <thead>
                   <tr>
@@ -356,6 +361,7 @@ span.fancytree-selected span.fancytree-title {
                   {% endfor %}
                 </tbody>
               </table>
+              {% endif %}
               <!-- <span class="total">Incoming total: {{ total_transfers }} </span><br/>
               <span class="total">Outgoing total: {{ total_rec_transfers }} </span>
 

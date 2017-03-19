@@ -283,6 +283,7 @@ SIZE_CHOICES = (
     ('network', _('network')),
     ('team', _('project')),
     ('community', _('community')),
+    ('company', _('company')), # bumbum fast hack (all this types can be handled flexible via general app)
 )
 
 
@@ -963,6 +964,8 @@ class EconomicAgent(models.Model):
     def related_contexts(self):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if self.is_context and not self in agents:
+          agents.extend([self])
         #cas = [a for a in agents if a.is_context]
         #return list(set(cas))
         return [a for a in agents if a.is_context]
@@ -976,6 +979,8 @@ class EconomicAgent(models.Model):
         agents.extend(grand_parents)
         if childs:
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if self.is_context and not self in agents:
+          agents.extend([self])
         return list(set([a for a in agents if a.is_context]))
 
     def related_all_agents(self, childs=True):
@@ -987,6 +992,8 @@ class EconomicAgent(models.Model):
         agents.extend(grand_parents)
         if childs:
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if self.is_context and not self in agents:
+          agents.extend([self])
         return list(set(agents))
 
     def related_context_queryset(self):
@@ -1020,6 +1027,8 @@ class EconomicAgent(models.Model):
     #  bum2
     def managed_projects(self): #returns a list or None
         agents = [ag.has_associate for ag in self.is_associate_of.filter(association_type__association_behavior="manager")]
+        if self.is_context and not self in agents:
+          agents.extend([self])
         return [a for a in agents if a.is_context] #EconomicAgent.objects.filter(pk__in=agent_ids)
 
     def is_public(self):
@@ -8109,22 +8118,41 @@ class Transfer(models.Model):
             if either.unit_of_quantity:
                 unit = either.unit_of_quantity.abbrev
             if give:
-                if give.to_agent:
+                if give.to_agent and give.from_agent:
                     give_text = "GIVE to " + give.to_agent.nick
+                elif give.to_agent and not give.from_agent:
+                    give_text = "FROM?"
+                elif not give.to_agent and give.from_agent:
+                    give_text = "GIVE from " + give.from_agent.nick
+                else:
+                    give_text = "??"
             if receive:
-                if receive.from_agent:
+                if receive.from_agent and receive.to_agent:
                     receive_text = "RECEIVE from " + receive.from_agent.nick
+                elif receive.from_agent and not receive.to_agent:
+                    receive_text = "TO?"
+                elif not receive.from_agent and receive.to_agent:
+                    receive_text = "RECEIVE at " + receive.to_agent.nick
+                else:
+                    give_text = "??"
             if give:
                 from_to = give_text
                 if receive:
                     from_to += " "
             if receive:
                 from_to = from_to + receive_text
-            text = " ".join([
-                qty,
-                unit,
-                resource,
-                from_to,
+            if either.resource_type and either.unit_of_quantity and either.unit_of_quantity.name == either.resource_type.name:
+                text = " ".join([
+                  qty,
+                  resource,
+                  from_to,
+                ])
+            else:
+                text = " ".join([
+                  qty,
+                  unit,
+                  resource,
+                  from_to,
                 ])
         return text
 
@@ -8461,6 +8489,7 @@ class Transfer(models.Model):
     def change_commitments_context_form(self): # bumbum
         from work.forms import ContextTransferCommitmentForm
         prefix = self.form_prefix() + "C"
+        #prefix = "ACM" + str(self.transfer_type.id) #self.form_prefix() + "C"
         commits = self.commitments.all()
         if commits:
             commit = commits[0]

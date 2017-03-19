@@ -26,9 +26,11 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
+from valuenetwork.valueaccounting.service import ExchangeService
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
+import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
@@ -653,6 +655,8 @@ def faircoin_history(request, resource_id):
     else:
         return render_to_response('work/no_permission.html')
 
+
+
 @login_required
 def edit_faircoin_event_description(request, resource_id):
     agent = get_agent(request)
@@ -669,8 +673,32 @@ def edit_faircoin_event_description(request, resource_id):
 
 
 
+def faircoin_history_chain(request, resource_id):
+    resource = get_object_or_404(EconomicResource, id=resource_id)
+    event_list = resource.events.all()
+    agent = get_agent(request)
+    init = {"quantity": resource.quantity,}
+    unit = resource.resource_type.unit
+    blockchain_info = faircoin_utils.get_address_history(resource.digital_currency_address)
+
+    tx_in_ocp = []
+    for event in event_list:
+        tx_in_ocp.append(event.digital_currency_tx_hash)
+
+    for tx in blockchain_info:
+        if str(tx[0]) not in tx_in_ocp:
+            pass
+            # TODO: str(tx[0]) is a transaction in the blockchain, but not in ocp.
+            # Here we can setup a EconomicEvent or whatever
+
+
+
+
+
 
 #    M E M B E R S H I P
+
+
 
 @login_required
 def share_payment(request, agent_id):
@@ -1981,6 +2009,7 @@ def validate_nick(request):
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
 
+
 def validate_username(request):
     #import pdb; pdb.set_trace()
     answer = True
@@ -2007,6 +2036,8 @@ def validate_username(request):
         answer = error
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
+
+
 
 @login_required
 def connect_agent_to_join_request(request, agent_id, join_request_id):
@@ -2244,14 +2275,29 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
                     uc = ext.use_case
                     if name and uc:
-                      new_ext = ExchangeType(
-                        name=name,
-                        use_case=uc,
-                        created_by=request.user,
-                        created_date=datetime.date.today(),
-                        context_agent=agnt
-                      )
-                      new_ext.save() # here we get an id
+                      try:
+                        new_ext = ExchangeType.objects.get(name=name)
+                        if new_ext:
+                          if new_ext.context_agent and not new_ext.context_agent == agnt:
+                            if agnt.parent():
+                              new_ext.context_agent = agnt.parent()
+                            else:
+                              new_ext.context_agent = agnt
+
+                            new_ext.edited_by = request.user
+                            new_ext.save() # TODO check if the new_ext is reached by the agent related contexts
+                          return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                            % ('work/agent', agent.id, 'exchange-logging-work', new_ext.id, 0))
+                      except:
+                        #pass
+                        new_ext = ExchangeType(
+                          name=name,
+                          use_case=uc,
+                          created_by=request.user,
+                          created_date=datetime.date.today(),
+                          context_agent=agnt
+                        )
+                        new_ext.save() # here we get an id
 
                       new_rec = Ocp_Record_Type(gen_ext)
                       new_rec.pk = None
@@ -3137,6 +3183,8 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 }
                 slot.add_commit_form = ContextTransferCommitmentForm(initial=commit_init, prefix="ACM" + str(slot.id), context_agent=context_agent, transfer_type=slot)
 
+                slot.add_ext_agent = ContextExternalAgent() #initial=None, prefix="AGN"+str(slot.id))#, context_agent=context_agent)
+
     else:
         raise ValidationError("System Error: No exchange or use case.")
 
@@ -3164,6 +3212,35 @@ def add_new_type_mkp(): # not used now
     #out += "</p><a href='#' class='btn-mini'>New Resource Type</a>"
     #out += "</div>"
     return out
+
+
+@login_required
+def add_transfer_external_agent(request, commitment_id, context_agent_id):
+    commitment = get_object_or_404(Commitment, pk=commitment_id)
+    context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
+    exchange = commitment.exchange
+    user_agent = get_agent(request)
+    if not user_agent:
+        return render_to_response('valueaccounting/no_permission.html')
+    if request.method == "POST":
+        form = AgentCreateForm(request.POST)
+        if form.is_valid():
+            new_agent = form.save(commit=False)
+            new_agent.created_by=request.user
+            new_agent.save()
+            if not commitment.to_agent and commitment.from_agent == context_agent:
+                commitment.to_agent = new_agent
+                commitment.save()
+            elif not commitment.from_agent and commitment.to_agent == context_agent:
+                commitment.from_agent = new_agent
+                commitment.save()
+            # TODO relate the context_agent
+
+
+        #import pdb; pdb.set_trace()
+    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+        % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
+
 
 
 # functions copied from valuenetwork.views because were only running by staff
@@ -3381,14 +3458,14 @@ def add_transfer(request, exchange_id, transfer_type_id):
 
 
 @login_required
-def add_transfer_commitment(request, exchange_id, transfer_type_id):
+def add_transfer_commitment_work(request, exchange_id, transfer_type_id):
     transfer_type = get_object_or_404(TransferType, pk=transfer_type_id)
     exchange = get_object_or_404(Exchange, pk=exchange_id)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         exchange_type = exchange.exchange_type
         context_agent = exchange.context_agent
         form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
+        #import pdb; pdb.set_trace()
         if form.is_valid():
             data = form.cleaned_data
             qty = data["quantity"]
@@ -3437,7 +3514,7 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                 xfer.save()
 
                 if exchange.exchange_type.use_case == UseCase.objects.get(identifier="supply_xfer"):
-                    if transfer_type.is_reciprocal:
+                    if not transfer_type.is_reciprocal:
                         et = EventType.objects.get(name="Give")
                     else:
                         et = EventType.objects.get(name="Receive")
@@ -3492,13 +3569,16 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                     )
                     commit2.save()
 
+        else:
+          # form not valid
+          pass
     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
         % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
 
 
 
 @login_required
-def change_transfer_commitments(request, transfer_id):
+def change_transfer_commitments_work(request, transfer_id):
     transfer = get_object_or_404(Transfer, pk=transfer_id)
     if request.method == "POST":
         commits = transfer.commitments.all()
@@ -3506,7 +3586,8 @@ def change_transfer_commitments(request, transfer_id):
         exchange = transfer.exchange
         context_agent = transfer.context_agent
         #import pdb; pdb.set_trace()
-        form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C")
+        form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C") # "ACM" + str(transfer_type.id) )
+        #import pdb; pdb.set_trace()
         if form.is_valid():
             data = form.cleaned_data
             et_give = EventType.objects.get(name="Give")
@@ -3976,7 +4057,7 @@ def delete_event(request, event_id):
 
 
 
-"""
+
 def resource_role_context_agent_formset(prefix, data=None):
     #import pdb; pdb.set_trace()
     RraFormSet = modelformset_factory(
@@ -3987,7 +4068,7 @@ def resource_role_context_agent_formset(prefix, data=None):
         )
     formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
     return formset
-"""
+
 
 
 #    P R O J E C T   R E S O U R C E S
@@ -4375,6 +4456,8 @@ def add_todo(request):
                                 )
 
     return HttpResponseRedirect(next)
+
+
 
 
 #    P R O C E S S   T A S K S

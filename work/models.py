@@ -429,14 +429,17 @@ class Ocp_Artwork_Type(Artwork_Type):
       verbose_name_plural= _(u'o-> Types of General Artworks/Resources')
 
     def __unicode__(self):
-      if self.resource_type:
-        return self.name+' <' #+'  ('+self.resource_type.name+')'
-      elif self.facet_value:
-        return self.name #+'  ('+self.facet_value.value+')'
+      try:
+        if self.resource_type:
+          return self.name+' <' #+'  ('+self.resource_type.name+')'
+      except:
+        return self.name+' !!'
+      if self.facet_value:
+          return self.name+':'#  ('+self.facet_value.value+')'
       elif self.facet:
-        return self.name+'  ('+self.facet.name+')'
+          return self.name+'  ('+self.facet.name+')'
       else:
-        return self.name
+          return self.name
 
 
 

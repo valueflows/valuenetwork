@@ -137,6 +137,7 @@ INSTALLED_APPS = [
     'corsheaders',
     #'django_filters',
     'rest_framework',
+    'graphene_django',
     'captcha',
 
     # `django-fobi` core
@@ -204,7 +205,7 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
     'PAGINATE_BY': 10,
-   'URL_FIELD_NAME': 'api_url',
+    'URL_FIELD_NAME': 'api_url',
 }
 
 # valueaccounting settings

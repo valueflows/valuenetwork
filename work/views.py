@@ -935,7 +935,7 @@ def your_projects(request):
     next = "/work/your-projects/"
     allowed = False
     if agent:
-        if agent.is_active_freedom_coop_member() or request.user.is_staff or agent.is_participant():
+        if agent.is_active_freedom_coop_member() or request.user.is_staff or agent.is_participant() or managed_projects:
             allowed = True
     if not allowed:
         return render_to_response('work/no_permission.html')

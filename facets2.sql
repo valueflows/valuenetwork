@@ -1,5 +1,6 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
+DROP TABLE "valueaccounting_facet";
 CREATE TABLE "valueaccounting_facet" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "name" varchar(32) NOT NULL UNIQUE, "description" text NULL, "clas" varchar(20) NULL);
 INSERT INTO "valueaccounting_facet" VALUES(1,'Material','This is a set of material resource types or facet values, in coordination with the General common tree of Material Artwork Types (physical items). This facet relates a General model class which manages the subtypes as a tree.','Material_Type');
 INSERT INTO "valueaccounting_facet" VALUES(2,'Types of Work','This is a set of Skill resource types or facet values, in coordination with the General common tree of Jobs (arts, verbs). This facet relates a Work model class which manages the subtypes as a tree.','Skill_Type');
@@ -9,6 +10,7 @@ COMMIT;
 
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
+DROP TABLE "valueaccounting_facetvalue";
 CREATE TABLE "valueaccounting_facetvalue" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "value" varchar(32) NOT NULL, "description" text NULL, "facet_id" integer NOT NULL REFERENCES "valueaccounting_facet" ("id"), UNIQUE ("facet_id", "value"));
 INSERT INTO "valueaccounting_facetvalue" VALUES(1,'Product','',1);
 INSERT INTO "valueaccounting_facetvalue" VALUES(8,'Space','',1);

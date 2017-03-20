@@ -212,7 +212,8 @@ class ExchangeService(object):
         tx_included = []
         for tx in tx_in_blockchain:
             if str(tx[0]) not in tx_in_ocp:
-                (qty, time) = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
+                (amount, time) = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
+                qty=Decimal(amount/1000000)
                 date = datetime.date.fromtimestamp(time)
                 tt = ExchangeService.faircoin_incoming_transfer_type()
                 xt = tt.exchange_type
@@ -222,29 +223,37 @@ class ExchangeService(object):
                     name="Receive Faircoins",
                     start_date=date,
                 )
-                #exchange.save()
+                exchange.save()
                 transfer = Transfer(
                     transfer_type=tt,
                     exchange=exchange,
                     transfer_date=date,
                     name="Receive Faircoins",
                 )
-                #transfer.save()
+                transfer.save()
 
                 et_receive = EventType.objects.get(name="Receive") 
                 state = "new"
+                confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
+                if confirmations > 0:
+                    state = "broadcast"
+                if confirmations > 2:
+                    state = "confirmed"
+
                 event = EconomicEvent(
                     event_type=et_receive,
                     event_date=date,
                     to_agent=agent,
                     resource_type=resource.resource_type,
                     resource=resource,
+                    digital_currency_tx_hash=str(tx[0]),
                     digital_currency_tx_state=state,
                     quantity=qty,
                     transfer=transfer,
+                    event_reference=faircoin_address
                 )
-                #event.save()
+                event.save()
                 
                 tx_included.append(str(tx[0]))
-
+        #import pdb; pdb.set_trace()
         return tx_included

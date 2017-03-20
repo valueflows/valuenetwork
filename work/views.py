@@ -2884,7 +2884,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
     exchanges_by_type = Exchange.objects.exchanges_by_type(agent)
 
-    total_transfers = [{'unit':u,'name':'','clas':'','income':0,'incommit':0,'outgo':0,'outcommit':0, 'balance':0,'balnote':'','debug':''} for u in agent.project.used_units_ids()]
+    total_transfers = [{'unit':u,'name':'','clas':'','income':0,'incommit':0,'outgo':0,'outcommit':0, 'balance':0,'balnote':'','debug':''} for u in agent.used_units_ids()]
     total_rec_transfers = 0
     comma = ""
 
@@ -3008,7 +3008,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Rtype_form": Rtype_form,
         "Stype_form": Stype_form,
-        "Utype_tree": Ocp_Unit_Type.objects.filter(id__in=agent.project.used_units_ids()), #all(),
+        "Utype_tree": Ocp_Unit_Type.objects.filter(id__in=agent.used_units_ids()), #all(),
         #"unit_types": unit_types,
         "ext_form": ext_form,
     }, context_instance=RequestContext(request))
@@ -3769,6 +3769,15 @@ def change_transfer_events(request, transfer_id):
         transfer_type = transfer.transfer_type
         exchange = transfer.exchange
         context_agent = transfer.context_agent
+        events = transfer.events.all()
+        if not context_agent:
+          if exchange.context_agent:
+            context_agent = exchange.context_agent
+          elif events:
+            if events[0].to_agent == request.user.agent.agent:
+              context_agent = request.user.agent.agent
+            elif events[0].from_agent == request.user.agent.agent:
+              context_agent = request.user.agent.agent
         #import pdb; pdb.set_trace()
         form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
         if form.is_valid():

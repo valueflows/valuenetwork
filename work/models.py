@@ -114,52 +114,7 @@ class Project(models.Model):
     def is_public(self):
         return self.visibility == 'public'
 
-    def used_units_ids(self):
-        exs = Exchange.objects.exchanges_by_type(self.agent)
-        uids = []
-        for ex in exs:
-          txs = ex.transfers.all()#filter(events__unit_of_value__ocp_unit_type__isnull=False) #exchange_type.transfer_types.all()
-          for tx in txs:
-            uv = tx.unit_of_value()
-            if uv and not uv.ocp_unit_type.id in uids:
-              # mptt: get_ancestors(ascending=False, include_self=False)
-              #ancs = uv.ocp_unit_type.get_ancestors(False, True)
-              #for an in ancs:
-              #  if not an.id in uids:
-              #    uids.append(an.id)
-              uids.append(uv.ocp_unit_type.id)
-            #rt = tx.resource_type()
-            #if rt.unit_of_value and rt.unit_of_value.ocp_unit_type:
-              #ancs = rt.unit_of_value.ocp_unit_type.get_ancestors(False, True)
-              #for an in ancs:
-              #  if not an.id in uids:
-              #    uids.append(an.id)
-              #pass #uids.append(rt.unit_of_value.ocp_unit_type.id)
-            uq = tx.unit_of_quantity()
-            if uq:
-              if not hasattr(uq, 'ocp_unit_type'):
-                raise ValidationError("The unit has not ocp_unit_type! "+str(uq))
-              else:
-                if uq.ocp_unit_type.clas == 'each':
-                  rt = tx.resource_type()
-                  if hasattr(rt, 'ocp_artwork_type') and rt.ocp_artwork_type:
-                    ancs = rt.ocp_artwork_type.get_ancestors(False,True)
-                    cur = False
-                    for an in ancs:
-                      if an.clas == "currency":
-                        cur = True
-                    if cur:
-                      if hasattr(rt.ocp_artwork_type, 'unit_type') and rt.ocp_artwork_type.unit_type.id:
-                        if rt.ocp_artwork_type.unit_type.ocp_unit_type:
-                          if not rt.ocp_artwork_type.unit_type.ocp_unit_type.id in uids:
-                            uids.append(rt.ocp_artwork_type.unit_type.ocp_unit_type.id)
-                        #pass
 
-                      #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.unit_type))
-
-
-
-        return uids
 
 class SkillSuggestion(models.Model):
     skill = models.CharField(_('skill'), max_length=128,

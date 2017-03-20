@@ -916,7 +916,10 @@ class ContextTransferForm(forms.Form):
             else:
                 if rts:
                     if resource_type:
-                        self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type).filter(agent_resource_roles__agent__id=context_agent.id)
+                        try:
+                          self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type).filter(agent_resource_roles__agent__id=context_agent.id)
+                        except:
+                          self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type)
                         self.fields["from_resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type)
                     else:
                         self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=rts[0]).filter(agent_resource_roles__agent__id=context_agent.id)

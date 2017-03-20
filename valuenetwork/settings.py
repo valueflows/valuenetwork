@@ -253,6 +253,12 @@ LOGGING = {
     }
 }
 
+GRAPHENE = {
+    'MIDDLEWARE': [
+        'graphene_django.debug.DjangoDebugMiddleware',
+    ]
+}
+
 #LOGGING_CONFIG = None
 
 FIXTURE_DIRS = [

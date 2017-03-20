@@ -33,15 +33,16 @@
         {% include "_messages.html" %}
     <div>
         <legend>
-            {% trans "Account History for" %} {{ resource.identifier }}&nbsp;&nbsp;
+            {% if resource.owner %}
+              <a href="{% url 'members_agent' agent_id=resource.owner.id %}">{{ resource.owner.name }}</a> >
+            {% endif %}
+            {% if resource.id %}
+              <a class="indent" href="{% url "manage_faircoin_account" resource_id=resource.id %}">{% trans "FairCoin Account" %}</a> >
+            {% endif %}
+            {% trans "History" %}: &nbsp;&nbsp;
 
             <div class="subnav">
-                {% if resource.id %}
-                    <a class="indent" href="{% url "manage_faircoin_account" resource_id=resource.id %}">Manage Account</a>
-                {% endif %}
-                {% if resource.owner %}
-                    <a class="indent" href="{% url 'members_agent' agent_id=resource.owner.id %}">{% trans "View Owner" %}</a>
-                {% endif %}
+                <a class="indent" href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Blockchain" %}</a>
             </div>
         </legend>
 

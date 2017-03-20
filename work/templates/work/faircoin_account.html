@@ -74,10 +74,7 @@
 
       <div class="subnav">
         <a class="indent" href="{% url "faircoin_history" resource_id=resource.id %}">{% trans "Account history" %}</a>
-        <a class="indent" href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Follow Chain" %}</a>
-        {% if resource.owner %}
-          <a class="indent" href="{% url 'members_agent' agent_id=resource.owner.id %}">{% trans "View Owner" %}</a>
-        {% endif %}
+        <a class="indent" href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Blockchain" %}</a>
       </div>
 		</legend>
 

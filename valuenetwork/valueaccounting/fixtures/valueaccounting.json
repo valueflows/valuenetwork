@@ -1,0 +1,218 @@
+[
+{
+  "fields": {
+    "clas": "Material_Type",
+    "name": "Material",
+    "description": "This is a set of material resource types or facet values, in coordination with the General common tree of Material Artwork Types (physical items). This facet relates a General model class which manages the subtypes as a tree."
+  },
+  "model": "valueaccounting.facet",
+  "pk": 1
+},
+{
+  "fields": {
+    "clas": "Skill_Type",
+    "name": "Types of Work",
+    "description": "This is a set of Skill resource types or facet values, in coordination with the General common tree of Jobs (arts, verbs). This facet relates a Work model class which manages the subtypes as a tree."
+  },
+  "model": "valueaccounting.facet",
+  "pk": 2
+},
+{
+  "fields": {
+    "clas": "Nonmaterial_Type",
+    "name": "Non-material",
+    "description": "This is a set of non-material resource types or facet values, in coordination with the General common tree of Non-material Artwork Types (physical items). This facet relates a General model class which manages the subtypes as a tree."
+  },
+  "model": "valueaccounting.facet",
+  "pk": 3
+},
+{
+  "fields": {
+    "clas": "Currency_Type",
+    "name": "Currency",
+    "description": "This facet is to group types of currencies, so a resource type can act as a currency of certain type if wears any of this values"
+  },
+  "model": "valueaccounting.facet",
+  "pk": 4
+},
+{
+  "fields": {
+    "facet": 1,
+    "description": "",
+    "value": "Product"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 1
+},
+{
+  "fields": {
+    "facet": 1,
+    "description": "",
+    "value": "Space"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 8
+},
+{
+  "fields": {
+    "facet": 1,
+    "description": "",
+    "value": "Raw material"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 9
+},
+{
+  "fields": {
+    "facet": 1,
+    "description": "",
+    "value": "Tool"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 10
+},
+{
+  "fields": {
+    "facet": 2,
+    "description": "",
+    "value": "Making"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 12
+},
+{
+  "fields": {
+    "facet": 2,
+    "description": "",
+    "value": "Communicating"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 13
+},
+{
+  "fields": {
+    "facet": 2,
+    "description": "",
+    "value": "LifeCareing"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 14
+},
+{
+  "fields": {
+    "facet": 3,
+    "description": "",
+    "value": "Visual"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 16
+},
+{
+  "fields": {
+    "facet": 3,
+    "description": "",
+    "value": "Formation"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 17
+},
+{
+  "fields": {
+    "facet": 3,
+    "description": "",
+    "value": "Sound"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 18
+},
+{
+  "fields": {
+    "facet": 3,
+    "description": "",
+    "value": "Text"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 19
+},
+{
+  "fields": {
+    "facet": 1,
+    "description": "",
+    "value": "Food'n'Drinks"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 21
+},
+{
+  "fields": {
+    "facet": 3,
+    "description": "",
+    "value": "Digital"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 22
+},
+{
+  "fields": {
+    "facet": 3,
+    "description": "",
+    "value": "Service"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 23
+},
+{
+  "fields": {
+    "facet": 3,
+    "description": "",
+    "value": "Money"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 24
+},
+{
+  "fields": {
+    "facet": 2,
+    "description": "",
+    "value": "Transporting"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 25
+},
+{
+  "fields": {
+    "facet": 4,
+    "description": "",
+    "value": "Fair currency"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 26
+},
+{
+  "fields": {
+    "facet": 4,
+    "description": "",
+    "value": "Fiat currency"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 27
+},
+{
+  "fields": {
+    "facet": 4,
+    "description": "",
+    "value": "Social currency"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 28
+},
+{
+  "fields": {
+    "facet": 4,
+    "description": "",
+    "value": "Crypto currency"
+  },
+  "model": "valueaccounting.facetvalue",
+  "pk": 29
+}
+]

@@ -1,0 +1,6428 @@
+[
+{
+  "fields": {
+    "rght": 44,
+    "name": "Being",
+    "parent": null,
+    "level": 0,
+    "lft": 1,
+    "tree_id": 1,
+    "clas": "Being",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 1
+},
+{
+  "fields": {
+    "rght": 24,
+    "name": "Space",
+    "parent": null,
+    "level": 0,
+    "lft": 1,
+    "tree_id": 2,
+    "clas": "Space",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 2
+},
+{
+  "fields": {
+    "rght": 334,
+    "name": "Artwork",
+    "parent": null,
+    "level": 0,
+    "lft": 1,
+    "tree_id": 3,
+    "clas": "Artwork",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 3
+},
+{
+  "fields": {
+    "rght": 3,
+    "name": "Person",
+    "parent": 1,
+    "level": 1,
+    "lft": 2,
+    "tree_id": 1,
+    "clas": "Person",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 4
+},
+{
+  "fields": {
+    "rght": 35,
+    "name": "Project",
+    "parent": 1,
+    "level": 1,
+    "lft": 4,
+    "tree_id": 1,
+    "clas": "Project",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 5
+},
+{
+  "fields": {
+    "rght": 43,
+    "name": "Company",
+    "parent": 1,
+    "level": 1,
+    "lft": 36,
+    "tree_id": 1,
+    "clas": "Company",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 6
+},
+{
+  "fields": {
+    "rght": 9,
+    "name": "Address",
+    "parent": 2,
+    "level": 1,
+    "lft": 2,
+    "tree_id": 2,
+    "clas": "Address",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 7
+},
+{
+  "fields": {
+    "rght": 23,
+    "name": "Region",
+    "parent": 2,
+    "level": 1,
+    "lft": 10,
+    "tree_id": 2,
+    "clas": "Region",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 8
+},
+{
+  "fields": {
+    "rght": 71,
+    "name": "Material",
+    "parent": 3,
+    "level": 1,
+    "lft": 2,
+    "tree_id": 3,
+    "clas": "Material",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 9
+},
+{
+  "fields": {
+    "rght": 147,
+    "name": "Non-material",
+    "parent": 3,
+    "level": 1,
+    "lft": 72,
+    "tree_id": 3,
+    "clas": "Nonmaterial",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 10
+},
+{
+  "fields": {
+    "rght": 281,
+    "name": "Record",
+    "parent": 3,
+    "level": 1,
+    "lft": 148,
+    "tree_id": 3,
+    "clas": "Record",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 11
+},
+{
+  "fields": {
+    "rght": 333,
+    "name": "Unit",
+    "parent": 3,
+    "level": 1,
+    "lft": 282,
+    "tree_id": 3,
+    "clas": "Unit",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 12
+},
+{
+  "fields": {
+    "rght": 32,
+    "name": "IC Project",
+    "parent": 5,
+    "level": 2,
+    "lft": 5,
+    "tree_id": 1,
+    "clas": "ic_project",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 13
+},
+{
+  "fields": {
+    "rght": 162,
+    "name": "Unit Ratio",
+    "parent": 11,
+    "level": 2,
+    "lft": 149,
+    "tree_id": 3,
+    "clas": "UnitRatio",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 14
+},
+{
+  "fields": {
+    "rght": 170,
+    "name": "currency Account",
+    "parent": 11,
+    "level": 2,
+    "lft": 163,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 15
+},
+{
+  "fields": {
+    "rght": 165,
+    "name": "CES account",
+    "parent": 15,
+    "level": 3,
+    "lft": 164,
+    "tree_id": 3,
+    "clas": "AccountCes",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 16
+},
+{
+  "fields": {
+    "rght": 167,
+    "name": "Crypto account",
+    "parent": 15,
+    "level": 3,
+    "lft": 166,
+    "tree_id": 3,
+    "clas": "AccountCrypto",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 17
+},
+{
+  "fields": {
+    "rght": 169,
+    "name": "Bank account",
+    "parent": 15,
+    "level": 3,
+    "lft": 168,
+    "tree_id": 3,
+    "clas": "AccountBank",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 18
+},
+{
+  "fields": {
+    "rght": 38,
+    "name": "Cooperative",
+    "parent": 6,
+    "level": 2,
+    "lft": 37,
+    "tree_id": 1,
+    "clas": "cooperative",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 19
+},
+{
+  "fields": {
+    "rght": 40,
+    "name": "Bank",
+    "parent": 6,
+    "level": 2,
+    "lft": 39,
+    "tree_id": 1,
+    "clas": "bank",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 20
+},
+{
+  "fields": {
+    "rght": 8,
+    "name": "Local Selfmanaged Group",
+    "parent": 23,
+    "level": 4,
+    "lft": 7,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 21
+},
+{
+  "fields": {
+    "rght": 10,
+    "name": "Regional Network (\"Ecoxarxa\")",
+    "parent": 23,
+    "level": 4,
+    "lft": 9,
+    "tree_id": 1,
+    "clas": "ces",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 22
+},
+{
+  "fields": {
+    "rght": 19,
+    "name": "Public",
+    "parent": 13,
+    "level": 3,
+    "lft": 6,
+    "tree_id": 1,
+    "clas": "public",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 23
+},
+{
+  "fields": {
+    "rght": 12,
+    "name": "Integral Cooperative",
+    "parent": 23,
+    "level": 4,
+    "lft": 11,
+    "tree_id": 1,
+    "clas": "ces",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 24
+},
+{
+  "fields": {
+    "rght": 14,
+    "name": "Productive Public",
+    "parent": 23,
+    "level": 4,
+    "lft": 13,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 25
+},
+{
+  "fields": {
+    "rght": 16,
+    "name": "Common Service",
+    "parent": 23,
+    "level": 4,
+    "lft": 15,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 26
+},
+{
+  "fields": {
+    "rght": 28,
+    "name": "Cooperating Collective",
+    "parent": 63,
+    "level": 4,
+    "lft": 27,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 27
+},
+{
+  "fields": {
+    "rght": 30,
+    "name": "Consumer Group",
+    "parent": 63,
+    "level": 4,
+    "lft": 29,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 28
+},
+{
+  "fields": {
+    "rght": 21,
+    "name": "Services project",
+    "parent": 13,
+    "level": 3,
+    "lft": 20,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 29
+},
+{
+  "fields": {
+    "rght": 25,
+    "name": "Selfemployed",
+    "parent": 13,
+    "level": 3,
+    "lft": 22,
+    "tree_id": 1,
+    "clas": "selfemployed",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 31
+},
+{
+  "fields": {
+    "rght": 24,
+    "name": "Selfemployed stallholder",
+    "parent": 31,
+    "level": 4,
+    "lft": 23,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 32
+},
+{
+  "fields": {
+    "rght": 318,
+    "name": "Currency",
+    "parent": 12,
+    "level": 2,
+    "lft": 305,
+    "tree_id": 3,
+    "clas": "currency",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 34
+},
+{
+  "fields": {
+    "rght": 309,
+    "name": "Social Currency",
+    "parent": 34,
+    "level": 3,
+    "lft": 306,
+    "tree_id": 3,
+    "clas": "social_currency",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 35
+},
+{
+  "fields": {
+    "rght": 313,
+    "name": "Crypto Currency",
+    "parent": 34,
+    "level": 3,
+    "lft": 310,
+    "tree_id": 3,
+    "clas": "crypto_currency",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 36
+},
+{
+  "fields": {
+    "rght": 317,
+    "name": "Fiat Currency",
+    "parent": 34,
+    "level": 3,
+    "lft": 314,
+    "tree_id": 3,
+    "clas": "fiat_currency",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 37
+},
+{
+  "fields": {
+    "rght": 324,
+    "name": "Area",
+    "parent": 12,
+    "level": 2,
+    "lft": 319,
+    "tree_id": 3,
+    "clas": "area",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 38
+},
+{
+  "fields": {
+    "rght": 20,
+    "name": "Continent",
+    "parent": 8,
+    "level": 2,
+    "lft": 11,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 39
+},
+{
+  "fields": {
+    "rght": 13,
+    "name": "Country",
+    "parent": 39,
+    "level": 3,
+    "lft": 12,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 40
+},
+{
+  "fields": {
+    "rght": 19,
+    "name": "Cultural Community",
+    "parent": 39,
+    "level": 3,
+    "lft": 14,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 41
+},
+{
+  "fields": {
+    "rght": 16,
+    "name": "Bioregion",
+    "parent": 41,
+    "level": 4,
+    "lft": 15,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 42
+},
+{
+  "fields": {
+    "rght": 18,
+    "name": "County",
+    "parent": 41,
+    "level": 4,
+    "lft": 17,
+    "tree_id": 2,
+    "clas": "region",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 43
+},
+{
+  "fields": {
+    "rght": 4,
+    "name": "Collective Polyvalent Space",
+    "parent": 7,
+    "level": 2,
+    "lft": 3,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 44
+},
+{
+  "fields": {
+    "rght": 6,
+    "name": "Workspace",
+    "parent": 7,
+    "level": 2,
+    "lft": 5,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 45
+},
+{
+  "fields": {
+    "rght": 8,
+    "name": "Housing",
+    "parent": 7,
+    "level": 2,
+    "lft": 7,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 46
+},
+{
+  "fields": {
+    "rght": 34,
+    "name": "Worldwide Network",
+    "parent": 5,
+    "level": 2,
+    "lft": 33,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 47
+},
+{
+  "fields": {
+    "rght": 292,
+    "name": "Time",
+    "parent": 12,
+    "level": 2,
+    "lft": 283,
+    "tree_id": 3,
+    "clas": "time_currency",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 48
+},
+{
+  "fields": {
+    "rght": 108,
+    "name": "live Formation",
+    "parent": 84,
+    "level": 4,
+    "lft": 99,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 49
+},
+{
+  "fields": {
+    "rght": 110,
+    "name": "Cultural artwork",
+    "parent": 10,
+    "level": 2,
+    "lft": 73,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 50
+},
+{
+  "fields": {
+    "rght": 132,
+    "name": "Digital artwork",
+    "parent": 10,
+    "level": 2,
+    "lft": 111,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 51
+},
+{
+  "fields": {
+    "rght": 105,
+    "name": "IC formation",
+    "parent": 49,
+    "level": 5,
+    "lft": 100,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 52
+},
+{
+  "fields": {
+    "rght": 102,
+    "name": "session of Collective formation",
+    "parent": 52,
+    "level": 6,
+    "lft": 101,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 53
+},
+{
+  "fields": {
+    "rght": 104,
+    "name": "session of Individual formation",
+    "parent": 52,
+    "level": 6,
+    "lft": 103,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 54
+},
+{
+  "fields": {
+    "rght": 27,
+    "name": "Machine",
+    "parent": 89,
+    "level": 3,
+    "lft": 18,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 55
+},
+{
+  "fields": {
+    "rght": 22,
+    "name": "Vehicle",
+    "parent": 55,
+    "level": 4,
+    "lft": 19,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 56
+},
+{
+  "fields": {
+    "rght": 21,
+    "name": "Car",
+    "parent": 56,
+    "level": 5,
+    "lft": 20,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 57
+},
+{
+  "fields": {
+    "rght": 151,
+    "name": "ratio Currency - Time",
+    "parent": 14,
+    "level": 3,
+    "lft": 150,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 58
+},
+{
+  "fields": {
+    "rght": 153,
+    "name": "ratio Currency - Currency",
+    "parent": 14,
+    "level": 3,
+    "lft": 152,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 59
+},
+{
+  "fields": {
+    "rght": 155,
+    "name": "ratio Area - Area",
+    "parent": 14,
+    "level": 3,
+    "lft": 154,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 60
+},
+{
+  "fields": {
+    "rght": 157,
+    "name": "ratio Time - Time",
+    "parent": 14,
+    "level": 3,
+    "lft": 156,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 61
+},
+{
+  "fields": {
+    "rght": 22,
+    "name": "Planet",
+    "parent": 8,
+    "level": 2,
+    "lft": 21,
+    "tree_id": 2,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 62
+},
+{
+  "fields": {
+    "rght": 31,
+    "name": "Online",
+    "parent": 13,
+    "level": 3,
+    "lft": 26,
+    "tree_id": 1,
+    "clas": "online",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 63
+},
+{
+  "fields": {
+    "rght": 42,
+    "name": "Insurance company",
+    "parent": 6,
+    "level": 2,
+    "lft": 41,
+    "tree_id": 1,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 64
+},
+{
+  "fields": {
+    "rght": 92,
+    "name": "Image",
+    "parent": 149,
+    "level": 4,
+    "lft": 85,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 65
+},
+{
+  "fields": {
+    "rght": 18,
+    "name": "Larder",
+    "parent": 23,
+    "level": 4,
+    "lft": 17,
+    "tree_id": 1,
+    "clas": "ic_larder",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 66
+},
+{
+  "fields": {
+    "rght": 298,
+    "name": "Weight",
+    "parent": 12,
+    "level": 2,
+    "lft": 293,
+    "tree_id": 3,
+    "clas": "weight",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 67
+},
+{
+  "fields": {
+    "rght": 304,
+    "name": "Length",
+    "parent": 12,
+    "level": 2,
+    "lft": 299,
+    "tree_id": 3,
+    "clas": "length",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 68
+},
+{
+  "fields": {
+    "rght": 159,
+    "name": "ratio Length - Length",
+    "parent": 14,
+    "level": 3,
+    "lft": 158,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 69
+},
+{
+  "fields": {
+    "rght": 161,
+    "name": "ratio Weight - Weight",
+    "parent": 14,
+    "level": 3,
+    "lft": 160,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 70
+},
+{
+  "fields": {
+    "rght": 83,
+    "name": "Text",
+    "parent": 50,
+    "level": 3,
+    "lft": 74,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 71
+},
+{
+  "fields": {
+    "rght": 76,
+    "name": "Poem",
+    "parent": 71,
+    "level": 4,
+    "lft": 75,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 73
+},
+{
+  "fields": {
+    "rght": 78,
+    "name": "Article",
+    "parent": 71,
+    "level": 4,
+    "lft": 77,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 74
+},
+{
+  "fields": {
+    "rght": 119,
+    "name": "Website",
+    "parent": 51,
+    "level": 3,
+    "lft": 112,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 75
+},
+{
+  "fields": {
+    "rght": 116,
+    "name": "Database",
+    "parent": 75,
+    "level": 4,
+    "lft": 115,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 76
+},
+{
+  "fields": {
+    "rght": 87,
+    "name": "Photo",
+    "parent": 65,
+    "level": 5,
+    "lft": 86,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 77
+},
+{
+  "fields": {
+    "rght": 89,
+    "name": "Illustration",
+    "parent": 65,
+    "level": 5,
+    "lft": 88,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 78
+},
+{
+  "fields": {
+    "rght": 91,
+    "name": "Graphic/Diagram",
+    "parent": 65,
+    "level": 5,
+    "lft": 90,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 79
+},
+{
+  "fields": {
+    "rght": 118,
+    "name": "Hosting Plan",
+    "parent": 75,
+    "level": 4,
+    "lft": 117,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 80
+},
+{
+  "fields": {
+    "rght": 114,
+    "name": "Plugin",
+    "parent": 75,
+    "level": 4,
+    "lft": 113,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 81
+},
+{
+  "fields": {
+    "rght": 96,
+    "name": "live Music",
+    "parent": 84,
+    "level": 4,
+    "lft": 95,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 82
+},
+{
+  "fields": {
+    "rght": 98,
+    "name": "Performance",
+    "parent": 84,
+    "level": 4,
+    "lft": 97,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 83
+},
+{
+  "fields": {
+    "rght": 109,
+    "name": "Live Event",
+    "parent": 50,
+    "level": 3,
+    "lft": 94,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 84
+},
+{
+  "fields": {
+    "rght": 125,
+    "name": "digital Music",
+    "parent": 51,
+    "level": 3,
+    "lft": 120,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 85
+},
+{
+  "fields": {
+    "rght": 122,
+    "name": "Song/Track",
+    "parent": 85,
+    "level": 4,
+    "lft": 121,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 86
+},
+{
+  "fields": {
+    "rght": 124,
+    "name": "Album",
+    "parent": 85,
+    "level": 4,
+    "lft": 123,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 87
+},
+{
+  "fields": {
+    "rght": 16,
+    "name": "Raw Material",
+    "parent": 9,
+    "level": 2,
+    "lft": 3,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 88
+},
+{
+  "fields": {
+    "rght": 30,
+    "name": "Tool",
+    "parent": 9,
+    "level": 2,
+    "lft": 17,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 89
+},
+{
+  "fields": {
+    "rght": 29,
+    "name": "Manual Tool",
+    "parent": 89,
+    "level": 3,
+    "lft": 28,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 90
+},
+{
+  "fields": {
+    "rght": 7,
+    "name": "raw Vegetal",
+    "parent": 88,
+    "level": 3,
+    "lft": 4,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 91
+},
+{
+  "fields": {
+    "rght": 9,
+    "name": "raw Mineral",
+    "parent": 88,
+    "level": 3,
+    "lft": 8,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 92
+},
+{
+  "fields": {
+    "rght": 11,
+    "name": "raw Animal",
+    "parent": 88,
+    "level": 3,
+    "lft": 10,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 93
+},
+{
+  "fields": {
+    "rght": 24,
+    "name": "Motor Hand Tool",
+    "parent": 55,
+    "level": 4,
+    "lft": 23,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 94
+},
+{
+  "fields": {
+    "rght": 43,
+    "name": "Food",
+    "parent": 160,
+    "level": 3,
+    "lft": 36,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 95
+},
+{
+  "fields": {
+    "rght": 40,
+    "name": "Artisan Vegetal derivate",
+    "parent": 95,
+    "level": 4,
+    "lft": 37,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 96
+},
+{
+  "fields": {
+    "rght": 45,
+    "name": "Drinks",
+    "parent": 160,
+    "level": 3,
+    "lft": 44,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 97
+},
+{
+  "fields": {
+    "rght": 42,
+    "name": "Artisan Animal derivate",
+    "parent": 95,
+    "level": 4,
+    "lft": 41,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 98
+},
+{
+  "fields": {
+    "rght": 280,
+    "name": "OCP Record",
+    "parent": 11,
+    "level": 2,
+    "lft": 171,
+    "tree_id": 3,
+    "clas": "ocp_record",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 124
+},
+{
+  "fields": {
+    "rght": 279,
+    "name": "OCP ExchangeType",
+    "parent": 124,
+    "level": 3,
+    "lft": 172,
+    "tree_id": 3,
+    "clas": "ocp_exchange",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 125
+},
+{
+  "fields": {
+    "rght": 194,
+    "name": "Gift Economy:",
+    "parent": 125,
+    "level": 4,
+    "lft": 173,
+    "tree_id": 3,
+    "clas": "gift_economy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 126
+},
+{
+  "fields": {
+    "rght": 210,
+    "name": "Swap Economy:",
+    "parent": 125,
+    "level": 4,
+    "lft": 195,
+    "tree_id": 3,
+    "clas": "swap_economy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 127
+},
+{
+  "fields": {
+    "rght": 270,
+    "name": "Social Currency economy:",
+    "parent": 125,
+    "level": 4,
+    "lft": 263,
+    "tree_id": 3,
+    "clas": "social_economy",
+    "description": "Mutual-credit currency operation"
+  },
+  "model": "general.type",
+  "pk": 128
+},
+{
+  "fields": {
+    "rght": 183,
+    "name": "Give gift:",
+    "parent": 126,
+    "level": 5,
+    "lft": 174,
+    "tree_id": 3,
+    "clas": "give",
+    "description": "Donate or present as a gift"
+  },
+  "model": "general.type",
+  "pk": 129
+},
+{
+  "fields": {
+    "rght": 193,
+    "name": "Receive gift:",
+    "parent": 126,
+    "level": 5,
+    "lft": 184,
+    "tree_id": 3,
+    "clas": "receive",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 130
+},
+{
+  "fields": {
+    "rght": 176,
+    "name": "give Material resources",
+    "parent": 129,
+    "level": 6,
+    "lft": 175,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 131
+},
+{
+  "fields": {
+    "rght": 180,
+    "name": "give Non-material resources",
+    "parent": 129,
+    "level": 6,
+    "lft": 177,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 132
+},
+{
+  "fields": {
+    "rght": 182,
+    "name": "give Service time",
+    "parent": 129,
+    "level": 6,
+    "lft": 181,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 133
+},
+{
+  "fields": {
+    "rght": 186,
+    "name": "receive Material resources",
+    "parent": 130,
+    "level": 6,
+    "lft": 185,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 134
+},
+{
+  "fields": {
+    "rght": 190,
+    "name": "receive Non-material resources",
+    "parent": 130,
+    "level": 6,
+    "lft": 187,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 135
+},
+{
+  "fields": {
+    "rght": 192,
+    "name": "receive Service time",
+    "parent": 130,
+    "level": 6,
+    "lft": 191,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 136
+},
+{
+  "fields": {
+    "rght": 198,
+    "name": "swap Material for Material",
+    "parent": 185,
+    "level": 6,
+    "lft": 197,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 137
+},
+{
+  "fields": {
+    "rght": 200,
+    "name": "swap Material for Non-material",
+    "parent": 185,
+    "level": 6,
+    "lft": 199,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 138
+},
+{
+  "fields": {
+    "rght": 202,
+    "name": "swap Non-material for Material",
+    "parent": 185,
+    "level": 6,
+    "lft": 201,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 139
+},
+{
+  "fields": {
+    "rght": 204,
+    "name": "swap Non-material for Non-material",
+    "parent": 185,
+    "level": 6,
+    "lft": 203,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 140
+},
+{
+  "fields": {
+    "rght": 265,
+    "name": "social Sell:",
+    "parent": 128,
+    "level": 5,
+    "lft": 264,
+    "tree_id": 3,
+    "clas": "sell",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 141
+},
+{
+  "fields": {
+    "rght": 267,
+    "name": "social Buy:",
+    "parent": 128,
+    "level": 5,
+    "lft": 266,
+    "tree_id": 3,
+    "clas": "buy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 142
+},
+{
+  "fields": {
+    "rght": 222,
+    "name": "fair-Sell Material resources",
+    "parent": 224,
+    "level": 6,
+    "lft": 221,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 143
+},
+{
+  "fields": {
+    "rght": 224,
+    "name": "fair-Sell Non-material resources",
+    "parent": 224,
+    "level": 6,
+    "lft": 223,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 144
+},
+{
+  "fields": {
+    "rght": 226,
+    "name": "fair-Sell Service-time",
+    "parent": 224,
+    "level": 6,
+    "lft": 225,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 145
+},
+{
+  "fields": {
+    "rght": 230,
+    "name": "fair-Buy Material resources",
+    "parent": 225,
+    "level": 6,
+    "lft": 229,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 146
+},
+{
+  "fields": {
+    "rght": 232,
+    "name": "fair-Buy Non-material resources",
+    "parent": 225,
+    "level": 6,
+    "lft": 231,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 147
+},
+{
+  "fields": {
+    "rght": 234,
+    "name": "fair-Buy Service time",
+    "parent": 225,
+    "level": 6,
+    "lft": 233,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 148
+},
+{
+  "fields": {
+    "rght": 93,
+    "name": "Visual",
+    "parent": 50,
+    "level": 3,
+    "lft": 84,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 149
+},
+{
+  "fields": {
+    "rght": 140,
+    "name": "Service",
+    "parent": 10,
+    "level": 2,
+    "lft": 133,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 150
+},
+{
+  "fields": {
+    "rght": 127,
+    "name": "digital File",
+    "parent": 51,
+    "level": 3,
+    "lft": 126,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 151
+},
+{
+  "fields": {
+    "rght": 6,
+    "name": "Fruit",
+    "parent": 91,
+    "level": 4,
+    "lft": 5,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 152
+},
+{
+  "fields": {
+    "rght": 26,
+    "name": "Laptop",
+    "parent": 55,
+    "level": 4,
+    "lft": 25,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 153
+},
+{
+  "fields": {
+    "rght": 146,
+    "name": "digital Currencies",
+    "parent": 10,
+    "level": 2,
+    "lft": 141,
+    "tree_id": 3,
+    "clas": "currency",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 155
+},
+{
+  "fields": {
+    "rght": 143,
+    "name": "FairCoin",
+    "parent": 155,
+    "level": 3,
+    "lft": 142,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 156
+},
+{
+  "fields": {
+    "rght": 145,
+    "name": "Euro digital",
+    "parent": 155,
+    "level": 3,
+    "lft": 144,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 157
+},
+{
+  "fields": {
+    "rght": 34,
+    "name": "physical Currencies",
+    "parent": 9,
+    "level": 2,
+    "lft": 31,
+    "tree_id": 3,
+    "clas": "currency",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 158
+},
+{
+  "fields": {
+    "rght": 33,
+    "name": "Euro cash",
+    "parent": 158,
+    "level": 3,
+    "lft": 32,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 159
+},
+{
+  "fields": {
+    "rght": 52,
+    "name": "Aliments",
+    "parent": 9,
+    "level": 2,
+    "lft": 35,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 160
+},
+{
+  "fields": {
+    "rght": 70,
+    "name": "Spaces",
+    "parent": 9,
+    "level": 2,
+    "lft": 53,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 161
+},
+{
+  "fields": {
+    "rght": 55,
+    "name": "Co-working space",
+    "parent": 161,
+    "level": 3,
+    "lft": 54,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 162
+},
+{
+  "fields": {
+    "rght": 57,
+    "name": "Eating space",
+    "parent": 161,
+    "level": 3,
+    "lft": 56,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 163
+},
+{
+  "fields": {
+    "rght": 59,
+    "name": "FabLab",
+    "parent": 161,
+    "level": 3,
+    "lft": 58,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 164
+},
+{
+  "fields": {
+    "rght": 39,
+    "name": "Jam",
+    "parent": 96,
+    "level": 5,
+    "lft": 38,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 165
+},
+{
+  "fields": {
+    "rght": 67,
+    "name": "Living space",
+    "parent": 161,
+    "level": 3,
+    "lft": 60,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 166
+},
+{
+  "fields": {
+    "rght": 47,
+    "name": "Meal",
+    "parent": 160,
+    "level": 3,
+    "lft": 46,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 167
+},
+{
+  "fields": {
+    "rght": 50,
+    "name": "Sweets",
+    "parent": 169,
+    "level": 4,
+    "lft": 49,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 168
+},
+{
+  "fields": {
+    "rght": 51,
+    "name": "Industrial pseudo-food",
+    "parent": 160,
+    "level": 3,
+    "lft": 48,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 169
+},
+{
+  "fields": {
+    "rght": 15,
+    "name": "Recycled materials",
+    "parent": 88,
+    "level": 3,
+    "lft": 12,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 170
+},
+{
+  "fields": {
+    "rght": 135,
+    "name": "Cleaning",
+    "parent": 150,
+    "level": 3,
+    "lft": 134,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 173
+},
+{
+  "fields": {
+    "rght": 137,
+    "name": "Cooking",
+    "parent": 150,
+    "level": 3,
+    "lft": 136,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 174
+},
+{
+  "fields": {
+    "rght": 107,
+    "name": "Course",
+    "parent": 49,
+    "level": 5,
+    "lft": 106,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 175
+},
+{
+  "fields": {
+    "rght": 139,
+    "name": "Programming",
+    "parent": 150,
+    "level": 3,
+    "lft": 138,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 176
+},
+{
+  "fields": {
+    "rght": 80,
+    "name": "Document",
+    "parent": 71,
+    "level": 4,
+    "lft": 79,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 177
+},
+{
+  "fields": {
+    "rght": 69,
+    "name": "Meeting room",
+    "parent": 161,
+    "level": 3,
+    "lft": 68,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 179
+},
+{
+  "fields": {
+    "rght": 82,
+    "name": "Translation",
+    "parent": 71,
+    "level": 4,
+    "lft": 81,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 180
+},
+{
+  "fields": {
+    "rght": 269,
+    "name": "social Rent:",
+    "parent": 128,
+    "level": 5,
+    "lft": 268,
+    "tree_id": 3,
+    "clas": "rent",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 181
+},
+{
+  "fields": {
+    "rght": 260,
+    "name": "fiat-rent-Charge resources",
+    "parent": 220,
+    "level": 6,
+    "lft": 257,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 182
+},
+{
+  "fields": {
+    "rght": 256,
+    "name": "fiat-rent-Pay resources",
+    "parent": 220,
+    "level": 6,
+    "lft": 253,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 183
+},
+{
+  "fields": {
+    "rght": 259,
+    "name": "fiat-rent-charge Space",
+    "parent": 182,
+    "level": 7,
+    "lft": 258,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 184
+},
+{
+  "fields": {
+    "rght": 205,
+    "name": "swap Resource for Resource",
+    "parent": 127,
+    "level": 5,
+    "lft": 196,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 185
+},
+{
+  "fields": {
+    "rght": 207,
+    "name": "swap Resource for Service Time",
+    "parent": 127,
+    "level": 5,
+    "lft": 206,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 186
+},
+{
+  "fields": {
+    "rght": 209,
+    "name": "swap Service Time for Service Time",
+    "parent": 127,
+    "level": 5,
+    "lft": 208,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 187
+},
+{
+  "fields": {
+    "rght": 218,
+    "name": "Currency Exchanges:",
+    "parent": 125,
+    "level": 4,
+    "lft": 213,
+    "tree_id": 3,
+    "clas": "currency_exchange",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 214
+},
+{
+  "fields": {
+    "rght": 215,
+    "name": "exchange FiatCurrency for FairCoin",
+    "parent": 214,
+    "level": 5,
+    "lft": 214,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 215
+},
+{
+  "fields": {
+    "rght": 262,
+    "name": "Fiat-currency Economy:",
+    "parent": 125,
+    "level": 4,
+    "lft": 243,
+    "tree_id": 3,
+    "clas": "fiat_economy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 217
+},
+{
+  "fields": {
+    "rght": 245,
+    "name": "fiat Sell",
+    "parent": 217,
+    "level": 5,
+    "lft": 244,
+    "tree_id": 3,
+    "clas": "sell",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 218
+},
+{
+  "fields": {
+    "rght": 251,
+    "name": "fiat Buy",
+    "parent": 217,
+    "level": 5,
+    "lft": 246,
+    "tree_id": 3,
+    "clas": "buy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 219
+},
+{
+  "fields": {
+    "rght": 261,
+    "name": "fiat Rent",
+    "parent": 217,
+    "level": 5,
+    "lft": 252,
+    "tree_id": 3,
+    "clas": "rent",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 220
+},
+{
+  "fields": {
+    "rght": 212,
+    "name": "Monetary Economy:",
+    "parent": 125,
+    "level": 4,
+    "lft": 211,
+    "tree_id": 3,
+    "clas": "money_economy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 221
+},
+{
+  "fields": {
+    "rght": 242,
+    "name": "Faircoin Economy:",
+    "parent": 125,
+    "level": 4,
+    "lft": 219,
+    "tree_id": 3,
+    "clas": "fair_economy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 222
+},
+{
+  "fields": {
+    "rght": 278,
+    "name": "Cryptocoins economy",
+    "parent": 125,
+    "level": 4,
+    "lft": 271,
+    "tree_id": 3,
+    "clas": "crypto_economy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 223
+},
+{
+  "fields": {
+    "rght": 227,
+    "name": "fair Sell",
+    "parent": 222,
+    "level": 5,
+    "lft": 220,
+    "tree_id": 3,
+    "clas": "sell",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 224
+},
+{
+  "fields": {
+    "rght": 235,
+    "name": "fair Buy",
+    "parent": 222,
+    "level": 5,
+    "lft": 228,
+    "tree_id": 3,
+    "clas": "buy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 225
+},
+{
+  "fields": {
+    "rght": 241,
+    "name": "fair Rent",
+    "parent": 222,
+    "level": 5,
+    "lft": 236,
+    "tree_id": 3,
+    "clas": "rent",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 226
+},
+{
+  "fields": {
+    "rght": 273,
+    "name": "crypto Sell",
+    "parent": 223,
+    "level": 5,
+    "lft": 272,
+    "tree_id": 3,
+    "clas": "sell",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 227
+},
+{
+  "fields": {
+    "rght": 275,
+    "name": "crypto Buy",
+    "parent": 223,
+    "level": 5,
+    "lft": 274,
+    "tree_id": 3,
+    "clas": "buy",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 228
+},
+{
+  "fields": {
+    "rght": 277,
+    "name": "crypto Rent",
+    "parent": 223,
+    "level": 5,
+    "lft": 276,
+    "tree_id": 3,
+    "clas": "rent",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 229
+},
+{
+  "fields": {
+    "rght": 217,
+    "name": "exchange SocialCurrency for FairCoin",
+    "parent": 214,
+    "level": 5,
+    "lft": 216,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 230
+},
+{
+  "fields": {
+    "rght": 255,
+    "name": "fiat-rent-pay Space",
+    "parent": 183,
+    "level": 7,
+    "lft": 254,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 231
+},
+{
+  "fields": {
+    "rght": 328,
+    "name": "Volume",
+    "parent": 12,
+    "level": 2,
+    "lft": 325,
+    "tree_id": 3,
+    "clas": "volume",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 232
+},
+{
+  "fields": {
+    "rght": 285,
+    "name": "Hours",
+    "parent": 48,
+    "level": 3,
+    "lft": 284,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 233
+},
+{
+  "fields": {
+    "rght": 287,
+    "name": "Days",
+    "parent": 48,
+    "level": 3,
+    "lft": 286,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 234
+},
+{
+  "fields": {
+    "rght": 289,
+    "name": "Moons",
+    "parent": 48,
+    "level": 3,
+    "lft": 288,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 235
+},
+{
+  "fields": {
+    "rght": 330,
+    "name": "Each",
+    "parent": 12,
+    "level": 2,
+    "lft": 329,
+    "tree_id": 3,
+    "clas": "each",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 236
+},
+{
+  "fields": {
+    "rght": 312,
+    "name": "Faircoins",
+    "parent": 36,
+    "level": 4,
+    "lft": 311,
+    "tree_id": 3,
+    "clas": "faircoin",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 237
+},
+{
+  "fields": {
+    "rght": 295,
+    "name": "Kilos",
+    "parent": 67,
+    "level": 3,
+    "lft": 294,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 238
+},
+{
+  "fields": {
+    "rght": 332,
+    "name": "Percent",
+    "parent": 12,
+    "level": 2,
+    "lft": 331,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 240
+},
+{
+  "fields": {
+    "rght": 308,
+    "name": "EcoCoops",
+    "parent": 35,
+    "level": 4,
+    "lft": 307,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 241
+},
+{
+  "fields": {
+    "rght": 321,
+    "name": "Square meters",
+    "parent": 38,
+    "level": 3,
+    "lft": 320,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 242
+},
+{
+  "fields": {
+    "rght": 323,
+    "name": "Hectares",
+    "parent": 38,
+    "level": 3,
+    "lft": 322,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 243
+},
+{
+  "fields": {
+    "rght": 327,
+    "name": "Liters",
+    "parent": 232,
+    "level": 3,
+    "lft": 326,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 244
+},
+{
+  "fields": {
+    "rght": 297,
+    "name": "Grams",
+    "parent": 67,
+    "level": 3,
+    "lft": 296,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 245
+},
+{
+  "fields": {
+    "rght": 291,
+    "name": "Years",
+    "parent": 48,
+    "level": 3,
+    "lft": 290,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 246
+},
+{
+  "fields": {
+    "rght": 301,
+    "name": "Meters",
+    "parent": 68,
+    "level": 3,
+    "lft": 300,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 247
+},
+{
+  "fields": {
+    "rght": 303,
+    "name": "Kilometers",
+    "parent": 68,
+    "level": 3,
+    "lft": 302,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 248
+},
+{
+  "fields": {
+    "rght": 316,
+    "name": "Euros",
+    "parent": 37,
+    "level": 4,
+    "lft": 315,
+    "tree_id": 3,
+    "clas": "euro",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 249
+},
+{
+  "fields": {
+    "rght": 129,
+    "name": "Software",
+    "parent": 51,
+    "level": 3,
+    "lft": 128,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 250
+},
+{
+  "fields": {
+    "rght": 179,
+    "name": "give FairCoin donation",
+    "parent": 132,
+    "level": 7,
+    "lft": 178,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 251
+},
+{
+  "fields": {
+    "rght": 238,
+    "name": "fair-rent-Pay any resources",
+    "parent": 226,
+    "level": 6,
+    "lft": 237,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 252
+},
+{
+  "fields": {
+    "rght": 240,
+    "name": "fair-rent-Charge any resources",
+    "parent": 226,
+    "level": 6,
+    "lft": 239,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 253
+},
+{
+  "fields": {
+    "rght": 189,
+    "name": "receive Faircoin donation",
+    "parent": 135,
+    "level": 7,
+    "lft": 188,
+    "tree_id": 3,
+    "clas": "faircoin",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 254
+},
+{
+  "fields": {
+    "rght": 62,
+    "name": "Daily room rent",
+    "parent": 166,
+    "level": 4,
+    "lft": 61,
+    "tree_id": 3,
+    "clas": "",
+    "description": "Room rent covers just the base costs of the house, no meals,\nbut does include tea and coffee.\n"
+  },
+  "model": "general.type",
+  "pk": 261
+},
+{
+  "fields": {
+    "rght": 64,
+    "name": "Monthly Living space",
+    "parent": 166,
+    "level": 4,
+    "lft": 63,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 262
+},
+{
+  "fields": {
+    "rght": 14,
+    "name": "recicled Plastics",
+    "parent": 170,
+    "level": 4,
+    "lft": 13,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 264
+},
+{
+  "fields": {
+    "rght": 66,
+    "name": "Yearly Living space <",
+    "parent": 166,
+    "level": 4,
+    "lft": 65,
+    "tree_id": 3,
+    "clas": "",
+    "description": "Gives you 250 days per year."
+  },
+  "model": "general.type",
+  "pk": 265
+},
+{
+  "fields": {
+    "rght": 248,
+    "name": "fiat-buy Material resources",
+    "parent": 219,
+    "level": 6,
+    "lft": 247,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 266
+},
+{
+  "fields": {
+    "rght": 250,
+    "name": "fiat-buy Non-material resources",
+    "parent": 219,
+    "level": 6,
+    "lft": 249,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 267
+},
+{
+  "fields": {
+    "rght": 131,
+    "name": "Internet connection",
+    "parent": 51,
+    "level": 3,
+    "lft": 130,
+    "tree_id": 3,
+    "clas": "",
+    "description": ""
+  },
+  "model": "general.type",
+  "pk": 271
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 4
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 5
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 6
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 13
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 19
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 20
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 21
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 22
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 23
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 24
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 25
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 26
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 27
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 28
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 29
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 31
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 32
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 47
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 63
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 64
+},
+{
+  "fields": {},
+  "model": "general.being_type",
+  "pk": 66
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 13
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 21
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 22
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 23
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 24
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 25
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 26
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 27
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 28
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 29
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 31
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 32
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 47
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 63
+},
+{
+  "fields": {},
+  "model": "general.project_type",
+  "pk": 66
+},
+{
+  "fields": {},
+  "model": "general.company_type",
+  "pk": 19
+},
+{
+  "fields": {},
+  "model": "general.company_type",
+  "pk": 20
+},
+{
+  "fields": {},
+  "model": "general.company_type",
+  "pk": 64
+},
+{
+  "fields": {
+    "rght": 38,
+    "description": "",
+    "parent": null,
+    "gerund": "",
+    "level": 0,
+    "lft": 1,
+    "verb": "",
+    "tree_id": 1,
+    "clas": "rel_hum_hum",
+    "name": ":Relation Human - Human"
+  },
+  "model": "general.relation",
+  "pk": 1
+},
+{
+  "fields": {
+    "rght": 6,
+    "description": "",
+    "parent": null,
+    "gerund": "",
+    "level": 0,
+    "lft": 1,
+    "verb": "",
+    "tree_id": 2,
+    "clas": "rel_hum_art",
+    "name": ":Relation Human - Art"
+  },
+  "model": "general.relation",
+  "pk": 2
+},
+{
+  "fields": {
+    "rght": 20,
+    "description": "",
+    "parent": null,
+    "gerund": "",
+    "level": 0,
+    "lft": 1,
+    "verb": "",
+    "tree_id": 3,
+    "clas": "rel_hum_spac",
+    "name": ":Relation Human - Space"
+  },
+  "model": "general.relation",
+  "pk": 3
+},
+{
+  "fields": {
+    "rght": 16,
+    "description": "",
+    "parent": null,
+    "gerund": "",
+    "level": 0,
+    "lft": 1,
+    "verb": "",
+    "tree_id": 4,
+    "clas": "",
+    "name": ":Relation Human - Artwork"
+  },
+  "model": "general.relation",
+  "pk": 4
+},
+{
+  "fields": {
+    "rght": 29,
+    "description": "",
+    "parent": 1,
+    "gerund": "",
+    "level": 1,
+    "lft": 18,
+    "verb": "",
+    "tree_id": 1,
+    "clas": "rel_pers_proj",
+    "name": ":relation Person - Project"
+  },
+  "model": "general.relation",
+  "pk": 5
+},
+{
+  "fields": {
+    "rght": 37,
+    "description": "",
+    "parent": 1,
+    "gerund": "",
+    "level": 1,
+    "lft": 36,
+    "verb": "",
+    "tree_id": 1,
+    "clas": "rel_pers_pers",
+    "name": ":relation Person - Person"
+  },
+  "model": "general.relation",
+  "pk": 6
+},
+{
+  "fields": {
+    "rght": 8,
+    "description": "",
+    "parent": 19,
+    "gerund": "participating",
+    "level": 2,
+    "lft": 7,
+    "verb": "to participate",
+    "tree_id": 1,
+    "clas": "",
+    "name": "participation"
+  },
+  "model": "general.relation",
+  "pk": 7
+},
+{
+  "fields": {
+    "rght": 6,
+    "description": "",
+    "parent": 19,
+    "gerund": "helping",
+    "level": 2,
+    "lft": 5,
+    "verb": "to help",
+    "tree_id": 1,
+    "clas": "",
+    "name": "help"
+  },
+  "model": "general.relation",
+  "pk": 8
+},
+{
+  "fields": {
+    "rght": 16,
+    "description": "",
+    "parent": 21,
+    "gerund": "collaborating",
+    "level": 2,
+    "lft": 15,
+    "verb": "to collaborate",
+    "tree_id": 1,
+    "clas": "",
+    "name": "collaboration"
+  },
+  "model": "general.relation",
+  "pk": 9
+},
+{
+  "fields": {
+    "rght": 28,
+    "description": "",
+    "parent": 5,
+    "gerund": "contributing/collaborating",
+    "level": 2,
+    "lft": 21,
+    "verb": "to contribute/collaborate",
+    "tree_id": 1,
+    "clas": "contribute",
+    "name": "contribution/collaboration"
+  },
+  "model": "general.relation",
+  "pk": 10
+},
+{
+  "fields": {
+    "rght": 4,
+    "description": "",
+    "parent": 19,
+    "gerund": "coordinating",
+    "level": 2,
+    "lft": 3,
+    "verb": "to coordinate",
+    "tree_id": 1,
+    "clas": "reference",
+    "name": "coordination"
+  },
+  "model": "general.relation",
+  "pk": 11
+},
+{
+  "fields": {
+    "rght": 23,
+    "description": "",
+    "parent": 10,
+    "gerund": "contributing in a commission",
+    "level": 3,
+    "lft": 22,
+    "verb": "to contribute in a commission",
+    "tree_id": 1,
+    "clas": "",
+    "name": "contribution in a commission"
+  },
+  "model": "general.relation",
+  "pk": 12
+},
+{
+  "fields": {
+    "rght": 25,
+    "description": "",
+    "parent": 10,
+    "gerund": "contributing occasionally",
+    "level": 3,
+    "lft": 24,
+    "verb": "to contribute occasionally",
+    "tree_id": 1,
+    "clas": "",
+    "name": "sporadic contribution in tasks"
+  },
+  "model": "general.relation",
+  "pk": 13
+},
+{
+  "fields": {
+    "rght": 27,
+    "description": "",
+    "parent": 10,
+    "gerund": "contributing economically",
+    "level": 3,
+    "lft": 26,
+    "verb": "to contribute economically",
+    "tree_id": 1,
+    "clas": "",
+    "name": "economic contribution"
+  },
+  "model": "general.relation",
+  "pk": 14
+},
+{
+  "fields": {
+    "rght": 9,
+    "description": "",
+    "parent": 3,
+    "gerund": "",
+    "level": 1,
+    "lft": 2,
+    "verb": "",
+    "tree_id": 3,
+    "clas": "rel_proj_addr",
+    "name": ":relation Project - Address"
+  },
+  "model": "general.relation",
+  "pk": 15
+},
+{
+  "fields": {
+    "rght": 5,
+    "description": "",
+    "parent": 17,
+    "gerund": "offering the space",
+    "level": 3,
+    "lft": 4,
+    "verb": "to offer the space",
+    "tree_id": 3,
+    "clas": "",
+    "name": "offer of space"
+  },
+  "model": "general.relation",
+  "pk": 16
+},
+{
+  "fields": {
+    "rght": 6,
+    "description": "",
+    "parent": 15,
+    "gerund": "managing the space",
+    "level": 2,
+    "lft": 3,
+    "verb": "to manage the space",
+    "tree_id": 3,
+    "clas": "",
+    "name": "management of space"
+  },
+  "model": "general.relation",
+  "pk": 17
+},
+{
+  "fields": {
+    "rght": 13,
+    "description": "",
+    "parent": 1,
+    "gerund": "",
+    "level": 1,
+    "lft": 10,
+    "verb": "",
+    "tree_id": 1,
+    "clas": "rel_proj_empr",
+    "name": ":relation Project - Company"
+  },
+  "model": "general.relation",
+  "pk": 18
+},
+{
+  "fields": {
+    "rght": 9,
+    "description": "",
+    "parent": 1,
+    "gerund": "",
+    "level": 1,
+    "lft": 2,
+    "verb": "",
+    "tree_id": 1,
+    "clas": "rel_proj_pers",
+    "name": ":relation Project - Person"
+  },
+  "model": "general.relation",
+  "pk": 19
+},
+{
+  "fields": {
+    "rght": 12,
+    "description": "",
+    "parent": 18,
+    "gerund": "using",
+    "level": 2,
+    "lft": 11,
+    "verb": "to use",
+    "tree_id": 1,
+    "clas": "",
+    "name": "usage"
+  },
+  "model": "general.relation",
+  "pk": 20
+},
+{
+  "fields": {
+    "rght": 17,
+    "description": "",
+    "parent": 1,
+    "gerund": "",
+    "level": 1,
+    "lft": 14,
+    "verb": "",
+    "tree_id": 1,
+    "clas": "rel_proj_proj",
+    "name": ":relation Project - Project"
+  },
+  "model": "general.relation",
+  "pk": 21
+},
+{
+  "fields": {
+    "rght": 35,
+    "description": "",
+    "parent": 1,
+    "gerund": "",
+    "level": 1,
+    "lft": 30,
+    "verb": "",
+    "tree_id": 1,
+    "clas": "rel_pers_comp",
+    "name": ":relation Person - Company"
+  },
+  "model": "general.relation",
+  "pk": 22
+},
+{
+  "fields": {
+    "rght": 8,
+    "description": "",
+    "parent": 15,
+    "gerund": "using the space",
+    "level": 2,
+    "lft": 7,
+    "verb": "to use the space",
+    "tree_id": 3,
+    "clas": "",
+    "name": "use a space"
+  },
+  "model": "general.relation",
+  "pk": 23
+},
+{
+  "fields": {
+    "rght": 15,
+    "description": "",
+    "parent": 3,
+    "gerund": "",
+    "level": 1,
+    "lft": 10,
+    "verb": "",
+    "tree_id": 3,
+    "clas": "rel_pers_addr",
+    "name": ":relation Person - Address"
+  },
+  "model": "general.relation",
+  "pk": 24
+},
+{
+  "fields": {
+    "rght": 12,
+    "description": "",
+    "parent": 24,
+    "gerund": "habitating in",
+    "level": 2,
+    "lft": 11,
+    "verb": "to habitate in",
+    "tree_id": 3,
+    "clas": "",
+    "name": "habitation"
+  },
+  "model": "general.relation",
+  "pk": 25
+},
+{
+  "fields": {
+    "rght": 14,
+    "description": "",
+    "parent": 24,
+    "gerund": "working in",
+    "level": 2,
+    "lft": 13,
+    "verb": "to work in",
+    "tree_id": 3,
+    "clas": "",
+    "name": "work in"
+  },
+  "model": "general.relation",
+  "pk": 26
+},
+{
+  "fields": {
+    "rght": 20,
+    "description": "",
+    "parent": 5,
+    "gerund": "following",
+    "level": 2,
+    "lft": 19,
+    "verb": "to follow",
+    "tree_id": 1,
+    "clas": "",
+    "name": "follow"
+  },
+  "model": "general.relation",
+  "pk": 27
+},
+{
+  "fields": {
+    "rght": 3,
+    "description": "",
+    "parent": 2,
+    "gerund": "learning",
+    "level": 1,
+    "lft": 2,
+    "verb": "to learn",
+    "tree_id": 2,
+    "clas": "",
+    "name": "learning"
+  },
+  "model": "general.relation",
+  "pk": 28
+},
+{
+  "fields": {
+    "rght": 5,
+    "description": "",
+    "parent": 2,
+    "gerund": "practicating",
+    "level": 1,
+    "lft": 4,
+    "verb": "to practicate",
+    "tree_id": 2,
+    "clas": "",
+    "name": "practication"
+  },
+  "model": "general.relation",
+  "pk": 29
+},
+{
+  "fields": {
+    "rght": 5,
+    "description": "",
+    "parent": 4,
+    "gerund": "",
+    "level": 1,
+    "lft": 2,
+    "verb": "",
+    "tree_id": 4,
+    "clas": "rel_hum_reco",
+    "name": ":relation Human - Record"
+  },
+  "model": "general.relation",
+  "pk": 30
+},
+{
+  "fields": {
+    "rght": 32,
+    "description": "",
+    "parent": 22,
+    "gerund": "buying to a company",
+    "level": 2,
+    "lft": 31,
+    "verb": "to buy to a company",
+    "tree_id": 1,
+    "clas": "",
+    "name": "buy to a company"
+  },
+  "model": "general.relation",
+  "pk": 31
+},
+{
+  "fields": {
+    "rght": 34,
+    "description": "",
+    "parent": 22,
+    "gerund": "working for a company",
+    "level": 2,
+    "lft": 33,
+    "verb": "to work for a company",
+    "tree_id": 1,
+    "clas": "",
+    "name": "work for a company"
+  },
+  "model": "general.relation",
+  "pk": 32
+},
+{
+  "fields": {
+    "rght": 19,
+    "description": "",
+    "parent": 3,
+    "gerund": "",
+    "level": 1,
+    "lft": 16,
+    "verb": "",
+    "tree_id": 3,
+    "clas": "rel_hum_regi",
+    "name": ":relation Human - Region"
+  },
+  "model": "general.relation",
+  "pk": 33
+},
+{
+  "fields": {
+    "rght": 18,
+    "description": "",
+    "parent": 33,
+    "gerund": "living in",
+    "level": 2,
+    "lft": 17,
+    "verb": "to live in",
+    "tree_id": 3,
+    "clas": "",
+    "name": "living in"
+  },
+  "model": "general.relation",
+  "pk": 34
+},
+{
+  "fields": {
+    "rght": 9,
+    "description": "",
+    "parent": 4,
+    "gerund": "",
+    "level": 1,
+    "lft": 6,
+    "verb": "",
+    "tree_id": 4,
+    "clas": "rel_hum_mate",
+    "name": ":relation Human - Material artwork"
+  },
+  "model": "general.relation",
+  "pk": 35
+},
+{
+  "fields": {
+    "rght": 4,
+    "description": "",
+    "parent": 30,
+    "gerund": "owning the record",
+    "level": 2,
+    "lft": 3,
+    "verb": "to own the record",
+    "tree_id": 4,
+    "clas": "holder",
+    "name": "ownership of record"
+  },
+  "model": "general.relation",
+  "pk": 36
+},
+{
+  "fields": {
+    "rght": 8,
+    "description": "",
+    "parent": 35,
+    "gerund": "pertaining",
+    "level": 2,
+    "lft": 7,
+    "verb": "to pertain",
+    "tree_id": 4,
+    "clas": "",
+    "name": "pertenence"
+  },
+  "model": "general.relation",
+  "pk": 37
+},
+{
+  "fields": {
+    "rght": 15,
+    "description": "",
+    "parent": 4,
+    "gerund": "",
+    "level": 1,
+    "lft": 10,
+    "verb": "",
+    "tree_id": 4,
+    "clas": "rel_hum_nonm",
+    "name": ":relation Human - Nonmaterial artwork"
+  },
+  "model": "general.relation",
+  "pk": 38
+},
+{
+  "fields": {
+    "rght": 12,
+    "description": "",
+    "parent": 38,
+    "gerund": "representing",
+    "level": 2,
+    "lft": 11,
+    "verb": "to represent",
+    "tree_id": 4,
+    "clas": "",
+    "name": "representation"
+  },
+  "model": "general.relation",
+  "pk": 39
+},
+{
+  "fields": {
+    "rght": 14,
+    "description": "",
+    "parent": 38,
+    "gerund": "offering a non-material",
+    "level": 2,
+    "lft": 13,
+    "verb": "to offer a non-material",
+    "tree_id": 4,
+    "clas": "",
+    "name": "offer of non-material"
+  },
+  "model": "general.relation",
+  "pk": 40
+},
+{
+  "fields": {
+    "rght": 5,
+    "description": "",
+    "parent": 46,
+    "gerund": "",
+    "level": 1,
+    "lft": 2,
+    "verb": "",
+    "tree_id": 9,
+    "clas": "rel_mat_addr",
+    "name": ":relation Material artwork - Address"
+  },
+  "model": "general.relation",
+  "pk": 41
+},
+{
+  "fields": {
+    "rght": 4,
+    "description": "",
+    "parent": 41,
+    "gerund": "parking in",
+    "level": 2,
+    "lft": 3,
+    "verb": "to park in",
+    "tree_id": 9,
+    "clas": "",
+    "name": "parking in"
+  },
+  "model": "general.relation",
+  "pk": 42
+},
+{
+  "fields": {
+    "rght": 3,
+    "description": "",
+    "parent": 47,
+    "gerund": "",
+    "level": 1,
+    "lft": 2,
+    "verb": "",
+    "tree_id": 10,
+    "clas": "rel_mat_reco",
+    "name": ":relation Material artwork - Record"
+  },
+  "model": "general.relation",
+  "pk": 43
+},
+{
+  "fields": {
+    "rght": 7,
+    "description": "",
+    "parent": 47,
+    "gerund": "",
+    "level": 1,
+    "lft": 6,
+    "verb": "",
+    "tree_id": 10,
+    "clas": "rel_mat_nonm",
+    "name": ":relation Material artwork - Non-material artwork"
+  },
+  "model": "general.relation",
+  "pk": 44
+},
+{
+  "fields": {
+    "rght": 5,
+    "description": "",
+    "parent": 47,
+    "gerund": "",
+    "level": 1,
+    "lft": 4,
+    "verb": "",
+    "tree_id": 10,
+    "clas": "rel_mat_mate",
+    "name": ":relation Material artwork - Material artwork"
+  },
+  "model": "general.relation",
+  "pk": 45
+},
+{
+  "fields": {
+    "rght": 8,
+    "description": "",
+    "parent": null,
+    "gerund": "",
+    "level": 0,
+    "lft": 1,
+    "verb": "",
+    "tree_id": 9,
+    "clas": "",
+    "name": ":Relation Artwork - Space"
+  },
+  "model": "general.relation",
+  "pk": 46
+},
+{
+  "fields": {
+    "rght": 12,
+    "description": "",
+    "parent": null,
+    "gerund": "",
+    "level": 0,
+    "lft": 1,
+    "verb": "",
+    "tree_id": 10,
+    "clas": "",
+    "name": ":Relation Artwork - Artwork"
+  },
+  "model": "general.relation",
+  "pk": 47
+},
+{
+  "fields": {
+    "rght": 8,
+    "description": "",
+    "parent": null,
+    "gerund": "",
+    "level": 0,
+    "lft": 1,
+    "verb": "",
+    "tree_id": 11,
+    "clas": "",
+    "name": ":Relation Artwork - Art"
+  },
+  "model": "general.relation",
+  "pk": 48
+},
+{
+  "fields": {
+    "rght": 5,
+    "description": "",
+    "parent": 48,
+    "gerund": "",
+    "level": 1,
+    "lft": 2,
+    "verb": "",
+    "tree_id": 11,
+    "clas": "rel_mat_jobs",
+    "name": ":relation Material artwork - Job"
+  },
+  "model": "general.relation",
+  "pk": 49
+},
+{
+  "fields": {
+    "rght": 7,
+    "description": "",
+    "parent": 46,
+    "gerund": "",
+    "level": 1,
+    "lft": 6,
+    "verb": "",
+    "tree_id": 9,
+    "clas": "rel_non_addr",
+    "name": ":relation Non-material artwork - Address"
+  },
+  "model": "general.relation",
+  "pk": 50
+},
+{
+  "fields": {
+    "rght": 9,
+    "description": "",
+    "parent": 47,
+    "gerund": "",
+    "level": 1,
+    "lft": 8,
+    "verb": "",
+    "tree_id": 10,
+    "clas": "rel_non_reco",
+    "name": ":relation Non-material artwork - Record"
+  },
+  "model": "general.relation",
+  "pk": 51
+},
+{
+  "fields": {
+    "rght": 7,
+    "description": "",
+    "parent": 48,
+    "gerund": "",
+    "level": 1,
+    "lft": 6,
+    "verb": "",
+    "tree_id": 11,
+    "clas": "rel_non_jobs",
+    "name": ":relation Non-material artwork - Job"
+  },
+  "model": "general.relation",
+  "pk": 52
+},
+{
+  "fields": {
+    "rght": 11,
+    "description": "",
+    "parent": 47,
+    "gerund": "",
+    "level": 1,
+    "lft": 10,
+    "verb": "",
+    "tree_id": 10,
+    "clas": "rel_non_nonm",
+    "name": ":relation Non-material artwork - Non-material artwork"
+  },
+  "model": "general.relation",
+  "pk": 53
+},
+{
+  "fields": {
+    "rght": 4,
+    "description": "",
+    "parent": 49,
+    "gerund": "serving for",
+    "level": 2,
+    "lft": 3,
+    "verb": "to service for",
+    "tree_id": 11,
+    "clas": "",
+    "name": "service for"
+  },
+  "model": "general.relation",
+  "pk": 54
+},
+{
+  "fields": {
+    "rght": 14,
+    "description": "",
+    "parent": 27,
+    "gerund": "selfmanaging",
+    "level": 2,
+    "lft": 9,
+    "verb": "to selfmanage",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Selfmanagement"
+  },
+  "model": "general.job",
+  "pk": 1
+},
+{
+  "fields": {
+    "rght": 11,
+    "description": "",
+    "parent": 1,
+    "gerund": "coordinating",
+    "level": 3,
+    "lft": 10,
+    "verb": "to coordinate",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Coordination"
+  },
+  "model": "general.job",
+  "pk": 2
+},
+{
+  "fields": {
+    "rght": 6,
+    "description": "",
+    "parent": 27,
+    "gerund": "developing",
+    "level": 2,
+    "lft": 3,
+    "verb": "to develop",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Development"
+  },
+  "model": "general.job",
+  "pk": 3
+},
+{
+  "fields": {
+    "rght": 49,
+    "description": "",
+    "parent": 25,
+    "gerund": "transporting",
+    "level": 1,
+    "lft": 46,
+    "verb": "to transport",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Transport"
+  },
+  "model": "general.job",
+  "pk": 4
+},
+{
+  "fields": {
+    "rght": 13,
+    "description": "",
+    "parent": 1,
+    "gerund": "facilitating IC",
+    "level": 3,
+    "lft": 12,
+    "verb": "to facilitate IC",
+    "tree_id": 7,
+    "clas": "ic_facilitate",
+    "name": "IC Facilitation"
+  },
+  "model": "general.job",
+  "pk": 5
+},
+{
+  "fields": {
+    "rght": 21,
+    "description": "",
+    "parent": 8,
+    "gerund": "restaurating",
+    "level": 3,
+    "lft": 18,
+    "verb": "to restaurate",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Restauration"
+  },
+  "model": "general.job",
+  "pk": 6
+},
+{
+  "fields": {
+    "rght": 35,
+    "description": "",
+    "parent": 25,
+    "gerund": "lifecareing",
+    "level": 1,
+    "lft": 16,
+    "verb": "to care life",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Lifecare"
+  },
+  "model": "general.job",
+  "pk": 7
+},
+{
+  "fields": {
+    "rght": 24,
+    "description": "",
+    "parent": 7,
+    "gerund": "alimentating",
+    "level": 2,
+    "lft": 17,
+    "verb": "to alimentate",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Alimentation"
+  },
+  "model": "general.job",
+  "pk": 8
+},
+{
+  "fields": {
+    "rght": 26,
+    "description": "",
+    "parent": 7,
+    "gerund": "making cloths",
+    "level": 2,
+    "lft": 25,
+    "verb": "to make cloths",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Clothing"
+  },
+  "model": "general.job",
+  "pk": 9
+},
+{
+  "fields": {
+    "rght": 31,
+    "description": "",
+    "parent": 12,
+    "gerund": "cleaning",
+    "level": 3,
+    "lft": 30,
+    "verb": "to clean",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Cleaning"
+  },
+  "model": "general.job",
+  "pk": 10
+},
+{
+  "fields": {
+    "rght": 28,
+    "description": "",
+    "parent": 7,
+    "gerund": "bodycaring",
+    "level": 2,
+    "lft": 27,
+    "verb": "to bodycare",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Bodycare"
+  },
+  "model": "general.job",
+  "pk": 11
+},
+{
+  "fields": {
+    "rght": 34,
+    "description": "",
+    "parent": 7,
+    "gerund": "sheltering/housing",
+    "level": 2,
+    "lft": 29,
+    "verb": "to shelter/housing",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Shelter/Housing"
+  },
+  "model": "general.job",
+  "pk": 12
+},
+{
+  "fields": {
+    "rght": 33,
+    "description": "",
+    "parent": 12,
+    "gerund": "building",
+    "level": 3,
+    "lft": 32,
+    "verb": "to build",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Building"
+  },
+  "model": "general.job",
+  "pk": 13
+},
+{
+  "fields": {
+    "rght": 48,
+    "description": "",
+    "parent": 4,
+    "gerund": "driving",
+    "level": 2,
+    "lft": 47,
+    "verb": "to drive",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Drive"
+  },
+  "model": "general.job",
+  "pk": 14
+},
+{
+  "fields": {
+    "rght": 45,
+    "description": "",
+    "parent": 25,
+    "gerund": "communicating",
+    "level": 1,
+    "lft": 36,
+    "verb": "to communicate",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Communication"
+  },
+  "model": "general.job",
+  "pk": 15
+},
+{
+  "fields": {
+    "rght": 38,
+    "description": "",
+    "parent": 15,
+    "gerund": "designing graphically",
+    "level": 2,
+    "lft": 37,
+    "verb": "to design graphically",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Graphic Design"
+  },
+  "model": "general.job",
+  "pk": 16
+},
+{
+  "fields": {
+    "rght": 42,
+    "description": "",
+    "parent": 15,
+    "gerund": "writing",
+    "level": 2,
+    "lft": 39,
+    "verb": "to write",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Write"
+  },
+  "model": "general.job",
+  "pk": 17
+},
+{
+  "fields": {
+    "rght": 41,
+    "description": "",
+    "parent": 17,
+    "gerund": "translating",
+    "level": 3,
+    "lft": 40,
+    "verb": "to translate",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Translate"
+  },
+  "model": "general.job",
+  "pk": 18
+},
+{
+  "fields": {
+    "rght": 44,
+    "description": "",
+    "parent": 15,
+    "gerund": "publishing",
+    "level": 2,
+    "lft": 43,
+    "verb": "to publish",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Publish"
+  },
+  "model": "general.job",
+  "pk": 19
+},
+{
+  "fields": {
+    "rght": 23,
+    "description": "",
+    "parent": 8,
+    "gerund": "growing vegetables",
+    "level": 3,
+    "lft": 22,
+    "verb": "to grow vegetables",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Grow Vegetables"
+  },
+  "model": "general.job",
+  "pk": 20
+},
+{
+  "fields": {
+    "rght": 5,
+    "description": "",
+    "parent": 3,
+    "gerund": "programming",
+    "level": 3,
+    "lft": 4,
+    "verb": "to program",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Programming"
+  },
+  "model": "general.job",
+  "pk": 21
+},
+{
+  "fields": {
+    "rght": 20,
+    "description": "",
+    "parent": 6,
+    "gerund": "cooking",
+    "level": 4,
+    "lft": 19,
+    "verb": "to cook",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Cook"
+  },
+  "model": "general.job",
+  "pk": 22
+},
+{
+  "fields": {
+    "rght": 50,
+    "description": "",
+    "parent": null,
+    "gerund": "doing",
+    "level": 0,
+    "lft": 1,
+    "verb": "to do",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Doing"
+  },
+  "model": "general.job",
+  "pk": 25
+},
+{
+  "fields": {
+    "rght": 4,
+    "description": "",
+    "parent": null,
+    "gerund": "not doing",
+    "level": 0,
+    "lft": 1,
+    "verb": "to not do",
+    "tree_id": 8,
+    "clas": "",
+    "name": "Not-doing"
+  },
+  "model": "general.job",
+  "pk": 26
+},
+{
+  "fields": {
+    "rght": 15,
+    "description": "",
+    "parent": 25,
+    "gerund": "making",
+    "level": 1,
+    "lft": 2,
+    "verb": "to make",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Making"
+  },
+  "model": "general.job",
+  "pk": 27
+},
+{
+  "fields": {
+    "rght": 3,
+    "description": "",
+    "parent": 26,
+    "gerund": "listening",
+    "level": 1,
+    "lft": 2,
+    "verb": "to listen",
+    "tree_id": 8,
+    "clas": "",
+    "name": "Listening"
+  },
+  "model": "general.job",
+  "pk": 28
+},
+{
+  "fields": {
+    "rght": 8,
+    "description": "",
+    "parent": 27,
+    "gerund": "transforming",
+    "level": 2,
+    "lft": 7,
+    "verb": "to transform",
+    "tree_id": 7,
+    "clas": "",
+    "name": "Transform"
+  },
+  "model": "general.job",
+  "pk": 29
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 7
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 8
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 39
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 40
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 41
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 42
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 43
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 44
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 45
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 46
+},
+{
+  "fields": {},
+  "model": "general.space_type",
+  "pk": 62
+},
+{
+  "fields": {},
+  "model": "general.address_type",
+  "pk": 44
+},
+{
+  "fields": {},
+  "model": "general.address_type",
+  "pk": 45
+},
+{
+  "fields": {},
+  "model": "general.address_type",
+  "pk": 46
+},
+{
+  "fields": {
+    "rght": 9,
+    "name": "Catalan Countries",
+    "parent": 5,
+    "level": 1,
+    "lft": 2,
+    "tree_id": 2,
+    "region_type": 41,
+    "description": ""
+  },
+  "model": "general.region",
+  "pk": 1
+},
+{
+  "fields": {
+    "rght": 8,
+    "name": "Catalunya",
+    "parent": 1,
+    "level": 2,
+    "lft": 3,
+    "tree_id": 2,
+    "region_type": 43,
+    "description": ""
+  },
+  "model": "general.region",
+  "pk": 2
+},
+{
+  "fields": {
+    "rght": 5,
+    "name": "Barcelon\u00e8s",
+    "parent": 2,
+    "level": 3,
+    "lft": 4,
+    "tree_id": 2,
+    "region_type": 43,
+    "description": ""
+  },
+  "model": "general.region",
+  "pk": 3
+},
+{
+  "fields": {
+    "rght": 7,
+    "name": "Anoia",
+    "parent": 2,
+    "level": 3,
+    "lft": 6,
+    "tree_id": 2,
+    "region_type": 43,
+    "description": ""
+  },
+  "model": "general.region",
+  "pk": 4
+},
+{
+  "fields": {
+    "rght": 10,
+    "name": "european continent",
+    "parent": null,
+    "level": 0,
+    "lft": 1,
+    "tree_id": 2,
+    "region_type": 39,
+    "description": ""
+  },
+  "model": "general.region",
+  "pk": 5
+},
+{
+  "fields": {
+    "rght": 2,
+    "name": "planet Earth",
+    "parent": null,
+    "level": 0,
+    "lft": 1,
+    "tree_id": 3,
+    "region_type": 62,
+    "description": ""
+  },
+  "model": "general.region",
+  "pk": 6
+},
+{
+  "fields": {},
+  "model": "general.region_type",
+  "pk": 39
+},
+{
+  "fields": {},
+  "model": "general.region_type",
+  "pk": 40
+},
+{
+  "fields": {},
+  "model": "general.region_type",
+  "pk": 41
+},
+{
+  "fields": {},
+  "model": "general.region_type",
+  "pk": 42
+},
+{
+  "fields": {},
+  "model": "general.region_type",
+  "pk": 43
+},
+{
+  "fields": {},
+  "model": "general.region_type",
+  "pk": 62
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 9
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 10
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 11
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 12
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 14
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 15
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 16
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 17
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 18
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 34
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 35
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 36
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 37
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 38
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 48
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 49
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 50
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 51
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 52
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 53
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 54
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 55
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 56
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 57
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 58
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 59
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 60
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 61
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 65
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 67
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 68
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 69
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 70
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 71
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 73
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 74
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 75
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 76
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 77
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 78
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 79
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 80
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 81
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 82
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 83
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 84
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 85
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 86
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 87
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 88
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 89
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 90
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 91
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 92
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 93
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 94
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 95
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 96
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 97
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 98
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 124
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 125
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 126
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 127
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 128
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 129
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 130
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 131
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 132
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 133
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 134
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 135
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 136
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 137
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 138
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 139
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 140
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 141
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 142
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 143
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 144
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 145
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 146
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 147
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 148
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 149
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 150
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 151
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 152
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 153
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 155
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 156
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 157
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 158
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 159
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 160
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 161
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 162
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 163
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 164
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 165
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 166
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 167
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 168
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 169
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 170
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 173
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 174
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 175
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 176
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 177
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 179
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 180
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 181
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 182
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 183
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 184
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 185
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 186
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 187
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 214
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 215
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 217
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 218
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 219
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 220
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 221
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 222
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 223
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 224
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 225
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 226
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 227
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 228
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 229
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 230
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 231
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 232
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 233
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 234
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 235
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 236
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 237
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 238
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 240
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 241
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 242
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 243
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 244
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 245
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 246
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 247
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 248
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 249
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 250
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 251
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 252
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 253
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 254
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 261
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 262
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 264
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 265
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 266
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 267
+},
+{
+  "fields": {},
+  "model": "general.artwork_type",
+  "pk": 271
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 49
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 50
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 51
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 52
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 53
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 54
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 65
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 71
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 73
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 74
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 75
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 76
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 77
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 78
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 79
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 80
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 81
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 82
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 83
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 84
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 85
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 86
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 87
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 149
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 150
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 151
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 155
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 156
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 157
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 173
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 174
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 175
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 176
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 177
+},
+{
+  "fields": {},
+  "model": "general.nonmaterial_type",
+  "pk": 180
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 55
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 56
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 57
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 88
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 89
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 90
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 91
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 92
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 93
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 94
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 95
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 96
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 97
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 98
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 152
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 153
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 158
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 159
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 160
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 161
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 162
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 163
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 164
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 165
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 166
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 167
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 168
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 169
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 170
+},
+{
+  "fields": {},
+  "model": "general.material_type",
+  "pk": 179
+},
+{
+  "fields": {
+    "unit_type": 35,
+    "region": null,
+    "code": "eco",
+    "name": "EcoCoop",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 1
+},
+{
+  "fields": {
+    "unit_type": 37,
+    "region": null,
+    "code": "\u20ac",
+    "name": "Euro",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 2
+},
+{
+  "fields": {
+    "unit_type": 38,
+    "region": null,
+    "code": "m2",
+    "name": "Square Meter",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 3
+},
+{
+  "fields": {
+    "unit_type": 38,
+    "region": null,
+    "code": "Ha",
+    "name": "Hectare",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 4
+},
+{
+  "fields": {
+    "unit_type": 48,
+    "region": null,
+    "code": "h",
+    "name": "Hour",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 5
+},
+{
+  "fields": {
+    "unit_type": 35,
+    "region": 4,
+    "code": "riu",
+    "name": "Riu",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 6
+},
+{
+  "fields": {
+    "unit_type": 36,
+    "region": 6,
+    "code": "\u0192",
+    "name": "FairCoin",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 7
+},
+{
+  "fields": {
+    "unit_type": 48,
+    "region": null,
+    "code": "dd",
+    "name": "Day",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 8
+},
+{
+  "fields": {
+    "unit_type": 48,
+    "region": null,
+    "code": "moon",
+    "name": "Moon cycle",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 9
+},
+{
+  "fields": {
+    "unit_type": 48,
+    "region": null,
+    "code": "yy",
+    "name": "Year",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 10
+},
+{
+  "fields": {
+    "unit_type": 35,
+    "region": null,
+    "code": "SCUR",
+    "name": "SocialCurrency",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 11
+},
+{
+  "fields": {
+    "unit_type": 68,
+    "region": null,
+    "code": "m",
+    "name": "Meter",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 12
+},
+{
+  "fields": {
+    "unit_type": 68,
+    "region": null,
+    "code": "Km",
+    "name": "Kilometer",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 13
+},
+{
+  "fields": {
+    "unit_type": 67,
+    "region": null,
+    "code": "Kg",
+    "name": "Kilogram",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 14
+},
+{
+  "fields": {
+    "unit_type": 67,
+    "region": null,
+    "code": "gr",
+    "name": "Gram",
+    "description": ""
+  },
+  "model": "general.unit",
+  "pk": 15
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 34
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 35
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 36
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 37
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 38
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 48
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 67
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 68
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 232
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 233
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 234
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 235
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 236
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 237
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 238
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 240
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 241
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 242
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 243
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 244
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 245
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 246
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 247
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 248
+},
+{
+  "fields": {},
+  "model": "general.unit_type",
+  "pk": 249
+},
+{
+  "fields": {
+    "record_type": 58,
+    "name": "EcoCoop * 10 = Hour",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 3
+},
+{
+  "fields": {
+    "record_type": 59,
+    "name": "EcoCoop * 1.000 = Euro",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 4
+},
+{
+  "fields": {
+    "record_type": 59,
+    "name": "Riu * 1.000 = Euro",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 5
+},
+{
+  "fields": {
+    "record_type": 61,
+    "name": "Hour * 24 = Day",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 6
+},
+{
+  "fields": {
+    "record_type": 61,
+    "name": "Day * 28 = Moon cycle",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 7
+},
+{
+  "fields": {
+    "record_type": 61,
+    "name": "Moon cycle * 13 = Year",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 8
+},
+{
+  "fields": {
+    "record_type": 59,
+    "name": "FairCoin * 20 = SocialCurrency",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 9
+},
+{
+  "fields": {
+    "record_type": 69,
+    "name": "Meter * 1000 = Kilometer",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 10
+},
+{
+  "fields": {
+    "record_type": 70,
+    "name": "Gram * 1000 = Kilogram",
+    "description": ""
+  },
+  "model": "general.record",
+  "pk": 11
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 14
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 15
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 16
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 17
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 18
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 58
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 59
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 60
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 61
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 69
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 70
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 124
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 125
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 126
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 127
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 128
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 129
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 130
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 131
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 132
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 133
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 134
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 135
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 136
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 137
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 138
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 139
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 140
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 141
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 142
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 143
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 144
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 145
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 146
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 147
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 148
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 181
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 182
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 183
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 184
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 185
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 186
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 187
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 214
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 215
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 217
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 218
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 219
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 220
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 221
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 222
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 223
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 224
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 225
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 226
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 227
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 228
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 229
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 230
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 231
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 251
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 252
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 253
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 254
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 266
+},
+{
+  "fields": {},
+  "model": "general.record_type",
+  "pk": 267
+},
+{
+  "fields": {
+    "out_unit": 5,
+    "rate": "10.0000",
+    "in_unit": 1
+  },
+  "model": "general.unitratio",
+  "pk": 3
+},
+{
+  "fields": {
+    "out_unit": 2,
+    "rate": "1.0000",
+    "in_unit": 1
+  },
+  "model": "general.unitratio",
+  "pk": 4
+},
+{
+  "fields": {
+    "out_unit": 2,
+    "rate": "1.0000",
+    "in_unit": 6
+  },
+  "model": "general.unitratio",
+  "pk": 5
+},
+{
+  "fields": {
+    "out_unit": 8,
+    "rate": "24.0000",
+    "in_unit": 5
+  },
+  "model": "general.unitratio",
+  "pk": 6
+},
+{
+  "fields": {
+    "out_unit": 9,
+    "rate": "28.0000",
+    "in_unit": 8
+  },
+  "model": "general.unitratio",
+  "pk": 7
+},
+{
+  "fields": {
+    "out_unit": 10,
+    "rate": "13.0000",
+    "in_unit": 9
+  },
+  "model": "general.unitratio",
+  "pk": 8
+},
+{
+  "fields": {
+    "out_unit": 11,
+    "rate": "20.0000",
+    "in_unit": 7
+  },
+  "model": "general.unitratio",
+  "pk": 9
+},
+{
+  "fields": {
+    "out_unit": 13,
+    "rate": "1000.0000",
+    "in_unit": 12
+  },
+  "model": "general.unitratio",
+  "pk": 10
+},
+{
+  "fields": {
+    "out_unit": 14,
+    "rate": "1000.0000",
+    "in_unit": 15
+  },
+  "model": "general.unitratio",
+  "pk": 11
+}
+]

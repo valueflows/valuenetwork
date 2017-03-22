@@ -448,7 +448,7 @@ li {
                                                             Event date:<br />{{ ct_form.event_date }}<br />
                                                             {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ct_form.from_agent }}<br />{% endif %}
                                                             {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ct_form.to_agent }}<br />{% endif %}
-                                                            Quantity transferred:<br />{{ ct_form.quantity }}<br />
+                                                            {{ ct_form.quantity.label }}:<br />{{ ct_form.quantity }}<br />
                                                             {% if ct_form.ocp_resource_type %}
                                                               {% trans "Type of Resource transferred:" %} <i>{{ ct_form.ocp_resource_type.label }}</i><br />
                                                               {{ ct_form.ocp_resource_type }}<br />
@@ -529,7 +529,7 @@ li {
                                                                 Event date:<br />{{ ce_form.event_date }}<br />
                                                                 {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ce_form.from_agent }}<br />{% endif %}
                                                                 {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ce_form.to_agent }}<br />{% endif %}
-                                                                Quantity transferred:<br />{{ ce_form.quantity }}<br />
+                                                                {{ ce_form.quantity.label }}:<br />{{ ce_form.quantity }}<br />
                                                                 {% if ce_form.ocp_resource_type %}
                                                                   {% trans "Type of Resource:" %} <i>{{ ce_form.ocp_resource_type.label }}</i><br />
                                                                   {{ ce_form.ocp_resource_type }}<br />
@@ -598,7 +598,7 @@ li {
                                                         Event date:<br />{{ cev_form.event_date }}<br />
                                                         {% if not slot.give_agent_is_context %}Transferred from:<br />{{ cev_form.from_agent }}<br />{% endif %}
                                                         {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ cev_form.to_agent }}<br />{% endif %}
-                                                        Quantity transferred:<br />{{ cev_form.quantity }}<br />
+                                                        {{ cev_form.quantity.label }}:<br />{{ cev_form.quantity }}<br />
                                                         {% if cev_form.ocp_resource_type %}
                                                           {% trans "Type of Resource transferred:" %} <i>{{ cev_form.ocp_resource_type.label }}</i><br />
                                                           {{ cev_form.ocp_resource_type }}<br />

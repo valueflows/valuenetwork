@@ -301,7 +301,7 @@ span.fancytree-selected span.fancytree-title {
 		<legend>
         <a class="indent" href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a> > {% trans "Exchanges" %}
             <div class="subnav">
-              {% if request.user.is_staff or request.user.agent.agent in project.managers %}
+              {% if request.user.is_staff or request.user.agent.agent in project.managers or request.user.agent.agent == project %}
                 {% if project.faircoin_resource %}
                   <a class="indent" href="{% url "manage_faircoin_account" resource_id=project.faircoin_resource.id %}">{% trans "Wallet" %}</a>
                 {% endif %}

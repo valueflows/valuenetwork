@@ -131,8 +131,10 @@ legend {
             <a class="indent smaller" href="{% url "agents" %}">{% trans "All Agents" %}</a> -->
         {% endif %}
         <div class="subnav">
-               {% if user_agent in agent.managers and agent.faircoin_resource %}
+               {% if agent.faircoin_resource %}
+                 {% if user_agent in agent.managers or user_agent == agent %}
                   <a class="indent" href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">{% trans "Wallet" %}</a>
+                 {% endif %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants %}
                    <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>

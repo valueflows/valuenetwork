@@ -910,20 +910,22 @@ class ContextTransferForm(forms.Form):
               self.fields["resource_type"].queryset = EconomicResourceType.objects.filter(id=resource_type.id)
             else:
               self.fields["resource_type"].queryset = rts
+            #import pdb; pdb.set_trace()
             if posting:
                 self.fields["resource"].queryset = EconomicResource.objects.all()
                 self.fields["from_resource"].queryset = EconomicResource.objects.all()
             else:
-                if rts:
-                    if resource_type:
-                        try:
-                          self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type).filter(agent_resource_roles__agent__id=context_agent.id)
-                        except:
-                          self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type)
-                        self.fields["from_resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type)
-                    else:
-                        self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=rts[0]).filter(agent_resource_roles__agent__id=context_agent.id)
-                        self.fields["from_resource"].queryset = EconomicResource.objects.filter(resource_type=rts[0])
+                if resource_type:
+                    try:
+                        self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type).filter(agent_resource_roles__agent__id=context_agent.id)
+                    except:
+                        self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type)
+                    self.fields["from_resource"].queryset = EconomicResource.objects.filter(resource_type=resource_type)
+                elif rts:
+                    self.fields["resource"].queryset = EconomicResource.objects.filter(resource_type=rts[0]).filter(agent_resource_roles__agent__id=context_agent.id)
+                    self.fields["from_resource"].queryset = EconomicResource.objects.filter(resource_type=rts[0])
+                else:
+                    self.fields['quantity'].label += " RT?" #+str(resource_type)
             if context_agent:
                 self.fields["to_agent"].queryset = transfer_type.to_context_agents(context_agent)
                 self.fields["from_agent"].queryset = transfer_type.from_context_agents(context_agent)
@@ -935,7 +937,7 @@ class ContextTransferForm(forms.Form):
 
             if hasattr(self.fields, 'ocp_resource_type'):
               for fv in facetvalues:
-                #self.fields["ocp_resource_type"].label += " FV:"+fv
+                self.fields["ocp_resource_type"].label += " FV:"+fv
                 try:
                     gtyp = Ocp_Artwork_Type.objects.get(facet_value__value=fv)
                     self.fields["ocp_resource_type"].label += " R:"+str(gtyp.name)
@@ -1003,10 +1005,21 @@ class ContextTransferForm(forms.Form):
                 else:
                     self.fields['quantity'].label += " ERROR: this facet is what? "+str(facet) #pass
             else:
-                self.fields['quantity'].label += " ERROR: this form has not ocp_resource_type field"
+                if resource_type:
+                    if resource_type.name == "Faircoin Address":
+                        resource_type = EconomicResourceType.objects.get(name="FairCoin")
+
+                    try:
+                        self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
+                    except:
+                        self.fields["ocp_resource_type"].label = " INITIAL? "+str(resource_type)
+                else:
+                    self.fields['quantity'].label += " ERROR: this form has not ocp_resource_type field, RT:"+str(resource_type)
 
             try:
                 self.fields["ocp_resource_type"].queryset = transfer_type.exchange_type.ocp_record_type.get_ocp_resource_types(transfer_type=transfer_type)
+                if resource_type:
+                    self.fields["ocp_resource_type"].initial = Ocp_Artwork_Type.objects.get(resource_type=resource_type)
             except:
                 self.fields["ocp_resource_type"].label = "  Sorry, this exchange type is not yet related to any resource types..."
 

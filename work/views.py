@@ -2898,11 +2898,14 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
         for transfer in x.transfer_list:
             if transfer.quantity():
-              if transfer.transfer_type.is_reciprocal:
+              if transfer.transfer_type.is_incoming(x, agent): #reciprocal:
                 sign = '<'
               else:
                 sign = '>'
               uq = transfer.unit_of_quantity()
+              rt = transfer.resource_type()
+              if not uq and rt:
+                uq = rt.unit
               if uq:
                 if not hasattr(uq, 'ocp_unit_type'):
                   raise ValidationError("The unit has not ocp_unit_type! "+str(uq))
@@ -2912,7 +2915,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     to['name'] = uq.ocp_unit_type.name
                     to['clas'] = uq.ocp_unit_type.clas
 
-                    if transfer.transfer_type.is_reciprocal:
+                    if transfer.transfer_type.is_incoming(x, agent): #is_reciprocal:
                       if transfer.events.all():
                         to['income'] = (to['income']*1) + (transfer.quantity()*1)
                       else:
@@ -2975,6 +2978,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       to['debug'] += 'U:'+str(uq.ocp_unit_type)+sign
 
               else:
+
                 pass #total_transfers[1]['debug'] += ' :: '+str(transfer.name)+sign
 
 
@@ -3114,10 +3118,18 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
         total_rect = 0
         #import pdb; pdb.set_trace()
         work_events = exchange.work_events()
-        slots = exchange.slots_with_detail()
+        slots = exchange.slots_with_detail(context_agent)
 
         for slot in slots:
-            if slot.is_reciprocal:
+            if slot.is_incoming(exchange, context_agent) == True:
+                #pass
+                total_rect = total_rect + slot.total
+                slot.is_income = True
+            elif slot.is_incoming(exchange, context_agent) == False:
+                total_t = total_t + slot.total
+                slot.is_income = False
+                #pass
+            elif slot.is_reciprocal:
                 total_rect = total_rect + slot.total
             else:
                 total_t = total_t + slot.total
@@ -3138,7 +3150,6 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
             }
             add_work_form = WorkEventContextAgentForm(initial=work_init, context_agent=context_agent)
 
-            #import pdb; pdb.set_trace()
             for slot in slots:
                 ta_init = slot.default_to_agent
                 fa_init = slot.default_from_agent
@@ -3167,6 +3178,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
 
                 slot.add_ext_agent = ContextExternalAgent() #initial=None, prefix="AGN"+str(slot.id))#, context_agent=context_agent)
 
+            #import pdb; pdb.set_trace()
     else:
         raise ValidationError("System Error: No exchange or use case.")
 
@@ -3762,22 +3774,31 @@ def transfer_from_commitment(request, transfer_id):
 
 
 @login_required
-def change_transfer_events(request, transfer_id):
+def change_transfer_events(request, transfer_id, context_agent_id=None):
     transfer = get_object_or_404(Transfer, pk=transfer_id)
+    if context_agent_id:
+      context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
     if request.method == "POST":
         events = transfer.events.all()
         transfer_type = transfer.transfer_type
         exchange = transfer.exchange
-        context_agent = transfer.context_agent
         events = transfer.events.all()
         if not context_agent:
-          if exchange.context_agent:
+          if transfer.context_agent:
+            context_agent = transfer.context_agent
+          elif exchange.context_agent:
             context_agent = exchange.context_agent
           elif events:
             if events[0].to_agent == request.user.agent.agent:
               context_agent = request.user.agent.agent
             elif events[0].from_agent == request.user.agent.agent:
               context_agent = request.user.agent.agent
+            #else:
+              #from_resource, to_resource = transfer.give_and_receive_resources()
+              #if transfer_type.is_reciprocal:
+              #  context_agent = events[0].to_agent
+              #else:
+              #  context_agent = events[0].from_agent
         #import pdb; pdb.set_trace()
         form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
         if form.is_valid():

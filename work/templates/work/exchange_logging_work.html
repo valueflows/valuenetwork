@@ -211,8 +211,10 @@ li {
 
         </div>
 
+        {% with slots|first as tt %}
         <div class="span8">
           {% if exchange %}
+            {% if tt and not tt.is_income %}
             <div class="trt infobox">
                 <h3 class="trtheading">Outgoing Transfers
                 <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
@@ -222,7 +224,7 @@ li {
                 </span>
                 </h3>
                 {% for slot in slots %}
-                    {% if not slot.is_reciprocal %}
+                    {% if True or not slot.is_income %}
                         <div class="log-section infobox2">
                             <h3>
                                 {{ slot.name }}
@@ -520,7 +522,7 @@ li {
                                                             <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                                 {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                                 {% trans "...created by you" %}</div>{% endif %}
 
@@ -589,7 +591,7 @@ li {
                                                     <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                         {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                         {% trans "...created by you" %}</div>{% endif %}
 
@@ -653,7 +655,8 @@ li {
                     {% endif %}
                 {% endfor %}
             </div>
-            {% if exchange.can_have_reciprocal_transfers %}
+            {% endif %}
+            {% if exchange.can_have_reciprocal_transfers or tt.is_income %}
             <div class="trt infobox">
                 <h3 CLASS="trtheading">Incoming Transfers
                 <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"
@@ -662,7 +665,7 @@ li {
                     <img src="{% static 'img/information-icon.png' %}" /></a>
                 </span></h3>
                 {% for slot in slots %}
-                    {% if slot.is_reciprocal %}
+                    {% if slot.is_income %}
                         <div class="log-section infobox2">
                             <h3>
                                 {{ slot.name }}
@@ -958,7 +961,7 @@ li {
                                                             <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                                 {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                                 {% trans "...created by you" %}</div>{% endif %}
 
@@ -1028,7 +1031,7 @@ li {
                                                     <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                         {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                         {% trans "...created by you" %}</div>{% endif %}
 
@@ -1199,6 +1202,7 @@ li {
             </div>
           {% endif %}
         </div>
+        {% endwith %}
     </div>
 </div>
 

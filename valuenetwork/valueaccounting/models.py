@@ -7399,12 +7399,15 @@ class TransferType(models.Model):
 
     def is_incoming(self, exchange, context_agent):
         transfers = exchange.transfers.all()
-        if transfers[0].transfer_type == self:
-            if transfers[0].to_agent() == context_agent:
-              return True
-            elif transfers[0].from_agent() == context_agent:
-              return False
+        if transfers:
+          for tx in transfers:
+            if tx.transfer_type == self:
+              if tx.to_agent() == context_agent:
+                return True
+              elif tx.from_agent() == context_agent:
+                return False
         elif not transfers:
+            #import pdb; pdb.set_trace()
             return self.is_reciprocal
 
         #return None
@@ -7611,6 +7614,12 @@ class Exchange(models.Model):
         #import pdb; pdb.set_trace()
         return slots
 
+    def has_reciprocal(self):
+        slots = self.exchange_type.transfer_types.all()
+        for slot in slots:
+            if slot.is_reciprocal:
+                return True
+        return False
 
     def work_events(self):
         return self.events.filter(

@@ -3131,8 +3131,10 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 #pass
             elif slot.is_reciprocal:
                 total_rect = total_rect + slot.total
+                slot.is_income = True
             else:
                 total_t = total_t + slot.total
+                slot.is_income = False
 
         if agent:
             #import pdb; pdb.set_trace()

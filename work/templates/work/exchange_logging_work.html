@@ -214,7 +214,7 @@ li {
         {% with slots|first as tt %}
         <div class="span8">
           {% if exchange %}
-            {% if tt and not tt.is_income %}
+            {% if exchange.exchange_type.transfer_types.count > 1 or tt and not tt.is_income %}
             <div class="trt infobox">
                 <h3 class="trtheading">Outgoing Transfers
                 <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
@@ -224,7 +224,7 @@ li {
                 </span>
                 </h3>
                 {% for slot in slots %}
-                    {% if True or not slot.is_income %}
+                    {% if not slot.is_income %}
                         <div class="log-section infobox2">
                             <h3>
                                 {{ slot.name }}
@@ -656,7 +656,7 @@ li {
                 {% endfor %}
             </div>
             {% endif %}
-            {% if exchange.can_have_reciprocal_transfers or tt.is_income %}
+            {% if exchange.can_have_reciprocal_transfers or tt and tt.is_income %}
             <div class="trt infobox">
                 <h3 CLASS="trtheading">Incoming Transfers
                 <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"

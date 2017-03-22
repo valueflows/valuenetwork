@@ -80,7 +80,7 @@
                      </li>
                     {% endif %}
 
-                    {% if request.user.agent.agent.is_active_freedom_coop_member or request.user.agent.agent.is_participant %}
+                    {% if request.user.agent.agent.is_active_freedom_coop_member or request.user.agent.agent.is_participant or request.user.agent.agent.managed_projects %}
                     <li id="my-projects" class="dropdown">
                       <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% trans 'Projects' %} <b class="caret"></b></a>
                       <ul class="subnav dropdown-menu" id="tasks-menu">

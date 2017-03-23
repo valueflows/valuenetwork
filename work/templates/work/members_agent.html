@@ -547,7 +547,8 @@ legend {
                 {% endif %}
 
 	          </div>
-            <div class="infobox" style="width:95%;">
+            {% if request.user.is_staff %}
+              <div class="infobox" style="width:95%;">
                   <h3 class="">{% trans "Active Processes" %}:</h3>
                   {% if agent.active_processes %}
                     <ul>
@@ -560,7 +561,8 @@ legend {
                   {% else %}
                         <p>{% trans "None" %}</p>
                   {% endif %}
-            </div>
+              </div>
+            {% endif %}
           </div>
 
 		    </div>

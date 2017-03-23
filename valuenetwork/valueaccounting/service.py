@@ -213,7 +213,7 @@ class ExchangeService(object):
         for tx in tx_in_blockchain:
             if str(tx[0]) not in tx_in_ocp:
                 (amount, time) = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
-                qty=Decimal(amount/1000000)
+                qty=Decimal(amount)/Decimal(1000000)
                 date = datetime.date.fromtimestamp(time)
                 tt = ExchangeService.faircoin_incoming_transfer_type()
                 xt = tt.exchange_type

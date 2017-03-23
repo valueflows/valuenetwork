@@ -441,7 +441,7 @@ def transfer_faircoins(request, resource_id):
                     )
                     transfer.save()
                 else:
-                    tt = faircoin_outgoing_transfer_type()
+                    tt = ExchangeService.faircoin_outgoing_transfer_type()
                     xt = tt.exchange_type
                     date = datetime.date.today()
                     exchange = Exchange(
@@ -550,7 +550,7 @@ def transfer_faircoins_old(request, resource_id):
                             )
                         transfer.save()
                     else:
-                        tt = faircoin_outgoing_transfer_type()
+                        tt = ExchangeService.faircoin_outgoing_transfer_type()
                         xt = tt.exchange_type
                         date = datetime.date.today()
                         exchange = Exchange(

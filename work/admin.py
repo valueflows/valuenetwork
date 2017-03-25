@@ -83,7 +83,7 @@ admin.site.register(Ocp_Skill_Type, Ocp_Type_Skill_Admin)
 
 class Ocp_Type_Unit_Admin(MPTTModelAdmin):
   model = Ocp_Unit_Type
-  list_display = ['name', 'clas', 'unit', 'ocp_unit']
+  list_display = ['name', 'clas', 'unit', 'ocpUnitType_ocp_unit']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     if db_field.name == 'parent':
       try:

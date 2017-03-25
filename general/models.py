@@ -1,6 +1,9 @@
 #encoding=utf-8
+from __future__ import print_function
+
 from django.utils.safestring import mark_safe
 from django.db import models
+from django.utils.six import python_2_unicode_compatible
 
 from mptt.models import MPTTModel
 from mptt.fields import TreeForeignKey, TreeManyToManyField
@@ -30,18 +33,18 @@ str_remove = 'erase'
 
 def erase_id_link(field, id):
 	out = '<a class="erase_id_on_box" name="'+str(field)+','+str(id)+'" href="javascript:;">'+str_remove+'</a>'
-	print out
+	print(out)
 	return out
 
 
 #	 C O N C E P T S - (Concepts, Ideas...)
-
+@python_2_unicode_compatible
 class Concept(MPTTModel):	# Abstract
 	name = models.CharField(unique=True, verbose_name=_(u"Name"), max_length=200, help_text=_(u"The name of the Concept"), default="")
 	description = models.TextField(blank=True, verbose_name=_(u"Description"))
 	parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 	class Meta:
@@ -50,6 +53,7 @@ class Concept(MPTTModel):	# Abstract
 		verbose_name_plural = _(u"c- Concepts")
 
 
+@python_2_unicode_compatible
 class Type(Concept):	# Create own ID's (TREE)
 	#concept = models.OneToOneField('Concept', primary_key=True, parent_link=True)
 	clas = models.CharField(blank=True, verbose_name=_(u"Class"), max_length=200,
@@ -60,7 +64,7 @@ class Type(Concept):	# Create own ID's (TREE)
 		verbose_name = _(u"c- Type")
 		#verbose_name_plural = _(u"c- Types")
 
-	def __unicode__(self):
+	def __str__(self):
 		if self.clas is None or self.clas == '':
 			return self.name
 		else:
@@ -74,17 +78,18 @@ class rel_Type_Types(models.Model):
 	class Meta:
 		verbose_name = _(u"T_type")
 		verbose_name_plural = _(u"Types related the Type")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.typ2.__unicode__()
+			return self.typ2.__str__()
 		else:
-			return self.relation.gerund+' > '+self.typ2.__unicode__()
+			return self.relation.gerund+' > '+self.typ2.__str__()
 """
 
 
 
 #	 B E I N G S - (Éssers, Entitats, Projectes...)
 """
+@python_2_unicode_compatible
 class Being(models.Model):	# Abstract
 	name = models.CharField(verbose_name=_(u"Name"), max_length=200, help_text=_(u"The name of the Entity"))
 	#being_type = TreeForeignKey('Being_Type', blank=True, null=True, verbose_name=_(u"Tipus d'entitat"))
@@ -94,7 +99,7 @@ class Being(models.Model):	# Abstract
 	class Meta:
 		abstract = True
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.name.encode("utf-8")
 """
 class Being_Type(Type):
@@ -104,6 +109,7 @@ class Being_Type(Type):
 		verbose_name_plural = _(u"e--> Types of entities")
 
 """
+@python_2_unicode_compatible
 class Human(Being):	# Create own ID's
 	nickname = models.CharField(max_length=50, blank=True, verbose_name=_(u"Nickname"), help_text=_(u"The nickname most used of the human entity"))
 	email = models.EmailField(max_length=100, blank=True, verbose_name=_(u"Email"), help_text=_(u"The main email address of the human entity"))
@@ -126,7 +132,7 @@ class Human(Being):	# Create own ID's
 		verbose_name = _(u"Human")
 		verbose_name_plural = _(u"e- Humans")
 
-	def __unicode__(self):
+	def __str__(self):
 		if self.nickname is None or self.nickname == '':
 			return self.name
 		else:
@@ -201,14 +207,14 @@ class Human(Being):	# Create own ID's
 			if recrels.count() == 0:
 				for acc in self.accountsCes.all():
 					newrec, created = rel_Human_Records.objects.get_or_create(human=self, record=acc, relation=rel_tit)
-					print '- new_REC acc_Ces: CREATED:'+str(created)+' :: '+str(newrec)
+					print('- new_REC acc_Ces: CREATED:' + str(created) + ' :: ' + str(newrec))
 
 		if hasattr(self, 'accountsBank') and self.accountsBank.count() > 0:
 			recrels = rel_Human_Records.objects.filter(human=self, record__in=self.accountsBank.all())
 			if recrels.count() == 0:
 				for acc in self.accountsBank.all():
 					newrec, created = rel_Human_Records.objects.get_or_create(human=self, record=acc, relation=rel_tit)
-					print '- new_REC acc_Bank: CREATED:'+str(created)+' :: '+str(newrec)
+					print('- new_REC acc_Bank: CREATED:' + str(created) + ' :: ' + str(newrec))
 
 		if hasattr(self, 'accountsCrypto') and self.accountsCrypto.count() > 0:
 			recrels = rel_Human_Records.objects.filter(human=self, record__in=self.accountsCrypto.all())
@@ -218,7 +224,7 @@ class Human(Being):	# Create own ID's
 					print '- new_REC acc_Crypto: CREATED:'+str(created)+' :: '+str(newrec)
     '''
 
-
+@python_2_unicode_compatible
 class Person(Human):
 	human = models.OneToOneField('Human', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	surnames = models.CharField(max_length=200, blank=True, verbose_name=_(u"Surnames"), help_text=_(u"The surnames of the Person"))
@@ -230,7 +236,7 @@ class Person(Human):
 		verbose_name= _(u'Person')
 		verbose_name_plural= _(u'e- Persons')
 
-	def __unicode__(self):
+	def __str__(self):
 		if self.nickname is None or self.nickname == '':
 			if self.surnames is None or self.surnames == '':
 				return self.name+' '+self.nickname2
@@ -244,6 +250,7 @@ class Person(Human):
 				return self.name+' '+self.surnames+' ('+self.nickname+')'
 
 
+@python_2_unicode_compatible
 class Project(MPTTModel, Human):
 	human = models.OneToOneField('Human', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	project_type = TreeForeignKey('Project_Type', blank=True, null=True, verbose_name=_(u"Type of project"))
@@ -283,7 +290,7 @@ class Project(MPTTModel, Human):
 	_ref_persons.allow_tags = True
 	_ref_persons.short_description = _(u"Reference person?")
 
-	def __unicode__(self):
+	def __str__(self):
 		if self.nickname is None or self.nickname == '':
 			if self.project_type:
 				return self.name+' ('+self.project_type.name+')'
@@ -294,7 +301,7 @@ class Project(MPTTModel, Human):
 """
 
 class Project_Type(Being_Type):
-	being_type = models.OneToOneField('Being_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	projectType_being_type = models.OneToOneField('Being_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name = _(u"Type of Project")
 		verbose_name_plural = _(u"e-> Types of Projects")
@@ -311,13 +318,14 @@ class Company(Human):
 		verbose_name_plural = _(u"e- Companies")
 """
 class Company_Type(Being_Type):
-	being_type = models.OneToOneField('Being_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	companyType_being_type = models.OneToOneField('Being_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name = _(u"Type of Company")
 		verbose_name_plural = _(u"e-> Types of Companies")
 
 
 """
+@python_2_unicode_compatible
 class rel_Human_Jobs(models.Model):
 	human = models.ForeignKey('Human')
 	job = TreeForeignKey('Job', verbose_name=_(u"Job"))
@@ -325,12 +333,14 @@ class rel_Human_Jobs(models.Model):
 	class Meta:
 		verbose_name = _(u"H_job")
 		verbose_name_plural = _(u"Skills of the entity")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.job.__unicode__()
+			return self.job.__str__()
 		else:
-			return self.relation.gerund+' > '+self.job.__unicode__()
+			return self.relation.gerund+' > '+self.job.__str__()
 
+
+@python_2_unicode_compatible
 class rel_Human_Addresses(models.Model):
 	human = models.ForeignKey('Human')
 	address = models.ForeignKey('Address', related_name='rel_human', verbose_name=_(u"Address"),
@@ -340,11 +350,11 @@ class rel_Human_Addresses(models.Model):
 	class Meta:
 		verbose_name = _(u"H_addr")
 		verbose_name_plural = _(u"Addresses of the entity")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation is None or self.relation.gerund is None or self.relation.gerund == '':
-			return self.address.__unicode__()
+			return self.address.__str__()
 		else:
-			return self.relation.gerund+' > '+self.address.__unicode__()
+			return self.relation.gerund+' > '+self.address.__str__()
 	def _is_main(self):
 		return self.main_address
 	_is_main.boolean = True
@@ -355,6 +365,8 @@ class rel_Human_Addresses(models.Model):
 	_selflink.allow_tags = True
 	_selflink.short_description = ''
 
+
+@python_2_unicode_compatible
 class rel_Human_Regions(models.Model):
 	human = models.ForeignKey('Human')
 	region = TreeForeignKey('Region', verbose_name=_(u"Region"))
@@ -362,13 +374,14 @@ class rel_Human_Regions(models.Model):
 	class Meta:
 		verbose_name = _(u"H_reg")
 		verbose_name_plural = _(u"Related regions")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.region.__unicode__()
+			return self.region.__str__()
 		else:
-			return self.relation.gerund+' > '+self.region.__unicode__()
+			return self.relation.gerund+' > '+self.region.__str__()
 
 
+@python_2_unicode_compatible
 class rel_Human_Records(models.Model):
 	human = models.ForeignKey('Human')
 	record = models.ForeignKey('Record', verbose_name=_(u"Record"))
@@ -376,18 +389,20 @@ class rel_Human_Records(models.Model):
 	class Meta:
 		verbose_name = _(u"H_rec")
 		verbose_name_plural = _(u"Related records")
-	def __unicode__(self):
+	def __str__(self):
 		if not hasattr(self.relation, 'gerund') or self.relation.gerund is None or self.relation.gerund == '':
-			return self.record.__unicode__()
+			return self.record.__str__()
 		else:
 			if not hasattr(self.record, 'record_type') or self.record.record_type is None or self.record.record_type == '':
-				return self.relation.gerund+' > '+self.record.__unicode__()
-			return self.record.record_type.name+': '+self.relation.gerund+' > '+self.record.__unicode__()
+				return self.relation.gerund+' > '+self.record.__str__()
+			return self.record.record_type.name+': '+self.relation.gerund+' > '+self.record.__str__()
 	def _selflink(self):
 		return self.record._selflink()
 	_selflink.allow_tags = True
 	_selflink.short_description = ''
 
+
+@python_2_unicode_compatible
 class rel_Human_Materials(models.Model):
 	human = models.ForeignKey('Human')
 	material = models.ForeignKey('Material', verbose_name=_(u"Material artwork"))
@@ -395,12 +410,14 @@ class rel_Human_Materials(models.Model):
 	class Meta:
 		verbose_name = _(u"H_mat")
 		verbose_name_plural = _(u"Material Artworks")
-	def __unicode__(self):
+	def __str__(self):
 		if not hasattr(self.relation, 'gerund') or self.relation.gerund is None or self.relation.gerund == '':
-			return self.material.__unicode__()
+			return self.material.__str__()
 		else:
-			return self.relation.gerund+' > '+self.material.__unicode__()
+			return self.relation.gerund+' > '+self.material.__str__()
 
+
+@python_2_unicode_compatible
 class rel_Human_Nonmaterials(models.Model):
 	human = models.ForeignKey('Human')
 	nonmaterial = models.ForeignKey('Nonmaterial', verbose_name=_(u"Non-material artwork"))
@@ -408,13 +425,14 @@ class rel_Human_Nonmaterials(models.Model):
 	class Meta:
 		verbose_name = _(u"H_inm")
 		verbose_name_plural = _(u"Non-material Artworks")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.nonmaterial.__unicode__()
+			return self.nonmaterial.__str__()
 		else:
-			return self.relation.gerund+' > '+self.nonmaterial.__unicode__()
+			return self.relation.gerund+' > '+self.nonmaterial.__str__()
 
 
+@python_2_unicode_compatible
 class rel_Human_Persons(models.Model):
 	human = models.ForeignKey('Human', related_name='human_persons')
 	person = models.ForeignKey('Person', related_name='rel_humans', verbose_name=_(u"Related person"))
@@ -422,11 +440,11 @@ class rel_Human_Persons(models.Model):
 	class Meta:
 		verbose_name = _(u"H_per")
 		verbose_name_plural = _(u"Related persons")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation is None or self.relation.gerund is None or self.relation.gerund == '':
-			return self.person.__unicode__()
+			return self.person.__str__()
 		else:
-			return self.relation.gerund+' > '+self.person.__unicode__()
+			return self.relation.gerund+' > '+self.person.__str__()
 
 	def _selflink(self):
 		return self.person._selflink()
@@ -434,6 +452,7 @@ class rel_Human_Persons(models.Model):
 	_selflink.short_description = ''
 
 
+@python_2_unicode_compatible
 class rel_Human_Projects(models.Model):
 	human = models.ForeignKey('Human', related_name='human_projects')
 	project = TreeForeignKey('Project', related_name='rel_humans', verbose_name=_(u"Related project"),
@@ -442,12 +461,12 @@ class rel_Human_Projects(models.Model):
 	class Meta:
 		verbose_name = _(u"H_pro")
 		verbose_name_plural = _(u"Related projects")
-	def __unicode__(self):
+	def __str__(self):
 		if self.project.project_type is None or self.project.project_type == '':
 			if self.relation.gerund is None or self.relation.gerund == '':
-				return self.project.__unicode__()
+				return self.project.__str__()
 			else:
-				return self.relation.gerund+' > '+self.project.__unicode__()
+				return self.relation.gerund+' > '+self.project.__str__()
 		else:
 			if not self.relation or self.relation.gerund is None or self.relation.gerund == '':
 				return '('+self.project.project_type.being_type.name+') rel? > '+self.project.name
@@ -455,6 +474,7 @@ class rel_Human_Projects(models.Model):
 				return '('+self.project.project_type.being_type.name+') '+self.relation.gerund+' > '+self.project.name
 
 
+@python_2_unicode_compatible
 class rel_Human_Companies(models.Model):
 	human= models.ForeignKey('Human', related_name='human_companies')
 	company = models.ForeignKey('Company', verbose_name=_(u"related Company"))
@@ -462,11 +482,11 @@ class rel_Human_Companies(models.Model):
 	class Meta:
 		verbose_name = _(u"H_emp")
 		verbose_name_plural = _(u"Related companies")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.company.__unicode__()
+			return self.company.__str__()
 		else:
-			return '('+self.company.company_type.being_type.name+') '+self.relation.gerund+' > '+self.company.__unicode__()
+			return '('+self.company.company_type.being_type.name+') '+self.relation.gerund+' > '+self.company.__str__()
 
 """
 
@@ -478,17 +498,17 @@ class rel_Address_Jobs(models.Model):
 	class Meta:
 		verbose_name = _(u"job")
 		verbose_name_plural = _(u"Arts/Oficis vinculats")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.job.__unicode__()
+			return self.job.__str__()
 		else:
-			return self.relation.gerund+' > '+self.job.__unicode__()
+			return self.relation.gerund+' > '+self.job.__str__()
 '''
 
 
 
 #	 A R T S - (Verbs, Relacions, Arts, Oficis, Sectors...)
-
+@python_2_unicode_compatible
 class Art(MPTTModel):	# Abstract
 	name = models.CharField(unique=True, max_length=200, verbose_name=_(u"Name"), help_text=_(u"The name of the Art"))
 	verb = models.CharField(max_length=200, blank=True, verbose_name=_(u"Verb"), help_text=_(u"The verb of the action, infinitive"))
@@ -497,7 +517,7 @@ class Art(MPTTModel):	# Abstract
 
 	parent = TreeForeignKey('self', null=True, blank=True, related_name='subarts')
 
-	def __unicode__(self):
+	def __str__(self):
 		if self.verb:
 			return self.name+', '+self.verb
 		else:
@@ -511,6 +531,7 @@ class Art(MPTTModel):	# Abstract
 		verbose_name_plural = _(u"a- Arts")
 
 
+@python_2_unicode_compatible
 class Relation(Art):	# Create own ID's (TREE)
 	#art = models.OneToOneField('Art', primary_key=True, parent_link=True)
 	clas = models.CharField(blank=True, verbose_name=_(u"Class"), max_length=50,
@@ -518,7 +539,7 @@ class Relation(Art):	# Create own ID's (TREE)
 	class Meta:
 		verbose_name= _(u'Relation')
 		verbose_name_plural= _(u'a- Relations')
-	def __unicode__(self):
+	def __str__(self):
 		if self.verb:
 			if self.clas is None or self.clas == '':
 				return self.verb
@@ -531,6 +552,7 @@ class Relation(Art):	# Create own ID's (TREE)
 				return self.name+' ('+self.clas+')'
 
 
+@python_2_unicode_compatible
 class Job(Art):		# Create own ID's (TREE)
 	#art = models.OneToOneField('Art', primary_key=True, parent_link=True)
 	clas = models.CharField(blank=True, verbose_name=_(u"Class"), max_length=50,
@@ -539,7 +561,7 @@ class Job(Art):		# Create own ID's (TREE)
 	class Meta:
 		verbose_name= _(u'Skill')
 		verbose_name_plural= _(u'a- Skills')
-	def __unicode__(self):
+	def __str__(self):
 		if self.clas is None or self.clas == '':
 			return self.name#+', '+self.verb
 		else:
@@ -550,17 +572,17 @@ class Job(Art):		# Create own ID's (TREE)
 #rel_tit = Relation.objects.get(clas='holder')
 
 #	 S P A C E S - (Regions, Places, Addresses...)
-
+@python_2_unicode_compatible
 class Space(models.Model):	# Abstact
 	name = models.CharField(verbose_name=_(u"Name"), max_length=100, help_text=_(u"The name of the Space"))
 	#space_type = TreeForeignKey('Space_Type', blank=True, null=True, verbose_name=_(u"Tipus d'espai"))
 	#m2 = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 	class Meta:
-		abstract = True;
+		abstract = True
 
 class Space_Type(Type):
 	typ = models.OneToOneField('Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
@@ -570,7 +592,7 @@ class Space_Type(Type):
 		verbose_name_plural= _(u"s--> Types of Spaces")
 
 
-
+@python_2_unicode_compatible
 class Address(Space):	# Create own ID's
 	#space = models.OneToOneField('Space', primary_key=True, parent_link=True)
 	address_type = TreeForeignKey('Address_Type', blank=True, null=True, verbose_name=_(u"Type of address"))
@@ -605,7 +627,7 @@ class Address(Space):	# Create own ID's
 	class Meta:
 		verbose_name= _(u'Address')
 		verbose_name_plural= _(u's- Addresses')
-	def __unicode__(self):
+	def __str__(self):
 		return self.name+' ('+self.p_address+' - '+self.town+')'
 
 	def _jobs_list(self):
@@ -626,7 +648,7 @@ class Address(Space):	# Create own ID's
 	_selflink.allow_tags = True
 
 class Address_Type(Space_Type):
-	space_type = models.OneToOneField('Space_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	addrTypeSpace_type = models.OneToOneField('Space_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name = _(u"Type of Address")
 		verbose_name_plural = _(u"s-> Types of Addresses")
@@ -645,7 +667,7 @@ class Region(MPTTModel, Space):	# Create own ID's (TREE)
 		verbose_name_plural= _(u's- Regions')
 
 class Region_Type(Space_Type):
-	space_type = models.OneToOneField('Space_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	regionType_space_type = models.OneToOneField('Space_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name = _(u"Type of Region")
 		verbose_name_plural = _(u"s-> Types of Regions")
@@ -654,13 +676,13 @@ class Region_Type(Space_Type):
 
 
 #	 A R T W O R K S - (Obres, Coses, Registres, Documents...)
-
+@python_2_unicode_compatible
 class Artwork(models.Model):	# Abstract
 	name = models.CharField(verbose_name=_(u"Name"), max_length=200, blank=True, null=True) #, help_text=_(u"El nom de la obra (Registre, Unitat, Cosa)"))
 	#artwork_type = TreeForeignKey('Artwork_Type', blank=True, verbose_name=_(u"Tipus d'Obra"))
 	description = models.TextField(blank=True, null=True, verbose_name=_(u"Description"))
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 	class Meta:
@@ -676,6 +698,7 @@ class Artwork_Type(Type):
 
 # - - - - - N O N - M A T E R I A L
 """
+@python_2_unicode_compatible
 class rel_Nonmaterial_Records(models.Model):
 	nonmaterial = models.ForeignKey('Nonmaterial')
 	record = models.ForeignKey('Record', verbose_name=_(u"related Record"))
@@ -683,12 +706,13 @@ class rel_Nonmaterial_Records(models.Model):
 	class Meta:
 		verbose_name = _(u"N_rec")
 		verbose_name_plural = _(u"Related records")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.record.__unicode__()
+			return self.record.__str__()
 		else:
-			return '('+self.record.record_type.name+') '+self.relation.gerund+' > '+self.record.__unicode__()
+			return '('+self.record.record_type.name+') '+self.relation.gerund+' > '+self.record.__str__()
 
+@python_2_unicode_compatible
 class rel_Nonmaterial_Addresses(models.Model):
 	nonmaterial = models.ForeignKey('Nonmaterial')
 	address = models.ForeignKey('Address', verbose_name=_(u"related Address"))
@@ -696,12 +720,13 @@ class rel_Nonmaterial_Addresses(models.Model):
 	class Meta:
 		verbose_name = _(u"N_adr")
 		verbose_name_plural = _(u"Related addresses")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.address.__unicode__()
+			return self.address.__str__()
 		else:
-			return '('+self.address.address_type.name+') '+self.relation.gerund+' > '+self.address.__unicode__()
+			return '('+self.address.address_type.name+') '+self.relation.gerund+' > '+self.address.__str__()
 
+@python_2_unicode_compatible
 class rel_Nonmaterial_Jobs(models.Model):
 	nonmaterial = models.ForeignKey('Nonmaterial')
 	job = models.ForeignKey('Job', related_name='nonmaterials', verbose_name=_(u"related Arts/Jobs"))
@@ -709,12 +734,13 @@ class rel_Nonmaterial_Jobs(models.Model):
 	class Meta:
 		verbose_name = _(u"N_ofi")
 		verbose_name_plural = _(u"Related Arts/Jobs")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.job.__unicode__()
+			return self.job.__str__()
 		else:
-			return self.relation.gerund+' > '+self.job.__unicode__()
+			return self.relation.gerund+' > '+self.job.__str__()
 
+@python_2_unicode_compatible
 class rel_Nonmaterial_Nonmaterials(models.Model):
 	nonmaterial = models.ForeignKey('Nonmaterial')
 	nonmaterial2 = models.ForeignKey('Nonmaterial', related_name='subnonmaterials', verbose_name=_(u"related Non-material Artworks"))
@@ -722,11 +748,11 @@ class rel_Nonmaterial_Nonmaterials(models.Model):
 	class Meta:
 		verbose_name = _(u"N_mat")
 		verbose_name_plural = _(u"related Non-material artworks")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.nonmaterial2.__unicode__()
+			return self.nonmaterial2.__str__()
 		else:
-			return '('+self.nonmaterial2.material_type.name+') '+self.relation.gerund+' > '+self.nonmaterial2.__unicode__()
+			return '('+self.nonmaterial2.material_type.name+') '+self.relation.gerund+' > '+self.nonmaterial2.__str__()
 
 
 class Nonmaterial(Artwork):	# Create own ID's
@@ -743,7 +769,7 @@ class Nonmaterial(Artwork):	# Create own ID's
 """
 
 class Nonmaterial_Type(Artwork_Type):
-	artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	nonmaterialType_artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name= _(u"Type of Non-material artwork")
 		verbose_name_plural= _(u"o-> Types of Non-material artworks")
@@ -751,8 +777,8 @@ class Nonmaterial_Type(Artwork_Type):
 
 """
 class Image(Nonmaterial):
-	nonmaterial = models.OneToOneField('Nonmaterial', primary_key=True, parent_link=True, on_delete=models.CASCADE)
-	image = models.ImageField(upload_to='files/images', height_field='height', width_field='width',
+	image_nonmaterial = models.OneToOneField('Nonmaterial', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	image_image = models.ImageField(upload_to='files/images', height_field='height', width_field='width',
 													blank=True, null=True,
 													verbose_name=_(u"Image (jpg/png)"))
 	#footer = models.TextField(blank=True, null=True, verbose_name=_(u"Peu de foto"))
@@ -768,6 +794,7 @@ class Image(Nonmaterial):
 
 # - - - - - M A T E R I A L
 """
+@python_2_unicode_compatible
 class rel_Material_Nonmaterials(models.Model):
 	material = models.ForeignKey('Material')
 	nonmaterial = models.ForeignKey('Nonmaterial', verbose_name=_(u"related Non-material"))
@@ -775,12 +802,13 @@ class rel_Material_Nonmaterials(models.Model):
 	class Meta:
 		verbose_name = _(u"M_inm")
 		verbose_name_plural = _(u"related Non-materials")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.nonmaterial.__unicode__()
+			return self.nonmaterial.__str__()
 		else:
-			return '('+self.nonmaterial.nonmaterial_type.name+') '+self.relation.gerund+' > '+self.nonmaterial.__unicode__()
+			return '('+self.nonmaterial.nonmaterial_type.name+') '+self.relation.gerund+' > '+self.nonmaterial.__str__()
 
+@python_2_unicode_compatible
 class rel_Material_Records(models.Model):
 	material = models.ForeignKey('Material')
 	record = models.ForeignKey('Record', verbose_name=_(u"related Record"))
@@ -788,12 +816,13 @@ class rel_Material_Records(models.Model):
 	class Meta:
 		verbose_name = _(u"M_rec")
 		verbose_name_plural = _(u"related Records")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.record.__unicode__()
+			return self.record.__str__()
 		else:
-			return '('+self.record.record_type.name+') '+self.relation.gerund+' > '+self.record.__unicode__()
+			return '('+self.record.record_type.name+') '+self.relation.gerund+' > '+self.record.__str__()
 
+@python_2_unicode_compatible
 class rel_Material_Addresses(models.Model):
 	material = models.ForeignKey('Material')
 	address = models.ForeignKey('Address', related_name='materials', verbose_name=_(u"related Address"))
@@ -801,12 +830,13 @@ class rel_Material_Addresses(models.Model):
 	class Meta:
 		verbose_name = _(u"M_adr")
 		verbose_name_plural = _(u"related Addresses")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.address.__unicode__()
+			return self.address.__str__()
 		else:
-			return '('+self.address.address_type.name+') '+self.relation.gerund+' > '+self.address.__unicode__()
+			return '('+self.address.address_type.name+') '+self.relation.gerund+' > '+self.address.__str__()
 
+@python_2_unicode_compatible
 class rel_Material_Materials(models.Model):
 	material = models.ForeignKey('Material')
 	material2 = models.ForeignKey('Material', related_name='submaterials', verbose_name=_(u"related Material artworks"))
@@ -814,12 +844,13 @@ class rel_Material_Materials(models.Model):
 	class Meta:
 		verbose_name = _(u"M_mat")
 		verbose_name_plural = _(u"related Material artworks")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.material2.__unicode__()
+			return self.material2.__str__()
 		else:
-			return '('+self.material2.material_type.name+') '+self.relation.gerund+' > '+self.material2.__unicode__()
+			return '('+self.material2.material_type.name+') '+self.relation.gerund+' > '+self.material2.__str__()
 
+@python_2_unicode_compatible
 class rel_Material_Jobs(models.Model):
 	material = models.ForeignKey('Material')
 	job = models.ForeignKey('Job', related_name='materials', verbose_name=_(u"related Arts/Jobs"))
@@ -827,11 +858,11 @@ class rel_Material_Jobs(models.Model):
 	class Meta:
 		verbose_name = _(u"M_ofi")
 		verbose_name_plural = _(u"related Arts/Jobs")
-	def __unicode__(self):
+	def __str__(self):
 		if self.relation.gerund is None or self.relation.gerund == '':
-			return self.job.__unicode__()
+			return self.job.__str__()
 		else:
-			return self.relation.gerund+' > '+self.job.__unicode__()
+			return self.relation.gerund+' > '+self.job.__str__()
 
 
 class Material(Artwork): # Create own ID's
@@ -849,11 +880,11 @@ class Material(Artwork): # Create own ID's
 
 	def _addresses_list(self):
 		out = ul_tag
-		print self.addresses.all()
+		print(self.addresses.all())
 		if self.addresses.all().count() > 0:
 			for add in self.addresses.all():
 				rel = add.materials.filter(material=self).first().relation
-				out += '<li>'+rel.gerund+': <b>'+add.__unicode__()+'</b></li>'
+				out += '<li>'+rel.gerund+': <b>'+add.__str__()+'</b></li>'
 			return out+'</ul>'
 		return str_none
 	_addresses_list.allow_tags = True
@@ -861,11 +892,11 @@ class Material(Artwork): # Create own ID's
 
 	def _jobs_list(self):
 		out = ul_tag
-		print self.jobs.all()
+		print(self.jobs.all())
 		if self.jobs.all().count() > 0:
 			for job in self.jobs.all():
 				rel = job.materials.filter(material=self).first().relation
-				out += '<li>'+rel.gerund+': <b>'+job.__unicode__()+'</b></li>'
+				out += '<li>'+rel.gerund+': <b>'+job.__str__()+'</b></li>'
 			return out+'</ul>'
 		return str_none
 	_jobs_list.allow_tags = True
@@ -873,21 +904,22 @@ class Material(Artwork): # Create own ID's
 """
 
 class Material_Type(Artwork_Type):
-	artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	materialType_artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name= _(u"Type of Material artwork")
 		verbose_name_plural= _(u"o-> Types of Material artworks")
 
 
 """
+@python_2_unicode_compatible
 class Asset(Material):
-	material = models.OneToOneField('Material', primary_key=True, parent_link=True, on_delete=models.CASCADE)
-	human = models.ForeignKey('Human', verbose_name=_(u"Entity"))
+	asset_material = models.OneToOneField('Material', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	asset_human = models.ForeignKey('Human', verbose_name=_(u"Entity"))
 	reciprocity = models.TextField(blank=True, verbose_name=_(u"Reciprocity"))
 	class Meta:
 		verbose_name = _(u"Asset")
 		verbose_name_plural = _(u"o- Assets")
-	def __unicode__(self):
+	def __str__(self):
 		return '('+self.material_type.name+') '+self.material.name
 
 	def _selflink(self):
@@ -902,6 +934,7 @@ class Asset(Material):
 
 # - - - - - U N I T S
 
+@python_2_unicode_compatible
 class Unit(Artwork):	# Create own ID's
 	unit_type = TreeForeignKey('Unit_Type', blank=True, null=True, verbose_name=_(u"Type of Unit"))
 	code = models.CharField(max_length=4, verbose_name=_(u"Code or Symbol"))
@@ -913,11 +946,11 @@ class Unit(Artwork):	# Create own ID's
 		verbose_name= _(u'Unit')
 		verbose_name_plural= _(u'o- Units')
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.unit_type.name+': '+self.name
 
 class Unit_Type(Artwork_Type):
-	artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	unitType_artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 
 	class Meta:
 		verbose_name = _(u"Type of Unit")
@@ -927,12 +960,13 @@ class Unit_Type(Artwork_Type):
 
 # - - - - - R E C O R D
 
+@python_2_unicode_compatible
 class Record(Artwork):	# Create own ID's
 	record_type = TreeForeignKey('Record_Type', blank=True, null=True, verbose_name=_(u"Type of Record"))
 	class Meta:
 		verbose_name= _(u'Record')
 		verbose_name_plural= _(u'o- Records')
-	def __unicode__(self):
+	def __str__(self):
 		if self.record_type is None or self.record_type == '':
 			return self.name
 		else:
@@ -946,12 +980,13 @@ class Record(Artwork):	# Create own ID's
 	_selflink.allow_tags = True
 
 class Record_Type(Artwork_Type):
-	artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
+	recordType_artwork_type = models.OneToOneField('Artwork_Type', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 	class Meta:
 		verbose_name= _(u'Type of Record')
 		verbose_name_plural= _(u'o-> Types of Records')
 
 
+@python_2_unicode_compatible
 class UnitRatio(Record):
 	record = models.OneToOneField('Record', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 
@@ -961,15 +996,16 @@ class UnitRatio(Record):
 	class Meta:
 		verbose_name = _(u"Equivalence between Units")
 		verbose_name_plural = _(u"o- Equivalences between Units")
-	def __unicode__(self):
+	def __str__(self):
 		return self.in_unit.name+' * '+str(self.rate)+' = '+self.out_unit.name
 
 
 """
+@python_2_unicode_compatible
 class AccountCes(Record):
 	record = models.OneToOneField('Record', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 
-	human = models.ForeignKey('Human', related_name='accountsCes', verbose_name=_(u"Owner human entity"))
+	accCes_human = models.ForeignKey('Human', related_name='accountsCes', verbose_name=_(u"Owner human entity"))
 	entity = models.ForeignKey('Project', verbose_name=_(u"Network of the account"))
 	unit = models.ForeignKey('Unit', verbose_name=_(u"Unit (currency)"))
 	code = models.CharField(max_length=10, blank=True, null=True, verbose_name=_(u"Network code"))
@@ -979,13 +1015,15 @@ class AccountCes(Record):
 		verbose_name= _(u'CES Account')
 		verbose_name_plural= _(u'o- CES Accounts')
 
-	def __unicode__(self):
-		return '('+self.unit.code+') '+self.human.nickname+' '+self.code+self.number#+' '+self.name
+	def __str__(self):
+		return '('+self.unit.code+') '+self.accCes_human.nickname + ' ' + self.code + self.number#+' '+self.name
 
+
+@python_2_unicode_compatible
 class AccountBank(Record):
 	record = models.OneToOneField('Record', primary_key=True, parent_link=True, on_delete=models.CASCADE)
 
-	human = models.ForeignKey('Human', related_name='accountsBank', verbose_name=_(u"Owner human entity"))
+	accBnk_human = models.ForeignKey('Human', related_name='accountsBank', verbose_name=_(u"Owner human entity"))
 	company = models.ForeignKey('Company', blank=True, null=True, verbose_name=_(u"Bank entity"))
 	unit = models.ForeignKey('Unit', blank=True, null=True, verbose_name=_(u"Unit (currency)"))
 	code = models.CharField(max_length=11, blank=True, null=True, verbose_name=_(u"SWIFT/BIC Code"))
@@ -996,22 +1034,26 @@ class AccountBank(Record):
 		verbose_name= _(u'Bank Account')
 		verbose_name_plural= _(u'o- Bank Accounts')
 
-	def __unicode__(self):
+	def __str__(self):
 		try:
-			return '('+self.unit.code+') '+self.company.nickname+': '+self.human.nickname+' '+self.number
+			return '('+self.unit.code+') '+self.company.nickname+': '+self.accBnk_human.nickname + ' ' + self.number
 		except:
 			return "<projecte buit>"
 
+
+@python_2_unicode_compatible
 class AccountCrypto(Record):
 	record = models.OneToOneField('Record', primary_key=True, parent_link=True, on_delete=models.CASCADE)
-	human = models.ForeignKey('Human', related_name='accountsCrypto', verbose_name=_(u"Owner human entity"))
+	accCrypt_human = models.ForeignKey('Human', related_name='accountsCrypto', verbose_name=_(u"Owner human entity"))
 	unit = models.ForeignKey('Unit', verbose_name=_(u"Unit (currency)"))
 	number = models.CharField(max_length=34, blank=True, verbose_name=_(u"Address of the wallet"))
 	class Meta:
 		verbose_name = _(u"Cryptocurrency Account")
 		verbose_name_plural = _(u"o- Cryptocurrency Accounts")
-	def __unicode__(self):
-		return '('+self.unit.code+') '+self.human.nickname+' '+self.number # +' '+self.name
+
+	def __str__(self):
+		return '('+self.unit.code+') '+self.accCrypt_human.nickname + ' ' + self.number # +' '+self.name
+
 """
 
 
@@ -1021,54 +1063,54 @@ class AccountCrypto(Record):
 from django.db.models.signals import post_migrate
 
 def create_general_types(**kwargs):
-  sep = ", "
-  out = "Initial basic types created: <br>"
-  being, created = Type.objects.get_or_create(name='Being', clas='Being')
-  if created: out += str(being)+sep
-  artwork, created = Type.objects.get_or_create(name='Artwork', clas='Artwork')
-  if created: out += str(artwork)+sep
-  space, created = Type.objects.get_or_create(name='Space', clas='Space')
-  if created: out += str(space)+'<br>'
+	sep = ", "
+	out = "Initial basic types created: <br>"
+	being, created = Type.objects.get_or_create(name='Being', clas='Being')
+	if created: out += str(being)+sep
+	artwork, created = Type.objects.get_or_create(name='Artwork', clas='Artwork')
+	if created: out += str(artwork)+sep
+	space, created = Type.objects.get_or_create(name='Space', clas='Space')
+	if created: out += str(space)+'<br>'
 
-  human, created = Being_Type.objects.get_or_create(name='Human', clas='Human', parent=being)
-  if created: out += str(human)+": "
-  person, created = Being_Type.objects.get_or_create(name='Person', clas='Person', parent=human)
-  if created: out += str(person)+sep
-  project, created = Being_Type.objects.get_or_create(name='Project', clas='Project', parent=human)
-  if created: out += str(project)+sep
-  company, created = Being_Type.objects.get_or_create(name='Company', clas='Company', parent=human)
-  if created: out += str(company)+'<br>'
+	human, created = Being_Type.objects.get_or_create(name='Human', clas='Human', parent=being)
+	if created: out += str(human)+": "
+	person, created = Being_Type.objects.get_or_create(name='Person', clas='Person', parent=human)
+	if created: out += str(person)+sep
+	project, created = Being_Type.objects.get_or_create(name='Project', clas='Project', parent=human)
+	if created: out += str(project)+sep
+	company, created = Being_Type.objects.get_or_create(name='Company', clas='Company', parent=human)
+	if created: out += str(company)+'<br>'
 
-  material, created = Artwork_Type.objects.get_or_create(name='Material', clas='Material', parent=artwork)
-  if created: out += str(material)+sep
-  nonmaterial, created = Artwork_Type.objects.get_or_create(name='Non-material', clas='Nonmaterial', parent=artwork)
-  if created: out += str(nonmaterial)+sep
-  record, created = Artwork_Type.objects.get_or_create(name='Record', clas='Record', parent=artwork)
-  if created: out += str(record)+sep
-  unit, created = Artwork_Type.objects.get_or_create(name='Unit', clas='Unit', parent=artwork)
-  if created: out += str(unit)+sep
-  currency, created = Unit_Type.objects.get_or_create(name='Currency', parent=unit)
-  if created: out += str(currency)+sep
-  social, created = Unit_Type.objects.get_or_create(name='MutualCredit currency', parent=currency)
-  if created: out += str(social)+sep
-  crypto, created = Unit_Type.objects.get_or_create(name='Cryptocurrency', parent=currency)
-  if created: out += str(crypto)+sep
-  fiat, created = Unit_Type.objects.get_or_create(name='Fiat currency', parent=currency)
-  if created: out += str(crypto)+'<br>'
+	material, created = Artwork_Type.objects.get_or_create(name='Material', clas='Material', parent=artwork)
+	if created: out += str(material)+sep
+	nonmaterial, created = Artwork_Type.objects.get_or_create(name='Non-material', clas='Nonmaterial', parent=artwork)
+	if created: out += str(nonmaterial)+sep
+	record, created = Artwork_Type.objects.get_or_create(name='Record', clas='Record', parent=artwork)
+	if created: out += str(record)+sep
+	unit, created = Artwork_Type.objects.get_or_create(name='Unit', clas='Unit', parent=artwork)
+	if created: out += str(unit)+sep
+	currency, created = Unit_Type.objects.get_or_create(name='Currency', parent=unit)
+	if created: out += str(currency)+sep
+	social, created = Unit_Type.objects.get_or_create(name='MutualCredit currency', parent=currency)
+	if created: out += str(social)+sep
+	crypto, created = Unit_Type.objects.get_or_create(name='Cryptocurrency', parent=currency)
+	if created: out += str(crypto)+sep
+	fiat, created = Unit_Type.objects.get_or_create(name='Fiat currency', parent=currency)
+	if created: out += str(crypto)+'<br>'
 
-  region, created = Space_Type.objects.get_or_create(name='Region', clas='Region', parent=space)
-  if created: out += str(region)+sep
-  address, created = Space_Type.objects.get_or_create(name='Address', clas='Address', parent=space)
-  if created: out += str(address)+'<br>'
+	region, created = Space_Type.objects.get_or_create(name='Region', clas='Region', parent=space)
+	if created: out += str(region)+sep
+	address, created = Space_Type.objects.get_or_create(name='Address', clas='Address', parent=space)
+	if created: out += str(address)+'<br>'
 
-  unitratio, created = Record_Type.objects.get_or_create(name='Unit Ratio', clas='UnitRatio', parent=record)
-  if created: out += str(unitratio)+sep
-  ces, created = Record_Type.objects.get_or_create(name='Account Ces', clas='AccountCes', parent=record)
-  if created: out += str(ces)+sep
-  bank, created = Record_Type.objects.get_or_create(name='Account Bank', clas='AccountBank', parent=record)
-  if created: out += str(bank)+sep
+	unitratio, created = Record_Type.objects.get_or_create(name='Unit Ratio', clas='UnitRatio', parent=record)
+	if created: out += str(unitratio)+sep
+	ces, created = Record_Type.objects.get_or_create(name='Account Ces', clas='AccountCes', parent=record)
+	if created: out += str(ces)+sep
+	bank, created = Record_Type.objects.get_or_create(name='Account Bank', clas='AccountBank', parent=record)
+	if created: out += str(bank)+sep
 
-  print out
-  return out
+	print(out)
+	return out
 
 #post_migrate.connect(create_general_types)

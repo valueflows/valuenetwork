@@ -10,12 +10,13 @@ from django.http import HttpResponse
 from django.contrib import admin
 admin.autodiscover()
 
+import work.views
 #from valuenetwork.valueaccounting.models import *
 
 
 urlpatterns = patterns("",
     url(r"^$", LoginView.as_view(template_name='account/login.html'), name='home'),
-    #url(r"^$", 'valuenetwork.valueaccounting.views.home', name="home"),
+    #url(r"^$", valuenetwork.valueaccounting.views.home, name="home"),
     url(r"^accounting/", include("valuenetwork.valueaccounting.urls")),
     url(r"^admin/", include(admin.site.urls)),
     url(r"^account/", include("account.urls")),
@@ -26,13 +27,13 @@ urlpatterns = patterns("",
     url(r"^api/", include("valuenetwork.api.urls")),
     #url(r'^report_builder/', include('report_builder.urls')),
     url(r'^comments/', include('django_comments.urls')),
-    url(r'^membership/$', 'work.views.membership_request', name="membership_request"),
+    url(r'^membership/$', work.views.membership_request, name="membership_request"),
     url(r'^membershipthanks/$', TemplateView.as_view(template_name='work/membership_thanks.html'), name='membership_thanks'),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^robots.txt$', lambda r: HttpResponse("User-agent: *\nAllow: /$\nDisallow: /", content_type="text/plain")),
 
-    url(r'^joinaproject/(?P<form_slug>.+)/$', 'work.views.joinaproject_request', name="joinaproject_request"),
+    url(r'^joinaproject/(?P<form_slug>.+)/$', work.views.joinaproject_request, name="joinaproject_request"),
     url(r'^joinaproject-thanks/$', TemplateView.as_view(template_name='work/joinaproject_thanks.html'), name='joinaproject_thanks'),
 
     # View URLs

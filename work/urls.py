@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
 import work.views
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(r'^my-dashboard/$', work.views.my_dashboard, name="my_dashboard"),
     url(r'^non-process-logging/$', work.views.non_process_logging, name="non_process_logging"),
     url(r'^work-timer/(?P<process_id>\d+)/(?P<commitment_id>\d+)/$', work.views.work_timer, name="work_timer"),
@@ -130,4 +130,4 @@ urlpatterns = patterns("",
     url(r'^add-transfer-external-agent/(?P<commitment_id>\d+)/(?P<context_agent_id>\d+)/$', work.views.add_transfer_external_agent,
         name="add_transfer_external_agent"),
 
-)
+]

@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
 import valuenetwork.board.views
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(r'^dhen-board/(?P<context_agent_id>\d+)/$', valuenetwork.board.views.dhen_board, name="dhen_board"),
     url(r'^dhen-board/$', valuenetwork.board.views.dhen_board, name="dhen_board"),
     url(r'^add-available/(?P<context_agent_id>\d+)/$', valuenetwork.board.views.add_available, 
@@ -21,4 +21,4 @@ urlpatterns = patterns("",
     url(r'^delete-farm-commitment/(?P<commitment_id>\d+)/$', valuenetwork.board.views.delete_farm_commitment, name="delete_farm_commitment"),
     #url(r'^delete-receipt/(?P<resource_id>\d+)/$', valuenetwork.board.views.delete_receipt, name="delete_receipt"),
     
-)
+]

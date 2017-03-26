@@ -23,7 +23,7 @@ router.register(r'usercreation', views.UserCreationViewSet, 'usercreation')
 router.register(r'agentcreation', views.AgentCreationViewSet, 'agentcreation')
 router.register(r'agentuser', views.AgentUserViewSet, 'agentuser')
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r"^agent-jsonld/$", views.agent_jsonld, name="agent_jsonld"),
@@ -34,4 +34,4 @@ urlpatterns = patterns("",
     url(r"^agent-relationship-inv-lod/(?P<agent_assoc_id>\d+)/$", views.agent_relationship_inv_lod, name="agent_relationship_inv_lod"),
     url(r"^agent-jsonld-query/$", views.agent_jsonld_query, name="agent_jsonld_query"),
     
-)
+]

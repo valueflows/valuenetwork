@@ -14,7 +14,7 @@ import work.views
 #from valuenetwork.valueaccounting.models import *
 
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(r"^$", LoginView.as_view(template_name='account/login.html'), name='home'),
     #url(r"^$", valuenetwork.valueaccounting.views.home, name="home"),
     url(r"^accounting/", include("valuenetwork.valueaccounting.urls")),
@@ -45,7 +45,7 @@ urlpatterns = patterns("",
     # DB Store plugin URLs
     url(r'^fobi/plugins/form-handlers/db-store/',
         include('fobi.contrib.plugins.form_handlers.db_store.urls')),
-)
+]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += staticfiles_urlpatterns()

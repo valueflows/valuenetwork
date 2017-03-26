@@ -1,8 +1,9 @@
 from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
 import valuenetwork.valueaccounting.views
+import work.views
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(r"^start/$", valuenetwork.valueaccounting.views.start, name="start"),
     url(r"^projects/$", valuenetwork.valueaccounting.views.projects, name="projects"),
     url(r"^agents/$", valuenetwork.valueaccounting.views.agents, name="agents"),
@@ -421,8 +422,8 @@ urlpatterns = patterns("",
         name="agent_associations"),
     url(r"^change-commitment-quantities/(?P<order_item_id>\d+)/$", valuenetwork.valueaccounting.views.change_commitment_quantities, 
         name="change_commitment_quantities"),
-)
-urlpatterns += patterns("",
+]
+urlpatterns += [
     url(r"^change-workflow-project/(?P<order_item_id>\d+)/$", valuenetwork.valueaccounting.views.change_workflow_project, 
         name="change_workflow_project"),        
     url(r"^add-order-item/(?P<order_id>\d+)/$", valuenetwork.valueaccounting.views.add_order_item, 
@@ -528,8 +529,8 @@ urlpatterns += patterns("",
     url(r"^send-faircoins/(?P<resource_id>\d+)/$", valuenetwork.valueaccounting.views.send_faircoins, 
         name="send_faircoins"),
     url(r"^validate-faircoin-address/$", valuenetwork.valueaccounting.views.validate_faircoin_address, name="validate_faircoin_address"),
-    url(r'^membership-requests/$', 'work.views.membership_requests', name="membership_requests"),
-    url(r'^membership-requests/(?P<state>\w+)/$', 'work.views.membership_requests', name="membership_requests"),
+    url(r'^membership-requests/$', work.views.membership_requests, name="membership_requests"),
+    url(r'^membership-requests/(?P<state>\w+)/$', work.views.membership_requests, name="membership_requests"),
     url(r'^membership-request/(?P<membership_request_id>\d+)/$', valuenetwork.valueaccounting.views.membership_request, 
         name="membership_request"), 
     url(r'^connect-agent/(?P<membership_request_id>\d+)/$', valuenetwork.valueaccounting.views.connect_agent_to_request, 
@@ -543,7 +544,7 @@ urlpatterns += patterns("",
     url(r'^delete-request/(?P<membership_request_id>\d+)/$', valuenetwork.valueaccounting.views.delete_request, 
         name="delete_request"), 
     url(r"^comments/$", valuenetwork.valueaccounting.views.comments, name="comments"),
-    url(r'^skill-suggestions/$', 'work.views.skill_suggestions', name="skill_suggestions"),
+    url(r'^skill-suggestions/$', work.views.skill_suggestions, name="skill_suggestions"),
     url(r'^create-skill/(?P<suggestion_id>\d+)/$', valuenetwork.valueaccounting.views.create_skill_for_suggestion, 
         name="create_skill_for_suggestion"),
     url(r'^decline-suggestion/(?P<suggestion_id>\d+)/$', valuenetwork.valueaccounting.views.decline_suggestion, 
@@ -551,5 +552,5 @@ urlpatterns += patterns("",
     url(r'^undecline-suggestion/(?P<suggestion_id>\d+)/$', valuenetwork.valueaccounting.views.undecline_suggestion, 
         name="undecline_suggestion"),
     url(r"^validate-resource-type-name/$", valuenetwork.valueaccounting.views.validate_resource_type_name, name="validate_resource_type_name"),
-)
+]
 

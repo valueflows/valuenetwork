@@ -35,8 +35,8 @@ import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
 
-if "notification" in settings.INSTALLED_APPS:
-    from notification import models as notification
+if "pinax.notifications" in settings.INSTALLED_APPS:
+    from pinax.notifications import models as notification
 else:
     notification = None
 

@@ -32,8 +32,8 @@ from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
 from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
 from work.utils import *
 
-if "notification" in settings.INSTALLED_APPS:
-    from notification import models as notification
+if "pinax.notifications" in settings.INSTALLED_APPS:
+    from pinax.notifications import models as notification
 else:
     notification = None
 
@@ -4128,7 +4128,7 @@ def add_todo(request):
             pattern = patterns[0].pattern
             form = TodoForm(data=request.POST, pattern=pattern)
         else:
-            form = TodoForm(request.POST)
+            form = TodoForm(data=request.POST)
         next = request.POST.get("next")
         agent = get_agent(request)
         et = None

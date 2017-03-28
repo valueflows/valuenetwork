@@ -1,11 +1,9 @@
 from django.conf import settings
-from django.db.models import signals
 from django.utils.translation import ugettext_noop as _
 
-if "pinax.notifications" in settings.INSTALLED_APPS:
-    from pinax.notifications import models as notification
-
-    def create_notice_types(app, created_models, verbosity, **kwargs):
+def create_notice_types(sender, **kwargs):
+    if "pinax.notifications" in settings.INSTALLED_APPS:
+        from pinax.notifications import models as notification
         notification.NoticeType.create("valnet_join_task", _("Join Task"), _("a colleaque wants to help with this task"), default=2)
         notification.NoticeType.create("valnet_help_wanted", _("Help Wanted"), _("a colleague requests help that fits your skills"), default=2)
         notification.NoticeType.create("valnet_new_task", _("New Task"), _("a new task was posted that fits your skills"), default=2)
@@ -20,7 +18,6 @@ if "pinax.notifications" in settings.INSTALLED_APPS:
         notification.NoticeType.create("comment_join_request", _("Comment in Project Join Request"), _("we have received a new comment in a join request"), default=2)
         notification.NoticeType.create("work_skill_suggestion", _("Skill suggestion"), _("we have received a new skill suggestion"), default=2)
         print "created valueaccounting notice types"
-    signals.post_migrate.connect(create_notice_types, sender=notification)
-else:
-    print "Skipping creation of valueaccounting NoticeTypes as notification app not found"
+    else:
+        print "Skipping creation of valueaccounting NoticeTypes as notification app not found"
 

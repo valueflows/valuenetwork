@@ -31,6 +31,7 @@ from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
 import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
+from valuenetwork.valueaccounting.service import ExchangeService
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
@@ -419,7 +420,7 @@ def transfer_faircoins(request, resource_id):
                     to_agent = to_resource.owner()
                 et_give = EventType.objects.get(name="Give")
                 if to_agent:
-                    tt = faircoin_internal_transfer_type()
+                    tt = ExchangeService.faircoin_internal_transfer_type()
                     xt = tt.exchange_type
                     date = datetime.date.today()
                     exchange = Exchange(
@@ -532,7 +533,7 @@ def transfer_faircoins_old(request, resource_id):
                         to_agent = to_resource.owner()
                     et_give = EventType.objects.get(name="Give")
                     if to_agent:
-                        tt = faircoin_internal_transfer_type()
+                        tt = ExchangeService.faircoin_internal_transfer_type()
                         xt = tt.exchange_type
                         date = datetime.date.today()
                         exchange = Exchange(

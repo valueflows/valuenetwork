@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from account.views import SignupView, LoginView, LogoutView, DeleteView
 from account.views import ConfirmEmailView

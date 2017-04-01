@@ -4,36 +4,75 @@
 
 from django.test import LiveServerTestCase
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from selenium import webdriver
 
-from valuenetwork.valueaccounting.models import AgentType, EconomicAgent
+from valuenetwork.valueaccounting.models import AgentType, EconomicAgent, EventType, EconomicResourceType
 
 class WorkAppTestCase(LiveServerTestCase):
     def setUp(self):
-        User.objects.create_superuser(
-            username='admin',
-            password='admin',
-            email='admin@example.com'
-        )
-        project_agent_type = AgentType.objects.create(
-            name='Project',
-            party_type='team',
-            is_context=True
-        )
-        EconomicAgent.objects.create(
-            name='Membership Requests',
-            nick='FC MembershipRequest',
-            agent_type=project_agent_type,
-            is_context=True
-        )
+        # We want to see debugging errors in the browser.
+        # In order to see them, to comment tearDown() is needed too.
+        setattr(settings, 'DEBUG', True)
+
+        # We want to reuse the test db, to be faster (manage.py test --keepdb).
+        # So we create the objects only if they are not in test db.
+        try:
+            User.objects.get(username='admin')
+        except User.DoesNotExist:
+            User.objects.create_superuser(
+                username='admin',
+                password='admin',
+                email='admin@example.com'
+            )
+
+        try:
+            AgentType.objects.get(name='Project')
+        except AgentType.DoesNotExist:
+            project_agent_type = AgentType.objects.create(
+                name='Project',
+                party_type='team',
+                is_context=True
+            )
+
+        try:
+            EconomicAgent.objects.get(name='Membership Requests')
+        except EconomicAgent.DoesNotExist:
+            EconomicAgent.objects.create(
+                name='Membership Requests',
+                nick='FC MembershipRequest',
+                agent_type=project_agent_type,
+                is_context=True
+            )
+
+        try:
+            EventType.objects.get(relationship='todo')
+        except EventType.DoesNotExist:
+            EventType.objects.create(
+                name='Todo',
+                label='todo',
+                relationship='todo',
+                related_to='agent',
+                resource_effect='=',
+            )
+
+        try:
+            EconomicResourceType.objects.get(behavior='work')
+        except EconomicResourceType.DoesNotExist:
+            EconomicResourceType.objects.create(
+                name='something_with_Admin',
+                behavior='work',
+            )
+
         self.selenium = webdriver.Firefox()
+        self.selenium.implicitly_wait(2)
         self.selenium.maximize_window()
         super(WorkAppTestCase, self).setUp()
 
     def tearDown(self):
         self.selenium.quit()
-        super(AdminTestCase, self).tearDown()
+        super(WorkAppTestCase, self).tearDown()
 
     def test_membership_request(self):
         s = self.selenium

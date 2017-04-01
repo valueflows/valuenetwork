@@ -1,10 +1,11 @@
 FreedomCoop's OCP (NRP fork)
-================================
+============================
 
 .. image:: https://api.travis-ci.org/freedomcoop/valuenetwork.svg
     :target: https://travis-ci.org/freedomcoop/valuenetwork.svg
 
 A Value Network Accounting.
+
 We mean Accounting in a large sense.  We are developing something analogous to an ERP system for value networks.
 Might call it NRP for Network Resource Planning or OCP for Open Collaborative Platform.
 

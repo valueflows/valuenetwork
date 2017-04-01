@@ -8,6 +8,7 @@
 
 from django.core.exceptions import MultipleObjectsReturned
 
+
 def ensureSingleModel(result):
     if (result.count() != 1):
         raise MultipleObjectsReturned

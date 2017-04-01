@@ -6,16 +6,38 @@
 #
 
 import graphene
+from django.core.exceptions import PermissionDenied
 from graphene_django.debug import DjangoDebug
 
+import valuenetwork.api.schemas.Auth
 import valuenetwork.api.schemas.EconomicAgent
+from valuenetwork.api.models import JwtAuthenticatedToken
 
-class Query(
+
+class ViewerQuery(
     valuenetwork.api.schemas.EconomicAgent.Query,
-    graphene.ObjectType):
+    graphene.ObjectType
+):
+    def __init__(self, *args, **kwargs):
+        self.token = kwargs.pop('token', None)
+        super(ViewerQuery, self).__init__(*args, **kwargs)
 
+
+class Query(graphene.ObjectType):
+    viewer = graphene.Field(ViewerQuery, token=graphene.String())
     debug = graphene.Field(DjangoDebug, name='__debug')
 
-    pass
+    def resolve_viewer(self, args, context, info):
+        token_str = args.get('token')
+        token = JwtAuthenticatedToken.from_token(token_str)
+        if token is not None:
+            return ViewerQuery(token=token)
+        raise PermissionDenied('Cannot access this resource')
 
-schema = graphene.Schema(query=Query)
+
+class Mutation(graphene.ObjectType):
+    create_token = valuenetwork.api.schemas.Auth.CreateToken.Field()
+    delete_token = valuenetwork.api.schemas.Auth.DeleteToken.Field()
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)

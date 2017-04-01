@@ -24,3 +24,5 @@ django-mptt
 django-fobi==0.6.10
 pytz
 graphene-django>=1.0
+PyJWT
+six

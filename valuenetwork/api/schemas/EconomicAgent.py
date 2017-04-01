@@ -28,15 +28,15 @@ class Query(graphene.AbstractType):
     # define input query params
 
     agent = graphene.Field(EconomicAgentType,
-                        me=graphene.Boolean(),
-                        nick=graphene.String(),
-                        name=graphene.String())
+                           me=graphene.Boolean(),
+                           nick=graphene.String(),
+                           name=graphene.String())
 
     all_agents = graphene.List(EconomicAgentType)
 
     # load single agents
 
-    def resolve_agent(self, args, context, info):
+    def resolve_agent(self, args, *rargs):
         me = args.get('me')
         nick = args.get('nick')
         name = args.get('name')
@@ -44,13 +44,10 @@ class Query(graphene.AbstractType):
         # load own agent
 
         if (me is not None):
-            if not context.user.is_authenticated():
-                raise PermissionDenied
-            else:
-                agentUser = AgentUser.objects.filter(user=context.user.id).first()
-                if (agentUser is None):
-                    raise PermissionDenied
-                return agentUser.agent
+            agentUser = AgentUser.objects.filter(user=self.token.user).first()
+            if agentUser is None:
+                raise PermissionDenied("Cannot find requested user")
+            return agentUser.agent
 
         # read by nickname
 

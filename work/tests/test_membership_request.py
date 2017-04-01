@@ -7,10 +7,14 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 from valuenetwork.valueaccounting.models import AgentType, EconomicAgent, EventType, EconomicResourceType
 
-class WorkAppTestCase(LiveServerTestCase):
+class MembershipRequestTestCase(LiveServerTestCase):
     def setUp(self):
         # We want to see debugging errors in the browser.
         # In order to see them, to comment tearDown() is needed too.
@@ -68,34 +72,42 @@ class WorkAppTestCase(LiveServerTestCase):
         self.selenium = webdriver.Firefox()
         self.selenium.implicitly_wait(2)
         self.selenium.maximize_window()
-        super(WorkAppTestCase, self).setUp()
+        super(MembershipRequestTestCase, self).setUp()
 
     def tearDown(self):
         self.selenium.quit()
-        super(WorkAppTestCase, self).tearDown()
+        super(MembershipRequestTestCase, self).tearDown()
+
+    def wait_for_load_new_page(self, driver, title):
+        try:
+            element = WebDriverWait(driver, 10).until(EC.title_contains(title))
+            return True
+        except TimeoutException as ex:
+            print("Exception has been thrown. " + str(ex))
+            self.tearDown()
 
     def test_membership_request(self):
         s = self.selenium
 
         # User fills the membership request form.
         s.get('%s%s' % (self.live_server_url, "/"))
-        assert "OCP: Open Collaborative Platform" in s.title
-        s.find_element_by_link_text("Join FreedomCoop")
-        s.get('%s%s' % (self.live_server_url, "/membership/"))
-        self.assertIn("Request Membership at FreedomCoop", s.title)
+        self.wait_for_load_new_page(s, "OCP: Open Collaborative Platform")
+        s.find_element_by_link_text("Join FreedomCoop").click()
+        self.wait_for_load_new_page(s, "Request Membership at FreedomCoop")
         s.find_element_by_id("id_name").send_keys("testuser01")
         s.find_element_by_id("id_requested_username").send_keys("testuser01")
         s.find_element_by_id("id_email_address").send_keys("testuser01@example.com")
         s.find_element_by_id("id_description").send_keys("This is a test user.")
         s.find_element_by_xpath('//input[@value="Submit"]').click()
-        assert "Thank you for your membership request" in s.title
+        self.wait_for_load_new_page(s, "Thank you for your membership request")
 
         # Admin login.
         s.get('%s%s' % (self.live_server_url, "/"))
-        assert "OCP: Open Collaborative Platform" in s.title
+        self.wait_for_load_new_page(s, "OCP: Open Collaborative Platform")
         s.find_element_by_id("id_username").send_keys("admin")
         s.find_element_by_id("id_password").send_keys("admin")
-        s.find_element_by_xpath('//input[@value="Log in"]').click()
+        s.find_element_by_xpath('//button[@type="submit"]').click()
+        self.wait_for_load_new_page(s, "My Dashboard")
 
         # Admin takes the simple task (accounting/work -> Mine!)
 

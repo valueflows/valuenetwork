@@ -1,23 +1,16 @@
+FreedomCoop's OCP (NRP fork)
+================================
 
-PAY ATTENTION!!!!! This version of valuenetwork is a fork of the original one.
-This fork done by Valentina Nardecchia for use to Freedom Coop.
+.. image:: https://api.travis-ci.org/freedomcoop/valuenetwork.svg
+    :target: https://travis-ci.org/freedomcoop/valuenetwork.svg
 
-valuenetwork
-=====================
-
-A prototype of Value Network Accounting, being developed in collaboration with http://www.sensorica.co/ , a pioneering value network.
-
-We mean Accounting in a large sense.  We are developing something analogous to an ERP system for value networks.  Might call it NRP for Network Resource Planning.
+A Value Network Accounting.
+We mean Accounting in a large sense.  We are developing something analogous to an ERP system for value networks.
+Might call it NRP for Network Resource Planning or OCP for Open Collaborative Platform.
 
 [Slide deck](https://docs.google.com/presentation/d/1JEPsxJOjEMHNhvIGLXzcvovrpXqpoY75YaPHDKI0t9w/pub?start=false&loop=false&delayms=3000).
 
-Background on Value Networks: http://www.sensorica.co/value-networks
-
-The prototype used the https://github.com/pinax/pinax-project-account starter project, built on the Django framework.
-
-See /docs/install.txt for developer installation instructions or [INSTALL.md](INSTALL.md).
-
-See /docs/install_ocp_debian_apache_ssl.rst for installation on debian-apache-ssl server. 
+See [docs](https://github.com/FreedomCoop/valuenetwork/tree/master/docs) for developer installation instructions.
 
 The valueaccounting app could be split out and used in other Django projects.
 

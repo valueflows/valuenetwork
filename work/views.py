@@ -4088,8 +4088,30 @@ def resource_role_context_agent_formset(prefix, data=None):
     return formset
 
 
+def json_ocp_resource_type_resources_with_locations(request, ocp_artwork_type_id):
+    #import pdb; pdb.set_trace()
+    rs = EconomicResource.objects.filter(resource_type__ocp_artwork_type__isnull=False, resource_type__ocp_artwork_type__id=ocp_artwork_type_id)
+    #import pdb; pdb.set_trace()
+    resources = []
+    for r in rs:
+        loc = ""
+        if r.current_location:
+            loc = r.current_location.name
+        fields = {
+            "pk": r.pk,
+            "identifier": r.identifier,
+            "location": loc,
+        }
+        resources.append({"fields": fields})
+    data = simplejson.dumps(resources, ensure_ascii=False)
+    return HttpResponse(data, content_type="text/json-comment-filtered")
+
+
+
+
 
 #    P R O J E C T   R E S O U R C E S
+
 
 def project_all_resources(request, agent_id):
     #import pdb; pdb.set_trace()

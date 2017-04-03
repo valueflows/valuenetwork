@@ -1219,14 +1219,23 @@ li {
     <script type="text/javascript">
 
 	$(document).ready(function(){
-      /*var ObjChosSingle = {
+      var ObjChosSingle = {
         allow_single_deselect: true,
         width: "250px",
         //no_results_text: "Oops, nothing found!",
         disable_search_threshold: 6
+      };
+      /*var ObjChos = {
+        //allow_single_deselect: true,
+        width: "290px",
+        no_results_text: "Oops, nothing found!",
+        max_selected_options: 1,
+        disable_search_threshold: 6,
       };*/
 
-		  $(".chzn-select").chosen();// ObjChosSingle );
+		  $(".chzn-select").each(function(){
+        $(this).chosen( ObjChosSingle );
+      });
 
       //$(".chzn-results").menu();
 
@@ -1346,20 +1355,23 @@ li {
 		    }
 	   }
 
-	   $(".resource-type-for-resource").change(getResources);
+	   $(".ocp-resource-type-for-resource").chosen().change( function(evt, params){
+          //alert('hau');
+          getResources( evt, params );
+      });
 
      function getResources(event) {
-            var resourceTypeId = event.target.value;
+            var resourceTypeId = event.target.value; //alert('resourceTypeId: '+resourceTypeId);
             if (resourceTypeId)
             {
                 var targetId = event.target.id;
                 var prefix = targetId.split('-')[0];
-                var resourceFieldId = "#" + prefix + "-resource";
+                var resourceFieldId = "#" + prefix + "-resource"; //alert($(resourceFieldId).html());
                 $(resourceFieldId).empty();
-                var jsonUrl = encodeURI("/accounting/json-resourcetype-resources-locations/" + resourceTypeId + "/");
+                var jsonUrl = encodeURI("/work/json-resourcetype-resources-locations/" + resourceTypeId + "/"); //alert('jsonUrl: '+jsonUrl);
                 $.get(jsonUrl,
-                    function(data){
-                    $(resourceFieldId).append('<option value="">' + '--------' + '</option>');
+                    function(data){ //alert('data:'+data);
+                    $(resourceFieldId).append('<option value="">' + '. . .' + '</option>');
                     for(var i=0 ; i<data.length ; i++)
                     {
                         var id = data[i].fields['pk'];
@@ -1370,7 +1382,7 @@ li {
                         }
                         $(resourceFieldId).append('<option value="' + id + '">' + name + '</option>')
                     }
-                    $(".chzn-select").trigger("liszt:updated");
+                    $(resourceFieldId).trigger("chosen:updated");
                 });
             }
       }

@@ -822,7 +822,7 @@ class ContextTransferForm(forms.Form):
         empty_label=_('. . .'),
         level_indicator='. ',
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type-for-resource input-xlarge chzn-select'})
+            attrs={'class': 'ocp-resource-type-for-resource input-xlarge'})
     )
 
     resource_type = forms.ModelChoiceField(

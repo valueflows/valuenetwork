@@ -3,13 +3,12 @@ sudo: false
 python: 2.7
 cache: pip
 install:
+  - pip install --upgrade pip setuptools --quiet
   - pip install -r requirements.txt --trusted-host dist.pinaxproject.com --quiet
   - pip install Image --quiet
-  - pip install selenium --quiet
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # seconds
-  - python manage.py migrate
 script:
 - python manage.py test

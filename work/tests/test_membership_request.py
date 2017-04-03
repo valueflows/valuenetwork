@@ -16,9 +16,9 @@ from valuenetwork.valueaccounting.models import AgentType, EconomicAgent, EventT
 
 class MembershipRequestTestCase(LiveServerTestCase):
     def setUp(self):
-        # We want to see debugging errors in the browser.
-        # In order to see them, to comment tearDown() is needed too.
-        setattr(settings, 'DEBUG', True)
+        # If you want to see debugging errors in the browser while making changes in the test,
+        # uncomment this line and comment tearDown() method.
+        #setattr(settings, 'DEBUG', True)
 
         # We want to reuse the test db, to be faster (manage.py test --keepdb).
         # So we create the objects only if they are not in test db.

@@ -1,4 +1,7 @@
 from django.apps import AppConfig
+from django.db.models.signals import post_migrate
+
+from valuenetwork.valueaccounting import signals
 
 class ValueAccountingAppConfig(AppConfig):
     name = 'valuenetwork.valueaccounting'
@@ -7,4 +10,5 @@ class ValueAccountingAppConfig(AppConfig):
     def ready(self):
         super(ValueAccountingAppConfig, self).ready()
 
-        import valuenetwork.valueaccounting.signals
+        post_migrate.connect(signals.create_notice_types, sender=self)
+        

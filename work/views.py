@@ -632,7 +632,7 @@ def faircoin_history(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     exchange_service = ExchangeService.get()
-    exchange_service.include_blockchain_tx_as_event(agent, resource)
+    exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
     event_list = resource.events.all()
     init = {"quantity": resource.quantity,}
     unit = resource.resource_type.unit
@@ -2965,7 +2965,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       if wal:
                         bal = wal.digital_currency_balance()
                         try:
-                          to['balance'] = '{0:.2f}'.format(float(bal))
+                          to['balance'] = '{0:.4f}'.format(float(bal))
                         except ValueError:
                           to['balance'] = bal
                         to['balnote'] = (to['income']*1) - (to['outgo']*1)
@@ -3005,7 +3005,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "selected_values": selected_values,
         "ets": ets,
         "event_ids": event_ids,
-        "project": agent,
+        "context_agent": agent,
         "nav_form": nav_form,
         "usecases": usecases,
         "Etype_tree": exchange_types, #Ocp_Record_Type.objects.filter(lft__gt=gen_ext.lft, rght__lt=gen_ext.rght, tree_id=gen_ext.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ),
@@ -3218,7 +3218,7 @@ def add_transfer_external_agent(request, commitment_id, context_agent_id):
     exchange = commitment.exchange
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render_to_response('work/no_permission.html')
     if request.method == "POST":
         form = AgentCreateForm(request.POST)
         if form.is_valid():

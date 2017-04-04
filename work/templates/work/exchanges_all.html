@@ -299,19 +299,19 @@ span.fancytree-selected span.fancytree-title {
     <div class="container">
         {% include "_messages.html" %}
 		<legend>
-        <a class="indent" href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a> > {% trans "Exchanges" %}
+        <a class="indent" href="{% url 'members_agent' agent_id=context_agent.id %}">{{ context_agent.name }}</a> > {% trans "Exchanges" %}
             <div class="subnav">
-              {% if request.user.is_staff or request.user.agent.agent in project.managers or request.user.agent.agent == project %}
-                {% if project.faircoin_resource %}
-                  <a class="indent" href="{% url "manage_faircoin_account" resource_id=project.faircoin_resource.id %}">{% trans "Wallet" %}</a>
+              {% if request.user.is_staff or request.user.agent.agent in context_agent.managers or request.user.agent.agent == context_agent %}
+                {% if context_agent.faircoin_resource %}
+                  <a class="indent" href="{% url "manage_faircoin_account" resource_id=context_agent.faircoin_resource.id %}">{% trans "Wallet" %}</a>
                 {% endif %}
-                <a class="indent" href="{% url "project_resources" agent_id=project.id %}">{% trans "Resources" %}</a>
+                <a class="indent" href="{% url "project_resources" agent_id=context_agent.id %}">{% trans "Resources" %}</a>
               {% endif %}
               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             </div>
         </legend>
         <div class="span12">
-          {% if request.user.agent.agent in project.managers or request.user.is_staff %}
+          {% if request.user.agent.agent in context_agent.managers or request.user.is_staff %}
             <div class="totals infobox"><h3>
               {% trans "Totals:" %}
               </h3>
@@ -335,7 +335,7 @@ span.fancytree-selected span.fancytree-title {
                     </th>
                     {% if request.user.is_superuser %}
                       <th>
-                         {% trans "(superusers debug)" %}
+                         <!-- {% trans "(superusers debug)" %} -->
                       </th>
                     {% endif %}
                   </tr>
@@ -369,7 +369,7 @@ span.fancytree-selected span.fancytree-title {
 
             </div>
           {% endif %}
-          {% if request.user.agent.agent in project.managers or request.user.is_staff %}
+          {% if request.user.agent.agent in context_agent.managers or request.user.is_staff %}
           <div id="new_exchange" class="miniform span8">
             <form id="exchangeForm" style="margin:0;" method="POST" action="">
                 <h3 style="display:inline-block;">{% trans "Create a new Exchange" %}:</h3> &nbsp;
@@ -601,7 +601,7 @@ span.fancytree-selected span.fancytree-title {
                 </div> <!-- end tabs -->
               </div>
               {% if request.user.is_superuser %}<span style="font-size:0.8em;color:#666;">(debug) <b>Contexts:</b>
-                {% for ag in project.related_all_agents %} {{ ag.name }} {% if not ag.nick == ag.name %}({{ ag.nick }}){% endif %}, {% endfor %}
+                {% for ag in context_agent.related_all_agents %} {{ ag.name }} {% if not ag.nick == ag.name %}({{ ag.nick }}){% endif %}, {% endfor %}
               </span>{% endif %}
               <span id="new_name"></span>
               &nbsp; <input style="display:inline; vertical-align:top; float:right; margin: 0px 0px 7px 5px;" type="submit" name="new_exchange" value="{% trans 'New Exchange' %}" class="btn btn-primary" />
@@ -702,18 +702,18 @@ span.fancytree-selected span.fancytree-title {
       <div class="span8">
 		  {% if exchanges %}
         <h3>
-          {% trans "List of Exchanges" %}{% if not user.is_staff and not request.user.agent.agent in project.managers %}
+          {% trans "List of Exchanges" %}{% if not user.is_staff and not request.user.agent.agent in context_agent.managers %}
             <span>({% trans "related to you" %})</span>
           {% endif %}:
         </h3>
 			  <ul>
 			    {% for x in exchanges %}
 
-            {% if user.is_staff or request.user.agent.agent in project.managers or request.user.agent.agent in x.related_agents %}
+            {% if user.is_staff or request.user.agent.agent in context_agent.managers or request.user.agent.agent in x.related_agents %}
                     <li>
-                        <a href="{% url "exchange_logging_work" context_agent_id=project.id exchange_type_id=0 exchange_id=x.id %}"><b>{{ x }}</b></a>  {% trans "created by" %} {{ x.created_by }}
+                        <a href="{% url "exchange_logging_work" context_agent_id=context_agent.id exchange_type_id=0 exchange_id=x.id %}"><b>{{ x }}</b></a>  {% trans "created by" %} {{ x.created_by }}
                         {% if user = x.created_by or user.is_superuser%}
-                            <a class="btn btn-info btn-mini" href="{% url "exchange_logging_work" context_agent_id=project.id exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a>
+                            <a class="btn btn-info btn-mini" href="{% url "exchange_logging_work" context_agent_id=context_agent.id exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a>
                             {% if x.is_deletable %}
                                 <form
                                     style="display: inline;"
@@ -778,7 +778,7 @@ span.fancytree-selected span.fancytree-title {
                 <p class="title"> {% trans "Filter by Type" %} </p>
 
                 {% for x in exchanges_by_type %}
-                  {% if user.is_staff or request.user.agent.agent in project.managers or request.user.agent.agent in x.related_agents %}
+                  {% if user.is_staff or request.user.agent.agent in context_agent.managers or request.user.agent.agent in x.related_agents %}
                     {% with x.exchange_type as et %}
                       {% with et.ocp_record_type.get_ancestors|slice:"5:6"|first as useca %}
                         {% ifchanged useca %}

@@ -11391,7 +11391,7 @@ class EconomicEvent(models.Model):
         elif self.resource_type.unit:
             return self.resource_type.unit.abbrev
         else:
-            return "¿unit?"
+            return "unit?"
 
     def own_or_resource_type_unit(self):
         if self.unit_of_quantity:

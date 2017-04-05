@@ -632,7 +632,7 @@ def faircoin_history(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     exchange_service = ExchangeService.get()
-    exchange_service.include_blockchain_tx_as_event(agent, resource)
+    exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
     event_list = resource.events.all()
     init = {"quantity": resource.quantity,}
     unit = resource.resource_type.unit
@@ -1774,7 +1774,7 @@ def decline_request(request, join_request_id):
     if mbr_req.agent and mbr_req.project:
         # modify relation to active
         ass_type = AgentAssociationType.objects.get(identifier="participant")
-        ass = AgentAssociation.objects.get(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
+        ass = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
         ass.state = "potential"
         ass.save()
     return HttpResponseRedirect('/%s/%s/%s/'
@@ -1807,7 +1807,7 @@ def accept_request(request, join_request_id):
     # modify relation to active
     association_type = AgentAssociationType.objects.get(identifier="participant")
     try:
-      association = AgentAssociation.objects.get(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=association_type)
+      association = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=association_type)
       association.state = "active"
       association.save()
     except:
@@ -2965,7 +2965,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       if wal:
                         bal = wal.digital_currency_balance()
                         try:
-                          to['balance'] = '{0:.2f}'.format(float(bal))
+                          to['balance'] = '{0:.4f}'.format(float(bal))
                         except ValueError:
                           to['balance'] = bal
                         to['balnote'] = (to['income']*1) - (to['outgo']*1)
@@ -3005,7 +3005,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "selected_values": selected_values,
         "ets": ets,
         "event_ids": event_ids,
-        "project": agent,
+        "context_agent": agent,
         "nav_form": nav_form,
         "usecases": usecases,
         "Etype_tree": exchange_types, #Ocp_Record_Type.objects.filter(lft__gt=gen_ext.lft, rght__lt=gen_ext.rght, tree_id=gen_ext.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ),
@@ -3218,7 +3218,7 @@ def add_transfer_external_agent(request, commitment_id, context_agent_id):
     exchange = commitment.exchange
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render_to_response('work/no_permission.html')
     if request.method == "POST":
         form = AgentCreateForm(request.POST)
         if form.is_valid():
@@ -4088,8 +4088,30 @@ def resource_role_context_agent_formset(prefix, data=None):
     return formset
 
 
+def json_ocp_resource_type_resources_with_locations(request, ocp_artwork_type_id):
+    #import pdb; pdb.set_trace()
+    rs = EconomicResource.objects.filter(resource_type__ocp_artwork_type__isnull=False, resource_type__ocp_artwork_type__id=ocp_artwork_type_id)
+    #import pdb; pdb.set_trace()
+    resources = []
+    for r in rs:
+        loc = ""
+        if r.current_location:
+            loc = r.current_location.name
+        fields = {
+            "pk": r.pk,
+            "identifier": r.identifier,
+            "location": loc,
+        }
+        resources.append({"fields": fields})
+    data = simplejson.dumps(resources, ensure_ascii=False)
+    return HttpResponse(data, content_type="text/json-comment-filtered")
+
+
+
+
 
 #    P R O J E C T   R E S O U R C E S
+
 
 def project_all_resources(request, agent_id):
     #import pdb; pdb.set_trace()

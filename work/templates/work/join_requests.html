@@ -26,7 +26,8 @@
 	 <div>
 
 	    <legend>
-	        {% blocktrans with proj=project.agent %}The "{{ proj }}" Join Requests{% endblocktrans %}
+          <a class="indent" href="{% url 'members_agent' agent_id=project.agent.id %}">{{ project.agent.name }}</a> >
+	        {% trans "Join Requests" %}
 
 	        {% if user.agent.agent.is_active_freedom_coop_member or user.is_staff %}
                 <!-- &nbsp; &nbsp; &nbsp;
@@ -53,7 +54,6 @@
 
           <div class="subnav">
 
-            <a class="indent" href="../{{ agent.id }}">{% trans "View Project" %}</a>
             <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
 

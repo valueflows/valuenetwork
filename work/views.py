@@ -429,7 +429,7 @@ def transfer_faircoins(request, resource_id):
                         name="Transfer Faircoins",
                         start_date=date,
                         notes=notes,
-                        context_agent=from_agent,
+                        #context_agent=from_agent, # don't set it to allow to_agent to see the exchange
                     )
                     exchange.save()
                     transfer = Transfer(
@@ -2889,7 +2889,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     total_rec_transfers = 0
     comma = ""
 
-    nunit = None
+    fairunit = None
     #import pdb; pdb.set_trace()
     for x in exchanges:
         #try:
@@ -2961,15 +2961,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
                       #to['debug'] += str(x.transfer_give_events())+':'
                     elif uq.ocp_unit_type.clas == 'faircoin':
-                      wal = agent.faircoin_resource()
-                      if wal:
-                        bal = wal.digital_currency_balance()
-                        try:
-                          to['balance'] = '{0:.4f}'.format(float(bal))
-                        except ValueError:
-                          to['balance'] = bal
-                        to['balnote'] = (to['income']*1) - (to['outgo']*1)
-                        #to['debug'] += str(x.transfer_give_events())+':'
+                      fairunit = uq.ocp_unit_type.id
+
+                      to['balnote'] = (to['income']*1) - (to['outgo']*1)
+                      #to['debug'] += str(x.transfer_give_events())+':'
 
                     elif uq.ocp_unit_type.clas == 'euro':
                       to['balance'] = (to['income']*1) - (to['outgo']*1)
@@ -2978,20 +2973,40 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     else:
                       to['debug'] += 'U:'+str(uq.ocp_unit_type)+sign
 
-              else:
-
+              else: # not uq
                 pass #total_transfers[1]['debug'] += ' :: '+str(transfer.name)+sign
-
+            else: # not quantity
+                pass
 
             for event in transfer.events.all():
                 event_ids = event_ids + comma + str(event.id)
                 comma = ","
+
+        # end for transfer in x.transfer_list
 
         #import pdb; pdb.set_trace()
         for event in x.events.all():
             event_ids = event_ids + comma + str(event.id)
             comma = ","
         #todo: get sort to work
+
+    # end for x in exchanges
+
+    if fairunit:
+        for to in total_transfers:
+            if to['unit'] == fairunit:
+                wal = agent.faircoin_resource()
+                if wal:
+                    if wal.is_wallet_address():
+                        bal = wal.digital_currency_balance()
+                        try:
+                            to['balance'] = '{0:.4f}'.format(float(bal))
+                        except ValueError:
+                            to['balance'] = bal
+                    else:
+                        to['balance'] = '??'
+                else:
+                    to['balance'] = '!!'
 
     #import pdb; pdb.set_trace()
 

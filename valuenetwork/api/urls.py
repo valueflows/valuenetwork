@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
 from django.conf.urls import url, include
+from django.views.decorators.csrf import csrf_exempt
 
 from graphene_django.views import GraphQLView
 from rest_framework import routers
@@ -26,7 +27,7 @@ router.register(r'agentuser', views.AgentUserViewSet, 'agentuser')
 
 urlpatterns = patterns("",
     url(r'^', include(router.urls)),
-    url(r'^graph', GraphQLView.as_view(graphiql=True, schema=schema.schema)),
+    url(r'^graph', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema.schema))),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r"^agent-jsonld/$", 'valuenetwork.api.views.agent_jsonld', name="agent_jsonld"),
     url(r"^agent-lod/(?P<agent_id>\d+)/$", 'valuenetwork.api.views.agent_lod', name="agent_lod"),

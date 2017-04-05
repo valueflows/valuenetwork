@@ -5,7 +5,7 @@ import graphene
 import jwt
 
 
-class CreateToken(graphene.relay.ClientIDMutation):
+class CreateToken(graphene.Mutation):
     class Input:
         username = graphene.String(required=True)
         password = graphene.String(required=True)
@@ -15,9 +15,9 @@ class CreateToken(graphene.relay.ClientIDMutation):
     error = graphene.String()
 
     @classmethod
-    def mutate_and_get_payload(cls, input, context, info):
-        username = input.get('username')
-        password = input.get('password')
+    def mutate(cls, root, args, context, info):
+        username = args.get('username')
+        password = args.get('password')
         user = authenticate(username=username, password=password)
         encoded = None
         error = None
@@ -30,7 +30,7 @@ class CreateToken(graphene.relay.ClientIDMutation):
                 'email': user.email,
                 'is_superuser': user.is_superuser,
                 'is_staff': user.is_staff,
-                'prev_login': user.last_login.isoformat(),
+                'prev_login': user.last_login.isoformat() if user.last_login is not None else None,
 
                 # special fields used in validation
                 'exp': (datetime.datetime.now() + datetime.timedelta(7)),

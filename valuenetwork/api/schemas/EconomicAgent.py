@@ -44,7 +44,7 @@ class Query(graphene.AbstractType):
         # load own agent
 
         if (me is not None):
-            agentUser = AgentUser.objects.filter(user=self.token.user).first()
+            agentUser = AgentUser.objects.filter(user=self.user).first()
             if agentUser is None:
                 raise PermissionDenied("Cannot find requested user")
             return agentUser.agent

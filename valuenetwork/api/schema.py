@@ -7,8 +7,10 @@
 
 import graphene
 import jwt
+from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from graphene_django.debug import DjangoDebug
+from django.conf import settings
 
 import valuenetwork.api.schemas.Auth
 import valuenetwork.api.schemas.EconomicAgent
@@ -20,6 +22,7 @@ class ViewerQuery(
 ):
     def __init__(self, *args, **kwargs):
         self.token = kwargs.pop('token', None)
+        self.user = kwargs.pop('user', None)
         super(ViewerQuery, self).__init__(*args, **kwargs)
 
 
@@ -29,9 +32,10 @@ class Query(graphene.ObjectType):
 
     def resolve_viewer(self, args, context, info):
         token_str = args.get('token')
-        token = jwt.decode(token_str)
-        if token is not None:
-            return ViewerQuery(token=token)
+        token = jwt.decode(token_str, settings.SECRET_KEY)
+        user = User.objects.get_by_natural_key(token['username'])
+        if token is not None and user is not None:
+            return ViewerQuery(token=token, user=user)
         raise PermissionDenied('Cannot access this resource')
 
 

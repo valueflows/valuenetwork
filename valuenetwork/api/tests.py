@@ -44,7 +44,7 @@ class EconomicAgentSchemaTest(TestCase):
 
         result = schema.execute('''
         mutation {
-          createToken(input: { username: "testUser11222", password: "123456" }) {
+          createToken(username: "testUser11222", password: "123456") {
             token
             ok
             error
@@ -64,4 +64,4 @@ class EconomicAgentSchemaTest(TestCase):
         }
         '''
         result = schema.execute(query)
-        self.assertTrue(result.data['viewer']['agent']['name'])
+        self.assertEqual('testUser11222', result.data['viewer']['agent']['name'])

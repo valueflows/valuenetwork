@@ -109,7 +109,7 @@
             {% if not node.name == 'Freedom Coop' %}
               {% if node in agent.managed_projects %}
                   <li><h4><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b></h4>
-                    {% if node.supply_exchange_count > 0 or node.demand_exchange_count > 0 or node.internal_exchange_count > 0 %}&nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>{% endif %}
+                    <!-- {% if False and node.supply_exchange_count > 0 or node.demand_exchange_count > 0 or node.internal_exchange_count > 0 %}&nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>{% endif %} -->
                     {% if False and node.contributions_count and agent.is_staff %}<a class="indent" href="{% url "contributions" project_id=node.id %}">{% trans "Contributions" %}: {{ node.contributions_count }}</a>
                     {% endif %}
                     {% if False and node.wip and agent.is_staff %}

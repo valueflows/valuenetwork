@@ -13,6 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.template.defaultfilters import slugify
 import json as simplejson
+from django.db.models.functions import Lower
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
@@ -1079,6 +1080,21 @@ class EconomicAgent(models.Model):
                             uids.append(rt.ocp_artwork_type.unit_type.ocp_unit_type.id)
                         #pass
                       #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.unit_type))
+            else:
+              rt = tx.resource_type()
+              rtun = None
+              if rt:
+                rtun = rt.unit
+                #rtut = rtun.unit_type
+              #import pdb; pdb.set_trace()
+              if rtun:
+                if not hasattr(rtun, 'ocp_unit_type'):
+                  raise ValidationError("The resource_type unit has not ocp_unit_type! "+str(rtun))
+                else:
+                  if not rtun.ocp_unit_type.id in uids:
+                    uids.append(rtun.ocp_unit_type.id)
+
+        #import pdb; pdb.set_trace()
         return uids
     #
 
@@ -7381,6 +7397,23 @@ class TransferType(models.Model):
         else:
             return context_agent.related_all_agents_queryset() #EconomicAgent.objects.all()
 
+    def is_incoming(self, exchange, context_agent):
+        transfers = exchange.transfers.all()
+        if transfers:
+          for tx in transfers:
+            if tx.transfer_type == self:
+              if tx.to_agent() == context_agent:
+                return True
+              elif tx.from_agent() == context_agent:
+                return False
+        elif not transfers:
+            #import pdb; pdb.set_trace()
+            return self.is_reciprocal
+
+        #return None
+        #import pdb; pdb.set_trace()
+        #pass
+
     def form_prefix(self):
         return "-".join(["TT", str(self.id)])
 
@@ -7438,7 +7471,7 @@ class ExchangeManager(models.Manager):
         return Exchange.objects.filter(start_date__range=[start, end]).filter( Q(context_agent__isnull=False, context_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__from_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__to_agent=agent) ).distinct() # | Q(context_agent__isnull=False, context_agent=agent) ) # bumbum add Q's from and to agent
 
     def exchanges_by_type(self, agent):
-        return Exchange.objects.filter( Q(context_agent__isnull=False, context_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__from_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__to_agent=agent) ).distinct().order_by('exchange_type__ocp_record_type__name') # bumbum add Q's from and to agent
+        return Exchange.objects.filter( Q(context_agent__isnull=False, context_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__from_agent=agent) | Q(context_agent__isnull=True, transfers__events__isnull=False, transfers__events__to_agent=agent) ).distinct().order_by(Lower('exchange_type__ocp_record_type__name').asc()) # bumbum add Q's from and to agent
 
 
 class Exchange(models.Model):
@@ -7533,7 +7566,7 @@ class Exchange(models.Model):
         #    answer = False
         return answer
 
-    def slots_with_detail(self):
+    def slots_with_detail(self, context_agent=None):
         #import pdb; pdb.set_trace()
         slots = self.exchange_type.transfer_types.all()
         slots = list(slots)
@@ -7563,20 +7596,30 @@ class Exchange(models.Model):
                         slot.total += transfer.actual_value()
                     elif transfer.actual_quantity():
                         slot.total += transfer.actual_quantity()
-            #import pdb; pdb.set_trace()
-            if slot.is_reciprocal:
+            if slot.is_incoming(self, context_agent): #is_reciprocal:
                 slot.default_from_agent = default_to_agent
-                slot.default_to_agent = default_from_agent
+                slot.default_to_agent = context_agent #default_from_agent
+                slot.is_income = True
             else:
-                slot.default_from_agent = default_from_agent
+                slot.default_from_agent = context_agent #default_from_agent
                 slot.default_to_agent = default_to_agent
+                slot.is_income = False
+
             if slot.is_currency and self.exchange_type.use_case != UseCase.objects.get(identifier="intrnl_xfer"):
                 if not slot.give_agent_is_context:
                     slot.default_from_agent = None #logged on agent
                 if not slot.receive_agent_is_context:
                     slot.default_to_agent = None #logged on agent
+
+        #import pdb; pdb.set_trace()
         return slots
 
+    def has_reciprocal(self):
+        slots = self.exchange_type.transfer_types.all()
+        for slot in slots:
+            if slot.is_reciprocal:
+                return True
+        return False
 
     def work_events(self):
         return self.events.filter(
@@ -11345,8 +11388,10 @@ class EconomicEvent(models.Model):
     def unit(self):
         if self.unit_of_quantity:
             return self.unit_of_quantity.abbrev
-        else:
+        elif self.resource_type.unit:
             return self.resource_type.unit.abbrev
+        else:
+            return "unit?"
 
     def own_or_resource_type_unit(self):
         if self.unit_of_quantity:

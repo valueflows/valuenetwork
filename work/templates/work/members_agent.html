@@ -136,8 +136,11 @@ legend {
                   <a class="indent" href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">{% trans "Wallet" %}</a>
                  {% endif %}
                {% endif %}
-               {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants %}
+               {% if user_agent.is_staff %}<!-- or user_agent in agent.managers or user_agent in agent.participants %} -->
                    <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+               {% endif %}
+               {% if user_agent.is_staff %}<!-- or user_agent in agent.managers %} -->
+                   <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
                {% endif %}
                {% if user_agent in agent.managers and agent.project.fobi_slug and agent.project.join_requests %}
                   <a class="indent" href="join-requests">{% trans "Join Requests" %}</a>
@@ -147,9 +150,6 @@ legend {
                      <a class="indent" href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">{% trans "Your Joining Feedback" %}</a>
                    {% endif %}
                  {% endfor %}
-               {% endif %}
-               {% if user_agent.is_staff or user_agent in agent.managers %}
-                   <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
                {% endif %}
                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
@@ -517,12 +517,14 @@ legend {
                         {% if user_agent in agent.managers %}
                           <li><a href="../{{ assoc.is_associate.id }}">{{ assoc.is_associate.name }}</a>
                             {% with assoc.is_associate.membership_request_id as id %}
-                                {% if id and user_agent.membership_request_id = id %}
+                                {% if id %}
+                                  {% if user_agent.membership_request_id = id or agent in user_agent.managed_projects %}
                                     {% if assoc.state == "potential" %} ({{ assoc.get_state_display }}) {% endif %}
                                     &nbsp;
                                     <a href="{% url 'membership_discussion' membership_request_id=id %}">
                                         {% trans "Membership discussion" %}
                                     </a>
+                                  {% endif %}
                                 {% endif %}
                             {% endwith %}
                             {% for req in assoc.is_associate.joinaproject_requests %}
@@ -545,7 +547,8 @@ legend {
                 {% endif %}
 
 	          </div>
-            <div class="infobox" style="width:95%;">
+            {% if request.user.is_staff %}
+              <div class="infobox" style="width:95%;">
                   <h3 class="">{% trans "Active Processes" %}:</h3>
                   {% if agent.active_processes %}
                     <ul>
@@ -558,7 +561,8 @@ legend {
                   {% else %}
                         <p>{% trans "None" %}</p>
                   {% endif %}
-            </div>
+              </div>
+            {% endif %}
           </div>
 
 		    </div>

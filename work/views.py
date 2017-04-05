@@ -31,6 +31,7 @@ from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
 import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
+from valuenetwork.valueaccounting.service import ExchangeService
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
@@ -419,7 +420,7 @@ def transfer_faircoins(request, resource_id):
                     to_agent = to_resource.owner()
                 et_give = EventType.objects.get(name="Give")
                 if to_agent:
-                    tt = faircoin_internal_transfer_type()
+                    tt = ExchangeService.faircoin_internal_transfer_type()
                     xt = tt.exchange_type
                     date = datetime.date.today()
                     exchange = Exchange(
@@ -441,7 +442,7 @@ def transfer_faircoins(request, resource_id):
                     )
                     transfer.save()
                 else:
-                    tt = faircoin_outgoing_transfer_type()
+                    tt = ExchangeService.faircoin_outgoing_transfer_type()
                     xt = tt.exchange_type
                     date = datetime.date.today()
                     exchange = Exchange(
@@ -532,7 +533,7 @@ def transfer_faircoins_old(request, resource_id):
                         to_agent = to_resource.owner()
                     et_give = EventType.objects.get(name="Give")
                     if to_agent:
-                        tt = faircoin_internal_transfer_type()
+                        tt = ExchangeService.faircoin_internal_transfer_type()
                         xt = tt.exchange_type
                         date = datetime.date.today()
                         exchange = Exchange(
@@ -550,7 +551,7 @@ def transfer_faircoins_old(request, resource_id):
                             )
                         transfer.save()
                     else:
-                        tt = faircoin_outgoing_transfer_type()
+                        tt = ExchangeService.faircoin_outgoing_transfer_type()
                         xt = tt.exchange_type
                         date = datetime.date.today()
                         exchange = Exchange(
@@ -631,7 +632,7 @@ def faircoin_history(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     exchange_service = ExchangeService.get()
-    exchange_service.include_blockchain_tx_as_event(agent, resource)
+    exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
     event_list = resource.events.all()
     init = {"quantity": resource.quantity,}
     unit = resource.resource_type.unit
@@ -2898,11 +2899,14 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
         for transfer in x.transfer_list:
             if transfer.quantity():
-              if transfer.transfer_type.is_reciprocal:
+              if transfer.transfer_type.is_incoming(x, agent): #reciprocal:
                 sign = '<'
               else:
                 sign = '>'
               uq = transfer.unit_of_quantity()
+              rt = transfer.resource_type()
+              if not uq and rt:
+                uq = rt.unit
               if uq:
                 if not hasattr(uq, 'ocp_unit_type'):
                   raise ValidationError("The unit has not ocp_unit_type! "+str(uq))
@@ -2912,7 +2916,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     to['name'] = uq.ocp_unit_type.name
                     to['clas'] = uq.ocp_unit_type.clas
 
-                    if transfer.transfer_type.is_reciprocal:
+                    if transfer.transfer_type.is_incoming(x, agent): #is_reciprocal:
                       if transfer.events.all():
                         to['income'] = (to['income']*1) + (transfer.quantity()*1)
                       else:
@@ -2961,7 +2965,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       if wal:
                         bal = wal.digital_currency_balance()
                         try:
-                          to['balance'] = '{0:.2f}'.format(float(bal))
+                          to['balance'] = '{0:.4f}'.format(float(bal))
                         except ValueError:
                           to['balance'] = bal
                         to['balnote'] = (to['income']*1) - (to['outgo']*1)
@@ -2975,6 +2979,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       to['debug'] += 'U:'+str(uq.ocp_unit_type)+sign
 
               else:
+
                 pass #total_transfers[1]['debug'] += ' :: '+str(transfer.name)+sign
 
 
@@ -3000,7 +3005,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "selected_values": selected_values,
         "ets": ets,
         "event_ids": event_ids,
-        "project": agent,
+        "context_agent": agent,
         "nav_form": nav_form,
         "usecases": usecases,
         "Etype_tree": exchange_types, #Ocp_Record_Type.objects.filter(lft__gt=gen_ext.lft, rght__lt=gen_ext.rght, tree_id=gen_ext.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ),
@@ -3114,13 +3119,23 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
         total_rect = 0
         #import pdb; pdb.set_trace()
         work_events = exchange.work_events()
-        slots = exchange.slots_with_detail()
+        slots = exchange.slots_with_detail(context_agent)
 
         for slot in slots:
-            if slot.is_reciprocal:
+            if slot.is_incoming(exchange, context_agent) == True:
+                #pass
                 total_rect = total_rect + slot.total
+                slot.is_income = True
+            elif slot.is_incoming(exchange, context_agent) == False:
+                total_t = total_t + slot.total
+                slot.is_income = False
+                #pass
+            elif slot.is_reciprocal:
+                total_rect = total_rect + slot.total
+                slot.is_income = True
             else:
                 total_t = total_t + slot.total
+                slot.is_income = False
 
         if agent:
             #import pdb; pdb.set_trace()
@@ -3138,7 +3153,6 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
             }
             add_work_form = WorkEventContextAgentForm(initial=work_init, context_agent=context_agent)
 
-            #import pdb; pdb.set_trace()
             for slot in slots:
                 ta_init = slot.default_to_agent
                 fa_init = slot.default_from_agent
@@ -3167,6 +3181,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
 
                 slot.add_ext_agent = ContextExternalAgent() #initial=None, prefix="AGN"+str(slot.id))#, context_agent=context_agent)
 
+            #import pdb; pdb.set_trace()
     else:
         raise ValidationError("System Error: No exchange or use case.")
 
@@ -3203,7 +3218,7 @@ def add_transfer_external_agent(request, commitment_id, context_agent_id):
     exchange = commitment.exchange
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render_to_response('work/no_permission.html')
     if request.method == "POST":
         form = AgentCreateForm(request.POST)
         if form.is_valid():
@@ -3762,22 +3777,31 @@ def transfer_from_commitment(request, transfer_id):
 
 
 @login_required
-def change_transfer_events(request, transfer_id):
+def change_transfer_events(request, transfer_id, context_agent_id=None):
     transfer = get_object_or_404(Transfer, pk=transfer_id)
+    if context_agent_id:
+      context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
     if request.method == "POST":
         events = transfer.events.all()
         transfer_type = transfer.transfer_type
         exchange = transfer.exchange
-        context_agent = transfer.context_agent
         events = transfer.events.all()
         if not context_agent:
-          if exchange.context_agent:
+          if transfer.context_agent:
+            context_agent = transfer.context_agent
+          elif exchange.context_agent:
             context_agent = exchange.context_agent
           elif events:
             if events[0].to_agent == request.user.agent.agent:
               context_agent = request.user.agent.agent
             elif events[0].from_agent == request.user.agent.agent:
               context_agent = request.user.agent.agent
+            #else:
+              #from_resource, to_resource = transfer.give_and_receive_resources()
+              #if transfer_type.is_reciprocal:
+              #  context_agent = events[0].to_agent
+              #else:
+              #  context_agent = events[0].from_agent
         #import pdb; pdb.set_trace()
         form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
         if form.is_valid():
@@ -4064,8 +4088,30 @@ def resource_role_context_agent_formset(prefix, data=None):
     return formset
 
 
+def json_ocp_resource_type_resources_with_locations(request, ocp_artwork_type_id):
+    #import pdb; pdb.set_trace()
+    rs = EconomicResource.objects.filter(resource_type__ocp_artwork_type__isnull=False, resource_type__ocp_artwork_type__id=ocp_artwork_type_id)
+    #import pdb; pdb.set_trace()
+    resources = []
+    for r in rs:
+        loc = ""
+        if r.current_location:
+            loc = r.current_location.name
+        fields = {
+            "pk": r.pk,
+            "identifier": r.identifier,
+            "location": loc,
+        }
+        resources.append({"fields": fields})
+    data = simplejson.dumps(resources, ensure_ascii=False)
+    return HttpResponse(data, content_type="text/json-comment-filtered")
+
+
+
+
 
 #    P R O J E C T   R E S O U R C E S
+
 
 def project_all_resources(request, agent_id):
     #import pdb; pdb.set_trace()

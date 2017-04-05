@@ -211,8 +211,10 @@ li {
 
         </div>
 
+        {% with slots|first as tt %}
         <div class="span8">
           {% if exchange %}
+            {% if exchange.exchange_type.transfer_types.count > 1 or tt and not tt.is_income %}
             <div class="trt infobox">
                 <h3 class="trtheading">Outgoing Transfers
                 <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
@@ -222,7 +224,7 @@ li {
                 </span>
                 </h3>
                 {% for slot in slots %}
-                    {% if not slot.is_reciprocal %}
+                    {% if not slot.is_income %}
                         <div class="log-section infobox2">
                             <h3>
                                 {{ slot.name }}
@@ -520,7 +522,7 @@ li {
                                                             <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                                 {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                                 {% trans "...created by you" %}</div>{% endif %}
 
@@ -589,7 +591,7 @@ li {
                                                     <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                         {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                         {% trans "...created by you" %}</div>{% endif %}
 
@@ -653,7 +655,8 @@ li {
                     {% endif %}
                 {% endfor %}
             </div>
-            {% if exchange.can_have_reciprocal_transfers %}
+            {% endif %}
+            {% if exchange.can_have_reciprocal_transfers or tt and tt.is_income %}
             <div class="trt infobox">
                 <h3 CLASS="trtheading">Incoming Transfers
                 <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"
@@ -662,7 +665,7 @@ li {
                     <img src="{% static 'img/information-icon.png' %}" /></a>
                 </span></h3>
                 {% for slot in slots %}
-                    {% if slot.is_reciprocal %}
+                    {% if slot.is_income %}
                         <div class="log-section infobox2">
                             <h3>
                                 {{ slot.name }}
@@ -958,7 +961,7 @@ li {
                                                             <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                                 {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                                 {% trans "...created by you" %}</div>{% endif %}
 
@@ -1028,7 +1031,7 @@ li {
                                                     <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id %}" method="POST" >
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_events" transfer_id=xfer.id context_agent_id=context_agent.id %}" method="POST" >
                                                         {% if xfer.events.first.created_by == request.user %}<div style="float:right">
                                                         {% trans "...created by you" %}</div>{% endif %}
 
@@ -1199,6 +1202,7 @@ li {
             </div>
           {% endif %}
         </div>
+        {% endwith %}
     </div>
 </div>
 
@@ -1215,14 +1219,23 @@ li {
     <script type="text/javascript">
 
 	$(document).ready(function(){
-      /*var ObjChosSingle = {
+      var ObjChosSingle = {
         allow_single_deselect: true,
         width: "250px",
         //no_results_text: "Oops, nothing found!",
         disable_search_threshold: 6
+      };
+      /*var ObjChos = {
+        //allow_single_deselect: true,
+        width: "290px",
+        no_results_text: "Oops, nothing found!",
+        max_selected_options: 1,
+        disable_search_threshold: 6,
       };*/
 
-		  $(".chzn-select").chosen();// ObjChosSingle );
+		  $(".chzn-select").each(function(){
+        $(this).chosen( ObjChosSingle );
+      });
 
       //$(".chzn-results").menu();
 
@@ -1342,7 +1355,9 @@ li {
 		    }
 	   }
 
-	   $(".resource-type-for-resource").change(getResources);
+	   $(".ocp-resource-type-for-resource").chosen().change( function(evt, params){
+          getResources( evt, params );
+     });
 
      function getResources(event) {
             var resourceTypeId = event.target.value;
@@ -1352,10 +1367,10 @@ li {
                 var prefix = targetId.split('-')[0];
                 var resourceFieldId = "#" + prefix + "-resource";
                 $(resourceFieldId).empty();
-                var jsonUrl = encodeURI("/accounting/json-resourcetype-resources-locations/" + resourceTypeId + "/");
+                var jsonUrl = encodeURI("/work/json-resourcetype-resources-locations/" + resourceTypeId + "/");
                 $.get(jsonUrl,
                     function(data){
-                    $(resourceFieldId).append('<option value="">' + '--------' + '</option>');
+                    $(resourceFieldId).append('<option value="">' + '. . .' + '</option>');
                     for(var i=0 ; i<data.length ; i++)
                     {
                         var id = data[i].fields['pk'];
@@ -1366,7 +1381,7 @@ li {
                         }
                         $(resourceFieldId).append('<option value="' + id + '">' + name + '</option>')
                     }
-                    $(".chzn-select").trigger("liszt:updated");
+                    $(resourceFieldId).trigger("chosen:updated");
                 });
             }
       }

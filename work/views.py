@@ -1774,7 +1774,7 @@ def decline_request(request, join_request_id):
     if mbr_req.agent and mbr_req.project:
         # modify relation to active
         ass_type = AgentAssociationType.objects.get(identifier="participant")
-        ass = AgentAssociation.objects.get(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
+        ass = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
         ass.state = "potential"
         ass.save()
     return HttpResponseRedirect('/%s/%s/%s/'
@@ -1807,7 +1807,7 @@ def accept_request(request, join_request_id):
     # modify relation to active
     association_type = AgentAssociationType.objects.get(identifier="participant")
     try:
-      association = AgentAssociation.objects.get(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=association_type)
+      association = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=association_type)
       association.state = "active"
       association.save()
     except:

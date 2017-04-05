@@ -1,6 +1,7 @@
 import datetime
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.core.exceptions import PermissionDenied
 import graphene
 import jwt
 
@@ -11,8 +12,6 @@ class CreateToken(graphene.Mutation):
         password = graphene.String(required=True)
 
     token = graphene.String()
-    ok = graphene.Boolean()
-    error = graphene.String()
 
     @classmethod
     def mutate(cls, root, args, context, info):
@@ -20,7 +19,6 @@ class CreateToken(graphene.Mutation):
         password = args.get('password')
         user = authenticate(username=username, password=password)
         encoded = None
-        error = None
         if user is not None:
             token = jwt.encode({
                 'id': user.id,
@@ -40,5 +38,5 @@ class CreateToken(graphene.Mutation):
 
             # :TODO: we should also update user last_login time here
         else:
-            error = 'Invalid credentials'
-        return CreateToken(token=encoded, ok=error is None, error=error)
+            raise PermissionDenied('Invalid credentials')
+        return CreateToken(token=encoded)

@@ -464,7 +464,7 @@ th, td {
                                             {% if todo.is_deletable %}
                                                 {% if agent != todo.to_agent %}
 
-                                                        <form class="declineForm" id="declineForm-{{ todo.id }}" action="{% url "todo_decline" todo_id=todo.id %}" method="POST" >
+                                                        <form class="declineForm" id="declineForm-{{ todo.id }}" action="{% url "work_todo_decline" todo_id=todo.id %}" method="POST" >
 							                                {% csrf_token %}
 							                                <input type="hidden" name="next" value="{% url "project_work" %}" />
                                                             <input type="submit" name="submit" class="btn btn-warning btn-mini"  title="Decline" value="{% trans 'Decline' %}" />
@@ -480,7 +480,7 @@ th, td {
 					                                {% trans "Change" %}
 				                                </a>
 				                                {% if todo.is_deletable %}
-                                                    <form style="display: inline;" id="deleteForm-{{ todo.id }}" action="{% url "todo_delete" todo_id=todo.id %}" method="POST" >
+                                                    <form style="display: inline;" id="deleteForm-{{ todo.id }}" action="{% url "work_todo_delete" todo_id=todo.id %}" method="POST" >
 					                                    {% csrf_token %}
 					                                    <input type="hidden" name="next" value="{% url "project_work" %}" />
                                                         <button class="btn btn-warning btn-mini" title="Delete" >{% trans "Delete" %}</button>
@@ -493,7 +493,7 @@ th, td {
 
                                         {% if agent  %}
                                             {% if not todo.from_agent %}
-                                                <form style="display: inline;" class="mineForm" id="mineForm-{{ todo.id }}" action="{% url "todo_mine" todo_id=todo.id %}" method="POST" >
+                                                <form style="display: inline;" class="mineForm" id="mineForm-{{ todo.id }}" action="{% url "work_todo_mine" todo_id=todo.id %}" method="POST" >
 						                            {% csrf_token %}
                                                     <input type="hidden" name="next" value="{% url "project_work" %}" />
                                                     <input type="submit" name="submit" class="btn btn-primary btn-mini"  title="Mine" value="{% trans 'Mine!' %}" />
@@ -508,7 +508,7 @@ th, td {
 				                                </div>
 				                                <div class="modal-body">
 
-					                                <form class="changeForm" id="changeForm-{{ todo.id }}" action="{% url "todo_change" todo_id=todo.id %}" method="POST" >
+					                                <form class="changeForm" id="changeForm-{{ todo.id }}" action="{% url "work_todo_change" todo_id=todo.id %}" method="POST" >
 						                                {% csrf_token %}
 						                                {{ todo.work_todo_change_form|as_bootstrap }}
 						                                <input type="hidden" name="next" value="{% url "project_work" %}" />

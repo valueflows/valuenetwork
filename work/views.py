@@ -4936,7 +4936,12 @@ def work_todo_change(request, todo_id):
         if todo:
             agent = get_agent(request)
             prefix = todo.form_prefix()
-            form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
+            patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+            if patterns:
+                pattern = patterns[0].pattern
+                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, instance=todo, prefix=prefix)
+            else:
+                form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
             if form.is_valid():
                 todo = form.save()
 

@@ -575,7 +575,7 @@ th, td {
                                                 <td>
                                                     <form class="doneForm" id="timeForm-{{ todo.id }}" action="{% url 'work_todo_done' todo_id=todo.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        <input type="hidden" name="next" value="{% url "my_dashboard" %}" />
+                                                        <input type="hidden" name="next" value="{% url "take_new_tasks" %}" />
                                                         <input type="submit" name="submit" class="btn btn-primary btn-mini"  title="Done" value="{% trans 'Done' %}" />
                                                     </form>
                                                 </td>
@@ -596,7 +596,7 @@ th, td {
 
                                                         <form class="declineForm" id="declineForm-{{ todo.id }}" action="{% url "work_todo_decline" todo_id=todo.id %}" method="POST" >
                                                             {% csrf_token %}
-                                                            <input type="hidden" name="next" value="{% url "my_dashboard" %}" />
+                                                            <input type="hidden" name="next" value="{% url "take_new_tasks" %}" />
                                                             <input type="submit" name="submit" class="btn btn-warning btn-mini"  title="Decline" value="{% trans 'Decline' %}" />
                                                         </form>
 
@@ -613,7 +613,7 @@ th, td {
                                                 {% if todo.is_deletable %}
                                                     <form style="display: inline;" id="deleteForm-{{ todo.id }}" action="{% url "work_todo_delete" todo_id=todo.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        <input type="hidden" name="next" value="{% url "my_tasks" %}" />
+                                                        <input type="hidden" name="next" value="{% url "take_new_tasks" %}" />
                                                         <button class="btn btn-warning btn-mini" title="Delete" >X</button>
                                                     </form>
                                                 {% endif %}

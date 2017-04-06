@@ -4419,6 +4419,9 @@ def my_tasks(request):
 @login_required
 def take_new_tasks(request):
     #import pdb; pdb.set_trace()
+    #task_bugs change
+    # this method needs some serious house cleaning...
+    # to do later, see github issue cited below
     #my_work = []
     my_skillz = []
     other_wip = []
@@ -4458,9 +4461,14 @@ def take_new_tasks(request):
     else:
         todo_form = WorkTodoForm(agent=agent, initial=init)
     #work_now = settings.USE_WORK_NOW
+    #task_bugs change
+    # see https://github.com/FreedomCoop/valuenetwork/issues/263
+    # process_tasks shd be filled
+    process_tasks = []
     return render_to_response("work/take_new_tasks.html", {
         "agent": agent,
         #"my_work": my_work,
+        "process_tasks": process_tasks,
         "my_skillz": my_skillz,
         #"other_unassigned": other_unassigned,
         #"my_todos": my_todos,
@@ -4977,14 +4985,17 @@ def work_todo_time(request):
                 qty = Decimal(hours)
             else:
                 qty = Decimal("0.0")
+            #task_bugs change
+            # was creating zero qty events
             event = todo.todo_event()
             if event:
                 event.quantity = qty
                 event.save()
             else:
-                event = create_event_from_todo(todo)
-                event.quantity = qty
-                event.save()
+                if qty:
+                    event = create_event_from_todo(todo)
+                    event.quantity = qty
+                    event.save()
     return HttpResponse("Ok", content_type="text/plain")
 
 @login_required
@@ -4999,6 +5010,8 @@ def work_todo_mine(request, todo_id):
             agent = get_agent(request)
             todo.from_agent = agent
             todo.save()
+            #task_bugs change
+            # was creating an event here
     next = request.POST.get("next")
     if next:
         return HttpResponseRedirect(next)
@@ -5020,10 +5033,7 @@ def work_todo_description(request):
             if event:
                 event.description = did
                 event.save()
-            else:
-                event = create_event_from_todo(todo)
-                event.description = did
-                event.save()
+
     return HttpResponse("Ok", content_type="text/plain")
 
 @login_required

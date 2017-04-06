@@ -489,12 +489,16 @@ th, td {
                                     </ul>
                                 {% endif %}
                             </li>
-                            <p style="margin-left: 1em; margin-bottom: 0;">
-                                {% trans "for process" %}: <a href="{% url "process_logging" process_id=item.process.id %}">{{ item.process }}</a>
-                            </p>
-                            <p style="margin-left: 1em; margin-bottom: 0;">
-                                {% trans "for order" %}: {{ item.independent_demand }}
-                            </p>
+                            {% if item.process %}
+                                <p style="margin-left: 1em; margin-bottom: 0;">
+                                    {% trans "for process" %}: <a href="{% url "process_logging" process_id=item.process.id %}">{{ item.process }}</a>
+                                </p>
+                            {% endif %}
+                            {% if item.independent_demand %}
+                                <p style="margin-left: 1em; margin-bottom: 0;">
+                                    {% trans "for order" %}: {{ item.independent_demand }}
+                                </p>
+                            {% endif %}
 
 
                         {% endfor %}

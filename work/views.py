@@ -4432,7 +4432,9 @@ def take_new_tasks(request):
     my_skillz = Commitment.objects.unfinished().filter(
         from_agent=None,
         context_agent__id__in=context_ids,
-        event_type__relationship="work",
+        #task_bugs change
+        #event_type__relationship="work",
+        event_type__relationship="todo",
         resource_type__id__in=skill_ids)
     #other_unassigned = Commitment.objects.unfinished().filter(
     #    from_agent=None,
@@ -4521,7 +4523,8 @@ def add_todo(request):
 def project_work(request):
     #import pdb; pdb.set_trace()
     agent = get_agent(request)
-    projects = agent.managed_projects()  #related_contexts()
+    #task_bugs change
+    projects = agent.related_contexts() #managed_projects()
     if not agent or agent.is_participant_candidate():
         return render_to_response('work/no_permission.html')
     next = "/work/project-work/"

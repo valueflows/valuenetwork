@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import PermissionDenied
 import graphene
 import jwt
+from .helpers import hash_password
 
 
 class CreateToken(graphene.Mutation):
@@ -18,25 +19,15 @@ class CreateToken(graphene.Mutation):
         username = args.get('username')
         password = args.get('password')
         user = authenticate(username=username, password=password)
-        encoded = None
+        hashed_passwd = hash_password(user)
         if user is not None:
             token = jwt.encode({
                 'id': user.id,
                 'username': user.username,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'is_superuser': user.is_superuser,
-                'is_staff': user.is_staff,
-                'prev_login': user.last_login.isoformat() if user.last_login is not None else None,
-
-                # special fields used in validation
-                'exp': (datetime.datetime.now() + datetime.timedelta(7)),
+                'password': hashed_passwd,
                 'iat': datetime.datetime.now(),
             }, settings.SECRET_KEY)
             encoded = token
-
-            # :TODO: we should also update user last_login time here
         else:
             raise PermissionDenied('Invalid credentials')
         return CreateToken(token=encoded)

@@ -1,19 +1,4 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
-
-
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
 
 
 class EconomicAgentSchemaTest(TestCase):
@@ -46,13 +31,10 @@ class EconomicAgentSchemaTest(TestCase):
         mutation {
           createToken(username: "testUser11222", password: "123456") {
             token
-            ok
-            error
           }
         }
         ''')
         call_result = result.data['createToken']
-        self.assertTrue(call_result['ok'], call_result['error'])
         token = call_result['token']
         query = '''
         query {
@@ -65,3 +47,33 @@ class EconomicAgentSchemaTest(TestCase):
         '''
         result = schema.execute(query)
         self.assertEqual('testUser11222', result.data['viewer']['agent']['name'])
+
+    def test_change_password(self):
+        from .schema import schema
+
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''')
+        call_result = result.data['createToken']
+        token = call_result['token']
+        from django.contrib.auth.models import User
+        user = User.objects.get_by_natural_key('testUser11222')
+        user.set_password('654321')
+        user.save()
+        query = '''
+                query {
+                  viewer(token: "''' + token + '''") {
+                    agent(me: true) {
+                      name
+                    }
+                  }
+                }
+                '''
+        result = schema.execute(query)
+        self.assertEqual(None, result.data['viewer'])
+        self.assertTrue(len(result.errors) == 1)
+        self.assertEqual('Invalid password', str(result.errors[0]))

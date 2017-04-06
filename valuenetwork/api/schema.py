@@ -14,6 +14,7 @@ from django.conf import settings
 
 import valuenetwork.api.schemas.Auth
 import valuenetwork.api.schemas.EconomicAgent
+from valuenetwork.api.schemas.helpers import hash_password
 
 
 class ViewerQuery(
@@ -35,6 +36,8 @@ class Query(graphene.ObjectType):
         token = jwt.decode(token_str, settings.SECRET_KEY)
         user = User.objects.get_by_natural_key(token['username'])
         if token is not None and user is not None:
+            if token['password'] != hash_password(user):
+                raise PermissionDenied("Invalid password")
             return ViewerQuery(token=token, user=user)
         raise PermissionDenied('Cannot access this resource')
 

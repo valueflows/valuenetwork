@@ -429,7 +429,7 @@ def transfer_faircoins(request, resource_id):
                         name="Transfer Faircoins",
                         start_date=date,
                         notes=notes,
-                        context_agent=from_agent,
+                        #context_agent=from_agent, # don't set it to allow to_agent to see the exchange
                     )
                     exchange.save()
                     transfer = Transfer(
@@ -1774,7 +1774,7 @@ def decline_request(request, join_request_id):
     if mbr_req.agent and mbr_req.project:
         # modify relation to active
         ass_type = AgentAssociationType.objects.get(identifier="participant")
-        ass = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
+        ass, created = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
         ass.state = "potential"
         ass.save()
     return HttpResponseRedirect('/%s/%s/%s/'
@@ -1807,7 +1807,7 @@ def accept_request(request, join_request_id):
     # modify relation to active
     association_type = AgentAssociationType.objects.get(identifier="participant")
     try:
-      association = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=association_type)
+      association, created = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=association_type)
       association.state = "active"
       association.save()
     except:
@@ -2889,7 +2889,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     total_rec_transfers = 0
     comma = ""
 
-    nunit = None
+    fairunit = None
     #import pdb; pdb.set_trace()
     for x in exchanges:
         #try:
@@ -2961,15 +2961,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
                       #to['debug'] += str(x.transfer_give_events())+':'
                     elif uq.ocp_unit_type.clas == 'faircoin':
-                      wal = agent.faircoin_resource()
-                      if wal:
-                        bal = wal.digital_currency_balance()
-                        try:
-                          to['balance'] = '{0:.4f}'.format(float(bal))
-                        except ValueError:
-                          to['balance'] = bal
-                        to['balnote'] = (to['income']*1) - (to['outgo']*1)
-                        #to['debug'] += str(x.transfer_give_events())+':'
+                      fairunit = uq.ocp_unit_type.id
+
+                      to['balnote'] = (to['income']*1) - (to['outgo']*1)
+                      #to['debug'] += str(x.transfer_give_events())+':'
 
                     elif uq.ocp_unit_type.clas == 'euro':
                       to['balance'] = (to['income']*1) - (to['outgo']*1)
@@ -2978,20 +2973,40 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     else:
                       to['debug'] += 'U:'+str(uq.ocp_unit_type)+sign
 
-              else:
-
+              else: # not uq
                 pass #total_transfers[1]['debug'] += ' :: '+str(transfer.name)+sign
-
+            else: # not quantity
+                pass
 
             for event in transfer.events.all():
                 event_ids = event_ids + comma + str(event.id)
                 comma = ","
+
+        # end for transfer in x.transfer_list
 
         #import pdb; pdb.set_trace()
         for event in x.events.all():
             event_ids = event_ids + comma + str(event.id)
             comma = ","
         #todo: get sort to work
+
+    # end for x in exchanges
+
+    if fairunit:
+        for to in total_transfers:
+            if to['unit'] == fairunit:
+                wal = agent.faircoin_resource()
+                if wal:
+                    if wal.is_wallet_address():
+                        bal = wal.digital_currency_balance()
+                        try:
+                            to['balance'] = '{0:.4f}'.format(float(bal))
+                        except ValueError:
+                            to['balance'] = bal
+                    else:
+                        to['balance'] = '??'
+                else:
+                    to['balance'] = '!!'
 
     #import pdb; pdb.set_trace()
 
@@ -4404,6 +4419,9 @@ def my_tasks(request):
 @login_required
 def take_new_tasks(request):
     #import pdb; pdb.set_trace()
+    #task_bugs change
+    # this method needs some serious house cleaning...
+    # to do later, see github issue cited below
     #my_work = []
     my_skillz = []
     other_wip = []
@@ -4417,7 +4435,9 @@ def take_new_tasks(request):
     my_skillz = Commitment.objects.unfinished().filter(
         from_agent=None,
         context_agent__id__in=context_ids,
-        event_type__relationship="work",
+        #task_bugs change
+        #event_type__relationship="work",
+        event_type__relationship="todo",
         resource_type__id__in=skill_ids)
     #other_unassigned = Commitment.objects.unfinished().filter(
     #    from_agent=None,
@@ -4441,9 +4461,14 @@ def take_new_tasks(request):
     else:
         todo_form = WorkTodoForm(agent=agent, initial=init)
     #work_now = settings.USE_WORK_NOW
+    #task_bugs change
+    # see https://github.com/FreedomCoop/valuenetwork/issues/263
+    # process_tasks shd be filled
+    process_tasks = []
     return render_to_response("work/take_new_tasks.html", {
         "agent": agent,
         #"my_work": my_work,
+        "process_tasks": process_tasks,
         "my_skillz": my_skillz,
         #"other_unassigned": other_unassigned,
         #"my_todos": my_todos,
@@ -4506,7 +4531,8 @@ def add_todo(request):
 def project_work(request):
     #import pdb; pdb.set_trace()
     agent = get_agent(request)
-    projects = agent.managed_projects()  #related_contexts()
+    #task_bugs change
+    projects = agent.related_contexts() #managed_projects()
     if not agent or agent.is_participant_candidate():
         return render_to_response('work/no_permission.html')
     next = "/work/project-work/"
@@ -4918,7 +4944,12 @@ def work_todo_change(request, todo_id):
         if todo:
             agent = get_agent(request)
             prefix = todo.form_prefix()
-            form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
+            patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+            if patterns:
+                pattern = patterns[0].pattern
+                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, instance=todo, prefix=prefix)
+            else:
+                form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
             if form.is_valid():
                 todo = form.save()
 
@@ -4954,14 +4985,17 @@ def work_todo_time(request):
                 qty = Decimal(hours)
             else:
                 qty = Decimal("0.0")
+            #task_bugs change
+            # was creating zero qty events
             event = todo.todo_event()
             if event:
                 event.quantity = qty
                 event.save()
             else:
-                event = create_event_from_todo(todo)
-                event.quantity = qty
-                event.save()
+                if qty:
+                    event = create_event_from_todo(todo)
+                    event.quantity = qty
+                    event.save()
     return HttpResponse("Ok", content_type="text/plain")
 
 @login_required
@@ -4976,6 +5010,8 @@ def work_todo_mine(request, todo_id):
             agent = get_agent(request)
             todo.from_agent = agent
             todo.save()
+            #task_bugs change
+            # was creating an event here
     next = request.POST.get("next")
     if next:
         return HttpResponseRedirect(next)
@@ -4997,10 +5033,7 @@ def work_todo_description(request):
             if event:
                 event.description = did
                 event.save()
-            else:
-                event = create_event_from_todo(todo)
-                event.description = did
-                event.save()
+
     return HttpResponse("Ok", content_type="text/plain")
 
 @login_required

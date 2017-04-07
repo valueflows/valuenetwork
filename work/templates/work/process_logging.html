@@ -200,9 +200,11 @@ hr {
             {% endif %}
 		{% endif %}
     <div class="subnav">
-      <a class="indent" href="{% url "order_plan" order_id=process.independent_demand.id %}">{% trans "View Order" %}</a>
-      <a class="indent" href="{% url 'members_agent' agent_id=process.context_agent.id %}">{% trans "View Project" %}</a>
-      <!-- <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a> -->
+        {% if process.independent_demand %}
+            <a class="indent" href="{% url "order_plan" order_id=process.independent_demand.id %}">{% trans "View Order" %}</a>
+        {% endif %}
+        <a class="indent" href="{% url 'members_agent' agent_id=process.context_agent.id %}">{% trans "View Project" %}</a>
+        <!-- <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a> -->
     </div>
 	</legend>
 

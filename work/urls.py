@@ -134,3 +134,5 @@ urlpatterns = [
         name="json_ocp_resource_type_resources_with_locations"),
 
 ]
+
+

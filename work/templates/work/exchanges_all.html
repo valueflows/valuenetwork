@@ -704,7 +704,7 @@ span.fancytree-selected span.fancytree-title {
         <h3>
           {% trans "List of Exchanges" %}{% if not user.is_staff and not request.user.agent.agent in context_agent.managers %}
             <span>({% trans "related to you" %})</span>
-          {% endif %}:
+          {% endif %}: &nbsp;<span style="font-size:80%">{{ exchanges.count }}</span>
         </h3>
 			  <ul>
 			    {% for x in exchanges %}

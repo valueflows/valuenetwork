@@ -1356,9 +1356,9 @@ li {
 	   }
 
 	   $(".ocp-resource-type-for-resource").chosen().change( function(evt, params){
-          //alert('hau');
+
           getResources( evt, params );
-      });
+     });
 
      function getResources(event) {
             var resourceTypeId = event.target.value; //alert('resourceTypeId: '+resourceTypeId);
@@ -1368,9 +1368,10 @@ li {
                 var prefix = targetId.split('-')[0];
                 var resourceFieldId = "#" + prefix + "-resource"; //alert($(resourceFieldId).html());
                 $(resourceFieldId).empty();
-                var jsonUrl = encodeURI("/work/json-resourcetype-resources-locations/" + resourceTypeId + "/"); //alert('jsonUrl: '+jsonUrl);
+
+                var jsonUrl = encodeURI("/work/json-resourcetype-resources-locations/" + resourceTypeId + "/");
                 $.get(jsonUrl,
-                    function(data){ //alert('data:'+data);
+                    function(data){
                     $(resourceFieldId).append('<option value="">' + '. . .' + '</option>');
                     for(var i=0 ; i<data.length ; i++)
                     {

@@ -4,7 +4,7 @@
 
 from django.test import LiveServerTestCase
 
-from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -33,7 +33,7 @@ class MembershipRequestTestCase(LiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super(MembershipRequestTestCase, cls).setUpClass()
-        cls.selenium = WebDriver()
+        cls.selenium = webdriver.PhantomJS()
 
     @classmethod
     def tearDownClass(cls):

@@ -1,6 +1,5 @@
-# To run this test you'll need to download geckodriver to
-# /usr/local/bin/ or any other place in user $PATH.
-# Download from https://github.com/mozilla/geckodriver/releases
+# To run this test you'll need to download phantomjs. See:
+# https://gist.github.com/telbiyski/ec56a92d7114b8631c906c18064ce620
 
 from django.test import LiveServerTestCase
 

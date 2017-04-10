@@ -4590,6 +4590,22 @@ def project_work(request):
     }, context_instance=RequestContext(request))
 
 
+@login_required
+def work_change_process_sked_ajax(request):
+    #import pdb; pdb.set_trace()
+    proc_id = request.POST["proc_id"]
+    process = Process.objects.get(id=proc_id)
+    form = ScheduleProcessForm(prefix=proc_id,instance=process,data=request.POST)
+    if form.is_valid():
+        data = form.cleaned_data
+        process.start_date = data["start_date"]
+        process.end_date = data["end_date"]
+        process.notes = data["notes"]
+        process.save()
+        return_data = "OK"
+        return HttpResponse(return_data, content_type="text/plain")
+    else:
+        return HttpResponse(form.errors, content_type="text/json-comment-filtered")
 
 
 

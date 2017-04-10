@@ -178,7 +178,7 @@ hr {
                 </div>
                 <div class="modal-body">
                     <form class="validateMe" id="process-form" name="chgproc" enctype="multipart/form-data"
-                        action="{% url "change_process" process_id=process.id %}" method="POST" >
+                        action="{% url "work_change_process" process_id=process.id %}" method="POST" >
                         {% csrf_token %}
                         {{ change_process_form|as_bootstrap }}
                         <input type="hidden" id="next" name="next" value="work" />

@@ -4607,7 +4607,24 @@ def work_change_process_sked_ajax(request):
     else:
         return HttpResponse(form.errors, content_type="text/json-comment-filtered")
 
+@login_required
+def work_change_process(request, process_id):
+    process = get_object_or_404(Process, id=process_id)
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        form = ProcessForm(
+            instance=process,
+            data=request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            form.save()
+            #next = request.POST.get("next")
+            #if next:
+            #    return HttpResponseRedirect('/%s/%s/'
+            #        % ('work/process-logging', process.id))
 
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
 
 @login_required
 def process_logging(request, process_id):

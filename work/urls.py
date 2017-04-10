@@ -132,7 +132,10 @@ urlpatterns = [
 
     url(r"^json-resourcetype-resources-locations/(?P<ocp_artwork_type_id>\d+)/$", 'work.views.json_ocp_resource_type_resources_with_locations',
         name="json_ocp_resource_type_resources_with_locations"),
+    url(r"^work-change-process-sked-ajax/$", 'work.views.work_change_process_sked_ajax', 
+        name="work_change_process_sked_ajax"),
+    url(r"^work-change-process/(?P<process_id>\d+)/$", 'work.views.work_change_process', 
+        name="work_change_process"),
 
 ]
-
 

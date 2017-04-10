@@ -94,7 +94,6 @@
                           title="{% trans 'List of project related tasks' %}"
                           >{% trans 'Your project tasks' %}</a>
                         </li>
-                        {% if request.user.is_staff %}
                         <li id="project-orders" >
                           <a href="{% url 'order_list' %}"
                           title="{% trans 'Open orders in your projects' %}"
@@ -105,7 +104,6 @@
                           title="{% trans 'Plan process tasks for a project' %}"
                           >{% trans 'Plan project process' %}</a>
                         </li>
-                        {% endif %}
                         <li id="tutorial" >
                           <a href="#" class="disabled"
                           title="{% trans 'How to create a project in OCP' %}"

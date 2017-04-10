@@ -292,7 +292,7 @@ th, td {
                                     {% if process.notes %}
                                       <span>
                                         <b>{% trans "Notes:" %} </b>
-                                            {{ process.notes|urlize }}
+                                            {{ process.notes|urlize|linebreaks }}
                                       </span>
                                     {% endif %}
                                   </div>
@@ -658,7 +658,7 @@ th, td {
 		            var endDate = $form.find( 'input[name="{{ process.id }}-end_date"]' ).val();
 		            var modalId = "#procModal{{ process.id }}";
 		            var modal = $(modalId);
-                    var url = "{% url 'change_process_sked_ajax' %}";
+                    var url = "{% url 'work_change_process_sked_ajax' %}";
 		            var jqxhr = $.post( url, formData,
 			            function( data ) {
                             $("#proc-notes{{ process.id }}").html(notes);

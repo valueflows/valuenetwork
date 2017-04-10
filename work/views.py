@@ -4591,8 +4591,41 @@ def project_work(request):
     }, context_instance=RequestContext(request))
 
 
+@login_required
+def work_change_process_sked_ajax(request):
+    #import pdb; pdb.set_trace()
+    proc_id = request.POST["proc_id"]
+    process = Process.objects.get(id=proc_id)
+    form = ScheduleProcessForm(prefix=proc_id,instance=process,data=request.POST)
+    if form.is_valid():
+        data = form.cleaned_data
+        process.start_date = data["start_date"]
+        process.end_date = data["end_date"]
+        process.notes = data["notes"]
+        process.save()
+        return_data = "OK"
+        return HttpResponse(return_data, content_type="text/plain")
+    else:
+        return HttpResponse(form.errors, content_type="text/json-comment-filtered")
 
+@login_required
+def work_change_process(request, process_id):
+    process = get_object_or_404(Process, id=process_id)
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        form = ProcessForm(
+            instance=process,
+            data=request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            form.save()
+            #next = request.POST.get("next")
+            #if next:
+            #    return HttpResponseRedirect('/%s/%s/'
+            #        % ('work/process-logging', process.id))
 
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
 
 @login_required
 def process_logging(request, process_id):

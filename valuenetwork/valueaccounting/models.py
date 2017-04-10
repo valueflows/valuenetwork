@@ -10804,7 +10804,7 @@ class EconomicEvent(models.Model):
         #import pdb; pdb.set_trace()
         state = self.digital_currency_tx_state
         new_state = None
-        if state == "pending" or state == "broadcast":
+        if state == "new" or state == "pending" or state == "broadcast":
             tx = self.digital_currency_tx_hash
             if tx:
                 from valuenetwork.valueaccounting.faircoin_utils import get_confirmations

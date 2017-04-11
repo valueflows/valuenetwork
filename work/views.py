@@ -5725,7 +5725,75 @@ def plan_work(request, rand=0):
         "help": get_help("process_select"),
     }, context_instance=RequestContext(request))
 
+def project_history(request, project_id):
+    #import pdb; pdb.set_trace()
+    project = get_object_or_404(EconomicAgent, pk=project_id)
+    agent = get_agent(request)
+    event_list = project.contribution_events()
+    #event_list = project.all_events()
+    agent_ids = {event.from_agent.id for event in event_list if event.from_agent}
+    agents = EconomicAgent.objects.filter(id__in=agent_ids)
+    filter_form = ProjectContributionsFilterForm(agents=agents, data=request.POST or None)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        if filter_form.is_valid():
+            data = filter_form.cleaned_data
+            #event_type = data["event_type"]
+            from_agents = data["from_agents"]
+            start = data["start_date"]
+            end = data["end_date"]
+            if from_agents:
+                event_list = event_list.filter(from_agent__in=from_agents)
+            if start:
+                event_list = event_list.filter(event_date__gte=start)
+            if end:
+                event_list = event_list.filter(event_date__lte=end)
+    event_ids = ",".join([str(event.id) for event in event_list])
+    paginator = Paginator(event_list, 25)
+    page = request.GET.get('page')
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        events = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        events = paginator.page(paginator.num_pages)
 
+    return render_to_response("work/project_history.html", {
+        "project": project,
+        "events": events,
+        "filter_form": filter_form,
+        "agent": agent,
+        "event_ids": event_ids,
+    }, context_instance=RequestContext(request))
+
+@login_required
+def project_history_csv(request):
+    #import pdb; pdb.set_trace()
+    event_ids = request.GET.get("event-ids")
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=project-history.csv'
+    writer = csv.writer(response)
+    event_ids_split = event_ids.split(",")
+    queryset = EconomicEvent.objects.filter(id__in=event_ids_split)
+    opts = EconomicEvent._meta
+    field_names = [field.name for field in opts.fields]
+    writer.writerow(field_names)
+    for obj in queryset:
+        row = []
+        for field in field_names:
+            x = getattr(obj, field)
+            try:
+                x = x.encode('latin-1', 'replace')
+            except AttributeError:
+                pass
+            row.append(x)
+        writer.writerow(row)
+
+    return response
+
+    
 @login_required
 def order_delete_confirmation_work(request, order_id):
     order = get_object_or_404(Order, pk=order_id)

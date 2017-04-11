@@ -136,6 +136,9 @@ urlpatterns = [
         name="work_change_process_sked_ajax"),
     url(r"^work-change-process/(?P<process_id>\d+)/$", work.views.work_change_process, 
         name="work_change_process"),
-
+        
+    url(r"^project-history/(?P<project_id>\d+)/$", work.views.project_history, name="project_history"),
+    url(r'^project-history-csv/$', work.views.project_history_csv, 
+        name="project_history_csv"),
 ]
 

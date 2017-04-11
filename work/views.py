@@ -5773,7 +5773,7 @@ def project_history_csv(request):
     #import pdb; pdb.set_trace()
     event_ids = request.GET.get("event-ids")
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=.csv'
+    response['Content-Disposition'] = 'attachment; filename=project-history.csv'
     writer = csv.writer(response)
     event_ids_split = event_ids.split(",")
     queryset = EconomicEvent.objects.filter(id__in=event_ids_split)

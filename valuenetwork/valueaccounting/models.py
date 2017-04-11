@@ -912,6 +912,10 @@ class EconomicAgent(models.Model):
             Q(event_type__name='Expense Contribution')
             )
         return sum(event.quantity for event in events)
+        
+    def all_events(self):
+        return EconomicEvent.objects.filter(
+            Q(from_agent=self)|Q(to_agent=self))
 
     def events_by_event_type(self):
         agent_events = EconomicEvent.objects.filter(
@@ -10786,6 +10790,13 @@ class EconomicEvent(models.Model):
                     pass
         super(EconomicEvent, self).delete(*args, **kwargs)
 
+    def due_date(self):
+        if self.commitment:
+            return self.commitment.due_date
+        else:
+            return self.event_date
+        
+        
     def previous_events(self):
         """ Experimental method:
         Trying to use properties of events to determine event sequence.

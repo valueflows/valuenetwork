@@ -384,47 +384,19 @@ class AgentAccount(object):
 class AgentManager(models.Manager):
 
     def without_user(self):
-        #import pdb; pdb.set_trace()
-        all_agents = EconomicAgent.objects.all()
-        ua_ids = []
-        for agent in all_agents:
-            if agent.users.all():
-                ua_ids.append(agent.id)
-        return EconomicAgent.objects.exclude(id__in=ua_ids)
+        return self.filter(users__isnull=True)
 
     def individuals_without_user(self):
-        #import pdb; pdb.set_trace()
-        all_agents = self.individuals()
-        ua_ids = []
-        for agent in all_agents:
-            if agent.users.all():
-                ua_ids.append(agent.id)
-        return all_agents.exclude(id__in=ua_ids)
+        return self.individuals().filter(users__isnull=True)
 
     def with_user(self):
-        #better version from django-users
-        #needs testing
-        #return EconomicAgent.objects.filter(users__isnull=False).distinct()
-        all_agents = EconomicAgent.objects.all()
-        ua_ids = []
-        for agent in all_agents:
-            if agent.users.all():
-                ua_ids.append(agent.id)
-        return EconomicAgent.objects.filter(id__in=ua_ids)
+        return self.exclude(users__isnull=True)
 
     def without_membership_request(self):
-        from work.models import MembershipRequest
-        reqs = MembershipRequest.objects.all()
-        req_agts = [req.agent for req in reqs if req.agent]
-        rids = [agt.id for agt in req_agts]
-        return EconomicAgent.objects.exclude(id__in=rids).order_by("name")
+        return self.filter(membership_requests__isnull=True).order_by("name")
 
     def without_join_request(self):
-        from work.models import JoinRequest
-        reqs = JoinRequest.objects.all()
-        req_agts = [req.agent for req in reqs if req.agent]
-        rids = [agt.id for agt in req_agts]
-        return EconomicAgent.objects.exclude(id__in=rids).order_by("name")
+        return self.filter(project_join_requests__isnull=True).order_by("name")
 
     def projects(self):
         return EconomicAgent.objects.filter(agent_type__party_type="team")
@@ -1078,12 +1050,12 @@ class EconomicAgent(models.Model):
                       if an.clas == "currency":
                         cur = True
                     if cur:
-                      if hasattr(rt.ocp_artwork_type, 'unit_type') and rt.ocp_artwork_type.unit_type.id:
-                        if rt.ocp_artwork_type.unit_type.ocp_unit_type:
-                          if not rt.ocp_artwork_type.unit_type.ocp_unit_type.id in uids:
-                            uids.append(rt.ocp_artwork_type.unit_type.ocp_unit_type.id)
+                      if hasattr(rt.ocp_artwork_type, 'ocpArtworkType_unit_type') and rt.ocp_artwork_type.ocpArtworkType_unit_type.id:
+                        if rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type:
+                          if not rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.id in uids:
+                            uids.append(rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.id)
                         #pass
-                      #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.unit_type))
+                      #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.ocpArtworkType_unit_type))
             else:
               rt = tx.resource_type()
               rtun = None
@@ -6253,6 +6225,7 @@ class ProcessManager(models.Manager):
                     ids.append(process.id)
         return Process.objects.filter(pk__in=ids)
 
+
 class Process(models.Model):
     name = models.CharField(_('name'), max_length=128)
     parent = models.ForeignKey('self', blank=True, null=True,
@@ -10842,7 +10815,7 @@ class EconomicEvent(models.Model):
         #import pdb; pdb.set_trace()
         state = self.digital_currency_tx_state
         new_state = None
-        if state == "pending" or state == "broadcast":
+        if state == "new" or state == "pending" or state == "broadcast":
             tx = self.digital_currency_tx_hash
             if tx:
                 from valuenetwork.valueaccounting.faircoin_utils import get_confirmations

@@ -407,7 +407,7 @@ span.fancytree-selected span.fancytree-title {
                                 {% recursetree Etype_tree %}
                                   {% if True or node.exchange_type or request.user.is_staff or not node.is_leaf_node %}
                                     {% if case.typ in node.get_ancestors %}
-                                      <li id="Eid_{{ node.id }}" {% if node.ocp_artwork_type %}data-related="Rid_{{ node.ocp_artwork_type.id }}"{% endif %} {% if node.ocp_skill_type %}data-related="Sid_{{ node.ocp_skill_type.id }}"{% endif %} ><span>{% if not node.exchange_type %}<em>{% endif %}{{ node.name }}{% if node.exchange_type %} &lt; {% else %}</em>{% endif %}
+                                      <li id="Eid_{{ node.id }}" {% if node.ocpRecordType_ocp_artwork_type %}data-related="Rid_{{ node.ocpRecordType_ocp_artwork_type.id }}"{% endif %} {% if node.ocp_skill_type %}data-related="Sid_{{ node.ocp_skill_type.id }}"{% endif %} ><span>{% if not node.exchange_type %}<em>{% endif %}{{ node.name }}{% if node.exchange_type %} &lt; {% else %}</em>{% endif %}
 
                                         {% if node.exchange_type.created_by == request.user or request.user.is_superuser %} &nbsp; <span class="edit" id="Eid_{{ node.id }}"></span>
                                         {% endif %}
@@ -425,7 +425,7 @@ span.fancytree-selected span.fancytree-title {
                                             "parent":"{{ node.parent.id }}",
                                             "description":"{{ node.exchange_type.description }}",
                                             "context":"{{ node.exchange_type.context_agent.id }}",
-                                            "resource_type":"{{ node.ocp_artwork_type.id }}",
+                                            "resource_type":"{{ node.ocpRecordType_ocp_artwork_type.id }}",
                                             "skill_type":"{{ node.ocp_skill_type.id }}",
                                           };
                                         </script>
@@ -489,7 +489,7 @@ span.fancytree-selected span.fancytree-title {
                                       "substi":"{{ node.resource_type.substitutable }}",
                                       "unit":"{{ node.resource_type.unit.ocp_unit_type.id }}",
                                       "price":"{% if node.resource_type.price_per_unit %}{{ node.resource_type.price_per_unit }}{% endif %}",
-                                      "related":"{% if node.material_type %}{{ node.material_type.id }}{% elif node.nonmaterial_type %}{{ node.nonmaterial_type.id }}{% endif %}",
+                                      "related":"{% if node.ocpArtworkType_material_type %}{{ node.ocpArtworkType_material_type.id }}{% elif node.ocpArtworkType_nonmaterial_type %}{{ node.ocpArtworkType_nonmaterial_type.id }}{% endif %}",
                                       "parentrecipe":"{{ node.resource_type.parent.id }}",
                                       "url":"{{ node.resource_type.url }}",
                                       "photo_url":"{{ node.resource_type.photo_url }}",
@@ -975,6 +975,10 @@ span.fancytree-selected span.fancytree-title {
         if(obj['description']) $mod.find('#id_description').val(obj['description']);
         if(obj['substi'] == 'False' || obj['substi'] == '') $mod.find('#id_substitutable').val(obj['substi']).prop('checked', false);
         else if(obj['substi'] && obj['substi'] == 'True') $mod.find('#id_substitutable').val(obj['substi']).prop('checked', true);
+        $mod.find('#id_substitutable').change(function(){
+          if($(this).prop('checked')) $(this).val('True');
+          else $(this).val('False');
+        });
         $mod.find('#id_price_per_unit').val(obj['price']);
         $mod.find('#id_url').val(obj['url']);
         $mod.find('#id_photo_url').val(obj['photo_url']);
@@ -1341,9 +1345,9 @@ span.fancytree-selected span.fancytree-title {
         //ide = 'Eid';
         //tid = 'exchange_type';
       }
-      //alert('UPDATE tree tid:'+tid+' $tab:'+$tab.attr('id')+' ide:'+ide);
 
       var snd = data.tree.getSelectedNodes();
+      //alert('UPDATE tree tid:'+tid+' $tab:'+$tab.attr('id')+' ide:'+ide+' snd:'+snd);
 
       if(snd.length > 0 && $('span.edit#'+snd[0].key).length){
         if(ide == "Rid") $('li.edit_resource_type').show();

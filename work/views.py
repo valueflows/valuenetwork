@@ -36,8 +36,8 @@ from valuenetwork.valueaccounting.service import ExchangeService
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
 
-if "notification" in settings.INSTALLED_APPS:
-    from notification import models as notification
+if "pinax.notifications" in settings.INSTALLED_APPS:
+    from pinax.notifications import models as notification
 else:
     notification = None
 
@@ -2287,7 +2287,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       new_rec.id = None
                       new_rec.name = name
                       new_rec.exchange_type = new_ext
-                      new_rec.ocp_artwork_type = gen_rt
+                      new_rec.ocpRecordType_ocp_artwork_type = gen_rt
                       new_rec.ocp_skill_type = gen_sk
                       # mptt: insert_node(node, target, position='last-child', save=False)
                       new_rec = Ocp_Record_Type.objects.insert_node(new_rec, gen_ext, 'last-child', True)
@@ -2390,7 +2390,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     out = None
                     if hasattr(data["unit_type"], 'id'):
                       gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
-                      out = gut.ocp_unit
+                      out = gut.ocpUnitType_ocp_unit
                     if hasattr(data, "substitutable"):
                       substi = data["substitutable"]
                     else:
@@ -2453,8 +2453,8 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       name=data["name"],
                       description=data["description"],
                       resource_type=new_rt,
-                      material_type=rel_material,
-                      nonmaterial_type=rel_nonmaterial,
+                      ocpArtworkType_material_type=rel_material,
+                      ocpArtworkType_nonmaterial_type=rel_nonmaterial,
                     )
                     # mptt: insert_node(node, target, position='last-child', save=False)
                     try:
@@ -2484,7 +2484,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     out = None
                     if hasattr(data["unit_type"], 'id'):
                       gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
-                      out = gut.ocp_unit
+                      out = gut.ocpUnitType_ocp_unit
                     edid = request.POST.get("edid")
                     if edid == '':
                       raise ValidationError("Missing edid!")
@@ -2516,8 +2516,8 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                               non = Nonmaterial_Type.objects.get(id=rrt.id)
                               rel_nonmaterial = non
                               break
-                          grt.material_type = rel_material
-                          grt.nonmaterial_type = rel_nonmaterial
+                          grt.ocpArtworkType_material_type = rel_material
+                          grt.ocpArtworkType_nonmaterial_type = rel_nonmaterial
 
                         grt.save()
 
@@ -2626,7 +2626,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     out = None
                     if hasattr(data["unit_type"], 'id'):
                       gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
-                      out = gut.ocp_unit
+                      out = gut.ocpUnitType_ocp_unit
                     new_rt = EconomicResourceType(
                       name=data["name"],
                       description=data["description"],
@@ -2697,7 +2697,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     out = None
                     if hasattr(data["unit_type"], 'id'):
                       gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
-                      out = gut.ocp_unit
+                      out = gut.ocpUnitType_ocp_unit
                     edid = request.POST.get("edid")
                     if edid == '':
                       raise ValidationError("Missing id of the edited skill! (edid)")
@@ -2938,11 +2938,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                           if an.clas == "currency":
                             rt.cur = True
                         if rt.cur:
-                          to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type.unit_type.ocp_unit_type.name)+sign+' - '
+                          to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name)+sign+' - '
                           for ttr in total_transfers:
-                            if ttr['unit'] == rt.ocp_artwork_type.unit_type.ocp_unit_type.id:
-                              ttr['name'] = rt.ocp_artwork_type.unit_type.ocp_unit_type.name
-                              ttr['clas'] = rt.ocp_artwork_type.unit_type.ocp_unit_type.clas
+                            if ttr['unit'] == rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.id:
+                              ttr['name'] = rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name
+                              ttr['clas'] = rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.clas
 
                               if transfer.events.all():
                                 if sign == '<':
@@ -2961,6 +2961,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
                       #to['debug'] += str(x.transfer_give_events())+':'
                     elif uq.ocp_unit_type.clas == 'faircoin':
+
                       fairunit = uq.ocp_unit_type.id
 
                       to['balnote'] = (to['income']*1) - (to['outgo']*1)

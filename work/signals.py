@@ -10,8 +10,8 @@ def comment_notification(sender, comment, **kwargs):
     if ct_commented.model == 'membershiprequest':
         msr_creator_username = comment.content_object.requested_username
 
-        if "notification" in settings.INSTALLED_APPS:
-            from notification import models as notification
+        if "pinax.notifications" in settings.INSTALLED_APPS:
+            from pinax.notifications import models as notification
             users = User.objects.filter(is_staff=True) | User.objects.filter(username=msr_creator_username)
 
             if users:
@@ -32,8 +32,8 @@ def comment_notification(sender, comment, **kwargs):
         jr_creator = comment.content_object.agent.user()
         jr_managers = comment.content_object.project.agent.managers()
 
-        if "notification" in settings.INSTALLED_APPS:
-            from notification import models as notification
+        if "pinax.notifications" in settings.INSTALLED_APPS:
+            from pinax.notifications import models as notification
             users = []
             if jr_creator:
                 users.append(jr_creator.user)

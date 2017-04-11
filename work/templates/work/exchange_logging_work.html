@@ -1356,17 +1356,19 @@ li {
 	   }
 
 	   $(".ocp-resource-type-for-resource").chosen().change( function(evt, params){
+
           getResources( evt, params );
      });
 
      function getResources(event) {
-            var resourceTypeId = event.target.value;
+            var resourceTypeId = event.target.value; //alert('resourceTypeId: '+resourceTypeId);
             if (resourceTypeId)
             {
                 var targetId = event.target.id;
                 var prefix = targetId.split('-')[0];
-                var resourceFieldId = "#" + prefix + "-resource";
+                var resourceFieldId = "#" + prefix + "-resource"; //alert($(resourceFieldId).html());
                 $(resourceFieldId).empty();
+
                 var jsonUrl = encodeURI("/work/json-resourcetype-resources-locations/" + resourceTypeId + "/");
                 $.get(jsonUrl,
                     function(data){

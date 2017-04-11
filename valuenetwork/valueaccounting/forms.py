@@ -3863,7 +3863,7 @@ class ValueEquationBucketForm(forms.ModelForm):
 
 class ValueEquationBucketRuleForm(forms.ModelForm):
     event_type = forms.ModelChoiceField(
-        queryset=EventType.objects.used_for_value_equations().order_by("name"),
+        queryset=None, # fill in init as it's not a lazy QS
         required=True,
         empty_label=None,
         help_text="A default equation will appear below when you select an event type.",
@@ -3876,6 +3876,10 @@ class ValueEquationBucketRuleForm(forms.ModelForm):
     class Meta:
         model = ValueEquationBucketRule
         fields = ('event_type', 'claim_rule_type', 'claim_creation_equation')
+        
+    def __init__(self, *args, **kwargs):
+        super(ValueEquationBucketRuleForm, self).__init__(*args, **kwargs)
+        self.fields['event_type'].queryset = EventType.objects.used_for_value_equations().order_by("name")
 
 
 class ValueEquationSelectionForm(forms.Form):

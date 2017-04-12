@@ -9089,13 +9089,13 @@ class Commitment(models.Model):
     def resource_create_form(self, data=None):
         #import pdb; pdb.set_trace()
         if self.resource_type.inventory_rule == "yes":
-            from valuenetwork.valueaccounting.forms import CreateEconomicResourceForm
+            from valuenetwork.valueaccounting.forms import ProduceEconomicResourceForm
             init = {
                 "from_agent": self.from_agent,
                 "quantity": self.quantity,
                 "unit_of_quantity": self.resource_type.unit,
             }
-            return CreateEconomicResourceForm(prefix=self.form_prefix(), initial=init, data=data)
+            return ProduceEconomicResourceForm(prefix=self.form_prefix(), initial=init, data=data)
         else:
             from valuenetwork.valueaccounting.forms import UninventoriedProductionEventForm
             init = {

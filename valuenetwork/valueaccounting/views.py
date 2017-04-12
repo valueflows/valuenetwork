@@ -7902,7 +7902,7 @@ def log_resource_for_commitment(request, commitment_id):
         resource_data = form.cleaned_data
         agent = get_agent(request)
         resource_type = ct.resource_type
-        qty = resource_data["quantity"]
+        qty = resource_data["event_quantity"]
         event_type = ct.event_type
         resource = None
         if resource_type.inventory_rule == "yes":

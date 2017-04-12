@@ -4804,7 +4804,63 @@ def process_logging(request, process_id):
         "help": get_help("process_work"),
     }, context_instance=RequestContext(request))
 
+@login_required
+def work_log_resource_for_commitment(request, commitment_id):
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    form = ct.resource_create_form(data=request.POST)
+    #import pdb; pdb.set_trace()
+    if form.is_valid():
+        resource_data = form.cleaned_data
+        agent = get_agent(request)
+        resource_type = ct.resource_type
+        qty = resource_data["event_quantity"]
+        event_type = ct.event_type
+        resource = None
+        if resource_type.inventory_rule == "yes":
+            resource = form.save(commit=False)
+            resource.quantity = qty
+            resource.resource_type = resource_type
+            resource.created_by=request.user
+            if not ct.resource_type.substitutable:
+                resource.independent_demand = ct.independent_demand
+                resource.order_item = ct.order_item
+            if event_type.applies_stage():
+                resource.stage = ct.stage
+            resource.save()
+            event_date = resource_data["created_date"]
+        else:
+            event_date = resource_data["event_date"]
+        from_agent = resource_data["from_agent"]
+        default_agent = ct.process.default_agent()
+        if not from_agent:
+            from_agent = default_agent
+        event = EconomicEvent(
+            resource = resource,
+            commitment = ct,
+            event_date = event_date,
+            event_type = event_type,
+            from_agent = from_agent,
+            to_agent = default_agent,
+            resource_type = ct.resource_type,
+            process = ct.process,
+            context_agent = ct.process.context_agent,
+            quantity = qty,
+            unit_of_quantity = ct.unit_of_quantity,
+            created_by = request.user,
+            changed_by = request.user,
+        )
+        event.save()
+        ct.process.set_started(event.event_date, request.user)
 
+    next = request.POST.get("next")
+    if next:
+        if next == "work":
+            return HttpResponseRedirect('/%s/%s/'
+                % ('work/process-logging', ct.process.id))
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', ct.process.id))
+        
 from functools import partial, wraps
 
 @login_required

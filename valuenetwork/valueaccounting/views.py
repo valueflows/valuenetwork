@@ -6,7 +6,7 @@ from operator import itemgetter, attrgetter, methodcaller
 
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseServerError, Http404, HttpResponseNotFound, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template import RequestContext
@@ -88,9 +88,8 @@ def home(request):
                         rts.append(vc.resource_type)
                         value_creations.append(vc)
             template_params["value_creations"] = value_creations
-    return render_to_response("homepage.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "homepage.html",
+        template_params)
 
 def work_to_do(template_params):
     template_params["work_to_do"] = Commitment.objects.unfinished().filter(
@@ -102,7 +101,7 @@ def work_to_do(template_params):
 def create_agent(request):
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     if request.method == "POST":
         form = AgentCreateForm(request.POST)
         if form.is_valid():
@@ -116,7 +115,7 @@ def create_agent(request):
 @login_required
 def create_user(request, agent_id):
     if not request.user.is_staff:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     if request.method == "POST":
         user_form = UserCreationForm(data=request.POST)
@@ -142,7 +141,7 @@ def create_user(request, agent_id):
 def create_user_and_agent(request):
     #import pdb; pdb.set_trace()
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     user_form = UserCreationForm(data=request.POST or None)
     agent_form = AgentForm(data=request.POST or None)
     agent_selection_form = AgentSelectionForm()
@@ -218,11 +217,11 @@ def create_user_and_agent(request):
                         return HttpResponseRedirect('/%s/%s/'
                             % ('accounting/agent', agent.id))
 
-    return render_to_response("valueaccounting/create_user_and_agent.html", {
+    return render(request, "valueaccounting/create_user_and_agent.html", {
         "user_form": user_form,
         "agent_form": agent_form,
         "agent_selection_form": agent_selection_form,
-    }, context_instance=RequestContext(request))
+    })
 
 def projects(request):
     #import pdb; pdb.set_trace()
@@ -251,20 +250,20 @@ def projects(request):
     nicks = '~'.join([
         agt.nick for agt in EconomicAgent.objects.all()])
 
-    return render_to_response("valueaccounting/projects.html", {
+    return render(request, "valueaccounting/projects.html", {
         "roots": roots,
         "agent": agent,
         "help": get_help("projects"),
         "agent_form": agent_form,
         "nicks": nicks,
-    }, context_instance=RequestContext(request))
+    })
 
 '''
 @login_required
 def create_project(request):
     agent = get_agent(request)
     if not agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     if request.method == "POST":
         form = ProjectForm(request.POST)
         if form.is_valid():
@@ -288,7 +287,7 @@ def locations(request):
     latitude = settings.MAP_LATITUDE
     longitude = settings.MAP_LONGITUDE
     zoom = settings.MAP_ZOOM
-    return render_to_response("valueaccounting/locations.html", {
+    return render(request, "valueaccounting/locations.html", {
         "agent": agent,
         "locations": locations,
         "nolocs": nolocs,
@@ -296,7 +295,7 @@ def locations(request):
         "longitude": longitude,
         "zoom": zoom,
         "help": get_help("locations"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def create_location(request, agent_id=None):
@@ -305,7 +304,7 @@ def create_location(request, agent_id=None):
         agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     if agent:
         init= {
             "name": agent.name,
@@ -329,13 +328,13 @@ def create_location(request, agent_id=None):
                     % ('accounting/agent', agent.id))
             else:
                 return HttpResponseRedirect("/accounting/locations/")
-    return render_to_response("valueaccounting/create_location.html", {
+    return render(request, "valueaccounting/create_location.html", {
         "agent": agent,
         "location_form": location_form,
         "latitude": latitude,
         "longitude": longitude,
         "zoom": zoom,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def request_faircoin_address(request, agent_id=None):
@@ -345,7 +344,7 @@ def request_faircoin_address(request, agent_id=None):
             agent = get_object_or_404(EconomicAgent, id=agent_id)
         user_agent = get_agent(request)
         if not user_agent:
-            return render_to_response('valueaccounting/no_permission.html')
+            return render(request, 'valueaccounting/no_permission.html')
         if agent:
             agent.request_faircoin_address()
     return HttpResponseRedirect('/%s/%s/'
@@ -362,7 +361,7 @@ def change_location(request, location_id, agent_id=None):
         location_agents = ", ".join([agt.name for agt in location.agents()])
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     location_form = ChangeLocationForm(instance=location, data=request.POST or None)
     latitude = settings.MAP_LATITUDE
     longitude = settings.MAP_LONGITUDE
@@ -386,7 +385,7 @@ def change_location(request, location_id, agent_id=None):
                     % ('accounting/agent', agent.id))
             else:
                 return HttpResponseRedirect("/accounting/locations/")
-    return render_to_response("valueaccounting/change_location.html", {
+    return render(request, "valueaccounting/change_location.html", {
         "agent": agent,
         "locationAddress": locationAddress,
         "location_agents": location_agents,
@@ -394,7 +393,7 @@ def change_location(request, location_id, agent_id=None):
         "latitude": latitude,
         "longitude": longitude,
         "zoom": zoom,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def add_agent_to_location(request, location_id, agent_id=None):
@@ -411,7 +410,7 @@ def change_agent(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     change_form = AgentCreateForm(instance=agent, data=request.POST or None)
     if request.method == "POST":
         #import pdb; pdb.set_trace()
@@ -428,13 +427,13 @@ def agents(request):
     nicks = '~'.join([
         agt.nick for agt in EconomicAgent.objects.all()])
 
-    return render_to_response("valueaccounting/agents.html", {
+    return render(request, "valueaccounting/agents.html", {
         "agents": agents,
         "agent_form": agent_form,
         "user_agent": user_agent,
         "help": get_help("agents"),
         "nicks": nicks,
-    }, context_instance=RequestContext(request))
+    })
 
 def radial_graph(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
@@ -449,10 +448,10 @@ def radial_graph(request, agent_id):
                 connections[cx] = 0
             connections[cx] += 1
 
-    return render_to_response("valueaccounting/radial_graph.html", {
+    return render(request, "valueaccounting/radial_graph.html", {
         "agents": agents,
         "root": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 def agent(request, agent_id):
     #import pdb; pdb.set_trace()
@@ -553,7 +552,7 @@ def agent(request, agent_id):
             member_hours_roles.sort(lambda x, y: cmp(x[0], y[0]))
             roles_height = len(member_hours_roles) * 20
 
-    return render_to_response("valueaccounting/agent.html", {
+    return render(request, "valueaccounting/agent.html", {
         "agent": agent,
         "membership_request": membership_request,
         "photo_size": (128, 128),
@@ -571,7 +570,7 @@ def agent(request, agent_id):
         "individual_stats": individual_stats,
         "roles_height": roles_height,
         "help": get_help("agent"),
-    }, context_instance=RequestContext(request))
+    })
 
 def accounting(request, agent_id):
     #import pdb; pdb.set_trace()
@@ -579,10 +578,10 @@ def accounting(request, agent_id):
     accounts = agent.events_by_event_type()
 
 
-    return render_to_response("valueaccounting/accounting.html", {
+    return render(request, "valueaccounting/accounting.html", {
         "agent": agent,
         "accounts": accounts,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def test_patterns(request):
@@ -598,11 +597,11 @@ def test_patterns(request):
                 slot.resource_types = pattern.get_resource_types(slot)
                 slot.facets = pattern.facets_for_event_type(slot)
 
-    return render_to_response("valueaccounting/test_patterns.html", {
+    return render(request, "valueaccounting/test_patterns.html", {
         "pattern_form": pattern_form,
         "pattern": pattern,
         "slots": slots,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def maintain_patterns(request, use_case_id=None):
@@ -635,12 +634,12 @@ def maintain_patterns(request, use_case_id=None):
                 qs = ProcessPattern.objects.filter(id__in=allowed_pattern_ids).exclude(id__in=pattern_ids)
                 pattern_form = PatternSelectionForm(queryset=qs)
 
-    return render_to_response("valueaccounting/maintain_patterns.html", {
+    return render(request, "valueaccounting/maintain_patterns.html", {
         "use_case_form": use_case_form,
         "use_case": use_case,
         "patterns": patterns,
         "pattern_form": pattern_form,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def exchange_types(request):
@@ -657,12 +656,12 @@ def exchange_types(request):
     internal_exchange_types = ExchangeType.objects.internal_exchange_types()
     new_form = NewExchangeTypeForm()
 
-    return render_to_response("valueaccounting/exchange_types.html", {
+    return render(request, "valueaccounting/exchange_types.html", {
         "supply_exchange_types": supply_exchange_types,
         "demand_exchange_types": demand_exchange_types,
         "internal_exchange_types": internal_exchange_types,
         "new_form": new_form,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_exchange_type(request, exchange_type_id):
@@ -734,12 +733,12 @@ def change_exchange_type(request, exchange_type_id):
                 % ('accounting/change-exchange-type', exchange_type.id))
 
 
-    return render_to_response("valueaccounting/change_exchange_type.html", {
+    return render(request, "valueaccounting/change_exchange_type.html", {
         "exchange_type": exchange_type,
         "change_ext_form": change_ext_form,
         "add_tt_form": add_tt_form,
         "slots": slots,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def add_transfer_type(request, exchange_type_id):
@@ -843,11 +842,11 @@ def change_pattern(request, pattern_id, use_case_id):
         return HttpResponseRedirect('/%s/%s/%s/'
             % ('accounting/change-pattern', pattern.id, use_case.id))
 
-    return render_to_response("valueaccounting/change_pattern.html", {
+    return render(request, "valueaccounting/change_pattern.html", {
         "pattern": pattern,
         "slots": slots,
         "use_case": use_case,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_pattern_name(request):
@@ -913,7 +912,7 @@ def delete_exchange_type(request, exchange_type_id):
 @login_required
 def sessions(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     from django.contrib.sessions.models import Session
     sessions = Session.objects.all().order_by('-expire_date')[0:20]
     for session in sessions:
@@ -938,10 +937,10 @@ def sessions(request):
             except Session.DoesNotExist:
                 pass
 
-    return render_to_response("valueaccounting/sessions.html", {
+    return render(request, "valueaccounting/sessions.html", {
         "sessions": sessions,
         "selected_session": selected_session,
-    }, context_instance=RequestContext(request))
+    })
 
 def select_resource_types(facet_values):
     """ Logic:
@@ -1011,7 +1010,7 @@ def resource_types(request):
                     fvs.append(FacetValue.objects.get(facet__name=fname,value=fvalue))
                 roots = select_resource_types(fvs)
                 roots.sort(key=lambda rt: rt.label())
-    return render_to_response("valueaccounting/resource_types.html", {
+    return render(request, "valueaccounting/resource_types.html", {
         "roots": roots,
         "facets": facets,
         "select_all": select_all,
@@ -1021,7 +1020,7 @@ def resource_types(request):
         "photo_size": (128, 128),
         "help": get_help("resource_types"),
         "resource_names": resource_names,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def resource_type(request, resource_type_id):
@@ -1063,7 +1062,7 @@ def resource_type(request, resource_type_id):
                 return HttpResponseRedirect('/%s/%s/'
                     % ('accounting/resource', resource.id))
 
-    return render_to_response("valueaccounting/resource_type.html", {
+    return render(request, "valueaccounting/resource_type.html", {
         "resource_type": resource_type,
         "photo_size": (128, 128),
         "resource_names": resource_names,
@@ -1071,7 +1070,7 @@ def resource_type(request, resource_type_id):
         "create_form": create_form,
         "create_role_formset": create_role_formset,
         "help": get_help("resource_type"),
-    }, context_instance=RequestContext(request))
+    })
 
 def inventory(request):
     #import pdb; pdb.set_trace()
@@ -1109,7 +1108,7 @@ def inventory(request):
         for rt in rts:
             if rt.onhand_qty()>0:
                 resource_types.append(rt)
-    return render_to_response("valueaccounting/inventory.html", {
+    return render(request, "valueaccounting/inventory.html", {
         #"resources": resources,
         "resource_types": resource_types,
         "facets": facets,
@@ -1117,13 +1116,13 @@ def inventory(request):
         "selected_values": selected_values,
         "photo_size": (128, 128),
         "help": get_help("inventory"),
-    }, context_instance=RequestContext(request))
+    })
 
 def resource_flow_report(request, resource_type_id):
     #todo: this report is dependent on DHEN's specific work flow, will need to be generalized
     #import pdb; pdb.set_trace()
     if settings.ALL_WORK_PAGE != "/board/dhen-board/":
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     rt = get_object_or_404(EconomicResourceType, id=resource_type_id)
     #redo: need exchange_types as well as process_types
     #this next stmt is obsolete until we get mixed process-exchange recipes
@@ -1214,12 +1213,12 @@ def resource_flow_report(request, resource_type_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         lots = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/resource_flow_report.html", {
+    return render(request, "valueaccounting/resource_flow_report.html", {
         "lots": lots,
         "stages": stages,
         "rt": rt,
         #"sort_form": sort_form,
-    }, context_instance=RequestContext(request))
+    })
 
 def adjust_resource(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
@@ -1266,13 +1265,13 @@ def event_history(request, resource_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/event_history.html", {
+    return render(request, "valueaccounting/event_history.html", {
         "resource": resource,
         "agent": agent,
         "adjustment_form": adjustment_form,
         "unit": unit,
         "events": events,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def send_faircoins(request, resource_id):
@@ -1441,9 +1440,9 @@ def all_contributions(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/all_contributions.html", {
+    return render(request, "valueaccounting/all_contributions.html", {
         "events": events,
-    }, context_instance=RequestContext(request))
+    })
 
 def contributions(request, project_id):
     #import pdb; pdb.set_trace()
@@ -1479,13 +1478,13 @@ def contributions(request, project_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/project_contributions.html", {
+    return render(request, "valueaccounting/project_contributions.html", {
         "project": project,
         "events": events,
         "filter_form": filter_form,
         "agent": agent,
         "event_ids": event_ids,
-    }, context_instance=RequestContext(request))
+    })
 
 def project_wip(request, project_id):
     #import pdb; pdb.set_trace()
@@ -1503,10 +1502,10 @@ def project_wip(request, project_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         processes = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/project_wip.html", {
+    return render(request, "valueaccounting/project_wip.html", {
         "project": project,
         "processes": processes,
-    }, context_instance=RequestContext(request))
+    })
 
 def finished_processes(request, agent_id):
     #import pdb; pdb.set_trace()
@@ -1524,10 +1523,10 @@ def finished_processes(request, agent_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         processes = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/finished_processes.html", {
+    return render(request, "valueaccounting/finished_processes.html", {
         "project": project,
         "processes": processes,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def contribution_history(request, agent_id):
@@ -1567,13 +1566,13 @@ def contribution_history(request, agent_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/agent_contributions.html", {
+    return render(request, "valueaccounting/agent_contributions.html", {
         "agent": agent,
         "user_is_agent": user_is_agent,
         "events": events,
         "filter_form": filter_form,
         "event_ids": event_ids,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def agent_value_accounting(request, agent_id):
@@ -1618,7 +1617,7 @@ def agent_value_accounting(request, agent_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/agent_value_accounting.html", {
+    return render(request, "valueaccounting/agent_value_accounting.html", {
         "agent": agent,
         "events": events,
         "no_bucket": no_bucket,
@@ -1627,7 +1626,7 @@ def agent_value_accounting(request, agent_id):
         "outstanding_claims": format(outstanding_claims, ",.2f"),
         "claim_distributions": format(claim_distributions, ",.2f"),
         "other_distributions": format(other_distributions, ",.2f"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def unscheduled_time_contributions(request):
@@ -1684,11 +1683,11 @@ def unscheduled_time_contributions(request):
                 return HttpResponseRedirect('/%s/%s/'
                     % ('accounting/contributionhistory', member.id))
 
-    return render_to_response("valueaccounting/unscheduled_time_contributions.html", {
+    return render(request, "valueaccounting/unscheduled_time_contributions.html", {
         "member": member,
         "time_formset": time_formset,
         "help": get_help("non_production"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def agent_associations(request, agent_id):
@@ -1745,12 +1744,12 @@ def agent_associations(request, agent_id):
         elif keep_going:
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/agent-associations', agent.id))
-    return render_to_response("valueaccounting/agent_associations.html", {
+    return render(request, "valueaccounting/agent_associations.html", {
         "agent": agent,
         "has_associates_formset": has_associates_formset,
         "is_associates_formset": is_associates_formset,
         "help": get_help("associations"),
-    }, context_instance=RequestContext(request))
+    })
 
 def json_resource_type_resources(request, resource_type_id):
     #import pdb; pdb.set_trace()
@@ -1907,7 +1906,7 @@ class AgentSummary(object):
 #obsolete
 def value_equation(request, project_id):
     #import pdb; pdb.set_trace()
-    return render_to_response('valueaccounting/no_permission.html')
+    return render(request, 'valueaccounting/no_permission.html')
     project = get_object_or_404(EconomicAgent, pk=project_id)
     all_subs = project.with_all_sub_agents()
     summaries = CachedEventSummary.objects.select_related(
@@ -1974,13 +1973,13 @@ def value_equation(request, project_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/value_equation.html", {
+    return render(request, "valueaccounting/value_equation.html", {
         "project": project,
         "events": events,
         "form": form,
         "agent_totals": agent_totals,
         "total": total,
-    }, context_instance=RequestContext(request))
+    })
 
 def extended_bill(request, resource_type_id):
     rt = get_object_or_404(EconomicResourceType, pk=resource_type_id)
@@ -2029,7 +2028,7 @@ def extended_bill(request, resource_type_id):
         selected_depth = depth
         select_all = True
         selected_vals = "all"
-    return render_to_response("valueaccounting/extended_bill.html", {
+    return render(request, "valueaccounting/extended_bill.html", {
         "resource_type": rt,
         "output_ctype": output_ctype,
         "nodes": nodes,
@@ -2041,7 +2040,7 @@ def extended_bill(request, resource_type_id):
         "photo_size": (128, 128),
         "big_photo_size": (200, 200),
         "help": get_help("recipes"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def edit_extended_bill(request, resource_type_id):
@@ -2057,7 +2056,7 @@ def edit_extended_bill(request, resource_type_id):
     resource_names = '~'.join(names)
     #end_time = time.time()
     #print("edit_extended_bill view elapsed time was %g seconds" % (end_time - start_time))
-    return render_to_response("valueaccounting/edit_xbill.html", {
+    return render(request, "valueaccounting/edit_xbill.html", {
         "resource_type": rt,
         "output_ctype": output_ctype,
         "nodes": nodes,
@@ -2067,7 +2066,7 @@ def edit_extended_bill(request, resource_type_id):
         "feature_form": feature_form,
         "resource_names": resource_names,
         "help": get_help("ed_asmbly_recipe"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def edit_stream_recipe(request, resource_type_id):
@@ -2077,14 +2076,14 @@ def edit_stream_recipe(request, resource_type_id):
     resource_type_form = EconomicResourceTypeChangeForm(instance=rt)
     names = EconomicResourceType.objects.values_list('name', flat=True)
     resource_names = '~'.join(names)
-    return render_to_response("valueaccounting/edit_stream_recipe.html", {
+    return render(request, "valueaccounting/edit_stream_recipe.html", {
         "resource_type": rt,
         "process_types": process_types,
         "resource_names": resource_names,
         "photo_size": (128, 128),
         "resource_type_form": resource_type_form,
         "help": get_help("ed_wf_recipe"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 def view_stream_recipe(request, resource_type_id):
@@ -2094,14 +2093,14 @@ def view_stream_recipe(request, resource_type_id):
     names = EconomicResourceType.objects.values_list('name', flat=True)
     resource_names = '~'.join(names)
     agent = get_agent(request)
-    return render_to_response("valueaccounting/view_stream_recipe.html", {
+    return render(request, "valueaccounting/view_stream_recipe.html", {
         "resource_type": rt,
         "agent": agent,
         "process_types": process_types,
         "resource_names": resource_names,
         "photo_size": (128, 128),
         "help": get_help("ed_wf_recipe"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -2130,10 +2129,10 @@ def delete_resource_type_confirmation(request, resource_type_id):
     side_effects = False
     if rt.process_types.all():
         side_effects = True
-        return render_to_response('valueaccounting/resource_type_delete_confirmation.html', {
+        return render(request, 'valueaccounting/resource_type_delete_confirmation.html', {
             "resource_type": rt,
             "side_effects": side_effects,
-            }, context_instance=RequestContext(request))
+            })
     else:
         rt.delete()
         return HttpResponseRedirect('/%s/'
@@ -2200,14 +2199,14 @@ def delete_order_confirmation(request, order_id):
         for ct in pcs:
             #visited_resources.add(ct.resource_type)
             schedule_commitment(ct, sked, reqs, work, tools, visited_resources, 0)
-        return render_to_response('valueaccounting/order_delete_confirmation.html', {
+        return render(request, 'valueaccounting/order_delete_confirmation.html', {
             "order": order,
             "sked": sked,
             "reqs": reqs,
             "work": work,
             "tools": tools,
             "next": next,
-        }, context_instance=RequestContext(request))
+        })
     else:
         commitments = Commitment.objects.filter(independent_demand=order)
         if commitments:
@@ -2215,14 +2214,14 @@ def delete_order_confirmation(request, order_id):
                 sked.append(ct)
                 if ct.process not in sked:
                     sked.append(ct.process)
-            return render_to_response('valueaccounting/order_delete_confirmation.html', {
+            return render(request, 'valueaccounting/order_delete_confirmation.html', {
                 "order": order,
                 "sked": sked,
                 "reqs": reqs,
                 "work": work,
                 "tools": tools,
                 "next": next,
-            }, context_instance=RequestContext(request))
+            })
         else:
             order.delete()
             if next == "demand":
@@ -2316,12 +2315,12 @@ def delete_process_type_confirmation(request,
         next = '/%s/%s/' % ('accounting/edit-xbomfg', resource_type_id)
     if pt.resource_types.all():
         side_effects = True
-        return render_to_response('valueaccounting/process_type_delete_confirmation.html', {
+        return render(request, 'valueaccounting/process_type_delete_confirmation.html', {
             "process_type": pt,
             "resource_type_id": resource_type_id,
             "side_effects": side_effects,
             "next": next,
-            }, context_instance=RequestContext(request))
+            })
     else:
         pt.delete()
         return HttpResponseRedirect(next)
@@ -2333,11 +2332,11 @@ def delete_feature_confirmation(request,
     side_effects = False
     if ft.options.all():
         side_effects = True
-        return render_to_response('valueaccounting/feature_delete_confirmation.html', {
+        return render(request, 'valueaccounting/feature_delete_confirmation.html', {
             "feature": ft,
             "resource_type_id": resource_type_id,
             "side_effects": side_effects,
-            }, context_instance=RequestContext(request))
+            })
     else:
         ft.delete()
         return HttpResponseRedirect('/%s/%s/'
@@ -2848,22 +2847,22 @@ def network(request, resource_type_id):
     #import pdb; pdb.set_trace()
     rt = get_object_or_404(EconomicResourceType, pk=resource_type_id)
     nodes, edges = graphify(rt, 3)
-    return render_to_response("valueaccounting/network.html", {
+    return render(request, "valueaccounting/network.html", {
         "resource_type": rt,
         "photo_size": (128, 128),
         "nodes": nodes,
         "edges": edges,
-    }, context_instance=RequestContext(request))
+    })
 
 def project_network(request):
     #import pdb; pdb.set_trace()
     producers = [p for p in ProcessType.objects.all() if p.produced_resource_types()]
     nodes, edges = project_graph(producers)
-    return render_to_response("valueaccounting/network.html", {
+    return render(request, "valueaccounting/network.html", {
         "photo_size": (128, 128),
         "nodes": nodes,
         "edges": edges,
-    }, context_instance=RequestContext(request))
+    })
 
 def timeline(request, from_date, to_date, context_id):
     try:
@@ -2878,7 +2877,7 @@ def timeline(request, from_date, to_date, context_id):
     unassigned = Commitment.objects.unfinished().filter(
         from_agent=None,
         event_type__relationship="work").order_by("due_date")
-    return render_to_response("valueaccounting/timeline.html", {
+    return render(request, "valueaccounting/timeline.html", {
         "orderId": 0,
         "context_id": context_id,
         "useContextId": 0,
@@ -2886,7 +2885,7 @@ def timeline(request, from_date, to_date, context_id):
         "to_date": to_date,
         "timeline_date": timeline_date,
         "unassigned": unassigned,
-    }, context_instance=RequestContext(request))
+    })
 
 def json_timeline(request, from_date, to_date, context_id):
     try:
@@ -2919,13 +2918,13 @@ def context_timeline(request, context_id):
         context_agent=context_agent,
         from_agent=None,
         event_type__relationship="work").order_by("due_date")
-    return render_to_response("valueaccounting/timeline.html", {
+    return render(request, "valueaccounting/timeline.html", {
         "orderId": 0,
         "context_id": context_id,
         "useContextId": 1,
         "timeline_date": timeline_date,
         "unassigned": unassigned,
-    }, context_instance=RequestContext(request))
+    })
 
 def json_context_timeline(request, context_id):
     #import pdb; pdb.set_trace()
@@ -2950,13 +2949,13 @@ def order_timeline(request, order_id):
         independent_demand=order,
         from_agent=None,
         event_type__relationship="work").order_by("due_date")
-    return render_to_response("valueaccounting/timeline.html", {
+    return render(request, "valueaccounting/timeline.html", {
         "orderId": order.id,
         "context_id": 0,
         "useContextId": 0,
         "timeline_date": timeline_date,
         "unassigned": unassigned,
-    }, context_instance=RequestContext(request))
+    })
 
 def json_order_timeline(request, order_id):
     events = {'dateTimeFormat': 'Gregorian','events':[]}
@@ -3106,37 +3105,37 @@ def json_customer_orders(request, customer_id):
 
 
 def explore(request):
-    return render_to_response("valueaccounting/explore.html", {
-    }, context_instance=RequestContext(request))
+    return render(request, "valueaccounting/explore.html", {
+    })
 
 def unfold_commitment(request, commitment_id):
     commitment = get_object_or_404(Commitment, pk=commitment_id)
     process = commitment.process
-    return render_to_response("valueaccounting/unfold.html", {
+    return render(request, "valueaccounting/unfold.html", {
         "commitment": commitment,
         "process": process,
-    }, context_instance=RequestContext(request))
+    })
 
 def unfold_process(request, process_id):
     process = get_object_or_404(Process, pk=process_id)
     commitment = None
-    return render_to_response("valueaccounting/unfold.html", {
+    return render(request, "valueaccounting/unfold.html", {
         "commitment": commitment,
         "process": process,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
 
-    return render_to_response("valueaccounting/cleanup.html", {
-    }, context_instance=RequestContext(request))
+    return render(request, "valueaccounting/cleanup.html", {
+    })
 
 @login_required
 def misc(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
 
     context_agent = None
     context_agents = EconomicAgent.objects.context_agents()
@@ -3155,82 +3154,82 @@ def misc(request):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/create-distribution', agent.id))
 
-    return render_to_response("valueaccounting/misc.html", {
+    return render(request, "valueaccounting/misc.html", {
         "context_agent": context_agent,
         "ca_form": ca_form,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup_processes(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     orphans = [p for p in Process.objects.all() if p.is_orphan()]
 
-    return render_to_response("valueaccounting/cleanup_processes.html", {
+    return render(request, "valueaccounting/cleanup_processes.html", {
         "orphans": orphans,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup_old_processes(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     old_date = datetime.date.today() - datetime.timedelta(days=30)
     orphans = Process.objects.unfinished().filter(
         end_date__lt=old_date).order_by("end_date")
 
-    return render_to_response("valueaccounting/cleanup_old_processes.html", {
+    return render(request, "valueaccounting/cleanup_old_processes.html", {
         "orphans": orphans,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup_resourcetypes(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     orphans = [rt for rt in EconomicResourceType.objects.all() if rt.is_orphan()]
 
-    return render_to_response("valueaccounting/cleanup_resourcetypes.html", {
+    return render(request, "valueaccounting/cleanup_resourcetypes.html", {
         "orphans": orphans,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup_work_resourcetypes(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     suspects = [rt for rt in EconomicResourceType.objects.all() if rt.work_without_value()]
 
-    return render_to_response("valueaccounting/cleanup_work_resourcetypes.html", {
+    return render(request, "valueaccounting/cleanup_work_resourcetypes.html", {
         "suspects": suspects,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup_resources(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     orphans = [er for er in EconomicResource.objects.all() if er.is_orphan()]
 
-    return render_to_response("valueaccounting/cleanup_resources.html", {
+    return render(request, "valueaccounting/cleanup_resources.html", {
         "orphans": orphans,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup_unsourced_resources(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     suspects = [er for er in EconomicResource.objects.all() if er.unsourced_consumption()]
 
-    return render_to_response("valueaccounting/cleanup_unsourced_resources.html", {
+    return render(request, "valueaccounting/cleanup_unsourced_resources.html", {
         "suspects": suspects,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cleanup_unvalued_resources(request):
     if not request.user.is_superuser:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     suspects = [er for er in EconomicResource.objects.all() if er.used_without_value()]
 
-    return render_to_response("valueaccounting/cleanup_unvalued_resources.html", {
+    return render(request, "valueaccounting/cleanup_unvalued_resources.html", {
         "suspects": suspects,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def create_order(request):
@@ -3371,10 +3370,10 @@ def create_order(request):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/order-schedule', order.id))
 
-    return render_to_response("valueaccounting/create_order.html", {
+    return render(request, "valueaccounting/create_order.html", {
         "order_form": order_form,
         "item_forms": item_forms,
-    }, context_instance=RequestContext(request))
+    })
 
 #todo: s/b refactored in a commitment method
 #flow todo: shd order_item be used here?
@@ -3431,10 +3430,10 @@ def orders(request, agent_id):
         visited = set()
         for order_item in order_items:
             order_item.processes = order_item.unique_processes_for_order_item(visited)
-    return render_to_response("valueaccounting/orders.html", {
+    return render(request, "valueaccounting/orders.html", {
         "agent": agent,
         "orders": orders,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def order_schedule(request, order_id):
@@ -3471,13 +3470,13 @@ def order_schedule(request, order_id):
                 next_date = last_date + datetime.timedelta(days=1)
                 init = {"start_date": next_date, "end_date": next_date}
                 order_item.add_process_form = WorkflowProcessForm(prefix=str(order_item.id), initial=init, order_item=order_item)
-    return render_to_response("valueaccounting/order_schedule.html", {
+    return render(request, "valueaccounting/order_schedule.html", {
         "order": order,
         "agent": agent,
         "order_items": order_items,
         "add_order_item_form": add_order_item_form,
         "error_message": error_message,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_commitment_quantities(request, order_item_id):
@@ -3628,23 +3627,23 @@ def demand(request):
             return HttpResponseRedirect('/%s/%s/%s/'
                 % ('accounting/exchange', ext.id, 0))
 
-    return render_to_response("valueaccounting/demand.html", {
+    return render(request, "valueaccounting/demand.html", {
         "orders": orders,
         "rands": rands,
         "agent": agent,
         "nav_form": nav_form,
         "help": help,
-    }, context_instance=RequestContext(request))
+    })
 
 def closed_work_orders(request):
     agent = get_agent(request)
     orders = Order.objects.closed_work_orders()
     #help = get_help("demand")
-    return render_to_response("valueaccounting/closed_work_orders.html", {
+    return render(request, "valueaccounting/closed_work_orders.html", {
         "rands": orders,
         "agent": agent,
         #"help": help,
-    }, context_instance=RequestContext(request))
+    })
 
 def resource_type_lists(request):
     agent = get_agent(request)
@@ -3665,12 +3664,12 @@ def resource_type_lists(request):
             return HttpResponseRedirect('/%s/'
                 % ('accounting/resource-type-lists'))
 
-    return render_to_response("valueaccounting/resource_type_lists.html", {
+    return render(request, "valueaccounting/resource_type_lists.html", {
         "rt_lists": rt_lists,
         "rtl_form": rtl_form,
         "agent": agent,
         #"help": help,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def create_resource_type_list(request):
@@ -3704,11 +3703,11 @@ def create_resource_type_list(request):
             return HttpResponseRedirect('/%s/'
                 % ('accounting/resource-type-lists'))
 
-    return render_to_response("valueaccounting/resource_type_list.html", {
+    return render(request, "valueaccounting/resource_type_list.html", {
         "rtl_form": rtl_form,
         "element_forms": element_forms,
         #"help": get_help("associations"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_resource_type_list(request, list_id):
@@ -3766,12 +3765,12 @@ def change_resource_type_list(request, list_id):
             return HttpResponseRedirect('/%s/'
                 % ('accounting/resource-type-lists'))
 
-    return render_to_response("valueaccounting/resource_type_list.html", {
+    return render(request, "valueaccounting/resource_type_list.html", {
         "rtl_form": rtl_form,
         "rt_list": rt_list,
         "element_forms": element_forms,
         #"help": get_help("associations"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def delete_resource_type_list(request, list_id):
@@ -3815,12 +3814,12 @@ def supply_older(request):
                     if source not in suppliers[agent]:
                         suppliers[agent][source] = []
                     suppliers[agent][source].append(commitment)
-    return render_to_response("valueaccounting/supply.html", {
+    return render(request, "valueaccounting/supply.html", {
         "mreqs": mreqs,
         "treqs": treqs,
         "suppliers": suppliers,
         "help": get_help("supply"),
-    }, context_instance=RequestContext(request))
+    })
 
 def supply_old(request):
     agent = get_agent(request)
@@ -3840,14 +3839,14 @@ def supply_old(request):
                     suppliers[agent][source] = []
                 suppliers[agent][source].append(commitment)
     treqs = []
-    return render_to_response("valueaccounting/supply.html", {
+    return render(request, "valueaccounting/supply.html", {
         "mreqs": mreqs,
         "treqs": treqs,
         "suppliers": suppliers,
         "agent": agent,
         #"supplier_form": supplier_form,
         "help": get_help("supply"),
-    }, context_instance=RequestContext(request))
+    })
 
 def supply(request):
     agent = get_agent(request)
@@ -3881,14 +3880,14 @@ def supply(request):
                 return HttpResponseRedirect('/%s/%s/%s/'
                     % ('accounting/exchange', ext.id, 0))
 
-    return render_to_response("valueaccounting/supply.html", {
+    return render(request, "valueaccounting/supply.html", {
         "mreqs": mreqs,
         "treqs": treqs,
         "suppliers": suppliers,
         "agent": agent,
         "nav_form": nav_form,
         "help": get_help("supply"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def create_supplier(request):
@@ -3977,7 +3976,7 @@ def work(request):
     processes, context_agents = assemble_schedule(start, end, chosen_context_agent)
     todos = Commitment.objects.todos().filter(due_date__range=(start, end))
     work_now = settings.USE_WORK_NOW
-    return render_to_response("valueaccounting/work.html", {
+    return render(request, "valueaccounting/work.html", {
         "agent": agent,
         "context_agents": context_agents,
         "all_processes": processes,
@@ -3990,7 +3989,7 @@ def work(request):
         "todos": todos,
         "work_now": work_now,
         "help": get_help("all_work"),
-    }, context_instance=RequestContext(request))
+    })
 
 def schedule(request, context_agent_slug=None):
     context_agent = None
@@ -4000,9 +3999,9 @@ def schedule(request, context_agent_slug=None):
     end = datetime.date.today() + datetime.timedelta(weeks=4)
     #import pdb; pdb.set_trace()
     processes, context_agents = assemble_schedule(start, end, context_agent)
-    return render_to_response("valueaccounting/schedule.html", {
+    return render(request, "valueaccounting/schedule.html", {
         "context_agents": context_agents,
-    }, context_instance=RequestContext(request))
+    })
 
 def today(request):
     agent = get_agent(request)
@@ -4012,12 +4011,12 @@ def today(request):
     todos = Commitment.objects.todos().filter(due_date=start)
     processes, context_agents = assemble_schedule(start, end)
     events = EconomicEvent.objects.filter(event_date=start)
-    return render_to_response("valueaccounting/today.html", {
+    return render(request, "valueaccounting/today.html", {
         "agent": agent,
         "context_agents": context_agents,
         "todos": todos,
         "events": events,
-    }, context_instance=RequestContext(request))
+    })
 
 
 class EventProcessSummary(object):
@@ -4108,7 +4107,7 @@ def this_week(request):
     cas_ids = [ca.id for ca in cas]
     active = len(cas)
     non_active = EconomicAgent.objects.context_agents().exclude(id__in=cas_ids).count()
-    return render_to_response("valueaccounting/this_week.html", {
+    return render(request, "valueaccounting/this_week.html", {
         "agent": agent,
         "start": start,
         "end": end,
@@ -4117,7 +4116,7 @@ def this_week(request):
         "total_hours": total_hours,
         "total_participants": total_participants,
         "context_agents": context_agents,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def add_todo(request):
@@ -4352,7 +4351,7 @@ def start(request):
     else:
         todo_form = TodoForm(initial=init)
     work_now = settings.USE_WORK_NOW
-    return render_to_response("valueaccounting/start.html", {
+    return render(request, "valueaccounting/start.html", {
         "agent": agent,
         "my_work": my_work,
         "my_skillz": my_skillz,
@@ -4361,7 +4360,7 @@ def start(request):
         "todo_form": todo_form,
         "work_now": work_now,
         "help": get_help("my_work"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 def agent_stats(request, agent_id):
@@ -4377,11 +4376,11 @@ def agent_stats(request, agent_id):
     for key, value in agents.iteritems():
         member_hours.append((key, value))
     member_hours.sort(lambda x, y: cmp(y[1], x[1]))
-    return render_to_response("valueaccounting/agent_stats.html", {
+    return render(request, "valueaccounting/agent_stats.html", {
         "agent": agent,
         "scores": scores,
         "member_hours": member_hours,
-    }, context_instance=RequestContext(request))
+    })
 
 def project_stats(request, context_agent_slug):
     project = None
@@ -4402,10 +4401,10 @@ def project_stats(request, context_agent_slug):
             for key, value in agents.items():
                 member_hours.append((key, value))
             member_hours.sort(lambda x, y: cmp(y[1], x[1]))
-    return render_to_response("valueaccounting/project_stats.html", {
+    return render(request, "valueaccounting/project_stats.html", {
         "member_hours": member_hours,
         "page_title": "All-time project stats",
-    }, context_instance=RequestContext(request))
+    })
 
 def recent_stats(request, context_agent_slug):
     project = None
@@ -4429,10 +4428,10 @@ def recent_stats(request, context_agent_slug):
         for key, value in agents_stats.items():
             member_hours.append((key, value))
         member_hours.sort(lambda x, y: cmp(y[1], x[1]))
-    return render_to_response("valueaccounting/project_stats.html", {
+    return render(request, "valueaccounting/project_stats.html", {
         "member_hours": member_hours,
         "page_title": "Last 2 months project stats",
-    }, context_instance=RequestContext(request))
+    })
 
 
 def project_roles(request, context_agent_slug):
@@ -4465,26 +4464,26 @@ def project_roles(request, context_agent_slug):
             for row in agents.values():
                 member_hours.append(row)
             member_hours.sort(lambda x, y: cmp(x[0], y[0]))
-    return render_to_response("valueaccounting/project_roles.html", {
+    return render(request, "valueaccounting/project_roles.html", {
         "project": project,
         "headings": headings,
         "member_hours": member_hours,
-    }, context_instance=RequestContext(request))
+    })
 
 def order_graph(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    return render_to_response("valueaccounting/order_graph.html", {
+    return render(request, "valueaccounting/order_graph.html", {
         "order_id": order_id,
-    }, context_instance=RequestContext(request))
+    })
 
 def processes_graph(request, object_type=None, object_id=None):
     url_extension = ""
     if object_type:
         url_extension = "".join([ object_type, "/", object_id, "/"])
 
-    return render_to_response("valueaccounting/processes_graph.html", {
+    return render(request, "valueaccounting/processes_graph.html", {
         "url_extension": url_extension,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def commit_to_task(request, commitment_id):
@@ -6859,10 +6858,10 @@ def change_event(request, event_id):
         else:
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/contributionhistory', agent.id))
-    return render_to_response("valueaccounting/change_event.html", {
+    return render(request, "valueaccounting/change_event.html", {
         "event_form": event_form,
         "page": page,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def delete_event(request, event_id):
@@ -7105,9 +7104,8 @@ def labnotes_reload(
         was_running,
         was_retrying,
     )
-    return render_to_response("valueaccounting/workbook.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "valueaccounting/workbook.html",
+        template_params)
 
 @login_required
 def work_commitment(
@@ -7118,7 +7116,7 @@ def work_commitment(
     agent = get_agent(request)
     if not request.user.is_superuser:
         if agent != ct.from_agent:
-            return render_to_response('valueaccounting/no_permission.html')
+            return render(request, 'valueaccounting/no_permission.html')
     template_params = create_labnotes_context(
         request,
         ct,
@@ -7160,9 +7158,8 @@ def work_commitment(
                 ct.save()
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/labnote', ct.id))
-    return render_to_response("valueaccounting/workbook.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "valueaccounting/workbook.html",
+        template_params)
 
 def create_worknow_context(
         request,
@@ -7238,16 +7235,15 @@ def work_now(
         ct = get_object_or_404(Commitment, id=commitment_id)
         #if not request.user.is_superuser:
         #    if agent != ct.from_agent:
-        #        return render_to_response('valueaccounting/no_permission.html')
+        #        return render(request, 'valueaccounting/no_permission.html')
     template_params = create_worknow_context(
         request,
         process,
         agent,
         ct,
     )
-    return render_to_response("valueaccounting/work_now.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "valueaccounting/work_now.html",
+        template_params)
 
 def create_past_work_context(
         request,
@@ -7355,7 +7351,7 @@ def pastwork_reload(
     ct = get_object_or_404(Commitment, id=commitment_id)
     agent = get_agent(request)
     if agent != ct.from_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     #import pdb; pdb.set_trace()
     event=None
     event_id = int(event_id)
@@ -7371,9 +7367,8 @@ def pastwork_reload(
     if request.method == "POST":
         return HttpResponseRedirect('/%s/%s/'
             % ('accounting/labnote', ct.id))
-    return render_to_response("valueaccounting/log_past_work.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "valueaccounting/log_past_work.html",
+        template_params)
 
 #obsolete?
 @login_required
@@ -7385,7 +7380,7 @@ def log_past_work(
     agent = get_agent(request)
     if not request.user.is_superuser:
         if agent != ct.from_agent:
-            return render_to_response('valueaccounting/no_permission.html')
+            return render(request, 'valueaccounting/no_permission.html')
     template_params = create_past_work_context(
         request,
         ct,
@@ -7394,9 +7389,8 @@ def log_past_work(
     if request.method == "POST":
         return HttpResponseRedirect('/%s/%s/'
             % ('accounting/labnote', ct.id))
-    return render_to_response("valueaccounting/log_past_work.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "valueaccounting/log_past_work.html",
+        template_params)
 
 @login_required
 def save_work_now(request, event_id):
@@ -7533,13 +7527,13 @@ def process_details(request, process_id):
     if process.work_events():
         labnotes = True
     cited_ids = [c.resource.id for c in process.citations()]
-    return render_to_response("valueaccounting/process.html", {
+    return render(request, "valueaccounting/process.html", {
         "process": process,
         "labnotes": labnotes,
         "cited_ids": cited_ids,
         "agent": agent,
         "help": get_help("process"),
-    }, context_instance=RequestContext(request))
+    })
 
 def process_oriented_logging(request, process_id):
     process = get_object_or_404(Process, id=process_id)
@@ -7677,7 +7671,7 @@ def process_oriented_logging(request, process_id):
 
     output_resource_ids = [e.resource.id for e in process.production_events() if e.resource]
 
-    return render_to_response("valueaccounting/process_oriented_logging.html", {
+    return render(request, "valueaccounting/process_oriented_logging.html", {
         "process": process,
         "change_process_form": change_process_form,
         "cited_ids": cited_ids,
@@ -7712,7 +7706,7 @@ def process_oriented_logging(request, process_id):
         "unplanned_work": unplanned_work,
         "work_now": work_now,
         "help": get_help("process"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def add_unplanned_cite_event(request, process_id):
@@ -8269,11 +8263,11 @@ def labnotes_history(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         processes = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/labnotes_history.html", {
+    return render(request, "valueaccounting/labnotes_history.html", {
         "processes": processes,
         "photo_size": (128, 128),
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 def todo_history(request):
     #import pdb; pdb.set_trace()
@@ -8290,9 +8284,9 @@ def todo_history(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         todos = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/todo_history.html", {
+    return render(request, "valueaccounting/todo_history.html", {
         "todos": todos,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def open_todos(request):
@@ -8310,9 +8304,9 @@ def open_todos(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         todos = paginator.page(paginator.num_pages)
 
-    return render_to_response("valueaccounting/open_todos.html", {
+    return render(request, "valueaccounting/open_todos.html", {
         "todos": todos,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def resource(request, resource_id, extra_context=None):
@@ -8385,7 +8379,7 @@ def resource(request, resource_id, extra_context=None):
                     send_coins_form = SendFairCoinsForm()
                     from faircoin_utils import network_fee
                     limit = resource.spending_limit()
-        return render_to_response("valueaccounting/digital_currency_resource.html", {
+        return render(request, "valueaccounting/digital_currency_resource.html", {
             "resource": resource,
             "photo_size": (128, 128),
             "role_formset": role_formset,
@@ -8393,16 +8387,16 @@ def resource(request, resource_id, extra_context=None):
             "is_owner": is_owner,
             "send_coins_form": send_coins_form,
             "limit": limit,
-        }, context_instance=RequestContext(request))
+        })
     else:
-        return render_to_response("valueaccounting/resource.html", {
+        return render(request, "valueaccounting/resource.html", {
             "resource": resource,
             "photo_size": (128, 128),
             "process_add_form": process_add_form,
             "order_form": order_form,
             "role_formset": role_formset,
             "agent": agent,
-        }, context_instance=RequestContext(request))
+        })
 
 
 def resource_role_agent_formset(prefix, data=None):
@@ -8474,14 +8468,14 @@ def incoming_value_flows(request, resource_id):
                 totals[flow.from_agent] += flow.quantity
     for key, value in totals.items():
         member_hours.append((key, value))
-    return render_to_response("valueaccounting/incoming_value_flows.html", {
+    return render(request, "valueaccounting/incoming_value_flows.html", {
         "resource": resource,
         "value_equation": ve,
         "ve_selection_form": ve_selection_form,
         "flows": flows,
         "value_per_unit": value_per_unit,
         "member_hours": member_hours,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_resource(request, resource_id):
@@ -8557,22 +8551,20 @@ def labnotes(request, process_id):
     if work_commitments.count() == 1:
         ct = work_commitments[0]
         template_params = get_labnote_context(ct, agent)
-        return render_to_response("valueaccounting/labnote.html",
-            template_params,
-            context_instance=RequestContext(request))
+        return render(request, "valueaccounting/labnote.html",
+            template_params)
     else:
-        return render_to_response("valueaccounting/labnotes.html", {
+        return render(request, "valueaccounting/labnotes.html", {
             "process": process,
             "agent": agent,
-        }, context_instance=RequestContext(request))
+        })
 
 def labnote(request, commitment_id):
     ct = get_object_or_404(Commitment, id=commitment_id)
     request_agent = get_agent(request)
     template_params = get_labnote_context(ct, request_agent)
-    return render_to_response("valueaccounting/labnote.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "valueaccounting/labnote.html",
+        template_params)
 
 @login_required
 def production_event_for_commitment(request):
@@ -9032,13 +9024,13 @@ def copy_process(request, process_id):
             elif keep_going:
                 return HttpResponseRedirect('/%s/%s/'
                     % ('accounting/change-process', process.id))
-    return render_to_response("valueaccounting/create_process.html", {
+    return render(request, "valueaccounting/create_process.html", {
         "demand": demand,
         "demand_form": demand_form,
         "process_form": process_form,
         "output_formset": output_formset,
         "input_formset": input_formset,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_work_event(request, event_id):
@@ -9857,7 +9849,7 @@ def change_process(request, process_id):
             elif keep_going:
                 return HttpResponseRedirect('/%s/%s/'
                     % ('accounting/change-process', process.id))
-    return render_to_response("valueaccounting/change_process.html", {
+    return render(request, "valueaccounting/change_process.html", {
         "process": process,
         "rand_form": rand_form,
         "demand_form": demand_form,
@@ -9867,7 +9859,7 @@ def change_process(request, process_id):
         "consumable_formset": consumable_formset,
         "usable_formset": usable_formset,
         "work_formset": work_formset,
-    }, context_instance=RequestContext(request))
+    })
     '''
 
 #todo: soon to be obsolete (is it obsolete now?)
@@ -9983,11 +9975,11 @@ def change_order(request, order_id):
     else:
         next = request.GET.get("next")
 
-    return render_to_response("valueaccounting/change_order.html", {
+    return render(request, "valueaccounting/change_order.html", {
         "order_form": order_form,
         "order": order,
         "next": next,
-    }, context_instance=RequestContext(request))
+    })
 
 class ResourceType_EventType(object):
     def __init__(self, resource_type, event_type):
@@ -10254,7 +10246,7 @@ def process_selections(request, rand=0):
                 return HttpResponseRedirect('/%s/%s/%s/'
                     % ('accounting/work-now', process.id, work_commitment.id))
 
-    return render_to_response("valueaccounting/process_selections.html", {
+    return render(request, "valueaccounting/process_selections.html", {
         "slots": slots,
         "selected_pattern": selected_pattern,
         "selected_context_agent": selected_context_agent,
@@ -10264,7 +10256,7 @@ def process_selections(request, rand=0):
         "demand_form": demand_form,
         "rand": rand,
         "help": get_help("process_select"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def plan_from_recipe(request):
@@ -10414,14 +10406,14 @@ def plan_from_recipe(request):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/order-schedule', demand.id))
 
-    return render_to_response("valueaccounting/plan_from_recipe.html", {
+    return render(request, "valueaccounting/plan_from_recipe.html", {
         "selected_context_agent": selected_context_agent,
         "ca_form": ca_form,
         "date_name_form": date_name_form,
         "resource_types": resource_types,
         "resource_type_lists": resource_type_lists,
         "help": get_help("plan_from_recipe"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def plan_from_rt(request, resource_type_id):
@@ -10463,11 +10455,11 @@ def plan_from_rt(request, resource_type_id):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/process', process.id))
 
-    return render_to_response("valueaccounting/plan_from_rt.html", {
+    return render(request, "valueaccounting/plan_from_rt.html", {
         "form": form,
         "resource_type": resource_type,
         "help": get_help("plan_from_rt"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def plan_from_rt_recipe(request, resource_type_id):
@@ -10565,13 +10557,13 @@ def plan_from_rt_recipe(request, resource_type_id):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/order-schedule', demand.id))
 
-    return render_to_response("valueaccounting/plan_from_rt_recipe.html", {
+    return render(request, "valueaccounting/plan_from_rt_recipe.html", {
         "date_name_form": date_name_form,
         "resource_type": resource_type,
         "resource_required": resource_required,
         "recipe_type": recipe_type,
         "help": get_help("plan_fr_rt_rcpe"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -10589,10 +10581,10 @@ def resource_facet_table(request):
             cell = headings.index(rf.facet_value.facet)
             row[cell] = rf
         rows.append(row)
-    return render_to_response("valueaccounting/resource_facets.html", {
+    return render(request, "valueaccounting/resource_facets.html", {
         "headings": headings,
         "rows": rows,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def comments(request):
@@ -10608,9 +10600,9 @@ def comments(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         comment_list = paginator.page(paginator.num_pages)
-    return render_to_response("valueaccounting/comments.html", {
+    return render(request, "valueaccounting/comments.html", {
         "comment_list": comment_list,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_resource_facet_value(request):
@@ -10790,7 +10782,7 @@ def exchanges(request, agent_id=None):
 
     #import pdb; pdb.set_trace()
 
-    return render_to_response("valueaccounting/exchanges.html", {
+    return render(request, "valueaccounting/exchanges.html", {
         "exchanges": exchanges,
         "dt_selection_form": dt_selection_form,
         "total_transfers": total_transfers,
@@ -10801,7 +10793,7 @@ def exchanges(request, agent_id=None):
         "ets": ets,
         "event_ids": event_ids,
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 #obsolete
 def exchanges_old(request):
@@ -10896,7 +10888,7 @@ def exchanges_old(request):
             comma = ","
     #import pdb; pdb.set_trace()
 
-    return render_to_response("valueaccounting/exchanges.html", {
+    return render(request, "valueaccounting/exchanges.html", {
         "exchanges": exchanges,
         "dt_selection_form": dt_selection_form,
         "total_cash": total_cash,
@@ -10907,7 +10899,7 @@ def exchanges_old(request):
         "selected_values": selected_values,
         "references": references,
         "event_ids": event_ids,
-    }, context_instance=RequestContext(request))
+    })
 
 def internal_exchanges(request, agent_id=None):
     #import pdb; pdb.set_trace()
@@ -10985,7 +10977,7 @@ def internal_exchanges(request, agent_id=None):
 
     #import pdb; pdb.set_trace()
 
-    return render_to_response("valueaccounting/internal_exchanges.html", {
+    return render(request, "valueaccounting/internal_exchanges.html", {
         "exchanges": exchanges,
         "dt_selection_form": dt_selection_form,
         "total_transfers": total_transfers,
@@ -10996,7 +10988,7 @@ def internal_exchanges(request, agent_id=None):
         "ets": ets,
         "event_ids": event_ids,
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 #obsolete
 def material_contributions(request):
@@ -11031,11 +11023,11 @@ def material_contributions(request):
             comma = ","
     #import pdb; pdb.set_trace()
 
-    return render_to_response("valueaccounting/material_contributions.html", {
+    return render(request, "valueaccounting/material_contributions.html", {
         "exchanges": exchanges,
         "dt_selection_form": dt_selection_form,
         "event_ids": event_ids,
-    }, context_instance=RequestContext(request))
+    })
 
 def demand_exchanges(request, agent_id=None):
     #import pdb; pdb.set_trace()
@@ -11112,7 +11104,7 @@ def demand_exchanges(request, agent_id=None):
 
     #import pdb; pdb.set_trace()
 
-    return render_to_response("valueaccounting/demand_exchanges.html", {
+    return render(request, "valueaccounting/demand_exchanges.html", {
         "exchanges": exchanges,
         "dt_selection_form": dt_selection_form,
         "total_transfers": total_transfers,
@@ -11123,7 +11115,7 @@ def demand_exchanges(request, agent_id=None):
         "ets": ets,
         "event_ids": event_ids,
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 #obsolete
 def sales_and_distributions(request, agent_id=None):
@@ -11203,7 +11195,7 @@ def sales_and_distributions(request, agent_id=None):
             comma = ","
     #import pdb; pdb.set_trace()
 
-    return render_to_response("valueaccounting/sales_and_distributions.html", {
+    return render(request, "valueaccounting/sales_and_distributions.html", {
         "exchanges": exchanges,
         "dt_selection_form": dt_selection_form,
         "total_cash_receipts": total_cash_receipts,
@@ -11214,7 +11206,7 @@ def sales_and_distributions(request, agent_id=None):
         "references": references,
         "event_ids": event_ids,
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 def distributions(request, agent_id=None):
     #import pdb; pdb.set_trace()
@@ -11257,14 +11249,14 @@ def distributions(request, agent_id=None):
             comma = ","
     #import pdb; pdb.set_trace()
 
-    return render_to_response("valueaccounting/distributions.html", {
+    return render(request, "valueaccounting/distributions.html", {
         "distributions": distributions,
         "dt_selection_form": dt_selection_form,
         "total_distributions": total_distributions,
         "event_ids": event_ids,
         "agent": agent,
         "user_agent": user_agent,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def exchange_events_csv(request):
@@ -11395,7 +11387,7 @@ def exchange_logging(request, exchange_type_id=None, exchange_id=None, context_a
             else:
                 exchange_form = ExchangeForm()
             slots = exchange_type.slots()
-            return render_to_response("valueaccounting/exchange_logging.html", {
+            return render(request, "valueaccounting/exchange_logging.html", {
                 "use_case": use_case,
                 "exchange_type": exchange_type,
                 "exchange_form": exchange_form,
@@ -11406,7 +11398,7 @@ def exchange_logging(request, exchange_type_id=None, exchange_id=None, context_a
                 "total_t": 0,
                 "total_rect": 0,
                 "help": get_help("exchange"),
-            }, context_instance=RequestContext(request))
+            })
         else:
             raise ValidationError("System Error: No agent, not allowed to create exchange.")
 
@@ -11481,7 +11473,7 @@ def exchange_logging(request, exchange_type_id=None, exchange_id=None, context_a
     else:
         raise ValidationError("System Error: No exchange or use case.")
 
-    return render_to_response("valueaccounting/exchange_logging.html", {
+    return render(request, "valueaccounting/exchange_logging.html", {
         "use_case": use_case,
         "exchange": exchange,
         "exchange_type": exchange_type,
@@ -11495,7 +11487,7 @@ def exchange_logging(request, exchange_type_id=None, exchange_id=None, context_a
         "total_t": total_t,
         "total_rect": total_rect,
         "help": get_help("exchange"),
-    }, context_instance=RequestContext(request))
+    })
 
 '''
 def exchange_logging_old(request, exchange_id):
@@ -11752,7 +11744,7 @@ def exchange_logging_old(request, exchange_id):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/exchange', exchange.id))
 
-    return render_to_response("valueaccounting/exchange_logging.html", {
+    return render(request, "valueaccounting/exchange_logging.html", {
         "use_case": use_case,
         "exchange": exchange,
         "exchange_form": exchange_form,
@@ -11811,7 +11803,7 @@ def exchange_logging_old(request, exchange_id):
         "total_out": total_out,
         "shipped_ids": shipped_ids,
         "help": get_help("exchange"),
-    }, context_instance=RequestContext(request))
+    })
 
 #obsolete
 @login_required
@@ -11835,13 +11827,13 @@ def create_exchange(request, use_case_identifier):
             exchange.save()
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/exchange', exchange.id))
-    return render_to_response("valueaccounting/create_exchange.html", {
+    return render(request, "valueaccounting/create_exchange.html", {
         "exchange_form": exchange_form,
         "use_case": use_case,
         "context_agent": context_agent,
         "context_types": context_types,
         "help": get_help("create_exchange"),
-    }, context_instance=RequestContext(request))
+    })
 
 #obsolete
 @login_required
@@ -11864,19 +11856,19 @@ def create_sale(request):
             exchange.save()
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/exchange', exchange.id))
-    return render_to_response("valueaccounting/create_sale.html", {
+    return render(request, "valueaccounting/create_sale.html", {
         "exchange_form": exchange_form,
         "context_agent": context_agent,
         "context_types": context_types,
         "help": get_help("create_sale"),
-    }, context_instance=RequestContext(request))
+    })
 
 #obsolete
 @login_required
 def create_distribution(request, agent_id):
     #import pdb; pdb.set_trace()
     if not request.user.is_staff:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     context_agent = get_object_or_404(EconomicAgent, id=agent_id)
     exchange_form = DistributionForm()
     if request.method == "POST":
@@ -11889,11 +11881,11 @@ def create_distribution(request, agent_id):
             exchange.save()
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/exchange', exchange.id))
-    return render_to_response("valueaccounting/create_distribution.html", {
+    return render(request, "valueaccounting/create_distribution.html", {
         "exchange_form": exchange_form,
         "context_agent": context_agent,
         "help": get_help("create_distribution"),
-    }, context_instance=RequestContext(request))
+    })
 '''
 
 def distribution_logging(request, distribution_id=None):
@@ -11901,7 +11893,7 @@ def distribution_logging(request, distribution_id=None):
     agent = get_agent(request)
     if not agent:
         if not distribution_id:
-            return render_to_response('valueaccounting/no_permission.html')
+            return render(request, 'valueaccounting/no_permission.html')
     logger = False
     if agent:
         if request.user.is_superuser:
@@ -11955,7 +11947,7 @@ def distribution_logging(request, distribution_id=None):
         }
         add_disbursement_form = DisbursementEventForm(prefix='disb', initial=disb_init, pattern=pattern)
 
-    return render_to_response("valueaccounting/distribution_logging.html", {
+    return render(request, "valueaccounting/distribution_logging.html", {
         "main_form": main_form,
         "dist": dist,
         "agent": agent,
@@ -11963,14 +11955,14 @@ def distribution_logging(request, distribution_id=None):
         "add_distribution_form": add_distribution_form,
         "add_disbursement_form": add_disbursement_form,
         "help": get_help("distribution_logging"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def create_distribution_using_value_equation(request, agent_id, value_equation_id=None):
     #import pdb; pdb.set_trace()
     #start_time = time.time()
     if not request.user.is_staff:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     context_agent = get_object_or_404(EconomicAgent, id=agent_id)
     if value_equation_id:
         ve = ValueEquation.objects.get(id=value_equation_id)
@@ -12068,7 +12060,7 @@ def create_distribution_using_value_equation(request, agent_id, value_equation_i
                     bucket.form = bucket.filter_entry_form()
     #end_time = time.time()
     #print("views.create_distribution_using_value_equation elapsed time was %g seconds" % (end_time - start_time))
-    return render_to_response("valueaccounting/create_distribution_using_value_equation.html", {
+    return render(request, "valueaccounting/create_distribution_using_value_equation.html", {
         "events_to_distribute": events_to_distribute,
         "header_form": header_form,
         "buckets": buckets,
@@ -12077,7 +12069,7 @@ def create_distribution_using_value_equation(request, agent_id, value_equation_i
         "agent_totals": agent_totals,
         "no_totals": no_totals,
         "help": get_help("create_distribution"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 def send_distribution_notification(distribution_event):
@@ -12150,10 +12142,10 @@ def resource_flow(request):
     resource_form = ResourceFlowForm(pattern=pattern)
     role_formset = resource_role_agent_formset(prefix='role')
 
-    return render_to_response("valueaccounting/resource_flow.html", {
+    return render(request, "valueaccounting/resource_flow.html", {
         "resource_form": resource_form,
         "role_formset": role_formset,
-    }, context_instance=RequestContext(request))
+    })
 
 #demo page for DHEN and GT
 #@login_required
@@ -12163,10 +12155,10 @@ def workflow_board_demo(request):
     resource_form = ResourceFlowForm(pattern=pattern)
     process_form = PlanProcessForm()
 
-    return render_to_response("valueaccounting/workflow_board_demo.html", {
+    return render(request, "valueaccounting/workflow_board_demo.html", {
         "resource_form": resource_form,
         "process_form": process_form,
-    }, context_instance=RequestContext(request))
+    })
 
 #demo page for DHEN
 #@login_required
@@ -12179,22 +12171,22 @@ def inventory_board_demo(request):
     move_dryer_form = ExchangeFlowForm()
     move_seller_form = ExchangeFlowForm()
 
-    return render_to_response("valueaccounting/inventory_board_demo.html", {
+    return render(request, "valueaccounting/inventory_board_demo.html", {
         "resource_form": resource_form,
         "process_form": process_form,
         "move_harvester_form": move_harvester_form,
         "move_dryer_form": move_dryer_form,
         "move_seller_form": move_seller_form,
-    }, context_instance=RequestContext(request))
+    })
 
 def lots(request):
     #import pdb; pdb.set_trace()
 
 
-    return render_to_response("valueaccounting/lots.html", {
+    return render(request, "valueaccounting/lots.html", {
         "resource_form": resource_form,
         "process_form": process_form,
-    }, context_instance=RequestContext(request))
+    })
 
 #@login_required
 def bucket_filter_header(request):
@@ -12214,9 +12206,9 @@ def bucket_filter_header(request):
             filter_set = data["filter_set"]
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                 % ('accounting/bucket-filter', agent.id, event_type.id, pattern_id, filter_set))
-    return render_to_response("valueaccounting/bucket_filter_header.html", {
+    return render(request, "valueaccounting/bucket_filter_header.html", {
         "header_form": header_form,
-    }, context_instance=RequestContext(request))
+    })
 
 #@login_required
 def bucket_filter(request, agent_id, event_type_id, pattern_id, filter_set):
@@ -12277,7 +12269,7 @@ def bucket_filter(request, agent_id, event_type_id, pattern_id, filter_set):
                     events = [e for e in events if e.resource_type in resource_types]
                 count = len(events)
 
-    return render_to_response("valueaccounting/bucket_filter.html", {
+    return render(request, "valueaccounting/bucket_filter.html", {
         "filter_set": filter_set,
         "context_agent": agent,
         "event_type": event_type,
@@ -12285,7 +12277,7 @@ def bucket_filter(request, agent_id, event_type_id, pattern_id, filter_set):
         "filter_form": filter_form,
         "events": events,
         "count": count,
-    }, context_instance=RequestContext(request))
+    })
 
 
 class AgentSubtotal(object):
@@ -12375,7 +12367,7 @@ def value_equation_sandbox(request, value_equation_id=None):
             if bucket.filter_method:
                 bucket.form = bucket.filter_entry_form()
 
-    return render_to_response("valueaccounting/value_equation_sandbox.html", {
+    return render(request, "valueaccounting/value_equation_sandbox.html", {
         "header_form": header_form,
         "buckets": buckets,
         "agent_totals": agent_totals,
@@ -12385,7 +12377,7 @@ def value_equation_sandbox(request, value_equation_id=None):
         "event_count": event_count,
         "hours": hours,
         "ve": ve,
-    }, context_instance=RequestContext(request))
+    })
 
 def json_value_equation_bucket(request, value_equation_id):
     #import pdb; pdb.set_trace()
@@ -12415,10 +12407,10 @@ def value_equations(request):
     value_equations = ValueEquation.objects.all()
     agent = get_agent(request)
 
-    return render_to_response("valueaccounting/value_equations.html", {
+    return render(request, "valueaccounting/value_equations.html", {
         "value_equations": value_equations,
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def edit_value_equation(request, value_equation_id=None):
@@ -12449,14 +12441,14 @@ def edit_value_equation(request, value_equation_id=None):
             count+=1
         rpt_heading = "Bucket " + str(vebr.value_equation_bucket.sequence) + " " + vebr.event_type.name
 
-    return render_to_response("valueaccounting/edit_value_equation.html", {
+    return render(request, "valueaccounting/edit_value_equation.html", {
         "value_equation": value_equation,
         "agent": agent,
         "value_equation_form": value_equation_form,
         "value_equation_bucket_form": value_equation_bucket_form,
         "test_results": test_results,
         "rpt_heading": rpt_heading,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def create_value_equation(request):
@@ -12663,7 +12655,7 @@ def cash_report(request):
     balance = starting_balance + in_total - out_total
     summary_list = sorted(summary.iteritems())
 
-    return render_to_response("valueaccounting/cash_report.html", {
+    return render(request, "valueaccounting/cash_report.html", {
         "events": events,
         "summary_list": summary_list,
         "dt_selection_form": dt_selection_form,
@@ -12678,7 +12670,7 @@ def cash_report(request):
         "selected_vas": selected_vas,
         "event_ids": event_ids,
         "option": option,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def cash_events_csv(request):
@@ -12735,10 +12727,10 @@ def virtual_accounts(request):
         for va in virtual_accounts:
             va.payout = va.allow_payout_by(agent, request.user)
 
-    return render_to_response("valueaccounting/virtual_accounts.html", {
+    return render(request, "valueaccounting/virtual_accounts.html", {
         "virtual_accounts": virtual_accounts,
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def payout_from_virtual_account(request, account_id):
@@ -12864,9 +12856,9 @@ def agent_type_lod(request, agent_type_name):
 
     ser = store.serialize(format='json-ld', context=context, indent=4)
     return HttpResponse(ser, content_type='application/json')
-    #return render_to_response("valueaccounting/agent_type.html", {
+    #return render(request, "valueaccounting/agent_type.html", {
     #    "agent_type": agent_type,
-    #}, context_instance=RequestContext(request))
+    #})
 
 def agent_relationship_type_lod(request, agent_assoc_type_name):
     #import pdb; pdb.set_trace()
@@ -12906,9 +12898,9 @@ def agent_relationship_type_lod(request, agent_assoc_type_name):
 
     ser = store.serialize(format='json-ld', context=context, indent=4)
     return HttpResponse(ser, content_type='application/json')
-    #return render_to_response("valueaccounting/agent_assoc_type.html", {
+    #return render(request, "valueaccounting/agent_assoc_type.html", {
     #    "agent_assoc_type": agent_assoc_type,
-    #}, context_instance=RequestContext(request))
+    #})
 
 def agent_relationship_lod(request, agent_assoc_id):
     aa = AgentAssociation.objects.filter(id=agent_assoc_id)
@@ -12938,9 +12930,9 @@ def agent_relationship_lod(request, agent_assoc_id):
 
     ser = store.serialize(format='json-ld', context=context, indent=4)
     return HttpResponse(ser, content_type='application/json')
-    #return render_to_response("valueaccounting/agent_association.html", {
+    #return render(request, "valueaccounting/agent_association.html", {
     #    "agent_association": agent_association,
-    #}, context_instance=RequestContext(request))
+    #})
 
 
 def agent_relationship_inv_lod(request, agent_assoc_id):
@@ -12971,9 +12963,9 @@ def agent_relationship_inv_lod(request, agent_assoc_id):
 
     ser = store.serialize(format='json-ld', context=context, indent=4)
     return HttpResponse(ser, content_type='application/json')
-    #return render_to_response("valueaccounting/agent_association.html", {
+    #return render(request, "valueaccounting/agent_association.html", {
     #    "agent_association": agent_association,
-    #}, context_instance=RequestContext(request))
+    #})
 
 def agent_lod(request, agent_id):
     agents = EconomicAgent.objects.filter(id=agent_id)
@@ -13242,12 +13234,12 @@ def skill_suggestions(request):
             state = data["state"]
     suggestions =  SkillSuggestion.objects.filter(state=state)
 
-    return render_to_response("valueaccounting/skill_suggestions.html", {
+    return render(request, "valueaccounting/skill_suggestions.html", {
         "help": get_help("skill_suggestions"),
         "suggestions": suggestions,
         "state_form": state_form,
         "state": state,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def validate_resource_type_name(request):
@@ -13331,19 +13323,19 @@ def membership_requests(request):
             state = data["state"]
     requests =  MembershipRequest.objects.filter(state=state)
 
-    return render_to_response("valueaccounting/membership_requests.html", {
+    return render(request, "valueaccounting/membership_requests.html", {
         "help": get_help("membership_requests"),
         "requests": requests,
         "state_form": state_form,
         "state": state,
         #"agent_form": agent_form,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def membership_request(request, membership_request_id):
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     mbr_req = get_object_or_404(MembershipRequest, pk=membership_request_id)
     init = {
         "name": " ".join([mbr_req.name, mbr_req.surname]),
@@ -13360,13 +13352,13 @@ def membership_request(request, membership_request_id):
     agent_form = AgentCreateForm(initial=init)
     nicks = '~'.join([
         agt.nick for agt in EconomicAgent.objects.all()])
-    return render_to_response("valueaccounting/membership_request.html", {
+    return render(request, "valueaccounting/membership_request.html", {
         "help": get_help("membership_request"),
         "mbr_req": mbr_req,
         "agent_form": agent_form,
         "user_agent": user_agent,
         "nicks": nicks,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def decline_request(request, membership_request_id):
@@ -13433,4 +13425,3 @@ def resource_role_context_agent_formset(prefix, data=None):
         )
     formset = RraFormSet(prefix=prefix, queryset=AgentResourceRole.objects.none(), data=data)
     return formset
-

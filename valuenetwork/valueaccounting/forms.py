@@ -246,7 +246,7 @@ class SelectResourceForm(forms.Form):
         if resource_type:
             self.fields["resource"].queryset = EconomicResource.goods.filter(resource_type=resource_type)
 
-
+#check
 class SelectOrCreateResourceForm(forms.ModelForm):
     resource = ResourceModelChoiceField(
         queryset=EconomicResource.objects.all(),
@@ -287,7 +287,7 @@ class SelectOrCreateResourceForm(forms.ModelForm):
         if qty_help:
             self.fields["quantity"].help_text = qty_help
 
-
+#check
 class EconomicResourceForm(forms.ModelForm):
     value_per_unit_of_use = forms.DecimalField(
         #help_text="Does not apply to this resource.",
@@ -333,7 +333,7 @@ class EconomicResourceForm(forms.ModelForm):
             self.fields["value_per_unit_of_use"].widget=forms.TextInput(attrs={'value': '0.0', 'class': 'quantity'})
             self.fields["value_per_unit_of_use"].help_text = vpu_help
 
-
+#check: might need qty field, used in process logging
 class CreateEconomicResourceForm(forms.ModelForm):
     from_agent = forms.ModelChoiceField(
         required=False,

@@ -140,5 +140,8 @@ urlpatterns = [
     url(r"^project-history/(?P<agent_id>\d+)/$", work.views.project_history, name="project_history"),
     url(r'^project-history-csv/$', work.views.project_history_csv,
         name="project_history_csv"),
+        
+    url(r'^work-log-resource/(?P<commitment_id>\d+)/$', work.views.work_log_resource_for_commitment, 
+        name="work_log_resource_for_commitment"),
 ]
 

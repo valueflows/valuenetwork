@@ -333,7 +333,7 @@ class EconomicResourceForm(forms.ModelForm):
             self.fields["value_per_unit_of_use"].widget=forms.TextInput(attrs={'value': '0.0', 'class': 'quantity'})
             self.fields["value_per_unit_of_use"].help_text = vpu_help
 
-#check: might need qty field, used in process logging
+#check
 class CreateEconomicResourceForm(forms.ModelForm):
     from_agent = forms.ModelChoiceField(
         required=False,
@@ -349,11 +349,34 @@ class CreateEconomicResourceForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'item-name',}))
     url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
     photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
-    quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
 
     class Meta:
         model = EconomicResource
-        exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
+        exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'quantity', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
+
+#used in process logging
+class ProduceEconomicResourceForm(forms.ModelForm):
+    from_agent = forms.ModelChoiceField(
+        required=False,
+        queryset=EconomicAgent.objects.all(),
+        label=_("Work done by"),
+        help_text=_("Required only if not logging work inputs"),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}))
+    identifier = forms.CharField(
+        required=False,
+        label=_("Identifier"),
+        help_text=_("For example, lot number or serial number."),
+        widget=forms.TextInput(attrs={'class': 'item-name',}))
+    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+    photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+    event_quantity = forms.DecimalField(
+        label=_("Quantity produced"),
+        widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
+
+    class Meta:
+        model = EconomicResource
+        exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'quantity', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
 
 
 class TransformEconomicResourceForm(forms.ModelForm):

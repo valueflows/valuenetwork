@@ -246,48 +246,7 @@ class SelectResourceForm(forms.Form):
         if resource_type:
             self.fields["resource"].queryset = EconomicResource.goods.filter(resource_type=resource_type)
 
-#check
-class SelectOrCreateResourceForm(forms.ModelForm):
-    resource = ResourceModelChoiceField(
-        queryset=EconomicResource.objects.all(),
-        label="Add to selected resource or create new resource below",
-        required=False,
-        widget=forms.Select(attrs={'class': 'input-xlarge chzn-select',}))
-    quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
-    #unit_of_quantity = forms.ModelChoiceField(
-    #    queryset=Unit.objects.exclude(unit_type='value'),
-    #    label=_("Unit"),
-    #    empty_label=None,
-    #    widget=forms.Select(attrs={'class': 'input-medium',}))
-    identifier = forms.CharField(
-        required=False,
-        label="Identifier",
-        help_text="For example, lot number or serial number.",
-        widget=forms.TextInput(attrs={'class': 'item-name',}))
-    current_location = forms.ModelChoiceField(
-        queryset=Location.objects.all(),
-        required=False,
-        label=_("Current Resource Location"),
-        widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
-    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
-    photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
-    notes = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
 
-    class Meta:
-        model = EconomicResource
-        fields = ('quantity', 'identifier', 'current_location', 'url', 'photo_url', 'notes')
-
-    def __init__(self, resource_type=None, qty_help=None, *args, **kwargs):
-        super(SelectOrCreateResourceForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
-        if resource_type:
-            self.fields["resource"].queryset = EconomicResource.goods.filter(resource_type=resource_type)
-        if qty_help:
-            self.fields["quantity"].help_text = qty_help
-
-#check
 class EconomicResourceForm(forms.ModelForm):
     value_per_unit_of_use = forms.DecimalField(
         #help_text="Does not apply to this resource.",
@@ -333,7 +292,7 @@ class EconomicResourceForm(forms.ModelForm):
             self.fields["value_per_unit_of_use"].widget=forms.TextInput(attrs={'value': '0.0', 'class': 'quantity'})
             self.fields["value_per_unit_of_use"].help_text = vpu_help
 
-#check
+#used on resource_type page
 class CreateEconomicResourceForm(forms.ModelForm):
     from_agent = forms.ModelChoiceField(
         required=False,

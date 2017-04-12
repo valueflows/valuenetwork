@@ -14,16 +14,24 @@
 
 <style>
 
-	tr.even td 
-	{
+	tr.even td {
 		color:#000000;
-		background-color:#EAF2D3;
+		background-color:#f5f5f5; /*EAF2D3;*/
 	}
-
-	th
-	{
+	/*th {
 		background-color:#C8D6E8;
-	}
+	}*/
+
+  .control-group input, .control-group .controls div {
+    margin-bottom: 5px;
+  }
+  #filterForm .btn {
+    margin-bottom: 7px;
+  }
+  #btn-export {
+    margin-bottom: 6px;
+    float: right;
+  }
 
 </style>
 
@@ -35,12 +43,13 @@
     <div class="container">
         {% include "_messages.html" %}
 	<div>
-		<legend>{% trans "History for" %} {{ project.agent_type }} {{ project }}</legend>
-		
+		<legend>
+        <a class="indent" href="{% url 'members_agent' agent_id=project.id %}">{{ project.name }}</a> > {% trans "Work History" %}</legend>
+
 		<div>
             <form id="filterForm" action="." method="POST" style="display: inline;" >
                 {% csrf_token %}
-                <div id="div_id_start_date" class="control-group" style="display: inline;" >     
+                <div id="div_id_start_date" class="control-group" style="display: inline;" >
                     <label for="id_start_date" class="control-label required-field" style="display: inline;" >
                         {% trans "Show events from " %}
                     </label>
@@ -48,7 +57,7 @@
                         {{ filter_form.start_date }}
                     </div>
                 </div>
-                <div id="div_id_end_date" class="control-group" style="display: inline;" >     
+                <div id="div_id_end_date" class="control-group" style="display: inline;" >
                     <label for="id_end_date" class="control-label required-field" style="display: inline;" >
                         {% trans " through " %}
                     </label>
@@ -62,23 +71,22 @@
                     </label>
                     <div class="controls" style="display: inline; vertical-align: bottom;" >
                         {{ filter_form.from_agents }}
-                    </div>                    
+                    </div>
                 </div>&nbsp;
                 <input type="submit" name="submit" class="btn btn-info" style="display: inline;" value="{% trans 'Filter' %}" />
             </form>
                 {% if event_ids and agent %}
-                    <a 
-                        href=" {% url "project_history_csv" %}?event-ids={{ event_ids }}" 
-                        id="btn-export" 
-                        class="btn btn-primary" 
-                        title="Export filtered list to csv (comma separated value) format" 
-                        style="display: inline; vertical-align: middle;"
+                    <a
+                        href=" {% url "project_history_csv" %}?event-ids={{ event_ids }}"
+                        id="btn-export"
+                        class="btn btn-primary"
+                        title="Export filtered list to csv (comma separated value) format"
                         >{% trans "Export CSV File" %}
                     </a>
                 {% endif %}
 		</div>
-		
-		<table style="width: 100%;" class="table table-bordered table-hover table-condensed" >
+
+		<table style="width:100%; margin-top:13px;" class="table table-bordered table-hover table-condensed" >
 			<thead>
                 <th>{% trans "Done" %}</th>
 				<th>{% trans "Due" %}</th>
@@ -92,9 +100,9 @@
 				{% comment %}
 				<th>{% trans "Deliverables" %}</th>
 				{% endcomment %}
-				
+
 			</thead>
-			<tbody>	
+			<tbody>
 				{% for event in events %}
 					<tr class="{% cycle 'odd' 'even' %}">
 						<td>{{ event.event_date }}</td>
@@ -125,7 +133,7 @@
 					    {% endcomment %}
 					</tr>
 				{% endfor %}
-			<tbody>	
+			<tbody>
 		</table>
 <div class="pagination">
     <span class="step-links">
@@ -159,7 +167,7 @@
 	$(document).ready(function(){
 
 		$('#projects').addClass('active');
-		
+
 		$(".chzn-select").chosen({
             placeholder_text_multiple: "Select some workers"
 		});

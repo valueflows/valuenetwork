@@ -5725,9 +5725,9 @@ def plan_work(request, rand=0):
         "help": get_help("process_select"),
     }, context_instance=RequestContext(request))
 
-def project_history(request, project_id):
+def project_history(request, agent_id):
     #import pdb; pdb.set_trace()
-    project = get_object_or_404(EconomicAgent, pk=project_id)
+    project = get_object_or_404(EconomicAgent, pk=agent_id)
     agent = get_agent(request)
     event_list = project.contribution_events()
     #event_list = project.all_events()
@@ -5793,7 +5793,7 @@ def project_history_csv(request):
 
     return response
 
-    
+
 @login_required
 def order_delete_confirmation_work(request, order_id):
     order = get_object_or_404(Order, pk=order_id)

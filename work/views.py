@@ -5,7 +5,7 @@ import datetime
 
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseServerError, Http404, HttpResponseNotFound, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -49,10 +49,9 @@ def get_url_starter():
 
 def work_home(request):
 
-    return render_to_response("work_home.html", {
+    return render(request, "work_home.html", {
         "help": get_help("work_home"),
-    },
-        context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -60,18 +59,18 @@ def my_dashboard(request):
     #import pdb; pdb.set_trace()
     agent = get_agent(request)
 
-    return render_to_response("work/my_dashboard.html", {
+    return render(request, "work/my_dashboard.html", {
         "agent": agent,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def new_features(request):
     new_features = NewFeature.objects.all()
 
-    return render_to_response("work/new_features.html", {
+    return render(request, "work/new_features.html", {
         "new_features": new_features,
         "photo_size": (256, 256),
-    }, context_instance=RequestContext(request))
+    })
 
 def map(request):
     agent = get_agent(request)
@@ -80,7 +79,7 @@ def map(request):
     latitude = settings.MAP_LATITUDE
     longitude = settings.MAP_LONGITUDE
     zoom = settings.MAP_ZOOM
-    return render_to_response("work/map.html", {
+    return render(request, "work/map.html", {
         "agent": agent,
         "locations": locations,
         "nolocs": nolocs,
@@ -88,7 +87,7 @@ def map(request):
         "longitude": longitude,
         "zoom": zoom,
         "help": get_help("work_map"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 
@@ -129,7 +128,7 @@ def profile(request):
     #balance = 2
     candidate_membership = agent.candidate_membership()
 
-    return render_to_response("work/profile.html", {
+    return render(request, "work/profile.html", {
         "agent": agent,
         "photo_size": (128, 128),
         "change_form": change_form,
@@ -147,7 +146,7 @@ def profile(request):
         #"share_price": share_price,
         #"number_of_shares": number_of_shares,
         #"can_pay": can_pay,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -155,7 +154,7 @@ def change_personal_info(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     change_form = WorkAgentCreateForm(instance=agent, data=request.POST or None)
     if request.method == "POST":
         #import pdb; pdb.set_trace()
@@ -169,7 +168,7 @@ def upload_picture(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     form = UploadAgentForm(instance=agent, data=request.POST, files=request.FILES)
     if form.is_valid():
         data = form.cleaned_data
@@ -226,7 +225,7 @@ def update_skills(request, agent_id):
         agent = get_object_or_404(EconomicAgent, id=agent_id)
         user_agent = get_agent(request)
         if not user_agent:
-            return render_to_response('valueaccounting/no_permission.html')
+            return render(request, 'valueaccounting/no_permission.html')
         #import pdb; pdb.set_trace()
         et_work = EventType.objects.get(name="Time Contribution")
         arts = agent.resource_types.filter(event_type=et_work)
@@ -288,10 +287,10 @@ def register_skills(request):
     agent = get_agent(request)
     skills = EconomicResourceType.objects.filter(behavior="work")
 
-    return render_to_response("work/register_skills.html", {
+    return render(request, "work/register_skills.html", {
         "agent": agent,
         "skills": skills,
-    }, context_instance=RequestContext(request))
+    })
 '''
 
 
@@ -334,7 +333,7 @@ def manage_faircoin_account(request, resource_id):
                 payment_due = True
             can_pay = balance >= share_price
 
-    return render_to_response("work/faircoin_account.html", {
+    return render(request, "work/faircoin_account.html", {
         "resource": resource,
         "photo_size": (128, 128),
         "agent": agent,
@@ -350,7 +349,7 @@ def manage_faircoin_account(request, resource_id):
         "faircoin_account": faircoin_account,
         "balance": balance,
 
-    }, context_instance=RequestContext(request))
+    })
 
 def validate_faircoin_address_for_worker(request):
     #import pdb; pdb.set_trace()
@@ -649,14 +648,14 @@ def faircoin_history(request, resource_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
     if resource.owner() == agent or resource.owner() in agent.managed_projects() or agent.is_staff():
-        return render_to_response("work/faircoin_history.html", {
+        return render(request, "work/faircoin_history.html", {
             "resource": resource,
             "agent": agent,
             "unit": unit,
             "events": events,
-        }, context_instance=RequestContext(request))
+        })
     else:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
 
 
 
@@ -897,10 +896,10 @@ def membership_request(request):
 
             return HttpResponseRedirect('/%s/'
                 % ('membershipthanks'))
-    return render_to_response("work/membership_request.html", {
+    return render(request, "work/membership_request.html", {
         "help": get_help("work_membership_request"),
         "membership_form": membership_form,
-    }, context_instance=RequestContext(request))
+    })
 
 
 def membership_discussion(request, membership_request_id):
@@ -911,13 +910,13 @@ def membership_discussion(request, membership_request_id):
         if user_agent.membership_request() == mbr_req or request.user.is_staff:
             allowed = True
     if not allowed:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
 
-    return render_to_response("work/membership_request_with_comments.html", {
+    return render(request, "work/membership_request_with_comments.html", {
         "help": get_help("membership_request"),
         "mbr_req": mbr_req,
         "user_agent": user_agent,
-    }, context_instance=RequestContext(request))
+    })
 
 
 
@@ -939,7 +938,7 @@ def your_projects(request):
         if agent.is_active_freedom_coop_member() or request.user.is_staff or agent.is_participant() or managed_projects:
             allowed = True
     if not allowed:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
 
     for node in projects:
         aats = []
@@ -975,21 +974,21 @@ def your_projects(request):
                       aats.append(aat)
             node.aats = aats'''
 
-    return render_to_response("work/your_projects.html", {
+    return render(request, "work/your_projects.html", {
         "projects": projects,
         "help": get_help("your_projects"),
         "agent": agent,
         "agent_form": agent_form,
         "managed_projects": managed_projects,
         "join_projects": join_projects,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
 def create_your_project(request):
     user_agent = get_agent(request)
     if not user_agent or not user_agent.is_active_freedom_coop_member:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     if request.method == "POST":
         pro_form = ProjectCreateForm(request.POST)
         agn_form = AgentCreateForm(request.POST)
@@ -1032,7 +1031,7 @@ def members_agent(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent or not user_agent.is_participant or not user_agent.is_active_freedom_coop_member:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
 
     user_is_agent = False
     if agent == user_agent:
@@ -1156,7 +1155,7 @@ def members_agent(request, agent_id):
 
     #artwork = get_object_or_404(Artwork_Type, clas="Material")
 
-    return render_to_response("work/members_agent.html", {
+    return render(request, "work/members_agent.html", {
         "agent": agent,
         "membership_request": membership_request,
         "photo_size": (128, 128),
@@ -1178,7 +1177,7 @@ def members_agent(request, agent_id):
         "form_entries": entries,
         "fobi_name": fobi_name,
         #"artwork_pk": artwork.pk,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -1203,7 +1202,7 @@ def change_your_project(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         try:
@@ -1461,13 +1460,13 @@ def joinaproject_request(request, form_slug = False):
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
     fobi_form = FormClass(**kwargs)
 
-    return render_to_response("work/joinaproject_request.html", {
+    return render(request, "work/joinaproject_request.html", {
         "help": get_help("work_join_request"),
         "join_form": join_form,
         "fobi_form": fobi_form,
         "project": project,
         "post": escapejs(json.dumps(request.POST)),
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -1494,7 +1493,7 @@ def joinaproject_request_internal(request, agent_id = False):
           request = request
       )
     else:
-      return render_to_response('work/no_permission.html')
+      return render(request, 'work/no_permission.html')
 
     if request.method == "POST":
         #import pdb; pdb.set_trace()
@@ -1666,13 +1665,13 @@ def joinaproject_request_internal(request, agent_id = False):
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
     fobi_form = FormClass(**kwargs)
 
-    return render_to_response("work/joinaproject_request_internal.html", {
+    return render(request, "work/joinaproject_request_internal.html", {
         "help": get_help("work_join_request_internal"),
         "join_form": join_form,
         "fobi_form": fobi_form,
         "project": project,
         "post": escapejs(json.dumps(request.POST)),
-    }, context_instance=RequestContext(request))
+    })
 
 
 
@@ -1725,7 +1724,7 @@ def join_requests(request, agent_id):
             else:
               req.entries = []
 
-    return render_to_response("work/join_requests.html", {
+    return render(request, "work/join_requests.html", {
         "help": get_help("join_requests"),
         "requests": requests,
         "state_form": state_form,
@@ -1733,14 +1732,14 @@ def join_requests(request, agent_id):
         "agent_form": agent_form,
         "project": project,
         "fobi_headers": fobi_headers,
-    }, context_instance=RequestContext(request))
+    })
 
 
 '''@login_required
 def join_request(request, join_request_id):
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
     init = {
         "name": " ".join([mbr_req.name, mbr_req.surname]),
@@ -1757,13 +1756,13 @@ def join_request(request, join_request_id):
     agent_form = AgentCreateForm(initial=init)
     nicks = '~'.join([
         agt.nick for agt in EconomicAgent.objects.all()])
-    return render_to_response("work/join_request.html", {
+    return render(request, "work/join_request.html", {
         "help": get_help("join_request"),
         "mbr_req": mbr_req,
         "agent_form": agent_form,
         "user_agent": user_agent,
         "nicks": nicks,
-    }, context_instance=RequestContext(request))
+    })
 '''
 
 @login_required
@@ -1922,7 +1921,7 @@ def project_feedback(request, agent_id, join_request_id):
       elif jn_req.agent == request.user.agent.agent: #in user_agent.joinaproject_requests():
         allowed = True
     if not allowed:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
 
     fobi_slug = project.fobi_slug
     fobi_headers = []
@@ -1946,13 +1945,13 @@ def project_feedback(request, agent_id, join_request_id):
             for key in fobi_keys:
               jn_req.items_data.append({"key": jn_req.form_headers[key], "val": jn_req.data.get(key)})
 
-    return render_to_response("work/join_request_with_comments.html", {
+    return render(request, "work/join_request_with_comments.html", {
         "help": get_help("project_feedback"),
         "jn_req": jn_req,
         "user_agent": user_agent,
         "agent": agent,
         "fobi_headers": fobi_headers,
-    }, context_instance=RequestContext(request))
+    })
 
 
 
@@ -2076,7 +2075,7 @@ def create_project_user_and_agent(request, agent_id):
     #import pdb; pdb.set_trace()
     project_agent = get_object_or_404(EconomicAgent, id=agent_id)
     if not project_agent.managers: # or not request.user.agent.agent in project_agent.managers:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     user_form = UserCreationForm(data=request.POST or None)
     agent_form = AgentForm(data=request.POST or None)
     agent_selection_form = AgentSelectionForm()
@@ -2152,11 +2151,11 @@ def create_project_user_and_agent(request, agent_id):
                         return HttpResponseRedirect('/%s/%s/'
                             % ('accounting/agent', agent.id))
 
-    return render_to_response("work/create_project_user_and_agent.html", {
+    return render(request, "work/create_project_user_and_agent.html", {
         "user_form": user_form,
         "agent_form": agent_form,
         "agent_selection_form": agent_selection_form,
-    }, context_instance=RequestContext(request))
+    })
 
 '''
 
@@ -3011,7 +3010,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
     #import pdb; pdb.set_trace()
 
-    return render_to_response("work/exchanges_all.html", {
+    return render(request, "work/exchanges_all.html", {
         "exchanges": exchanges,
         "exchanges_by_type": exchanges_by_type,
         "dt_selection_form": dt_selection_form,
@@ -3032,7 +3031,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
         "Utype_tree": Ocp_Unit_Type.objects.filter(id__in=agent.used_units_ids()), #all(),
         #"unit_types": unit_types,
         "ext_form": ext_form,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -3099,7 +3098,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
 
             '''exchange_form = ExchangeContextForm()
             slots = exchange_type.slots()
-            return render_to_response("work/exchange_logging_work.html", {
+            return render(request, "work/exchange_logging_work.html", {
                 "use_case": use_case,
                 "exchange_type": exchange_type,
                 "exchange_form": exchange_form,
@@ -3111,7 +3110,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 "total_t": 0,
                 "total_rect": 0,
                 "help": get_help("exchange"),
-            }, context_instance=RequestContext(request))'''
+            })'''
         else:
             raise ValidationError("System Error: No agent, not allowed to create exchange.")
 
@@ -3201,7 +3200,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
     else:
         raise ValidationError("System Error: No exchange or use case.")
 
-    return render_to_response("work/exchange_logging_work.html", {
+    return render(request, "work/exchange_logging_work.html", {
         "use_case": use_case,
         "exchange": exchange,
         "exchange_type": exchange_type,
@@ -3216,7 +3215,7 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
         "total_rect": total_rect,
         "help": get_help("exchange"),
         #"add_type": add_new_type_mkp(),
-    }, context_instance=RequestContext(request))
+    })
 
 
 def add_new_type_mkp(): # not used now
@@ -3234,7 +3233,7 @@ def add_transfer_external_agent(request, commitment_id, context_agent_id):
     exchange = commitment.exchange
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     if request.method == "POST":
         form = AgentCreateForm(request.POST)
         if form.is_valid():
@@ -4209,7 +4208,7 @@ def project_all_resources(request, agent_id):
 
     Rtype_form = NewResourceTypeForm(agent=agent, data=request.POST or None)
 
-    return render_to_response("work/project_resources.html", {
+    return render(request, "work/project_resources.html", {
         #"resources": resources,
         "resource_types": resource_types,
         "facets": facets,
@@ -4222,14 +4221,14 @@ def project_all_resources(request, agent_id):
         'Rtype_tree': Ocp_Artwork_Type.objects.all(),
         'Rtype_form': Rtype_form,
         'Stype_tree': Ocp_Skill_Type.objects.all(),
-    }, context_instance=RequestContext(request))
+    })
 
 
 def new_resource_type(request, agent_id, Rtype):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not (agent == user_agent or user_agent in agent.managers()):
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
 
     # process savings TODO
 
@@ -4244,7 +4243,7 @@ def project_resource(request, agent_id, resource_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not (agent == user_agent or user_agent in agent.managers()):
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
 
     RraFormSet = modelformset_factory(
         AgentResourceRole,
@@ -4312,7 +4311,7 @@ def project_resource(request, agent_id, resource_id):
                     send_coins_form = SendFairCoinsForm()
                     from valuenetwork.valueaccounting.faircoin_utils import network_fee
                     limit = resource.spending_limit()
-        return render_to_response("work/faircoin_account.html", {
+        return render(request, "work/faircoin_account.html", {
             "resource": resource,
             "photo_size": (128, 128),
             "role_formset": role_formset,
@@ -4320,16 +4319,16 @@ def project_resource(request, agent_id, resource_id):
             "is_owner": is_owner,
             "send_coins_form": send_coins_form,
             "limit": limit,
-        }, context_instance=RequestContext(request))
+        })
     else:
-        return render_to_response("work/project_resource.html", {
+        return render(request, "work/project_resource.html", {
             "resource": resource,
             "photo_size": (128, 128),
             "process_add_form": process_add_form,
             "order_form": order_form,
             "role_formset": role_formset,
             "agent": agent,
-        }, context_instance=RequestContext(request))
+        })
 
 
 
@@ -4349,12 +4348,12 @@ def movenode(request, node_id): # still not used
     else:
         form = MoveNodeForm(rtype)
 
-    return render_to_response('work/project_resources.html', {
+    return render(request, 'work/project_resources.html', {
         'form': form,
         'rtype': rtype,
         'Rtype_tree': Ocp_Artwork_Type.objects.all(),
         #'agent': agent,
-    }, context_instance=RequestContext(request))
+    })
 
 
 
@@ -4405,7 +4404,7 @@ def my_tasks(request):
         todo_form = WorkTodoForm(agent=agent, initial=init)
     #work_now = settings.USE_WORK_NOW
     #import pdb; pdb.set_trace()
-    return render_to_response("work/my_tasks.html", {
+    return render(request, "work/my_tasks.html", {
         "agent": agent,
         "my_work": my_work,
         #"my_skillz": my_skillz,
@@ -4414,7 +4413,7 @@ def my_tasks(request):
         "todo_form": todo_form,
         #"work_now": work_now,
         "help": get_help("proc_log"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -4466,7 +4465,7 @@ def take_new_tasks(request):
     # see https://github.com/FreedomCoop/valuenetwork/issues/263
     # process_tasks shd be filled
     process_tasks = []
-    return render_to_response("work/take_new_tasks.html", {
+    return render(request, "work/take_new_tasks.html", {
         "agent": agent,
         #"my_work": my_work,
         "process_tasks": process_tasks,
@@ -4476,7 +4475,7 @@ def take_new_tasks(request):
         #"todo_form": todo_form,
         #"work_now": work_now,
         "help": get_help("proc_log"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -4535,7 +4534,7 @@ def project_work(request):
     #task_bugs change
     projects = agent.related_contexts() #managed_projects()
     if not agent or agent.is_participant_candidate():
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     next = "/work/project-work/"
     context_id = 0
     start = datetime.date.today() - datetime.timedelta(days=30)
@@ -4575,7 +4574,7 @@ def project_work(request):
         if todo.context_agent in projects:
             my_project_todos.append(todo)
     #import pdb; pdb.set_trace()
-    return render_to_response("work/project_work.html", {
+    return render(request, "work/project_work.html", {
         "agent": agent,
         "context_agents": context_agents,
         "all_processes": projects,
@@ -4588,7 +4587,7 @@ def project_work(request):
         "todos": my_project_todos,
         "next": next,
         "help": get_help("project_work"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -4637,7 +4636,7 @@ def process_logging(request, process_id):
     user = request.user
     agent_projects = agent.related_contexts()
     if process.context_agent not in agent_projects:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     logger = False
     worker = False
     super_logger = False
@@ -4768,7 +4767,7 @@ def process_logging(request, process_id):
 
     output_resource_ids = [e.resource.id for e in process.production_events() if e.resource]
 
-    return render_to_response("work/process_logging.html", {
+    return render(request, "work/process_logging.html", {
         "process": process,
         "change_process_form": change_process_form,
         "cited_ids": cited_ids,
@@ -4803,7 +4802,7 @@ def process_logging(request, process_id):
         "unplanned_work": unplanned_work,
         "work_now": work_now,
         "help": get_help("process_work"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def work_log_resource_for_commitment(request, commitment_id):
@@ -5021,11 +5020,11 @@ def non_process_logging(request):
                 return HttpResponseRedirect('/%s/'
                     % ('work/my-history'))
 
-    return render_to_response("work/non_process_logging.html", {
+    return render(request, "work/non_process_logging.html", {
         "member": member,
         "time_formset": time_formset,
         "help": get_help("non_proc_log"),
-    }, context_instance=RequestContext(request))
+    })
 
 
 
@@ -5864,7 +5863,7 @@ def my_history(request): # tasks history
         events = paginator.page(paginator.num_pages)
 
     #import pdb; pdb.set_trace()
-    return render_to_response("work/my_history.html", {
+    return render(request, "work/my_history.html", {
         "agent": agent,
         "user_is_agent": user_is_agent,
         "events": events,
@@ -5877,7 +5876,7 @@ def my_history(request): # tasks history
         "claim_distributions": format(claim_distributions, ",.2f"),
         "other_distributions": format(other_distributions, ",.2f"),
         "help": get_help("my_history"),
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def change_history_event(request, event_id):
@@ -5908,10 +5907,10 @@ def change_history_event(request, event_id):
             #            % ('work/my-history'))
             return HttpResponseRedirect('/%s/'
                 % ('work/my-history'))
-    return render_to_response("work/change_history_event.html", {
+    return render(request, "work/change_history_event.html", {
         "event_form": event_form,
         "page": page,
-    }, context_instance=RequestContext(request))
+    })
 
 
 
@@ -5990,16 +5989,15 @@ def work_timer(
         ct = get_object_or_404(Commitment, id=commitment_id)
         #if not request.user.is_superuser:
         #    if agent != ct.from_agent:
-        #        return render_to_response('valueaccounting/no_permission.html')
+        #        return render(request, 'valueaccounting/no_permission.html')
     template_params = create_worktimer_context(
         request,
         process,
         agent,
         ct,
     )
-    return render_to_response("work/work_timer.html",
-        template_params,
-        context_instance=RequestContext(request))
+    return render(request, "work/work_timer.html",
+        template_params)
 
 @login_required
 def save_timed_work_now(request, event_id):
@@ -6047,11 +6045,11 @@ def order_list(request):
     #import pdb; pdb.set_trace()
     projects = agent.managed_projects()
 
-    return render_to_response("work/order_list.html", {
+    return render(request, "work/order_list.html", {
         "projects": projects,
         "agent": agent,
         "help": help,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -6061,7 +6059,7 @@ def order_plan(request, order_id):
     #import pdb; pdb.set_trace()
     coordinated_projects = agent.managed_projects()
     if order.provider not in coordinated_projects:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     error_message = ""
     order_items = order.order_items()
     rts = None
@@ -6092,13 +6090,13 @@ def order_plan(request, order_id):
                 next_date = last_date + datetime.timedelta(days=1)
                 init = {"start_date": next_date, "end_date": next_date}
                 order_item.add_process_form = WorkflowProcessForm(prefix=str(order_item.id), initial=init, order_item=order_item)
-    return render_to_response("work/order_plan.html", {
+    return render(request, "work/order_plan.html", {
         "order": order,
         "agent": agent,
         "order_items": order_items,
         "add_order_item_form": add_order_item_form,
         "error_message": error_message,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -6107,7 +6105,7 @@ def change_project_order(request, order_id):
     agent = get_agent(request)
     coordinated_projects = agent.managed_projects()
     if order.provider not in coordinated_projects:
-        return render_to_response('valueaccounting/no_permission.html')
+        return render(request, 'valueaccounting/no_permission.html')
     #import pdb; pdb.set_trace()
     order_form = OrderChangeForm(instance=order, data=request.POST or None)
     if request.method == "POST":
@@ -6116,11 +6114,11 @@ def change_project_order(request, order_id):
             return HttpResponseRedirect('/%s/'
                 % ('work/order-list'))
 
-    return render_to_response("work/change_project_order.html", {
+    return render(request, "work/change_project_order.html", {
         "order_form": order_form,
         "order": order,
         "next": next,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
@@ -6356,7 +6354,7 @@ def plan_work(request, rand=0):
                 return HttpResponseRedirect('/%s/%s/'
                     % ('work/process-logging', process.id))
 
-    return render_to_response("work/plan_work.html", {
+    return render(request, "work/plan_work.html", {
         "slots": slots,
         "selected_pattern": selected_pattern,
         "selected_context_agent": selected_context_agent,
@@ -6366,7 +6364,7 @@ def plan_work(request, rand=0):
         #"demand_form": demand_form,
         "rand": rand,
         "help": get_help("process_select"),
-    }, context_instance=RequestContext(request))
+    })
 
 def project_history(request, agent_id):
     #import pdb; pdb.set_trace()
@@ -6403,13 +6401,13 @@ def project_history(request, agent_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    return render_to_response("work/project_history.html", {
+    return render(request, "work/project_history.html", {
         "project": project,
         "events": events,
         "filter_form": filter_form,
         "agent": agent,
         "event_ids": event_ids,
-    }, context_instance=RequestContext(request))
+    })
 
 @login_required
 def project_history_csv(request):
@@ -6443,7 +6441,7 @@ def order_delete_confirmation_work(request, order_id):
     agent = get_agent(request)
     coordinated_projects = agent.managed_projects()
     if order.provider not in coordinated_projects:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     pcs = order.producing_commitments()
     sked = []
     reqs = []
@@ -6456,14 +6454,14 @@ def order_delete_confirmation_work(request, order_id):
         for ct in pcs:
             #visited_resources.add(ct.resource_type)
             schedule_commitment(ct, sked, reqs, work, tools, visited_resources, 0)
-        return render_to_response('work/order_delete_confirmation_work.html', {
+        return render(request, 'work/order_delete_confirmation_work.html', {
             "order": order,
             "sked": sked,
             "reqs": reqs,
             "work": work,
             "tools": tools,
             "next": next,
-        }, context_instance=RequestContext(request))
+        })
     else:
         commitments = Commitment.objects.filter(independent_demand=order)
         if commitments:
@@ -6471,14 +6469,14 @@ def order_delete_confirmation_work(request, order_id):
                 sked.append(ct)
                 if ct.process not in sked:
                     sked.append(ct.process)
-            return render_to_response('work/order_delete_confirmation_work.html', {
+            return render(request, 'work/order_delete_confirmation_work.html', {
                 "order": order,
                 "sked": sked,
                 "reqs": reqs,
                 "work": work,
                 "tools": tools,
                 "next": next,
-            }, context_instance=RequestContext(request))
+            })
         else:
             order.delete()
             if next == "order-list":
@@ -6514,11 +6512,9 @@ def invoice_number(request):
             % ('work/invoice-number',))
 
 
-    return render_to_response("work/invoice_number.html", {
+    return render(request, "work/invoice_number.html", {
         "help": get_help("invoice_number"),
         "agent": agent,
         "form": form,
         "invoice_numbers": invoice_numbers,
-    }, context_instance=RequestContext(request))
-
-
+    })

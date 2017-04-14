@@ -189,6 +189,10 @@ urlpatterns = [
         name="work_add_unplanned_cite_event"),
     url(r"^delete-citation-event/(?P<commitment_id>\d+)/(?P<resource_id>\d+)/$", work.views.work_delete_citation_event, 
         name="work_delete_citation_event"),
+    url(r"^json-citation-unit/(?P<resource_type_id>\d+)/$", work.views.json_resource_type_citation_unit, 
+        name="work_json_resource_type_citation_unit"),
+    url(r"^join-task/(?P<commitment_id>\d+)/$", work.views.work_join_task, 
+        name="work_join_task"),
         
 ]
 

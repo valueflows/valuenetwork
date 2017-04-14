@@ -590,7 +590,7 @@ hr {
                                             </div>
                                             <div class="modal-body">
 
-                                                <form class="joinForm validateMe" name="join{{ item.id }}" enctype="multipart/form-data" action="{% url "join_task" commitment_id=item.id %}" method="POST" >
+                                                <form class="joinForm validateMe" name="join{{ item.id }}" enctype="multipart/form-data" action="{% url "work_join_task" commitment_id=item.id %}" method="POST" >
                                                     {% csrf_token %}
 {% comment %}
                                                     {{ item.join_form|as_bootstrap }}

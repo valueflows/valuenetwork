@@ -5911,7 +5911,50 @@ def work_delete_citation_event(request, commitment_id, resource_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('work/process-logging', process.id))
             
-            
+def json_resource_type_citation_unit(request, resource_type_id):
+    #import pdb; pdb.set_trace()
+    ert = get_object_or_404(EconomicResourceType, pk=resource_type_id)
+    direction = "use"
+    defaults = {
+        "unit": ert.directional_unit(direction).name,
+    }
+    data = simplejson.dumps(defaults, ensure_ascii=False)
+    return HttpResponse(data, content_type="text/json-comment-filtered")
+    
+@login_required
+def work_join_task(request, commitment_id):
+    if request.method == "POST":
+        ct = get_object_or_404(Commitment, id=commitment_id)
+        process = ct.process
+        agent = get_agent(request)
+
+        if notification:
+            #import pdb; pdb.set_trace()
+            workers = ct.workers()
+            users = []
+            for worker in workers:
+                worker_users = [au.user for au in worker.users.all()]
+                users.extend(worker_users)
+            site_name = get_site_name()
+            if users:
+                notification.send(
+                    users,
+                    "valnet_join_task",
+                    {"resource_type": ct.resource_type,
+                    "due_date": ct.due_date,
+                    "hours": ct.quantity,
+                    "unit": ct.resource_type.unit,
+                    "description": ct.description or "",
+                    "process": process,
+                    "creator": agent,
+                    "site_name": site_name,
+                    }
+                )
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+
  #    H I S T O R Y
 
 @login_required

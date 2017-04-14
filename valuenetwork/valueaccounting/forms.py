@@ -756,7 +756,7 @@ class ProcessConsumableForm(forms.ModelForm):
         queryset=Unit.objects.exclude(unit_type='value'),
         label=_("Unit"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
+        widget=forms.Select(attrs={'class': 'input-medium',}))
     description = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={'class': 'item-description',}))
@@ -869,7 +869,7 @@ class UnplannedOutputForm(forms.ModelForm):
         queryset=Unit.objects.exclude(unit_type='value').exclude(unit_type='time'),
         empty_label=None,
         label=_("Unit"),
-        widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
+        widget=forms.Select(attrs={'class': 'input-medium',}))
     url = forms.URLField(
         required=False,
         label="URL",
@@ -1496,6 +1496,21 @@ class WorkEventChangeForm(forms.ModelForm):
     class Meta:
         model = EconomicEvent
         fields = ('id', 'event_date', 'quantity', 'is_contribution', 'description')
+        
+class NonHourWorkEventChangeForm(forms.ModelForm):
+    id = forms.CharField(required=False, widget=forms.HiddenInput)
+    event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
+    quantity = forms.DecimalField(required=False,
+        widget=DecimalDurationWidget,
+        help_text="")
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
+
+    class Meta:
+        model = EconomicEvent
+        fields = ('id', 'event_date', 'quantity', 'is_contribution', 'description')
+
 
 
 #obsolete?

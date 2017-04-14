@@ -181,6 +181,14 @@ urlpatterns = [
         name="work_add_use_event"),
     url(r"^log-stage-change-event/(?P<commitment_id>\d+)/(?P<resource_id>\d+)/$", work.views.work_log_stage_change_event, 
         name="work_log_stage_change_event"),
+    url(r"^add-process-citation/(?P<process_id>\d+)/$", work.views.work_add_process_citation, 
+        name="work_add_process_citation"),
+    url(r'^citation-event/(?P<commitment_id>\d+)/(?P<resource_id>\d+)/$', work.views.work_add_citation_event, 
+        name="work_add_citation_event"),
+    url(r'^unplanned-cite-event/(?P<process_id>\d+)/$', work.views.work_add_unplanned_cite_event, 
+        name="work_add_unplanned_cite_event"),
+    url(r"^delete-citation-event/(?P<commitment_id>\d+)/(?P<resource_id>\d+)/$", work.views.work_delete_citation_event, 
+        name="work_delete_citation_event"),
         
 ]
 

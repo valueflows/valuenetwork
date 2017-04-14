@@ -816,10 +816,9 @@ hr {
                             <h3 id="cite-label">{% trans "Add an unplanned citation" %}</h3>
                         </div>
                         <div class="modal-body">
-                            <form class="cite-form validateMe" name="cite" enctype="multipart/form-data" id="addUnplannedCiteForm" action="{% url "add_unplanned_cite_event" process_id=process.id %}" method="POST" >
+                            <form class="cite-form validateMe" name="cite" enctype="multipart/form-data" id="addUnplannedCiteForm" action="{% url "work_add_unplanned_cite_event" process_id=process.id %}" method="POST" >
                                 {% csrf_token %}
                                 {{ unplanned_cite_form|as_bootstrap }}
-                                <span id="cite-unit">{{ context_agent.cite_unit }}</span>
                                 <div class="modal-footer">
                                     <input type="hidden" id="next" name="next" value="work" />
                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -869,7 +868,7 @@ hr {
                                             style="display: inline;"
                                             class="delete-citation-form"
                                             id="deleteForm{{ event.id }}"
-                                            action="{% url "delete_citation_event" commitment_id=item.id resource_id=resource.id %}"
+                                            action="{% url "work_delete_citation_event" commitment_id=item.id resource_id=resource.id %}"
                                             method="POST" >
                                             {% csrf_token %}
                                             <input type="hidden" id="next" name="next" value="work" />
@@ -902,7 +901,7 @@ hr {
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="eventForm{{ resource.id }} validateMe" name="res{{ resource.id }}" enctype="multipart/form-data"
-                                                        action="{% url "add_citation_event" commitment_id=item.id resource_id=resource.id %}" method="POST" >
+                                                        action="{% url "work_add_citation_event" commitment_id=item.id resource_id=resource.id %}" method="POST" >
                                                         {% csrf_token %}
                                                         {{ resource.cite_event_form|as_bootstrap }}
                                                     <div class="modal-footer">
@@ -1524,7 +1523,7 @@ hr {
 
         </div>
         <div class="modal-body">
-            <form class="cite-form" enctype="multipart/form-data" id="addCitationForm" name="addcite" action="{% url "add_process_citation" process_id=process.id %}" method="POST" >
+            <form class="cite-form" enctype="multipart/form-data" id="addCitationForm" name="addcite" action="{% url "work_add_process_citation" process_id=process.id %}" method="POST" >
 	            {% csrf_token %}
 
                     {{ add_citation_form|as_bootstrap }}
@@ -1801,7 +1800,7 @@ hr {
                 var targetId = event.target.id;
                 var prefix = targetId.split('-')[0];
                 var unitName = "#" + prefix + "-unit_of_quantity";
-                var jsonUrl = encodeURI("/accounting/json-citation-unit/" + resourceId + "/");
+                var jsonUrl = encodeURI("/work/json-citation-unit/" + resourceId + "/");
                 $.get(jsonUrl,
                     function(data){
                         var unit = data["unit"];

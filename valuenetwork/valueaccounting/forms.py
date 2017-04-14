@@ -1193,6 +1193,7 @@ class SelectCitationResourceForm(forms.Form):
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.citables_with_resources()
 
+            
 class UnplannedCiteEventForm(forms.Form):
     resource_type = FacetedModelChoiceField(
         queryset=EconomicResourceType.objects.all(),
@@ -1206,17 +1207,19 @@ class UnplannedCiteEventForm(forms.Form):
     #    queryset=Unit.objects.all(),
     #    widget=forms.Select(attrs={'readonly': 'readonly' }))
 
-    def __init__(self, pattern, load_resources=False, *args, **kwargs):
+    def __init__(self, pattern, cite_unit=None, load_resources=False, *args, **kwargs):
         #import pdb; pdb.set_trace()
         super(UnplannedCiteEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.citables_with_resources()
+            if cite_unit:
+                self.fields["unit_of_quantity"] = cite_unit.name
             if load_resources:
                 resources = EconomicResource.objects.all()
                 self.fields["resource"].choices = [('', '----------')] + [(r.id, r) for r in resources]
 
-#todo: test this
+                
 class UnplannedInputEventForm(forms.Form):
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
     resource_type = FacetedModelChoiceField(

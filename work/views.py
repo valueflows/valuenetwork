@@ -4739,9 +4739,10 @@ def process_logging(request, process_id):
                     add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=date_init)
 
         if "cite" in slots:
-            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=pattern)
+            cite_unit = None
             if context_agent.unit_of_claim_value:
                 cite_unit = context_agent.unit_of_claim_value
+            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=pattern, cite_unit=cite_unit)
             if logger:
                 add_citation_form = ProcessCitationForm(prefix='citation', pattern=pattern)
         if "consume" in slots:
@@ -5729,12 +5730,12 @@ def work_add_process_output(request, process_id):
 
 @login_required
 def work_log_stage_change_event(request, commitment_id, resource_id):
+    to_be_changed_commitment = get_object_or_404(Commitment, pk=commitment_id)
+    process = to_be_changed_commitment.process
     if request.method == "POST":
         #import pdb; pdb.set_trace()
-        to_be_changed_commitment = get_object_or_404(Commitment, pk=commitment_id)
         resource = get_object_or_404(EconomicResource, pk=resource_id)
-        quantity = resource.quantity
-        process = to_be_changed_commitment.process
+        quantity = resource.quantity 
         default_agent = process.default_agent()
         from_agent = default_agent
         event_date = datetime.date.today()
@@ -5786,9 +5787,131 @@ def work_log_stage_change_event(request, commitment_id, resource_id):
         resource.quantity = quantity
         resource.save()
         process.set_started(event.event_date, request.user)
-        return HttpResponseRedirect('/%s/%s/'
-            % ('work/process-logging', process.id))        
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))        
 
+@login_required
+def work_add_process_citation(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        form = ProcessCitationForm(data=request.POST, prefix='citation')
+        if form.is_valid():
+            input_data = form.cleaned_data
+            demand = process.independent_demand()
+            quantity = Decimal("1")
+            rt = input_data["resource_type"]
+            descrip = input_data["description"]
+            pattern = process.process_pattern
+            event_type = pattern.event_type_for_resource_type("cite", rt)
+            agent = get_agent(request)
+            ct = Commitment(
+                process=process,
+                #from_agent=agent,
+                independent_demand=demand,
+                order_item = process.order_item(),
+                event_type=event_type,
+                due_date=process.start_date,
+                resource_type=rt,
+                context_agent=process.context_agent,
+                quantity=quantity,
+                description=descrip,
+                unit_of_quantity=rt.directional_unit("cite"),
+                created_by=request.user,
+            )
+            ct.save()
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))    
+        
+@login_required
+def work_add_citation_event(request, commitment_id, resource_id):
+    #import pdb; pdb.set_trace()
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    resource = get_object_or_404(EconomicResource, pk=resource_id)
+    prefix = resource.form_prefix()
+    unit = ct.resource_type.directional_unit("use")
+    qty_help = " ".join(["unit:", unit.abbrev])
+    form = InputEventForm(qty_help=qty_help, prefix=prefix, data=request.POST)
+    if form.is_valid():
+        agent = get_agent(request)
+        event = form.save(commit=False)
+        event.commitment = ct
+        event.event_type = ct.event_type
+        event.from_agent = agent
+        event.resource_type = ct.resource_type
+        event.resource = resource
+        event.process = ct.process
+        default_agent = ct.process.default_agent()
+        event.from_agent = default_agent
+        event.to_agent = default_agent
+        event.context_agent = ct.context_agent
+        event.unit_of_quantity = unit
+        event.created_by = request.user
+        event.changed_by = request.user
+        event.save()
+        ct.process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', ct.process.id))
+        
+@login_required
+def work_add_unplanned_cite_event(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    pattern = process.process_pattern
+    #import pdb; pdb.set_trace()
+    if pattern:
+        form = UnplannedCiteEventForm(
+            prefix='unplannedcite',
+            data=request.POST,
+            pattern=pattern,
+            load_resources=True)
+        if form.is_valid():
+            data = form.cleaned_data
+            qty = data["quantity"]
+            if qty:
+                agent = get_agent(request)
+                rt = data["resource_type"]
+                r_id = data["resource"]
+                resource = EconomicResource.objects.get(id=r_id)
+                #todo: rethink for citations
+                default_agent = process.default_agent()
+                from_agent = resource.owner() or default_agent
+                event_type = pattern.event_type_for_resource_type("cite", rt)
+                event = EconomicEvent(
+                    event_type=event_type,
+                    resource_type = rt,
+                    resource = resource,
+                    from_agent = from_agent,
+                    to_agent = default_agent,
+                    process = process,
+                    context_agent = process.context_agent,
+                    event_date = datetime.date.today(),
+                    quantity=qty,
+                    unit_of_quantity = rt.directional_unit("cite"),
+                    created_by = request.user,
+                    changed_by = request.user,
+                )
+                event.save()
+                process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+@login_required
+def work_delete_citation_event(request, commitment_id, resource_id):
+    #import pdb; pdb.set_trace()
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    process = ct.process
+    if request.method == "POST":
+        resource = get_object_or_404(EconomicResource, pk=resource_id)
+        events = ct.fulfillment_events.filter(resource=resource)
+        for event in events:
+            event.delete()
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+            
+            
  #    H I S T O R Y
 
 @login_required

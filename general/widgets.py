@@ -3,8 +3,6 @@ import copy
 from django import forms
 from django.contrib.admin.templatetags.admin_static import static
 from django.core.urlresolvers import reverse
-from django.forms.widgets import RadioFieldRenderer
-from django.forms.widgets import flatatt
 from django.utils.html import escape, format_html, format_html_join, smart_urlquote
 from django.utils.text import Truncator
 from django.utils.translation import ugettext as _

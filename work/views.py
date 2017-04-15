@@ -4711,6 +4711,7 @@ def process_logging(request, process_id):
                 else:
                     add_output_form = ProcessOutputForm(prefix='output')
                     add_output_form.fields["resource_type"].queryset = output_resource_types
+        #import pdb; pdb.set_trace()
         if "work" in slots:
             if agent:
                 work_init = {
@@ -4738,9 +4739,10 @@ def process_logging(request, process_id):
                     add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=date_init)
 
         if "cite" in slots:
-            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=pattern)
+            cite_unit = None
             if context_agent.unit_of_claim_value:
                 cite_unit = context_agent.unit_of_claim_value
+            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=pattern, cite_unit=cite_unit)
             if logger:
                 add_citation_form = ProcessCitationForm(prefix='citation', pattern=pattern)
         if "consume" in slots:
@@ -4856,6 +4858,102 @@ def work_log_resource_for_commitment(request, commitment_id):
         if next == "work":
             return HttpResponseRedirect('/%s/%s/'
                 % ('work/process-logging', ct.process.id))
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', ct.process.id))
+        
+@login_required
+def work_invite_collaborator(request, commitment_id):
+    commitment = get_object_or_404(Commitment, pk=commitment_id)
+    process = commitment.process
+    if request.method == "POST":
+        if notification:
+            agent = get_agent(request)
+            users = commitment.possible_work_users()
+            site_name = get_site_name()
+            if users:
+                notification.send(
+                    users,
+                    "valnet_help_wanted",
+                    {"resource_type": commitment.resource_type,
+                    "due_date": commitment.due_date,
+                    "hours": commitment.quantity,
+                    "unit": commitment.resource_type.unit,
+                    "description": commitment.description or "",
+                    "process": commitment.process,
+                    "creator": agent,
+                    "site_name": site_name,
+                    }
+                )
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+@login_required
+def work_change_commitment(request, commitment_id):
+    ct = get_object_or_404(Commitment, id=commitment_id)
+    process = ct.process
+    if request.method == "POST":
+        
+        agent = get_agent(request)
+        prefix = ct.form_prefix()
+        #import pdb; pdb.set_trace()
+        if ct.event_type.relationship=="work":
+            form = WorkCommitmentForm(instance=ct, data=request.POST, prefix=prefix)
+        else:
+            form = ChangeCommitmentForm(instance=ct, data=request.POST, prefix=prefix)
+        next = request.POST.get("next")
+
+        if form.is_valid():
+            data = form.cleaned_data
+            rt = ct.resource_type
+            demand = ct.independent_demand
+            new_qty = data["quantity"]
+            
+            #todo:
+            #old_ct = Commitment.objects.get(id=commitment_id)
+            #explode = handle_commitment_changes(old_ct, rt, new_qty, demand, demand)
+            #flow todo: explode?
+            #explode wd apply to rt changes, which will not happen here
+            #handle_commitment_changes will propagate qty changes
+            commitment = form.save()
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))  
+        
+@login_required
+def work_add_to_resource_for_commitment(request, commitment_id):
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    form = ct.select_resource_form(data=request.POST)
+    if form.is_valid():
+        #import pdb; pdb.set_trace()
+        data = form.cleaned_data
+        agent = get_agent(request)
+        resource = data["resource"]
+        quantity = data["quantity"]
+        if resource and quantity:
+            resource.quantity += quantity
+            resource.changed_by=request.user
+            resource.save()
+            event_type = ct.event_type
+            default_agent = ct.process.default_agent()
+            event = EconomicEvent(
+                resource = resource,
+                commitment = ct,
+                event_date = datetime.date.today(),
+                event_type = event_type,
+                from_agent = default_agent,
+                to_agent = default_agent,
+                resource_type = ct.resource_type,
+                process = ct.process,
+                context_agent = ct.context_agent,
+                quantity = quantity,
+                unit_of_quantity = ct.unit_of_quantity,
+                created_by = request.user,
+                changed_by = request.user,
+            )
+            event.save()
+            ct.process.set_started(event.event_date, request.user)
+
 
     return HttpResponseRedirect('/%s/%s/'
         % ('work/process-logging', ct.process.id))
@@ -5127,9 +5225,9 @@ def work_todo_description(request):
 
 @login_required
 def work_commit_to_task(request, commitment_id):
+    ct = get_object_or_404(Commitment, id=commitment_id)
+    process = ct.process
     if request.method == "POST":
-        ct = get_object_or_404(Commitment, id=commitment_id)
-        process = ct.process
         agent = get_agent(request)
         prefix = ct.form_prefix()
         form = CommitmentForm(data=request.POST, prefix=prefix)
@@ -5152,18 +5250,73 @@ def work_commit_to_task(request, commitment_id):
             ct.from_agent = agent
             ct.changed_by=request.user
             ct.save()
-    if next:
-        return HttpResponseRedirect(next)
-    return HttpResponseRedirect('/%s/'
-        % ('work/my-dashboard'))
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+
+@login_required
+def work_uncommit(request, commitment_id):
+    ct = get_object_or_404(Commitment, id=commitment_id)
+    process = ct.process
+    if request.method == "POST":
+        ct.from_agent = None
+        ct.save()
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+
+@login_required
+def work_add_process_worker(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    if request.method == "POST":
+        import pdb; pdb.set_trace()
+        form = WorkCommitmentForm(data=request.POST, prefix='work')
+        if form.is_valid():
+            input_data = form.cleaned_data
+            demand = process.independent_demand()
+            rt = input_data["resource_type"]
+            pattern = process.process_pattern
+            event_type = pattern.event_type_for_resource_type("work", rt)
+            ct = form.save(commit=False)
+            ct.process=process
+            #flow todo: test order_item
+            ct.order_item = process.order_item()
+            ct.independent_demand=demand
+            ct.event_type=event_type
+            #ct.due_date=process.end_date
+            ct.resource_type=rt
+            ct.context_agent=process.context_agent
+            ct.unit_of_quantity=rt.directional_unit("use")
+            ct.created_by=request.user
+            ct.save()
+            if notification:
+                #import pdb; pdb.set_trace()
+                agent = get_agent(request)
+                users = ct.possible_work_users()
+                site_name = get_site_name()
+                if users:
+                    notification.send(
+                        users,
+                        "valnet_help_wanted",
+                        {"resource_type": ct.resource_type,
+                        "due_date": ct.due_date,
+                        "hours": ct.quantity,
+                        "unit": ct.resource_type.unit,
+                        "description": ct.description or "",
+                        "process": ct.process,
+                        "creator": agent,
+                        "site_name": site_name,
+                        }
+                    )
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
 
 @login_required
 def work_delete_event(request, event_id):
     #import pdb; pdb.set_trace()
+    event = get_object_or_404(EconomicEvent, pk=event_id)
+    process = event.process
     if request.method == "POST":
-        event = get_object_or_404(EconomicEvent, pk=event_id)
         agent = event.from_agent
-        process = event.process
         exchange = event.exchange
         distribution = event.distribution
         resource = event.resource
@@ -5194,12 +5347,615 @@ def work_delete_event(request, event_id):
 
     next = request.POST.get("next")
     if next:
-        return HttpResponseRedirect(next)
-    return HttpResponseRedirect('/%s/'
-        % ('work/my-history'))
+        if next != "process-logging":
+            return HttpResponseRedirect(next)
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
 
+@login_required
+def work_add_work_event(request, commitment_id):
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    form = ct.input_event_form_init(data=request.POST)
+    #import pdb; pdb.set_trace()
+    if form.is_valid():
+        event = form.save(commit=False)
+        event.commitment = ct
+        event.event_type = ct.event_type
+        #event.from_agent = ct.from_agent
+        event.to_agent = ct.process.default_agent()
+        event.resource_type = ct.resource_type
+        event.process = ct.process
+        event.context_agent = ct.context_agent
+        event.unit_of_quantity = ct.unit_of_quantity
+        event.created_by = request.user
+        event.changed_by = request.user
+        event.save()
+        ct.process.set_started(event.event_date, request.user)
 
-#    H I S T O R Y
+    return HttpResponseRedirect('/%s/%s/'
+            % ('work/process-logging', ct.process.id))
+            
+@login_required
+def work_change_work_event(request, event_id):
+    event = get_object_or_404(EconomicEvent, id=event_id)
+    commitment = event.commitment
+    process = event.process
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        form = event.work_event_change_form(data=request.POST)
+        if form.is_valid():
+            #import pdb; pdb.set_trace()
+            data = form.cleaned_data
+            form.save()
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+@login_required
+def work_add_process_input(request, process_id, slot):
+    process = get_object_or_404(Process, pk=process_id)
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        pattern = process.process_pattern
+        if slot == "c":
+            form = ProcessConsumableForm(data=request.POST, pattern=pattern, prefix='consumable')
+            rel = "consume"
+        elif slot == "u":
+            form = ProcessUsableForm(data=request.POST, pattern=pattern, prefix='usable')
+            rel = "use"
+        if form.is_valid():
+            input_data = form.cleaned_data
+            qty = input_data["quantity"]
+            if qty:
+                demand = process.independent_demand()
+                ct = form.save(commit=False)
+                rt = input_data["resource_type"]
+                pattern = process.process_pattern
+                event_type = pattern.event_type_for_resource_type(rel, rt)
+                ct.event_type = event_type
+                ct.process = process
+                ct.context_agent=process.context_agent
+                ct.order_item = process.order_item()
+                ct.independent_demand = demand
+                ct.due_date = process.start_date
+                ct.created_by = request.user
+                #todo: add stage and state as args?
+                #todo pr: this shd probably use own_or_parent_recipes
+                #ptrt, inheritance = ct.resource_type.main_producing_process_type_relationship()
+                #if ptrt:
+                #    ct.context_agent = ptrt.process_type.context_agent
+                ct.save()
+                #todo: this is used in process logging; shd it explode?
+                #explode_dependent_demands(ct, request.user)
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+def work_json_directional_unit(request, resource_type_id, direction):
+    #import pdb; pdb.set_trace()
+    ert = get_object_or_404(EconomicResourceType, pk=resource_type_id)
+    defaults = {
+        "unit": ert.directional_unit(direction).id,
+    }
+    data = simplejson.dumps(defaults, ensure_ascii=False)
+    return HttpResponse(data, content_type="text/json-comment-filtered")
+    
+@login_required
+def work_delete_process_commitment(request, commitment_id):
+    commitment = get_object_or_404(Commitment, pk=commitment_id)
+    process = commitment.process
+    #commitment.delete_dependants()
+    commitment.delete()
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+@login_required
+def work_add_unplanned_work_event(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    pattern = process.process_pattern
+    #import pdb; pdb.set_trace()
+    if pattern:
+        form = UnplannedWorkEventForm(prefix="unplanned", data=request.POST, pattern=pattern)
+        if form.is_valid():
+            event = form.save(commit=False)
+            rt = event.resource_type
+            event.event_type = pattern.event_type_for_resource_type("work", rt)
+            event.process = process
+            event.context_agent = process.context_agent
+            default_agent = process.default_agent()
+            event.to_agent = default_agent
+            event.unit_of_quantity = rt.unit
+            event.created_by = request.user
+            event.changed_by = request.user
+            event.save()
+            process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+
+@login_required
+def work_change_unplanned_work_event(request, event_id):
+    event = get_object_or_404(EconomicEvent, id=event_id)
+    process = event.process
+    pattern = process.process_pattern
+    if pattern:
+        #import pdb; pdb.set_trace()
+        if request.method == "POST":
+            form = UnplannedWorkEventForm(
+                pattern=pattern,
+                instance=event,
+                prefix=str(event.id),
+                data=request.POST)
+            if form.is_valid():
+                data = form.cleaned_data
+                form.save()
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+
+@login_required
+def work_add_unplanned_output(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        form = UnplannedOutputForm(data=request.POST, prefix='unplannedoutput')
+        if form.is_valid():
+            output_data = form.cleaned_data
+            qty = output_data["quantity"]
+            if qty:
+                event = form.save(commit=False)
+                rt = output_data["resource_type"]
+                identifier = output_data["identifier"]
+                notes = output_data["notes"]
+                url = output_data["url"]
+                photo_url = output_data["photo_url"]
+                access_rules = output_data["access_rules"]
+                demand = None
+                if not rt.substitutable:
+                    demand = process.independent_demand()
+                    #flow todo: add order_item ? [no]
+                    #N/A I think, but see also
+                    #add_process_output
+
+                resource = EconomicResource(
+                    resource_type=rt,
+                    identifier=identifier,
+                    independent_demand=demand,
+                    notes=notes,
+                    url=url,
+                    photo_url=photo_url,
+                    quantity=event.quantity,
+                    access_rules=access_rules,
+                    #unit_of_quantity=event.unit_of_quantity,
+                    created_by=request.user,
+                )
+                resource.save()
+
+                event.resource = resource
+                pattern = process.process_pattern
+                event_type = pattern.event_type_for_resource_type("out", rt)
+                event.event_type = event_type
+                event.process = process
+                event.context_agent = process.context_agent
+                default_agent = process.default_agent()
+                event.from_agent = default_agent
+                event.to_agent = default_agent
+                event.event_date = datetime.date.today()
+                event.created_by = request.user
+                event.save()
+                process.set_started(event.event_date, request.user)
+
+                next = request.POST.get("next")
+                if next and next == "exchange-work":
+                  role_formset =  resource_role_context_agent_formset(prefix="resource", data=request.POST)
+                else:
+                  role_formset =  resource_role_agent_formset(prefix="resource", data=request.POST)
+
+                for form_rra in role_formset.forms:
+                    if form_rra.is_valid():
+                        data_rra = form_rra.cleaned_data
+                        if data_rra:
+                            role = data_rra["role"]
+                            agent = data_rra["agent"]
+                            if role and agent:
+                                rra = AgentResourceRole()
+                                rra.agent = agent
+                                rra.role = role
+                                rra.resource = resource
+                                rra.is_contact = data_rra["is_contact"]
+                                rra.save()
+                #todo: add exchange-work redirect?
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+
+@login_required
+def work_add_unplanned_input_event(request, process_id, slot):
+    process = get_object_or_404(Process, pk=process_id)
+    pattern = process.process_pattern
+    #import pdb; pdb.set_trace()
+    if pattern:
+        if slot == "c":
+            prefix = "unplannedconsumption"
+            et = "consume"
+        else:
+            prefix = "unplannedusable"
+            et = "use"
+        form = UnplannedInputEventForm(
+            prefix=prefix,
+            data=request.POST,
+            pattern=pattern,
+            load_resources=True)
+        if form.is_valid():
+            agent = get_agent(request)
+            data = form.cleaned_data
+            agent = get_agent(request)
+            rt = data["resource_type"]
+            r_id = data["resource"]
+            qty = data["quantity"]
+            event_date = data["event_date"]
+            unit = rt.unit
+            if et == "use":
+                unit = rt.unit_for_use()
+            resource = EconomicResource.objects.get(id=r_id)
+            default_agent = process.default_agent()
+            from_agent = resource.owner() or default_agent
+            event_type = pattern.event_type_for_resource_type(et, rt)
+            event = EconomicEvent(
+                event_type=event_type,
+                resource_type = rt,
+                resource = resource,
+                from_agent = from_agent,
+                to_agent = default_agent,
+                process = process,
+                context_agent = process.context_agent,
+                event_date = event_date,
+                quantity=qty,
+                unit_of_quantity = unit,
+                created_by = request.user,
+                changed_by = request.user,
+            )
+            event.save()
+            if event_type.consumes_resources():
+                resource.quantity -= event.quantity
+                resource.changed_by=request.user
+                resource.save()
+            process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+
+def json_resource_type_resources(request, resource_type_id):
+    #import pdb; pdb.set_trace()
+    json = serializers.serialize("json", EconomicResource.objects.filter(resource_type=resource_type_id), fields=('identifier'))
+    return HttpResponse(json, content_type='application/json')
+    
+@login_required
+def work_add_consumption_event(request, commitment_id, resource_id):
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    process = ct.process
+    resource = get_object_or_404(EconomicResource, pk=resource_id)
+    prefix = resource.form_prefix()
+    form = InputEventForm(prefix=prefix, data=request.POST)
+    if form.is_valid():
+        agent = get_agent(request)
+        event = form.save(commit=False)
+        event.commitment = ct
+        event.event_type = ct.event_type
+        event.resource_type = ct.resource_type
+        event.resource = resource
+        event.process = ct.process
+        event.context_agent = ct.context_agent
+        default_agent = ct.process.default_agent()
+        event.from_agent = default_agent
+        event.to_agent = default_agent
+        event.unit_of_quantity = ct.unit_of_quantity
+        event.created_by = request.user
+        event.changed_by = request.user
+        event.save()
+        if ct.consumes_resources():
+            resource.quantity -= event.quantity
+            resource.changed_by=request.user
+            resource.save()
+        ct.process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+@login_required
+def work_add_use_event(request, commitment_id, resource_id):
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    resource = get_object_or_404(EconomicResource, pk=resource_id)
+    prefix = resource.form_prefix()
+    unit = ct.resource_type.directional_unit("use")
+    qty_help = " ".join(["unit:", unit.abbrev])
+    form = InputEventForm(qty_help=qty_help, prefix=prefix, data=request.POST)
+    if form.is_valid():
+        agent = get_agent(request)
+        event = form.save(commit=False)
+        event.commitment = ct
+        event.event_type = ct.event_type
+        event.from_agent = agent
+        event.resource_type = ct.resource_type
+        event.resource = resource
+        event.process = ct.process
+        #event.project = ct.project
+        default_agent = ct.process.default_agent()
+        event.from_agent = default_agent
+        event.to_agent = default_agent
+        event.context_agent = ct.context_agent
+        event.unit_of_quantity = unit
+        event.created_by = request.user
+        event.changed_by = request.user
+        event.save()
+        ct.process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', ct.process.id))
+
+@login_required
+def work_add_process_output(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    if request.method == "POST":
+        form = ProcessOutputForm(data=request.POST, prefix='output')
+        if form.is_valid():
+            output_data = form.cleaned_data
+            qty = output_data["quantity"]
+            if qty:
+                ct = form.save(commit=False)
+                rt = output_data["resource_type"]
+                pattern = process.process_pattern
+                event_type = pattern.event_type_for_resource_type("out", rt)
+                ct.event_type = event_type
+                ct.process = process
+                ct.context_agent = process.context_agent
+                ct.independent_demand = process.independent_demand()
+                ct.due_date = process.end_date
+                ct.created_by = request.user
+                ct.save()
+                if process.name == "Make something":
+                    process.name = " ".join([
+                                "Make",
+                                ct.resource_type.name,
+                            ])
+                else:
+                    process.name = " and ".join([
+                                process.name,
+                                ct.resource_type.name,
+                            ])
+                if len(process.name) > 128:
+                    process.name = process.name[0:128]
+                process.save()
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+
+@login_required
+def work_log_stage_change_event(request, commitment_id, resource_id):
+    to_be_changed_commitment = get_object_or_404(Commitment, pk=commitment_id)
+    process = to_be_changed_commitment.process
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        resource = get_object_or_404(EconomicResource, pk=resource_id)
+        quantity = resource.quantity 
+        default_agent = process.default_agent()
+        from_agent = default_agent
+        event_date = datetime.date.today()
+        prefix = resource.form_prefix()
+        #shameless hack
+        qty_field = prefix + "-quantity"
+        if request.POST.get(qty_field):
+            form = resource.transform_form(data=request.POST)
+            if form.is_valid():
+                data = form.cleaned_data
+                quantity = data["quantity"]
+                event_date = data["event_date"]
+                from_agent = data["from_agent"]
+        change_commitment = process.changeable_requirements()[0]
+        rt = to_be_changed_commitment.resource_type
+        event = EconomicEvent(
+            commitment=to_be_changed_commitment,
+            event_type=to_be_changed_commitment.event_type,
+            resource_type = rt,
+            resource = resource,
+            from_agent = from_agent,
+            to_agent = default_agent,
+            process = process,
+            context_agent = process.context_agent,
+            event_date = event_date,
+            quantity=resource.quantity,
+            unit_of_quantity = rt.unit,
+            created_by = request.user,
+            changed_by = request.user,
+        )
+        event.save()
+        event = EconomicEvent(
+            commitment=change_commitment,
+            event_type=change_commitment.event_type,
+            resource_type = rt,
+            resource = resource,
+            from_agent = from_agent,
+            to_agent = default_agent,
+            process = process,
+            context_agent = process.context_agent,
+            event_date = event_date,
+            quantity=quantity,
+            unit_of_quantity = rt.unit,
+            created_by = request.user,
+            changed_by = request.user,
+        )
+        event.save()
+        resource.stage = change_commitment.stage
+        resource.quantity = quantity
+        resource.save()
+        process.set_started(event.event_date, request.user)
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))        
+
+@login_required
+def work_add_process_citation(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        form = ProcessCitationForm(data=request.POST, prefix='citation')
+        if form.is_valid():
+            input_data = form.cleaned_data
+            demand = process.independent_demand()
+            quantity = Decimal("1")
+            rt = input_data["resource_type"]
+            descrip = input_data["description"]
+            pattern = process.process_pattern
+            event_type = pattern.event_type_for_resource_type("cite", rt)
+            agent = get_agent(request)
+            ct = Commitment(
+                process=process,
+                #from_agent=agent,
+                independent_demand=demand,
+                order_item = process.order_item(),
+                event_type=event_type,
+                due_date=process.start_date,
+                resource_type=rt,
+                context_agent=process.context_agent,
+                quantity=quantity,
+                description=descrip,
+                unit_of_quantity=rt.directional_unit("cite"),
+                created_by=request.user,
+            )
+            ct.save()
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))    
+        
+@login_required
+def work_add_citation_event(request, commitment_id, resource_id):
+    #import pdb; pdb.set_trace()
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    resource = get_object_or_404(EconomicResource, pk=resource_id)
+    prefix = resource.form_prefix()
+    unit = ct.resource_type.directional_unit("use")
+    qty_help = " ".join(["unit:", unit.abbrev])
+    form = InputEventForm(qty_help=qty_help, prefix=prefix, data=request.POST)
+    if form.is_valid():
+        agent = get_agent(request)
+        event = form.save(commit=False)
+        event.commitment = ct
+        event.event_type = ct.event_type
+        event.from_agent = agent
+        event.resource_type = ct.resource_type
+        event.resource = resource
+        event.process = ct.process
+        default_agent = ct.process.default_agent()
+        event.from_agent = default_agent
+        event.to_agent = default_agent
+        event.context_agent = ct.context_agent
+        event.unit_of_quantity = unit
+        event.created_by = request.user
+        event.changed_by = request.user
+        event.save()
+        ct.process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', ct.process.id))
+        
+@login_required
+def work_add_unplanned_cite_event(request, process_id):
+    process = get_object_or_404(Process, pk=process_id)
+    pattern = process.process_pattern
+    #import pdb; pdb.set_trace()
+    if pattern:
+        form = UnplannedCiteEventForm(
+            prefix='unplannedcite',
+            data=request.POST,
+            pattern=pattern,
+            load_resources=True)
+        if form.is_valid():
+            data = form.cleaned_data
+            qty = data["quantity"]
+            if qty:
+                agent = get_agent(request)
+                rt = data["resource_type"]
+                r_id = data["resource"]
+                resource = EconomicResource.objects.get(id=r_id)
+                #todo: rethink for citations
+                default_agent = process.default_agent()
+                from_agent = resource.owner() or default_agent
+                event_type = pattern.event_type_for_resource_type("cite", rt)
+                event = EconomicEvent(
+                    event_type=event_type,
+                    resource_type = rt,
+                    resource = resource,
+                    from_agent = from_agent,
+                    to_agent = default_agent,
+                    process = process,
+                    context_agent = process.context_agent,
+                    event_date = datetime.date.today(),
+                    quantity=qty,
+                    unit_of_quantity = rt.directional_unit("cite"),
+                    created_by = request.user,
+                    changed_by = request.user,
+                )
+                event.save()
+                process.set_started(event.event_date, request.user)
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+@login_required
+def work_delete_citation_event(request, commitment_id, resource_id):
+    #import pdb; pdb.set_trace()
+    ct = get_object_or_404(Commitment, pk=commitment_id)
+    process = ct.process
+    if request.method == "POST":
+        resource = get_object_or_404(EconomicResource, pk=resource_id)
+        events = ct.fulfillment_events.filter(resource=resource)
+        for event in events:
+            event.delete()
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+            
+def json_resource_type_citation_unit(request, resource_type_id):
+    #import pdb; pdb.set_trace()
+    ert = get_object_or_404(EconomicResourceType, pk=resource_type_id)
+    direction = "use"
+    defaults = {
+        "unit": ert.directional_unit(direction).name,
+    }
+    data = simplejson.dumps(defaults, ensure_ascii=False)
+    return HttpResponse(data, content_type="text/json-comment-filtered")
+    
+@login_required
+def work_join_task(request, commitment_id):
+    if request.method == "POST":
+        ct = get_object_or_404(Commitment, id=commitment_id)
+        process = ct.process
+        agent = get_agent(request)
+
+        if notification:
+            #import pdb; pdb.set_trace()
+            workers = ct.workers()
+            users = []
+            for worker in workers:
+                worker_users = [au.user for au in worker.users.all()]
+                users.extend(worker_users)
+            site_name = get_site_name()
+            if users:
+                notification.send(
+                    users,
+                    "valnet_join_task",
+                    {"resource_type": ct.resource_type,
+                    "due_date": ct.due_date,
+                    "hours": ct.quantity,
+                    "unit": ct.resource_type.unit,
+                    "description": ct.description or "",
+                    "process": process,
+                    "creator": agent,
+                    "site_name": site_name,
+                    }
+                )
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/process-logging', process.id))
+        
+
+ #    H I S T O R Y
 
 @login_required
 def my_history(request): # tasks history
@@ -5443,9 +6199,6 @@ def work_process_finished(request, process_id):
             process.save()
     return HttpResponseRedirect('/%s/%s/'
         % ('work/process-logging', process_id))
-
-
-
 
 
 

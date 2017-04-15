@@ -10071,10 +10071,20 @@ class EconomicEvent(models.Model):
     def form_prefix(self):
         return "-".join(["EVT", str(self.id)])
 
-    def work_event_change_form(self):
-        from valuenetwork.valueaccounting.forms import WorkEventChangeForm
+    def work_event_change_form(self, data=None):
+        unit = self.unit_of_quantity
+        if not unit:
+            unit = self.resource_type.unit
         prefix = self.form_prefix()
-        return WorkEventChangeForm(instance=self, prefix=prefix, )
+        qty_help = "up to 2 decimal places"
+        if unit:
+            if unit.unit_type == "time":
+                from valuenetwork.valueaccounting.forms import WorkEventChangeForm
+                return WorkEventChangeForm(instance=self, prefix=prefix, data=data)
+            else:
+                qty_help = " ".join(["unit:", unit.abbrev, ", up to 2 decimal places"])
+        from valuenetwork.valueaccounting.forms import InputEventForm
+        return InputEventForm(qty_help=qty_help, instance=self, prefix=prefix, data=data)
 
     def change_form_old(self, data=None):
         # import pdb; pdb.set_trace()

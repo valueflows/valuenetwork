@@ -184,6 +184,9 @@
 
 		$( "#processForm" ).validate({
 			rules: {
+                "context_agent": {
+                    required: true
+                },
 				start_date: {
 					required: true,
 					date: true

@@ -1330,7 +1330,7 @@ class ProjectSelectionFilteredForm(forms.Form):
 
     def __init__(self, agent, *args, **kwargs):
         super(ProjectSelectionFilteredForm, self).__init__(*args, **kwargs)
-        projects = agent.managed_projects()
+        projects = agent.related_context_queryset()
         if projects:
             self.fields["context_agent"].choices = [(proj.id, proj.name) for proj in projects]
 

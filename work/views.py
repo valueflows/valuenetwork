@@ -4637,7 +4637,7 @@ def process_logging(request, process_id):
     agent_projects = agent.related_contexts()
     if process.context_agent not in agent_projects:
         return render(request, 'valueaccounting/no_permission.html')
-    logger = False
+    logger = True
     worker = False
     super_logger = False
     todays_date = datetime.date.today()

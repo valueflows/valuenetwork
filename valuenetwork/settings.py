@@ -128,7 +128,6 @@ INSTALLED_APPS = [
     # theme
     "pinax_theme_bootstrap_account",
     "pinax_theme_bootstrap",
-    "django_forms_bootstrap",
     'bootstrap3',
 
     # external

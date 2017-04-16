@@ -66,7 +66,7 @@
                             {% elif state == "new" %}
                                 
                                 <a href="#create-skill{{ suggestion.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal">{% trans "Create Skill" %}</a>
-                                    <div class="modal hide fade" id="create-skill{{ suggestion.id }}" tabindex="-1" role="dialog" aria-labelledby="skill-label" aria-hidden="true">
+                                    <div class="modal fade" id="create-skill{{ suggestion.id }}" tabindex="-1" role="dialog" aria-labelledby="skill-label" aria-hidden="true">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                             <h3 id="skill-label">{% trans "Create Skill" %}</h3>

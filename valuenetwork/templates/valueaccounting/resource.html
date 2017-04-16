@@ -60,7 +60,7 @@
 		</legend>
 		
         {% if agent %}
-		    <div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
+		    <div class="modal fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
 			    <div class="modal-header">
 				    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 				    <h3 id="resource-change-label">{% trans "Change" %} {{ resource }}</h3>
@@ -95,7 +95,7 @@
                 </div>
             </div>
 		      
-		      <div class="modal hide fade" id="resourceOrderForm" tabindex="-1" role="dialog" aria-labelledby="resource-order-label" aria-hidden="true">
+		      <div class="modal fade" id="resourceOrderForm" tabindex="-1" role="dialog" aria-labelledby="resource-order-label" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3 id="resource-order-label">{% trans "Create Work Order for" %} {{ resource }}</h3>
@@ -264,7 +264,7 @@
                         <div >
 		                    <a href="#processAddForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Add process that created resource" %}</a>
 	                    </div>
-	                    <div class="modal hide fade" id="processAddForm" tabindex="-1" role="dialog" aria-labelledby="process-add-label" aria-hidden="true">
+	                    <div class="modal fade" id="processAddForm" tabindex="-1" role="dialog" aria-labelledby="process-add-label" aria-hidden="true">
 	                      <div class="modal-header">
 		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 		                    <h3 id="process-add-label">{% trans "Add Process" %}</h3>

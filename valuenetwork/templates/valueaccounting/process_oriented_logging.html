@@ -161,7 +161,7 @@ hr {
             <a href="#changeProcess" role="button" class="btn btn-info" data-toggle="modal" title="Change this process">
                 {% trans "Change" %}
             </a>
-            <div class="modal hide fade" id="changeProcess" tabindex="-1" role="dialog" aria-labelledby="change-process" aria-hidden="true">
+            <div class="modal fade" id="changeProcess" tabindex="-1" role="dialog" aria-labelledby="change-process" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3 id="change-process">{% trans "Change " %} {{ process }} </h3>
@@ -258,7 +258,7 @@ hr {
                                                 {% trans "or Log details" %}
                                             </a>
                                         </div>
-                                        <div class="modal hide fade toBeChangedModal" id="toBeChangedModal{{ to_be_changed_requirement.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
+                                        <div class="modal fade toBeChangedModal" id="toBeChangedModal{{ to_be_changed_requirement.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
                                             <div class="modal-header">
                                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                 <h3 id="resource-label">{% trans "Change " %} {{ resource }} to @{{ changeable_requirement.stage }}</h3>
@@ -287,7 +287,7 @@ hr {
                                     <i class="icon-edit"></i>
                                     </a>
                 
-                                    <div class="modal hide fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
+                                    <div class="modal fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                             <h3 id="commitment-label">{% trans "Change Requirement" %}</h3>
@@ -326,7 +326,7 @@ hr {
                                     </a>
                                 {% endif %}
                 
-                                <div class="modal hide fade resourceModal" id="resourceModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
+                                <div class="modal fade resourceModal" id="resourceModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="resource-label">{% trans "Log new" %} {{ item.resource_type.name }}</h3>
@@ -343,7 +343,7 @@ hr {
                                     </div>
                                 </div>
                                 
-                                <div class="modal hide fade addToResourceModal" id="addToResourceModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="add-to-resource-label" aria-hidden="true">
+                                <div class="modal fade addToResourceModal" id="addToResourceModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="add-to-resource-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="add-to-resource-label">{% trans "Add to " %} {{ item.resource_type.name }} {% trans "Resource" %}</h3>
@@ -470,7 +470,7 @@ hr {
 			                       <i class="icon-edit"></i>
 	                        </a>
 
-	                        <div class="modal hide fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
+	                        <div class="modal fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
 		                        <div class="modal-header">
 			                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 			                        <h3 id="commitment-label">{% trans "Change Requirement" %}</h3>
@@ -527,7 +527,7 @@ hr {
                                     {% trans "Invite a collaborator" %}
                                 </a>
 
-                                <div class="modal hide fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="invite-label" aria-hidden="true">
+                                <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="invite-label" aria-hidden="true">
                                   <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                     <h3 id="invite-label">
@@ -556,7 +556,7 @@ hr {
                                         <a href="#joinForm{{ item.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Notify the person who has taken the task that you want to help">
                                             {% trans "Join this task" %}
                                         </a>
-                                        <div class="modal hide fade joinForm" id="joinForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="join-label" aria-hidden="true">
+                                        <div class="modal fade joinForm" id="joinForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="join-label" aria-hidden="true">
                                             <div class="modal-header">
                                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                 <h3 id="join-label">{% trans "Join this task" %}: {{ item.resource_type.name }}</h3>
@@ -592,7 +592,7 @@ hr {
                                             {% trans "I'll work on this later" %}
                                         </a>
 
-                                        <div class="modal hide fade takeTaskModal" id="commitmentForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
+                                        <div class="modal fade takeTaskModal" id="commitmentForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
                                             <div class="modal-header">
                                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                 <h3 id="commitment-label">{% trans "Commit to this task" %}: {{ item.resource_type.name }}</h3>
@@ -631,7 +631,7 @@ hr {
                                     {% trans "I did some work on this" %}
                                 </a>
 
-                                <div class="modal hide fade workEventModal" id="eventModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
+                                <div class="modal fade workEventModal" id="eventModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="event-label">{% trans "Add Work Contribution" %}</h3>
@@ -664,7 +664,7 @@ hr {
 								               <i class="icon-edit"></i>
 							                </a>
 						
-							                <div class="modal hide fade workEventModal" id="eventChgModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
+							                <div class="modal fade workEventModal" id="eventChgModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
 								                <div class="modal-header">
 									                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 									                <h3 id="event-label">{% trans "Change Time Contribution" %}</h3>
@@ -719,7 +719,7 @@ hr {
 					               <i class="icon-edit"></i>
 				                </a>
 			
-				                <div class="modal hide fade workEventModal" id="eventChgModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
+				                <div class="modal fade workEventModal" id="eventChgModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
 					                <div class="modal-header">
 						                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 						                <h3 id="event-label">{% trans "Change Time Contribution" %}</h3>
@@ -782,7 +782,7 @@ hr {
                     </span>
                 </h2>
                 {% if agent %}
-                    <div class="modal hide fade" id="unplannedCiteModal" tabindex="-1" role="dialog" aria-labelledby="cite-label" aria-hidden="true">
+                    <div class="modal fade" id="unplannedCiteModal" tabindex="-1" role="dialog" aria-labelledby="cite-label" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h3 id="cite-label">{% trans "Add an unplanned citation" %}</h3>
@@ -866,7 +866,7 @@ hr {
                                             {% trans "Log citation" %}
                                             </a>
                     
-                                            <div class="modal hide fade eventModal" id="citeEventModal{{ resource.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
+                                            <div class="modal fade eventModal" id="citeEventModal{{ resource.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                     <h3 id="event-label">{% trans "Log citation of" %} {{ resource.identifier  }}</h3>
@@ -945,7 +945,7 @@ hr {
 	            </h2>
 
 	             {% if agent %}
-                        <div class="modal hide fade" id="unplannedConsumptionModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-consumption-label" aria-hidden="true">
+                        <div class="modal fade" id="unplannedConsumptionModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-consumption-label" aria-hidden="true">
                             <div class="modal-header">
 	                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                 <h3 id="unplanned-consumption-label">{% trans "Add unplanned consumption" %}</h3>
@@ -980,7 +980,7 @@ hr {
 			                   <i class="icon-edit"></i>
 		                    </a>
 	
-		                    <div class="modal hide fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
+		                    <div class="modal fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
 			                    <div class="modal-header">
 				                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 				                    <h3 id="commitment-label">{% trans "Change Requirement" %}</h3>
@@ -1036,7 +1036,7 @@ hr {
 					                {% trans "Log consumption" %}
 				                    </a>
 			
-				                    <div class="modal hide fade eventModal" id="consumeEventModal{{ resource.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
+				                    <div class="modal fade eventModal" id="consumeEventModal{{ resource.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
 					                    <div class="modal-header">
 						                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 						                    <h3 id="event-label">{% trans "Log consumption of" %} {{ resource.identifier }}</h3>
@@ -1169,7 +1169,7 @@ hr {
 	            </h2>
 
 	            {% if agent %}
-                    <div class="modal hide fade" id="unplannedUseModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-use-label" aria-hidden="true">
+                    <div class="modal fade" id="unplannedUseModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-use-label" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h3 id="unplanned-use-label">{% trans "Add unplanned use" %}</h3>
@@ -1199,7 +1199,7 @@ hr {
 			                   <i class="icon-edit"></i>
 		                    </a>
 
-		                    <div class="modal hide fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
+		                    <div class="modal fade commitmentModal" id="commitmentModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="commitment-label" aria-hidden="true">
 			                    <div class="modal-header">
 				                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 				                    <h3 id="commitment-label">{% trans "Change Requirement" %}</h3>
@@ -1244,7 +1244,7 @@ hr {
 					                {% trans "Log use" %}
 				                    </a>
 			
-				                    <div class="modal hide fade eventModal" id="useEventModal{{ resource.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
+				                    <div class="modal fade eventModal" id="useEventModal{{ resource.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
 					                    <div class="modal-header">
 						                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 						                    <h3 id="event-label">{% trans "Log use of" %} {{ resource.identifier  }}</h3>
@@ -1408,7 +1408,7 @@ hr {
 
     {% if logger %}
     
-	<div class="modal hide fade" id="addOutputModal" tabindex="-1" role="dialog" aria-labelledby="output-label" aria-hidden="true">
+	<div class="modal fade" id="addOutputModal" tabindex="-1" role="dialog" aria-labelledby="output-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
@@ -1446,7 +1446,7 @@ hr {
         {% endif %}
     </div>
 
-    <div class="modal hide fade rtmodal" id="createResourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-consumable-create-label" aria-hidden="true">
+    <div class="modal fade rtmodal" id="createResourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-consumable-create-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h3 id="resource-consumable-create-label">{% trans "Create a new Resource Type" %}</h3>
@@ -1474,7 +1474,7 @@ hr {
         </div>
     </div>
 
-    <div class="modal hide fade" id="addCiteModal" tabindex="-1" role="dialog" aria-labelledby="cite-label" aria-hidden="true">
+    <div class="modal fade" id="addCiteModal" tabindex="-1" role="dialog" aria-labelledby="cite-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
@@ -1497,7 +1497,7 @@ hr {
         </div>
     </div>
 
-    <div class="modal hide fade" id="addConsumableModal" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
+    <div class="modal fade" id="addConsumableModal" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
@@ -1521,7 +1521,7 @@ hr {
         </div>
     </div>
 
-    <div class="modal hide fade" id="addUsableModal" tabindex="-1" role="dialog" aria-labelledby="use-label" aria-hidden="true">
+    <div class="modal fade" id="addUsableModal" tabindex="-1" role="dialog" aria-labelledby="use-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
@@ -1545,7 +1545,7 @@ hr {
         </div>
     </div>
 
-    <div class="modal hide fade" id="addWorkModal" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
+    <div class="modal fade" id="addWorkModal" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
@@ -1584,7 +1584,7 @@ hr {
 
      {% if agent %}
 
-     <div class="modal hide fade unplannedOutputModal" id="unplannedOutputModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-output-label" aria-hidden="true">
+     <div class="modal fade unplannedOutputModal" id="unplannedOutputModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-output-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h3 id="unplanned-output">{% trans "Log Unplanned Output" %}</h3>
@@ -1617,7 +1617,7 @@ hr {
         </div>
     </div>
 
-     <div class="modal hide fade unplannedWorkModal" id="unplannedWorkModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-work-label" aria-hidden="true">
+     <div class="modal fade unplannedWorkModal" id="unplannedWorkModal" tabindex="-1" role="dialog" aria-labelledby="unplanned-work-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h3 id="unplanned-work">{% trans "Log Unplanned Work Contribution" %}</h3>

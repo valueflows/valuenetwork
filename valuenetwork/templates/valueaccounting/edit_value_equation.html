@@ -109,7 +109,7 @@ th
                     <a href="#create-ve" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Create New Value Equation" %}</a>
                 </div>
 
-                <div class="modal hide fade" id="create-ve" tabindex="-1" role="dialog" aria-labelledby="create-ve-label" aria-hidden="true">
+                <div class="modal fade" id="create-ve" tabindex="-1" role="dialog" aria-labelledby="create-ve-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3 id="create-ve-label">{% trans "Create Value Equation" %}</h3>
@@ -139,7 +139,7 @@ th
                         <a href="#create-veb" role="button" class="btn btn-info btn-mini" data-toggle="modal">{% trans "Add a Bucket" %}</a>
                     </div>
 
-                    <div class="modal hide fade" id="change-ve" tabindex="-1" role="dialog" aria-labelledby="change-ve-label" aria-hidden="true">
+                    <div class="modal fade" id="change-ve" tabindex="-1" role="dialog" aria-labelledby="change-ve-label" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h3 id="change-ve-label">{% trans "Change Value Equation" %} </h3>
@@ -156,7 +156,7 @@ th
                         </div>
                     </div>
         
-                    <div class="modal hide fade" id="create-veb" tabindex="-1" role="dialog" aria-labelledby="create-veb-label" aria-hidden="true">
+                    <div class="modal fade" id="create-veb" tabindex="-1" role="dialog" aria-labelledby="create-veb-label" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h3 id="create-veb-label">{% trans "Create Value Equation Bucket" %} </h3>
@@ -233,7 +233,7 @@ th
                                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete this value equation bucket" >{% trans "Delete" %}</button>
                                 </form>
 
-                                <div class="modal hide fade" id="change-veb{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="change-veb-label" aria-hidden="true">
+                                <div class="modal fade" id="change-veb{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="change-veb-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="change-veb-label">{% trans "Change Value Equation Bucket" %} </h3>
@@ -254,7 +254,7 @@ th
                                   <div style="display: inline;" >
                                     <a href="#create-vebr{{ bucket.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">{% trans "Add a Bucket Rule" %}</a>
                                   </div>
-                                  <div class="modal hide fade cvebr" id="create-vebr{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="create-vebr-label{{ bucket.id }}" aria-hidden="true">
+                                  <div class="modal fade cvebr" id="create-vebr{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="create-vebr-label{{ bucket.id }}" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="create-vebr-label{{ bucket.id }}">{% trans "Create Bucket Rule for " %}{{ bucket.name }} </h3>
@@ -296,7 +296,7 @@ th
                                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete this value equation bucket rule" >{% trans "Delete" %}</button>
                                             </form>
 
-                                            <div class="modal hide fade cvebr" id="change-vebr{{ rule.id }}" tabindex="-1" role="dialog" aria-labelledby="change-vebr-label" aria-hidden="true">
+                                            <div class="modal fade cvebr" id="change-vebr{{ rule.id }}" tabindex="-1" role="dialog" aria-labelledby="change-vebr-label" aria-hidden="true">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                                     <h3 id="change-vebr-label">{% trans "Change Rule for " %} {{ bucket.name }} - {{ rule.event_type.name }} </h3>

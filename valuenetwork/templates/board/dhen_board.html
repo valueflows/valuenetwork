@@ -180,7 +180,7 @@ h3 {
                               {% endif %}
                               </li>
                               {% if agent %}
-                                <div class="modal hide fade" id="changeFarmModal{{ com.id }}" tabindex="-1" role="dialog" aria-labelledby="change-farm-label" aria-hidden="true">
+                                <div class="modal fade" id="changeFarmModal{{ com.id }}" tabindex="-1" role="dialog" aria-labelledby="change-farm-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="change-farm-label">{% trans "Change Farm Availability" %}</h3>
@@ -197,7 +197,7 @@ h3 {
                                         </form>
                                     </div>
                                 </div>
-                                <div class="modal hide fade xfer" id="farmModal{{ com.id }}" tabindex="-1" role="dialog" aria-labelledby="farm" aria-hidden="true">
+                                <div class="modal fade xfer" id="farmModal{{ com.id }}" tabindex="-1" role="dialog" aria-labelledby="farm" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="farm">{{ com.resource_type }} from {{ com.from_agent.nick }}</h3>
@@ -262,7 +262,7 @@ h3 {
                                     {% endif %}
                                 </li>
                                 {% if agent %}
-                                  <div class="modal hide fade xfer" id="harvesterModal{{ res.id }}" tabindex="-1" role="dialog" aria-labelledby="harv" aria-hidden="true">
+                                  <div class="modal fade xfer" id="harvesterModal{{ res.id }}" tabindex="-1" role="dialog" aria-labelledby="harv" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="harv">{{ res.resource_type }} from {{ res.owner_based_on_exchange.nick }}</h3>
@@ -312,7 +312,7 @@ h3 {
                             {% endif %}
                         </div>
                        {% if agent %}
-                          <div class="modal hide fade xfer" id="combineModal{{ rt.id }}" tabindex="-1" role="dialog" aria-labelledby="combine" aria-hidden="true">
+                          <div class="modal fade xfer" id="combineModal{{ rt.id }}" tabindex="-1" role="dialog" aria-labelledby="combine" aria-hidden="true">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                 <h3 id="combine">Combine lots for {{ rt.name }}</h3>
@@ -378,7 +378,7 @@ h3 {
 {% endcomment %}
 	</div>
 
-    <div class="modal hide fade" id="availableModal" tabindex="-1" role="dialog" aria-labelledby="available-label" aria-hidden="true">
+    <div class="modal fade" id="availableModal" tabindex="-1" role="dialog" aria-labelledby="available-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h3 id="available-label">{% trans "Add availability" %}</h3>
@@ -396,7 +396,7 @@ h3 {
         </div>
     </div>
 
-    <div class="modal hide fade" id="receiveModal" tabindex="-1" role="dialog" aria-labelledby="receive-label" aria-hidden="true">
+    <div class="modal fade" id="receiveModal" tabindex="-1" role="dialog" aria-labelledby="receive-label" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h3 id="receive-label">{% trans "Receive directly" %}</h3>

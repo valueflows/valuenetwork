@@ -121,7 +121,7 @@ container li {
 
          {% if agent %}
             {% if not resource_type.is_work %}
-                <div class="modal hide fade resourceModal" id="resourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
+                <div class="modal fade resourceModal" id="resourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3 id="resource-label">{% trans "Create Resource of type" %} {{ resource_type.name }}</h3>
@@ -253,7 +253,7 @@ container li {
 	    {% endif %}
 
          {% if agent %}
-			<div class="modal hide fade" id="resourceChangeForm{{ resource_type.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
+			<div class="modal fade" id="resourceChangeForm{{ resource_type.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 					<h3 id="resource-change-label">{% trans "Change" %} {{ resource_type }}</h3>

@@ -262,7 +262,7 @@ th, td {
     							      <a href="#procModal{{ process.id }}" id="chg-process{{ process.id }}" role="button" class="btn btn-primary btn-mini chg-process" data-toggle="modal">{% trans "Notes and Dates" %}</a>
 
 
-						            <div class="modal hide fade procModal" id="procModal{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="proc-label" aria-hidden="true">
+						            <div class="modal fade procModal" id="procModal{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="proc-label" aria-hidden="true">
 							            <div class="modal-header">
 								            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 								            <h3 id="proc-label">{% trans "Add Notes and Change Dates" %}</h3>
@@ -338,7 +338,7 @@ th, td {
 							    </a>
 						    </div>
 
-						    <div class="modal hide fade todoModal" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="todo-label" aria-hidden="true">
+						    <div class="modal fade todoModal" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="todo-label" aria-hidden="true">
 							    <div class="modal-header">
 								    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 								    <h3 id="todo-label">{% trans "Add a todo" %}</h3>
@@ -478,7 +478,7 @@ th, td {
                                             {% endif %}
                                         {% endif %}
                                         {% if agent == todo.to_agent %}
-                                            <div class="modal hide fade changeModal" id="changeModal-{{ todo.id }}" tabindex="-1" role="dialog" aria-labelledby="change-label" aria-hidden="true">
+                                            <div class="modal fade changeModal" id="changeModal-{{ todo.id }}" tabindex="-1" role="dialog" aria-labelledby="change-label" aria-hidden="true">
 				                                <div class="modal-header">
 					                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 					                                <h3 id="change-label">{% trans "Change todo" %}</h3>

@@ -139,7 +139,7 @@ ul {
 
         </h4>
         
-			<div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
+			<div class="modal fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 					<h3 id="resource-change-label">{% trans "Change" %} {{ resource_type }}</h3>
@@ -177,7 +177,7 @@ ul {
 		    </div>
         {% endif %}
 
-		<div class="modal hide fade processForm" id="processForm{{ resource_type.id }}" tabindex="-1" role="dialog" aria-labelledby="process-label" aria-hidden="true">
+		<div class="modal fade processForm" id="processForm{{ resource_type.id }}" tabindex="-1" role="dialog" aria-labelledby="process-label" aria-hidden="true">
 		  <div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 			<h3 id="process-label">{% blocktrans %}Add a process type to create {{ resource_type }}{% endblocktrans %}</h3>
@@ -240,7 +240,7 @@ ul {
 						</div>
 
 
-						<div class="modal hide fade processForm" id="processChangeForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
+						<div class="modal fade processForm" id="processChangeForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
 						  <div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							<h3 id="process-change-label">{% trans "Change" %} {{ xbill_object }}</h3>
@@ -273,7 +273,7 @@ ul {
 						</div>
 
 
-						<div class="modal hide fade" id="changeInputForm{{ node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-input-label" aria-hidden="true">
+						<div class="modal fade" id="changeInputForm{{ node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-input-label" aria-hidden="true">
 						  <div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							<h3 id="change-input-label">{% trans "Change" %} {{ xbill_node }}</h3>
@@ -309,7 +309,7 @@ ul {
 							<a href="#changeSourceForm{{ node_id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>							
 						</div>
 
-						<div class="modal hide fade sourceForm" id="changeSourceForm{{ node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-source-label" aria-hidden="true">
+						<div class="modal fade sourceForm" id="changeSourceForm{{ node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-source-label" aria-hidden="true">
 						  <div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							<h3 id="change-source-label">{% trans "Change" %} {{ xbill_node }}</h3>
@@ -365,7 +365,7 @@ ul {
 							            </div>
                                     {% endif %}
 
-							        <div class="modal hide fade processForm" id="processForm{{ rtype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="process-label" aria-hidden="true">
+							        <div class="modal fade processForm" id="processForm{{ rtype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="process-label" aria-hidden="true">
 							          <div class="modal-header">
 								        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 								        <h3 id="process-label">{% blocktrans %}Add a process type to produce {{ rtype }}{% endblocktrans %}</h3>
@@ -397,7 +397,7 @@ ul {
 					                        </a>							
 						                </div>
 
-						                <div class="modal hide fade sourceForm" id="sourceForm{{ rtype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="source-label" aria-hidden="true">
+						                <div class="modal fade sourceForm" id="sourceForm{{ rtype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="source-label" aria-hidden="true">
 						                  <div class="modal-header">
 							                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							                <h3 id="source-label">{% blocktrans %}Add a source for {{ rtype }}{% endblocktrans %}</h3>
@@ -432,7 +432,7 @@ ul {
 							            </a>
 						            </div>
 
-						            <div class="modal hide fade" id="consumableForm{{ xbill_consumable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
+						            <div class="modal fade" id="consumableForm{{ xbill_consumable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
 						              <div class="modal-header">
 							            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							            <h3 id="consumable-label">{% blocktrans %}Add a consumable input to {{ ptype }}{% endblocktrans %}</h3>
@@ -466,7 +466,7 @@ ul {
 
 						            </div>
 
-				                    <div class="modal hide fade rtmodal" id="createResourceForm{{ xbill_consumable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-consumable-create-label{{ xbill_consumable_prefix }}" aria-hidden="true">
+				                    <div class="modal fade rtmodal" id="createResourceForm{{ xbill_consumable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-consumable-create-label{{ xbill_consumable_prefix }}" aria-hidden="true">
 					                    <div class="modal-header">
 						                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 						                    <h3 id="resource-consumable-create-label{{ xbill_consumable_prefix }}">{% trans "Create a new Resource Type" %}</h3>
@@ -508,7 +508,7 @@ ul {
 							            </a>
 						            </div>
 
-						            <div class="modal hide fade" id="usableForm{{ xbill_usable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="usable-label" aria-hidden="true">
+						            <div class="modal fade" id="usableForm{{ xbill_usable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="usable-label" aria-hidden="true">
 						              <div class="modal-header">
 							            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							            <h3 id="usable-label">{% blocktrans %}Add a usable input to {{ ptype }}{% endblocktrans %}</h3>
@@ -540,7 +540,7 @@ ul {
 
 						            </div>
 
-				                    <div class="modal hide fade rtmodal" id="createResourceForm{{ xbill_usable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-usable-create-label{{ xbill_usable_prefix }}" aria-hidden="true">
+				                    <div class="modal fade rtmodal" id="createResourceForm{{ xbill_usable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-usable-create-label{{ xbill_usable_prefix }}" aria-hidden="true">
 					                    <div class="modal-header">
 						                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 						                    <h3 id="resource-usable-create-label{{ xbill_usable_prefix }}">{% trans "Create a new Resource Type" %}</h3>
@@ -582,7 +582,7 @@ ul {
 							            </a>
 						            </div>
 
-						            <div class="modal hide fade" id="citeForm{{ citable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="cite-label" aria-hidden="true">
+						            <div class="modal fade" id="citeForm{{ citable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="cite-label" aria-hidden="true">
 						              <div class="modal-header">
 							            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							            <h3 id="cite-label">{% blocktrans %}Add a citable to {{ ptype }}{% endblocktrans %}</h3>
@@ -610,7 +610,7 @@ ul {
 
 						            </div>
 
-				                    <div class="modal hide fade rtmodal" id="createResourceForm{{ citable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-citable-create-label{{ citable_prefix }}" aria-hidden="true">
+				                    <div class="modal fade rtmodal" id="createResourceForm{{ citable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-citable-create-label{{ citable_prefix }}" aria-hidden="true">
 					                    <div class="modal-header">
 						                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 						                    <h3 id="resource-citable-create-label{{ ptype.node_id }}">{% trans "Create a new Resource Type" %}</h3>
@@ -649,7 +649,7 @@ ul {
 							        </a>
 						        </div>
 
-						        <div class="modal hide fade" id="workForm{{ ptype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
+						        <div class="modal fade" id="workForm{{ ptype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
 						          <div class="modal-header">
 							        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							        <h3 id="work-label">{% blocktrans %}Add work to {{ ptype }}{% endblocktrans %}</h3>
@@ -675,7 +675,7 @@ ul {
 							        </a>
 						        </div>
 
-						        <div class="modal hide fade" id="featureForm{{ ptype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="feature-label" aria-hidden="true">
+						        <div class="modal fade" id="featureForm{{ ptype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="feature-label" aria-hidden="true">
 						          <div class="modal-header">
 							        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							        <h3 id="feature-label">{% blocktrans %}Add a feature to {{ ptype }}{% endblocktrans %}</h3>
@@ -711,7 +711,7 @@ ul {
 							<a href="#changeFeatureForm{{ object_node_id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>							
 						</div>
 
-						<div class="modal hide fade" id="changeFeatureForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-feature-label" aria-hidden="true">
+						<div class="modal fade" id="changeFeatureForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-feature-label" aria-hidden="true">
 						  <div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 							<h3 id="change-feature-label">{% trans "Change" %} {{ xbill_object }}</h3>
@@ -745,7 +745,7 @@ ul {
 									</a>
 								</div>
 
-								<div class="modal hide fade" id="optionChangeForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="options-change-label" aria-hidden="true">
+								<div class="modal fade" id="optionChangeForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="options-change-label" aria-hidden="true">
 								  <div class="modal-header">
 									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 									<h3 id="options-change-label">{% blocktrans %}Change options for {{ xbill_object }}{% endblocktrans %}</h3>
@@ -772,7 +772,7 @@ ul {
 									</a>
 								</div>
 
-								<div class="modal hide fade" id="optionsForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="options-label" aria-hidden="true">
+								<div class="modal fade" id="optionsForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="options-label" aria-hidden="true">
 								  <div class="modal-header">
 									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 									<h3 id="options-label">{% blocktrans %}Select options for {{ xbill_object }}{% endblocktrans %}</h3>

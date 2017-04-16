@@ -145,7 +145,7 @@ li {
                     </span>
                 </h3>
                 {% if logger and dist %}
-                    <div class="modal hide fade" id="disburseModal" tabindex="-1" role="dialog" aria-labelledby="disbursement" aria-hidden="true">
+                    <div class="modal fade" id="disburseModal" tabindex="-1" role="dialog" aria-labelledby="disbursement" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h3 id="disbursement">{% trans "Log a Cash Disbursement" %}</h3>
@@ -173,7 +173,7 @@ li {
                                 <i class="icon-edit"></i>
                                 </a>
         
-                                <div class="modal hide fade" id="eventModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label{{ event.id }}" aria-hidden="true">
+                                <div class="modal fade" id="eventModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label{{ event.id }}" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="event-label{{ event.id }}">{% trans "Change Disbursement Event" %}</h3>
@@ -223,7 +223,7 @@ li {
                     </span>
                 </h3>
                 {% if logger and dist %}
-                    <div class="modal hide fade" id="distributionModal" tabindex="-1" role="dialog" aria-labelledby="distribution" aria-hidden="true">
+                    <div class="modal fade" id="distributionModal" tabindex="-1" role="dialog" aria-labelledby="distribution" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h3 id="distribution">{% trans "Log a Distribution" %}</h3>
@@ -253,7 +253,7 @@ li {
                                 <i class="icon-edit"></i>
                                 </a>
         
-                                <div class="modal hide fade" id="eventModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label{{ event.id }}" aria-hidden="true">
+                                <div class="modal fade" id="eventModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label{{ event.id }}" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="event-label{{ event.id }}">{% trans "Change Distribution Event" %}</h3>

@@ -137,7 +137,7 @@ textarea {
                                 {% trans "Project" %}: {{ item.context_agent }} 
                                 <a href="#changeProject-{{ item.id }}" role="button" class="btn btn-primary btn-mini indent" data-toggle="modal">{% trans "Change Project" %}</a>
                             </div>
-                            <div class="modal hide fade" id="resourceQuantity-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-qty-label" aria-hidden="true">
+                            <div class="modal fade" id="resourceQuantity-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-qty-label" aria-hidden="true">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                     <h3 id="resource-qty-label">{% trans "Change resource quantity for workflow plan" %} </h3>
@@ -158,7 +158,7 @@ textarea {
                                 </div>
                             </div>
 
-                            <div class="modal hide fade" id="changeProject-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="chg-proj-label" aria-hidden="true">
+                            <div class="modal fade" id="changeProject-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="chg-proj-label" aria-hidden="true">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                     <h3 id="chg-proj-label">{% trans "Change project for workflow plan" %} </h3>
@@ -187,7 +187,7 @@ textarea {
 			</ul>
 
 			{% if agent %}
-                <div class="modal hide fade" id="addOrderItem" tabindex="-1" role="dialog" aria-labelledby="order-item-label" aria-hidden="true">
+                <div class="modal fade" id="addOrderItem" tabindex="-1" role="dialog" aria-labelledby="order-item-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3 id="order-item-label">{% trans "Add another Order Item" %} </h3>
@@ -235,7 +235,7 @@ textarea {
                       </div>
                       
                       {% if agent %}
-                        <div class="modal hide fade productionProcessModal" id="productionProcessModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="productionProcess-label" aria-hidden="true">
+                        <div class="modal fade productionProcessModal" id="productionProcessModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="productionProcess-label" aria-hidden="true">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                 <h3 id="productionProcess-label">{% trans "Add Production Process" %}</h3>
@@ -270,7 +270,7 @@ textarea {
                                     </a>
                                 </div>
                                 
-                                <div class="modal hide fade processForm" id="insertProcessForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-insert-label" aria-hidden="true">
+                                <div class="modal fade processForm" id="insertProcessForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-insert-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="process-insert-label">{% blocktrans %}Insert process for {% endblocktrans %} {{ order }} </h3>
@@ -321,7 +321,7 @@ textarea {
                               {% if agent %}
                               <a href="#processChangeForm{{ process.id }}" role="button" class="btn btn-primary btn-mini process-btn" data-toggle="modal">{% trans "Change process plan" %}</a>
                                 
-                                <div class="modal hide fade processForm" id="processChangeForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
+                                <div class="modal fade processForm" id="processChangeForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="process-change-label">{% trans "Change" %} {{ process.name }}</h3>
@@ -366,7 +366,7 @@ textarea {
                                     </a>
                                 </div>
                                 
-                                <div class="modal hide fade processForm" id="addProcessForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="process-add-label" aria-hidden="true">
+                                <div class="modal fade processForm" id="addProcessForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="process-add-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                                         <h3 id="process-add-label">{% blocktrans %}Add process for {% endblocktrans %} {{ order }} </h3>

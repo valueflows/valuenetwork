@@ -129,7 +129,7 @@ textarea {
 
         </h4>
         
-        <div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
+        <div class="modal fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h3 id="resource-change-label">{% trans "Change" %} {{ resource_type }}</h3>
@@ -169,7 +169,7 @@ textarea {
                 </a>
             </div>
             
-            <div class="modal hide fade processForm" id="insertProcessForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="process-insert-label" aria-hidden="true">
+            <div class="modal fade processForm" id="insertProcessForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="process-insert-label" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3 id="process-insert-label">{% blocktrans %}Insert process type for {% endblocktrans %} {{ resource_type }} </h3>
@@ -200,7 +200,7 @@ textarea {
                 <a href="#processChangeForm{{ process_type.id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
             </div>
 
-            <div class="modal hide fade processForm" id="processChangeForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
+            <div class="modal fade processForm" id="processChangeForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
                 <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h3 id="process-change-label">{% trans "Change" %} {{ xbill_object }}</h3>
@@ -231,7 +231,7 @@ textarea {
                     </a>
                 </div>
             
-                <div class="modal hide fade" id="workForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
+                <div class="modal fade" id="workForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3 id="work-label">{% blocktrans %}Add work to {% endblocktrans %} {{ process_type.name }}</h3>
@@ -257,7 +257,7 @@ textarea {
                     </a>
                 </div>
             
-                <div class="modal hide fade" id="consumableForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
+                <div class="modal fade" id="consumableForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3 id="consumable-label">{% blocktrans %}Add a consumable input to {% endblocktrans %} {{ process_type.name }}</h3>
@@ -299,7 +299,7 @@ textarea {
                     </a>
                 </div>
                 
-                <div class="modal hide fade" id="usesForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="uses-label" aria-hidden="true">
+                <div class="modal fade" id="usesForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="uses-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3 id="uses-label">{% blocktrans %}Add a usable input to {% endblocktrans %} {{ process_type.name }}</h3>
@@ -340,7 +340,7 @@ textarea {
                     </a>
                 </div>
                 
-                <div class="modal hide fade" id="citesForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="cites-label" aria-hidden="true">
+                <div class="modal fade" id="citesForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="cites-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3 id="cites-label">{% blocktrans %}Add a citable input to {% endblocktrans %} {{ process_type.name }}</h3>
@@ -402,7 +402,7 @@ textarea {
                         <a href="#changeInputForm{{ ptrt.id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
                     </div>
 
-                    <div class="modal hide fade" id="changeInputForm{{ ptrt.id }}" tabindex="-1" role="dialog" aria-labelledby="change-input-label" aria-hidden="true">
+                    <div class="modal fade" id="changeInputForm{{ ptrt.id }}" tabindex="-1" role="dialog" aria-labelledby="change-input-label" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                             <h3 id="change-input-label">{% trans "Change" %} {{ ptrt }}</h3>
@@ -472,7 +472,7 @@ textarea {
             </a>
         </div>
         
-        <div class="modal hide fade processForm" id="processForm0" tabindex="-1" role="dialog" aria-labelledby="process-label" aria-hidden="true">
+        <div class="modal fade processForm" id="processForm0" tabindex="-1" role="dialog" aria-labelledby="process-label" aria-hidden="true">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h3 id="process-label">{% blocktrans %}Add next process type for {% endblocktrans %} {{ resource_type }} </h3>

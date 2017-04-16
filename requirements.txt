@@ -3,7 +3,7 @@
 
 Django<1.10
 django-extensions
-pinax-theme-bootstrap==2.0.4
+pinax-theme-bootstrap==7.11.0
 pinax-theme-bootstrap-account==1.0b2
 django-appconf==1.0.2
 django-bootstrap3

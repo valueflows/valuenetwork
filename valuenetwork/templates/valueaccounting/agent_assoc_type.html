@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap3 %}
+{% load bootstrap3 %} {% load staticfiles %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "Agent association type" %}: {{ agent_assoc_type.name }}{% endblock %}
@@ -124,8 +124,8 @@
 
 {% comment %}
 {% block extra_script %}
-	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-	<script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+	<script src="{% static 'js/jquery-ui.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/jquery.validate.min.js' %}"></script>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 {% endblock %}
 {% endcomment %}

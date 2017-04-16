@@ -3,12 +3,12 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load staticfiles %}
-{% load bootstrap3 %}
+{% load bootstrap3 %} {% load staticfiles %}
 
 {% block head_title %}{% trans "Inventory " %} {% endblock %}
 
 {% block extra_head %}
- <link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+ <link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}" />
  <link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
 
 <style>
@@ -336,7 +336,7 @@ a {
 
 {% endblock %}
 {% block extra_script %}
-	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="{% static 'js/jquery-ui.min.js' %}"></script>
 {% endblock %}
 {% block extra_body %}
 	{{ block.super }}

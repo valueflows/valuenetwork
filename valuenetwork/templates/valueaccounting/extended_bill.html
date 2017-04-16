@@ -6,7 +6,7 @@
 {% block head_title %}{% trans "Recipe for " %} {{ resource_type }}{% endblock %}
 
 {% block extra_head %}
- <link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+ <link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}" />
 <style>
 h4 {
 	margin-top: 1em; 
@@ -222,7 +222,7 @@ ul {
     </div>
 {% endblock %}
 {% block extra_script %}
-	<script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="{% static 'js/jquery-ui.min.js' %}"></script>
 {% endblock %}
 {% block extra_body %}
 	{{ block.super }}

@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap3 %}
+{% load bootstrap3 %} {% load staticfiles %}
 
 {% block head_title %}{% trans "Cleanup Unsourced Resources" %}{% endblock %}
 
@@ -35,7 +35,7 @@
     </div>
 {% endblock %}
 {% block extra_script %}
-    <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script>
 {% endblock %}
 
 {% block extra_body %}

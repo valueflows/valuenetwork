@@ -2,13 +2,13 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap3 %}
+{% load bootstrap3 %} {% load staticfiles %}
 
 {% block head_title %}{% trans "Freedom Coop Membership Request for " %} {{ mbr_req.name }}{% endblock %}
 
 {% block extra_head %}
 
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}" />
 
 <style>
     
@@ -144,7 +144,7 @@ th
 
 {% block extra_script %}
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.validate.min.js' %}"></script>
 {% endblock %}
 
 {% block extra_body %}

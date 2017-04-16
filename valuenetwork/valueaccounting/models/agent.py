@@ -271,7 +271,7 @@ class EconomicAgent(models.Model):
         return address
 
     def create_faircoin_resource(self, address):
-        from valuenetwork.valueaccounting.models import *
+
         role_types = AgentResourceRoleType.objects.filter(is_owner=True)
         owner_role_type = None
         if role_types:
@@ -594,12 +594,10 @@ class EconomicAgent(models.Model):
         return sum(event.quantity for event in events)
 
     def all_events(self):
-        from valuenetwork.valueaccounting.models import *
         return EconomicEvent.objects.filter(
             Q(from_agent=self) | Q(to_agent=self))
 
     def events_by_event_type(self):
-        from valuenetwork.valueaccounting.models import *
         agent_events = EconomicEvent.objects.filter(
             Q(from_agent=self) | Q(to_agent=self))
         ets = EventType.objects.all()
@@ -614,19 +612,15 @@ class EconomicAgent(models.Model):
         return answer
 
     def distributions_count(self):
-        from valuenetwork.valueaccounting.models import *
         return Distribution.objects.filter(context_agent=self).count()
 
     def demand_exchange_count(self):
-        from valuenetwork.valueaccounting.models import *
         return Exchange.objects.demand_exchanges().filter(context_agent=self).count()
 
     def supply_exchange_count(self):
-        from valuenetwork.valueaccounting.models import *
         return Exchange.objects.supply_exchanges().filter(context_agent=self).count()
 
     def internal_exchange_count(self):
-        from valuenetwork.valueaccounting.models import *
         return Exchange.objects.internal_exchanges().filter(context_agent=self).count()
 
     def with_all_sub_agents(self):
@@ -731,7 +725,6 @@ class EconomicAgent(models.Model):
             return False
 
     def used_units_ids(self):
-        from valuenetwork.valueaccounting.models import *
         exs = Exchange.objects.exchanges_by_type(self)
         uids = []
         for ex in exs:
@@ -810,7 +803,6 @@ class EconomicAgent(models.Model):
         return self.active_processes()
 
     def process_types_queryset(self):
-        from valuenetwork.valueaccounting.models import *
         pts = list(ProcessType.objects.filter(context_agent=self))
         parent = self.parent()
         while parent:
@@ -820,7 +812,7 @@ class EconomicAgent(models.Model):
         return ProcessType.objects.filter(id__in=pt_ids)
 
     def get_resource_types_with_recipe(self):
-        from valuenetwork.valueaccounting.models import *
+
         rts = [pt.main_produced_resource_type() for pt in ProcessType.objects.filter(context_agent=self) if
                pt.main_produced_resource_type()]
         # import pdb; pdb.set_trace()
@@ -1046,7 +1038,6 @@ class EconomicAgent(models.Model):
         return [var.resource for var in vars]
 
     def create_virtual_account(self, resource_type):
-        from valuenetwork.valueaccounting.models import *
         # import pdb; pdb.set_trace()
         role_types = AgentResourceRoleType.objects.filter(is_owner=True)
         owner_role_type = None
@@ -1158,7 +1149,6 @@ class EconomicAgent(models.Model):
         return self.is_context
 
     def orders_queryset(self):
-        from valuenetwork.valueaccounting.models import *
         # import pdb; pdb.set_trace()
         orders = []
         exf = self.exchange_firm()
@@ -1179,7 +1169,6 @@ class EconomicAgent(models.Model):
         return Order.objects.filter(id__in=order_ids)
 
     def shipments_queryset(self):
-        from valuenetwork.valueaccounting.models import *
         # import pdb; pdb.set_trace()
         shipments = []
         exf = self.exchange_firm()
@@ -1214,7 +1203,6 @@ class EconomicAgent(models.Model):
         return qs
 
     def undistributed_events(self):
-        from valuenetwork.valueaccounting.models import *
         # import pdb; pdb.set_trace()
         event_ids = []
         # et = EventType.objects.get(name="Cash Receipt")
@@ -1238,7 +1226,6 @@ class EconomicAgent(models.Model):
         return EconomicEvent.objects.filter(id__in=event_ids)
 
     def undistributed_distributions(self):
-        from valuenetwork.valueaccounting.models import *
         # import pdb; pdb.set_trace()
         id_ids = []
         et = EventType.objects.get(name="Distribution")
@@ -1361,7 +1348,6 @@ from django.db.models.signals import post_migrate
 #    if app != "valueaccounting":
 #        return
 def create_agent_types(**kwargs):
-    from valuenetwork.valueaccounting.models import *
     AgentType.create('Individual', 'individual', False)
     AgentType.create('Organization', 'org', False)
     AgentType.create('Network', 'network', True)

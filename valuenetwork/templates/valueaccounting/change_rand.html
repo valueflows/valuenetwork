@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Change R&amp;D Project" %}: {{ rand }}{% endblock %}
 
@@ -58,9 +58,9 @@
 			{% csrf_token %}
 		<div class="row-fluid">
 			<div class="span6">
-				{{ rand_form|as_bootstrap }}
+				{% bootstrap_form rand_form %}
 
-				{{ process_form|as_bootstrap }}
+				{% bootstrap_form process_form %}
 				<div class="form-actions">
 					<input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" />  
 					<input type="submit" name="keep-going" value="{% trans 'Save and continue editing' %}" class="btn btn-primary" />

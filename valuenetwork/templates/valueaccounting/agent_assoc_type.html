@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "Agent association type" %}: {{ agent_assoc_type.name }}{% endblock %}
@@ -66,7 +66,7 @@
 			    <div class="modal-body">
 				    <form enctype="multipart/form-data" action="{% url "change_agent" agent_id=agent.id %}" method="POST" >
 					    {% csrf_token %}
-					    {{ change_form|as_bootstrap }}
+					    {% bootstrap_form change_form %}
 
 				        <div class="modal-footer">
 					      <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

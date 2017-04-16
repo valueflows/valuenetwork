@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Production" %}{% endblock %}
 
@@ -30,7 +30,7 @@
 		<legend>{% trans "Create a Plan from Recipe for " %} {{ resource_type.name }} </legend>
 		<form class="form-horizontal" id="processForm" method="POST" action=".">
 	        {% csrf_token %}
-            {{ date_name_form|as_bootstrap }}
+            {% bootstrap_form date_name_form %}
             
             {% if resource_required %}
                 <div id="resources" class = "resources" >

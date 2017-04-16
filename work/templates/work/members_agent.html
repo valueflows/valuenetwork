@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% with user_agent as user %}
@@ -220,7 +220,7 @@ legend {
                     <div class="modal-body">
                         <form enctype="multipart/form-data" action="{% url 'change_your_project' agent_id=agent.id %}" method="POST" >
                             {% csrf_token %}
-                            {{ change_form|as_bootstrap }}
+                            {% bootstrap_form change_form %}
                             <div class="modal-footer">
                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                             <button class="btn btn-primary">{% trans "Save changes" %}</button>
@@ -239,7 +239,7 @@ legend {
                     <div class="modal-body">
                         <form id="userForm" enctype="multipart/form-data" action="{% url "create_user" agent_id=agent.id %}" method="POST" >
                             {% csrf_token %}
-                            {{ user_form|as_bootstrap }}
+                            {% bootstrap_form user_form %}
                             <input type="checkbox" id="staff" name="is_staff"> <label for="staff">Coop Admin user?</label>
 
                             <div class="modal-footer">
@@ -498,7 +498,7 @@ legend {
                           <div class="modal-body">
                               <form id="assnForm" enctype="multipart/form-data" action="{% url "edit_relations" agent_id=agent.id %}" method="POST" >
                                   {% csrf_token %}
-                                  {{ assn_form|as_bootstrap }}
+                                  {% bootstrap_form assn_form %}
 
                                   <div class="modal-footer">
                                   <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

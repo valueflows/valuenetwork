@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Virtual Accounts" %}{% endblock %}
 
@@ -45,7 +45,7 @@
                                 <div class="modal-body">
                                     <form class="validateMe" id="payoutForm{{ acct.id }}" action="{% url "payout_from_virtual_account" account_id=acct.id %}" method="POST" >
                                         {% csrf_token %}
-                                        {{ acct.payout_form|as_bootstrap }}
+                                        {% bootstrap_form acct.payout_form %}
                                         <input type="hidden" id="next" name="next" value="process" />
                                         <div class="modal-footer">
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

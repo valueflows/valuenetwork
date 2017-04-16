@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "Resource" %}: {{ resource }}{% endblock %}
@@ -68,7 +68,7 @@
 			    <div class="modal-body">
 				    <form id="resource-change-form" action="{% url "change_resource" resource_id=resource.id %}" method="POST" >
 					    {% csrf_token %}
-					    {{ resource.change_form|as_bootstrap }}
+					    {% bootstrap_form resource.change_form %}
                         {{ role_formset.management_form }}
                         <table>
                             <tr>
@@ -103,7 +103,7 @@
                 <div class="modal-body">
                     <form enctype="multipart/form-data" action="{% url "plan_work_order_for_resource" resource_id=resource.id %}" method="POST" >
                         {% csrf_token %}
-                        {{ order_form|as_bootstrap }}
+                        {% bootstrap_form order_form %}
                         <div class="modal-footer">
                           <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                           <button class="btn btn-primary">{% trans "Save changes" %}</button>

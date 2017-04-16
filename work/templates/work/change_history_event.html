@@ -2,7 +2,7 @@
 
 {% load i18n %}
 
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load staticfiles %}
 
 {% block head_title %}{% trans "Change Contribution" %}{% endblock %}
@@ -30,7 +30,7 @@
     <form id="eventForm" class="form-horizontal" method="POST" action="">
 	    {% csrf_token %}
 
-				{{ event_form|as_bootstrap }}
+				{% bootstrap_form event_form %}
 				<input type="hidden" id="page" name="page" value="{{ page }}" />
 
         <div class="form-actions">

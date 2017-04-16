@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Change Process" %}: {{ process }}{% endblock %}
 
@@ -65,13 +65,13 @@
 		<div class="row-fluid">
 			<div class="span6">
 			    <legend class="section">{% trans "Order" %}:</legend>
-				{{ rand_form|as_bootstrap }}
+				{% bootstrap_form rand_form %}
 				{% if demand_form %}
 				    <p style="margin-left: 14em;">{% trans "Or" %}</p>
-				    {{ demand_form|as_bootstrap }}
+				    {% bootstrap_form demand_form %}
 			    {% endif %}
 				<legend class="section">{% trans "Process" %}:</legend>
-				{{ process_form|as_bootstrap }}
+				{% bootstrap_form process_form %}
 				<div class="form-actions">
 					<input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 
 					<input type="submit" name="keep-going" value="{% trans 'Save and continue editing' %}" class="btn btn-primary" />

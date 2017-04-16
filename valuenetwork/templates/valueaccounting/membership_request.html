@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Freedom Coop Membership Request for " %} {{ mbr_req.name }}{% endblock %}
 
@@ -72,7 +72,7 @@ th
                             <form class="validateMe" id="agentForm" enctype="multipart/form-data" 
                                 action="{% url 'create_agent_for_request' membership_request_id=mbr_req.id %}" method="POST" >
                                 {% csrf_token %}
-                                {{ agent_form|as_bootstrap }}
+                                {% bootstrap_form agent_form %}
                                 <div class="modal-footer">
                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                     <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />

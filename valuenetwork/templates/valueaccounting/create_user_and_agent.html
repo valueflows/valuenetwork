@@ -2,7 +2,7 @@
 
 {% load i18n %}
 
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load staticfiles %}
 
 {% block head_title %}{% trans "Create Agent and User" %}{% endblock %}
@@ -33,13 +33,13 @@
     <form id="userAgentForm" class="form-horizontal" method="POST" action="">
 	    {% csrf_token %}
 	        <div id="agent-selection">
-                {{ agent_selection_form|as_bootstrap }}
+                {% bootstrap_form agent_selection_form %}
                 <p id="or" >...or create a new one</p>
             </div>
             
             <div>
-				{{ agent_form|as_bootstrap }}
-				{{ user_form|as_bootstrap }}
+				{% bootstrap_form agent_form %}
+				{% bootstrap_form user_form %}
 			</div>
 
         <div class="form-actions">

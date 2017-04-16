@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "Resource Type" %}:  {{ resource_type.name }}{% endblock %}
@@ -129,7 +129,7 @@ container li {
                     <div class="modal-body">
                         <form class="resource-form" id="resourceForm" enctype="multipart/form-data" action="." method="POST" >
                             {% csrf_token %}
-                            {{ create_form|as_bootstrap }}
+                            {% bootstrap_form create_form %}
                             {{ create_role_formset.management_form }}
                             <table>
                                 <tr>
@@ -261,7 +261,7 @@ container li {
 				<div class="modal-body">
 					<form class="resource-change-form" enctype="multipart/form-data" action="{% url "change_resource_type" resource_type_id=resource_type.id %}" method="POST" >
 						{% csrf_token %}
-						{{ resource_type.change_form|as_bootstrap }}
+						{% bootstrap_form resource_type.change_form %}
 						<input type="hidden" name="next" value="{% url "resource_type" resource_type_id=resource_type.id %}" />
 					  <div class="modal-footer">
 						<button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

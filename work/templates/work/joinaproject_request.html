@@ -1,6 +1,6 @@
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -101,8 +101,8 @@
       </p> -->
       <form id="joinForm" class="validateMe" action="." method="POST" >
         {% csrf_token %}
-        {{ join_form|as_bootstrap }}
-        {{ fobi_form|as_bootstrap }}
+        {% bootstrap_form join_form %}
+        {% bootstrap_form fobi_form %}
 
         <input type="submit" name="submit" value="{% trans 'Submit' %}" class="btn btn-primary" />
       </form>

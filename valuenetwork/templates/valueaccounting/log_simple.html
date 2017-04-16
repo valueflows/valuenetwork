@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load staticfiles %}
 
 {% block head_title %}{% trans "Log Design Contributions" %}{% endblock %}
@@ -66,7 +66,7 @@
         <div class="row-fluid">
             <div class="span6">
 				<legend class="section">{% trans "Resource Created" %}:</legend>
-				{{ output_form|as_bootstrap }}
+				{% bootstrap_form output_form %}
                 <p>Type of resource created</p>
 				<p>{{ resource_form.resource_type }}
                 <a href="#createResourceForm" role="button" class="add-another" data-toggle="modal">
@@ -81,7 +81,7 @@
 
             <div class="span6">
 				<legend class="section" >{% trans "Work Done" %}:</legend>
-				{{ work_form|as_bootstrap }}
+				{% bootstrap_form work_form %}
 
 				<legend class="section" style="margin-top: 1em;">{% trans "Citations" %}:</legend>
                 <a href="#addCiteModal" role="button" class="btn" data-toggle="modal">{% trans "+ cite" %}</a>
@@ -104,7 +104,7 @@
             </div>
             <div class="modal-body">
 
-	              {{ citations_select_form|as_bootstrap }}
+	              {% bootstrap_form citations_select_form %}
 
 	              <div class="modal-footer">
 		            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -124,7 +124,7 @@
 		<div class="modal-body">
 			<form class="resource-create-form" id="rtCreateForm" action="" enctype="multipart/form-data" method="POST" >
 				{% csrf_token %}
-				{{ rt_create_form|as_bootstrap }}
+				{% bootstrap_form rt_create_form %}
                 {{ rtf_create_formset.management_form }}
                 <table>
                     {% for form in rtf_create_formset %}

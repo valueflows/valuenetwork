@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Change Exchange Type and Pattern" %}{% endblock %}
 
@@ -151,7 +151,7 @@ h3 {
                     <h3>{% trans "Exchange Type" %}</h3>
                     <form id="extForm" name="extForm" action="." method="POST" >
                         {% csrf_token %}
-                        {{ change_ext_form|as_bootstrap }}
+                        {% bootstrap_form change_ext_form %}
                         <input type="submit" name="save_ext" value="{% trans 'Save exchange type' %}" class="btn btn-primary" />
                         {% if exchange_type.ocp_record_type %} &nbsp; (E:{{ exchange_type.ocp_record_type }}, R:{{ exchange_type.ocp_record_type.ocp_artwork_type }}, S:{{ exchange_type.ocp_record_type.ocp_skill_type }}) {% else %} <span class="alert">Not connected to the General type trees!</span> {% endif %}
                     </form>
@@ -170,7 +170,7 @@ h3 {
                         <div class="modal-body">
                             <form id="ttForm" class="validateMe" id="ttForm" enctype="multipart/form-data" action="{% url "add_transfer_type" exchange_type_id=exchange_type.id %}" method="POST" >
                                 {% csrf_token %}
-                                {{ add_tt_form|as_bootstrap }}
+                                {% bootstrap_form add_tt_form %}
                                 <div class="modal-footer">
                                     <button class="btn cancelBtn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                     <input type="submit" name="add_tt" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
@@ -197,7 +197,7 @@ h3 {
                                 <div class="modal-body">
                                     <form id="changeForm{{ slot.id }}" class="validateMe" enctype="multipart/form-data" action="{% url "change_transfer_type" transfer_type_id=slot.id %}" method="POST" >
                                         {% csrf_token %}
-                                        {{ slot.change_form|as_bootstrap }}
+                                        {% bootstrap_form slot.change_form %}
                                         <div class="modal-footer">
                                             <button class="btn cancelBtn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                             <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />

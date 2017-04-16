@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Value Equation Sandbox" %}{% endblock %}
 
@@ -133,7 +133,7 @@ img {
                                         </div>
                                     </div>
                                 {% else %}
-                                    {{ bucket.form|as_bootstrap }} 
+                                    {% bootstrap_form bucket.form %} 
                                 {% endif %}
                               </div>
                             {% endif %}

@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Exchange" %}: {{ exchange }}{% endblock %}
 
@@ -198,7 +198,7 @@ li {
             </div>
             <form class="validateMe miniform" id="exchangeForm" method="POST" action="" style="padding-bottom:13px;">
                 {% csrf_token %}
-                {{ exchange_form|as_bootstrap }}
+                {% bootstrap_form exchange_form %}
                 {% if agent %}
                     <!-- <div class="form-actions"> -->
                         <input type="submit" name="save" value="{% trans 'Save changes' %}" class="btn btn-primary" />
@@ -373,7 +373,7 @@ li {
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "add_transfer_external_agent" commitment_id=xfer.commitments.first.id context_agent_id=context_agent.id %}" method="POST" >
                                                         {% csrf_token %}
                                                         {% with slot.add_ext_agent as ag_form %}
-                                                          {{ ag_form|as_bootstrap }}
+                                                          {% bootstrap_form ag_form %}
                                                         {% endwith %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                       <div class="modal-footer">
@@ -812,7 +812,7 @@ li {
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url "add_transfer_external_agent" commitment_id=xfer.commitments.first.id context_agent_id=context_agent.id %}" method="POST" >
                                                         {% csrf_token %}
                                                         {% with slot.add_ext_agent as ag_form %}
-                                                          {{ ag_form|as_bootstrap }}
+                                                          {% bootstrap_form ag_form %}
                                                         {% endwith %}
                                                         <input type="hidden" id="next" name="next" value="exchange-work" />
                                                       <div class="modal-footer">

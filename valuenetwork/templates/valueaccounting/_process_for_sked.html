@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 <ul class="no-indent">
 
@@ -90,7 +90,7 @@
 
 								    <form class="commitmentForm" enctype="multipart/form-data" action="{% url "commit_to_task" commitment_id=item.id %}" method="POST" >
 									    {% csrf_token %}
-									    {{ item.commitment_form|as_bootstrap }}
+									    {% bootstrap_form item.commitment_form %}
 									    <input type="hidden" name="next" value="{% url "work" %}" />
 								      <div class="modal-footer">
 									    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

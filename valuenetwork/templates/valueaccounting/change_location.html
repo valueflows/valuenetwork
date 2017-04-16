@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load staticfiles %}
 
 {% block head_title %}{% trans "Change Location" %}{% endblock %}
@@ -42,7 +42,7 @@
             <form id="locationForm" method="POST" action="">
                  {% csrf_token %}
 
-                {{ location_form|as_bootstrap }}
+                {% bootstrap_form location_form %}
                 
                 {% if agent %}
                     <input type="hidden" id="agentId" name="agentId" value="{{ agent.id }}" />

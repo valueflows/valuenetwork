@@ -2,7 +2,7 @@
 
 {% load i18n %}
 
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Value Time Contributions for " %} {{ project }}{% endblock %}
 
@@ -67,7 +67,7 @@ th
 		    </p>
 {% endcomment %}
 		    <div style="float: left;">
-	            {{ form|as_bootstrap }}
+	            {% bootstrap_form form %}
 		    </div>
 
 	        <div class="form-actions" style="float: left;">

@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Cash Receipt" %}{% endblock %}
 
@@ -32,7 +32,7 @@
 		<form id="exchangeForm" method="POST" action="">
 			{% csrf_token %}
 			<div class="span12">
-				{{ exchange_form|as_bootstrap }}
+				{% bootstrap_form exchange_form %}
 				<div class="form-actions">
 					<input type="submit" name="save" value="{% trans 'Save and go to step 2' %}" class="btn btn-primary" /> 
 			   	</div>

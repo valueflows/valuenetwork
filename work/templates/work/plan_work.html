@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Production" %}{% endblock %}
 
@@ -105,9 +105,9 @@
           <div class="span6">
 
                     <!-- <hr /> -->
-                    {{ process_form|as_bootstrap }}
+                    {% bootstrap_form process_form %}
 {% comment %}
-                    {{ demand_form|as_bootstrap }}
+                    {% bootstrap_form demand_form %}
                     (If an order is not selected, a new work order will be created automatically.)
 {% endcomment %}
                     <!-- <hr /> -->

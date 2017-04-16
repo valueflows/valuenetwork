@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load staticfiles %}
 
 {% block head_title %}{% trans "Log Financial Contribution" %}{% endblock %}
@@ -65,7 +65,7 @@
         <div class="row-fluid">
             <div class="span6">
 				<legend class="section">{% trans "Financial Contribution" %}:</legend>
-				{{ financial_form|as_bootstrap }}
+				{% bootstrap_form financial_form %}
                 <div class="save">
 			        <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 
 			    </div>
@@ -73,11 +73,11 @@
 
             <div class="span6">
 				<legend class="section" >{% trans "Resources Acquired" %}:</legend>
-				{{ resource_form|as_bootstrap }}
+				{% bootstrap_form resource_form %}
                 <hr />
-				{{ resource_form|as_bootstrap }}
+				{% bootstrap_form resource_form %}
                 <hr />
-				{{ resource_form|as_bootstrap }}
+				{% bootstrap_form resource_form %}
                 
             </div>
 	   	</div>

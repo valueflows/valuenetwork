@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load staticfiles %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Inventory " %} {% endblock %}
 
@@ -315,7 +315,7 @@ a {
         <div class="modal-body">
             <form class="resource-form" id="resourceForm" enctype="multipart/form-data" action="." method="POST" >
                 {% csrf_token %}
-                {{ create_form|as_bootstrap }}
+                {% bootstrap_form create_form %}
                 {{ create_role_formset.management_form }}
                 Resource access roles<br />
                 {% for form in create_role_formset %}

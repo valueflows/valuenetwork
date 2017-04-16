@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Skill Suggestions" %}{% endblock %}
 
@@ -75,7 +75,7 @@
                                             <form class="validateMe" id="skillForm{{ suggestion.id }}" enctype="multipart/form-data"
                                                 action="{% url "create_skill_for_suggestion" suggestion_id=suggestion.id %}" method="POST" >
                                                 {% csrf_token %}
-                                                {{ suggestion.resource_type_form|as_bootstrap }}
+                                                {% bootstrap_form suggestion.resource_type_form %}
                                                 <div class="modal-footer">
                                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                                     <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />

@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Process" %}: {{ process }}{% endblock %}
 
@@ -180,7 +180,7 @@ hr {
                     <form class="validateMe" id="process-form" name="chgproc" enctype="multipart/form-data"
                         action="{% url "work_change_process" process_id=process.id %}" method="POST" >
                         {% csrf_token %}
-                        {{ change_process_form|as_bootstrap }}
+                        {% bootstrap_form change_process_form %}
                         <input type="hidden" id="next" name="next" value="work" />
                         <div class="modal-footer">
                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -285,7 +285,7 @@ hr {
                                                 <form class="resource-form validateMe" id="resourceForm{{ item.id }}" name="resfrm{{ item.id }}" enctype="multipart/form-data"
                                                     action="{% url "work_log_stage_change_event" commitment_id=to_be_changed_requirement.id resource_id=resource.id %}" method="POST" >
                                                     {% csrf_token %}
-                                                    {{ resource.transform_form|as_bootstrap }}
+                                                    {% bootstrap_form resource.transform_form %}
                                                     <input type="hidden" id="next" name="next" value="work" />
                                                 <div class="modal-footer">
                                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -314,7 +314,7 @@ hr {
                                         <div class="modal-body">
                                             <form class="commitmentForm{{ item.id }} validateMe" name="comout{{ item.id }}" enctype="multipart/form-data" action="{% url "work_change_commitment" commitment_id=item.id %}" method="POST" >
                                                 {% csrf_token %}
-                                                {{ item.change_form|as_bootstrap }}
+                                                {% bootstrap_form item.change_form %}
                                                 <div class="modal-footer">
                                                     <input type="hidden" id="next" name="next" value="work" />
                                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -353,7 +353,7 @@ hr {
                                     <div class="modal-body">
                                         <form class="resource-form validateMe" id="resourceForm{{ item.id }}" name="resout{{ item.id }}" enctype="multipart/form-data" action="{% url "work_log_resource_for_commitment" commitment_id=item.id %}" method="POST" >
                                             {% csrf_token %}
-                                            {{ item.resource_create_form|as_bootstrap }}
+                                            {% bootstrap_form item.resource_create_form %}
                                         <div class="modal-footer">
                                             <input type="hidden" id="next" name="next" value="work" />
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -371,7 +371,7 @@ hr {
                                     <div class="modal-body">
                                         <form class="add-to-resource-form validateMe" id="addToResourceForm{{ item.id }}" name="addtores{{ item.id }}" enctype="multipart/form-data" action="{% url "work_add_to_resource_for_commitment" commitment_id=item.id %}" method="POST" >
                                             {% csrf_token %}
-                                            {{ item.select_resource_form|as_bootstrap }}
+                                            {% bootstrap_form item.select_resource_form %}
                                         <div class="modal-footer">
                                             <input type="hidden" id="next" name="next" value="work" />
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -501,7 +501,7 @@ hr {
 		                        <div class="modal-body">
 			                        <form class="commitmentForm{{ item.id }} validateMe" name="uncomm{{ item.id }}" enctype="multipart/form-data" action="{% url "work_change_commitment" commitment_id=item.id %}" method="POST" >
 				                        {% csrf_token %}
-				                        {{ item.changeform|as_bootstrap }}
+				                        {% bootstrap_form item.changeform %}
 				                        <input type="hidden" id="next" name="next" value="work" />
                                         <div class="modal-footer">
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -561,7 +561,7 @@ hr {
                                     <form class="invite-form validateMe" id="inviteForm" name="invite" action="{% url "work_invite_collaborator" commitment_id=item.id %}" method="POST" >
                                         {% csrf_token %}
 {% comment %}
-                                        {{ item.invite_collaborator_form|as_bootstrap }}
+                                        {% bootstrap_form item.invite_collaborator_form %}
 {% endcomment %}
                                         <b>Notify people with these skills that you would like help with this task.</b><br />
                                     <div class="modal-footer">
@@ -593,7 +593,7 @@ hr {
                                                 <form class="joinForm validateMe" name="join{{ item.id }}" enctype="multipart/form-data" action="{% url "work_join_task" commitment_id=item.id %}" method="POST" >
                                                     {% csrf_token %}
 {% comment %}
-                                                    {{ item.join_form|as_bootstrap }}
+                                                    {% bootstrap_form item.join_form %}
 {% endcomment %}
                                                     <b>Notify the person assigned to this task that you would like to help.</b><br />
                                                     <input type="hidden" name="next" value="work" />
@@ -624,7 +624,7 @@ hr {
                                             <div class="takeTaskBody modal-body">
                                                 <form class="commitmentForm validateMe takeTaskForm" name="tt{{ item.id }}" enctype="multipart/form-data" action="{% url "work_commit_to_task" commitment_id=item.id %}" method="POST" >
                                                     {% csrf_token %}
-                                                    {{ item.commitment_form|as_bootstrap }}
+                                                    {% bootstrap_form item.commitment_form %}
                                                     <input type="hidden" name="next" value="work" />
                                                 <div class="modal-footer takeTaskFooter">
                                                     <div class="info">
@@ -666,7 +666,7 @@ hr {
                                     <div class="modal-body">
                                         <form class="eventForm{{ item.id }} validateMe" name="ef{{ item.id }}" enctype="multipart/form-data" action="{% url "work_add_work_event" commitment_id=item.id %}" method="POST" >
                                             {% csrf_token %}
-                                            {{ item.input_work_form_init|as_bootstrap }}
+                                            {% bootstrap_form item.input_work_form_init %}
                                             <div class="modal-footer">
                                             <input type="hidden" id="next" name="next" value="work" />
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -700,7 +700,7 @@ hr {
 								                <div class="modal-body">
 									                <form class="eventForm{{ event.id }} validateMe" name="efc{{ event.id }}" enctype="multipart/form-data" action="{% url "work_change_work_event" event_id=event.id %}" method="POST" >
 										                {% csrf_token %}
-										                {{ event.work_event_change_form|as_bootstrap }}
+										                {% bootstrap_form event.work_event_change_form %}
 										                <input type="hidden" id="next" name="next" value="work" />
                                                         <div class="modal-footer">
                                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -755,7 +755,7 @@ hr {
 					                <div class="modal-body">
 						                <form class="eventForm{{ event.id }} validateMe" name="efcc{{ event.id }}" enctype="multipart/form-data" action="{% url "work_change_unplanned_work_event" event_id=event.id %}" method="POST" >
 							                {% csrf_token %}
-							                {{ event.changeform|as_bootstrap }}
+							                {% bootstrap_form event.changeform %}
 							                <input type="hidden" id="next" name="next" value="work" />
                                             <div class="modal-footer">
                                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -818,7 +818,7 @@ hr {
                         <div class="modal-body">
                             <form class="cite-form validateMe" name="cite" enctype="multipart/form-data" id="addUnplannedCiteForm" action="{% url "work_add_unplanned_cite_event" process_id=process.id %}" method="POST" >
                                 {% csrf_token %}
-                                {{ unplanned_cite_form|as_bootstrap }}
+                                {% bootstrap_form unplanned_cite_form %}
                                 <div class="modal-footer">
                                     <input type="hidden" id="next" name="next" value="work" />
                                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -903,7 +903,7 @@ hr {
                                                     <form class="eventForm{{ resource.id }} validateMe" name="res{{ resource.id }}" enctype="multipart/form-data"
                                                         action="{% url "work_add_citation_event" commitment_id=item.id resource_id=resource.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {{ resource.cite_event_form|as_bootstrap }}
+                                                        {% bootstrap_form resource.cite_event_form %}
                                                     <div class="modal-footer">
                                                         <input type="hidden" id="next" name="next" value="work" />
                                                         <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -984,7 +984,7 @@ hr {
                                 <form class="consumption-form validateMe" name="cf" enctype="multipart/form-data" id="addUnplannedConsumptionForm"
                                     action="{% url "work_add_unplanned_input_event" process_id=process.id slot='c' %}" method="POST" >
 	                              {% csrf_token %}
-	                              {{ unplanned_consumption_form|as_bootstrap }}
+	                              {% bootstrap_form unplanned_consumption_form %}
 	                              <div class="modal-footer">
                                     <input type="hidden" id="next" name="next" value="work" />
 		                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1019,7 +1019,7 @@ hr {
 			                    <div class="modal-body">
 				                    <form class="commitmentForm{{ item.id }} validateMe" name="com{{ item.id }}" enctype="multipart/form-data" action="{% url "work_change_commitment" commitment_id=item.id %}" method="POST" >
 					                    {% csrf_token %}
-					                    {{ item.changeform|as_bootstrap }}
+					                    {% bootstrap_form item.changeform %}
 					                    <input type="hidden" id="next" name="next" value="work" />
                                         <div class="modal-footer">
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1076,7 +1076,7 @@ hr {
 						                    <form class="eventForm{{ resource.id }} validateMe" name="efr{{ resource.id }}" enctype="multipart/form-data"
 						                        action="{% url "work_add_consumption_event" commitment_id=item.id resource_id=resource.id %}" method="POST" >
 							                    {% csrf_token %}
-							                    {{ resource.consumption_event_form|as_bootstrap }}
+							                    {% bootstrap_form resource.consumption_event_form %}
 						                      <div class="modal-footer">
                                                 <input type="hidden" id="next" name="next" value="work" />
 							                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1211,7 +1211,7 @@ hr {
                             <form class="use-form validateMe" name="enuse" enctype="multipart/form-data" id="addUnplannedUseForm"
                                 action="{% url "work_add_unplanned_input_event" process_id=process.id slot='u' %}" method="POST" >
                               {% csrf_token %}
-                              {{ unplanned_use_form|as_bootstrap }}
+                              {% bootstrap_form unplanned_use_form %}
                               <div class="modal-footer">
                                 <input type="hidden" id="next" name="next" value="work" />
 	                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1241,7 +1241,7 @@ hr {
 			                    <div class="modal-body">
 				                    <form class="commitmentForm{{ item.id }} validateMe" name="cm{{ item.id }}" enctype="multipart/form-data" action="{% url "work_change_commitment" commitment_id=item.id %}" method="POST" >
 					                    {% csrf_token %}
-					                    {{ item.changeform|as_bootstrap }}
+					                    {% bootstrap_form item.changeform %}
 					                    <input type="hidden" id="next" name="next" value="work" />
                                         <div class="modal-footer">
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1288,7 +1288,7 @@ hr {
 						                    <form class="eventForm{{ resource.id }} validateMe" name="resef{{ resource.id }}" enctype="multipart/form-data"
 						                        action="{% url "work_add_use_event" commitment_id=item.id resource_id=resource.id %}" method="POST" >
 							                    {% csrf_token %}
-							                    {{ resource.use_event_form|as_bootstrap }}
+							                    {% bootstrap_form resource.use_event_form %}
 						                      <div class="modal-footer">
                                                 <input type="hidden" id="next" name="next" value="work" />
 							                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1494,7 +1494,7 @@ hr {
         <div class="modal-body">
             <form class="resource-create-form validateMe" id="resource-create-form" name="rescreate" enctype="multipart/form-data" action="." method="POST" >
                 {% csrf_token %}
-                {{ resource_type_form|as_bootstrap }}
+                {% bootstrap_form resource_type_form %}
                 {{ facet_formset.management_form }}
                 <table>
                     {% for form in facet_formset %}
@@ -1526,7 +1526,7 @@ hr {
             <form class="cite-form" enctype="multipart/form-data" id="addCitationForm" name="addcite" action="{% url "work_add_process_citation" process_id=process.id %}" method="POST" >
 	            {% csrf_token %}
 
-                    {{ add_citation_form|as_bootstrap }}
+                    {% bootstrap_form add_citation_form %}
 
               <div class="modal-footer">
 	            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1550,7 +1550,7 @@ hr {
                 action="{% url "work_add_process_input" process_id=process.id slot='c' %}" method="POST" >
 	            {% csrf_token %}
 
-                    {{ add_consumable_form|as_bootstrap }}
+                    {% bootstrap_form add_consumable_form %}
 
               <div class="modal-footer">
 	            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1575,7 +1575,7 @@ hr {
                 action="{% url "work_add_process_input" process_id=process.id  slot='u' %}" method="POST" >
 	            {% csrf_token %}
 
-                    {{ add_usable_form|as_bootstrap }}
+                    {% bootstrap_form add_usable_form %}
 
               <div class="modal-footer">
 	            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1605,7 +1605,7 @@ hr {
             <form class="work-form validateMe" id="addWorkForm" name="addwork" action="{% url "work_add_process_worker" process_id=process.id %}" method="POST" >
 	            {% csrf_token %}
 
-                    {{ add_work_form|as_bootstrap }}
+                    {% bootstrap_form add_work_form %}
 
               <div class="modal-footer">
 	            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -1636,7 +1636,7 @@ hr {
         <div class="modal-body">
             <form class="unplanned-output-form validateMe" name="unout" enctype="multipart/form-data" action="{% url "work_add_unplanned_output" process_id=process.id %}" method="POST" >
                 {% csrf_token %}
-                {{ unplanned_output_form|as_bootstrap }}
+                {% bootstrap_form unplanned_output_form %}
                 {{ role_formset.management_form }}
                 Resource Roles
                 <table>
@@ -1665,7 +1665,7 @@ hr {
         <div class="modal-body">
             <form class="unplanned-work-form validateMe" enctype="multipart/form-data" name="unwork" action="{% url "work_add_unplanned_work_event" process_id=process.id %}" method="POST" >
                 {% csrf_token %}
-                {{ unplanned_work_form|as_bootstrap }}
+                {% bootstrap_form unplanned_work_form %}
               <div class="modal-footer">
                 <input type="hidden" id="next" name="next" value="work" />
                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

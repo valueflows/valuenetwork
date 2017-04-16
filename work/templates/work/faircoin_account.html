@@ -1,7 +1,7 @@
 {% extends "work_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "FairCoin Account" %}: {{ resource.identifier }}{% endblock %}
@@ -87,7 +87,7 @@
 			    <div class="modal-body">
 				    <form id="resource-change-form" action="{% url "change_faircoin_account" resource_id=resource.id %}" method="POST" >
 					    {% csrf_token %}
-					    {{ resource.change_form|as_bootstrap }}
+					    {% bootstrap_form resource.change_form %}
 					    {% comment %}
                         {{ role_formset.management_form }}
                         <table>
@@ -255,7 +255,7 @@
                     <h3 id="coinHeader" >{% trans "Send Faircoins" %}</h3>
                     <form id="sendCoinsForm" method="POST" action={% if payment_due %}"#" class="disabled" style="color:#888;" {% else %}"{% url "transfer_faircoins" resource_id=resource.id %}" {% endif %}>
                         {% if payment_due %}
-                          {{ send_coins_form|as_bootstrap }}
+                          {% bootstrap_form send_coins_form %}
                           <em>{% trans "(available when full member)" %}</em>
                         {% elif not resource.is_wallet_address %}
                           <em>{% trans "(available when the address pertains to this wallet)" %}</em>
@@ -263,7 +263,7 @@
                           <em>{% trans "(please wait about a minute to have a new fair-address and refresh the page)" %}</em>
                         {% else %}
                           {% csrf_token %}
-                          {{ send_coins_form|as_bootstrap }}
+                          {% bootstrap_form send_coins_form %}
                           <button class="btn btn-primary" name="sendCoins" value="coins">{% trans "Send" %}</button>
                         {% endif %}
                     </form>

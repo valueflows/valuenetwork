@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "Resource Types" %}{% endblock %}
@@ -77,7 +77,7 @@
 					<div class="modal-body">
 						<form class="resource-create-form" id="resourceCreateForm" enctype="multipart/form-data" action="{% url "create_resource_type" %}" method="POST" >
 							{% csrf_token %}
-							{{ create_form|as_bootstrap }}
+							{% bootstrap_form create_form %}
                             {{ create_formset.management_form }}
                             <table>
                                 {% for form in create_formset %}

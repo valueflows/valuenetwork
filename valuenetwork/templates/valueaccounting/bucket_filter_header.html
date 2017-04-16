@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Filter demo - header" %}{% endblock %}
 
@@ -31,7 +31,7 @@
 
             <form id="headerForm" action="." method="POST" >
                 {% csrf_token %}
-                {{ header_form|as_bootstrap }}
+                {% bootstrap_form header_form %}
                 <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'Submit' %}" />
             </form>
 

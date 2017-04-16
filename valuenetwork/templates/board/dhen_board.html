@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Exchange" %}: {{ exchange }}{% endblock %}
 
@@ -188,8 +188,8 @@ h3 {
                                     <div class="modal-body">
                                         <form class="validateMe" enctype="multipart/form-data" action="{% url "change_available" commitment_id=com.id %}" method="POST" >
                                             {% csrf_token %}
-                                            {{ com.zero_form|as_bootstrap }}
-                                            {{ com.commitment_form|as_bootstrap }}
+                                            {% bootstrap_form com.zero_form %}
+                                            {% bootstrap_form com.commitment_form %}
                                             <div class="modal-footer">
                                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                                 <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
@@ -207,7 +207,7 @@ h3 {
                                             action="{% url "purchase_resource" context_agent_id=context_agent.id commitment_id=com.id %}" 
                                             method="POST" >
                                             {% csrf_token %}
-                                            {{ com.zero_form|as_bootstrap }}
+                                            {% bootstrap_form com.zero_form %}
                                             <p class="modal-hdg">Harvester Breakout</p>
                                             {{ com.multiple_formset.management_form }}
                                             <table>
@@ -231,8 +231,8 @@ h3 {
                                                 {% endfor %}
                                             </table>
                                             <p class="modal-hdg">Combine Harvester Resources</p>
-                                            {{ com.lot_form|as_bootstrap }}
-                                            {{ com.transfer_form|as_bootstrap }}
+                                            {% bootstrap_form com.lot_form %}
+                                            {% bootstrap_form com.transfer_form %}
                                             <div class="modal-footer">
                                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                                 <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
@@ -272,7 +272,7 @@ h3 {
                                             action="{% url "transfer_resource" context_agent_id=context_agent.id resource_id=res.id %}" 
                                             method="POST" >
                                             {% csrf_token %}
-                                            {{ res.transfer_form|as_bootstrap }}
+                                            {% bootstrap_form res.transfer_form %}
                                             <div class="modal-footer">
                                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                                 <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
@@ -322,7 +322,7 @@ h3 {
                                     action="{% url "combine_resources" context_agent_id=context_agent.id resource_type_id=rt.id %}" 
                                     method="POST" >
                                     {% csrf_token %}
-                                    {{ rt.combine_form|as_bootstrap }}
+                                    {% bootstrap_form rt.combine_form %}
                                     <div class="modal-footer">
                                         <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                         <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
@@ -387,7 +387,7 @@ h3 {
             <form class="validateMe" id="availableForm" enctype="multipart/form-data" 
                 action="{% url "add_available" context_agent_id=context_agent.id %}" method="POST" >
                 {% csrf_token %}
-                {{ available_form|as_bootstrap }}
+                {% bootstrap_form available_form %}
                 <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                     <button class="btn btn-primary">{% trans "Save" %}</button>
@@ -405,7 +405,7 @@ h3 {
             <form class="validateMe" id="availableForm" enctype="multipart/form-data" 
                 action="{% url "receive_directly" context_agent_id=context_agent.id %}" method="POST" >
                 {% csrf_token %}
-                {{ receive_form|as_bootstrap }}
+                {% bootstrap_form receive_form %}
                 <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                     <button class="btn btn-primary">{% trans "Save" %}</button>

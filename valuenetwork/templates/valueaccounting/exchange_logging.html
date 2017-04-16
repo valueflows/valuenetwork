@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Exchange" %}: {{ exchange }}{% endblock %}
 
@@ -157,7 +157,7 @@ li {
             </div>
             <form class="validateMe" id="exchangeForm" method="POST" action="">
                 {% csrf_token %}
-                {{ exchange_form|as_bootstrap }}
+                {% bootstrap_form exchange_form %}
                 {% if agent %}
                     <div class="form-actions">
                         <input type="submit" name="save" value="{% trans 'Save changes' %}" class="btn btn-primary" /> 
@@ -924,7 +924,7 @@ li {
                                 <div class="modal-body">
                                     <form class="validateMe"  class="eventForm{{ event.id }} validateMe" enctype="multipart/form-data" action="{% url "change_exchange_work_event" event_id=event.id %}" method="POST" >
                                         {% csrf_token %}
-                                        {{ event.changeform|as_bootstrap }}
+                                        {% bootstrap_form event.changeform %}
                                         <input type="hidden" id="next" name="next" value="exchange" />
                                         <div class="modal-footer">
                                             <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

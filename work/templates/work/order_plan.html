@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Schedule for " %}{{ order }}{% endblock %}
 
@@ -222,7 +222,7 @@ textarea {
                     <div class="modal-body">
                         <form class="order-item-form validateMe" enctype="multipart/form-data" action="{% url "add_order_item" order_id=order.id %}" method="POST" >
                             {% csrf_token %}
-                            {{ add_order_item_form|as_bootstrap }}
+                            {% bootstrap_form add_order_item_form %}
                             <input type="hidden" name="next" value="{% url "order_plan" order_id=order.id %}" />
                             <div class="modal-footer">
                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -274,7 +274,7 @@ textarea {
                             <div class="modal-body">
                                 <form class="productionProcess{{ item.id }} validateMe" action="{% url "create_production_process" commitment_id=item.id %}" method="POST" >
                                     {% csrf_token %}
-                                    {{ item.process_form|as_bootstrap }}
+                                    {% bootstrap_form item.process_form %}
                                     <input type="hidden" id="next" name="next" value="order-plan" />
                                     <div class="modal-footer">
                                         <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

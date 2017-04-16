@@ -2,7 +2,7 @@
 
 {% load i18n %}
 
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load staticfiles %}
 
 {% block head_title %}{% trans "Change Order" %}: {{ order }}{% endblock %}
@@ -30,7 +30,7 @@
     <form id="orderForm" class="form-horizontal" method="POST" action="">
         {% csrf_token %}
 
-        {{ order_form|as_bootstrap }}
+        {% bootstrap_form order_form %}
 
         <div class="form-actions">
             <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 

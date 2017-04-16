@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Production" %}{% endblock %}
 
@@ -101,11 +101,11 @@
               <div class="span6">
 
                     <hr />
-                    {{ process_form|as_bootstrap }}
+                    {% bootstrap_form process_form %}
 
 
                     {% if rand %}
-                        {{ demand_form|as_bootstrap }}  
+                        {% bootstrap_form demand_form %}  
                         (If a work order is not selected, a new work order will be created automatically.) 
                     {% endif %}
                     <hr />                

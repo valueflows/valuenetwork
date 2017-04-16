@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Work" %}{% endblock %}
 
@@ -272,7 +272,7 @@ th, td {
 							            <div class="modal-body">
 								            <form id="procForm{{ process.id }}" enctype="multipart/form-data" action="." method="POST" >
 									          {% csrf_token %}
-									          {{ process.schedule_form|as_bootstrap }}
+									          {% bootstrap_form process.schedule_form %}
                                               <input type="hidden" name="proc_id" value="{{ process.id }}" />
 								              <div class="modal-footer">
 									            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -366,7 +366,7 @@ th, td {
 
 								    <form class="todoForm" id="todoForm" action="{% url "work_add_todo" %}" method="POST" >
 									    {% csrf_token %}
-									    {{ todo_form|as_bootstrap }}
+									    {% bootstrap_form todo_form %}
 									    <input type="hidden" name="next" value="{% url "project_work" %}" />
 								      <div class="modal-footer">
 									    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -510,7 +510,7 @@ th, td {
 
 					                                <form class="changeForm" id="changeForm-{{ todo.id }}" action="{% url "work_todo_change" todo_id=todo.id %}" method="POST" >
 						                                {% csrf_token %}
-						                                {{ todo.work_todo_change_form|as_bootstrap }}
+						                                {% bootstrap_form todo.work_todo_change_form %}
 						                                <input type="hidden" name="next" value="{% url "project_work" %}" />
 					                                  <div class="modal-footer">
 						                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

@@ -54,7 +54,7 @@ ul {
 		<legend>{% trans "Resource Flows for " %}{{ rt.name }}</legend>
 {% comment %}
         <form id="sort" enctype="multipart/form-data" method="POST" >
-            {{ sort_form|as_bootstrap }}
+            {% bootstrap_form sort_form %}
         </form>
 {% endcomment %}
 		<table style="width: 100%;" class="table table-bordered table-hover table-condensed" >

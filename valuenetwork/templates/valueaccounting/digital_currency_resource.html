@@ -1,7 +1,7 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "FairCoin Resource" %}: {{ resource }}{% endblock %}
@@ -72,7 +72,7 @@
 			    <div class="modal-body">
 				    <form id="resource-change-form" action="{% url "change_resource" resource_id=resource.id %}" method="POST" >
 					    {% csrf_token %}
-					    {{ resource.change_form|as_bootstrap }}
+					    {% bootstrap_form resource.change_form %}
                         {{ role_formset.management_form }}
                         <table>
                             <tr>
@@ -194,7 +194,7 @@
                     <h3 id="coinHeader" >{% trans "Send Faircoins" %}</h3>
                     <form id="sendCoinsForm" action="{% url "send_faircoins" resource_id=resource.id %}" method="POST" >
                         {% csrf_token %}
-                        {{ send_coins_form|as_bootstrap }}
+                        {% bootstrap_form send_coins_form %}
                         <button class="btn btn-primary" name="sendCoins" value="coins">{% trans "Send" %}</button>
                     </form>
                 {% endif %}

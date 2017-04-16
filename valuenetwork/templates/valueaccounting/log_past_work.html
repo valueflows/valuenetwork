@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Labnotes for " %} {{ commitment.from_agent.name }} doing {{ commitment.resource_type.name }} on {{ process.name }}{% endblock %}
 
@@ -213,7 +213,7 @@
 		                    <div class="modal-body">
 			                    <form class="resource-create-form" id="resource-create-form" enctype="multipart/form-data" action="." method="POST" >
 				                    {% csrf_token %}
-				                    {{ resource_type_form|as_bootstrap }}
+				                    {% bootstrap_form resource_type_form %}
                                     {{ facet_formset.management_form }}
                                     <table>
                                         {% for form in facet_formset %}
@@ -245,7 +245,7 @@
 					                action="{% url "new_process_input" commitment_id=commitment.id slot='c' %}" method="POST" >
 						            {% csrf_token %}
 
-					                    {{ add_consumable_form|as_bootstrap }}
+					                    {% bootstrap_form add_consumable_form %}
 
                                 	<input type='hidden' id='consumableRunning' name='wasRunning' value='' />
 			                        <input type='hidden' id='consumableRetrying' name='wasRetrying' value='' />
@@ -272,7 +272,7 @@
 					                action="{% url "new_process_input" commitment_id=commitment.id  slot='u' %}" method="POST" >
 						            {% csrf_token %}
 
-					                    {{ add_usable_form|as_bootstrap }}
+					                    {% bootstrap_form add_usable_form %}
 
                                 	<input type='hidden' id='usableRunning' name='wasRunning' value='' />
 			                        <input type='hidden' id='usableRetrying' name='wasRetrying' value='' />
@@ -298,7 +298,7 @@
 					            <form class="cite-form" enctype="multipart/form-data" id="addCitationForm" action="{% url "new_process_citation" commitment_id=commitment.id %}" method="POST" >
 						            {% csrf_token %}
 
-					                    {{ add_citation_form|as_bootstrap }}
+					                    {% bootstrap_form add_citation_form %}
 
                                 	<input type='hidden' id='citeRunning' name='wasRunning' value='' />
 			                        <input type='hidden' id='citeRetrying' name='wasRetrying' value='' />
@@ -325,7 +325,7 @@
 					            <form class="work-form" id="addWorkForm" action="{% url "new_process_worker" commitment_id=commitment.id %}" method="POST" >
 						            {% csrf_token %}
 
-					                    {{ add_work_form|as_bootstrap }}
+					                    {% bootstrap_form add_work_form %}
 
                                 	<input type='hidden' id='workRunning' name='wasRunning' value='' />
 			                        <input type='hidden' id='workRetrying' name='wasRetrying' value='' />
@@ -402,9 +402,9 @@
 
 
 								            {% if resource %}
-							                    {{ resource.change_form|as_bootstrap }}
+							                    {% bootstrap_form resource.change_form %}
 						                    {% else %}
-							                    {{ item.resource_create_form|as_bootstrap }}
+							                    {% bootstrap_form item.resource_create_form %}
 						                    {% endif %}
 						                    
                                         	<input type="hidden" name="itemId" value="{{ item.id }}" />					            
@@ -428,7 +428,7 @@
 						        <div class="modal-body">
 							        <form class="failure-form" id="failForm{{ item.id }}" action="{% url "failed_outputs" commitment_id=item.id %}" method="POST" >
 								        {% csrf_token %}
-								        {{ failure_form|as_bootstrap }}
+								        {% bootstrap_form failure_form %}
 								        <input type="hidden" name="next" value="{% url "work_commitment" commitment_id=commitment.id %}" />
 							          <div class="modal-footer">
 								        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

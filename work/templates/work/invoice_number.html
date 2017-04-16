@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "Invoice Number" %}{% endblock %}
 
@@ -35,7 +35,7 @@
         <h3>{% trans "Create a new Invoice Number" %}</h3>
         <form id="invoiceNumberForm" action="." method="POST">
             {% csrf_token %}
-            {{ form|as_bootstrap }}
+            {% bootstrap_form form %}
             <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Create" %}' />
         </form>
         

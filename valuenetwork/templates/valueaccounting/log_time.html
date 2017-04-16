@@ -2,7 +2,7 @@
 
 {% load i18n %}
 
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 
 {% block head_title %}{% trans "Log Your Time Contributions" %}{% endblock %}
@@ -65,7 +65,7 @@ text {
 		<div style="float:left; width: 40%; ">
 	        <legend>Log Time</legend>
 
-		    {{ form|as_bootstrap }}
+		    {% bootstrap_form form %}
 
 		    <div class="form-actions">
 		        <button class="btn btn-primary" type="submit">Start</button>

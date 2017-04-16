@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 {% load thumbnail %}
 
 {% block head_title %}{% trans "Today" %}{% endblock %}
@@ -294,7 +294,7 @@ th, td {
 
 					                                <form class="changeForm" id="changeForm-{{ todo.id }}" action="{% url "todo_change" todo_id=todo.id %}" method="POST" >
 						                                {% csrf_token %}
-						                                {{ todo.todo_change_form|as_bootstrap }}
+						                                {% bootstrap_form todo.todo_change_form %}
 						                                <input type="hidden" name="next" value="{% url "work" %}" />
 					                                  <div class="modal-footer">
 						                                <input type="cancel" class="btn" data-dismiss="modal" aria-hidden="true" value='{% trans "Cancel" %}'/>

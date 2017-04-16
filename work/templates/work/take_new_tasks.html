@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load bootstrap_tags %}
+{% load bootstrap3 %}
 
 {% block head_title %}{% trans "My Dashboard" %}{% endblock %}
 
@@ -210,7 +210,7 @@ th, td {
 
                                     <form class="todoForm" id="todoForm" action="{% url "work_add_todo" %}" method="POST" >
                                         {% csrf_token %}
-                                        {{ todo_form|as_bootstrap }}
+                                        {% bootstrap_form todo_form %}
                                         <input type="hidden" name="next" value="{% url "my_dashboard" %}" />
                                     <div class="modal-footer">
                                         <input type="cancel" class="btn cancel" data-dismiss="modal" aria-hidden="true" value='{% trans "Cancel" %}'/>
@@ -297,7 +297,7 @@ th, td {
 
                                                 <form class="changeForm" id="changeForm-{{ todo.id }}" action="{% url "work_todo_change" todo_id=todo.id %}" method="POST" >
                                                     {% csrf_token %}
-                                                    {{ todo.work_todo_change_form|as_bootstrap }}
+                                                    {% bootstrap_form todo.work_todo_change_form %}
                                                     <input type="hidden" name="next" value="{% url "my_dashboard" %}" />
                                                   <div class="modal-footer">
                                                     <input type="cancel" class="btn cancel" data-dismiss="modal" aria-hidden="true" value='{% trans "Cancel" %}'/>
@@ -386,7 +386,7 @@ th, td {
 													<div class="span12">
 														<form class="commitmentForm" enctype="multipart/form-data" action="{% url "commit_to_task" commitment_id=item.id %}" method="POST" >
 															{% csrf_token %}
-															{{ item.commitment_form|as_bootstrap }}
+															{% bootstrap_form item.commitment_form %}
 															<input type="hidden" name="next" value="{% url "my_dashboard" %}" />
 														  <div class="modal-footer">
 															<input type="cancel" class="btn cancel" data-dismiss="modal" aria-hidden="true" value='{% trans "Cancel" %}'/>
@@ -464,7 +464,7 @@ th, td {
                                                 <div class="span12">
                                                     <form class="commitmentForm" enctype="multipart/form-data" action="{% url "commit_to_task" commitment_id=item.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {{ item.commitment_form|as_bootstrap }}
+                                                        {% bootstrap_form item.commitment_form %}
                                                         <input type="hidden" name="next" value="{% url "my_dashboard" %}" />
                                                         <div class="modal-footer">
                                                         <input type="cancel" class="btn cancel" data-dismiss="modal" aria-hidden="true" value='{% trans "Cancel" %}'/>
@@ -641,7 +641,7 @@ th, td {
 
                                                     <form class="changeForm" id="changeForm-{{ todo.id }}" action="{% url "work_todo_change" todo_id=todo.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {{ todo.work_todo_change_form|as_bootstrap }}
+                                                        {% bootstrap_form todo.work_todo_change_form %}
                                                         <input type="hidden" name="next" value="{% url 'take_new_tasks' %}" />
                                                       <div class="modal-footer">
                                                         <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

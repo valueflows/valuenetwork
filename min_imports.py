@@ -44,16 +44,13 @@ class RemoveClassmapImports(ast.NodeTransformer):
     def __init__(self, classmap):
         self.classmap = classmap
 
-    def visit_Import(self, node):
-        return self.m_visit_import(node)
-
-    def visit_ImportFrom(self, node):
-        return self.m_visit_import(node)
-
     def m_visit_import(self, node):
         if any([self.classmap.has_key(name) for name in node.names]):
             return None
         return node
+
+    visit_Import = m_visit_import
+    visit_ImportFrom = m_visit_import
 
 
 def remove_classmap_imports(directory):
@@ -69,10 +66,17 @@ def remove_classmap_imports(directory):
             f.write(new_source)
 
 
-ImportAt = namedtuple('ImportAt', ['name', 'filename', 'lineno', 'col_offset', 'references'])
+ImportAt = namedtuple('ImportAt', ['name', 'filename', 'lineno', 'col_offset', 'scope', 'references'])
 
 
-_Scope = namedtuple('_Scope', ['parent', 'children', 'enclosing_symbol'])
+class _Scope(object):
+    __slots__ = ['parent', 'children', 'enclosing_symbol']
+
+    def __init__(self, **kwargs):
+        super(_Scope, self).__init__()
+        self.parent = kwargs.pop('parent', None)
+        self.children = kwargs.pop('children', [])
+        self.enclosing_symbol = kwargs.pop('enclosing_symbol', None)
 
 
 class NameGrabberNodeVisitor(ast.NodeVisitor):
@@ -82,25 +86,44 @@ class NameGrabberNodeVisitor(ast.NodeVisitor):
         self.classmap = classmap
         self.names = []
 
+    def visit(self, node):
+        method = 'visit_' + node.__class__.__name__
+        visitor = getattr(self, method, self.generic_visit)
+        result = visitor(node)
+        end_method = 'end_visit_' + node.__class__.__name__
+        end_visitor = getattr(self, end_method, None)
+        if end_visitor:
+            end_visitor(node)
+        return result
+
     def visit_ClassDef(self, node):
         old_scope = self.scope
         self.scope = _Scope(parent=self.scope, enclosing_symbol=node.name)
-        old_scope.children = [self.scope]
+        self._add_to_scope(self.scope, old_scope)
 
-        # TODO: Leave & enter scopes
+    def end_visit_ClassDef(self, node):
+        self.scope = self.scope.parent
 
     def visit_FunctionDef(self, node):
+        old_scope = self.scope
         self.scope = _Scope(parent=self.scope, enclosing_symbol=node.name)
+        self._add_to_scope(self.scope, old_scope)
 
     def visit_Name(self, node):
         if self.classmap.has_key(node.id):
             self.names.append(
-                ImportAt(name=node.id, filename=self.filename, lineno=node.lineno, col_offset=node.col_offset,
+                ImportAt(name=node.id, filename=self.filename, scope=self.scope, lineno=node.lineno,
+                         col_offset=node.col_offset,
                          references=self.classmap[node.id]))
+
+    def _add_to_scope(self, receiver, scope):
+        receiver.children = receiver.children or []
+        receiver.children.append(scope)
 
 
 def compute_minimal_imports(directory, classmap):
     to_scan = get_py_files(directory)
+    global_names = []
     for file_to_scan in to_scan:
         with open(file_to_scan, 'r') as f:
             source = '\n'.join(f.readlines())
@@ -108,7 +131,8 @@ def compute_minimal_imports(directory, classmap):
             visitor = NameGrabberNodeVisitor(file_to_scan, classmap)
             visitor.visit(node)
             names = visitor.names
-            print names
+            global_names.extend(names)
+    print global_names
 
 
 if __name__ == '__main__':

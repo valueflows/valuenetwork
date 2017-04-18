@@ -5268,7 +5268,7 @@ def work_uncommit(request, commitment_id):
 def work_add_process_worker(request, process_id):
     process = get_object_or_404(Process, pk=process_id)
     if request.method == "POST":
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         form = WorkCommitmentForm(data=request.POST, prefix='work')
         if form.is_valid():
             input_data = form.cleaned_data

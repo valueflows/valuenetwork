@@ -1,10 +1,22 @@
 import ast
 import optparse
 import os
-import astor
 from collections import OrderedDict, namedtuple
+import itertools
 
 DefinedClass = namedtuple('DefinedClass', ['name', 'filename', 'lineno', 'col_offset'])
+
+
+class ScopedNodeVisitor(ast.NodeVisitor):
+    def visit(self, node):
+        method = 'visit_' + node.__class__.__name__
+        visitor = getattr(self, method, self.generic_visit)
+        result = visitor(node)
+        end_method = 'end_visit_' + node.__class__.__name__
+        end_visitor = getattr(self, end_method, None)
+        if end_visitor:
+            end_visitor(node)
+        return result
 
 
 class FindClassDefinitionsNodeVisitor(ast.NodeVisitor):
@@ -40,32 +52,6 @@ def get_py_files(directory):
     return to_scan
 
 
-class RemoveClassmapImports(ast.NodeTransformer):
-    def __init__(self, classmap):
-        self.classmap = classmap
-
-    def m_visit_import(self, node):
-        if any([self.classmap.has_key(name) for name in node.names]):
-            return None
-        return node
-
-    visit_Import = m_visit_import
-    visit_ImportFrom = m_visit_import
-
-
-def remove_classmap_imports(directory):
-    to_scan = get_py_files(directory)
-    for file_to_scan in to_scan:
-        with open(file_to_scan, 'r') as f:
-            source = '\n'.join(f.readlines())
-            node = ast.parse(source, file_to_scan)
-            transformer = RemoveClassmapImports(classmap)
-            node = transformer.visit(node)
-            new_source = astor.to_source(node)
-        with open(file_to_scan, 'w') as f:
-            f.write(new_source)
-
-
 ImportAt = namedtuple('ImportAt', ['name', 'filename', 'lineno', 'col_offset', 'scope', 'references'])
 
 
@@ -79,27 +65,18 @@ class _Scope(object):
         self.enclosing_symbol = kwargs.pop('enclosing_symbol', None)
 
 
-class NameGrabberNodeVisitor(ast.NodeVisitor):
+class NameGrabberNodeVisitor(ScopedNodeVisitor):
     def __init__(self, filename, classmap):
         self.scope = self.root_scope = _Scope()
         self.filename = filename
         self.classmap = classmap
         self.names = []
 
-    def visit(self, node):
-        method = 'visit_' + node.__class__.__name__
-        visitor = getattr(self, method, self.generic_visit)
-        result = visitor(node)
-        end_method = 'end_visit_' + node.__class__.__name__
-        end_visitor = getattr(self, end_method, None)
-        if end_visitor:
-            end_visitor(node)
-        return result
-
     def visit_ClassDef(self, node):
         old_scope = self.scope
         self.scope = _Scope(parent=self.scope, enclosing_symbol=node.name)
-        self._add_to_scope(self.scope, old_scope)
+        old_scope.children.append(self.scope)
+        self.generic_visit(node)
 
     def end_visit_ClassDef(self, node):
         self.scope = self.scope.parent
@@ -107,18 +84,15 @@ class NameGrabberNodeVisitor(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         old_scope = self.scope
         self.scope = _Scope(parent=self.scope, enclosing_symbol=node.name)
-        self._add_to_scope(self.scope, old_scope)
+        old_scope.children.append(self.scope)
+        self.generic_visit(node)
 
     def visit_Name(self, node):
-        if self.classmap.has_key(node.id):
-            self.names.append(
-                ImportAt(name=node.id, filename=self.filename, scope=self.scope, lineno=node.lineno,
-                         col_offset=node.col_offset,
-                         references=self.classmap[node.id]))
-
-    def _add_to_scope(self, receiver, scope):
-        receiver.children = receiver.children or []
-        receiver.children.append(scope)
+        if node.id in self.classmap:
+            ImportAt(name=node.id, filename=self.filename, scope=self.scope, lineno=node.lineno,
+                     col_offset=node.col_offset,
+                     references=self.classmap[node.id])
+        self.generic_visit(node)
 
 
 def compute_minimal_imports(directory, classmap):
@@ -130,9 +104,7 @@ def compute_minimal_imports(directory, classmap):
             node = ast.parse(source, file_to_scan)
             visitor = NameGrabberNodeVisitor(file_to_scan, classmap)
             visitor.visit(node)
-            names = visitor.names
-            global_names.extend(names)
-    print global_names
+            global_names.extend(visitor.names)
 
 
 if __name__ == '__main__':
@@ -142,5 +114,4 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     directory = options.directory
     classmap = find_class_definitions(directory)
-    remove_classmap_imports(directory)
     compute_minimal_imports(directory, classmap)

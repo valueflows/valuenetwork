@@ -884,7 +884,7 @@ class EconomicAgent(models.Model):
             Q(event_type__name='Expense Contribution')
             )
         return sum(event.quantity for event in events)
-        
+
     def all_events(self):
         return EconomicEvent.objects.filter(
             Q(from_agent=self)|Q(to_agent=self))
@@ -10535,6 +10535,7 @@ TX_STATE_CHOICES = (
     ('pending', _('Pending')),
     ('broadcast', _('Broadcast')),
     ('confirmed', _('Confirmed')),
+    ('external', _('External')),
 )
 
 class EconomicEvent(models.Model):
@@ -10768,8 +10769,8 @@ class EconomicEvent(models.Model):
             return self.commitment.due_date
         else:
             return self.event_date
-        
-        
+
+
     def previous_events(self):
         """ Experimental method:
         Trying to use properties of events to determine event sequence.
@@ -10815,7 +10816,7 @@ class EconomicEvent(models.Model):
         #import pdb; pdb.set_trace()
         state = self.digital_currency_tx_state
         new_state = None
-        if state == "new" or state == "pending" or state == "broadcast":
+        if state == "external" or state == "pending" or state == "broadcast":
             tx = self.digital_currency_tx_hash
             if tx:
                 from valuenetwork.valueaccounting.faircoin_utils import get_confirmations

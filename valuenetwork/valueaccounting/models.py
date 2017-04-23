@@ -4508,13 +4508,16 @@ class EconomicResource(models.Model):
             from valuenetwork.valueaccounting.faircoin_utils import network_fee
             balance = self.digital_currency_balance() #get_address_balance(address)
             newbalance = self.digital_currency_balance_unconfirmed()
-            if balance:
-                if newbalance < balance:
-                    bal = newbalance
-                else:
-                    bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
-                fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
-                limit = bal - fee
+            try:
+                if balance:
+                    if newbalance < balance:
+                        bal = newbalance
+                    else:
+                        bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
+                    fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
+                    limit = bal - fee
+            except InvalidOperation:
+                limit = Decimal("0.0")
         return limit
 
     def context_agents(self):

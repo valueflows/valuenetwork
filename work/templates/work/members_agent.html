@@ -617,7 +617,7 @@ legend {
                     {% ifchanged assoc.association_type %}
                         <h4> {{ assoc.association_type.label }}: </h4>
                     {% endifchanged %}
-                    <li><a href="../{{ assoc.has_associate.id }}">{{ assoc.has_associate.name }}</a>
+                    <li><a href="{% url "members_agent" agent_id=assoc.has_associate.id %}">{{ assoc.has_associate.name }}</a>
                         {% if assoc.state == "potential" %} ({{ assoc.get_state_display }}) {% endif %}
                     </li>
                 {% endfor %}
@@ -653,7 +653,7 @@ legend {
                             <h4>{{ assoc.association_type.inverse_label }}: </h4>
                         {% endifchanged %}
                         {% if user_agent in agent.managers %}
-                          <li><a href="../{{ assoc.is_associate.id }}">{{ assoc.is_associate.name }}</a>
+                          <li><a href="{% url "members_agent" agent_id=assoc.is_associate.id %}">{{ assoc.is_associate.name }}</a>
                             {% with assoc.is_associate.membership_request_id as id %}
                                 {% if id %}
                                   {% if user_agent.membership_request_id = id or agent.nick = "FC MembershipRequest" or agent.nick = "Freedom Coop" %}
@@ -678,7 +678,7 @@ legend {
                             {% endfor %}
                           </li>
                         {% elif not assoc.state == "potential" %}
-                          <li><a href="../{{ assoc.is_associate.id }}">{{ assoc.is_associate.name }}</a></li>
+                          <li><a href="{% url "members_agent" agent_id=assoc.is_associate.id %}">{{ assoc.is_associate.name }}</a></li>
                         {% endif %}
                     {% endfor %}
                     </ul>

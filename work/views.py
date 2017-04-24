@@ -98,7 +98,9 @@ def map(request):
 def profile(request):
     #import pdb; pdb.set_trace()
     agent = get_agent(request)
-    change_form = WorkAgentCreateForm(instance=agent)
+    return members_agent(request, agent.id)
+
+    """change_form = WorkAgentCreateForm(instance=agent)
     skills = EconomicResourceType.objects.filter(behavior="work")
     et_work = EventType.objects.get(name="Time Contribution")
     arts = agent.resource_types.filter(event_type=et_work)
@@ -147,7 +149,7 @@ def profile(request):
         #"share_price": share_price,
         #"number_of_shares": number_of_shares,
         #"can_pay": can_pay,
-    }, context_instance=RequestContext(request))
+    }, context_instance=RequestContext(request))"""
 
 
 @login_required

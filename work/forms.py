@@ -82,7 +82,9 @@ class SkillSuggestionForm(forms.ModelForm):
 
 
 class MembershipRequestForm(forms.ModelForm):
-    if not settings.TESTING:
+    if settings.TESTING:
+        captcha = None
+    else:
         captcha = CaptchaField()
 
     class Meta:
@@ -822,7 +824,7 @@ class ContextTransferForm(forms.Form):
         empty_label=_('. . .'),
         level_indicator='. ',
         widget=forms.Select(
-            attrs={'class': 'ocp-resource-type-for-resource input-xlarge chzn-select'})
+            attrs={'class': 'ocp-resource-type-for-resource input-xlarge'})
     )
 
     resource_type = forms.ModelChoiceField(
@@ -1328,7 +1330,7 @@ class ProjectSelectionFilteredForm(forms.Form):
 
     def __init__(self, agent, *args, **kwargs):
         super(ProjectSelectionFilteredForm, self).__init__(*args, **kwargs)
-        projects = agent.managed_projects()
+        projects = agent.related_context_queryset()
         if projects:
             self.fields["context_agent"].choices = [(proj.id, proj.name) for proj in projects]
 
@@ -1367,4 +1369,3 @@ class InvoiceNumberForm(forms.ModelForm):
         super(InvoiceNumberForm, self).__init__(*args, **kwargs)
         #import pdb; pdb.set_trace()
         self.fields["member"].queryset = agent.invoicing_candidates()
-

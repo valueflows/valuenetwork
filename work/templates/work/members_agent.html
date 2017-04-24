@@ -136,10 +136,10 @@ legend {
                   <a class="indent" href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">{% trans "Wallet" %}</a>
                  {% endif %}
                {% endif %}
-               {% if user_agent.is_staff %}<!-- or user_agent in agent.managers or user_agent in agent.participants %} -->
+               {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
                    <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
                {% endif %}
-               {% if user_agent.is_staff %}<!-- or user_agent in agent.managers %} -->
+               {% if user_agent.is_staff or user_agent in agent.managers or user_agent == agent %}
                    <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
                {% endif %}
                {% if user_agent in agent.managers and agent.project.fobi_slug and agent.project.join_requests %}
@@ -151,6 +151,7 @@ legend {
                    {% endif %}
                  {% endfor %}
                {% endif %}
+               <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
         </div>
@@ -518,7 +519,7 @@ legend {
                           <li><a href="../{{ assoc.is_associate.id }}">{{ assoc.is_associate.name }}</a>
                             {% with assoc.is_associate.membership_request_id as id %}
                                 {% if id %}
-                                  {% if user_agent.membership_request_id = id or agent in user_agent.managed_projects %}
+                                  {% if user_agent.membership_request_id = id or agent.nick = "FC MembershipRequest" or agent.nick = "Freedom Coop" %}
                                     {% if assoc.state == "potential" %} ({{ assoc.get_state_display }}) {% endif %}
                                     &nbsp;
                                     <a href="{% url 'membership_discussion' membership_request_id=id %}">

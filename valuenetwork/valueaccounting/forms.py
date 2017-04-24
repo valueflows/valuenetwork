@@ -247,47 +247,6 @@ class SelectResourceForm(forms.Form):
             self.fields["resource"].queryset = EconomicResource.goods.filter(resource_type=resource_type)
 
 
-class SelectOrCreateResourceForm(forms.ModelForm):
-    resource = ResourceModelChoiceField(
-        queryset=EconomicResource.objects.all(),
-        label="Add to selected resource or create new resource below",
-        required=False,
-        widget=forms.Select(attrs={'class': 'input-xlarge chzn-select',}))
-    quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
-    #unit_of_quantity = forms.ModelChoiceField(
-    #    queryset=Unit.objects.exclude(unit_type='value'),
-    #    label=_("Unit"),
-    #    empty_label=None,
-    #    widget=forms.Select(attrs={'class': 'input-medium',}))
-    identifier = forms.CharField(
-        required=False,
-        label="Identifier",
-        help_text="For example, lot number or serial number.",
-        widget=forms.TextInput(attrs={'class': 'item-name',}))
-    current_location = forms.ModelChoiceField(
-        queryset=Location.objects.all(),
-        required=False,
-        label=_("Current Resource Location"),
-        widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
-    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
-    photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
-    notes = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
-
-    class Meta:
-        model = EconomicResource
-        fields = ('quantity', 'identifier', 'current_location', 'url', 'photo_url', 'notes')
-
-    def __init__(self, resource_type=None, qty_help=None, *args, **kwargs):
-        super(SelectOrCreateResourceForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
-        if resource_type:
-            self.fields["resource"].queryset = EconomicResource.goods.filter(resource_type=resource_type)
-        if qty_help:
-            self.fields["quantity"].help_text = qty_help
-
-
 class EconomicResourceForm(forms.ModelForm):
     value_per_unit_of_use = forms.DecimalField(
         #help_text="Does not apply to this resource.",
@@ -333,7 +292,7 @@ class EconomicResourceForm(forms.ModelForm):
             self.fields["value_per_unit_of_use"].widget=forms.TextInput(attrs={'value': '0.0', 'class': 'quantity'})
             self.fields["value_per_unit_of_use"].help_text = vpu_help
 
-
+#used on resource_type page
 class CreateEconomicResourceForm(forms.ModelForm):
     from_agent = forms.ModelChoiceField(
         required=False,
@@ -349,11 +308,34 @@ class CreateEconomicResourceForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'item-name',}))
     url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
     photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
-    quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
 
     class Meta:
         model = EconomicResource
-        exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
+        exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'quantity', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
+
+#used in process logging
+class ProduceEconomicResourceForm(forms.ModelForm):
+    from_agent = forms.ModelChoiceField(
+        required=False,
+        queryset=EconomicAgent.objects.all(),
+        label=_("Work done by"),
+        help_text=_("Required only if not logging work inputs"),
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}))
+    identifier = forms.CharField(
+        required=False,
+        label=_("Identifier"),
+        help_text=_("For example, lot number or serial number."),
+        widget=forms.TextInput(attrs={'class': 'item-name',}))
+    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+    photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+    event_quantity = forms.DecimalField(
+        label=_("Quantity produced"),
+        widget=forms.TextInput(attrs={'class': 'quantity input-small',}))
+
+    class Meta:
+        model = EconomicResource
+        exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'quantity', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
 
 
 class TransformEconomicResourceForm(forms.ModelForm):
@@ -774,7 +756,7 @@ class ProcessConsumableForm(forms.ModelForm):
         queryset=Unit.objects.exclude(unit_type='value'),
         label=_("Unit"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
+        widget=forms.Select(attrs={'class': 'input-medium',}))
     description = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={'class': 'item-description',}))
@@ -887,7 +869,7 @@ class UnplannedOutputForm(forms.ModelForm):
         queryset=Unit.objects.exclude(unit_type='value').exclude(unit_type='time'),
         empty_label=None,
         label=_("Unit"),
-        widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
+        widget=forms.Select(attrs={'class': 'input-medium',}))
     url = forms.URLField(
         required=False,
         label="URL",
@@ -1211,6 +1193,7 @@ class SelectCitationResourceForm(forms.Form):
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.citables_with_resources()
 
+            
 class UnplannedCiteEventForm(forms.Form):
     resource_type = FacetedModelChoiceField(
         queryset=EconomicResourceType.objects.all(),
@@ -1224,17 +1207,19 @@ class UnplannedCiteEventForm(forms.Form):
     #    queryset=Unit.objects.all(),
     #    widget=forms.Select(attrs={'readonly': 'readonly' }))
 
-    def __init__(self, pattern, load_resources=False, *args, **kwargs):
+    def __init__(self, pattern, cite_unit=None, load_resources=False, *args, **kwargs):
         #import pdb; pdb.set_trace()
         super(UnplannedCiteEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.citables_with_resources()
+            if cite_unit:
+                self.fields["unit_of_quantity"] = cite_unit.name
             if load_resources:
                 resources = EconomicResource.objects.all()
                 self.fields["resource"].choices = [('', '----------')] + [(r.id, r) for r in resources]
 
-#todo: test this
+                
 class UnplannedInputEventForm(forms.Form):
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
     resource_type = FacetedModelChoiceField(
@@ -1514,6 +1499,21 @@ class WorkEventChangeForm(forms.ModelForm):
     class Meta:
         model = EconomicEvent
         fields = ('id', 'event_date', 'quantity', 'is_contribution', 'description')
+        
+class NonHourWorkEventChangeForm(forms.ModelForm):
+    id = forms.CharField(required=False, widget=forms.HiddenInput)
+    event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
+    quantity = forms.DecimalField(required=False,
+        widget=DecimalDurationWidget,
+        help_text="")
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
+
+    class Meta:
+        model = EconomicEvent
+        fields = ('id', 'event_date', 'quantity', 'is_contribution', 'description')
+
 
 
 #obsolete?
@@ -3863,7 +3863,7 @@ class ValueEquationBucketForm(forms.ModelForm):
 
 class ValueEquationBucketRuleForm(forms.ModelForm):
     event_type = forms.ModelChoiceField(
-        queryset=EventType.objects.used_for_value_equations().order_by("name"),
+        queryset=None, # fill in init as it's not a lazy QS
         required=True,
         empty_label=None,
         help_text="A default equation will appear below when you select an event type.",
@@ -3876,6 +3876,10 @@ class ValueEquationBucketRuleForm(forms.ModelForm):
     class Meta:
         model = ValueEquationBucketRule
         fields = ('event_type', 'claim_rule_type', 'claim_creation_equation')
+        
+    def __init__(self, *args, **kwargs):
+        super(ValueEquationBucketRuleForm, self).__init__(*args, **kwargs)
+        self.fields['event_type'].queryset = EventType.objects.used_for_value_equations().order_by("name")
 
 
 class ValueEquationSelectionForm(forms.Form):

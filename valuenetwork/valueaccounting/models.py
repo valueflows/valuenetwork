@@ -384,47 +384,19 @@ class AgentAccount(object):
 class AgentManager(models.Manager):
 
     def without_user(self):
-        #import pdb; pdb.set_trace()
-        all_agents = EconomicAgent.objects.all()
-        ua_ids = []
-        for agent in all_agents:
-            if agent.users.all():
-                ua_ids.append(agent.id)
-        return EconomicAgent.objects.exclude(id__in=ua_ids)
+        return self.filter(users__isnull=True)
 
     def individuals_without_user(self):
-        #import pdb; pdb.set_trace()
-        all_agents = self.individuals()
-        ua_ids = []
-        for agent in all_agents:
-            if agent.users.all():
-                ua_ids.append(agent.id)
-        return all_agents.exclude(id__in=ua_ids)
+        return self.individuals().filter(users__isnull=True)
 
     def with_user(self):
-        #better version from django-users
-        #needs testing
-        #return EconomicAgent.objects.filter(users__isnull=False).distinct()
-        all_agents = EconomicAgent.objects.all()
-        ua_ids = []
-        for agent in all_agents:
-            if agent.users.all():
-                ua_ids.append(agent.id)
-        return EconomicAgent.objects.filter(id__in=ua_ids)
+        return self.exclude(users__isnull=True)
 
     def without_membership_request(self):
-        from work.models import MembershipRequest
-        reqs = MembershipRequest.objects.all()
-        req_agts = [req.agent for req in reqs if req.agent]
-        rids = [agt.id for agt in req_agts]
-        return EconomicAgent.objects.exclude(id__in=rids).order_by("name")
+        return self.filter(membership_requests__isnull=True).order_by("name")
 
     def without_join_request(self):
-        from work.models import JoinRequest
-        reqs = JoinRequest.objects.all()
-        req_agts = [req.agent for req in reqs if req.agent]
-        rids = [agt.id for agt in req_agts]
-        return EconomicAgent.objects.exclude(id__in=rids).order_by("name")
+        return self.filter(project_join_requests__isnull=True).order_by("name")
 
     def projects(self):
         return EconomicAgent.objects.filter(agent_type__party_type="team")
@@ -913,6 +885,10 @@ class EconomicAgent(models.Model):
             )
         return sum(event.quantity for event in events)
 
+    def all_events(self):
+        return EconomicEvent.objects.filter(
+            Q(from_agent=self)|Q(to_agent=self))
+
     def events_by_event_type(self):
         agent_events = EconomicEvent.objects.filter(
             Q(from_agent=self)|Q(to_agent=self))
@@ -1074,12 +1050,12 @@ class EconomicAgent(models.Model):
                       if an.clas == "currency":
                         cur = True
                     if cur:
-                      if hasattr(rt.ocp_artwork_type, 'unit_type') and rt.ocp_artwork_type.unit_type.id:
-                        if rt.ocp_artwork_type.unit_type.ocp_unit_type:
-                          if not rt.ocp_artwork_type.unit_type.ocp_unit_type.id in uids:
-                            uids.append(rt.ocp_artwork_type.unit_type.ocp_unit_type.id)
+                      if hasattr(rt.ocp_artwork_type, 'ocpArtworkType_unit_type') and rt.ocp_artwork_type.ocpArtworkType_unit_type.id:
+                        if rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type:
+                          if not rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.id in uids:
+                            uids.append(rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.id)
                         #pass
-                      #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.unit_type))
+                      #raise ValidationError("The RT:"+str(rt.ocp_artwork_type)+" unit:"+str(rt.ocp_artwork_type.ocpArtworkType_unit_type))
             else:
               rt = tx.resource_type()
               rtun = None
@@ -4532,13 +4508,16 @@ class EconomicResource(models.Model):
             from valuenetwork.valueaccounting.faircoin_utils import network_fee
             balance = self.digital_currency_balance() #get_address_balance(address)
             newbalance = self.digital_currency_balance_unconfirmed()
-            if balance:
-                if newbalance < balance:
-                    bal = newbalance
-                else:
-                    bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
-                fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
-                limit = bal - fee
+            try:
+                if balance:
+                    if newbalance < balance:
+                        bal = newbalance
+                    else:
+                        bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
+                    fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
+                    limit = bal - fee
+            except InvalidOperation:
+                limit = Decimal("0.0")
         return limit
 
     def context_agents(self):
@@ -6248,6 +6227,7 @@ class ProcessManager(models.Manager):
                 if use_et in process.process_pattern.event_types():
                     ids.append(process.id)
         return Process.objects.filter(pk__in=ids)
+
 
 class Process(models.Model):
     name = models.CharField(_('name'), max_length=128)
@@ -9112,13 +9092,13 @@ class Commitment(models.Model):
     def resource_create_form(self, data=None):
         #import pdb; pdb.set_trace()
         if self.resource_type.inventory_rule == "yes":
-            from valuenetwork.valueaccounting.forms import CreateEconomicResourceForm
+            from valuenetwork.valueaccounting.forms import ProduceEconomicResourceForm
             init = {
                 "from_agent": self.from_agent,
                 "quantity": self.quantity,
                 "unit_of_quantity": self.resource_type.unit,
             }
-            return CreateEconomicResourceForm(prefix=self.form_prefix(), initial=init, data=data)
+            return ProduceEconomicResourceForm(prefix=self.form_prefix(), initial=init, data=data)
         else:
             from valuenetwork.valueaccounting.forms import UninventoriedProductionEventForm
             init = {
@@ -10558,6 +10538,7 @@ TX_STATE_CHOICES = (
     ('pending', _('Pending')),
     ('broadcast', _('Broadcast')),
     ('confirmed', _('Confirmed')),
+    ('external', _('External')),
 )
 
 class EconomicEvent(models.Model):
@@ -10786,6 +10767,13 @@ class EconomicEvent(models.Model):
                     pass
         super(EconomicEvent, self).delete(*args, **kwargs)
 
+    def due_date(self):
+        if self.commitment:
+            return self.commitment.due_date
+        else:
+            return self.event_date
+
+
     def previous_events(self):
         """ Experimental method:
         Trying to use properties of events to determine event sequence.
@@ -10831,7 +10819,7 @@ class EconomicEvent(models.Model):
         #import pdb; pdb.set_trace()
         state = self.digital_currency_tx_state
         new_state = None
-        if state == "pending" or state == "broadcast":
+        if state == "external" or state == "pending" or state == "broadcast":
             tx = self.digital_currency_tx_hash
             if tx:
                 from valuenetwork.valueaccounting.faircoin_utils import get_confirmations
@@ -11446,10 +11434,20 @@ class EconomicEvent(models.Model):
     def form_prefix(self):
         return "-".join(["EVT", str(self.id)])
 
-    def work_event_change_form(self):
-        from valuenetwork.valueaccounting.forms import WorkEventChangeForm
+    def work_event_change_form(self, data=None):
+        unit = self.unit_of_quantity
+        if not unit:
+            unit = self.resource_type.unit
         prefix = self.form_prefix()
-        return WorkEventChangeForm(instance=self, prefix=prefix, )
+        qty_help = "up to 2 decimal places"
+        if unit:
+            if unit.unit_type == "time":
+                from valuenetwork.valueaccounting.forms import WorkEventChangeForm
+                return WorkEventChangeForm(instance=self, prefix=prefix, data=data)
+            else:
+                qty_help = " ".join(["unit:", unit.abbrev, ", up to 2 decimal places"])
+        from valuenetwork.valueaccounting.forms import InputEventForm
+        return InputEventForm(qty_help=qty_help, instance=self, prefix=prefix, data=data)
 
     def change_form_old(self, data=None):
         #import pdb; pdb.set_trace()

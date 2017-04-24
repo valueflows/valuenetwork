@@ -61,7 +61,7 @@ from general.models import Artwork_Type
 
 class Ocp_Type_Artwork_Admin(MPTTModelAdmin):
   model = Ocp_Artwork_Type
-  list_display = ['name', 'clas', 'facet', 'facet_value', 'resource_type', 'context_agent', 'unit_type']
+  list_display = ['name', 'clas', 'facet', 'facet_value', 'resource_type', 'context_agent', 'ocpArtworkType_unit_type']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     if db_field.name == 'parent':
       try:
@@ -83,7 +83,7 @@ admin.site.register(Ocp_Skill_Type, Ocp_Type_Skill_Admin)
 
 class Ocp_Type_Unit_Admin(MPTTModelAdmin):
   model = Ocp_Unit_Type
-  list_display = ['name', 'clas', 'unit', 'ocp_unit']
+  list_display = ['name', 'clas', 'ocpUnitType_unit', 'ocpUnitType_ocp_unit']
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     if db_field.name == 'parent':
       try:

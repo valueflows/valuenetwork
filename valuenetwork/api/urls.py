@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic import TemplateView
 from django.conf.urls import url, include
 from django.views.decorators.csrf import csrf_exempt
@@ -25,16 +25,15 @@ router.register(r'usercreation', views.UserCreationViewSet, 'usercreation')
 router.register(r'agentcreation', views.AgentCreationViewSet, 'agentcreation')
 router.register(r'agentuser', views.AgentUserViewSet, 'agentuser')
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^graph', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema.schema))),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r"^agent-jsonld/$", 'valuenetwork.api.views.agent_jsonld', name="agent_jsonld"),
-    url(r"^agent-lod/(?P<agent_id>\d+)/$", 'valuenetwork.api.views.agent_lod', name="agent_lod"),
-    url(r"^agent-type-lod/(?P<agent_type_name>\w+)/$", 'valuenetwork.api.views.agent_type_lod', name="agent_type_lod"),
-    url(r"^agent-relationship-type-lod/(?P<agent_assoc_type_name>\w+)/$", 'valuenetwork.api.views.agent_relationship_type_lod', name="agent_relationship_type_lod"),
-    url(r"^agent-relationship-lod/(?P<agent_assoc_id>\d+)/$", 'valuenetwork.api.views.agent_relationship_lod', name="agent_relationship_lod"),
-    url(r"^agent-relationship-inv-lod/(?P<agent_assoc_id>\d+)/$", 'valuenetwork.api.views.agent_relationship_inv_lod', name="agent_relationship_inv_lod"),
-    url(r"^agent-jsonld-query/$", 'valuenetwork.api.views.agent_jsonld_query', name="agent_jsonld_query"),
-
-)
+    url(r"^agent-jsonld/$", views.agent_jsonld, name="agent_jsonld"),
+    url(r"^agent-lod/(?P<agent_id>\d+)/$", views.agent_lod, name="agent_lod"),
+    url(r"^agent-type-lod/(?P<agent_type_name>\w+)/$", views.agent_type_lod, name="agent_type_lod"),
+    url(r"^agent-relationship-type-lod/(?P<agent_assoc_type_name>\w+)/$", views.agent_relationship_type_lod, name="agent_relationship_type_lod"),
+    url(r"^agent-relationship-lod/(?P<agent_assoc_id>\d+)/$", views.agent_relationship_lod, name="agent_relationship_lod"),
+    url(r"^agent-relationship-inv-lod/(?P<agent_assoc_id>\d+)/$", views.agent_relationship_inv_lod, name="agent_relationship_inv_lod"),
+    url(r"^agent-jsonld-query/$", views.agent_jsonld_query, name="agent_jsonld_query"),
+]

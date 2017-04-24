@@ -525,7 +525,7 @@ span.fancytree-selected span.fancytree-title {
                           </div>
                         </div>
                         <!--<hr>-->
-                        {% if False and request.user.is_superuser %}
+                        {% if request.user.is_superuser %}
                         <div style="clear:left; ">
                           <p>{% trans "Or choose a related <b>Skill Verb</b> (service time):" %}</p>
 
@@ -646,7 +646,7 @@ span.fancytree-selected span.fancytree-title {
                 <h3><span id="name_action">{% trans "Add a new" %}</span> {% trans "Skill Type:" %}</h3>
               </div>
               <div class="modal-body">
-                <form class="validateMe" id="skillForm" enctype="multipart/form-data" action="" method="POST" >
+                <form class="validateMe" id="skillForm" enctype="multipart/form-data" action="{% url "new_skill_type" agent_id=context_agent.id %}" method="POST" >
                   {% csrf_token %}
                   {% for fil in Stype_form %}
                     <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >

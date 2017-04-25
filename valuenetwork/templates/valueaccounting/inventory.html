@@ -47,6 +47,7 @@ img {
 			    {% trans "Inventory" %}
 			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url "resource_types" %}">{% trans "Resource Types" %}</a>
 			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url "locations" %}">{% trans "Locations" %}</a>
+			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url "skill_suggestions" %}">{% trans "Skill Suggestions" %}</a>
 		    </legend>
             {% for rt in resource_types %}
                 <div class="rtype"> <a href="{% url "resource_type" resource_type_id=rt.id %}">{{ rt.name }}</a> ( {{ rt.facet_list }} )</div>
@@ -71,7 +72,7 @@ img {
                     {% endif %}
                     {% if resource.agent_resource_roles.all %}
                         {% for item in resource.agent_resource_roles.all %}
-                            ~ {{ item.role.name }}: {{ item.agent.nick }} 
+                            ~ {{ item.role.name }}: {{ item.agent.nick }}
                         {% endfor %}
                     {% endif %}
 
@@ -80,7 +81,7 @@ img {
                     {% endif %}
                     </div>
                     {% comment %}<div class="info">Quality: {{ resource.quality }} </div>{% endcomment %}
-                                        
+
                 {% endfor %}
             {% endfor %}
 		</div>
@@ -104,9 +105,9 @@ img {
 
 		$( "#help" ).toggle( function(){
             $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help"); 
+            $( "#help" ).text("Hide Help");
         }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
@@ -121,7 +122,7 @@ img {
 			}
 		});
 
-		$('.category').click(function() 
+		$('.category').click(function()
 		{
 			var checkedCats = [];
 			var checkedBox = $(this)[0];

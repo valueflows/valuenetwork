@@ -688,7 +688,7 @@ class NewSkillTypeForm(forms.Form):
             context_ids = [c.id for c in agent.related_all_agents()]
             if not agent.id in context_ids:
                 context_ids.append(agent.id)
-            contexts = agent.related_all_contexts_queryset(agent)
+            contexts = agent.related_all_contexts_queryset(agent, False) # 2nd arg: include childs
             initial = contexts.last()
             for ag in contexts:
               if ag.is_root():

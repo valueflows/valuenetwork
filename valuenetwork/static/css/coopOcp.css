@@ -377,8 +377,13 @@ form#stateForm {
   display: block;
   font-size: 0.9em;
   color: #887;
+  margin-top: 3px;
+}
+.modal input {
+  margin-bottom: 0;
 }
 .modal label {
+  margin-top: 15px;
   /*font-weight: bold;
   font-size: 1.05em;*/
 }

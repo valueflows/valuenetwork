@@ -21,94 +21,104 @@
 
 <style>
 
-.labnote {
-    background-color: beige;
-    padding: 2px 6px 3px 6px;
-    border: 1px solid gainsboro;
-}
-.btn-info {
-    margin-left: 10px;
-}
+  .labnote {
+      background-color: beige;
+      padding: 2px 6px 3px 6px;
+      border: 1px solid gainsboro;
+  }
+  .btn-info {
+      margin-left: 10px;
+  }
 
-.btn {
-    margin-top: 1px;
-    margin-bottom: 1px;
-}
-#id_notes, #id_access_rules {
-  width: 500px;
-  height: 100px;
-}
-.modal {
-    width: 600px;
-}
-.text-center {
-    text-align: center;
-}
-.assoc li {
-    margin-left: 3em;
-}
-.indent {
-    margin-left: .9em;
-    }
-#chart_div0 {
-    margin-top: 25px;
-}
-.chart-heading{
-    text-align: center;
-}
-#chart_div1 {
-    margin-bottom: 25px;
-}
-#chart_div2 {
-    margin-bottom: 25px;
-}
-#chart_div3 {
-    margin-bottom: 25px;
-    height: {{ roles_height }}px;
-}
-#balance {
-    font-weight: bold;
-    font-size: 1.2em;
-    margin-right: 1em;
-}
-.down {
-    margin-top: 10px;
-}
-.smaller {
-    font-size: .9em;
-}
-.button-row {
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-legend {
-    margin-bottom: 30px;;
-}
-.membership {
-    font-weight: bold;
-    color: firebrick;
-}
-.action-form {
-    display: inline;
-}
+  .btn {
+      margin-top: 1px;
+      margin-bottom: 1px;
+  }
+  #id_notes, #id_access_rules {
+    width: 500px;
+    height: 100px;
+  }
+  .modal {
+      width: 600px;
+  }
+  .text-center {
+      text-align: center;
+  }
+  .assoc li {
+      margin-left: 3em;
+  }
+  .indent {
+      margin-left: .9em;
+      }
+  #chart_div0 {
+      margin-top: 25px;
+  }
+  .chart-heading{
+      text-align: center;
+  }
+  #chart_div1 {
+      margin-bottom: 25px;
+  }
+  #chart_div2 {
+      margin-bottom: 25px;
+  }
+  #chart_div3 {
+      margin-bottom: 25px;
+      height: {{ roles_height }}px;
+  }
+  #balance {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-right: 1em;
+  }
+  .down {
+      margin-top: 10px;
+  }
+  .smaller {
+      font-size: .9em;
+  }
+  .button-row {
+      margin-top: 0;
+      margin-bottom: 10px;
+  }
+  legend {
+      margin-bottom: 30px;;
+  }
+  .membership {
+      font-weight: bold;
+      color: firebrick;
+  }
+  .action-form {
+      display: inline;
+  }
 
   fieldset {
     border: 0;
   }
-  label {
+  /*label {
     display: block;
-    margin: 30px 0 0 0;
-  }
+    margin-top: 15px;
+  }*/
   .overflow {
     height: 200px;
   }
 
-.showhide {
-  color: #734279;
-  margin-left: 3px;
-  font-weight: bold;
-  cursor: pointer;
-}
+  .showhide {
+    color: #734279;
+    margin-left: 3px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  #div_id_photo .controls label {
+    display: inline;
+  }
+  #uploadPicture form > div > label {
+    font-weight: bold;
+  }
+  form .controls {
+    margin-top: 5px;
+  }
 
 </style>
 
@@ -291,7 +301,7 @@ legend {
                         <img src="{{ agent.photo_url }}" width="128" height="96" />
                       {% endif %}
                       {% if user_agent in agent.managers or user_is_agent %}
-                        <a href="#uploadPicture" role="button" class="btn btn-primary btn-mini" data-toggle="modal" style="float:right;">{% if agent.photo or agent.photo_url %}{% trans "Change" %}{% else %}{% trans "Upload" %}{% endif %}</a>
+                        <a href="#uploadPicture" role="button" class="btn btn-primary btn-mini" data-toggle="modal" style="float:right;">{% if agent.photo or agent.photo_url %}{% trans "Change" %}{% else %}{% trans "Set" %}{% endif %}</a>
                       {% endif %}
                     </td>
                   </tr>
@@ -478,7 +488,7 @@ legend {
                                     <input type="checkbox" name="skillChoice" value="{{ skill.id }}" {% if skill.checked %} checked="checked" {% endif %} />
                                     {{ skill }}
                                     {% if skill.thanks %}
-                                        &nbsp;&nbsp;&nbsp;<span class="thanks">{% trans "Thanks for the suggestion!" %}</span>
+                                        &nbsp;&nbsp;&nbsp;<em class="thanks">{% trans "Thanks for the suggestion!" %}</em>
                                     {% endif %}
                                 </li>
                             {% endfor %}
@@ -588,7 +598,7 @@ legend {
 
 	        </div>
 
-        {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members or request.user.is_superuser %}
+        {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
           <div class="span6">
           {% if agent.project and form_entries and fobi_name and user_agent in agent.managers %}
             <div class="requests">

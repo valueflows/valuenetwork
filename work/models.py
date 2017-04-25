@@ -128,7 +128,7 @@ class SkillSuggestion(models.Model):
         help_text=_("this skill suggestion became this ResourceType"))
     state = models.CharField(_('state'),
         max_length=12, choices=REQUEST_STATE_CHOICES,
-        default='new', editable=False)
+        default='new') #, editable=False)
 
 
     def __unicode__(self):

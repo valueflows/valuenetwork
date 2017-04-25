@@ -2307,16 +2307,40 @@ def new_skill_type(request, agent_id):
                     break
 
               new_oat = Ocp_Skill_Type(
-                name=data["name"],
-                verb=data["verb"],
-                gerund=data["gerund"],
-                description=data["description"],
-                resource_type=new_rt,
-                ocp_artwork_type=data["related_type"],
+                  name=data["name"],
+                  verb=data["verb"],
+                  gerund=data["gerund"],
+                  description=data["description"],
+                  resource_type=new_rt,
+                  ocp_artwork_type=data["related_type"],
               )
               # mptt: insert_node(node, target, position='last-child', save=False)
               new_ski = Ocp_Skill_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
 
+              suggestion = SkillSuggestion(
+                  skill=data["name"],
+                  suggested_by=request.user,
+                  resource_type=new_rt,
+                  state="accepted"
+              )
+              suggestion.save()
+              try:
+                suggester = request.user.agent.agent
+              except:
+                suggester = request.user
+              if notification:
+                  users = User.objects.filter(is_staff=True)
+                  suggestions_url = get_url_starter() + "/accounting/skill-suggestions/"
+                  if users and get_site_name():
+                      site_name = get_site_name()
+                      notification.send(
+                        users,
+                        "work_skill_suggestion",
+                        {"skill": suggestion.skill,
+                         "suggested_by": suggester.name,
+                         "suggestions_url": suggestions_url,
+                        }
+                      )
               #nav_form = ExchangeNavForm(agent=agent, data=None)
               #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
               #Stype_form = NewSkillTypeForm(agent=agent, data=None)

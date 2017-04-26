@@ -387,3 +387,25 @@ form#stateForm {
   /*font-weight: bold;
   font-size: 1.05em;*/
 }
+
+
+/*   T R E E S   */
+
+div.fancytree-radio {
+  /*float: left;*/
+  display: inline-table;
+}
+div ul.fancytree-container {
+  background: none;
+  border: none;
+}
+span.fancytree-title span.edit a {
+  color: #734279;
+  cursor: pointer;
+}
+span.fancytree-title span.edit a:hover {
+  text-decoration: underline;
+}
+span.fancytree-selected span.fancytree-title {
+    font-style: inherit;
+}

@@ -91,7 +91,7 @@ class ExchangeService(object):
         xt = ExchangeType.objects.filter(
             use_case=use_case,
             name="Receive FairCoins")
-        if xt: 
+        if xt:
             xt = xt[0]
         else:
             xt = ExchangeType(
@@ -106,7 +106,7 @@ class ExchangeService(object):
         tt = TransferType.objects.filter(
             exchange_type=xt,
             name="Receive FairCoins")
-        if tt: 
+        if tt:
             tt = tt[0]
         else:
             tt = TransferType(
@@ -232,8 +232,8 @@ class ExchangeService(object):
                 )
                 transfer.save()
 
-                et_receive = EventType.objects.get(name="Receive") 
-                state = "new"
+                et_receive = EventType.objects.get(name="Receive")
+                state = "external"
                 confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
                 if confirmations > 0:
                     state = "broadcast"
@@ -253,7 +253,7 @@ class ExchangeService(object):
                     event_reference=faircoin_address
                 )
                 event.save()
-                
+
                 tx_included.append(str(tx[0]))
         #import pdb; pdb.set_trace()
         return tx_included

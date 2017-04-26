@@ -892,6 +892,10 @@ class EconomicAgent(models.Model):
             )
         return sum(event.quantity for event in events)
 
+    def all_events(self):
+        return EconomicEvent.objects.filter(
+            Q(from_agent=self)|Q(to_agent=self))
+
     def events_by_event_type(self):
         agent_events = EconomicEvent.objects.filter(
             Q(from_agent=self)|Q(to_agent=self))
@@ -4511,13 +4515,16 @@ class EconomicResource(models.Model):
             from valuenetwork.valueaccounting.faircoin_utils import network_fee
             balance = self.digital_currency_balance() #get_address_balance(address)
             newbalance = self.digital_currency_balance_unconfirmed()
-            if balance:
-                if newbalance < balance:
-                    bal = newbalance
-                else:
-                    bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
-                fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
-                limit = bal - fee
+            try:
+                if balance:
+                    if newbalance < balance:
+                        bal = newbalance
+                    else:
+                        bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
+                    fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
+                    limit = bal - fee
+            except InvalidOperation:
+                limit = Decimal("0.0")
         return limit
 
     def context_agents(self):
@@ -9092,13 +9099,13 @@ class Commitment(models.Model):
     def resource_create_form(self, data=None):
         #import pdb; pdb.set_trace()
         if self.resource_type.inventory_rule == "yes":
-            from valuenetwork.valueaccounting.forms import CreateEconomicResourceForm
+            from valuenetwork.valueaccounting.forms import ProduceEconomicResourceForm
             init = {
                 "from_agent": self.from_agent,
                 "quantity": self.quantity,
                 "unit_of_quantity": self.resource_type.unit,
             }
-            return CreateEconomicResourceForm(prefix=self.form_prefix(), initial=init, data=data)
+            return ProduceEconomicResourceForm(prefix=self.form_prefix(), initial=init, data=data)
         else:
             from valuenetwork.valueaccounting.forms import UninventoriedProductionEventForm
             init = {
@@ -10538,6 +10545,7 @@ TX_STATE_CHOICES = (
     ('pending', _('Pending')),
     ('broadcast', _('Broadcast')),
     ('confirmed', _('Confirmed')),
+    ('external', _('External')),
 )
 
 class EconomicEvent(models.Model):
@@ -10766,6 +10774,13 @@ class EconomicEvent(models.Model):
                     pass
         super(EconomicEvent, self).delete(*args, **kwargs)
 
+    def due_date(self):
+        if self.commitment:
+            return self.commitment.due_date
+        else:
+            return self.event_date
+
+
     def previous_events(self):
         """ Experimental method:
         Trying to use properties of events to determine event sequence.
@@ -10811,7 +10826,7 @@ class EconomicEvent(models.Model):
         #import pdb; pdb.set_trace()
         state = self.digital_currency_tx_state
         new_state = None
-        if state == "new" or state == "pending" or state == "broadcast":
+        if state == "external" or state == "pending" or state == "broadcast":
             tx = self.digital_currency_tx_hash
             if tx:
                 from valuenetwork.valueaccounting.faircoin_utils import get_confirmations
@@ -11426,10 +11441,20 @@ class EconomicEvent(models.Model):
     def form_prefix(self):
         return "-".join(["EVT", str(self.id)])
 
-    def work_event_change_form(self):
-        from valuenetwork.valueaccounting.forms import WorkEventChangeForm
+    def work_event_change_form(self, data=None):
+        unit = self.unit_of_quantity
+        if not unit:
+            unit = self.resource_type.unit
         prefix = self.form_prefix()
-        return WorkEventChangeForm(instance=self, prefix=prefix, )
+        qty_help = "up to 2 decimal places"
+        if unit:
+            if unit.unit_type == "time":
+                from valuenetwork.valueaccounting.forms import WorkEventChangeForm
+                return WorkEventChangeForm(instance=self, prefix=prefix, data=data)
+            else:
+                qty_help = " ".join(["unit:", unit.abbrev, ", up to 2 decimal places"])
+        from valuenetwork.valueaccounting.forms import InputEventForm
+        return InputEventForm(qty_help=qty_help, instance=self, prefix=prefix, data=data)
 
     def change_form_old(self, data=None):
         #import pdb; pdb.set_trace()

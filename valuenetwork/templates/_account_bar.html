@@ -1,4 +1,3 @@
-{% load firstof from future %}
 {% load account_tags %}
 {% load i18n %}
 
@@ -16,14 +15,14 @@
 	                <li><a href="/admin/"><i class="icon-wrench"></i> {% trans "Admin" %}</a></li>
 	                <li><a href="{% url "maintain_patterns" %}"><i class="icon-cog"></i> {% trans "Patterns" %}</a></li>
 	                <li><a href="{% url "exchange_types" %}"><i class="icon-cog"></i> {% trans "Exchange Types" %}</a></li>
-	                
+
 				{% endif %}
 
 				{% if user.is_superuser %}
 
 	                <li><a href="{% url 'misc' %}"><i class="icon-cog"></i> {% trans "Miscellaneous Pages" %}</a></li>
 				{% endif %}
-				
+
 				<li><a href="{% url 'my_dashboard' %}"><i class="icon-time"></i> {% trans "Coop Work App" %}</a></li>
 
                 <li class="divider"></li>
@@ -32,7 +31,7 @@
         </li>
     {% else %}
         <li>
-            {% if request.path = '/' %}
+            {% if request.path == '/' %}
                 <a href="{% url "account_login" %}">
             {% else %}
                 <a href="{% url "account_login" %}?next={% firstof request.path '/' %}">

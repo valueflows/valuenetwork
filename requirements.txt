@@ -21,6 +21,6 @@ html5lib==0.99999999
 bleach
 django-simple-captcha
 django-mptt
-django-fobi==0.6.10
+django-fobi==0.10.4
 pytz
 selenium

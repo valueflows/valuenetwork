@@ -1,8 +1,8 @@
 FreedomCoop's OCP (NRP fork)
 ============================
 
-.. image:: https://api.travis-ci.org/freedomcoop/valuenetwork.svg
-    :target: https://travis-ci.org/freedomcoop/valuenetwork.svg
+.. image:: https://travis-ci.org/FreedomCoop/valuenetwork.svg?branch=master
+    :target: https://travis-ci.org/FreedomCoop/valuenetwork.svg?branch=master
 
 A Value Network Accounting.
 

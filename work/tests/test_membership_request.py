@@ -87,18 +87,17 @@ class MembershipRequestTestCase(LiveServerTestCase):
         self.wait_loading(s, '//title[contains(text(), "| Agent:")]')
 
         # Admin creates user (click Create user -> enter new password)
-        # 'Cannot create digital currency resource for test_user01 because no digital currency account ResourceTypes.'
-        #s.find_element_by_partial_link_text("Create User").click()
-        #self.wait_loading(s, '//button[contains(text(), "Save user")]')
-        #s.find_element_by_id("id_password1").send_keys("test_user01password")
-        #s.find_element_by_id("id_password2").send_keys("test_user01password")
-        #s.find_element_by_xpath('//button[contains(text(), "Save user")]').click()
-        #self.wait_loading(s, '//title[contains(text(), "| Agent:")]')
+        s.find_element_by_partial_link_text("Create User").click()
+        self.wait_js(s, '//button[contains(text(), "Save user")]')
+        s.find_element_by_id("id_password1").send_keys("test_user01password")
+        s.find_element_by_id("id_password2").send_keys("test_user01password")
+        s.find_element_by_xpath('//button[contains(text(), "Save user")]').click()
+        self.wait_js(s, '//a[contains(text(), "FairCoin: Faircoin address for test_user01")]')
 
 
         # Admin defines associations (click Maintain Associations)
-        #s.find_element_by_partial_link_text("Maintain Associations").click()
-        #self.wait_loading(s, '//title[contains(text(), "| Maintain Associations")]')
+        s.find_element_by_partial_link_text("Maintain Associations").click()
+        self.wait_loading(s, '//title[contains(text(), "| Maintain Associations")]')
 
         # - change "is participant of" -> FC MembershipRequest
         # - change "Active" -> candidate

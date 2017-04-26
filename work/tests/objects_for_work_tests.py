@@ -1,14 +1,16 @@
 from django.contrib.auth.models import User
 from django.conf import settings
 
+import decimal
+
 from valuenetwork.valueaccounting.models import \
-    AgentType, EconomicAgent, AgentUser, EventType, EconomicResourceType
+    AgentType, EconomicAgent, AgentUser, EventType, EconomicResourceType, \
+    Unit, AgentResourceRoleType
 
 # It creates the needed initial data to run the work tests:
 # admin_user, admin_agent, Freedom Coop agent, FC Membership request agent, ...
 def initial_test_data():
-    # To see debugging errors in the browser while making changes in the test,
-    # uncomment this line and comment inside tearDown() method and add "pass".
+    # To see debugging errors in the browser while making changes in the test.
     setattr(settings, 'DEBUG', True)
 
     # We want to reuse the test db, to be faster (manage.py test --keepdb),
@@ -50,4 +52,13 @@ def initial_test_data():
     EventType.objects.get_or_create(name='Todo', label='todo',
         relationship='todo', related_to='agent', resource_effect='=')
 
-    EconomicResourceType.objects.create(name='something_with_Admin', behavior='work')
+    EconomicResourceType.objects.get_or_create(name='something_with_Admin', behavior='work')
+
+    # Manage FairCoin
+    FC_unit, c = Unit.objects.get_or_create(unit_type='value', name='FairCoin', abbrev='FairCoin')
+
+    EconomicResourceType.objects.get_or_create(name='FairCoin', unit=FC_unit, unit_of_use=FC_unit,
+        value_per_unit_of_use=decimal.Decimal('1.00'), substitutable=True, behavior='dig_acct')
+
+    AgentResourceRoleType.objects.get_or_create(name='Owner', is_owner=True)
+    

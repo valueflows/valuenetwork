@@ -174,7 +174,9 @@
                    {% endif %}
                  {% endfor %}
                {% endif %}
-               <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
+               {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
+                   <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
+               {% endif %}
                <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
                <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
         </div>
@@ -274,7 +276,7 @@
                 </div>
             {% endif %}
 
-        </div>
+    </div>
 		<div class="row-fluid">
 
 		    <div class="span5" id="agent-table-block" style="width: 48%;">
@@ -461,8 +463,63 @@
 
 	            </table>
 
-              {% if agent.is_individual %}
-                <div class="span6 infobox skills-box" style="width:100%;">
+
+              {% if user.is_staff or user_agent in agent.managers %}
+              <!-- <div class="row-fluid" tyle="margin-top:2em;"> -->
+                <div class="span6 infobox" style="width:100%;">
+                  <h3 class="">{% trans "Resources" %}:</h3>
+                  {% if agent.resources_created %}
+                    <h4 class="hdg">{% trans "Resources Created" %}:</h4>
+                    <ul>
+                        {% for resource in agent.resources_created %}
+                            <li>
+                                <a href="{% url "project_resource" agent_id=agent.id resource_id=resource.id %}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                  {% if agent.resource_relationships %}
+                    <h4 class="hdg">{% trans "Resource Relationships" %}:</h4>
+                    <ul>
+                        {% for rel in agent.resource_relationships %}
+                            {% ifchanged rel.role %}
+                                <h4>{{ rel.role.name }} </h4>
+                            {% endifchanged %}
+                            <li>
+                                <a href="{% url "project_resource" agent_id=agent.id resource_id=rel.resource.id %}"> {{ rel.resource }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+
+
+              <!-- </div> -->
+              {% endif %}
+
+	      </div>
+
+
+        <div class="span6">
+          {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}{% if agent.project and form_entries and fobi_name and user_agent in agent.managers %}
+            <div class="requests span6">
+              <h3>
+                {% trans "Pending to create user+agent:" %} <!-- <span style="font-weight:normal;">{{ fobi_name }}</span> -->
+              </h3>
+              <ul>
+                {% for req in form_entries %}
+                  <li>
+                    {{ req.name }} <!--( <a href="mailto:{{ req.email_address }}">{{ req.email_address }}</a> )-->
+                  </li>
+                {% endfor %}
+              </ul>
+              <p>&nbsp;</p>
+            </div>
+          {% endif %}{% endif %}
+
+
+          {% if agent.is_individual or user_is_agent %}
+              <div class="span6 infobox skills-box" style="width:100%;">
                   <h3 class="">{% trans "Skills" %}:</h3>
                   {% if agent.skills %}
                     {% if user_agent in agent.managers or user_is_agent %}
@@ -614,69 +671,17 @@
                       </div>
                     </div>
                   {% endif %}
-                </div>
-              {% endif %}
-
-              {% if user.is_staff or user_agent in agent.managers %}
-              <!-- <div class="row-fluid" tyle="margin-top:2em;"> -->
-                <div class="span6 infobox" style="width:100%;">
-                  <h3 class="">{% trans "Resources" %}:</h3>
-                  {% if agent.resources_created %}
-                    <h4 class="hdg">{% trans "Resources Created" %}:</h4>
-                    <ul>
-                        {% for resource in agent.resources_created %}
-                            <li>
-                                <a href="{% url "project_resource" agent_id=agent.id resource_id=resource.id %}"> {{ resource.resource_type.name }}: {{ resource.identifier }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                  {% endif %}
-                  {% if agent.resource_relationships %}
-                    <h4 class="hdg">{% trans "Resource Relationships" %}:</h4>
-                    <ul>
-                        {% for rel in agent.resource_relationships %}
-                            {% ifchanged rel.role %}
-                                <h4>{{ rel.role.name }} </h4>
-                            {% endifchanged %}
-                            <li>
-                                <a href="{% url "project_resource" agent_id=agent.id resource_id=rel.resource.id %}"> {{ rel.resource }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                  {% endif %}
-                </div>
-
-
-              <!-- </div> -->
-              {% endif %}
-
-	        </div>
-
-        {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
-          <div class="span6">
-          {% if agent.project and form_entries and fobi_name and user_agent in agent.managers %}
-            <div class="requests">
-              <h3>
-                {% trans "Pending to create user+agent:" %} <!-- <span style="font-weight:normal;">{{ fobi_name }}</span> -->
-              </h3>
-              <ul>
-                {% for req in form_entries %}
-                  <li>
-                    {{ req.name }} <!--( <a href="mailto:{{ req.email_address }}">{{ req.email_address }}</a> )-->
-                  </li>
-                {% endfor %}
-              </ul>
-              <p>&nbsp;</p>
-            </div>
+              </div>
           {% endif %}
 
-	        <div class="assoc infobox" style="width:95%;">
-            <h3>
-              {% trans "Relations:" %}
-            </h3>
+          {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+  	        <div class="span6 assoc infobox" style="width:100%;">
+              <h3>
+                {% trans "Relations:" %}
+              </h3>
 
-                <h4 class="hdg"> {{ agent.name }} {% trans "is associated with" %}: </h4>
-                <ul>
+              <h4 class="hdg"> {{ agent.name }} {% trans "is associated with" %}: </h4>
+              <ul>
                 {% for assoc in is_associated_with  %}
                     {% ifchanged assoc.association_type %}
                         <h4> {{ assoc.association_type.label }}: </h4>
@@ -685,10 +690,10 @@
                         {% if assoc.state == "potential" %} ({{ assoc.get_state_display }}) {% endif %}
                     </li>
                 {% endfor %}
-                </ul>
-                {% if has_associations %}
-                    <h4 class="hdg">{{ agent.name }} {% trans "has these associates" %}: &nbsp; &nbsp;
-                    {% if user_agent in agent.managers or user_agent.is_staff %}
+              </ul>
+              {% if has_associations %}
+                  <h4 class="hdg">{{ agent.name }} {% trans "has these associates" %}: &nbsp; &nbsp;
+                  {% if user_agent in agent.managers or user_agent.is_staff %}
                       {% if agent.is_context %}
                         <a href="#agentAssnForm" role="button" class="btn btn-primary btn-mini" data-toggle="modal">{% trans "Edit member relations" %}</a>
                         <div class="modal hide fade" id="agentAssnForm" tabindex="-1" role="dialog" aria-labelledby="assn-label" aria-hidden="true">
@@ -709,9 +714,9 @@
                           </div>
                         </div>
                       {% endif %}
-                    {% endif %}
-                    </h4>
-                    <ul>
+                  {% endif %}
+                  </h4>
+                  <ul>
                     {% for assoc in has_associations %}
                         {% ifchanged assoc.association_type %}
                             <h4>{{ assoc.association_type.inverse_label }}: </h4>
@@ -745,12 +750,13 @@
                           <li><a href="{% url "members_agent" agent_id=assoc.is_associate.id %}">{{ assoc.is_associate.name }}</a></li>
                         {% endif %}
                     {% endfor %}
-                    </ul>
-                {% endif %}
+                  </ul>
+              {% endif %}
 
 	          </div>
-            {% if request.user.is_staff %}
-              <div class="infobox" style="width:95%;">
+          {% endif %}
+          {% if request.user.is_staff %}
+              <div class="span6 infobox" style="width:100%;">
                   <h3 class="">{% trans "Active Processes" %}:</h3>
                   {% if agent.active_processes %}
                     <ul>
@@ -764,39 +770,40 @@
                         <p>{% trans "None" %}</p>
                   {% endif %}
               </div>
-            {% endif %}
-          </div>
-
-		    </div>
-
-
-            {% if agent.is_individual and user.is_staff %}
-                <div class="span8">
-                    <h4 class="hdg"> {% trans "Cumulative Contributions" %}</h4>
-                    <div id="chart_div0"></div>
-                </div>
-            {% endif %}
-
-         <div class="row-fluid" tyle="margin-bottom:2em;">
-        <hr />
-        <h3>{% trans "Cumulative Time" %}</h3>
-        <div class="row-fluid">
-          <div class="span6">
-            <h4 class="chart-heading">{% trans "Last 2 months" %}</h4>
-            <div id="chart_div1"></div>
-          </div>
-          <div class="span6">
-            <h4 class="chart-heading">{% trans "Forever" %}</h4>
-            <div id="chart_div2"></div>
-          </div>
+          {% endif %}
         </div>
-        <h3>{% trans "Roles" %}</h3>
-        <div id="chart_div3"></div>
 
-      </div>
+		  </div>
+
+
+      {% if agent.is_individual and user.is_staff %}
+          <div class="span8">
+              <h4 class="hdg"> {% trans "Cumulative Contributions" %}</h4>
+              <div id="chart_div0"></div>
+          </div>
+      {% endif %}
+
+      {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+        <div class="row-fluid" tyle="margin-bottom:2em;">
+          <hr />
+          <h3>{% trans "Cumulative Time" %}</h3>
+          <div class="row-fluid">
+            <div class="span6">
+              <h4 class="chart-heading">{% trans "Last 2 months" %}</h4>
+              <div id="chart_div1"></div>
+            </div>
+            <div class="span6">
+              <h4 class="chart-heading">{% trans "Forever" %}</h4>
+              <div id="chart_div2"></div>
+            </div>
+          </div>
+          <h3>{% trans "Roles" %}</h3>
+          <div id="chart_div3"></div>
+
+        </div>
+      {% endif %}
 
     </div>
-  {% endif %}
 
   {% if agent.project and not user_agent in agent.managers and not agent in user_agent.related_contexts or agent.project in user_agent.joinaproject_requests_projects and not user_agent in agent.members %}
     <div id="join-this-project"  class="span5">

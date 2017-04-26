@@ -170,7 +170,7 @@ def upload_picture(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render_to_response('work/no_permission.html')
+        return render(request, 'work/no_permission.html')
     form = UploadAgentForm(instance=agent, data=request.POST, files=request.FILES)
     if form.is_valid():
         data = form.cleaned_data
@@ -227,7 +227,7 @@ def update_skills(request, agent_id):
         agent = get_object_or_404(EconomicAgent, id=agent_id)
         user_agent = get_agent(request)
         if not user_agent:
-            return render_to_response('work/no_permission.html')
+            return render(request, 'work/no_permission.html')
         #import pdb; pdb.set_trace()
         et_work = EventType.objects.get(name="Time Contribution")
         arts = agent.resource_types.filter(event_type=et_work)
@@ -1239,7 +1239,7 @@ def assign_skills(request, agent_id):
         agent = get_object_or_404(EconomicAgent, id=agent_id)
         user_agent = get_agent(request)
         if not user_agent:
-            return render_to_response('work/no_permission.html')
+            return render(request, 'work/no_permission.html')
         et_work = EventType.objects.get(name="Time Contribution")
         arts = agent.resource_types.filter(event_type=et_work)
         old_skill_rts = []

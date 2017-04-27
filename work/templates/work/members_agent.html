@@ -464,7 +464,7 @@
 	            </table>
 
 
-              {% if user.is_staff or user_agent in agent.managers %}
+              {% if user.is_staff or user_agent in agent.managers or user_is_agent %}
               <!-- <div class="row-fluid" tyle="margin-top:2em;"> -->
                 <div class="span6 infobox" style="width:100%;">
                   <h3 class="">{% trans "Resources" %}:</h3>

@@ -2347,6 +2347,15 @@ def new_skill_type(request, agent_id):
               # mptt: insert_node(node, target, position='last-child', save=False)
               new_ski = Ocp_Skill_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
 
+              et_work = EventType.objects.get(name="Time Contribution")
+              art = AgentResourceType(
+                    agent=agent,
+                    resource_type=new_rt,
+                    event_type=et_work,
+                    created_by=request.user,
+              )
+              art.save()
+
               suggestion = SkillSuggestion(
                   skill=data["name"],
                   suggested_by=request.user,

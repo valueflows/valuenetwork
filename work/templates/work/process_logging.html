@@ -1087,7 +1087,7 @@ hr {
 				                    </div>
 					            {% endif %}
                                 {% for event in resource.consuming_events %}
-                                    {% if event.commitment = item %}
+                                    {% if event.commitment == item %}
 							            <div class="use event-section" >
 								            <span class="event-label">{% trans "Consumed" %}:</span><span>
 								                 {{ event.quantity }} {{ event.unit_of_quantity }} {{ event.event_date }}
@@ -1299,7 +1299,7 @@ hr {
 				                    </div>
 						        {% endif %}
                                 {% for event in resource.using_events %}
-                                    {% if event.commitment = item %}
+                                    {% if event.commitment == item %}
 							            <div  class="use event-section" >
 								            <span class="event-label">{% trans "Used" %}:</span> <span >
 								                {{ event.resource.identifier }} {{ event.quantity }} {{ item.resource_type.unit_for_use }} {{ event.event_date }}

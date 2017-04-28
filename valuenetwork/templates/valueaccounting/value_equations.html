@@ -70,7 +70,7 @@
 
                 <div class="ve"><a href="{{ ve.get_absolute_url }}">{{ ve.name }}</a>
                     <span class="live">({% if ve.live %}{% trans "Live" %}{% else %}{% trans "Test Only" %}{% endif%})</span>
-                    {% if user = ve.created_by or user.is_superuser %}
+                    {% if user == ve.created_by or user.is_superuser %}
                         <form
                             style="display: inline;"  
                             action="{% url "edit_value_equation" value_equation_id=ve.id %}" 

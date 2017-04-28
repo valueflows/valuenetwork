@@ -219,7 +219,7 @@ th
                         <div class="veb">
                             <span class="name">{{ bucket }}</span>
 
-                            {% if user = value_equation.created_by or user.is_superuser %}
+                            {% if user == value_equation.created_by or user.is_superuser %}
                                 <div style="display: inline;" >
                                     <a href="#change-veb{{ bucket.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal">{% trans "Change" %}</a>
                                 </div>
@@ -282,7 +282,7 @@ th
                                     <div class="vebr">
                                         Rule for: <b>{{ rule.event_type.name }}</b> 
 
-                                        {% if user = value_equation.created_by or user.is_superuser %}
+                                        {% if user == value_equation.created_by or user.is_superuser %}
                                             <div style="display: inline;" >
                                                 <a href="#change-vebr{{ rule.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal">{% trans "Change" %}</a>
                                             </div>

@@ -58,7 +58,7 @@
                 <li>
                     <a href="{% url "distribution_logging" distribution_id=dist.id %}">{{ dist }}
                     </a>  {% trans "created by" %} {{ dist.created_by }}
-                    {% if user = dist.created_by or user.is_superuser%}
+                    {% if user == dist.created_by or user.is_superuser%}
                         <a class="btn btn-info btn-mini" href="{% url "distribution_logging" distribution_id=dist.id %}">{% trans "Change" %}</a> 
                         	{% if dist.is_deletable %}
                                 <form

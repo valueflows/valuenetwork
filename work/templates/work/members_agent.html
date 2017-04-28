@@ -529,7 +529,7 @@
                         {% for skill in agent.skills %}
                             <li>
                                 {% if skill.ocp_skill_type %}{{ skill.ocp_skill_type.name }}{% else %}{{ skill }}{% endif %}
-                                {% if skill.created_by = agent.user.user and user_is_agent %} <em>{% trans "(created by you)" %}</em>{% elif skill.changed_by = agent.user.user and user_is_agent %} <em>{% trans "(edited by you)" %}</em>{% elif skill in agent.suggested_skills %} <em>{% blocktrans %}(suggested by {{ agent }}) {% endblocktrans %}</em>{% endif %}
+                                {% if skill.created_by == agent.user.user and user_is_agent %} <em>{% trans "(created by you)" %}</em>{% elif skill.changed_by == agent.user.user and user_is_agent %} <em>{% trans "(edited by you)" %}</em>{% elif skill in agent.suggested_skills %} <em>{% blocktrans %}(suggested by {{ agent }}) {% endblocktrans %}</em>{% endif %}
 
                             </li>
                         {% endfor %}
@@ -652,7 +652,7 @@
                         <form class="validateMe" id="skillForm" enctype="multipart/form-data" action="{% url 'new_skill_type' agent_id=agent.id %}" method="POST" >
                           {% csrf_token %}
                           {% for fil in Stype_form %}
-                            <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
+                            <div class="modal-field" {% if fil.name == 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
                               {% if not fil.name == 'edid' %}
                                 <label>{{ fil.label }}:</label>
                               {% endif %}
@@ -725,7 +725,7 @@
                           <li><a href="{% url "members_agent" agent_id=assoc.is_associate.id %}">{{ assoc.is_associate.name }}</a>
                             {% with assoc.is_associate.membership_request_id as id %}
                                 {% if id %}
-                                  {% if user_agent.membership_request_id = id or agent.nick = "FC MembershipRequest" or agent.nick = "Freedom Coop" %}
+                                  {% if user_agent.membership_request_id == id or agent.nick = "FC MembershipRequest" or agent.nick = "Freedom Coop" %}
                                     {% if assoc.state == "potential" %} ({{ assoc.get_state_display }}) {% endif %}
                                     &nbsp;
                                     <a href="{% url 'membership_discussion' membership_request_id=id %}">
@@ -810,7 +810,7 @@
       <h3>
         {% trans "Join this project:" %}
       </h3>
-      {% if agent.project.joining_style = "moderated" %}
+      {% if agent.project.joining_style == "moderated" %}
         {% if user_agent.req %}
             {% if user_agent.req.state == 'declined' %}
               <p>{% trans "Sorry, you've tried to join this project but your request was <b>declined</b> for any reason. See the thread at" %}:
@@ -823,7 +823,7 @@
           <p> {% if agent.project.fobi_slug %}<b><a href="{% url 'project_joinform' agent_id=agent.id %}" class="btn btn-primary">{% trans "Form to join" %} "{{ agent.name }}"</a></b>{% else %} <em class="alert">{% trans "Sorry, the form is not ready, try tomorrow" %}</em> {% endif %}
           </p>
         {% endif %}
-      {% elif agent.project.joining_style = "autojoin" %}
+      {% elif agent.project.joining_style == "autojoin" %}
         <div>
           {% trans "You can simply join this project with one click" %}:
             <form

@@ -78,6 +78,13 @@
       </div>
 		</legend>
 
+    {% if resource.digital_currency_balance == "Not accessible now" %}
+      <div class="alert alert-warning">
+        <strong>{% trans "Warning:" %}</strong>
+        {% trans "Operations with your online wallet are not available temporarily. Please, come back later." %}
+      </div>
+    {% endif %}
+
         {% if agent and request.user.agent.agent.is_staff %}
 		    <div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
 			    <div class="modal-header">
@@ -126,10 +133,14 @@
 	            <table class="table table-bordered" >
 	                <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        {% if not resource.digital_currency_balance = resource.digital_currency_balance_unconfirmed %}
-                            <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
+                        {% if not resource.digital_currency_balance == "Not accessible now" %}
+                            {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
+                                <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
+                            {% else %}
+                                <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
+                            {% endif %}
                         {% else %}
-                            <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
+                            <td class="error"><b>{% trans "Not available now" %}</b></td>
                         {% endif %}
                     </tr>
 {% comment %}
@@ -264,7 +275,11 @@
                         {% else %}
                           {% csrf_token %}
                           {{ send_coins_form|as_bootstrap }}
-                          <button class="btn btn-primary" name="sendCoins" value="coins">{% trans "Send" %}</button>
+                          {% if not resource.digital_currency_balance == "Not accessible now" %}
+                              <button class="btn btn-primary" name="sendCoins" value="coins">{% trans "Send" %}</button>
+                          {% else %}
+                              <button class="btn btn-danger disabled" disabled><b>{% trans "Not available now" %}</b></button>
+                          {% endif %}
                         {% endif %}
                     </form>
                 {% endif %}

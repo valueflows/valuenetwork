@@ -4516,7 +4516,7 @@ class EconomicResource(models.Model):
                         bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
                     fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
                     limit = bal - fee
-            except InvalidOperation:
+            except:
                 limit = Decimal("0.0")
         return limit
 

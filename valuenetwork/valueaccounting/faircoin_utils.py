@@ -57,6 +57,8 @@ def get_transaction_info(tx_hash, address):
 
         time = transaction['time']
         return (amount, time)
+    else:
+        return None, None
 
 def is_mine(address):
     if init_electrum_fair():

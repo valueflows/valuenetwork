@@ -12,7 +12,7 @@ from valuenetwork.valueaccounting.models import (
     EconomicEvent,
 )
 
-import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
+from valuenetwork.valueaccounting import faircoin_utils
 
 class ExchangeService(object):
     @classmethod
@@ -127,7 +127,8 @@ class ExchangeService(object):
             to_resource = to_resources[0]  # shd be only one
             to_agent = to_resource.owner()
         et_give = EventType.objects.get(name="Give")
-        if to_resource:
+        network_fee = faircoin_utils.network_fee()
+        if to_resource and network_fee:
             tt = ExchangeService.faircoin_internal_transfer_type()
             xt = tt.exchange_type
             date = datetime.date.today()
@@ -182,8 +183,7 @@ class ExchangeService(object):
             # network_fee is subtracted from quantity
             # so quantity is correct for the giving event
             # but receiving event will get quantity - network_fee
-            from valuenetwork.valueaccounting.faircoin_utils import network_fee
-            quantity = qty - Decimal(float(network_fee()) / 1.e6)
+            quantity = qty - Decimal(float(network_fee) / 1.e6)
             et_receive = EventType.objects.get(name="Receive")
             event = EconomicEvent(
                 event_type=et_receive,
@@ -214,47 +214,48 @@ class ExchangeService(object):
         tx_included = []
         for tx in tx_in_blockchain:
             if str(tx[0]) not in tx_in_ocp:
-                (amount, time) = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
-                qty=Decimal(amount)/Decimal(1000000)
-                date = datetime.date.fromtimestamp(time)
-                tt = ExchangeService.faircoin_incoming_transfer_type()
-                xt = tt.exchange_type
-                exchange = Exchange(
-                    exchange_type=xt,
-                    use_case=xt.use_case,
-                    name="Receive Faircoins",
-                    start_date=date,
-                )
-                exchange.save()
-                transfer = Transfer(
-                    transfer_type=tt,
-                    exchange=exchange,
-                    transfer_date=date,
-                    name="Receive Faircoins",
-                )
-                transfer.save()
-
-                et_receive = EventType.objects.get(name="Receive")
-                state = "external"
+                amount, time = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
                 confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
-                if confirmations > 0:
-                    state = "broadcast"
-                if confirmations > 2:
-                    state = "confirmed"
+                if amount and confirmations:
+                    qty=Decimal(amount)/Decimal(1000000)
+                    date = datetime.date.fromtimestamp(time)
+                    tt = ExchangeService.faircoin_incoming_transfer_type()
+                    xt = tt.exchange_type
+                    exchange = Exchange(
+                        exchange_type=xt,
+                        use_case=xt.use_case,
+                        name="Receive Faircoins",
+                        start_date=date,
+                    )
+                    exchange.save()
+                    transfer = Transfer(
+                        transfer_type=tt,
+                        exchange=exchange,
+                        transfer_date=date,
+                        name="Receive Faircoins",
+                    )
+                    transfer.save()
 
-                event = EconomicEvent(
-                    event_type=et_receive,
-                    event_date=date,
-                    to_agent=agent,
-                    resource_type=resource.resource_type,
-                    resource=resource,
-                    digital_currency_tx_hash=str(tx[0]),
-                    digital_currency_tx_state=state,
-                    quantity=qty,
-                    transfer=transfer,
-                    event_reference=faircoin_address
-                )
-                event.save()
+                    et_receive = EventType.objects.get(name="Receive")
+                    state = "external"
+                    if confirmations > 0:
+                        state = "broadcast"
+                    if confirmations > 2:
+                        state = "confirmed"
 
-                tx_included.append(str(tx[0]))
+                    event = EconomicEvent(
+                        event_type=et_receive,
+                        event_date=date,
+                        to_agent=agent,
+                        resource_type=resource.resource_type,
+                        resource=resource,
+                        digital_currency_tx_hash=str(tx[0]),
+                        digital_currency_tx_state=state,
+                        quantity=qty,
+                        transfer=transfer,
+                        event_reference=faircoin_address
+                    )
+                    event.save()
+
+                    tx_included.append(str(tx[0]))
         return tx_included

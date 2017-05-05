@@ -249,7 +249,7 @@
             {% if not proj.visibility = "private" %}
               {% if not request.user.agent.agent in proj.agent.managers and not request.user.agent.agent in proj.agent.members %}
                   <li><b><a href="../agent/{{ proj.agent.id }}">{{ proj.agent.name }}</a></b> <!--({{ proj.visibility }} - {{ proj.joining_style }})-->
-                    {% if proj.joining_style = "moderated" %}
+                    {% if proj.joining_style == "moderated" %}
                       {% if not proj in request.user.agent.agent.related_contexts and proj in request.user.agent.agent.joinaproject_requests_projects %}
                         {% for req in request.user.agent.agent.joinaproject_requests %}
                           {% if req.project == proj %}

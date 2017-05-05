@@ -50,7 +50,7 @@
                 {% for x in exchanges %}
                     <li>
                         <a href="{% url "exchange_logging" exchange_type_id=0 exchange_id=x.id %}">{{ x }}</a>  {% trans "created by" %} {{ x.created_by }}
-                        {% if user = x.created_by or user.is_superuser%}
+                        {% if user == x.created_by or user.is_superuser%}
                             <a class="btn btn-info btn-mini" href="{% url "exchange_logging" exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a> 
                             {% if x.is_deletable %}
                                 <form

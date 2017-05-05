@@ -2321,14 +2321,16 @@ def new_skill_type(request, agent_id):
                 #if an.clas != 'Artwork':
                   an = Ocp_Skill_Type.objects.get(id=an.id)
                   if an.resource_type:
-                    for fv in an.resource_type.facets.all():
+                    new_rtfv = None
+                    for fv in an.resource_type.facets.all():  # inherit first facetvalue from the parents
                       new_rtfv = ResourceTypeFacetValue(
                         resource_type=new_rt,
                         facet_value=fv.facet_value
                       )
                       new_rtfv.save()
-                    break
-                  elif an.facet_value:
+                    if new_rtfv:
+                      break
+                  if an.facet_value:                          # if no fvs (didn't break) and the parent has one, relate that fv to the new skill
                     new_rtfv = ResourceTypeFacetValue(
                         resource_type=new_rt,
                         facet_value=an.facet_value
@@ -2427,7 +2429,6 @@ def edit_skill_type(request, agent_id):
             if edid == '':
               raise ValidationError("Missing id of the edited skill! (edid)")
             else:
-              #raise ValidationError("Lets edit "+edid)
               idar = edid.split('_')
               if idar[0] == "Sid":
                 grt = Ocp_Skill_Type.objects.get(id=idar[1])
@@ -2468,19 +2469,21 @@ def edit_skill_type(request, agent_id):
                   grt.save()
 
                   # mptt: get_ancestors(ascending=False, include_self=False)
-                  ancs = parent_st.get_ancestors(True, True)
+                  ancs = parent_st.get_ancestors(True, True)   # note: they're General.Job
                   for an in ancs:
                     #if an.clas != 'Artwork':
                       an = Ocp_Skill_Type.objects.get(id=an.id)
                       if an.resource_type:
+                        new_rtfv = None
                         for fv in an.resource_type.facets.all():
                           new_rtfv = ResourceTypeFacetValue(
                             resource_type=new_rt,
                             facet_value=fv.facet_value
                           )
                           new_rtfv.save()
-                        break
-                      elif an.facet_value:
+                        if new_rtfv:
+                          break
+                      if an.facet_value:
                         new_rtfv = ResourceTypeFacetValue(
                             resource_type=new_rt,
                             facet_value=an.facet_value
@@ -2505,19 +2508,21 @@ def edit_skill_type(request, agent_id):
                     for rtfv in old_rtfvs:
                       rtfv.delete()
                     # mptt: get_ancestors(ascending=False, include_self=False)
-                    ancs = parent_st.get_ancestors(True, True)
+                    ancs = parent_st.get_ancestors(True, True)   # note: they're General.Job
                     for an in ancs:
                       #if an.clas != 'Artwork':
                         an = Ocp_Skill_Type.objects.get(id=an.id)
                         if an.resource_type:
+                          new_rtfv = None
                           for fv in an.resource_type.facets.all():
                             new_rtfv = ResourceTypeFacetValue(
                               resource_type=rt,
                               facet_value=fv.facet_value
                             )
                             new_rtfv.save()
-                          break
-                        elif an.facet_value:
+                          if new_rtfv:
+                            break
+                        if an.facet_value:
                           new_rtfv = ResourceTypeFacetValue(
                               resource_type=rt,
                               facet_value=an.facet_value
@@ -2648,10 +2653,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       try:
                         new_ext = ExchangeType.objects.get(name=name)
                         if new_ext:
-                          if new_ext.context_agent and not new_ext.context_agent == agnt:
-                            if agnt.parent():
-                              new_ext.context_agent = agnt.parent()
-                            else:
+                          if new_ext.context_agent and not new_ext.context_agent == agnt: # if the ext exists and the context_agent is not the
+                            if agnt.parent():                                             # same, set the parent agent or the new agent as
+                              new_ext.context_agent = agnt.parent()                       # a new context. TODO: check if the old context has
+                            else:                                                         # the same parent (so the ext keeps showing for them)
                               new_ext.context_agent = agnt
 
                             new_ext.edited_by = request.user
@@ -2753,7 +2758,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
                   else: # endif ext
-                    # the ocp record type still not have an ocp exchange type, create it? TODO
+                    # the parent ocp record type still not have an ocp exchange type, create it? TODO
                     pass
 
                   #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -2805,14 +2810,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       if an.clas != 'Artwork':
                         an = Ocp_Artwork_Type.objects.get(id=an.id)
                         if an.resource_type:
+                          new_rtfv = None
                           for fv in an.resource_type.facets.all():
                             new_rtfv = ResourceTypeFacetValue(
                               resource_type=new_rt,
                               facet_value=fv.facet_value
                             )
                             new_rtfv.save()
-                          break
-                        elif an.facet_value:
+                          if new_rtfv:
+                            break
+                        if an.facet_value:
                           new_rtfv = ResourceTypeFacetValue(
                               resource_type=new_rt,
                               facet_value=an.facet_value
@@ -2850,9 +2857,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       raise ValidationError('Cannot insert node:'+str(new_oat)+' Parent:'+str(parent_rt))
 
 
-                    nav_form = ExchangeNavForm(agent=agent, data=None)
-                    Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                    Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                    #nav_form = ExchangeNavForm(agent=agent, data=None)
+                    #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                    #Stype_form = NewSkillTypeForm(agent=agent, data=None)
 
                   else: # have no parent_type id
                     pass
@@ -2936,14 +2943,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                             if an.clas != 'Artwork':
                               an = Ocp_Artwork_Type.objects.get(id=an.id)
                               if an.resource_type:
+                                new_rtfv = None
                                 for fv in an.resource_type.facets.all():
                                   new_rtfv = ResourceTypeFacetValue(
                                     resource_type=new_rt,
                                     facet_value=fv.facet_value
                                   )
                                   new_rtfv.save()
-                                break
-                              elif an.facet_value:
+                                if new_rtfv:
+                                  break
+                              if an.facet_value:
                                 new_rtfv = ResourceTypeFacetValue(
                                     resource_type=new_rt,
                                     facet_value=an.facet_value
@@ -2973,14 +2982,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                               if an.clas != 'Artwork':
                                 an = Ocp_Artwork_Type.objects.get(id=an.id)
                                 if an.resource_type:
+                                  new_rtfv = None
                                   for fv in an.resource_type.facets.all():
                                     new_rtfv = ResourceTypeFacetValue(
                                       resource_type=rt,
                                       facet_value=fv.facet_value
                                     )
                                     new_rtfv.save()
-                                  break
-                                elif an.facet_value:
+                                  if new_rtfv:
+                                    break
+                                if an.facet_value:
                                   new_rtfv = ResourceTypeFacetValue(
                                       resource_type=rt,
                                       facet_value=an.facet_value
@@ -2989,9 +3000,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                                   break
                           rt.save()
 
-                        nav_form = ExchangeNavForm(agent=agent, data=None)
-                        Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                        Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                        #nav_form = ExchangeNavForm(agent=agent, data=None)
+                        #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                        #Stype_form = NewSkillTypeForm(agent=agent, data=None)
 
                       else: # is not Rid
                         pass
@@ -3226,13 +3237,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   if ext:
                     ext.save()
 
-                nav_form = ExchangeNavForm(agent=agent, data=None)
-                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
                 #raise ValidationError("Editing Exchange Type! "+data['parent_type'].name+' ext:'+str(new_parent)+' moved:'+str(moved))
-                #uca = data["use_case"]
-                #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                #    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type
 
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
@@ -3261,9 +3269,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                             exchanges_included.append(ex)
                     exchanges = exchanges_included
 
-                nav_form = ExchangeNavForm(agent=agent, data=None)
-                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
         else:
           exchanges = Exchange.objects.filter(context_agent=agent) #.none()
           selected_values = "all"

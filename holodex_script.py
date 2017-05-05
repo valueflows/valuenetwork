@@ -26,7 +26,6 @@ aat_file_path = os.path.join(SCRIPT_ROOT, "holodex", "dhen-data", "relationshipT
 a_file_path = os.path.join(SCRIPT_ROOT, "holodex", "dhen-data", "agents.csv")
 aa_file_path = os.path.join(SCRIPT_ROOT, "holodex", "dhen-data", "agentRelationships.csv")
 
-#import pdb; pdb.set_trace()
 agent_types = AgentType.objects.all()
 with open(at_file_path, 'wb') as csvfile:
     w = csv.writer(csvfile, delimiter=',', quotechar="'", quoting=csv.QUOTE_ALL)
@@ -153,7 +152,6 @@ exception csv.Error
 
 
 def exchange_events_csv(request):
-    #import pdb; pdb.set_trace()
     event_ids = request.GET.get("event-ids")
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=contributions.csv'

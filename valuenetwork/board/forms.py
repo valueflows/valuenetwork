@@ -25,7 +25,6 @@ class FilterForm(forms.Form):
 
     def __init__(self, pattern=None, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             et = EventType.objects.get(name="Transfer")
@@ -57,7 +56,6 @@ class TransferFlowForm(forms.Form):
         
     def __init__(self, assoc_type_identifier=None, context_agent=None, qty_help=None, *args, **kwargs):
         super(TransferFlowForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if context_agent and assoc_type_identifier:
             self.fields["to_agent"].queryset = context_agent.all_has_associates_by_type(assoc_type_identifier=assoc_type_identifier)   
         if qty_help:
@@ -89,7 +87,6 @@ class ExchangeFlowForm(forms.Form):
         
     def __init__(self, assoc_type_identifier=None, context_agent=None, qty_help=None, *args, **kwargs):
         super(ExchangeFlowForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if context_agent and assoc_type_identifier:
             self.fields["to_agent"].queryset = context_agent.all_has_associates_by_type(assoc_type_identifier=assoc_type_identifier)   
         if qty_help:
@@ -163,7 +160,6 @@ class AvailableForm(forms.ModelForm):
 
     def __init__(self, exchange_type=None, context_agent=None, *args, **kwargs):
         super(AvailableForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if exchange_type:
             tt = exchange_type.transfer_types_non_reciprocal()[0]
             self.fields["resource_type"].queryset = tt.get_resource_types()
@@ -200,7 +196,6 @@ class CombineResourcesForm(forms.Form):
         
     def __init__(self, stage=None, resource_type=None, *args, **kwargs):
         super(CombineResourcesForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if resource_type and stage:
             self.fields["resources"].queryset = resource_type.onhand_for_exchange_stage(stage=stage)
 
@@ -249,7 +244,6 @@ class ReceiveForm(forms.Form):
         
     def __init__(self, exchange_type=None, context_agent=None, *args, **kwargs):
         super(ReceiveForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if exchange_type:
             tt = exchange_type.transfer_types_non_reciprocal()[0]
             self.fields["resource_type"].queryset = tt.get_resource_types()

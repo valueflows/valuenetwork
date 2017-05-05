@@ -26,7 +26,6 @@ def default_context_agent():
 
 #todo: a lot of this can be configured instead of hard-coded
 def dhen_board(request, context_agent_id=None):
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
     pattern = ProcessPattern.objects.get(name="Herbs")
     selected_resource_type = None
@@ -86,7 +85,6 @@ def dhen_board(request, context_agent_id=None):
 @login_required
 def add_available(request, context_agent_id):
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         context_agent = EconomicAgent.objects.get(id=context_agent_id)
         form = AvailableForm(data=request.POST, prefix="AVL")
         if form.is_valid():
@@ -106,7 +104,6 @@ def add_available(request, context_agent_id):
 @login_required
 def receive_directly(request, context_agent_id):
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         context_agent = EconomicAgent.objects.get(id=context_agent_id)
         stage = ExchangeType.objects.get(name="Harvester to Drying Site") 
         exchange_type = ExchangeType.objects.get(name="Purchase to Drying Site") #todo: odd to have stage different....
@@ -266,7 +263,6 @@ def get_next_stage(exchange_type=None):
 @login_required
 def purchase_resource(request, context_agent_id, commitment_id): #this is the farm > harvester > drying site, confusing name
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         commitment = get_object_or_404(Commitment, id=commitment_id)
         context_agent = EconomicAgent.objects.get(id=context_agent_id)
         stage = None
@@ -278,7 +274,6 @@ def purchase_resource(request, context_agent_id, commitment_id): #this is the fa
         zero_form = ZeroOutForm(prefix=prefix, data=request.POST)
 
         if zero_form.is_valid():        
-            #import pdb; pdb.set_trace()
             zero_data = zero_form.cleaned_data
             zero_out = zero_data["zero_out"]
             if zero_out == True:
@@ -310,7 +305,6 @@ def purchase_resource(request, context_agent_id, commitment_id): #this is the fa
             formset = create_exchange_formset(prefix=prefix, data=request.POST, context_agent=context_agent, assoc_type_identifier="Harvester")
             quantity = 0
             ces = []
-            #import pdb; pdb.set_trace()
             for form_ee in formset.forms:
                 if form_ee.is_valid():
                     data_ee = form_ee.cleaned_data
@@ -624,7 +618,6 @@ def purchase_resource(request, context_agent_id, commitment_id): #this is the fa
 @login_required
 def transfer_resource(request, context_agent_id, resource_id): #this is drying site to seller
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         resource = get_object_or_404(EconomicResource, id=resource_id)
         context_agent = EconomicAgent.objects.get(id=context_agent_id)
         stage = ExchangeType.objects.get(name="Harvester to Drying Site")
@@ -648,7 +641,6 @@ def transfer_resource(request, context_agent_id, resource_id): #this is drying s
             give_et = EventType.objects.get(name="Give")
             receive_et = EventType.objects.get(name="Receive")
             pay_rt = EconomicResourceType.objects.filter(unit__unit_type="value")[0]
-            #import pdb; pdb.set_trace()
                         
             xfer_exchange = Exchange(
                 name="Transfer " + resource.resource_type.name,
@@ -792,7 +784,6 @@ def transfer_resource(request, context_agent_id, resource_id): #this is drying s
 
 def combine_resources(request, context_agent_id, resource_type_id):
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         resource_type = get_object_or_404(EconomicResourceType, id=resource_type_id)
         context_agent = EconomicAgent.objects.get(id=context_agent_id)
         stage = ExchangeType.objects.get(name="Drying Site to Seller") #actually the stage here should be the process stage, and the rest should handle that
@@ -911,7 +902,6 @@ def delete_farm_commitment(request, commitment_id):
 def undo_col2(request, resource_id):
     resource = get_object_or_404(EconomicResource, pk=resource_id)
     context_agent_id = default_context_agent().id
-    #import pdb; pdb.set_trace()
     flows = resource.incoming_value_flows()
     for item in flows:
         if item.class_label() == "Economic Event":
@@ -928,7 +918,6 @@ def undo_col2(request, resource_id):
 def undo_col3(request, resource_id):
     resource = get_object_or_404(EconomicResource, pk=resource_id)
     context_agent_id = default_context_agent().id
-    #import pdb; pdb.set_trace()
     flows = resource.incoming_value_flows()
     #todo: I'm not sure how to delete the right rows without going too far back in the chain......
     #for item in flows:

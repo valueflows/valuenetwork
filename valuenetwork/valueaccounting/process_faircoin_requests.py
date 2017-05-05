@@ -16,7 +16,6 @@ from valuenetwork.valueaccounting.lockfile import FileLock, AlreadyLocked, LockT
 #FAIRCOIN_DIVISOR = int(1000000)
 
 def init_electrum_fair():
-    #import pdb; pdb.set_trace()
     try:
         assert(efn.daemon_is_up())
     except:
@@ -40,7 +39,6 @@ def acquire_lock():
     return lock
 
 def create_address_for_agent(agent):
-    #import pdb; pdb.set_trace()
     address = None
     try:
         address = efn.new_fair_address(
@@ -99,7 +97,6 @@ def create_requested_addresses():
     return msg
 
 def broadcast_tx():
-    #import pdb; pdb.set_trace()
 
     try:
         events = EconomicEvent.objects.filter(
@@ -117,7 +114,6 @@ def broadcast_tx():
         return "failed to get events"
 
     try:
-        #import pdb; pdb.set_trace()
         successful_events = 0
         failed_events = 0
         if events:
@@ -143,7 +139,6 @@ def broadcast_tx():
                     continue
 
                 logger.critical("about to make_transaction_from_address. Amount: %d" %(int(amount)))
-                #import pdb; pdb.set_trace()
                 tx_hash = None
                 try:
                     tx_hash = efn.make_transaction_from_address(address_origin, address_end, int(amount))

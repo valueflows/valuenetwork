@@ -11,7 +11,6 @@ from django.http import HttpResponseRedirect, QueryDict
 from account.conf import settings
 
 def is_coop_worker(request):
-    #import pdb; pdb.set_trace()
     answer = False
     agent = None
     try:
@@ -26,7 +25,6 @@ def is_coop_worker(request):
 def default_redirect(request, fallback_url, **kwargs):
     redirect_field_name = kwargs.get("redirect_field_name", "next")
     next = request.GET.get(redirect_field_name)
-    #import pdb; pdb.set_trace()
     if is_coop_worker(request):
         next = settings.WORKER_LOGIN_REDIRECT_URL    
     if not next:

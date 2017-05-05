@@ -56,7 +56,6 @@ def work_home(request):
 
 @login_required
 def my_dashboard(request):
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
 
     return render(request, "work/my_dashboard.html", {
@@ -95,7 +94,6 @@ def map(request):
 
 @login_required
 def profile(request):
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
     change_form = WorkAgentCreateForm(instance=agent)
     skills = EconomicResourceType.objects.filter(behavior="work")
@@ -157,7 +155,6 @@ def change_personal_info(request, agent_id):
         return render(request, 'work/no_permission.html')
     change_form = WorkAgentCreateForm(instance=agent, data=request.POST or None)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         if change_form.is_valid():
             agent = change_form.save()
     return HttpResponseRedirect('/%s/'
@@ -195,7 +192,6 @@ def add_worker_to_location(request, location_id, agent_id):
 @login_required
 def add_location_to_worker(request, agent_id):
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         agent = get_object_or_404(EconomicAgent, id=agent_id)
         data = request.POST
         address = data["address"]
@@ -226,7 +222,6 @@ def update_skills(request, agent_id):
         user_agent = get_agent(request)
         if not user_agent:
             return render(request, 'valueaccounting/no_permission.html')
-        #import pdb; pdb.set_trace()
         et_work = EventType.objects.get(name="Time Contribution")
         arts = agent.resource_types.filter(event_type=et_work)
         old_skill_rts = []
@@ -253,7 +248,6 @@ def update_skills(request, agent_id):
                 )
                 art.save()
         other_form = SkillSuggestionForm(data=request.POST)
-        #import pdb; pdb.set_trace()
         if other_form.is_valid():
             suggestion = other_form.save(commit=False)
             suggestion.suggested_by = request.user
@@ -283,7 +277,6 @@ def update_skills(request, agent_id):
 '''
 @login_required
 def register_skills(request):
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
     skills = EconomicResourceType.objects.filter(behavior="work")
 
@@ -298,7 +291,6 @@ def register_skills(request):
 
 @login_required
 def manage_faircoin_account(request, resource_id):
-    #import pdb; pdb.set_trace()
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     send_coins_form = None
@@ -352,7 +344,6 @@ def manage_faircoin_account(request, resource_id):
     })
 
 def validate_faircoin_address_for_worker(request):
-    #import pdb; pdb.set_trace()
     from valuenetwork.valueaccounting.faircoin_utils import is_valid
     data = request.GET
     address = data["to_address"].strip()
@@ -364,7 +355,6 @@ def validate_faircoin_address_for_worker(request):
 
 @login_required
 def change_faircoin_account(request, resource_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         resource = get_object_or_404(EconomicResource, pk=resource_id)
         form = EconomicResourceForm(data=request.POST, instance=resource)
@@ -399,7 +389,6 @@ def change_faircoin_account(request, resource_id):
 @login_required
 def transfer_faircoins(request, resource_id):
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         resource = get_object_or_404(EconomicResource, id=resource_id)
         agent = get_agent(request)
         to_agent = request.POST["to_user"]
@@ -684,7 +673,6 @@ def edit_faircoin_event_description(request, resource_id):
 
 @login_required
 def share_payment(request, agent_id):
-    #import pdb; pdb.set_trace()
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     agent_account = agent.faircoin_resource()
     balance = agent_account.digital_currency_balance()
@@ -774,7 +762,6 @@ def share_payment(request, agent_id):
             )
         event.save()
 
-        #import pdb; pdb.set_trace()
         quantity = Decimal(number_of_shares)
         resource = EconomicResource(
             resource_type=share,
@@ -817,7 +804,6 @@ def share_payment(request, agent_id):
             )
         event.save()
 
-        #import pdb; pdb.set_trace()
         aa = agent.candidate_association()
 
         if aa:
@@ -840,7 +826,6 @@ def share_payment(request, agent_id):
 def membership_request(request):
     membership_form = MembershipRequestForm(data=request.POST or None)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         if membership_form.is_valid():
             human = True
             data = membership_form.cleaned_data
@@ -925,7 +910,6 @@ def membership_discussion(request, membership_request_id):
 
 @login_required
 def your_projects(request):
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
     agent_form = ProjectCreateForm() #initial={'agent_type': 'Project'})
     projects = agent.related_contexts()
@@ -959,7 +943,6 @@ def your_projects(request):
     for root in roots:
         root.nodes = root.child_tree()
         annotate_tree_properties(root.nodes)
-        #import pdb; pdb.set_trace()
         for node in root.nodes:
             aats = []
             for aat in node.agent_association_types():
@@ -1027,7 +1010,6 @@ def create_your_project(request):
 
 @login_required
 def members_agent(request, agent_id):
-    #import pdb; pdb.set_trace()
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent or not user_agent.is_participant or not user_agent.is_active_freedom_coop_member:
@@ -1057,7 +1039,6 @@ def members_agent(request, agent_id):
     nav_form = InternalExchangeNavForm(data=request.POST or None)
     if agent:
         if request.method == "POST":
-            #import pdb; pdb.set_trace()
             if nav_form.is_valid():
                 data = nav_form.cleaned_data
                 ext = data["exchange_type"]
@@ -1118,7 +1099,6 @@ def members_agent(request, agent_id):
                 member_hours_recent.append((key, value))
             member_hours_recent.sort(lambda x, y: cmp(y[1], x[1]))
 
-        #import pdb; pdb.set_trace()
 
         ces = CachedEventSummary.objects.filter(
             event_type__relationship="work",
@@ -1184,7 +1164,6 @@ def members_agent(request, agent_id):
 def edit_relations(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    #import pdb; pdb.set_trace()
     if user_agent in agent.managers():
         assn_form = AssociationForm(agent=agent,data=request.POST)
         if assn_form.is_valid():
@@ -1204,7 +1183,6 @@ def change_your_project(request, agent_id):
     if not user_agent:
         return render(request, 'work/no_permission.html')
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         try:
           project = agent.project
         except:
@@ -1292,7 +1270,6 @@ def joinaproject_request(request, form_slug = False):
 
 
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         fobi_form = FormClass(request.POST, request.FILES)
         #form_element_entries = form_entry.formelemententry_set.all()[:]
         #field_name_to_label_map, cleaned_data = get_processed_form_data(
@@ -1496,7 +1473,6 @@ def joinaproject_request_internal(request, agent_id = False):
       return render(request, 'work/no_permission.html')
 
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         fobi_form = FormClass(request.POST, request.FILES)
         #form_element_entries = form_entry.formelemententry_set.all()[:]
         #field_name_to_label_map, cleaned_data = get_processed_form_data(
@@ -1822,7 +1798,6 @@ from itertools import chain
 def create_account_for_join_request(request, join_request_id):
     if request.method == "POST":
         jn_req = get_object_or_404(JoinRequest, pk=join_request_id)
-        #import pdb; pdb.set_trace()
         form = ProjectAgentCreateForm(prefix=jn_req.form_prefix(), data=request.POST or None)
         if form.is_valid():
             data = form.cleaned_data
@@ -1957,7 +1932,6 @@ def project_feedback(request, agent_id, join_request_id):
 
 
 def validate_nick(request):
-    #import pdb; pdb.set_trace()
     answer = True
     error = ""
     data = request.GET
@@ -1993,7 +1967,6 @@ def validate_nick(request):
 
 
 def validate_username(request):
-    #import pdb; pdb.set_trace()
     answer = True
     error = ""
     data = request.GET
@@ -2029,7 +2002,6 @@ def connect_agent_to_join_request(request, agent_id, join_request_id):
         agent_form = JoinAgentSelectionForm(data=request.POST)
         if agent_form.is_valid():
             data = agent_form.cleaned_data
-            #import pdb; pdb.set_trace()
             agent = data["created_agent"]
             mbr_req.agent=agent
             mbr_req.state = "new"
@@ -2072,7 +2044,6 @@ def two_dicts_to_string(headers, data, html_element1='th', html_element2='td'):
 '''
 @login_required
 def create_project_user_and_agent(request, agent_id):
-    #import pdb; pdb.set_trace()
     project_agent = get_object_or_404(EconomicAgent, id=agent_id)
     if not project_agent.managers: # or not request.user.agent.agent in project_agent.managers:
         return render(request, 'valueaccounting/no_permission.html')
@@ -2080,7 +2051,6 @@ def create_project_user_and_agent(request, agent_id):
     agent_form = AgentForm(data=request.POST or None)
     agent_selection_form = AgentSelectionForm()
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         sa_id = request.POST.get("selected_agent")
         agent = None
         if sa_id:
@@ -2165,7 +2135,6 @@ def create_project_user_and_agent(request, agent_id):
 
 @login_required
 def exchanges_all(request, agent_id): #all types of exchanges for one context agent
-    #import pdb; pdb.set_trace()
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     today = datetime.date.today()
     end =  today
@@ -2200,7 +2169,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
 
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         new_exchange = request.POST.get("new_exchange")
         if new_exchange:
             if nav_form.is_valid():
@@ -2224,7 +2192,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     if hasattr(data["skill_type"], 'id'):
                       gen_sk = Ocp_Skill_Type.objects.get(id=data["skill_type"].id)
 
-                    #import pdb; pdb.set_trace()
 
                     if gen_rt and gen_ext.ocp_artwork_type and gen_ext.ocp_artwork_type == gen_rt: # we have the related RT in the ET! do nothing.
                       return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -2349,7 +2316,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                           else:
                             old_fvs = tr.facet_values.all()
                             new_tr.facet_values = old_fvs
-                            #import pdb; pdb.set_trace()
 
                         # end for tr in ext.transfer_types.all()
                         return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -2889,7 +2855,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     comma = ""
 
     fairunit = None
-    #import pdb; pdb.set_trace()
     for x in exchanges:
         #try:
         #    xx = list(x.transfer_list)
@@ -2984,7 +2949,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
         # end for transfer in x.transfer_list
 
-        #import pdb; pdb.set_trace()
         for event in x.events.all():
             event_ids = event_ids + comma + str(event.id)
             comma = ","
@@ -3008,7 +2972,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 else:
                     to['balance'] = '!!'
 
-    #import pdb; pdb.set_trace()
 
     return render(request, "work/exchanges_all.html", {
         "exchanges": exchanges,
@@ -3036,7 +2999,6 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
 
 @login_required
 def delete_exchange(request, exchange_id):
-    #import pdb; pdb.set_trace()
     #todo: Lynn needs lots of work
     if request.method == "POST":
         exchange = get_object_or_404(Exchange, pk=exchange_id)
@@ -3067,7 +3029,6 @@ def delete_exchange(request, exchange_id):
 
 @login_required
 def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exchange_id=None):
-    #import pdb; pdb.set_trace()
     context_agent = get_object_or_404(EconomicAgent, pk=context_agent_id)
     agent = get_agent(request)
     logger = False
@@ -3118,7 +3079,6 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
         exchange = get_object_or_404(Exchange, id=exchange_id)
 
         if request.method == "POST":
-            #import pdb; pdb.set_trace()
             exchange_form = ExchangeContextForm(instance=exchange, data=request.POST)
             if exchange_form.is_valid():
                 exchange = exchange_form.save()
@@ -3132,7 +3092,6 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
         slots = []
         total_t = 0
         total_rect = 0
-        #import pdb; pdb.set_trace()
         work_events = exchange.work_events()
         slots = exchange.slots_with_detail(context_agent)
 
@@ -3153,7 +3112,6 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
                 slot.is_income = False
 
         if agent:
-            #import pdb; pdb.set_trace()
             if request.user == exchange.created_by or context_agent in agent.managed_projects() or context_agent == agent:
                 logger = True
 
@@ -3196,7 +3154,6 @@ def exchange_logging_work(request, context_agent_id, exchange_type_id=None, exch
 
                 slot.add_ext_agent = ContextExternalAgent() #initial=None, prefix="AGN"+str(slot.id))#, context_agent=context_agent)
 
-            #import pdb; pdb.set_trace()
     else:
         raise ValidationError("System Error: No exchange or use case.")
 
@@ -3249,7 +3206,6 @@ def add_transfer_external_agent(request, commitment_id, context_agent_id):
             # TODO relate the context_agent
 
 
-        #import pdb; pdb.set_trace()
     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
         % ('work/agent', context_agent.id, 'exchange-logging-work', 0, exchange.id))
 
@@ -3259,7 +3215,6 @@ def add_transfer_external_agent(request, commitment_id, context_agent_id):
 
 @login_required
 def add_transfer(request, exchange_id, transfer_type_id):
-    #import pdb; pdb.set_trace()
     exchange = get_object_or_404(Exchange, pk=exchange_id)
     transfer_type = get_object_or_404(TransferType, pk=transfer_type_id)
     if request.method == "POST":
@@ -3293,7 +3248,6 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     gen_rt = data["ocp_resource_type"]
                     rt = get_rt_from_ocp_rt(gen_rt)
 
-                #import pdb; pdb.set_trace()
                 #if not transfer_type.can_create_resource:
                 res = data["resource"]
                 if transfer_type.is_currency:
@@ -3401,7 +3355,6 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     created_by = request.user
                     )
                 xfer.save()
-                #import pdb; pdb.set_trace()
                 e_is_to_distribute = is_to_distribute
                 if et == et_give:
                     e_is_to_distribute = False
@@ -3477,7 +3430,6 @@ def add_transfer_commitment_work(request, exchange_id, transfer_type_id):
         exchange_type = exchange.exchange_type
         context_agent = exchange.context_agent
         form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix="ACM" + str(transfer_type.id))
-        #import pdb; pdb.set_trace()
         if form.is_valid():
             data = form.cleaned_data
             qty = data["quantity"]
@@ -3600,9 +3552,7 @@ def change_transfer_commitments_work(request, transfer_id):
         transfer_type = transfer.transfer_type
         exchange = transfer.exchange
         context_agent = transfer.context_agent
-        #import pdb; pdb.set_trace()
         form = ContextTransferCommitmentForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "C") # "ACM" + str(transfer_type.id) )
-        #import pdb; pdb.set_trace()
         if form.is_valid():
             data = form.cleaned_data
             et_give = EventType.objects.get(name="Give")
@@ -3678,7 +3628,6 @@ def transfer_from_commitment(request, transfer_id):
     exchange = transfer.exchange
     context_agent = transfer.context_agent
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         form = ContextTransferForm(data=request.POST, transfer_type=transfer.transfer_type, context_agent=transfer.context_agent, posting=True, prefix=transfer.form_prefix())
         if form.is_valid():
             data = form.cleaned_data
@@ -3817,7 +3766,6 @@ def change_transfer_events(request, transfer_id, context_agent_id=None):
               #  context_agent = events[0].to_agent
               #else:
               #  context_agent = events[0].from_agent
-        #import pdb; pdb.set_trace()
         form = ContextTransferForm(data=request.POST, transfer_type=transfer_type, context_agent=context_agent, posting=True, prefix=transfer.form_prefix() + "E")
         if form.is_valid():
             data = form.cleaned_data
@@ -3969,7 +3917,6 @@ def delete_transfer_events(request, transfer_id):
 
 @login_required
 def add_work_for_exchange(request, exchange_id):
-    #import pdb; pdb.set_trace()
     exchange = get_object_or_404(Exchange, pk=exchange_id)
     context_agent = exchange.context_agent
     form = WorkEventContextAgentForm(context_agent=context_agent, data=request.POST)
@@ -3994,7 +3941,6 @@ def change_exchange_work_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)
     exchange = event.exchange
     context_agent=exchange.context_agent
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         form = WorkEventContextAgentForm(
             context_agent=context_agent,
@@ -4003,7 +3949,6 @@ def change_exchange_work_event(request, event_id):
             prefix=str(event.id))
         if form.is_valid():
             data = form.cleaned_data
-            #import pdb; pdb.set_trace()
             form.save()
 
     return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -4013,7 +3958,6 @@ def change_exchange_work_event(request, event_id):
 
 @login_required
 def delete_event(request, event_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         event = get_object_or_404(EconomicEvent, pk=event_id)
         agent = event.from_agent
@@ -4092,7 +4036,6 @@ def delete_event(request, event_id):
 
 
 def resource_role_context_agent_formset(prefix, data=None):
-    #import pdb; pdb.set_trace()
     RraFormSet = modelformset_factory(
         AgentResourceRole,
         form=ResourceRoleContextAgentForm,
@@ -4104,9 +4047,7 @@ def resource_role_context_agent_formset(prefix, data=None):
 
 
 def json_ocp_resource_type_resources_with_locations(request, ocp_artwork_type_id):
-    #import pdb; pdb.set_trace()
     rs = EconomicResource.objects.filter(resource_type__ocp_artwork_type__isnull=False, resource_type__ocp_artwork_type__id=ocp_artwork_type_id)
-    #import pdb; pdb.set_trace()
     resources = []
     for r in rs:
         loc = ""
@@ -4129,7 +4070,6 @@ def json_ocp_resource_type_resources_with_locations(request, ocp_artwork_type_id
 
 
 def project_all_resources(request, agent_id):
-    #import pdb; pdb.set_trace()
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     contexts = agent.related_all_contexts()
     contexts.append(agent)
@@ -4238,7 +4178,6 @@ def new_resource_type(request, agent_id, Rtype):
 
 
 def project_resource(request, agent_id, resource_id):
-    #import pdb; pdb.set_trace()
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
@@ -4275,7 +4214,6 @@ def project_resource(request, agent_id, resource_id):
                     order_form = StartDateAndNameForm(initial=init)
 
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         process_save = request.POST.get("process-save")
         if process_save:
             process_add_form = AddProcessFromResourceForm(data=request.POST)
@@ -4365,7 +4303,6 @@ def movenode(request, node_id): # still not used
 
 @login_required
 def my_tasks(request):
-    #import pdb; pdb.set_trace()
     my_work = []
     #my_skillz = []
     other_wip = []
@@ -4393,7 +4330,6 @@ def my_tasks(request):
     #    other_unassigned = Commitment.objects.unfinished().filter(
     #        from_agent=None,
     #        event_type__relationship="work")
-    #import pdb; pdb.set_trace()
     my_todos = Commitment.objects.todos().filter(from_agent=agent)
     init = {"from_agent": agent,}
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
@@ -4403,7 +4339,6 @@ def my_tasks(request):
     else:
         todo_form = WorkTodoForm(agent=agent, initial=init)
     #work_now = settings.USE_WORK_NOW
-    #import pdb; pdb.set_trace()
     return render(request, "work/my_tasks.html", {
         "agent": agent,
         "my_work": my_work,
@@ -4418,7 +4353,6 @@ def my_tasks(request):
 
 @login_required
 def take_new_tasks(request):
-    #import pdb; pdb.set_trace()
     #task_bugs change
     # this method needs some serious house cleaning...
     # to do later, see github issue cited below
@@ -4451,7 +4385,6 @@ def take_new_tasks(request):
     #    other_unassigned = Commitment.objects.unfinished().filter(
     #        from_agent=None,
     #        event_type__relationship="work")
-    #import pdb; pdb.set_trace()
     my_todos = Commitment.objects.todos().filter(from_agent=agent)
     init = {"from_agent": agent,}
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
@@ -4481,7 +4414,6 @@ def take_new_tasks(request):
 @login_required
 def add_todo(request):
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
         if patterns:
             pattern = patterns[0].pattern
@@ -4510,7 +4442,6 @@ def add_todo(request):
                             site_name = get_site_name()
                             user = todo.from_agent.user()
                             if user:
-                                #import pdb; pdb.set_trace()
                                 notification.send(
                                     [user.user,],
                                     "valnet_new_todo",
@@ -4529,7 +4460,6 @@ def add_todo(request):
 
 @login_required
 def project_work(request):
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
     #task_bugs change
     projects = agent.related_contexts() #managed_projects()
@@ -4549,7 +4479,6 @@ def project_work(request):
         todo_form = WorkTodoForm(pattern=pattern, agent=agent)
     else:
         todo_form = WorkTodoForm(agent=agent)
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         if date_form.is_valid():
             dates = date_form.cleaned_data
@@ -4573,7 +4502,6 @@ def project_work(request):
     for todo in todos:
         if todo.context_agent in projects:
             my_project_todos.append(todo)
-    #import pdb; pdb.set_trace()
     return render(request, "work/project_work.html", {
         "agent": agent,
         "context_agents": context_agents,
@@ -4592,7 +4520,6 @@ def project_work(request):
 
 @login_required
 def work_change_process_sked_ajax(request):
-    #import pdb; pdb.set_trace()
     proc_id = request.POST["proc_id"]
     process = Process.objects.get(id=proc_id)
     form = ScheduleProcessForm(prefix=proc_id,instance=process,data=request.POST)
@@ -4610,7 +4537,6 @@ def work_change_process_sked_ajax(request):
 @login_required
 def work_change_process(request, process_id):
     process = get_object_or_404(Process, id=process_id)
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         form = ProcessForm(
             instance=process,
@@ -4631,7 +4557,6 @@ def process_logging(request, process_id):
     process = get_object_or_404(Process, id=process_id)
     pattern = process.process_pattern
     context_agent = process.context_agent
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
     user = request.user
     agent_projects = agent.related_contexts()
@@ -4672,7 +4597,6 @@ def process_logging(request, process_id):
         if request.user.is_staff or request.user == process.created_by:
             logger = True
             super_logger = True
-        #import pdb; pdb.set_trace()
         for req in work_reqs:
             req.changeform = req.change_work_form()
             if agent == req.from_agent:
@@ -4698,7 +4622,6 @@ def process_logging(request, process_id):
         role_formset = resource_role_context_agent_formset(prefix="resource")
         produce_et = EventType.objects.get(name="Resource Production")
         change_et = EventType.objects.get(name="Change")
-        #import pdb; pdb.set_trace()
         if "out" in slots:
             if logger:
                 if change_et in event_types:
@@ -4711,7 +4634,6 @@ def process_logging(request, process_id):
                 else:
                     add_output_form = ProcessOutputForm(prefix='output')
                     add_output_form.fields["resource_type"].queryset = output_resource_types
-        #import pdb; pdb.set_trace()
         if "work" in slots:
             if agent:
                 work_init = {
@@ -4757,7 +4679,6 @@ def process_logging(request, process_id):
             process_expense_form = ProcessExpenseEventForm(prefix='processexpense', pattern=pattern)
 
     cited_ids = [c.resource.id for c in process.citations()]
-    #import pdb; pdb.set_trace()
     citation_requirements = process.citation_requirements()
     for cr in citation_requirements:
         cr.resources = []
@@ -4809,7 +4730,6 @@ def process_logging(request, process_id):
 def work_log_resource_for_commitment(request, commitment_id):
     ct = get_object_or_404(Commitment, pk=commitment_id)
     form = ct.resource_create_form(data=request.POST)
-    #import pdb; pdb.set_trace()
     if form.is_valid():
         resource_data = form.cleaned_data
         agent = get_agent(request)
@@ -4897,7 +4817,6 @@ def work_change_commitment(request, commitment_id):
         
         agent = get_agent(request)
         prefix = ct.form_prefix()
-        #import pdb; pdb.set_trace()
         if ct.event_type.relationship=="work":
             form = WorkCommitmentForm(instance=ct, data=request.POST, prefix=prefix)
         else:
@@ -4925,7 +4844,6 @@ def work_add_to_resource_for_commitment(request, commitment_id):
     ct = get_object_or_404(Commitment, pk=commitment_id)
     form = ct.select_resource_form(data=request.POST)
     if form.is_valid():
-        #import pdb; pdb.set_trace()
         data = form.cleaned_data
         agent = get_agent(request)
         resource = data["resource"]
@@ -4982,13 +4900,11 @@ def non_process_logging(request):
         queryset=EconomicEvent.objects.none(),
         initial = init,
         data=request.POST or None)
-    #import pdb; pdb.set_trace()
     ctx_qs = member.related_context_queryset()
     for form in time_formset.forms:
         form.fields["context_agent"].queryset = ctx_qs
         #form.fields["context_agent"].empty_label = "choose...";
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         keep_going = request.POST.get("keep-going")
         just_save = request.POST.get("save")
         if time_formset.is_valid():
@@ -5031,7 +4947,6 @@ def non_process_logging(request):
 
 @login_required
 def work_todo_done(request, todo_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         try:
             todo = Commitment.objects.get(id=todo_id)
@@ -5050,7 +4965,6 @@ def work_todo_done(request, todo_id):
 @login_required
 def work_add_todo(request):
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         agent = get_agent(request)
         patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
         if patterns:
@@ -5079,7 +4993,6 @@ def work_add_todo(request):
                             site_name = get_site_name()
                             user = todo.from_agent.user()
                             if user:
-                                #import pdb; pdb.set_trace()
                                 notification.send(
                                     [user.user,],
                                     "valnet_new_todo",
@@ -5093,7 +5006,6 @@ def work_add_todo(request):
 
 @login_required
 def work_todo_delete(request, todo_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         try:
             todo = Commitment.objects.get(id=todo_id)
@@ -5107,7 +5019,6 @@ def work_todo_delete(request, todo_id):
                         site_name = get_site_name()
                         user = todo.from_agent.user()
                         if user:
-                            #import pdb; pdb.set_trace()
                             notification.send(
                                 [user.user,],
                                 "valnet_deleted_todo",
@@ -5122,7 +5033,6 @@ def work_todo_delete(request, todo_id):
 
 @login_required
 def work_todo_change(request, todo_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         try:
             todo = Commitment.objects.get(id=todo_id)
@@ -5145,7 +5055,6 @@ def work_todo_change(request, todo_id):
 
 @login_required
 def work_todo_decline(request, todo_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         try:
             todo = Commitment.objects.get(id=todo_id)
@@ -5159,7 +5068,6 @@ def work_todo_decline(request, todo_id):
 
 @login_required
 def work_todo_time(request):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         todo_id = request.POST.get("todoId")
         try:
@@ -5187,7 +5095,6 @@ def work_todo_time(request):
 
 @login_required
 def work_todo_mine(request, todo_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         try:
             todo = Commitment.objects.get(id=todo_id)
@@ -5207,7 +5114,6 @@ def work_todo_mine(request, todo_id):
 
 @login_required
 def work_todo_description(request):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         todo_id = request.POST.get("todoId")
         try:
@@ -5233,7 +5139,6 @@ def work_commit_to_task(request, commitment_id):
         form = CommitmentForm(data=request.POST, prefix=prefix)
         next = None
         next = request.POST.get("next")
-        #import pdb; pdb.set_trace()
         if form.is_valid():
             data = form.cleaned_data
             #todo: next line did not work, don't want to take time to figure out why right now
@@ -5268,7 +5173,6 @@ def work_uncommit(request, commitment_id):
 def work_add_process_worker(request, process_id):
     process = get_object_or_404(Process, pk=process_id)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         form = WorkCommitmentForm(data=request.POST, prefix='work')
         if form.is_valid():
             input_data = form.cleaned_data
@@ -5289,7 +5193,6 @@ def work_add_process_worker(request, process_id):
             ct.created_by=request.user
             ct.save()
             if notification:
-                #import pdb; pdb.set_trace()
                 agent = get_agent(request)
                 users = ct.possible_work_users()
                 site_name = get_site_name()
@@ -5312,7 +5215,6 @@ def work_add_process_worker(request, process_id):
 
 @login_required
 def work_delete_event(request, event_id):
-    #import pdb; pdb.set_trace()
     event = get_object_or_404(EconomicEvent, pk=event_id)
     process = event.process
     if request.method == "POST":
@@ -5356,7 +5258,6 @@ def work_delete_event(request, event_id):
 def work_add_work_event(request, commitment_id):
     ct = get_object_or_404(Commitment, pk=commitment_id)
     form = ct.input_event_form_init(data=request.POST)
-    #import pdb; pdb.set_trace()
     if form.is_valid():
         event = form.save(commit=False)
         event.commitment = ct
@@ -5380,11 +5281,9 @@ def work_change_work_event(request, event_id):
     event = get_object_or_404(EconomicEvent, id=event_id)
     commitment = event.commitment
     process = event.process
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         form = event.work_event_change_form(data=request.POST)
         if form.is_valid():
-            #import pdb; pdb.set_trace()
             data = form.cleaned_data
             form.save()
     return HttpResponseRedirect('/%s/%s/'
@@ -5393,7 +5292,6 @@ def work_change_work_event(request, event_id):
 @login_required
 def work_add_process_input(request, process_id, slot):
     process = get_object_or_404(Process, pk=process_id)
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         pattern = process.process_pattern
         if slot == "c":
@@ -5430,7 +5328,6 @@ def work_add_process_input(request, process_id, slot):
         % ('work/process-logging', process.id))
         
 def work_json_directional_unit(request, resource_type_id, direction):
-    #import pdb; pdb.set_trace()
     ert = get_object_or_404(EconomicResourceType, pk=resource_type_id)
     defaults = {
         "unit": ert.directional_unit(direction).id,
@@ -5451,7 +5348,6 @@ def work_delete_process_commitment(request, commitment_id):
 def work_add_unplanned_work_event(request, process_id):
     process = get_object_or_404(Process, pk=process_id)
     pattern = process.process_pattern
-    #import pdb; pdb.set_trace()
     if pattern:
         form = UnplannedWorkEventForm(prefix="unplanned", data=request.POST, pattern=pattern)
         if form.is_valid():
@@ -5477,7 +5373,6 @@ def work_change_unplanned_work_event(request, event_id):
     process = event.process
     pattern = process.process_pattern
     if pattern:
-        #import pdb; pdb.set_trace()
         if request.method == "POST":
             form = UnplannedWorkEventForm(
                 pattern=pattern,
@@ -5495,7 +5390,6 @@ def work_change_unplanned_work_event(request, event_id):
 def work_add_unplanned_output(request, process_id):
     process = get_object_or_404(Process, pk=process_id)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         form = UnplannedOutputForm(data=request.POST, prefix='unplannedoutput')
         if form.is_valid():
             output_data = form.cleaned_data
@@ -5571,7 +5465,6 @@ def work_add_unplanned_output(request, process_id):
 def work_add_unplanned_input_event(request, process_id, slot):
     process = get_object_or_404(Process, pk=process_id)
     pattern = process.process_pattern
-    #import pdb; pdb.set_trace()
     if pattern:
         if slot == "c":
             prefix = "unplannedconsumption"
@@ -5624,7 +5517,6 @@ def work_add_unplanned_input_event(request, process_id, slot):
         % ('work/process-logging', process.id))
 
 def json_resource_type_resources(request, resource_type_id):
-    #import pdb; pdb.set_trace()
     json = serializers.serialize("json", EconomicResource.objects.filter(resource_type=resource_type_id), fields=('identifier'))
     return HttpResponse(json, content_type='application/json')
     
@@ -5733,7 +5625,6 @@ def work_log_stage_change_event(request, commitment_id, resource_id):
     to_be_changed_commitment = get_object_or_404(Commitment, pk=commitment_id)
     process = to_be_changed_commitment.process
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         resource = get_object_or_404(EconomicResource, pk=resource_id)
         quantity = resource.quantity 
         default_agent = process.default_agent()
@@ -5794,7 +5685,6 @@ def work_log_stage_change_event(request, commitment_id, resource_id):
 def work_add_process_citation(request, process_id):
     process = get_object_or_404(Process, pk=process_id)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         form = ProcessCitationForm(data=request.POST, prefix='citation')
         if form.is_valid():
             input_data = form.cleaned_data
@@ -5826,7 +5716,6 @@ def work_add_process_citation(request, process_id):
         
 @login_required
 def work_add_citation_event(request, commitment_id, resource_id):
-    #import pdb; pdb.set_trace()
     ct = get_object_or_404(Commitment, pk=commitment_id)
     resource = get_object_or_404(EconomicResource, pk=resource_id)
     prefix = resource.form_prefix()
@@ -5859,7 +5748,6 @@ def work_add_citation_event(request, commitment_id, resource_id):
 def work_add_unplanned_cite_event(request, process_id):
     process = get_object_or_404(Process, pk=process_id)
     pattern = process.process_pattern
-    #import pdb; pdb.set_trace()
     if pattern:
         form = UnplannedCiteEventForm(
             prefix='unplannedcite',
@@ -5900,7 +5788,6 @@ def work_add_unplanned_cite_event(request, process_id):
         
 @login_required
 def work_delete_citation_event(request, commitment_id, resource_id):
-    #import pdb; pdb.set_trace()
     ct = get_object_or_404(Commitment, pk=commitment_id)
     process = ct.process
     if request.method == "POST":
@@ -5912,7 +5799,6 @@ def work_delete_citation_event(request, commitment_id, resource_id):
         % ('work/process-logging', process.id))
             
 def json_resource_type_citation_unit(request, resource_type_id):
-    #import pdb; pdb.set_trace()
     ert = get_object_or_404(EconomicResourceType, pk=resource_type_id)
     direction = "use"
     defaults = {
@@ -5929,7 +5815,6 @@ def work_join_task(request, commitment_id):
         agent = get_agent(request)
 
         if notification:
-            #import pdb; pdb.set_trace()
             workers = ct.workers()
             users = []
             for worker in workers:
@@ -5959,7 +5844,6 @@ def work_join_task(request, commitment_id):
 
 @login_required
 def my_history(request): # tasks history
-    #import pdb; pdb.set_trace()
     #agent = get_object_or_404(EconomicAgent, pk=agent_id)
     user_agent = get_agent(request)
     agent = user_agent
@@ -5979,7 +5863,6 @@ def my_history(request): # tasks history
     paid_filter = "U"
     if request.method == "POST":
         if filter_form.is_valid():
-            #import pdb; pdb.set_trace()
             data = filter_form.cleaned_data
             et_ids = data["event_types"]
             start = data["start_date"]
@@ -6028,7 +5911,6 @@ def my_history(request): # tasks history
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
 
-    #import pdb; pdb.set_trace()
     return render(request, "work/my_history.html", {
         "agent": agent,
         "user_is_agent": user_is_agent,
@@ -6048,10 +5930,8 @@ def my_history(request): # tasks history
 def change_history_event(request, event_id):
     event = get_object_or_404(EconomicEvent, pk=event_id)
     page = request.GET.get("page")
-    #import pdb; pdb.set_trace()
     event_form = event.change_form(data=request.POST or None)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         page = request.POST.get("page")
         if event_form.is_valid():
             event = event_form.save(commit=False)
@@ -6167,7 +6047,6 @@ def work_timer(
 
 @login_required
 def save_timed_work_now(request, event_id):
-    #import pdb; pdb.set_trace()
     if request.method == "POST":
         event = get_object_or_404(EconomicEvent, id=event_id)
         form = WorkbookForm(instance=event, data=request.POST)
@@ -6188,7 +6067,6 @@ def save_timed_work_now(request, event_id):
 
 @login_required
 def work_process_finished(request, process_id):
-    #import pdb; pdb.set_trace()
     process = get_object_or_404(Process, pk=process_id)
     if not process.finished:
         process.finished = True
@@ -6208,7 +6086,6 @@ def work_process_finished(request, process_id):
 def order_list(request):
     agent = get_agent(request)
     help = get_help("order_list")
-    #import pdb; pdb.set_trace()
     projects = agent.managed_projects()
 
     return render(request, "work/order_list.html", {
@@ -6222,7 +6099,6 @@ def order_list(request):
 def order_plan(request, order_id):
     agent = get_agent(request)
     order = get_object_or_404(Order, pk=order_id)
-    #import pdb; pdb.set_trace()
     coordinated_projects = agent.managed_projects()
     if order.provider not in coordinated_projects:
         return render(request, 'valueaccounting/no_permission.html')
@@ -6242,12 +6118,10 @@ def order_plan(request, order_id):
             rts = ProcessPattern.objects.all_production_resource_types()
         if rts:
             add_order_item_form = AddOrderItemForm(resource_types=rts)
-        #import pdb; pdb.set_trace()
         visited = set()
         for order_item in order_items:
             order_item.processes = order_item.unique_processes_for_order_item(visited)
             if order_item.is_workflow_order_item():
-                #import pdb; pdb.set_trace()
                 init = {'quantity': order_item.quantity,}
                 order_item.resource_qty_form = ResourceQuantityForm(prefix=str(order_item.id), initial=init)
                 init = {'context_agent': order_item.context_agent,}
@@ -6272,7 +6146,6 @@ def change_project_order(request, order_id):
     coordinated_projects = agent.managed_projects()
     if order.provider not in coordinated_projects:
         return render(request, 'valueaccounting/no_permission.html')
-    #import pdb; pdb.set_trace()
     order_form = OrderChangeForm(instance=order, data=request.POST or None)
     if request.method == "POST":
         if order_form.is_valid():
@@ -6289,14 +6162,12 @@ def change_project_order(request, order_id):
 
 @login_required
 def plan_work(request, rand=0):
-    #import pdb; pdb.set_trace()
     agent = get_agent(request)
     slots = []
     resource_types = []
     selected_pattern = None
     selected_context_agent = None
     pattern_form = PatternProdSelectionForm()
-    #import pdb; pdb.set_trace()
     ca_form = ProjectSelectionFilteredForm(agent=agent)
     init = {"start_date": datetime.date.today(), "end_date": datetime.date.today()}
     process_form = DateAndNameForm(data=request.POST or None)
@@ -6309,7 +6180,6 @@ def plan_work(request, rand=0):
         edit_process = request.POST.get("edit-process")
         get_related = request.POST.get("get-related")
         if get_related:
-            #import pdb; pdb.set_trace()
             selected_pattern = ProcessPattern.objects.get(id=request.POST.get("pattern"))
             selected_context_agent = EconomicAgent.objects.get(id=request.POST.get("context_agent"))
             if selected_pattern:
@@ -6319,7 +6189,6 @@ def plan_work(request, rand=0):
             process_form = DateAndNameForm(initial=init)
             #demand_form = OrderSelectionFilteredForm(provider=selected_context_agent)
         else:
-            #import pdb; pdb.set_trace()
             rp = request.POST
             today = datetime.date.today()
             if process_form.is_valid():
@@ -6340,7 +6209,6 @@ def plan_work(request, rand=0):
             consumed_rts = []
             used_rts = []
             work_rts = []
-            #import pdb; pdb.set_trace()
             for key, value in dict(rp).iteritems():
                 if "selected-context-agent" in key:
                     context_agent_id = key.split("~")[1]
@@ -6353,7 +6221,6 @@ def plan_work(request, rand=0):
                 et = None
                 action = ""
                 try:
-                    #import pdb; pdb.set_trace()
                     et_name = key.split("~")[0]
                     et = EventType.objects.get(name=et_name)
                     action = et.relationship
@@ -6412,9 +6279,7 @@ def plan_work(request, rand=0):
             )
             process.save()
 
-            #import pdb; pdb.set_trace()
             for rt in produced_rts:
-                #import pdb; pdb.set_trace()
                 resource_types.append(rt)
                 et = selected_pattern.event_type_for_resource_type("out", rt)
                 if et:
@@ -6475,7 +6340,6 @@ def plan_work(request, rand=0):
                             user=request.user)
 
             for rt in work_rts:
-                #import pdb; pdb.set_trace()
                 agent = None
                 et = selected_pattern.event_type_for_resource_type("work", rt)
                 if et:
@@ -6490,7 +6354,6 @@ def plan_work(request, rand=0):
                         description="",
                         user=request.user)
                     if notification:
-                        #import pdb; pdb.set_trace()
                         if not work_commitment.from_agent:
                             agent = get_agent(request)
                             users = work_commitment.possible_work_users()
@@ -6533,7 +6396,6 @@ def plan_work(request, rand=0):
     })
 
 def project_history(request, agent_id):
-    #import pdb; pdb.set_trace()
     project = get_object_or_404(EconomicAgent, pk=agent_id)
     agent = get_agent(request)
     event_list = project.contribution_events()
@@ -6542,7 +6404,6 @@ def project_history(request, agent_id):
     agents = EconomicAgent.objects.filter(id__in=agent_ids)
     filter_form = ProjectContributionsFilterForm(agents=agents, data=request.POST or None)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         if filter_form.is_valid():
             data = filter_form.cleaned_data
             #event_type = data["event_type"]
@@ -6577,7 +6438,6 @@ def project_history(request, agent_id):
 
 @login_required
 def project_history_csv(request):
-    #import pdb; pdb.set_trace()
     event_ids = request.GET.get("event-ids")
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=project-history.csv'
@@ -6613,7 +6473,6 @@ def order_delete_confirmation_work(request, order_id):
     reqs = []
     work = []
     tools = []
-    #import pdb; pdb.set_trace()
     next = "order-list"
     if pcs:
         visited_resources = set()

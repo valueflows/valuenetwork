@@ -223,7 +223,6 @@ class JoinRequest(models.Model):
             "nick": self.requested_username,
             "email": self.email_address,
             }
-        #import pdb; pdb.set_trace()
         agent_type = self.agent_type()
         if agent_type:
             init["agent_type"] = agent_type

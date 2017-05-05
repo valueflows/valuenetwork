@@ -10,7 +10,6 @@ def init_electrum_fair():
 #obsolete
 """
 def create_address_for_agent(agent):
-    #import pdb; pdb.set_trace()
     init_electrum_fair()
     wallet = efn.wallet
     address = None

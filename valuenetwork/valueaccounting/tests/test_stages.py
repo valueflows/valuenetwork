@@ -180,14 +180,12 @@ class StageTest(TestCase):
         ]
         process_types, inheritance = sow.staged_process_type_sequence()
         expected_pts = [self.ideation, self.curation, self.finish]
-        #import pdb; pdb.set_trace()
         self.assertEqual(stages, expected_stages)
         self.assertEqual(process_types, expected_pts)
         
     def test_staged_schedule(self):
         start = datetime.date.today()
         order = self.sow.generate_staged_work_order("test order", start, self.user)
-        #import pdb; pdb.set_trace()
         processes = order.all_processes()
         self.assertEqual(len(processes), 3)
         first = processes[0]
@@ -209,7 +207,6 @@ class StageTest(TestCase):
         due_date = datetime.date.today()
         commitment = self.ct3_change.create_commitment(due_date, self.user)
         visited = []
-        #import pdb; pdb.set_trace()
         process = commitment.generate_producing_process(self.user, visited, explode=True)
         prev = process.previous_processes()[0]
         prev_prev = prev.previous_processes()[0]
@@ -227,7 +224,6 @@ class StageTest(TestCase):
         self.assertEqual(prev_next, process)
         prev_prev_next = prev_prev.next_processes()[0]
         self.assertEqual(prev_prev_next, prev)
-        #import pdb; pdb.set_trace()
         
     def test_staged_schedule_using_inherited_recipe(self):
         heir = EconomicResourceType(
@@ -237,7 +233,6 @@ class StageTest(TestCase):
         heir.save()
         start = datetime.date.today()
         order = heir.generate_staged_work_order("test order", start, self.user)
-        #import pdb; pdb.set_trace()
         #todo pr: all commitments use parent, not heir
         processes = order.all_processes()
         self.assertEqual(len(processes), 3)
@@ -259,7 +254,6 @@ class StageTest(TestCase):
         due_date = datetime.date.today()
         commitment = self.ct3_change.create_commitment(due_date, self.user)
         visited = []
-        #import pdb; pdb.set_trace()
         process = commitment.generate_producing_process(self.user, visited, explode=True)
         prev = process.previous_processes()[0]
         prev_prev = prev.previous_processes()[0]
@@ -277,7 +271,6 @@ class StageTest(TestCase):
         self.assertEqual(prev_next, process)
         prev_prev_next = prev_prev.next_processes()[0]
         self.assertEqual(prev_prev_next, prev)
-        #import pdb; pdb.set_trace()
           
     def test_resource_driven_order(self):
         repair_me = EconomicResource(
@@ -287,10 +280,8 @@ class StageTest(TestCase):
         )
         repair_me.save()
         start = datetime.date.today()
-        #import pdb; pdb.set_trace()
         order = self.equip.generate_staged_work_order_from_resource(repair_me, "Test repair", start, self.user)
         self.assertEqual(len(order.all_processes()), 3)
-        #import pdb; pdb.set_trace()
              
     def test_resource_driven_order_using_inherited_recipe(self):
         heir = EconomicResourceType(
@@ -305,10 +296,8 @@ class StageTest(TestCase):
         )
         repair_me.save()
         start = datetime.date.today()
-        #import pdb; pdb.set_trace()
         order = heir.generate_staged_work_order_from_resource(repair_me, "Test repair", start, self.user)
         self.assertEqual(len(order.all_processes()), 3)
-        #import pdb; pdb.set_trace()
         processes = order.all_processes()
         for process in processes:
             rt = process.output_resource_types()[0]
@@ -316,4 +305,3 @@ class StageTest(TestCase):
         cts = order.all_dependent_commitments()
         work = cts.filter(event_type__relationship="work")[0]
         self.assertEqual(work.resource_type, self.work)
-        #import pdb; pdb.set_trace()

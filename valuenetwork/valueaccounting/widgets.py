@@ -11,7 +11,6 @@ class DurationWidget(MultiWidget):
         super(DurationWidget, self).__init__(_widgets, attrs)
 
     def decompress(self, value):
-        #import pdb; pdb.set_trace()
         if value:
             duration = int(value)
             days = duration / 1440
@@ -24,7 +23,6 @@ class DurationWidget(MultiWidget):
         return u''.join(rendered_widgets)
 
     def value_from_datadict(self, data, files, name):
-        #import pdb; pdb.set_trace()
         dlist = [
             widget.value_from_datadict(data, files, name + '_%s' % i)
             for i, widget in enumerate(self.widgets)]
@@ -62,7 +60,6 @@ class DecimalDurationWidget(MultiWidget):
         super(DecimalDurationWidget, self).__init__(_widgets, attrs)
 
     def decompress(self, value):
-        #import pdb; pdb.set_trace()
         if value:
             duration = int(value)
             #days = duration / 24
@@ -77,7 +74,6 @@ class DecimalDurationWidget(MultiWidget):
         return u''.join(rendered_widgets)
 
     def value_from_datadict(self, data, files, name):
-        #import pdb; pdb.set_trace()
         dlist = [
             widget.value_from_datadict(data, files, name + '_%s' % i)
             for i, widget in enumerate(self.widgets)]
@@ -90,7 +86,6 @@ class DecimalDurationWidget(MultiWidget):
             mins = int(dlist[1])
         except ValueError:
             mins = 0
-        #import pdb; pdb.set_trace()
         try:
             duration = Decimal(hours)
             duration += Decimal(mins) / 60
@@ -100,7 +95,6 @@ class DecimalDurationWidget(MultiWidget):
             return duration
 
     def _has_changed(self, initial, data):
-        #import pdb; pdb.set_trace()
         if initial is None:
             initial = [u'' for x in range(0, 2)]
         else:

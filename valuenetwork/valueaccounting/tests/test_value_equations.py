@@ -71,7 +71,6 @@ from valuenetwork.valueaccounting.tests.objects_for_testing import Facets
 """
 
 def serialize_filter(orders):
-    #import pdb; pdb.set_trace()
     json = {"method": "Order",}
     json["orders"] = [order.id for order in orders]
     
@@ -116,7 +115,6 @@ class ValueEquationTest(TestCase):
         cts = self.order.order_items()
         self.order_item = cts[0]
         commitment = self.order_item
-        #import pdb; pdb.set_trace()
         visited = []
         process = commitment.generate_producing_process(self.user, visited, explode=True)
         
@@ -276,7 +274,6 @@ class ValueEquationTest(TestCase):
     def test_setup(self):
         parent = self.recipe.parent
         parent_pt = parent.main_producing_process_type()
-        #import pdb; pdb.set_trace()
         cts = self.order.order_items()
         commitment = cts[0]
         process = commitment.process
@@ -288,7 +285,6 @@ class ValueEquationTest(TestCase):
         used_commitment = process.used_input_requirements()[0]
         self.assertEqual(used_commitment.resource_type, self.recipe.usable.resource_type)
         consumable = self.recipe.consumable
-        #import pdb; pdb.set_trace()
         
     def test_rollup(self):
         parent_resource = self.parent_resource
@@ -296,17 +292,13 @@ class ValueEquationTest(TestCase):
         visited = set()
         path = []
         depth = 0
-        #import pdb; pdb.set_trace()
         value_per_unit = parent_resource.roll_up_value(path, depth, visited, ve)
         self.assertEqual(value_per_unit, Decimal("145.0"))
 
-        #import pdb; pdb.set_trace()
         
     def test_contribution_shares(self):
         ve = self.recipe.value_equation
-        #import pdb; pdb.set_trace()
         shares = self.order_item.compute_income_fractions_for_process(ve)
-        #import pdb; pdb.set_trace()
         work_contribution = [share for share in shares if share.event_type.name=="Time Contribution"][0]
         self.assertEqual(work_contribution.share, Decimal("25.0"))
         resource_production = [share for share in shares if share.event_type.name=="Resource Production"][0]
@@ -350,7 +342,6 @@ class ValueEquationTest(TestCase):
             elif at.to_agent.name == "vacontributor2":
                 self.assertEqual(at.quantity, Decimal("20.0"))
                 
-        #import pdb; pdb.set_trace()
         
     def test_faircoin_distribution(self):
         ve = self.recipe.value_equation
@@ -409,7 +400,6 @@ class ValueEquationTest(TestCase):
             context_agent=context_agent,
             created_by=self.user,
         )
-        #import pdb; pdb.set_trace()
         
         distribution = ve.run_value_equation_and_save(
             #events_to_distribute=etd, <-CashReceipts, optional
@@ -430,4 +420,3 @@ class ValueEquationTest(TestCase):
             elif at.to_agent.name == "vacontributor2":
                 self.assertEqual(at.quantity, Decimal("20.0"))
 
-        #import pdb; pdb.set_trace()

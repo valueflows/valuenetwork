@@ -255,5 +255,4 @@ class ExchangeService(object):
                 event.save()
 
                 tx_included.append(str(tx[0]))
-        #import pdb; pdb.set_trace()
         return tx_included

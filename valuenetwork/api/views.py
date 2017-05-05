@@ -56,7 +56,6 @@ class UserCreationViewSet(viewsets.ModelViewSet):
         """
         On creation, replace the raw password with a hashed version.
         """
-        #import pdb; pdb.set_trace()
         if created:
             obj.set_password(obj.password)
             obj.save()
@@ -160,7 +159,6 @@ class ContributionViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = EconomicEvent.objects.filter(is_contribution=True)
-        #import pdb; pdb.set_trace()
         context_slug = self.request.QUERY_PARAMS.get('context', None)
         if context_slug is not None:
             queryset = queryset.filter(context_agent__slug=context_slug)
@@ -263,7 +261,6 @@ def agent_type_lod(request, agent_type_name):
     ats = AgentType.objects.all()
     agent_type = None
     
-    #import pdb; pdb.set_trace()
     for at in ats:
         if camelcase(at.name) == agent_type_name:
             agent_type = at
@@ -291,7 +288,6 @@ def agent_type_lod(request, agent_type_name):
     #}, context_instance=RequestContext(request))    
 
 def agent_relationship_type_lod(request, agent_assoc_type_name):
-    #import pdb; pdb.set_trace()
     aats = AgentAssociationType.objects.all()
     agent_assoc_type = None
     for aat in aats:
@@ -432,7 +428,6 @@ def agent_lod(request, agent_id):
     
 #following method supplied by Niklas at rdflib-jsonld support to get the desired output for nested rdf inputs for rdflib
 def simplyframe(data):
-    #import pdb; pdb.set_trace()
     items, refs = {}, {}
     for item in data['@graph']:
         itemid = item.get('@id')
@@ -443,7 +438,6 @@ def simplyframe(data):
                 if isinstance(v, dict):
                     refid = v.get('@id')
                     if refid and refid.startswith('_:'):
-                        #import pdb; pdb.set_trace()
                         refs.setdefault(refid, (v, []))[1].append(item)
     for ref, subjects in refs.values():
         if len(subjects) == 1:
@@ -460,7 +454,6 @@ def agent_jsonld(request):
     path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
        
     agent_types = AgentType.objects.all()
-    #import pdb; pdb.set_trace()
     for at in agent_types:
         #if at.name != "Person" and at.name != "Organization" and at.name != "Group" and at.name != "Individual":
         if at.name != "Person" and at.name != "Group" and at.name != "Individual":
@@ -475,7 +468,6 @@ def agent_jsonld(request):
                 store.add((ref, RDFS.subClassOf, vf_ns.Group))
                 
     aa_types = AgentAssociationType.objects.all()
-    #import pdb; pdb.set_trace()
     for aat in aa_types:
         property_name = camelcase_lower(aat.label)
         inverse_property_name = camelcase_lower(aat.inverse_label)
@@ -492,7 +484,6 @@ def agent_jsonld(request):
         store.add((ref, OWL.inverseOf, inv_ref))
         store.add((inv_ref, OWL.inverseOf, ref))
 
-    #import pdb; pdb.set_trace()
     associations = AgentAssociation.objects.filter(state="active")
     agents = [assn.is_associate for assn in associations]
     agents.extend([assn.has_associate for assn in associations])
@@ -533,7 +524,6 @@ def agent_jsonld(request):
         store.add((inv_ref, vf_ns["relationship"], inv_ref_relationship))
           
     ser = store.serialize(format='json-ld', context=context, indent=4)
-    #import pdb; pdb.set_trace()
     #import json
     #data = json.loads(ser)
     #simplyframe(data)
@@ -543,7 +533,6 @@ def agent_jsonld(request):
 def agent_jsonld_query(request):
 
 
-    #import pdb; pdb.set_trace()
     g = Graph()
     url = "http://nrp.webfactional.com/api/agent-jsonld/"
     remote_jsonld = urlopen(url).read()
@@ -555,7 +544,6 @@ def agent_jsonld_query(request):
     local_expanded_json = g.serialize(format="json-ld", indent=4)
     local_expanded_dict = simplejson.loads(local_expanded_json)
     
-    #import pdb; pdb.set_trace()
     
     result = ""  
     agents = [x for x in graph if x['@id'].find('agent-lod') > -1]

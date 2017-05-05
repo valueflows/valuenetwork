@@ -12629,7 +12629,6 @@ def agent_jsonld(request):
     from rdflib.serializer import Serializer
     from rdflib import Namespace, URIRef
 
-    #mport pdb; pdb.set_trace()
     path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
 
     agent_types = AgentType.objects.all()

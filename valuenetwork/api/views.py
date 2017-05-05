@@ -450,7 +450,6 @@ def agent_jsonld(request):
     #test = '{ "@id": "http://nrp.webfactional.com/accounting/agent-lod/1", "@type": "Person", "vf:label": { "@language": "en", "@value": "Bob Haugen" } }'
     #return HttpResponse(test, content_type='application/json')
 
-    #mport pdb; pdb.set_trace()
     path, instance_abbrv, context, store, vf_ns = get_lod_setup_items()
        
     agent_types = AgentType.objects.all()

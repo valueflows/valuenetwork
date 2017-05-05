@@ -4374,7 +4374,7 @@ class EconomicResource(models.Model):
                 balance = balance[0]
                 if balance:
                     bal = Decimal(balance) / FAIRCOIN_DIVISOR
-            except InvalidOperation:
+            except:
                 bal = "Not accessible now"
         return bal
 
@@ -4399,7 +4399,7 @@ class EconomicResource(models.Model):
                 bal = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
                 if newadd:
                     bal += newadd
-            except InvalidOperation:
+            except:
                 bal = "Not accessible now"
         return bal
 

@@ -203,6 +203,8 @@ class ExchangeService(object):
     def include_blockchain_tx_as_event(self, agent, resource):
         faircoin_address = str(resource.digital_currency_address)
         tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
+        if not tx_in_blockchain: # Something wrong in daemon or network.
+            return []
 
         event_list = resource.events.all()
         tx_in_ocp = []

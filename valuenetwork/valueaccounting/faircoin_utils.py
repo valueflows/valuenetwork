@@ -4,9 +4,13 @@ def init_electrum_fair():
     try:
         assert(efn.daemon_is_up())
     except:
-        msg = "Can not init Electrum Network. Exiting."
+        msg = "Cannot connect with daemon. Exiting."
         assert False, msg
-
+    try:
+        assert(efn.is_connected())
+    except:
+        msg = "Cannot connect with electrum-server. Exiting."
+        assert False, msg
 #obsolete
 """
 def create_address_for_agent(agent):

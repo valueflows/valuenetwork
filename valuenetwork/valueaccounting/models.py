@@ -15,6 +15,7 @@ from django.template.defaultfilters import slugify
 import json as simplejson
 from django.db.models.functions import Lower
 
+from valuenetwork.valueaccounting import faircoin_utils
 from easy_thumbnails.fields import ThumbnailerImageField
 
 """Models based on REA
@@ -4360,8 +4361,7 @@ class EconomicResource(models.Model):
         history = []
         address = self.digital_currency_address
         if address:
-            from valuenetwork.valueaccounting.faircoin_utils import get_address_history
-            history = get_address_history(address)
+            history = faircoin_utils.get_address_history(address)
         return history
 
     def digital_currency_balance(self):
@@ -4369,8 +4369,7 @@ class EconomicResource(models.Model):
         address = self.digital_currency_address
         if address:
             try:
-                from valuenetwork.valueaccounting.faircoin_utils import get_address_balance
-                balance = get_address_balance(address)
+                balance = faircoin_utils.get_address_balance(address)
                 balance = balance[0]
                 if balance:
                     bal = Decimal(balance) / FAIRCOIN_DIVISOR
@@ -4384,8 +4383,7 @@ class EconomicResource(models.Model):
         address = self.digital_currency_address
         if address:
             try:
-                from valuenetwork.valueaccounting.faircoin_utils import get_address_balance
-                balance = get_address_balance(address)
+                balance = faircoin_utils.get_address_balance(address)
                 balance1 = balance[0]
                 unconfirmed = balance[1]+balance[2] # the response is triple with unmature and unconfirmed (negative)
                 newtxs = self.events.filter(digital_currency_tx_state="new")
@@ -4409,11 +4407,7 @@ class EconomicResource(models.Model):
           if self.is_address_requested():
             return True
           else:
-            try:
-                from valuenetwork.valueaccounting.faircoin_utils import is_mine
-                return is_mine(address)
-            except:
-                pass
+              return faircoin_utils.is_mine(address)
 
     def is_address_requested(self):
         address = self.digital_currency_address
@@ -4426,16 +4420,15 @@ class EconomicResource(models.Model):
         limit = 0
         address = self.digital_currency_address
         if address:
-            from valuenetwork.valueaccounting.faircoin_utils import network_fee
-            balance = self.digital_currency_balance() #get_address_balance(address)
+            balance = self.digital_currency_balance()
             newbalance = self.digital_currency_balance_unconfirmed()
             try:
                 if balance:
                     if newbalance < balance:
                         bal = newbalance
                     else:
-                        bal = balance #bal = Decimal(balance[0]) / FAIRCOIN_DIVISOR
-                    fee = Decimal(network_fee()) / FAIRCOIN_DIVISOR
+                        bal = balance
+                    fee = Decimal(faircoin_utils.network_fee()) / FAIRCOIN_DIVISOR
                     limit = bal - fee
             except:
                 limit = Decimal("0.0")
@@ -9884,11 +9877,9 @@ class ValueEquation(models.Model):
             #todo faircoin distribution
             to_agent = dist_event.to_agent
             if money_resource.is_digital_currency_resource():
-                if testing:
-                    #todo faircoin distribution: shd put this into models
-                    # no need to import from faircoin_utils
-                    from valuenetwork.valueaccounting.faircoin_utils import send_fake_faircoins
-                    #faircoins are the only digital currency we handle now
+                #if testing:
+                    # TODO faircoin distribution: shd put this into models
+                    # faircoins are the only digital currency we handle now
                 va = to_agent.faircoin_resource()
                 if va:
                     if va.resource_type != money_resource.resource_type:
@@ -10025,7 +10016,7 @@ class ValueEquation(models.Model):
                 quantity = dist_event.quantity
                 state = "new"
                 if testing:
-                    tx_hash, broadcasted = send_fake_faircoins(address_origin, address_end, quantity)
+                    tx_hash, broadcasted = faircoin_utils.send_fake_faircoins(address_origin, address_end, quantity)
                     state = "pending"
                     if broadcasted:
                         state = "broadcast"
@@ -10571,8 +10562,7 @@ class EconomicEvent(models.Model):
         if state == "external" or state == "pending" or state == "broadcast":
             tx = self.digital_currency_tx_hash
             if tx:
-                from valuenetwork.valueaccounting.faircoin_utils import get_confirmations
-                confirmations, timestamp = get_confirmations(tx)
+                confirmations, timestamp = faircoin_utils.get_confirmations(tx)
                 if confirmations > 0:
                     if state != "broadcast":
                         new_state = "broadcast"

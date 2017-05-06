@@ -30,7 +30,7 @@ from valuenetwork.valueaccounting.service import ExchangeService
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
-import valuenetwork.valueaccounting.faircoin_utils as faircoin_utils
+from valuenetwork.valueaccounting import faircoin_utils
 from valuenetwork.valueaccounting.service import ExchangeService
 
 from fobi.models import FormEntry
@@ -310,7 +310,6 @@ def manage_faircoin_account(request, resource_id):
     if agent:
         if agent.owns(resource) or resource.owner() in agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
-            #from valuenetwork.valueaccounting.faircoin_utils import network_fee
             limit = resource.spending_limit()
 
         candidate_membership = agent.candidate_membership()
@@ -347,11 +346,10 @@ def manage_faircoin_account(request, resource_id):
     })
 
 def validate_faircoin_address_for_worker(request):
-    from valuenetwork.valueaccounting.faircoin_utils import is_valid
     data = request.GET
     address = data["to_address"].strip()
-    answer = is_valid(address)
-    if not answer:
+    answer = faircoin_utils.is_valid(address)
+    if answer == False:
         answer = "Invalid FairCoin address"
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
@@ -402,7 +400,8 @@ def transfer_faircoins(request, resource_id):
             quantity = data["quantity"]
             notes = data["description"]
             address_origin = resource.digital_currency_address
-            if address_origin and address_end:
+            network_fee = faircoin_utils.network_fee()
+            if address_origin and address_end and network_fee:
                 from_agent = resource.owner()
                 to_resources = EconomicResource.objects.filter(digital_currency_address=address_end)
                 to_agent = None
@@ -474,8 +473,7 @@ def transfer_faircoins(request, resource_id):
                     )
                 event.save()
                 if to_agent:
-                    from valuenetwork.valueaccounting.faircoin_utils import network_fee
-                    quantity = quantity - Decimal(float(network_fee()) / 1.e6)
+                    quantity = quantity - Decimal(float(network_fee) / 1.e6)
                     et_receive = EventType.objects.get(name="Receive")
                     event = EconomicEvent(
                         event_type = et_receive,
@@ -491,7 +489,6 @@ def transfer_faircoins(request, resource_id):
                         description=notes,
                         )
                     event.save()
-                    #print "receive event:", event
 
                 return HttpResponseRedirect('/%s/%s/'
                     % ('work/faircoin-history', resource.id))
@@ -499,124 +496,6 @@ def transfer_faircoins(request, resource_id):
         return HttpResponseRedirect('/%s/%s/'
                 % ('work/manage-faircoin-account', resource.id))
 
-"""
-@login_required
-def transfer_faircoins_old(request, resource_id):
-    if request.method == "POST":
-        resource = get_object_or_404(EconomicResource, id=resource_id)
-        agent = get_agent(request)
-        send_coins_form = SendFairCoinsForm(data=request.POST)
-        if send_coins_form.is_valid():
-            data = send_coins_form.cleaned_data
-            address_end = data["to_address"]
-            quantity = data["quantity"]
-            address_origin = resource.digital_currency_address
-            if address_origin and address_end:
-                from valuenetwork.valueaccounting.faircoin_utils import send_faircoins, get_confirmations, network_fee
-                tx, broadcasted = send_faircoins(address_origin, address_end, quantity)
-                if tx:
-                    tx_hash = tx.hash()
-                    from_agent = resource.owner()
-                    to_resources = EconomicResource.objects.filter(digital_currency_address=address_end)
-                    to_agent = None
-                    if to_resources:
-                        to_resource = to_resources[0] #shd be only one
-                        to_agent = to_resource.owner()
-                    et_give = EventType.objects.get(name="Give")
-                    if to_agent:
-                        tt = ExchangeService.faircoin_internal_transfer_type()
-                        xt = tt.exchange_type
-                        date = datetime.date.today()
-                        exchange = Exchange(
-                            exchange_type=xt,
-                            use_case=xt.use_case,
-                            name="Transfer Faircoins",
-                            start_date=date,
-                            )
-                        exchange.save()
-                        transfer = Transfer(
-                            transfer_type=tt,
-                            exchange=exchange,
-                            transfer_date=date,
-                            name="Transfer Faircoins",
-                            )
-                        transfer.save()
-                    else:
-                        tt = ExchangeService.faircoin_outgoing_transfer_type()
-                        xt = tt.exchange_type
-                        date = datetime.date.today()
-                        exchange = Exchange(
-                            exchange_type=xt,
-                            use_case=xt.use_case,
-                            name="Send Faircoins",
-                            start_date=date,
-                            )
-                        exchange.save()
-                        transfer = Transfer(
-                            transfer_type=tt,
-                            exchange=exchange,
-                            transfer_date=date,
-                            name="Send Faircoins",
-                            )
-                        transfer.save()
-
-                    # network_fee is subtracted from quantity
-                    # so quantity is correct for the giving event
-                    # but receiving event will get quantity - network_fee
-                    state = "pending"
-                    if not broadcasted:
-                        confirmations = get_confirmations(tx_hash)
-                        if confirmations[0]:
-                            print "got broadcasted in view"
-                            broadcasted = True
-                    if broadcasted:
-                        state = "broadcast"
-                    event = EconomicEvent(
-                        event_type = et_give,
-                        event_date = date,
-                        from_agent=from_agent,
-                        to_agent=to_agent,
-                        resource_type=resource.resource_type,
-                        resource=resource,
-                        digital_currency_tx_hash = tx_hash,
-                        digital_currency_tx_state = state,
-                        quantity = quantity,
-                        transfer=transfer,
-                        event_reference=address_end,
-                        )
-                    event.save()
-                    if to_agent:
-                        outputs = tx.get_outputs()
-                        value = 0
-                        for address, val in outputs:
-                            if address == address_end:
-                                value = val
-                        if value:
-                            quantity = Decimal(value / 1.e6)
-                        else:
-                            quantity = quantity - Decimal(float(network_fee) / 1.e6)
-                        et_receive = EventType.objects.get(name="Receive")
-                        event = EconomicEvent(
-                            event_type = et_receive,
-                            event_date = date,
-                            from_agent=from_agent,
-                            to_agent=to_agent,
-                            resource_type=to_resource.resource_type,
-                            resource=to_resource,
-                            digital_currency_tx_hash = tx_hash,
-                            digital_currency_tx_state = state,
-                            quantity = quantity,
-                            transfer=transfer,
-                            )
-                        event.save()
-                        print "receive event:", event
-
-                    return HttpResponseRedirect('/%s/%s/'
-                        % ('work/faircoin-history', resource.id))
-
-            return HttpResponseRedirect('/%s/%s/'
-                    % ('work/manage-faircoin-account', resource.id))
-"""
 
 @login_required
 def faircoin_history(request, resource_id):
@@ -679,7 +558,6 @@ def share_payment(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     agent_account = agent.faircoin_resource()
     balance = agent_account.digital_currency_balance()
-    #balance = 2
     candidate_membership = agent.candidate_membership()
     share = EconomicResourceType.objects.membership_share()
     share_price = share.price_per_unit
@@ -748,8 +626,7 @@ def share_payment(request, agent_id):
             )
         event.save()
 
-        from valuenetwork.valueaccounting.faircoin_utils import network_fee
-        quantity = quantity - Decimal(float(network_fee()) / 1.e6)
+        quantity = quantity - Decimal(float(faircoin_utils.network_fee()) / 1.e6)
 
         event = EconomicEvent(
             event_type = et_receive,
@@ -4644,7 +4521,6 @@ def project_resource(request, agent_id, resource_id):
             if is_owner:
                 if resource.address_is_activated():
                     send_coins_form = SendFairCoinsForm()
-                    from valuenetwork.valueaccounting.faircoin_utils import network_fee
                     limit = resource.spending_limit()
         return render(request, "work/faircoin_account.html", {
             "resource": resource,

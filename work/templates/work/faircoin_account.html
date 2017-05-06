@@ -171,10 +171,10 @@
                     {% if resource.digital_currency_address %}
                         <tr>
                             <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
-                            <td>{% if resource.is_wallet_address %}
-                                {{ resource.digital_currency_address }}
-                                {% else %}
+                            <td>{% if resource.is_wallet_address == False %}
                                 <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
+                                {% else %}
+                                {{ resource.digital_currency_address }}
                                 {% endif %}
                             </td>
                         </tr>
@@ -268,7 +268,7 @@
                         {% if payment_due %}
                           {{ send_coins_form|as_bootstrap }}
                           <em>{% trans "(available when full member)" %}</em>
-                        {% elif not resource.is_wallet_address %}
+                        {% elif resource.is_wallet_address == False %}
                           <em>{% trans "(available when the address pertains to this wallet)" %}</em>
                         {% elif resource.is_address_requested %}
                           <em>{% trans "(please wait about a minute to have a new fair-address and refresh the page)" %}</em>

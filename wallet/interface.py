@@ -1,12 +1,11 @@
+from six import with_metaclass
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-class AbstractGateway(object):
+class AbstractGateway(with_metaclass(ABCMeta, object)):
     """
     This properties and methods must be rewritten:
     gateway_name, currency, get_balance, get_history, send_funds
     """
-
-    __metaclass__ = ABCMeta
 
     @classmethod
     def get(cls):

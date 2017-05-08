@@ -1,15 +1,15 @@
 from wallet.interface import AbstractGateway
-from wallet import fairpay_utils as fu
+from wallet import electrum_faircoin_utils as efu
 
-class FairpayGateway(AbstractGateway):
+class ElectrumFaircoinGateway(AbstractGateway):
 
     @property
     def gateway_name(self):
-        return 'fairpay'
+        return 'electrum_faircoin'
 
     @property
     def currency(self):
-        return 'euro'
+        return 'faircoin'
 
     def get_balance(self, account):
         return "get_balance from " + str(account)
@@ -17,5 +17,5 @@ class FairpayGateway(AbstractGateway):
     def get_history(self, account):
         return "get_history from " + str(account)
 
-    def send_funds(self):
-        return "Error: this gateway is read-only"
+    def send_funds(self, account):
+        return "send_funds from " + str(account)

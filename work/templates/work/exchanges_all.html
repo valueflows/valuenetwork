@@ -649,7 +649,7 @@ span.fancytree-selected span.fancytree-title {
                 <form class="validateMe" id="skillForm" enctype="multipart/form-data" action="" method="POST" >
                   {% csrf_token %}
                   {% for fil in Stype_form %}
-                    <div class="modal-field" {% if fil.name = 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
+                    <div class="modal-field" {% if fil.name == 'verb' %} style="float:left; margin-right:15px;" {% endif %} >
                       {% if not fil.name == 'edid' %}
                         <label>{{ fil.label }}:</label>
                       {% endif %}

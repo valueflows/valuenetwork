@@ -712,7 +712,7 @@ span.fancytree-selected span.fancytree-title {
             {% if user.is_staff or request.user.agent.agent in context_agent.managers or request.user.agent.agent in x.related_agents %}
                     <li>
                         <a href="{% url "exchange_logging_work" context_agent_id=context_agent.id exchange_type_id=0 exchange_id=x.id %}"><b>{{ x }}</b></a>  {% trans "created by" %} {{ x.created_by }}
-                        {% if user = x.created_by or user.is_superuser%}
+                        {% if user == x.created_by or user.is_superuser%}
                             <a class="btn btn-info btn-mini" href="{% url "exchange_logging_work" context_agent_id=context_agent.id exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a>
                             {% if x.is_deletable %}
                                 <form

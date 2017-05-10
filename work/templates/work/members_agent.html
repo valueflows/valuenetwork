@@ -602,7 +602,7 @@ legend {
       <h3>
         {% trans "Join this project:" %}
       </h3>
-      {% if agent.project.joining_style = "moderated" %}
+      {% if agent.project.joining_style == "moderated" %}
         {% if user_agent.req %}
             {% if user_agent.req.state == 'declined' %}
               <p>{% trans "Sorry, you've tried to join this project but your request was <b>declined</b> for any reason. See the thread at" %}:

@@ -55,7 +55,7 @@
       <div>
 
         <legend>
-            {% trans "Value Equations" %}  
+            {% trans "Value Equations" %}
             {% if agent %}
                 <a class="btn btn-info" href="{% url "edit_value_equation" %}">{% trans "Create Value Equation" %}</a>
             {% endif %}
@@ -70,17 +70,17 @@
 
                 <div class="ve"><a href="{{ ve.get_absolute_url }}">{{ ve.name }}</a>
                     <span class="live">({% if ve.live %}{% trans "Live" %}{% else %}{% trans "Test Only" %}{% endif%})</span>
-                    {% if user = ve.created_by or user.is_superuser %}
+                    {% if user == ve.created_by or user.is_superuser %}
                         <form
-                            style="display: inline;"  
-                            action="{% url "edit_value_equation" value_equation_id=ve.id %}" 
+                            style="display: inline;"
+                            action="{% url "edit_value_equation" value_equation_id=ve.id %}"
                             method="GET" >
                             <button style="display: inline;"  class="btn btn-primary" title="Change" >{% trans "Change" %}</button>
                         </form>
                         {% if ve.is_deletable %}
                             <form
-                                style="display: inline;"  
-                                action="{% url "delete_value_equation" value_equation_id=ve.id %}" 
+                                style="display: inline;"
+                                action="{% url "delete_value_equation" value_equation_id=ve.id %}"
                                 method="POST" >
                                 {% csrf_token %}
                                 <button style="display: inline;"  class="btn btn-warning" title="Delete" >{% trans "Delete" %}</button>
@@ -88,20 +88,20 @@
                         {% endif %}
 {% comment %}
                         <form
-                            style="display: inline;"  
-                            action="{% url "value_equation_sandbox" value_equation_id=ve.id %}" 
+                            style="display: inline;"
+                            action="{% url "value_equation_sandbox" value_equation_id=ve.id %}"
                             method="GET" >
                             <button style="display: inline;"  class="btn btn-info" title="Change" >{% trans "Experiment in the Sandbox" %}</button>
                         </form>
 {% endcomment %}
                     {% endif %}
-                    <a class="link" href="{% url "value_equation_sandbox" value_equation_id=ve.id %}">{% trans "Value Equation Sandbox" %}</a> 
+                    <a class="link" href="{% url "value_equation_sandbox" value_equation_id=ve.id %}">{% trans "Value Equation Sandbox" %}</a>
                     {% if agent %}
                       {% if ve.live and user.is_staff %}
                         <a class="link" href="{% url "create_distribution_using_value_equation" agent_id=ve.context_agent.id value_equation_id=ve.id %}">{% trans "Distribute Income" %}</a>
                       {% endif %}
                     {% endif %}
-                </div> 
+                </div>
                 <div class="using">For: <b>
                     {% if ve.context_agent %}
                         {{ ve.context_agent.nick }}
@@ -134,15 +134,14 @@
         $('#distribution').addClass('active');
 
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
-        
+
     }); // end document.ready
-    
+
     </script>
 {% endblock %}
-

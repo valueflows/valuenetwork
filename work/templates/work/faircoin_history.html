@@ -49,7 +49,7 @@
         <p>
             {% trans "Current Balance" %}:
               {% if not resource.digital_currency_balance == "Not accessible now" %}
-                {% if not resource.digital_currency_balance = resource.digital_currency_balance_unconfirmed %}
+                {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
                     {{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }})
                 {% else %}
                     {{ resource.digital_currency_balance }}

@@ -226,7 +226,7 @@ img {
           <ul class="root">
             {% for rel in agent.resource_relationships %}
               {% ifchanged rel.role %}
-                {% if not rel = agent.resource_relationships|first %}</ul></li>{% endif %}
+                {% if not rel == agent.resource_relationships|first %}</ul></li>{% endif %}
                 <li><h4>{{ rel.role.name }} </h4><ul>
               {% endifchanged %}
               <li>

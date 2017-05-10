@@ -207,7 +207,7 @@
 
         {% for node in projects %}
 
-            {% if not node.name = 'Freedom Coop' and not agent in node.managers and agent in node.members %}
+            {% if not node.name == 'Freedom Coop' and not agent in node.managers and agent in node.members %}
             <li><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b>
               &nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>
               {% if node.description %}
@@ -246,7 +246,7 @@
 
           {% for proj in join_projects %}
 
-            {% if not proj.visibility = "private" %}
+            {% if not proj.visibility == "private" %}
               {% if not request.user.agent.agent in proj.agent.managers and not request.user.agent.agent in proj.agent.members %}
                   <li><b><a href="../agent/{{ proj.agent.id }}">{{ proj.agent.name }}</a></b> <!--({{ proj.visibility }} - {{ proj.joining_style }})-->
                     {% if proj.joining_style = "moderated" %}

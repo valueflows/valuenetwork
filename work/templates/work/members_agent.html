@@ -615,7 +615,7 @@ legend {
           <p> {% if agent.project.fobi_slug %}<b><a href="{% url 'project_joinform' agent_id=agent.id %}" class="btn btn-primary">{% trans "Form to join" %} "{{ agent.name }}"</a></b>{% else %} <em class="alert">{% trans "Sorry, the form is not ready, try tomorrow" %}</em> {% endif %}
           </p>
         {% endif %}
-      {% elif agent.project.joining_style = "autojoin" %}
+      {% elif agent.project.joining_style == "autojoin" %}
         <div>
           {% trans "You can simply join this project with one click" %}:
             <form

@@ -1897,8 +1897,8 @@ def project_feedback(request, agent_id, join_request_id):
     if fobi_slug:
         form_entry = FormEntry.objects.get(slug=fobi_slug)
         #req = jn_req
-        if jn_req.fobi_data:
-            jn_req.entries = jn_req.fobi_data._default_manager.filter(pk=jn_req.fobi_data.pk) #.select_related('form_entry')
+        if jn_req.fobi_data and jn_req.fobi_data.pk:
+            jn_req.entries = SavedFormDataEntry.objects.filter(pk=jn_req.fobi_data.pk) #.select_related('form_entry')
             jn_req.entry = jn_req.entries[0]
             jn_req.form_headers = json.loads(jn_req.entry.form_data_headers)
             for val in jn_req.form_headers:

@@ -302,15 +302,11 @@ class InvoiceNumber(models.Model):
 from general.models import Record_Type, Artwork_Type, Material_Type, Nonmaterial_Type, Job, Unit_Type
 from mptt.models import TreeManager
 
-# TODO: make a manager and a method to review and import general.types not in ocp_artwork_type
+
 class Ocp_Artwork_TypeManager(TreeManager):
 
-    def update_from_general(self):
-        #try:
-        #    share = EconomicResourceType.objects.get(name="Membership Share")
-        #except EconomicResourceType.DoesNotExist:
-        #    raise ValidationError("Membership Share does not exist by that name")
-        return False #share
+    def update_from_general(self): # TODO, if general.Artwork_Type (or Type) changes independently, update the subclass with new items
+        return False
 
 
 class Ocp_Artwork_Type(Artwork_Type):
@@ -397,6 +393,13 @@ class Ocp_Artwork_Type(Artwork_Type):
 
 
 
+
+class Ocp_Skill_TypeManager(TreeManager):
+
+    def update_from_general(self): # TODO, if general.Job changes independently, update the subclass with new items
+        return False
+
+
 class Ocp_Skill_Type(Job):
     job = models.OneToOneField(
       Job,
@@ -437,6 +440,7 @@ class Ocp_Skill_Type(Job):
       help_text=_("a related General Artwork Type")
     )
 
+    objects = Ocp_Skill_TypeManager()
 
     class Meta:
       verbose_name= _(u'Type of General Skill Resources')

@@ -128,7 +128,10 @@ INSTALLED_APPS = [
     # theme
     "pinax_theme_bootstrap_account",
     "pinax_theme_bootstrap",
-    "django_forms_bootstrap",
+
+     # internalized pinax_forms_bootstrap v2.0.3.post1
+     # to solve Django > 1.10 compatibility
+    "forms_bootstrap2",
 
     # external
     #'debug_toolbar',

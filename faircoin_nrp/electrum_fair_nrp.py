@@ -47,13 +47,17 @@ def send_command(cmd, params):
     logging.debug('send command: %s --- params: %s' %(cmd, params))
     server = jsonrpclib.Server('http://%s:%d'%(my_host, my_port))
 
+    signal.alarm(7)
     try:
         f = getattr(server, cmd)
     except socket.error, (value, message):
-        logging.error("Can not connect to faircoin daemon. %d %s" %(value,message))
+        logging.error("Cannot connect to faircoin daemon. %d %s" %(value,message))
+        signal.alarm(0)
+        return "ERROR"
+    except TimeoutError, e:
+        logging.error("Timeout connecting to faircoin daemon: %s" % e)
         return "ERROR"
 
-    signal.alarm(7)
     try:
         out = f(*params)
     except socket.error, (value, message):

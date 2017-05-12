@@ -208,7 +208,7 @@ body .modal {
 					    <p style="margin-left: 2em;">
 						    <b>{% trans "Onhand" %}:</b> {{ resource.label }} {{ resource.quantity }} {{ resource.unit_ofFtake_quantity }}
                             {% for event in resource.consuming_events %}
-                                {% if event.commitment = item %}
+                                {% if event.commitment == item %}
 							        <p class="use" >
 								        <b>{% trans "Consumed" %}:</b> {{ event.quantity }} {{ event.event_date }}
 							        </p>
@@ -272,7 +272,7 @@ body .modal {
 					    <p style="margin-left: 2em;">
 						    <b>{% trans "Onhand" %}:</b> {{ resource.label }} {{ resource.quantity }} {{ resource.unit_of_quantity }}
                             {% for event in resource.using_events %}
-                                {% if event.commitment = item %}
+                                {% if event.commitment == item %}
 							        <p  class="use" >
 								        <b>{% trans "Used" %}:</b> {{ event.quantity }} {{ item.resource_type.unit_of_use }} {{ event.event_date }}
 							        </p>

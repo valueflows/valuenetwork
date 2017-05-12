@@ -38,7 +38,7 @@
     <div class="container">
         {% include "_messages.html" %}
 		<legend>{% trans "Distributions" %}
-            {% if agent %} 
+            {% if agent %}
                 for {{ agent.agent_type }} {{ agent.name }}
                 {% if user_agent %}
                     <a class="btn btn-primary indent" href="{% url "distribution_logging" %}">{% trans "Create Distribution Manually" %}</a>
@@ -48,24 +48,24 @@
 
         <div class="span8">
           <div class="totals">
-            <span class="total">Distributions total: {{ total_distributions }} </span> 
+            <span class="total">Distributions total: {{ total_distributions }} </span>
             <br />
             * Note these totals are valid only if the events selected all use the same currency.
-          </div>  
+          </div>
 		  {% if distributions %}
 		    <ul>
 		      {% for dist in distributions %}
                 <li>
                     <a href="{% url "distribution_logging" distribution_id=dist.id %}">{{ dist }}
                     </a>  {% trans "created by" %} {{ dist.created_by }}
-                    {% if user = dist.created_by or user.is_superuser%}
-                        <a class="btn btn-info btn-mini" href="{% url "distribution_logging" distribution_id=dist.id %}">{% trans "Change" %}</a> 
+                    {% if user == dist.created_by or user.is_superuser%}
+                        <a class="btn btn-info btn-mini" href="{% url "distribution_logging" distribution_id=dist.id %}">{% trans "Change" %}</a>
                         	{% if dist.is_deletable %}
                                 <form
-                                    style="display: inline;" 
-                                    class="delete-form" 
-                                    id="deleteForm{{ dist.id }}" 
-                                    action="{% url "delete_distribution" distribution_id=dist.id %}" 
+                                    style="display: inline;"
+                                    class="delete-form"
+                                    id="deleteForm{{ dist.id }}"
+                                    action="{% url "delete_distribution" distribution_id=dist.id %}"
                                     method="POST" >
                                     {% csrf_token %}
                                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete item" >{% trans "Delete" %}</button>
@@ -93,18 +93,18 @@
             <h3>{% trans "Filter the List" %}</h3>
             <form id="filter-form" action="." method="POST">
 	            {% csrf_token %}
-                <div id="div_id_start_date" class="control-group" style="display: inline;" > 
+                <div id="div_id_start_date" class="control-group" style="display: inline;" >
                     <label for="id_start_date" class="control-label required-field" style="display: inline; vertical-align: text-bottom;" >
                         {% trans "Start date " %}
-                    </label>    
+                    </label>
                     <div class="controls" style="display: inline;" >
                         {{ dt_selection_form.start_date }}
                     </div>
                 </div>
-                <div id="div_id_end_date" class="control-group" > 
+                <div id="div_id_end_date" class="control-group" >
                     <label for="id_end_date" class="control-label required-field" style="display: inline;  vertical-align: text-bottom; " >
                         {% trans "End date  " %}
-                    </label>    
+                    </label>
                     <div class="controls" style="display: inline;" >
                         {{ dt_selection_form.end_date }}
                     </div>
@@ -128,7 +128,7 @@
 	$(document).ready(function(){
 
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");

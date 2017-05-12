@@ -1552,8 +1552,8 @@ def join_requests(request, agent_id):
     if fobi_slug and requests:
         form_entry = FormEntry.objects.get(slug=fobi_slug)
         req = requests[0]
-        if req.fobi_data and req.fobi_data._default_manager:
-            req.entries = req.fobi_data._default_manager.filter(pk=req.fobi_data.pk).select_related('form_entry')
+        if req.fobi_data and req.fobi_data.pk:
+            req.entries = SavedFormDataEntry.objects.filter(pk=req.fobi_data.pk).select_related('form_entry')
             entry = req.entries[0]
             form_headers = json.loads(entry.form_data_headers)
             for val in form_headers:
@@ -1566,8 +1566,8 @@ def join_requests(request, agent_id):
                 req.possible_agent = EconomicAgent.objects.get(nick=req.requested_username)
               except:
                 req.possible_agent = False
-            if req.fobi_data and req.fobi_data._default_manager:
-              req.entries = req.fobi_data._default_manager.filter(pk=req.fobi_data.pk).select_related('form_entry')
+            if req.fobi_data and req.fobi_data.pk:
+              req.entries = SavedFormDataEntry.objects.filter(pk=req.fobi_data.pk).select_related('form_entry')
               entry = req.entries[0]
               req.data = json.loads(entry.saved_data)
               req.items = req.data.items()
@@ -1782,8 +1782,8 @@ def project_feedback(request, agent_id, join_request_id):
     if fobi_slug:
         form_entry = FormEntry.objects.get(slug=fobi_slug)
         #req = jn_req
-        if jn_req.fobi_data:
-            jn_req.entries = jn_req.fobi_data._default_manager.filter(pk=jn_req.fobi_data.pk) #.select_related('form_entry')
+        if jn_req.fobi_data and jn_req.fobi_data.pk:
+            jn_req.entries = SavedFormDataEntry.objects.filter(pk=jn_req.fobi_data.pk) #.select_related('form_entry')
             jn_req.entry = jn_req.entries[0]
             jn_req.form_headers = json.loads(jn_req.entry.form_data_headers)
             for val in jn_req.form_headers:

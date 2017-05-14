@@ -29,9 +29,9 @@
 {% block body_class %}projects{% endblock %}
 
 {% block body_base %}
-    <div class="container">
-        {% include "_messages.html" %}
-    <div>
+<div class="container">
+  {% include "_messages.html" %}
+  <div>
         <legend>
             {% if resource.owner %}
               <a href="{% url 'members_agent' agent_id=resource.owner.id %}">{{ resource.owner.name }}</a> >
@@ -48,13 +48,17 @@
 
         <p>
             {% trans "Current Balance" %}:
-                {% if not resource.digital_currency_balance = resource.digital_currency_balance_unconfirmed %}
+              {% if not resource.digital_currency_balance == "Not accessible now" %}
+                {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
                     {{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }})
                 {% else %}
                     {{ resource.digital_currency_balance }}
                 {% endif %}
-                {{ resource.unit_of_quantity }}<br />
-            {% trans "This is a list of transactions inside OCP:" %}
+                {{ resource.unit_of_quantity }}
+              {% else %}
+                <span class="error"><b>{% trans "Not available now" %}</b></span>
+              {% endif %}
+            <br />Address: <a target="_blank" href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}">{{ resource.digital_currency_address}}</a>
         </p>
 
 
@@ -108,30 +112,23 @@
                 {% endfor %}
             </tbody>
         </table>
-<div class="pagination">
-    <span class="step-links">
-        {% if events.has_previous %}
-            <a href="?page={{ events.previous_page_number }}">{% trans "previous" %}</a>
-        {% endif %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if events.has_previous %}
+                <a href="?page={{ events.previous_page_number }}">{% trans "previous" %}</a>
+            {% endif %}
 
-        <span class="current">
-            {% trans "Page" %} {{ events.number }} {% trans "of" %} {{ events.paginator.num_pages }}.
+            <span class="current">
+                {% trans "Page" %} {{ events.number }} {% trans "of" %} {{ events.paginator.num_pages }}.
+            </span>
+
+            {% if events.has_next %}
+                <a href="?page={{ events.next_page_number }}">{% trans "next" %}</a>
+            {% endif %}
         </span>
-
-        {% if events.has_next %}
-            <a href="?page={{ events.next_page_number }}">{% trans "next" %}</a>
-        {% endif %}
-    </span>
+    </div>
+  </div>
 </div>
-
-    </div>
-
-    <div>
-      <p>{% trans "If you want a complete list of the transactions related to " %}{{ resource.identifier }} in the faircoin network, please visit:<br />
-        <a target="_blank" href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}">Faircoin block explorer</a> (address: {{ resource.digital_currency_address}})<br />
-    </div>
-
-    </div>
 {% endblock %}
 
 {% block extra_script %}

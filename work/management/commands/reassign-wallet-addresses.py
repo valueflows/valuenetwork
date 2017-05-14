@@ -22,9 +22,11 @@ class Command(BaseCommand):
                 continue
             if fcr.digital_currency_address:
                 found += 1
-                if not is_address_in_wallet(fcr.digital_currency_address):
+                if is_address_in_wallet(fcr.digital_currency_address) == False:
                     reassigned += 1
-                    fcr.digital_currency_address = create_address_for_agent(agent)
-                    fcr.save()
+                    new_address = create_address_for_agent(agent)
+                    if new_address:
+                        fcr.digital_currency_address = new_address
+                        fcr.save()
 
         print "Finished %d wallet reassignments of %d wallets & %d total agents" % (reassigned, found, total)

@@ -1,12 +1,11 @@
 --extra-index-url=http://dist.pinaxproject.com/dev/
 --extra-index-url=http://dist.pinaxproject.com/alpha/
 
-Django<1.10
+Django<1.11
 django-extensions
 pinax-theme-bootstrap==2.0.4
 pinax-theme-bootstrap-account==1.0b2
 django-appconf==1.0.2
-django-forms-bootstrap==2.0.3.post1
 webtest
 django-webtest
 pinax-notifications
@@ -21,6 +20,7 @@ html5lib==0.99999999
 bleach
 django-simple-captcha
 django-mptt
-django-fobi==0.10.4
+django-fobi==0.11.3
+django-autoslug==1.9.3
 pytz
 selenium

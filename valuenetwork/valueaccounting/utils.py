@@ -34,17 +34,14 @@ def flattened_children(node, all_nodes, to_return):
 
 def flattened_children_by_association(node, all_associations, to_return): #works only for agents
     #todo: figure out why this failed when AAs were ordered by from_agent
-    #import pdb; pdb.set_trace()
     to_return.append(node)
     for association in all_associations:
         #if association.has_associate.id == node.id:
-        #    import pdb; pdb.set_trace()
         if association.has_associate.id == node.id and association.association_type.association_behavior == "child":
             flattened_children_by_association(association.is_associate, all_associations, to_return)
     return to_return
 
 def flattened_group_associations(node, all_associations, to_return): #works only for agents
-    #import pdb; pdb.set_trace()
     to_return.append(node)
     for association in all_associations:
         if association.has_associate.id == node.id and association.from_agent.agent_type.party_type!="individual":
@@ -53,7 +50,6 @@ def flattened_group_associations(node, all_associations, to_return): #works only
 
 def agent_dfs_by_association(node, all_associations, depth): #works only for agents
     #todo: figure out why this failed when AAs were ordered by from_agent
-    #import pdb; pdb.set_trace()
     node.depth = depth
     to_return = [node,]
     for association in all_associations:
@@ -63,7 +59,6 @@ def agent_dfs_by_association(node, all_associations, depth): #works only for age
 
 def group_dfs_by_has_associate(root, node, all_associations, visited, depth):
     #works only for agents, and only follows association_from
-    #import pdb; pdb.set_trace()
     to_return = []
     if node not in visited:
         visited.append(node)
@@ -75,7 +70,6 @@ def group_dfs_by_has_associate(root, node, all_associations, visited, depth):
     return to_return
 
 def group_dfs_by_is_associate(root, node, all_associations, visited, depth): 
-    #import pdb; pdb.set_trace()
     to_return = []
     if node not in visited:
         visited.append(node)
@@ -362,7 +356,6 @@ def project_process_graph(project_list, process_list):
 def project_graph(producers):
     nodes = []
     edges = []
-    #import pdb; pdb.set_trace()
     for p in producers:
         for rt in p.produced_resource_type_relationships():
             for pt in rt.resource_type.consuming_process_type_relationships():
@@ -668,18 +661,15 @@ def xbill_dfs(node, all_nodes, visited, depth):
             if subnode.node_id() != node.node_id():
                 if parents and node in parents:
                     #print "*active node:*", node, "*depth:*", depth, "*subnode:*", subnode, "*parent_object:*", subnode.xbill_parent_object(), "*parents:*", parents
-                    #import pdb; pdb.set_trace()
                     to_return.extend(xbill_dfs(subnode, all_nodes, visited, depth+1))
     return to_return
 
 def explode_xbill_children(node, nodes, exploded):
     if node not in nodes:
         nodes.append(node)
-        #import pdb; pdb.set_trace()
         xclass = node.xbill_class()
         explode = True
         if xclass == 'process-type':
-            #import pdb; pdb.set_trace()
             pt = node.process_type
             if pt in exploded:
                 explode = False
@@ -696,7 +686,6 @@ def generate_xbill(resource_type):
     for kid in resource_type.xbill_children():
         explode_xbill_children(kid, nodes, exploded)
     nodes = list(set(nodes))
-    #import pdb; pdb.set_trace()
     to_return = []
     visited = []
     for kid in resource_type.xbill_children():

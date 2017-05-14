@@ -78,7 +78,6 @@ class ExplosionTest(TestCase):
             
         cts = self.order.order_items()
         commitment = cts[0]
-        #import pdb; pdb.set_trace()
         visited = []
         process = commitment.generate_producing_process(self.user, visited, explode=True)
         child_input = process.incoming_commitments()[0]
@@ -112,7 +111,6 @@ class ExplosionTest(TestCase):
             unit_of_quantity=self.unit,
         )
         cyclic_input.save()
-        #import pdb; pdb.set_trace()
         cts = self.order.order_items()
         commitment = cts[0]
         visited = []
@@ -283,5 +281,4 @@ class ExplosionTest(TestCase):
         child_outputs=child_input.associated_producing_commitments()
         self.assertEqual(len(child_outputs), 0)
         self.assertTrue(explode)
-        #import pdb; pdb.set_trace()
 

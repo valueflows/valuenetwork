@@ -288,7 +288,6 @@ class LogoutView(TemplateResponseMixin, View):
         return self.render_to_response(ctx)
     
     def post(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         coop_worker = False
         if self.request.user.is_authenticated():
             user = self.request.user

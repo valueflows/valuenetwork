@@ -21,5 +21,6 @@ bleach
 django-simple-captcha
 django-mptt
 django-fobi==0.11.3
+django-autoslug==1.9.3
 pytz
 selenium

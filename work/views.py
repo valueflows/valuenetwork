@@ -303,17 +303,22 @@ def manage_faircoin_account(request, resource_id):
     can_pay = False
     faircoin_account = False
     balance = False
+    wallet = False
 
     if agent:
         if agent.owns(resource) or resource.owner() in agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
-            limit = resource.spending_limit()
+            wallet = faircoin_utils.fairwallet_obj()
+            if wallet:
+                limit = resource.spending_limit()
+            else:
+                limit = 0
 
         candidate_membership = agent.candidate_membership()
         if candidate_membership:
             faircoin_account = agent.faircoin_resource()
             balance = 0
-            if faircoin_account:
+            if faircoin_account and wallet:
                 balance = faircoin_account.digital_currency_balance_unconfirmed()
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
@@ -330,7 +335,7 @@ def manage_faircoin_account(request, resource_id):
         "agent": agent,
         "send_coins_form": send_coins_form,
         "limit": limit,
-
+        "wallet": wallet,
         "payment_due": payment_due,
         "candidate_membership": candidate_membership,
         "help": get_help("profile"),
@@ -498,8 +503,10 @@ def transfer_faircoins(request, resource_id):
 def faircoin_history(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
-    exchange_service = ExchangeService.get()
-    exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
+    wallet = faircoin_utils.fairwallet_obj()
+    if wallet:
+        exchange_service = ExchangeService.get()
+        exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
     event_list = resource.events.all()
     init = {"quantity": resource.quantity,}
     unit = resource.resource_type.unit
@@ -521,6 +528,7 @@ def faircoin_history(request, resource_id):
             "agent": agent,
             "unit": unit,
             "events": events,
+            "wallet": wallet,
         })
     else:
         return render(request, 'work/no_permission.html')

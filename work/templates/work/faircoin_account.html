@@ -78,7 +78,7 @@
       </div>
 		</legend>
 
-    {% if resource.digital_currency_balance == "Not accessible now" %}
+    {% if not wallet %}
       <div class="alert alert-warning">
         <strong>{% trans "Warning:" %}</strong>
         {% trans "Operations with your online wallet are not available temporarily. Please, come back later." %}
@@ -133,7 +133,7 @@
 	            <table class="table table-bordered" >
 	                <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        {% if not resource.digital_currency_balance == "Not accessible now" %}
+                        {% if wallet %}
                             {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
                                 <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
                             {% else %}
@@ -272,6 +272,8 @@
                           <em>{% trans "(available when the address pertains to this wallet)" %}</em>
                         {% elif resource.is_address_requested %}
                           <em>{% trans "(please wait about a minute to have a new fair-address and refresh the page)" %}</em>
+                        {% elif not wallet %}
+                          <em>{% trans "(sorry, the wallet is not available now, try later)" %}</em>
                         {% else %}
                           {% csrf_token %}
                           {{ send_coins_form|as_bootstrap }}

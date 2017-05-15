@@ -1,28 +1,49 @@
 import faircoin_nrp.electrum_fair_nrp as efn
 
 def init_electrum_fair():
-    try:
-        daemon = efn.daemon_is_up()
-    except:
-        msg = "Cannot connect with daemon. Exiting."
-        assert False, msg
+    if not hasattr(efn, 'daemon'):
+        try:
+            daemon = efn.daemon_is_up()
+        except:
+            msg = "Cannot connect with daemon. Exiting."
+            assert False, msg
 
-    if not daemon or (daemon == 'ERROR'):
+        if not daemon or (daemon == 'ERROR'):
+            return False
+        else:
+            efn.daemon = daemon
+
+    if not hasattr(efn, 'network') or not efn.network:
+        try:
+            network = efn.is_connected()
+        except:
+            msg = "Cannot connect with electrum-server. Exiting."
+            assert False, msg
+        efn.network = network and (network != 'ERROR')
+
+    return efn.network
+
+
+def fairwallet_obj():
+    if init_electrum_fair():
+        return efn
+    else:
         return False
 
-    try:
-        network = efn.is_connected()
-    except:
-        msg = "Cannot connect with electrum-server. Exiting."
-        assert False, msg
-
-    return network and (network != 'ERROR')
-
 def network_fee():
-    if init_electrum_fair():
-        network_fee = efn.network_fee()
-        if network_fee != 'ERROR':
-            return network_fee
+    if not hasattr(efn, 'netfee'):
+        if init_electrum_fair() and not efn.netfee:
+            network_fee = efn.network_fee()
+            if network_fee != 'ERROR':
+                efn.netfee = network_fee
+                return network_fee
+            else:
+              efn.netfee = False
+        else:
+            efn.netfee = False
+    else:
+        return efn.netfee
+
 
 def send_fake_faircoins(address_origin, address_end, amount):
     import time

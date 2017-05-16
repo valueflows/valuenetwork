@@ -466,6 +466,12 @@ class Ocp_Skill_Type(Job):
         return self.name
 
 
+class Ocp_Record_TypeManager(TreeManager):
+
+    def update_from_general(self): # TODO, if general.Record_Type changes independently, update the subclass with new items
+        return False
+
+
 class Ocp_Record_Type(Record_Type):
     ocpRecordType_record_type = models.OneToOneField(
         Record_Type,
@@ -496,6 +502,8 @@ class Ocp_Record_Type(Record_Type):
         blank=True, null=True,
         help_text=_("a related General Skill Type")
     )
+
+    objects = Ocp_Record_TypeManager()
 
     class Meta:
         verbose_name= _(u'Type of General Record')
@@ -579,6 +587,12 @@ class Ocp_Record_Type(Record_Type):
 
 from general.models import Unit as Gen_Unit
 
+class Ocp_Unit_TypeManager(TreeManager):
+
+    def update_from_general(self): # TODO, if general.Unit_Type changes independently, update the subclass with new items
+        return False
+
+
 class Ocp_Unit_Type(Unit_Type):
     ocpUnitType_unit_type = models.OneToOneField(
         Unit_Type,
@@ -602,6 +616,8 @@ class Ocp_Unit_Type(Unit_Type):
         blank=True, null=True,
         help_text=_("a related General Unit")
     )
+
+    objects = Ocp_Unit_TypeManager()
 
     class Meta:
         verbose_name= _(u'Type of General Unit')

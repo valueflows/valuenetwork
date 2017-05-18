@@ -38,11 +38,11 @@ class FairpayOauth2Connection(object):
         else:
             raise FairpayOauth2Error('Error ' + r.status_code, r.text)
 
-    def wallet_history(self, access_token):
+    def wallet_history(self, access_token, limit=10, offset=0):
         headers = {"Authorization":"Bearer " + access_token}
         data = {
-            "limit": 10,
-            "offset": 0,
+            "limit": limit,
+            "offset": offset,
         }
         r = requests.get(self.url_history, headers=headers, data=data)
         if r.status_code == '200':
@@ -69,4 +69,4 @@ class FairpayOauth2Connection(object):
         if r.status_code == '200':
             return True
         else:
-            return False
+            raise FairpayOauth2Error('Error ' + r.status_code, r.text)

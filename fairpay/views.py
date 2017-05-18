@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.core.exceptions import ValidationError
 
 from fairpay.models import FairpayOauth2
 from fairpay.forms import FairpayOauth2Form
-from fairpay.utils import FairpayOauth2Connection
+from fairpay.utils import FairpayOauth2Error, FairpayOauth2Connection
 
 @login_required
 def start(request, agent_id):
@@ -25,7 +25,13 @@ def auth(request, agent_id):
     if request.method == 'POST':
         form = FairpayOauth2Form(request.POST)
         if form.is_valid():
-            # TODO: call API for new access_token and save
+            c = FairpayOauth2Connection.get()
+            try:
+                access_token = c.new_token()
+            except FairpayOauth2Error:
+                raise ValidationError('Authentication failed.')
+
+            # TODO: save FairpayOauth2 object
             return redirect('fairpay_history', agent_id=agent_id)
 
     else:

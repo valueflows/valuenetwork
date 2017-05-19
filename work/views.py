@@ -1041,7 +1041,7 @@ def members_agent(request, agent_id):
 def edit_relations(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    if user_agent in agent.managers():
+    if user_agent in agent.managers() or request.user.is_superuser:
         assn_form = AssociationForm(agent=agent,data=request.POST)
         if assn_form.is_valid():
             member_assn = AgentAssociation.objects.get(id=int(request.POST.get("member")))

@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from valueaccounting.models import EconomicAgent
+from valuenetwork.valueaccounting.models import EconomicAgent
 
 class FairpayOauth2(models.Model):
     agent = models.ForeignKey(EconomicAgent, on_delete=models.CASCADE)

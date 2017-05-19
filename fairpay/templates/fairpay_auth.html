@@ -1,0 +1,13 @@
+{% load i18n %}
+{% load bootstrap_tags %}
+
+<htlm>
+  <head></head>
+  <body>
+    <form id="oauthForm" class="validateMe" action="." method="POST" >
+        {% csrf_token %}
+        {{ oauth_form|as_bootstrap }}
+        <input type="submit" name="submit" value="{% trans 'Submit' %}" class="btn btn-primary" />
+    </form>
+  </body>
+</html>

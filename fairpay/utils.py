@@ -61,9 +61,9 @@ class FairpayOauth2Connection(object):
         headers = {'X-Signature':
             'Signature access-key="' + access_key +
             '",nonce="' + nonce +
-            '",timestamp="' + str(timestamp) +
+            '",timestamp="' + timestamp +
             '",version="1",signature="' + signature +
-            '"'}}
+            '"'}
 
         r = requests.post(self.url_signature, headers = headers)
         if r.status_code == '200':

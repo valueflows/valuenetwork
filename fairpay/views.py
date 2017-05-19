@@ -37,8 +37,9 @@ def auth(request, agent_id):
     else:
         form = FairpayOauth2Form()
 
-    return render(request, 'fairpay_auth.html', {'form': form})
+    return render(request, 'fairpay_auth.html', {'oauth_form': form})
 
 @login_required
 def history(request, agent_id):
     # TODO: check current access_token, redirect or list transactions
+    pass

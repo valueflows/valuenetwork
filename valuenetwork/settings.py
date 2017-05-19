@@ -200,6 +200,7 @@ INSTALLED_APPS = [
     'valuenetwork.api',
     'account',
     'work.apps.WorkAppConfig',
+    'fairpay',
 
     # general
     'general',

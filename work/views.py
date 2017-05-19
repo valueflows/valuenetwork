@@ -2070,10 +2070,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       gen_sk = Ocp_Skill_Type.objects.get(id=data["skill_type"].id)
 
 
-                    if gen_rt and gen_ext.ocp_artwork_type and gen_ext.ocp_artwork_type == gen_rt: # we have the related RT in the ET! do nothing.
+                    if gen_rt and hasattr(gen_ext, 'ocp_artwork_type') and gen_ext.ocp_artwork_type and gen_ext.ocp_artwork_type == gen_rt: # we have the related RT in the ET! do nothing.
                       return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                               % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
-                    if gen_sk and gen_ext.ocp_skill_type and gen_ext.ocp_skill_type == gen_sk: # we have the related RT in the ET! do nothing.
+                    if gen_sk and hasattr(gen_ext, 'ocp_skill_type') and gen_ext.ocp_skill_type and gen_ext.ocp_skill_type == gen_sk: # we have the related RT in the ET! do nothing.
                       return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                               % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 

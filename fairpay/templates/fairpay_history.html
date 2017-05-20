@@ -1,0 +1,22 @@
+<htlm>
+  <head></head>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          {% for col_head in data_table.keys %}
+            <th>{{ col_head }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+          {% for row in data_table %}
+            <tr>
+              {% for td in row.values %}
+                <td>{{ td }}</td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+    </table>
+  </body>
+</html>

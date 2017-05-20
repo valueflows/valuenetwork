@@ -9,6 +9,6 @@ class FairpayOauth2(models.Model):
     fairpay_user = models.CharField(max_length=100, editable=False)
     access_token = models.CharField(max_length=100, editable=False)
     refresh_token = models.CharField(max_length=100, editable=False)
-    expires_token = models.TimeField(null=True, editable=False)
+    expires_token = models.IntegerField(null=True, editable=False)
     created = models.DateField(auto_now_add=True)
     updated = models.DateField(auto_now=True)

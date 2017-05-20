@@ -2,12 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 
+from valuenetwork.valueaccounting.models import EconomicAgent
 from fairpay.models import FairpayOauth2
 from fairpay.forms import FairpayOauth2Form
 from fairpay.utils import FairpayOauth2Error, FairpayOauth2Connection
 
 @login_required
 def start(request, agent_id):
+    #TODO: check if current user can manage this agent.
     try:
         oauth = FairpayOauth2.objects.filter(agent=agent_id)
     except ObjectDoesNotExist:
@@ -22,16 +24,30 @@ def start(request, agent_id):
 
 @login_required
 def auth(request, agent_id):
+    #TODO: check if current user can manage this agent.
     if request.method == 'POST':
         form = FairpayOauth2Form(request.POST)
         if form.is_valid():
+            name = form.cleaned_data['name']
+            password = form.cleaned_data['password']
             c = FairpayOauth2Connection.get()
             try:
-                access_token = c.new_token()
+                data = c.new_token(name, password)
             except FairpayOauth2Error:
                 raise ValidationError('Authentication failed.')
-
-            # TODO: save FairpayOauth2 object
+                #TODO: handle fail here. Message to user.
+            try:
+                agent = EconomicAgent.objects.get(id=agent_id)
+                FairpayOauth2.objects.create(
+                    agent = agent,
+                    fairpay_user = name,
+                    access_token = data['access_token'],
+                    refresh_token = data['refresh_token'],
+                    expires_token = int(data['expires_in']),
+                )
+            except:
+                pass
+                #TODO: handle fail here.
             return redirect('fairpay_history', agent_id=agent_id)
 
     else:
@@ -41,5 +57,30 @@ def auth(request, agent_id):
 
 @login_required
 def history(request, agent_id):
-    # TODO: check current access_token, redirect or list transactions
-    pass
+    #TODO: check if current user can manage this agent.
+    try:
+        oauth = FairpayOauth2.objects.filter(agent=agent_id)
+    except FairpayOauth2.DoesNotExist:
+        #TODO: message to user.
+        return redirect('fairpay_auth', agent_id=agent_id)
+    c = FairpayOauth2Connection.get()
+    #TODO: several oauth for one agent.
+    try:
+        data = c.wallet_history(oauth[0].access_token, limit=10, offset=0)
+    except FairpayOauth2Error: # TODO: catch other errors.
+        return redirect('fairpay_auth', agent_id=agent_id)
+
+    if data['status'] == 'ok':
+        table_data = {}
+        for i in range(data['data']['start'], data['data']['end']):
+            table_data[i] = {
+                'created': data['data']['elements'][i]['created'],
+                'amount': data['data']['elements'][i]['amount'],
+                'currency': data['data']['elements'][i]['currency'],
+                'concept': data['data']['elements'][i]['data_in']['concept'],
+                'method_in': data['data']['elements'][i]['method_in'],
+                'method_out': data['data']['elements'][i]['method_out'],
+            }
+        return render(request, 'fairpay_history.html', {'table_data': table_data})
+    else:
+        return redirect('fairpay_auth', agent_id=agent_id)

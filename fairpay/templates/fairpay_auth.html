@@ -1,13 +1,16 @@
+{% extends "work_base.html" %}
+
 {% load i18n %}
 {% load bootstrap_tags %}
 
-<htlm>
-  <head></head>
-  <body>
+{% block head_title %}{% trans "Fairpay authentication" %}{% endblock %}
+
+{% block body_base %}
+  <div class="container">
     <form id="oauthForm" class="validateMe" action="." method="POST" >
         {% csrf_token %}
         {{ oauth_form|as_bootstrap }}
         <input type="submit" name="submit" value="{% trans 'Submit' %}" class="btn btn-primary" />
     </form>
-  </body>
-</html>
+  </div>
+{% endblock %}

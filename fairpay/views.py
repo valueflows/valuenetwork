@@ -70,17 +70,23 @@ def history(request, agent_id):
     except FairpayOauth2Error: # TODO: catch other errors.
         return redirect('fairpay_auth', agent_id=agent_id)
 
-    if data['status'] == 'ok':
-        table_data = {}
+    if data['status'] == 'ok' and data['data']['total'] > 0:
+        table_headers = ['created', 'amount', 'currency', 'concept',
+                'method_in', 'method_out']
+        table_rows = []
         for i in range(data['data']['start'], data['data']['end']):
-            table_data[i] = {
-                'created': data['data']['elements'][i]['created'],
-                'amount': data['data']['elements'][i]['amount'],
-                'currency': data['data']['elements'][i]['currency'],
-                'concept': data['data']['elements'][i]['data_in']['concept'],
-                'method_in': data['data']['elements'][i]['method_in'],
-                'method_out': data['data']['elements'][i]['method_out'],
-            }
-        return render(request, 'fairpay_history.html', {'table_data': table_data})
+            table_rows.append([
+                data['data']['elements'][i]['created'],
+                data['data']['elements'][i]['amount'],
+                data['data']['elements'][i]['currency'],
+                data['data']['elements'][i]['data_in']['concept'],
+                data['data']['elements'][i]['method_in'],
+                data['data']['elements'][i]['method_out'],
+            ])
+        return render(request, 'fairpay_history.html', {
+            'table_headers': table_headers,
+            'table_rows': table_rows,
+            'fairpay_user': oauth[0].fairpay_user,
+        })
     else:
         return redirect('fairpay_auth', agent_id=agent_id)

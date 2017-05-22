@@ -78,6 +78,6 @@ class FairpayOauth2Test(TestCase):
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
 
-        # url = reverse('fairpay_history', args=[self.agent.id])
-        # response = self.client.get(url)
-        # self.assertEqual(response.status_code, 200)
+        #url = reverse('fairpay_history', args=[self.agent.id, 1])
+        #response = self.client.get(url)
+        #self.assertEqual(response.status_code, 200)

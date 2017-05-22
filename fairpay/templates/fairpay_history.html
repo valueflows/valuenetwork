@@ -1,22 +1,27 @@
-<htlm>
-  <head></head>
-  <body>
-    <table>
+{% extends "work_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Fairpay transactions list" %}: {{ fairpay_user }}{% endblock %}
+
+{% block body_base %}
+  <div class="container">
+    <table class="table table-condensed table-striped centered">
       <thead>
         <tr>
-          {% for col_head in data_table.keys %}
-            <th>{{ col_head }}</th>
+          {% for header in table_headers %}
+            <th>{{ header }}</th>
           {% endfor %}
         </tr>
       </thead>
       <tbody>
-          {% for row in data_table %}
+          {% for row in table_rows %}
             <tr>
-              {% for td in row.values %}
+              {% for td in row %}
                 <td>{{ td }}</td>
               {% endfor %}
             </tr>
           {% endfor %}
     </table>
-  </body>
-</html>
+  </div>
+{% endblock %}

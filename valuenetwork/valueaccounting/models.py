@@ -438,6 +438,13 @@ class AgentManager(models.Manager):
             raise ValidationError("FreedomCoop Projects group does not exist by 'FC_Projects' nickname.")
         return fc
 
+    def root_ocp_agent(self):
+        try:
+            ocp = EconomicAgent.objects.get(nick="OCP")
+        except EconomicAgent.DoesNotExist:
+            raise ValidationError("OCP main root Agent does not exist by 'OCP' nickname.")
+        return ocp
+
     def open_projects(self):
         return EconomicAgent.objects.filter(project__visibility="public") #is_public="True")
 

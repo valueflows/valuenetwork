@@ -95,7 +95,9 @@ def map(request):
 @login_required
 def profile(request):
     agent = get_agent(request)
-    change_form = WorkAgentCreateForm(instance=agent)
+    return members_agent(request, agent.id)
+
+    """change_form = WorkAgentCreateForm(instance=agent)
     skills = EconomicResourceType.objects.filter(behavior="work")
     et_work = EventType.objects.get(name="Time Contribution")
     arts = agent.resource_types.filter(event_type=et_work)
@@ -144,7 +146,7 @@ def profile(request):
         #"share_price": share_price,
         #"number_of_shares": number_of_shares,
         #"can_pay": can_pay,
-    })
+    }, context_instance=RequestContext(request))"""
 
 
 @login_required
@@ -165,7 +167,7 @@ def upload_picture(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render(request, 'valueaccounting/no_permission.html')
+        return render(request, 'work/no_permission.html')
     form = UploadAgentForm(instance=agent, data=request.POST, files=request.FILES)
     if form.is_valid():
         data = form.cleaned_data
@@ -221,7 +223,8 @@ def update_skills(request, agent_id):
         agent = get_object_or_404(EconomicAgent, id=agent_id)
         user_agent = get_agent(request)
         if not user_agent:
-            return render(request, 'valueaccounting/no_permission.html')
+            return render(request, 'work/no_permission.html')
+
         et_work = EventType.objects.get(name="Time Contribution")
         arts = agent.resource_types.filter(event_type=et_work)
         old_skill_rts = []
@@ -885,6 +888,8 @@ def create_your_project(request):
     return HttpResponseRedirect("/work/your-projects/")
 
 
+#    A G E N T   P A G E
+
 @login_required
 def members_agent(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
@@ -921,6 +926,9 @@ def members_agent(request, agent_id):
                 ext = data["exchange_type"]
             return HttpResponseRedirect('/%s/%s/%s/%s/'
                 % ('work/exchange', ext.id, 0, agent.id))
+
+    context_ids = [c.id for c in agent.related_all_agents()]
+    context_ids.append(agent.id)
     user_form = None
 
     if not agent.username():
@@ -941,6 +949,8 @@ def members_agent(request, agent_id):
     entries = []
     fobi_name = 'None'
 
+    et_work = EventType.objects.get(name="Time Contribution")
+
     if agent.is_individual():
         contributions = agent.given_events.filter(is_contribution=True)
         agents_stats = {}
@@ -950,6 +960,25 @@ def members_agent(request, agent_id):
         for key, value in agents_stats.items():
             individual_stats.append((key, value))
         individual_stats.sort(lambda x, y: cmp(y[1], x[1]))
+
+        skills = EconomicResourceType.objects.filter(behavior="work")
+        arts = agent.resource_types.filter(event_type=et_work)
+        agent.skills = []
+        user = agent.user().user
+        suggestions = user.skill_suggestion.all()
+        agent.suggested_skills = [sug.resource_type for sug in suggestions]
+        for art in arts:
+            agent.skills.append(art.resource_type)
+        for skil in agent.skills:
+            skil.checked = True
+            if skil in agent.suggested_skills:
+                skil.thanks = True
+        for skill in skills:
+            skill.checked = False
+            if skill in agent.skills:
+                skill.checked = True
+            if skill in agent.suggested_skills:
+                skill.thanks = True
 
     elif agent.is_context_agent():
         try:
@@ -1011,6 +1040,10 @@ def members_agent(request, agent_id):
             roles_height = len(member_hours_roles) * 20
 
     #artwork = get_object_or_404(Artwork_Type, clas="Material")
+    add_skill_form = AddUserSkillForm(agent=agent, data=request.POST or None)
+    Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
+
+    upload_form = UploadAgentForm(instance=agent)
 
     return render(request, "work/members_agent.html", {
         "agent": agent,
@@ -1020,6 +1053,7 @@ def members_agent(request, agent_id):
         "user_form": user_form,
         "nav_form": nav_form,
         "assn_form": assn_form,
+        "upload_form": upload_form,
         "user_agent": user_agent,
         "user_is_agent": user_is_agent,
         "has_associations": has_associations,
@@ -1033,6 +1067,9 @@ def members_agent(request, agent_id):
         "help": get_help("members_agent"),
         "form_entries": entries,
         "fobi_name": fobi_name,
+        "add_skill_form": add_skill_form,
+        "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
+        "Stype_form": Stype_form,
         #"artwork_pk": artwork.pk,
     })
 
@@ -1051,6 +1088,84 @@ def edit_relations(request, agent_id):
 
     return HttpResponseRedirect('/%s/%s/'
         % ('work/agent', agent.id))
+
+
+@login_required
+def assign_skills(request, agent_id):
+    if request.method == "POST":
+        agent = get_object_or_404(EconomicAgent, id=agent_id)
+        user_agent = get_agent(request)
+        if not user_agent:
+            return render(request, 'work/no_permission.html')
+        et_work = EventType.objects.get(name="Time Contribution")
+        arts = agent.resource_types.filter(event_type=et_work)
+        old_skill_rts = []
+        for art in arts:
+            old_skill_rts.append(art.resource_type)
+
+        add_skill_form = AddUserSkillForm(agent=agent, data=request.POST)
+        if add_skill_form.is_valid():
+            skill_type = Ocp_Skill_Type.objects.get(id=int(request.POST.get('skill_type')))
+            if not skill_type.resource_type:
+                #pass # TODO create it?
+                #out = None
+                root = EconomicAgent.objects.root_ocp_agent()
+                new_rt = EconomicResourceType(
+                  name=skill_type.name,
+                  description=skill_type.description,
+                  #unit=out,
+                  #price_per_unit=data["price_per_unit"],
+                  substitutable=False, #data["substitutable"],
+                  context_agent=root,
+                  #url=data["url"],
+                  #photo_url=data["photo_url"],
+                  #parent=data["parent"],
+                  created_by=request.user,
+                  behavior="work",
+                  inventory_rule="never",
+                )
+                new_rt.save()
+                skill_type.resource_type = new_rt
+                skill_type.save()
+
+            if skill_type.resource_type in old_skill_rts:
+                pass # TODO already assigned warn or hide from choices
+            else:
+                art = AgentResourceType(
+                    agent=agent,
+                    resource_type=skill_type.resource_type,
+                    event_type=et_work,
+                    created_by=request.user,
+                )
+                art.save()
+
+        new_skills_list = request.POST.getlist('skillChoice')
+        if new_skills_list:
+            new_skill_rts = []
+            for rt_id in new_skills_list:
+                skill = EconomicResourceType.objects.get(id=int(rt_id))
+                new_skill_rts.append(skill)
+
+            #import pdb; pdb.set_trace()
+            for skill in old_skill_rts:
+                if skill not in new_skill_rts:
+                    arts = AgentResourceType.objects.filter(agent=agent).filter(resource_type=skill)
+                    if arts:
+                        art = arts[0]
+                        art.delete()
+            """for skill in new_skill_rts:
+                if skill not in old_skill_rts:
+                    art = AgentResourceType(
+                        agent=agent,
+                        resource_type=skill,
+                        event_type=et_work,
+                        created_by=request.user,
+                    )
+                    #art.save()"""
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/agent', agent.id))
+
 
 
 @login_required
@@ -2007,6 +2122,285 @@ def create_project_user_and_agent(request, agent_id):
 '''
 
 
+#   S K I L L S
+
+@login_required
+def new_skill_type(request, agent_id):
+    agent = EconomicAgent.objects.get(id=agent_id)
+    new_skill = request.POST.get("new_skill_type")
+    if not new_skill:
+        edit_skill = request.POST.get("edit_skill_type")
+        if edit_skill:
+          #raise ValidationError("Edit skill type? redirect")
+          return edit_skill_type(request, agent.id)
+        else:
+          raise ValidationError("New skill type, invalid")
+
+    Stype_form = NewSkillTypeForm(agent=agent, data=request.POST)
+    if Stype_form.is_valid():
+        #raise ValidationError("New resource type, valid")
+        data = Stype_form.cleaned_data
+        if hasattr(data["parent_type"], 'id'):
+            parent_rt = Ocp_Skill_Type.objects.get(id=data["parent_type"].id)
+            if parent_rt.id:
+              out = None
+              if hasattr(data["unit_type"], 'id'):
+                gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
+                out = gut.ocpUnitType_ocp_unit
+              new_rt = EconomicResourceType(
+                name=data["name"],
+                description=data["description"],
+                unit=out,
+                price_per_unit=data["price_per_unit"],
+                substitutable=False, #data["substitutable"],
+                context_agent=data["context_agent"],
+                url=data["url"],
+                photo_url=data["photo_url"],
+                #parent=data["parent"],
+                created_by=request.user,
+                behavior="work",
+                inventory_rule="never",
+              )
+              new_rt.save()
+
+              # mptt: get_ancestors(ascending=False, include_self=False)
+              ancs = parent_rt.get_ancestors(True, True)
+              for an in ancs:
+                #if an.clas != 'Artwork':
+                  an = Ocp_Skill_Type.objects.get(id=an.id)
+                  if an.resource_type:
+                    new_rtfv = None
+                    for fv in an.resource_type.facets.all():  # inherit first facetvalue from the parents
+                      new_rtfv = ResourceTypeFacetValue(
+                        resource_type=new_rt,
+                        facet_value=fv.facet_value
+                      )
+                      new_rtfv.save()
+                    if new_rtfv:
+                      break
+                  if an.facet_value:                          # if no fvs (didn't break) and the parent has one, relate that fv to the new skill
+                    new_rtfv = ResourceTypeFacetValue(
+                        resource_type=new_rt,
+                        facet_value=an.facet_value
+                    )
+                    new_rtfv.save()
+                    break
+
+              new_oat = Ocp_Skill_Type(
+                  name=data["name"],
+                  verb=data["verb"],
+                  gerund=data["gerund"],
+                  description=data["description"],
+                  resource_type=new_rt,
+                  ocp_artwork_type=data["related_type"],
+              )
+              # mptt: insert_node(node, target, position='last-child', save=False)
+              new_ski = Ocp_Skill_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
+
+              et_work = EventType.objects.get(name="Time Contribution")
+              art = AgentResourceType(
+                    agent=agent,
+                    resource_type=new_rt,
+                    event_type=et_work,
+                    created_by=request.user,
+              )
+              art.save()
+
+              suggestion = SkillSuggestion(
+                  skill=data["name"],
+                  suggested_by=request.user,
+                  resource_type=new_rt,
+                  state="accepted"
+              )
+              suggestion.save()
+              try:
+                suggester = request.user.agent.agent
+              except:
+                suggester = request.user
+              if notification:
+                  users = User.objects.filter(is_staff=True)
+                  suggestions_url = get_url_starter() + "/accounting/skill-suggestions/"
+                  if users and get_site_name():
+                      site_name = get_site_name()
+                      notification.send(
+                        users,
+                        "work_skill_suggestion",
+                        {"skill": suggestion.skill,
+                         "suggested_by": suggester.name,
+                         "suggestions_url": suggestions_url,
+                        }
+                      )
+              #nav_form = ExchangeNavForm(agent=agent, data=None)
+              #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+              #Stype_form = NewSkillTypeForm(agent=agent, data=None)
+
+            else: # have no parent_type id
+              pass
+        else: # have no parent resource field
+            pass
+    else: # is not valid
+        pass #raise ValidationError(Rtype_form.errors)
+
+    next = request.POST.get("next")
+    if next == "exchanges_all":
+        return HttpResponseRedirect('/%s/%s/%s/'
+            % ('work/agent', agent.id, 'exchanges'))
+    elif next == "members_agent":
+        return HttpResponseRedirect('/%s/%s/'
+            % ('work/agent', agent.id))
+    else:
+        raise ValidationError("Has no next page specified! "+str(next))
+
+
+@login_required
+def edit_skill_type(request, agent_id):
+    edit_skill = request.POST.get("edit_skill_type")
+    if not edit_skill:
+        new_skill = request.POST.get("new_skill_type")
+        if new_skill:
+          raise ValidationError("New skill type? redirect")
+        else:
+          raise ValidationError("Edit skill type, invalid")
+
+    agent = EconomicAgent.objects.get(id=agent_id)
+    Stype_form = NewSkillTypeForm(agent=agent, data=request.POST)
+    if Stype_form.is_valid():
+        data = Stype_form.cleaned_data
+        if hasattr(data["parent_type"], 'id'):
+          parent_st = Ocp_Skill_Type.objects.get(id=data["parent_type"].id)
+          if parent_st.id:
+            out = None
+            if hasattr(data["unit_type"], 'id'):
+              gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
+              out = gut.ocpUnitType_ocp_unit
+            edid = request.POST.get("edid")
+            if edid == '':
+              raise ValidationError("Missing id of the edited skill! (edid)")
+            else:
+              idar = edid.split('_')
+              if idar[0] == "Sid":
+                grt = Ocp_Skill_Type.objects.get(id=idar[1])
+                grt.name = data["name"]
+                grt.description = data["description"]
+                grt.verb = data["verb"]
+                grt.gerund = data["gerund"]
+
+                moved = False
+                if not grt.parent == parent_st:
+                  # mptt: move_to(target, position='first-child')
+                  grt.move_to(parent_st, 'last-child')
+                  moved = True
+
+                grt.ocp_artwork_type = data["related_type"]
+                try:
+                  grt.save()
+                except:
+                  raise ValidationError("The skill name already exists and they are unique")
+
+                if not grt.resource_type:
+                  #pass #raise ValidationError("There's no resource type! create it?")
+                  new_rt = EconomicResourceType(
+                    name=data["name"],
+                    description=data["description"],
+                    unit=out,
+                    price_per_unit=data["price_per_unit"],
+                    substitutable=False, #data["substitutable"],
+                    context_agent=data["context_agent"],
+                    url=data["url"],
+                    photo_url=data["photo_url"],
+                    created_by=request.user,
+                    behavior="work",
+                    inventory_rule="never",
+                  )
+                  new_rt.save()
+                  grt.resource_type = new_rt
+                  grt.save()
+
+                  # mptt: get_ancestors(ascending=False, include_self=False)
+                  ancs = parent_st.get_ancestors(True, True)   # note: they're General.Job
+                  for an in ancs:
+                    #if an.clas != 'Artwork':
+                      an = Ocp_Skill_Type.objects.get(id=an.id)
+                      if an.resource_type:
+                        new_rtfv = None
+                        for fv in an.resource_type.facets.all():
+                          new_rtfv = ResourceTypeFacetValue(
+                            resource_type=new_rt,
+                            facet_value=fv.facet_value
+                          )
+                          new_rtfv.save()
+                        if new_rtfv:
+                          break
+                      if an.facet_value:
+                        new_rtfv = ResourceTypeFacetValue(
+                            resource_type=new_rt,
+                            facet_value=an.facet_value
+                        )
+                        new_rtfv.save()
+                        break
+
+                else:
+                  rt = grt.resource_type;
+                  rt.name = data["name"]
+                  rt.description = data["description"]
+                  rt.unit = out
+                  rt.price_per_unit = data["price_per_unit"]
+                  rt.substitutable = False #data["substitutable"]
+                  rt.context_agent = data["context_agent"]
+                  rt.url = data["url"]
+                  rt.photo_url = data["photo_url"]
+                  #rt.parent = data["parent"]
+                  rt.edited_by = request.user
+                  if moved:
+                    old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)
+                    for rtfv in old_rtfvs:
+                      rtfv.delete()
+                    # mptt: get_ancestors(ascending=False, include_self=False)
+                    ancs = parent_st.get_ancestors(True, True)   # note: they're General.Job
+                    for an in ancs:
+                      #if an.clas != 'Artwork':
+                        an = Ocp_Skill_Type.objects.get(id=an.id)
+                        if an.resource_type:
+                          new_rtfv = None
+                          for fv in an.resource_type.facets.all():
+                            new_rtfv = ResourceTypeFacetValue(
+                              resource_type=rt,
+                              facet_value=fv.facet_value
+                            )
+                            new_rtfv.save()
+                          if new_rtfv:
+                            break
+                        if an.facet_value:
+                          new_rtfv = ResourceTypeFacetValue(
+                              resource_type=rt,
+                              facet_value=an.facet_value
+                          )
+                          new_rtfv.save()
+                          break
+                  rt.save()
+
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
+
+              else: # is not Sid
+                pass
+          else: # have no parent_type id
+            pass
+        else: # have no parent resource field
+          pass
+
+    next = request.POST.get("next")
+    if next == "exchanges_all":
+        return HttpResponseRedirect('/%s/%s/%s/'
+            % ('work/agent', agent.id, 'exchanges'))
+    elif next == "members_agent":
+        return HttpResponseRedirect('/%s/%s/'
+            % ('work/agent', agent.id))
+    else:
+        raise ValidationError("Has no next page specified! "+str(next))
+
+
 
 #    E X C H A N G E S   A L L
 
@@ -2104,10 +2498,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       try:
                         new_ext = ExchangeType.objects.get(name=name)
                         if new_ext:
-                          if new_ext.context_agent and not new_ext.context_agent == agnt:
-                            if agnt.parent():
-                              new_ext.context_agent = agnt.parent()
-                            else:
+                          if new_ext.context_agent and not new_ext.context_agent == agnt: # if the ext exists and the context_agent is not the
+                            if agnt.parent():                                             # same, set the parent agent or the new agent as
+                              new_ext.context_agent = agnt.parent()                       # a new context. TODO: check if the old context has
+                            else:                                                         # the same parent (so the ext keeps showing for them)
                               new_ext.context_agent = agnt
 
                             new_ext.edited_by = request.user
@@ -2208,7 +2602,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
                   else: # endif ext
-                    # the ocp record type still not have an ocp exchange type, create it? TODO
+                    # the parent ocp record type still not have an ocp exchange type, create it? TODO
                     pass
 
                   #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -2260,14 +2654,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       if an.clas != 'Artwork':
                         an = Ocp_Artwork_Type.objects.get(id=an.id)
                         if an.resource_type:
+                          new_rtfv = None
                           for fv in an.resource_type.facets.all():
                             new_rtfv = ResourceTypeFacetValue(
                               resource_type=new_rt,
                               facet_value=fv.facet_value
                             )
                             new_rtfv.save()
-                          break
-                        elif an.facet_value:
+                          if new_rtfv:
+                            break
+                        if an.facet_value:
                           new_rtfv = ResourceTypeFacetValue(
                               resource_type=new_rt,
                               facet_value=an.facet_value
@@ -2305,9 +2701,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       raise ValidationError('Cannot insert node:'+str(new_oat)+' Parent:'+str(parent_rt))
 
 
-                    nav_form = ExchangeNavForm(agent=agent, data=None)
-                    Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                    Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                    #nav_form = ExchangeNavForm(agent=agent, data=None)
+                    #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                    #Stype_form = NewSkillTypeForm(agent=agent, data=None)
 
                   else: # have no parent_type id
                     pass
@@ -2391,14 +2787,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                             if an.clas != 'Artwork':
                               an = Ocp_Artwork_Type.objects.get(id=an.id)
                               if an.resource_type:
+                                new_rtfv = None
                                 for fv in an.resource_type.facets.all():
                                   new_rtfv = ResourceTypeFacetValue(
                                     resource_type=new_rt,
                                     facet_value=fv.facet_value
                                   )
                                   new_rtfv.save()
-                                break
-                              elif an.facet_value:
+                                if new_rtfv:
+                                  break
+                              if an.facet_value:
                                 new_rtfv = ResourceTypeFacetValue(
                                     resource_type=new_rt,
                                     facet_value=an.facet_value
@@ -2428,14 +2826,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                               if an.clas != 'Artwork':
                                 an = Ocp_Artwork_Type.objects.get(id=an.id)
                                 if an.resource_type:
+                                  new_rtfv = None
                                   for fv in an.resource_type.facets.all():
                                     new_rtfv = ResourceTypeFacetValue(
                                       resource_type=rt,
                                       facet_value=fv.facet_value
                                     )
                                     new_rtfv.save()
-                                  break
-                                elif an.facet_value:
+                                  if new_rtfv:
+                                    break
+                                if an.facet_value:
                                   new_rtfv = ResourceTypeFacetValue(
                                       resource_type=rt,
                                       facet_value=an.facet_value
@@ -2444,9 +2844,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                                   break
                           rt.save()
 
-                        nav_form = ExchangeNavForm(agent=agent, data=None)
-                        Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                        Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                        #nav_form = ExchangeNavForm(agent=agent, data=None)
+                        #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                        #Stype_form = NewSkillTypeForm(agent=agent, data=None)
 
                       else: # is not Rid
                         pass
@@ -2457,7 +2857,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   pass
 
         # there's no new_resource_type = request.POST.get("new_resource_type")
-        new_skill_type = request.POST.get("new_skill_type")
+        """new_skill_type = request.POST.get("new_skill_type")
         if new_skill_type:
             if Stype_form.is_valid():
                 #raise ValidationError("New resource type, valid")
@@ -2526,10 +2926,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 else: # have no parent resource field
                   pass
             else:
-                pass #raise ValidationError(Rtype_form.errors)
+                pass #raise ValidationError(Rtype_form.errors)"""
 
 
-        edit_skill_type = request.POST.get("edit_skill_type")
+        """edit_skill_type = request.POST.get("edit_skill_type")
         if edit_skill_type:
             if Stype_form.is_valid():
                 data = Stype_form.cleaned_data
@@ -2652,7 +3052,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   else: # have no parent_type id
                     pass
                 else: # have no parent resource field
-                  pass
+                  pass"""
 
 
         edit_exchange_type = request.POST.get("edit_exchange_type") # TODO the detail about transfertypes
@@ -2681,13 +3081,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   if ext:
                     ext.save()
 
-                nav_form = ExchangeNavForm(agent=agent, data=None)
-                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
                 #raise ValidationError("Editing Exchange Type! "+data['parent_type'].name+' ext:'+str(new_parent)+' moved:'+str(moved))
-                #uca = data["use_case"]
-                #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                #    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type
 
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
@@ -2716,9 +3113,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                             exchanges_included.append(ex)
                     exchanges = exchanges_included
 
-                nav_form = ExchangeNavForm(agent=agent, data=None)
-                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
         else:
           exchanges = Exchange.objects.filter(context_agent=agent) #.none()
           selected_values = "all"

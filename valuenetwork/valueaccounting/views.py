@@ -12761,7 +12761,10 @@ def decline_suggestion(request, suggestion_id):
 @login_required
 def undecline_suggestion(request, suggestion_id):
     suggestion = get_object_or_404(SkillSuggestion, pk=suggestion_id)
-    suggestion.state = "new"
+    if suggestion.resource_type:
+      suggestion.state = "accepted"
+    else:
+      suggestion.state = "new"
     suggestion.save()
     return HttpResponseRedirect('/%s/'
         % ('accounting/skill-suggestions'))

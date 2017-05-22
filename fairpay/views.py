@@ -1,92 +1,141 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.http import HttpResponseForbidden
+from django.contrib import messages
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 from fairpay.models import FairpayOauth2
 from fairpay.forms import FairpayOauth2Form
-from fairpay.utils import FairpayOauth2Error, FairpayOauth2Connection
+from fairpay.utils import FairpayOauth2Connection, FairpayOauth2Error
 
-@login_required
-def start(request, agent_id):
-    #TODO: check if current user can manage this agent.
+def get_agents(request, agent_id):
+
+    user_agent = None
     try:
-        oauth = FairpayOauth2.objects.filter(agent=agent_id)
-    except ObjectDoesNotExist:
-        return redirect('fairpay_auth', agent_id=agent_id)
-
-    if oauth.count() == 1:
-        return redirect('fairpay_history', agent_id=agent_id)
-    elif oauth.count() > 1:
-        # TODO: several fairpay accounts for one agent
+        au = request.user.agent
+        user_agent = au.agent
+    except:
         pass
+    if user_agent and user_agent.id == int(agent_id):
+        return True, user_agent, user_agent
+
+    agent = None
+    try:
+        agent = EconomicAgent.objects.get(id=agent_id)
+    except:
+        pass
+    if user_agent and agent and agent in user_agent.managed_projects():
+        return True, user_agent, agent
+
+    return False, user_agent, agent
 
 
 @login_required
 def auth(request, agent_id):
-    #TODO: check if current user can manage this agent.
+    access_permission, user_agent, agent = get_agents(request, agent_id)
+    if not access_permission:
+        return HttpResponseForbidden()
+
     if request.method == 'POST':
         form = FairpayOauth2Form(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
             password = form.cleaned_data['password']
-            c = FairpayOauth2Connection.get()
+            connection = FairpayOauth2Connection.get()
+
             try:
-                data = c.new_token(name, password)
+                response = connection.fake_new_token(name, password)
             except FairpayOauth2Error:
-                raise ValidationError('Authentication failed.')
-                #TODO: handle fail here. Message to user.
+                messages.error(request, 'Authentication failed.')
+                return redirect('fairpay_auth', agent_id=agent_id)
+
             try:
-                agent = EconomicAgent.objects.get(id=agent_id)
                 FairpayOauth2.objects.create(
                     agent = agent,
                     fairpay_user = name,
-                    access_token = data['access_token'],
-                    refresh_token = data['refresh_token'],
-                    expires_token = int(data['expires_in']),
+                    access_token = response['access_token'],
+                    refresh_token = response['refresh_token'],
+                    expires_token = int(response['expires_in']),
                 )
             except:
-                pass
-                #TODO: handle fail here.
-            return redirect('fairpay_history', agent_id=agent_id)
+                messages.error(request,
+                    'Something was wrong saving your fairpay data.')
 
+            messages.success(request,
+                'Your new access to fairpay has been succesfully created.')
+            return redirect('fairpay_auth', agent_id=agent_id)
+        else:
+            messages.error(request, 'Authentication failed.')
+            return redirect('fairpay_auth', agent_id=agent_id)
     else:
-        form = FairpayOauth2Form()
+        try:
+            oauths = FairpayOauth2.objects.filter(agent=agent)
+        except FairpayOauth2.DoesNotExist:
+            oauths = None
 
-    return render(request, 'fairpay_auth.html', {'oauth_form': form})
+        form = FairpayOauth2Form()
+        return render(request, 'fairpay_auth.html', {
+            'agent': agent,
+            'user_agent': user_agent,
+            'oauths': oauths,
+            'oauth_form': form,
+            })
+
 
 @login_required
-def history(request, agent_id):
-    #TODO: check if current user can manage this agent.
+def history(request, agent_id, oauth_id):
+    access_permission, user_agent, agent = get_agents(request, agent_id)
+    if not access_permission:
+        return HttpResponseForbidden()
+
     try:
-        oauth = FairpayOauth2.objects.filter(agent=agent_id)
+        oauths = FairpayOauth2.objects.filter(agent=agent)
     except FairpayOauth2.DoesNotExist:
-        #TODO: message to user.
-        return redirect('fairpay_auth', agent_id=agent_id)
-    c = FairpayOauth2Connection.get()
-    #TODO: several oauth for one agent.
+        oauths = None
+
+    if oauths:
+        oauth = None
+        for o in oauths:
+            if o.id == int(oauth_id):
+                oauth = o
+
+    if not oauths or not oauth:
+        return HttpResponseForbidden()
+
+    connection = FairpayOauth2Connection.get()
+
     try:
-        data = c.wallet_history(oauth[0].access_token, limit=10, offset=0)
-    except FairpayOauth2Error: # TODO: catch other errors.
+        data = connection.fake_wallet_history(
+            oauth.access_token,
+            limit=10,
+            offset=0
+        )
+    except FairpayOauth2Error:
+        messages.error(request,
+            'Something was wrong connecting to chip-chap.')
         return redirect('fairpay_auth', agent_id=agent_id)
 
-    if data['status'] == 'ok' and data['data']['total'] > 0:
+    if data['status'] == 'ok':
         table_headers = ['created', 'amount', 'currency', 'concept',
                 'method_in', 'method_out']
         table_rows = []
-        for i in range(data['data']['start'], data['data']['end']):
-            table_rows.append([
-                data['data']['elements'][i]['created'],
-                data['data']['elements'][i]['amount'],
-                data['data']['elements'][i]['currency'],
-                data['data']['elements'][i]['data_in']['concept'],
-                data['data']['elements'][i]['method_in'],
-                data['data']['elements'][i]['method_out'],
-            ])
+        if data['data']['total'] > 0:
+            for i in range(data['data']['start'], data['data']['end']):
+                table_rows.append([
+                    data['data']['elements'][i]['created'],
+                    data['data']['elements'][i]['amount'],
+                    data['data']['elements'][i]['currency'],
+                    data['data']['elements'][i]['data_in']['concept'],
+                    data['data']['elements'][i]['method_in'],
+                    data['data']['elements'][i]['method_out'],
+                ])
         return render(request, 'fairpay_history.html', {
             'table_headers': table_headers,
             'table_rows': table_rows,
-            'fairpay_user': oauth[0].fairpay_user,
+            'fairpay_user': oauth.fairpay_user,
         })
     else:
+        messages.error(request,
+            'Something was wrong connecting to chip-chap.')
         return redirect('fairpay_auth', agent_id=agent_id)

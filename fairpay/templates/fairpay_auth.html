@@ -3,10 +3,22 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 
-{% block head_title %}{% trans "Fairpay authentication" %}{% endblock %}
+{% block head_title %}{% trans "Fairpay authentication: " %}{{ agent.name }}{% endblock %}
 
 {% block body_base %}
+
   <div class="container">
+    {% include "_messages.html" %}
+    <h3>{% trans "Access to fairpay for agent " %}{{ agent.name }}:</h3>
+    <ul>
+      {% for oauth in oauths %}
+        <li><a href="{% url "fairpay_history" agent_id=agent.id oauth_id=oauth.id %}">{% trans "User" %} {{ oauth.fairpay_user }}</a></li>
+      {% empty %}
+        <li>( {% trans "You don't have any user yet" %} )</li>
+      {% endfor %}
+    </ul>
+    <br /><br />
+    <h3>{% trans "Create new access to fairpay" %}:</h3>
     <form id="oauthForm" class="validateMe" action="." method="POST" >
         {% csrf_token %}
         {{ oauth_form|as_bootstrap }}

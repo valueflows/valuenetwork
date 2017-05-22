@@ -212,7 +212,7 @@
                           {% if req.agent %}
 
                              {% if request.user.agent.agent.is_staff %}
-                                <a href="{{ req.agent.get_absolute_url }}">{{ req.name }} {{ req.surname }}</a>
+                                <a href="{% url 'members_agent' agent_id=req.agent.id %}">{{ req.name }} {{ req.surname }}</a>
                              {% else %}
                                 <a href="{% url "members_agent" agent_id=req.agent.id %}">
                                   {% if req.name %} {{ req.name }} {{ req.surname }} {% else %} <em>{{ req.agent.name }}</em> {% endif %}</a>

@@ -63,7 +63,11 @@ th
           {% if jn_req.agent.is_active_freedom_coop_member or request.user.agent.agent.is_participant %}
             {% trans "Feedback with" %} {{ agent.name }}
           {% elif request.user.agent.agent in agent.managers %}
-            {% blocktrans with user=jn_req.agent project=agent %}The joining request of {{ user }} related "{{ project }}" {% endblocktrans %}
+            <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a> >
+            {% if agent.project.fobi_slug and agent.project.join_requests %}
+              <a class="indent" href="{% url 'join_requests' agent_id=agent.id %}">{% trans "Join Requests" %}</a> >
+            {% endif %}
+            {{ jn_req.agent }}
           {% else %}
             {% trans "Your joining request for " %} {{ agent.name }}
           {% endif %}
@@ -76,7 +80,7 @@ th
           </span>
           <div class="subnav">
             {% if request.user.agent.agent in agent.managers %}
-              <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{% trans "Back to your Project" %}</a>
+              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             {% else %}
               {% if jn_req.agent.is_active_freedom_coop_member %}
                 <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{% trans "View Project" %}</a>
@@ -137,12 +141,15 @@ th
             {% if req.items_data %}
               {% for obj in req.items_data %}
                 <tr class="fobi">
-                  <th>{{ obj.key }}</th>
+                  <th>{{ obj.key }}:</th>
                   <td>{{ obj.val }}</td>
                 </tr>
               {% endfor %}
             {% else %}
               <tr><th class="error">ERROR:</th><td>{{ req.items_data }}</td></tr>
+            {% endif %}
+            {% if req.pending_shares %}
+              <tr><th>{% trans "Shares Pending" %}:</th><td><span style="color:#cb3636"><b>{{ req.pending_shares }}</b> shares</span> <a href="#" class="btn btn-primary">Pay your Shares</a></td></tr>
             {% endif %}
             <!-- <tr>
                 <th>{% trans "Languages" %}:</th>

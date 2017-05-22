@@ -2778,8 +2778,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         for an in ancs:
                           if an.clas == "currency":
                             rt.cur = True
-                        if rt.cur:
-                          to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name)+sign+' - '
+                        if rt.cur and rt.ocp_artwork_type.ocpArtworkType_unit_type:
+                          if rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type:
+                            to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name)+sign+' - '
+                          else:
+                            to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type)+sign+'-MISSING UNIT! '
                           for ttr in total_transfers:
                             if ttr['unit'] == rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.id:
                               ttr['name'] = rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name
@@ -4017,8 +4020,10 @@ def project_all_resources(request, agent_id):
                 #resource_types.sort(key=lambda rt: rt.label())
     else:
         for rt in rts:
-            if rt.onhand_qty()>0:
-                resource_types.append(rt)
+            #if rt.onhand_qty()>0:
+            resource_types.append(rt)
+            if rt.facets.count():
+              if rt.facets.all():
                 fvs.append(rt.facets.all()[0].facet_value) # add first facetvalue
         if fcr and not fcr.resource_type in resource_types:
             resource_types.append(fcr.resource_type)
@@ -4058,7 +4063,7 @@ def project_resource(request, agent_id, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    if not (agent == user_agent or user_agent in agent.managers()):
+    if not (agent == user_agent or user_agent in agent.managers() or request.user.is_superuser):
         return render(request, 'work/no_permission.html')
 
     RraFormSet = modelformset_factory(

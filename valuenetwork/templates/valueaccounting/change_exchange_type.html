@@ -318,30 +318,29 @@ h3 {
 
 	$(document).ready(function(){
 
-    var ObjChosSingle = {
-      allow_single_deselect: true,
-      width: "250px",
-      disable_search_threshold: 6
-    };
+      var ObjChosSingle = {
+        allow_single_deselect: true,
+        width: "250px",
+        disable_search_threshold: 6
+      };
 
-		$(".chzn-select").chosen( ObjChosSingle );
+		  $(".chzn-select").chosen( ObjChosSingle );
 
-		$( "#help" ).toggle( function(){
+		  $( "#help" ).toggle( function(){
             $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
-        })
+        }
+      );
 
-        $(".cancelBtn").click(function(event)
-        {
+      $(".cancelBtn").click(function(event){
             var target = event.target;
             var form = target.form;
             var formId = "#" + form.id;
             $(formId)[0].reset();
-
-        });
+      });
 
 	}); // end document.ready
 
@@ -369,7 +368,7 @@ h3 {
         }
 
         function sameOrigin(url)
-        {
+        { return true;
             // url could be relative or scheme relative or absolute
             var host = document.location.host; // host + port
             var protocol = document.location.protocol;

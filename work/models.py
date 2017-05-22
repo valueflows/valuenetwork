@@ -147,6 +147,8 @@ class SkillSuggestion(models.Model):
 
 from nine.versions import DJANGO_LTE_1_5
 from fobi.contrib.plugins.form_handlers.db_store.models import SavedFormDataEntry
+import simplejson as json
+
 
 USER_TYPE_CHOICES = (
     #('participant', _('project participant (no membership)')),
@@ -227,6 +229,65 @@ class JoinRequest(models.Model):
         if agent_type:
             init["agent_type"] = agent_type
         return ProjectAgentCreateForm(initial=init, prefix=self.form_prefix())
+
+    def fobi_items_keys(self):
+        fobi_headers = []
+        fobi_keys = []
+        if self.fobi_data and self.fobi_data.pk:
+            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+            entry = self.entries[0]
+            self.form_headers = json.loads(entry.form_data_headers)
+            for val in self.form_headers:
+                fobi_headers.append(self.form_headers[val])
+                fobi_keys.append(val)
+        return fobi_keys
+
+    def fobi_items_data(self):
+        self.items_data = None
+        if self.fobi_data and self.fobi_data.pk:
+            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+            entry = self.entries[0]
+            self.data = json.loads(entry.saved_data)
+            self.items = self.data.items()
+            self.items_data = []
+            for key in self.fobi_items_keys():
+                self.items_data.append(self.data.get(key))
+        return self.items_data
+
+    def pending_shares(self):
+        answer = ''
+        account_type = None
+        balance = 0
+        amount = 0
+        if self.project.joining_style == "moderated" and self.fobi_data:
+            rts = list(set([arr.resource.resource_type for arr in self.project.agent.resource_relationships()]))
+            for rt in rts:
+                if rt.ocp_artwork_type:
+                    for key in self.fobi_items_keys():
+                        if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
+                            val = self.data.get(key)
+                            account_type = rt
+                            data = json.loads(self.fobi_data.form_entry.formelemententry_set.all()[0].plugin_data)
+                            opts = data.get('choices').split('\r\n')
+                            for op in opts:
+                              opa = op.split(',')
+                              if opa[1].encode('utf-8').strip() == val.encode('utf-8').strip():
+                                amount = int(opa[0])
+
+        if self.agent:
+            user_rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
+            for rt in user_rts:
+                if rt == account_type: #.ocp_artwork_type:
+                    rss = list(set([arr.resource for arr in self.agent.resource_relationships()]))
+                    for rs in rss:
+                        if rs.resource_type == rt:
+                            balance = rs.price_per_unit # TODO: update the price_per_unit with wallet balance
+
+        answer = amount - balance
+        if answer > 0:
+            return int(answer)
+        else:
+            return answer #False
 
 
 class NewFeature(models.Model):

@@ -48,7 +48,7 @@ class FairpayOauth2Connection(object):
         if r.status_code == '200':
             return r.json()
         else:
-            raise FairpayOauth2Error('Error ' + r.status_code, r.text)
+            raise FairpayOauth2Error('Error ' + str(r.status_code), r.text)
 
     def signature_access(self):
         access_secret_bin = self.access_secret # b64decode(self.access_secret)
@@ -69,7 +69,7 @@ class FairpayOauth2Connection(object):
         if r.status_code == '200':
             return True
         else:
-            raise FairpayOauth2Error('Error ' + r.status_code, r.text)
+            raise FairpayOauth2Error('Error ' + str(r.status_code), r.text)
 
     def fake_new_token(self, username, password):
         if username == 'fairpay_user' and password == 'fairpay_user_passwd':

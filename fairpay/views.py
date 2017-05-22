@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
-from django.http import HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 
 from valuenetwork.valueaccounting.models import EconomicAgent
@@ -35,7 +34,7 @@ def get_agents(request, agent_id):
 def auth(request, agent_id):
     access_permission, user_agent, agent = get_agents(request, agent_id)
     if not access_permission:
-        return HttpResponseForbidden()
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = FairpayOauth2Form(request.POST)
@@ -45,7 +44,7 @@ def auth(request, agent_id):
             connection = FairpayOauth2Connection.get()
 
             try:
-                response = connection.fake_new_token(name, password)
+                response = connection.new_token(name, password)
             except FairpayOauth2Error:
                 messages.error(request, 'Authentication failed.')
                 return redirect('fairpay_auth', agent_id=agent_id)
@@ -65,9 +64,7 @@ def auth(request, agent_id):
             messages.success(request,
                 'Your new access to fairpay has been succesfully created.')
             return redirect('fairpay_auth', agent_id=agent_id)
-        else:
-            messages.error(request, 'Authentication failed.')
-            return redirect('fairpay_auth', agent_id=agent_id)
+
     else:
         try:
             oauths = FairpayOauth2.objects.filter(agent=agent)
@@ -87,7 +84,7 @@ def auth(request, agent_id):
 def history(request, agent_id, oauth_id):
     access_permission, user_agent, agent = get_agents(request, agent_id)
     if not access_permission:
-        return HttpResponseForbidden()
+        raise PermissionDenied
 
     try:
         oauths = FairpayOauth2.objects.filter(agent=agent)
@@ -101,12 +98,12 @@ def history(request, agent_id, oauth_id):
                 oauth = o
 
     if not oauths or not oauth:
-        return HttpResponseForbidden()
+        raise PermissionDenied
 
     connection = FairpayOauth2Connection.get()
 
     try:
-        data = connection.fake_wallet_history(
+        data = connection.wallet_history(
             oauth.access_token,
             limit=10,
             offset=0

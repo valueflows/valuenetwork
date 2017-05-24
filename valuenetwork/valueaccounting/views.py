@@ -556,6 +556,7 @@ def agent(request, agent_id):
         "individual_stats": individual_stats,
         "roles_height": roles_height,
         "help": get_help("agent"),
+        "use_faircoin": settings.USE_FAIRCOIN,
     })
 
 def accounting(request, agent_id):

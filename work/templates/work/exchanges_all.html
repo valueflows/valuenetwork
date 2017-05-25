@@ -364,8 +364,14 @@ hr {
                   {% if nav_form.exchange_type.errors and request.POST.new_exchange %}<div class="alert" style="display:inline-block;">{{ nav_form.exchange_type.errors }}</div>{% endif %}
 
                   {{ nav_form.exchange_type }}  &nbsp; <span>{% trans "Or make a new one..." %}</span><span class="showhide" id="sh-exchange_type" >(SHOW)</span></p>
-                {% if Rtype_form.errors or Stype_form.errors and not request.POST.new_exchange and not request.POST.edit_exchange_type %}<div class="alert" style="display:inline-block;"><ul><li>
-                    {% trans "The new resource type request has some errors, click 'SHOW' to see them." %}</li></ul></div>
+                {% if Rtype_form.errors or Stype_form.errors and not request.POST.new_exchange and not request.POST.edit_exchange_type %}
+                    {% if Rtype_form.errors %}{% if request.POST.new_resource_type or request.POST.edit_resource_type %}
+                        <div class="alert" style="display:inline-block;"><ul><li>
+                        {% trans "The new resource type request has some errors, click 'SHOW' to see them." %}</li></ul></div>{% endif %}
+                    {% elif Stype_form.errors %}{% if request.POST.new_skill_type or request.POST.edit_skill_type %}
+                        <div class="alert" style="display:inline-block;"><ul><li>
+                        {% trans "The new skill type request has some errors, click 'SHOW' to see them." %}</li></ul></div>{% endif %}
+                    {% endif %}
                 {% endif %}
                 <div class="list" id="list-exchange_type" style="margin-top: 5px;">
                   <div id="tabs" style="display:none;">

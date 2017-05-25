@@ -1666,7 +1666,7 @@ def join_requests(request, agent_id):
 
     if fobi_slug and requests:
         form_entry = FormEntry.objects.get(slug=fobi_slug)
-        req = requests[0]
+        req = requests.last()
         if req.fobi_data and req.fobi_data.pk:
             req.entries = SavedFormDataEntry.objects.filter(pk=req.fobi_data.pk).select_related('form_entry')
             entry = req.entries[0]
@@ -2439,6 +2439,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     Rtype_form = NewResourceTypeForm(agent=agent, data=request.POST or None)
     Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
 
+    #import pdb; pdb.set_trace()
     if request.method == "POST":
         new_exchange = request.POST.get("new_exchange")
         if new_exchange:
@@ -2679,11 +2680,17 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       rrt_ancs = rrt.get_ancestors(False, True)
                       for an in rrt_ancs: # see if is child of material or non-material
                         if an.clas == 'Material':
-                          mat = Material_Type.objects.get(id=rrt.id)
+                          try:
+                            mat = Material_Type.objects.get(id=rrt.id)
+                          except:
+                            mat = Ocp_Artwork_Type.objects.update_to_general('Material_Type', rrt.id)
                           rel_material = mat
                           break
                         if an.clas == 'Nonmaterial':
-                          non = Nonmaterial_Type.objects.get(id=rrt.id)
+                          try:
+                            non = Nonmaterial_Type.objects.get(id=rrt.id)
+                          except:
+                            non = Ocp_Artwork_Type.objects.update_to_general('Nonmaterial_Type', rrt.id)
                           rel_nonmaterial = non
                           break
 
@@ -2747,15 +2754,21 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                           rrt_ancs = rrt.get_ancestors(False, True)
                           for an in rrt_ancs: # see if is child of material or non-material
                             if an.clas == 'Material':
-                              mat = Material_Type.objects.get(id=rrt.id)
+                              try:
+                                mat = Material_Type.objects.get(id=rrt.id)
+                              except:
+                                mat = Ocp_Artwork_Type.objects.update_to_general('Material_Type', rrt.id)
                               rel_material = mat
                               break
                             if an.clas == 'Nonmaterial':
-                              non = Nonmaterial_Type.objects.get(id=rrt.id)
+                              try:
+                                non = Nonmaterial_Type.objects.get(id=rrt.id)
+                              except:
+                                non = Ocp_Artwork_Type.objects.update_to_general('Nonmaterial_Type', rrt.id)
                               rel_nonmaterial = non
                               break
-                          grt.ocpArtworkType_material_type = rel_material
-                          grt.ocpArtworkType_nonmaterial_type = rel_nonmaterial
+                        grt.ocpArtworkType_material_type = rel_material
+                        grt.ocpArtworkType_nonmaterial_type = rel_nonmaterial
 
                         grt.save()
 
@@ -4418,7 +4431,8 @@ def project_all_resources(request, agent_id):
     else:
         for rt in rts:
             #if rt.onhand_qty()>0:
-            resource_types.append(rt)
+            if not rt in resource_types:
+              resource_types.append(rt)
             if rt.facets.count():
               if rt.facets.all():
                 fvs.append(rt.facets.all()[0].facet_value) # add first facetvalue

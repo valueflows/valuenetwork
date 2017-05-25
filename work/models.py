@@ -1,12 +1,13 @@
-from django.db import models
+from django.db import models, connection
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from django.utils.translation import ugettext_lazy as _
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from valuenetwork.valueaccounting.models import *
-#from fobi.models import FormEntry
+from fobi.models import FormEntry
 
 from mptt.fields import TreeForeignKey
 
@@ -114,6 +115,36 @@ class Project(models.Model):
     def is_public(self):
         return self.visibility == 'public'
 
+    def fobi_form(self):
+        if self.fobi_slug:
+            entry = FormEntry.objects.get(slug=self.fobi_slug)
+            return entry
+        return False
+
+    def rts_with_clas(self):
+        rts_with_clas = []
+        rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
+        for rt in rts:
+            if rt.ocp_artwork_type and rt.ocp_artwork_type.clas:
+                rts_with_clas.append(rt)
+        return rts_with_clas
+
+    def share_types(self):
+        shr_ts = []
+        if self.is_moderated() and self.fobi_slug:
+            form = self.fobi_form()
+            fields = form.formelemententry_set.all()
+            for fi in fields:
+                data = json.loads(fi.plugin_data)
+                name = data.get('name')
+                for rt in self.rts_with_clas():
+                    if rt.ocp_artwork_type.clas == name: # matches the rt clas identifier with the fobi field name
+                        opts = data.get('choices').split('\r\n')
+                        for op in opts:
+                            opa = op.split(',')
+                            shr_ts.append(opa[1].strip())
+            return shr_ts
+        return False
 
 
 class SkillSuggestion(models.Model):
@@ -368,6 +399,49 @@ class Ocp_Artwork_TypeManager(TreeManager):
 
     def update_from_general(self): # TODO, if general.Artwork_Type (or Type) changes independently, update the subclass with new items
         return False
+
+    def update_to_general(self, table=None, ide=None): # update material and non-material general tables if not matching
+        if table and ide:
+            if table == 'Material_Type':
+                try:
+                    genm = Material_Type.objects.get(id=ide)
+                except:
+                    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+                        with connection.cursor() as cursor:
+                            cursor.execute("PRAGMA foreign_keys=OFF")
+                            cursor.execute("INSERT INTO general_material_type (materialType_artwork_type_id) VALUES (%s)", [ide])
+                            cursor.execute("PRAGMA foreign_keys=ON")
+                            return Material_Type.objects.get(id=ide)
+            elif table == 'Nonmaterial_Type':
+                try:
+                    genm = Nonmaterial_Type.objects.get(id=ide)
+                except:
+                    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+                        with connection.cursor() as cursor:
+                            cursor.execute("PRAGMA foreign_keys=OFF")
+                            cursor.execute("INSERT INTO general_nonmaterial_type (nonmaterialType_artwork_type_id) VALUES (%s)", [ide])
+                            cursor.execute("PRAGMA foreign_keys=ON")
+                            return Nonmaterial_Type.objects.get(id=ide)
+            else:
+                raise ValidationError("Unknown table for update_to_general ! "+table)
+
+        else: # update all
+            pass
+            ocp_mat = Ocp_Artwork_Type.objects.get(clas='Material')
+            ocp_mats_c = ocp_mat.get_descendant_count() # self not included, like at general_material_type
+            gen_mats_c = Material_Type.objects.count()
+            if not ocp_mats_c == gen_mats_c:
+                ocp_mats = ocp_mat.get_descendants()
+                gen_mats = Material_Type.objects.all()
+                for ocpm in ocp_mats:
+                    try:
+                        genm = Material_Type.objects.get(id=ocpm.id)
+                    except:
+                        if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+                            with connection.cursor() as cursor:
+                                cursor.execute("PRAGMA foreign_keys=OFF")
+                                cursor.execute("INSERT INTO general_material_type (materialType_artwork_type_id) VALUES (%s)", [ocpm.id])
+                                cursor.execute("PRAGMA foreign_keys=ON")
 
 
 class Ocp_Artwork_Type(Artwork_Type):

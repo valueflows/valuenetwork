@@ -94,6 +94,12 @@
                     <tr class="{% cycle 'odd' 'even' %}">
                       {% if True or state != "accepted" %}
                             <td>
+                                {% if project.share_types %}
+                                  {% trans "Shares:" %}
+                                  {% if req.pending_shares %}<span class="error">{% trans "Pending" %}</span>
+                                  {% else %}{% trans "Acquired" %}{% endif %}
+                                {% endif %}
+
                                 {% if state == "declined" %}
                                     <form
                                         class="action-form"
@@ -114,14 +120,16 @@
                                     </form>
                                 {% else %}
                                   {% if req.agent %}
-                                    <form
+                                    {% if not req.pending_shares %}
+                                      <form
                                         class="action-form"
                                         id="accept-form{{ req.id }}"
                                         action="{% url "accept_request" join_request_id=req.id %}"
                                         method="POST" >
                                         {% csrf_token %}
                                         <input type="submit" class="btn btn-mini btn-primary" name="submit" value='{% trans "Accept Member" %}' />
-                                    </form>
+                                      </form>
+                                    {% endif %}
                                     <form
                                         class="action-form"
                                         id="decline-form{{ req.id }}"

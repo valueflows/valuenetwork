@@ -166,7 +166,7 @@
                    <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
                {% endif %}
                {% if user_agent in agent.managers and agent.project.fobi_slug and agent.project.join_requests %}
-                  <a class="indent" href="join-requests">{% trans "Join Requests" %}</a>
+                  <a class="indent" href="{% url "join_requests" agent_id=agent.id %}">{% trans "Join Requests" %}</a>
                {% elif agent.project in user_agent.joinaproject_requests_projects %}
                  {% for req in user_agent.joinaproject_requests %}
                    {% if req.project == agent.project %}
@@ -422,6 +422,16 @@
                               {% endif %}
                           </td>
                         </tr>
+                        {% if agent.project.share_types %}
+                          <tr>
+                            <th>{% trans "Offered Shares:" %}</th>
+                            <td><ul style="margin-left:15px;">
+                              {% for typ in agent.project.share_types %}
+                                <li>{{ typ }}</li>
+                              {% endfor %}
+                            </ul></td>
+                          </tr>
+                        {% endif %}
                       {% endif %}
                   {% endif %}
 
@@ -502,9 +512,10 @@
 
         <div class="span6">
           {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}{% if agent.project and form_entries and fobi_name and user_agent in agent.managers %}
-            <div class="requests span6">
+            <div class="requests span6" style="width:100%;">
               <h3>
-                {% trans "Pending to create user+agent:" %} <!-- <span style="font-weight:normal;">{{ fobi_name }}</span> -->
+                {% trans "Pending to create user+agent:" %} &nbsp;
+                <a class="btn btn-primary" href="{% url "join_requests" agent_id=agent.id %}">{% trans "Manage Join Requests" %}</a>
               </h3>
               <ul>
                 {% for req in form_entries %}

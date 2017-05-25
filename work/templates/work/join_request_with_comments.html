@@ -60,16 +60,16 @@ th
         {% include "_messages.html" %}
     <div>
         <legend>
-          {% if jn_req.agent.is_active_freedom_coop_member or request.user.agent.agent.is_participant %}
+          {% if jn_req.agent.is_active_freedom_coop_member or user_agent.is_participant %}
             {% trans "Feedback with" %} {{ agent.name }}
-          {% elif request.user.agent.agent in agent.managers %}
+          {% elif user_agent in agent.managers or user_agent == agent %}
             <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a> >
             {% if agent.project.fobi_slug and agent.project.join_requests %}
               <a class="indent" href="{% url 'join_requests' agent_id=agent.id %}">{% trans "Join Requests" %}</a> >
             {% endif %}
-            {{ jn_req.agent }}
+            {{ jn_req.agent.name }}
           {% else %}
-            {% trans "Your joining request for " %} {{ agent.name }}
+            {% trans "Your joining request for " %}<a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a>
           {% endif %}
            &nbsp; <span style="font-weight:normal; font-size:80%;">
           {% if jn_req.agent %}
@@ -79,15 +79,15 @@ th
           {% endif %}
           </span>
           <div class="subnav">
-            {% if request.user.agent.agent in agent.managers %}
+            {% if user_agent in agent.managers or user_agent == agent %}
               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
             {% else %}
               {% if jn_req.agent.is_active_freedom_coop_member %}
                 <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{% trans "View Project" %}</a>
               {% endif %}
               <a class="indent" href="{% url "profile" %}">{% trans "Your Profile" %}</a>
-              {% if request.user.agent.agent.faircoin_resource %}
-                <a class="indent" href="{% url "manage_faircoin_account" resource_id=request.user.agent.agent.faircoin_resource.id %}"
+              {% if user_agent.faircoin_resource %}
+                <a class="indent" href="{% url "manage_faircoin_account" resource_id=user_agent.faircoin_resource.id %}"
                           title="{% trans 'Your personal faircoin wallet in OCP' %}"
                           >{% trans 'Faircoin Account' %}</a>
               {% endif %}
@@ -149,7 +149,10 @@ th
               <tr><th class="error">ERROR:</th><td>{{ req.items_data }}</td></tr>
             {% endif %}
             {% if req.pending_shares %}
-              <tr><th>{% trans "Shares Pending" %}:</th><td><span style="color:#cb3636"><b>{{ req.pending_shares }}</b> shares</span> <a href="#" class="btn btn-primary">Pay your Shares</a></td></tr>
+              <tr><th>{% trans "Shares Pending" %}:</th>
+                <td><span class="error"><b>{{ req.pending_shares }}</b> shares</span>
+                {% if user_agent in req.agent.managers or user_agent == req.agent or request.user.is_superuser %}<a href="#" class="btn btn-primary">Pay your Shares</a>{% endif %}</td>
+              </tr>
             {% endif %}
             <!-- <tr>
                 <th>{% trans "Languages" %}:</th>
@@ -176,9 +179,9 @@ th
     <div id="member-request-comments">
       <legend>
         {% if request.user.agent.agent in agent.managers %}
-          {% trans "Talk with " %} {{ jn_req.agent.name }}
+          {% trans "Talk with " %} {% if jn_req.agent %}<a class="indent" href="{% url 'members_agent' agent_id=jn_req.agent.id %}">{{ jn_req.agent.name }}</a> ({{ jn_req.agent.nick }}) {% else %} {{ jn_req.name }} ¿? {% endif %}
         {% else %}
-          {% trans "Talk with coordinators of " %} {{ agent.name }}
+          {% trans "Talk with coordinators of " %} <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a>  ({{ agent.nick }})
         {% endif %}
       </legend>
 

@@ -24,21 +24,19 @@ def create_user_agent():
     AgentUser.objects.get_or_create(agent=test_agent, user=test_user)
     return test_agent
 
-def fake_new_token(username, password):
+def fake_new_client(username, password):
     if username == 'fairpay_user' and password == 'fairpay_user_passwd':
         response = {
-            'token_type': 'bearer',
-            'expires_in': 3600,
-            'scope': 'panel',
-            'access_token': 'TestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestT',
-            'refresh_token': 'TestRefreshTokenTestRefreshTokenTestRefreshTokenTestRefreshTokenTestRefreshTokenTestRe'
+            'username': username,
+            'access_key': 'TestAccessKey',
+            'access_secret': 'TestAccessSecret'
         }
         return response
     else:
         raise FairpayOauth2Error('Error Testing', 'Authentication failed.')
 
-def fake_wallet_history(access_token):
-    if access_token == 'TestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestTokenTestT':
+def fake_wallet_history(access_key, access_secret):
+    if access_key == 'TestAccessKey' and access_secret == 'TestAccessSecret':
         response = ('{"data":{"total":1,"start":0,"end":1,"daily":[],"scales":[],'
         '"elements":[{"created":"2017-05-11T17:27:46+0200","updated":"2017-05-11T17:48:08+0200",'
         '"id":"591482f314227e6d648b4567","group":211,"service":"fac-halcash_es","ip":"1.2.3.4",'
@@ -65,7 +63,7 @@ class FairpayOauth2Test(TestCase):
         self.client = Client()
         self.agent = create_user_agent()
 
-    @patch.object(FairpayOauth2Connection, 'new_token', fake_new_token)
+    @patch.object(FairpayOauth2Connection, 'new_client', fake_new_client)
     @patch.object(FairpayOauth2Connection, 'wallet_history', fake_wallet_history)
     def test_create_fairpayoauth2(self):
         self.client.login(username='test_user', password='test_user_passwd')

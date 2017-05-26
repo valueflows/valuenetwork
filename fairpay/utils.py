@@ -17,13 +17,64 @@ class FairpayOauth2Connection(object):
         self.client_secret = connecting_data['client_secret']
         self.access_key = connecting_data['access_key']
         self.access_secret = connecting_data['access_secret']
-        self.url_token = "https://api.chip-chap.com/oauth/v2/token"
+        self.url_client = "https://api.chip-chap.com/oauth/v1/public"
         self.url_history = "https://api.chip-chap.com/user/v2/wallet/transactions"
-        self.url_signature = "https://api.chip-chap.com/services/v1/echo"
+        self.url_token = "https://api.chip-chap.com/oauth/v2/token"
+        self.url_signature = "https://pre-api.chip-chap.com/user/v2/wallet/transactions"
 
     @classmethod
     def get(cls):
         return cls()
+
+    def new_client(self, username, password):
+        access_key = self.access_key
+        access_secret_bin = b64decode(self.access_secret)
+        nonce = str(randint(0, 100000000))
+        timestamp = str(int(time.time()))
+        string_to_sign = access_key + nonce + timestamp
+        signature = hmac.new(access_secret_bin, string_to_sign,
+            digestmod=hashlib.sha256).hexdigest()
+        headers = {'X-Signature':
+            'Signature access-key="' + access_key +
+            '", nonce="' + nonce +
+            '", timestamp="' + timestamp +
+            '", version="2", signature="' + signature +
+            '"'}
+        data = {
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'username': username,
+            'password': password,
+        }
+        r = requests.post(self.url_client, headers=headers, data=data)
+        if r.status_code == '200':
+            return r.json()
+        else:
+            raise FairpayOauth2Error('Error ' + str(r.status_code), r.text)
+
+    def wallet_history(self, access_key, access_secret, limit=10, offset=0):
+        if len(access_secret) % 4:
+            access_secret += '=' * (4 - len(access_secret) % 4)
+
+        nonce = str(randint(0, 100000000))
+        timestamp = str(int(time.time()))
+        string_to_sign = access_key + nonce + timestamp
+        signature = hmac.new(b64decode(access_secret), string_to_sign, digestmod=hashlib.sha256).hexdigest()
+        headers = {'X-Signature':
+            'Signature access-key="' + access_key +
+            '", nonce="' + nonce +
+            '", timestamp="' + timestamp +
+            '", version="2", signature="' + signature +
+            '"'}
+        data = {
+            "limit": limit,
+            "offset": offset,
+        }
+        r = requests.get(self.url_history, headers=headers, data=data)
+        if r.status_code == '200':
+            return r.json()
+        else:
+            raise FairpayOauth2Error('Error ' + str(r.status_code), r.text)
 
     def new_token(self, username, password):
         r = requests.post(self.url_token, data = {
@@ -38,31 +89,19 @@ class FairpayOauth2Connection(object):
         else:
             raise FairpayOauth2Error('Error ' + str(r.status_code), r.text)
 
-    def wallet_history(self, access_token, limit=10, offset=0):
-        headers = {"Authorization":"Bearer " + access_token}
-        data = {
-            "limit": limit,
-            "offset": offset,
-        }
-        r = requests.get(self.url_history, headers=headers, data=data)
-        if r.status_code == '200':
-            return r.json()
-        else:
-            raise FairpayOauth2Error('Error ' + str(r.status_code), r.text)
-
     def signature_access(self):
-        access_secret_bin = self.access_secret # b64decode(self.access_secret)
+        access_secret_bin = b64decode(self.access_secret)
         nonce = str(randint(0, 100000000))
         timestamp = str(int(time.time()))
         string_to_sign = access_key + nonce + timestamp
-        signature = b64encode(hmac.new(access_secret_bin, string_to_sign,
-            digestmod=hashlib.sha256).digest())
+        signature = hmac.new(access_secret_bin, string_to_sign,
+            digestmod=hashlib.sha256).hexdigest()
 
         headers = {'X-Signature':
             'Signature access-key="' + access_key +
-            '",nonce="' + nonce +
-            '",timestamp="' + timestamp +
-            '",version="1",signature="' + signature +
+            '", nonce="' + nonce +
+            '", timestamp="' + timestamp +
+            '", version="2", signature="' + signature +
             '"'}
 
         r = requests.post(self.url_signature, headers = headers)

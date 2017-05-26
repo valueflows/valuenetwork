@@ -44,7 +44,7 @@ def auth(request, agent_id):
             connection = FairpayOauth2Connection.get()
 
             try:
-                response = connection.new_token(name, password)
+                response = connection.new_client(name, password)
             except FairpayOauth2Error:
                 messages.error(request, 'Authentication failed.')
                 return redirect('fairpay_auth', agent_id=agent_id)
@@ -53,9 +53,9 @@ def auth(request, agent_id):
                 FairpayOauth2.objects.create(
                     agent = agent,
                     fairpay_user = name,
-                    access_token = response['access_token'],
-                    refresh_token = response['refresh_token'],
-                    expires_token = int(response['expires_in']),
+                    access_key = response['access_key'],
+                    access_secret = response['access_secret'],
+                    created_by = request.user,
                 )
             except:
                 messages.error(request,
@@ -104,7 +104,8 @@ def history(request, agent_id, oauth_id):
 
     try:
         data = connection.wallet_history(
-            oauth.access_token,
+            oauth.access_key,
+            oauth.access_secret,
             limit=10,
             offset=0
         )

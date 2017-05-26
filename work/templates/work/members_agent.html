@@ -183,7 +183,7 @@
 		</legend>
 		<div class="button-row">
 
-            {% if user_agent in agent.managers or user_agent.is_staff %}
+            {% if user_agent in agent.managers or user_agent == agent or user_agent.is_staff %}
                 {% if agent.is_context %}
                   <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">
                     {% if not agent.project %}
@@ -197,7 +197,7 @@
                   </div>
                   {% endif %}
                 {% endif %}
-                {% if not agent.faircoin_address%}
+                {% if not agent.faircoin_address %}
                     <form
                         style="display: inline;"
                         class="faircoin-form indent"
@@ -209,6 +209,17 @@
                             {% trans "Request FairCoin Address" %}
                         </button>
                     </form>
+                {% endif %}
+                {% if agent.project %}
+                    {% for rt in agent.project.rts_with_clas %}
+                        {% if rt.ocp_artwork_type.clas == 'FairpayOauth2' %}
+                          {% if agent.fairpayOauth2 %}
+                            {{ agent.fairpayOauth2 }}
+                          {% else %}
+                            &nbsp; <a href="{% url "fairpay_auth" agent_id=agent.id %}" class="btn btn-primary">{% trans "Create Multicurrency Wallet Access" %}</a>
+                          {% endif %}
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
             {% endif %}
 

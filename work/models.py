@@ -139,10 +139,19 @@ class Project(models.Model):
                 name = data.get('name')
                 for rt in self.rts_with_clas():
                     if rt.ocp_artwork_type.clas == name: # matches the rt clas identifier with the fobi field name
-                        opts = data.get('choices').split('\r\n')
-                        for op in opts:
-                            opa = op.split(',')
-                            shr_ts.append(opa[1].strip())
+                        choi = data.get('choices')
+                        if choi:
+                            opts = choi.split('\r\n')
+                            for op in opts:
+                                opa = op.split(',')
+                                shr_ts.append(opa[1].strip())
+                        else:
+                            #import pdb; pdb.set_trace()
+                            text = data.get('help_text')
+                            opts = text.split('\r\n')
+                            for op in opts:
+                                shr_ts.append(op.strip(' /'))
+
             return shr_ts
         return False
 
@@ -298,12 +307,21 @@ class JoinRequest(models.Model):
                         if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
                             val = self.data.get(key)
                             account_type = rt
-                            data = json.loads(self.fobi_data.form_entry.formelemententry_set.all()[0].plugin_data)
-                            opts = data.get('choices').split('\r\n')
-                            for op in opts:
-                              opa = op.split(',')
-                              if opa[1].encode('utf-8').strip() == val.encode('utf-8').strip():
-                                amount = int(opa[0])
+                            for elem in self.fobi_data.form_entry.formelemententry_set.all():
+                                data = json.loads(elem.plugin_data)
+                                choi = data.get('choices')
+                                if choi:
+                                    opts = choi.split('\r\n')
+                                    for op in opts:
+                                      opa = op.split(',')
+                                      #import pdb; pdb.set_trace()
+                                      if type(val) is str and opa[1].encode('utf-8').strip() == val.encode('utf-8').strip():
+                                        amount = int(opa[0])
+                                        break
+                                elif type(val) is int and val:
+                                    amount = val
+                                    break
+
 
         if self.agent:
             user_rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
@@ -314,11 +332,16 @@ class JoinRequest(models.Model):
                         if rs.resource_type == rt:
                             balance = rs.price_per_unit # TODO: update the price_per_unit with wallet balance
 
-        answer = amount - balance
-        if answer > 0:
-            return int(answer)
-        else:
-            return answer #False
+        if amount:
+            answer = amount - balance
+            if answer > 0:
+                return int(answer)
+            else:
+                #import pdb; pdb.set_trace()
+                return 0
+
+        return '??'
+
 
 
 class NewFeature(models.Model):

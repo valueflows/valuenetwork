@@ -1045,6 +1045,40 @@ def members_agent(request, agent_id):
 
     upload_form = UploadAgentForm(instance=agent)
 
+    auto_resource = ''
+    for ag in is_associated_with:
+        if hasattr(ag.has_associate, 'project'):
+            rtsc = ag.has_associate.project.rts_with_clas()
+            for rt in rtsc:
+                is_account = False
+                ancs = rt.ocp_artwork_type.get_ancestors(True, True)
+                for anc in ancs:
+                    if anc.clas == 'accounts':
+                        is_account = True
+                if is_account:
+                    rts = list(set([arr.resource.resource_type for arr in agent.resource_relationships()]))
+                    if not rt in rts:
+                        res = ag.has_associate.agent_resource_roles.filter(resource__resource_type=rt)[0].resource
+                        res.id = None
+                        res.pk = None
+                        resarr = res.identifier.split(ag.has_associate.nick)
+                        res.identifier = ag.has_associate.nick+resarr[1]+agent.name #.identifier.split(ag.has_associate.nick)
+                        res.quantity = 1
+                        res.save()
+                        rol = AgentResourceRoleType.objects.filter(is_owner=True)[0]
+                        arr = AgentResourceRole(
+                            agent=agent,
+                            resource=res,
+                            role=rol,
+                            owner_percentage=100
+                        )
+                        arr.save()
+                        #import pdb; pdb.set_trace()
+                        auto_resource += _("To participate in")+" <b>"+ag.has_associate.name+"</b> "
+                        auto_resource += _("you need a")+" \"<b>"+rt.name+"</b>\"... "
+                        auto_resource += _("It has been created for you automatically.")+"<br />"
+
+
     return render(request, "work/members_agent.html", {
         "agent": agent,
         "membership_request": membership_request,
@@ -1070,7 +1104,7 @@ def members_agent(request, agent_id):
         "add_skill_form": add_skill_form,
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Stype_form": Stype_form,
-        #"artwork_pk": artwork.pk,
+        "auto_resource": auto_resource,
     })
 
 

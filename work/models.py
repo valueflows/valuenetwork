@@ -125,7 +125,7 @@ class Project(models.Model):
         rts_with_clas = []
         rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
         for rt in rts:
-            if rt.ocp_artwork_type and rt.ocp_artwork_type.clas:
+            if hasattr(rt, 'ocp_artwork_type') and rt.ocp_artwork_type and rt.ocp_artwork_type.clas:
                 rts_with_clas.append(rt)
         return rts_with_clas
 

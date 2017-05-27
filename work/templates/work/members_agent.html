@@ -184,6 +184,10 @@
 		<div class="button-row">
 
             {% if user_agent in agent.managers or user_agent == agent or user_agent.is_staff %}
+                {% if auto_resource %}<div class="note">
+                    {{ auto_resource|safe }}
+                    </div>
+                {% endif %}
                 {% if agent.is_context %}
                   <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">
                     {% if not agent.project %}
@@ -210,9 +214,9 @@
                         </button>
                     </form>
                 {% endif %}
-                {% if agent.project %}
-                    {% for rt in agent.project.rts_with_clas %}
-                        {% if rt.ocp_artwork_type.clas == 'FairpayOauth2' %}
+                {% if agent %}
+                    {% for arr in agent.resource_relationships %}
+                        {% if arr.resource.resource_type.ocp_artwork_type.clas == 'FairpayOauth2' %}
                           {% if agent.fairpayOauth2 %}
                             {{ agent.fairpayOauth2 }}
                           {% else %}

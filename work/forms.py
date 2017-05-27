@@ -75,6 +75,27 @@ class SkillSuggestionForm(forms.ModelForm):
         fields = ('skill',)
 
 
+class AddUserSkillForm(forms.Form):
+    skill_type = TreeNodeChoiceField(
+        queryset=Ocp_Skill_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'id_skill_type chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Skill type...")}
+        )
+    )
+
+    def __init__(self, agent, *args, **kwargs):
+        super(AddUserSkillForm, self).__init__(*args, **kwargs)
+        if agent:
+            context_ids = [c.id for c in agent.related_all_agents()]
+            if not agent.id in context_ids:
+                context_ids.append(agent.id)
+            self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+
 
 
 
@@ -605,22 +626,22 @@ class NewSkillTypeForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
     )
+    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        required=False,
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Has a main related material or non-material resource type?"),
+        help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
+    )
     context_agent = forms.ModelChoiceField(
         empty_label=None,
         queryset=EconomicAgent.objects.none(),
         help_text=_('If the skill is only useful for your project or a parent sector collective, choose a smaller context here.'),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}),
-    )
-    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        required=False,
-        empty_label='', #_('. . .'),
-        level_indicator='. ',
-        label=_("Has a main related resource type?"),
-        help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
-        widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
     )
     unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Unit_Type.objects.all(),
@@ -663,8 +684,13 @@ class NewSkillTypeForm(forms.Form):
             context_ids = [c.id for c in agent.related_all_agents()]
             if not agent.id in context_ids:
                 context_ids.append(agent.id)
-            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
-            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
+            contexts = agent.related_all_contexts_queryset(agent, False) # 2nd arg: include childs
+            initial = contexts.last()
+            for ag in contexts:
+              if ag.is_root():
+                initial = ag
+            self.fields["context_agent"].queryset = contexts
+            self.fields["context_agent"].initial = initial #self.fields["context_agent"].queryset.last()
 
             self.fields["parent_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
             self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )

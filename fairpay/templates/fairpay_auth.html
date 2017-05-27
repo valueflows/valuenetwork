@@ -3,26 +3,55 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 
-{% block head_title %}{% trans "Fairpay authentication: " %}{{ agent.name }}{% endblock %}
+{% block head_title %}{% trans "ChipChap authentication: " %}{{ agent.name }}{% endblock %}
 
 {% block body_base %}
 
   <div class="container">
     {% include "_messages.html" %}
-    <h3>{% trans "Access to fairpay for agent " %}{{ agent.name }}:</h3>
-    <ul>
-      {% for oauth in oauths %}
-        <li><a href="{% url "fairpay_history" agent_id=agent.id oauth_id=oauth.id %}">{% trans "User" %} {{ oauth.fairpay_user }}</a></li>
-      {% empty %}
-        <li>( {% trans "You don't have any user yet" %} )</li>
-      {% endfor %}
-    </ul>
+    <div class="infobox span6">
+    <h3>{% trans "Muticurrency wallet for agent " %}{{ agent.name }}</h3>
+      <table class="table" style="max-width:530px;">
+        <thead>
+          <tr>
+            <th class="span8">ChipChap User</th>
+            <th class="span2"></th>
+            <th class="span2"></th>
+          </tr>
+        {% for oauth in oauths %}
+          <tr>
+            <td><strong>{{ oauth.fairpay_user }}</strong></td>
+            <td style="text-align:right;">
+              <a class="btn btn-primary btn-mini" href="{% url "fairpay_history" agent_id=agent.id oauth_id=oauth.id %}">
+                {% trans 'Access' %}
+              </a>
+            </td>
+            <td style="text-align:right;">
+              <form id="deleteForm" class="validateMe" action="{% url 'fairpay_deleteauth' agent_id=agent.id oauth_id=oauth.id %}" method="POST" >
+                  {% csrf_token %}
+                  {{ delete_form }}
+                  <input type="submit" name="submit" value="{% trans 'Log Out' %}" class="btn btn-primary btn-mini" />
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td><p>{% trans "You don't have any authenticated user." %}<br />
+            {% trans "Use the form below with your ChipChap username and password to access." %}
+          </td><td></td><td></td></tr>
+        {% endfor %}
+      </table>
+    </div>
     <br /><br />
-    <h3>{% trans "Create new access to fairpay" %}:</h3>
-    <form id="oauthForm" class="validateMe" action="." method="POST" >
-        {% csrf_token %}
-        {{ oauth_form|as_bootstrap }}
-        <input type="submit" name="submit" value="{% trans 'Submit' %}" class="btn btn-primary" />
-    </form>
+    <div class="infobox span6">
+      <h3>{% trans "Authenticate another user in ChipChap" %}:</h3>
+      <form id="oauthForm" class="validateMe" action="." method="POST" >
+          {% csrf_token %}
+          {{ oauth_form|as_bootstrap }}
+          <input type="submit" name="submit" value="{% trans 'Submit' %}" class="btn btn-primary" />
+      </form>
+      <p><small class="muted">
+        {% trans 'By submitting your ChipChap user/password you give permission to this site to access to your ChipChap wallet.' %}
+      </small></p>
+    </div>
   </div>
 {% endblock %}

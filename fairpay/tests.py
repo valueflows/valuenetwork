@@ -35,7 +35,7 @@ def fake_new_client(username, password):
     else:
         raise FairpayOauth2Error('Error Testing', 'Authentication failed.')
 
-def fake_wallet_history(access_key, access_secret):
+def fake_wallet_history(self, access_key, access_secret, limit=10, offset=0):
     if access_key == 'TestAccessKey' and access_secret == 'TestAccessSecret':
         response = ('{"data":{"total":1,"start":0,"end":1,"daily":[],"scales":[],'
         '"elements":[{"created":"2017-05-11T17:27:46+0200","updated":"2017-05-11T17:48:08+0200",'

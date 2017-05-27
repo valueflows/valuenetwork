@@ -200,7 +200,6 @@ INSTALLED_APPS = [
     'valuenetwork.api',
     'account',
     'work.apps.WorkAppConfig',
-    'fairpay',
 
     # general
     'general',
@@ -330,5 +329,7 @@ CAPTCHA_NOISE_FUNCTIONS = (
 # ----put all other settings above this line----
 try:
     from local_settings import *
+    if 'LOCAL_INSTALLED_APPS' in locals():
+        INSTALLED_APPS += LOCAL_INSTALLED_APPS 
 except ImportError:
     pass

@@ -12,5 +12,6 @@ install:
   - pip install -r requirements.txt --trusted-host dist.pinaxproject.com --quiet
   - pip install Image --quiet
   - pip install tox --quiet
+  - echo "LOCAL_INSTALLED_APPS = ['fairpay',]" > local_settings.py
 script:
   - tox -e $TOXENV

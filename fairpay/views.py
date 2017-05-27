@@ -135,7 +135,7 @@ def history(request, agent_id, oauth_id):
     connection = FairpayOauth2Connection.get()
 
     try:
-        data = connection.fake_wallet_history(
+        data = connection.wallet_history(
             oauth.access_key,
             oauth.access_secret,
             limit=10,

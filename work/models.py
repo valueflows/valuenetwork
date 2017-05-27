@@ -448,7 +448,7 @@ class Ocp_Skill_Type(Job):
 
     def __unicode__(self):
       if self.resource_type:
-        if self.ocp_artwork_type:
+        if self.ocp_artwork_type and not self.ocp_artwork_type.name.lower() in self.get_gerund().lower():
           return self.get_gerund()+' - '+self.ocp_artwork_type.name.lower()+' <'
         else:
           return self.get_gerund()+' <' #name #+'  ('+self.resource_type.name+')'

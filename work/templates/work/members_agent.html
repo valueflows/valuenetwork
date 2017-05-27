@@ -528,7 +528,7 @@
                     <ul>
                         {% for skill in agent.skills %}
                             <li>
-                                {% if skill.ocp_skill_type %}{{ skill.ocp_skill_type.name }}{% else %}{{ skill }}{% endif %}
+                                {% if skill.ocp_skill_type %}{{ skill.ocp_skill_type }}{% else %}{{ skill }}{% endif %}
                                 {% if skill.created_by == agent.user.user and user_is_agent %} <em>{% trans "(created by you)" %}</em>{% elif skill.changed_by == agent.user.user and user_is_agent %} <em>{% trans "(edited by you)" %}</em>{% elif skill in agent.suggested_skills %} <em>{% blocktrans %}(suggested by {{ agent }}) {% endblocktrans %}</em>{% endif %}
 
                             </li>

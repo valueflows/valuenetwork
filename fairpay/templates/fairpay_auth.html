@@ -22,7 +22,7 @@
           <tr>
             <td><strong>{{ oauth.fairpay_user }}</strong></td>
             <td style="text-align:right;">
-              <a class="btn btn-primary btn-mini" href="{% url "fairpay_history" agent_id=agent.id oauth_id=oauth.id %}">
+              <a class="btn btn-primary btn-mini" href="{% url 'fairpay_history' agent_id=agent.id oauth_id=oauth.id %}">
                 {% trans 'Access' %}
               </a>
             </td>
@@ -30,13 +30,13 @@
               <form id="deleteForm" class="validateMe" action="{% url 'fairpay_deleteauth' agent_id=agent.id oauth_id=oauth.id %}" method="POST" >
                   {% csrf_token %}
                   {{ delete_form }}
-                  <input type="submit" name="submit" value="{% trans 'Log Out' %}" class="btn btn-primary btn-mini" />
+                  <input type="submit" name="submit" value="{% trans "Log Out" %}" class="btn btn-primary btn-mini" />
               </form>
             </td>
           </tr>
         {% empty %}
           <tr><td><p>{% trans "You don't have any authenticated user." %}<br />
-            {% trans "Use the form below with your ChipChap username and password to access." %}
+            {% trans "Use the form below with to access." %}
           </td><td></td><td></td></tr>
         {% endfor %}
       </table>
@@ -50,8 +50,8 @@
           <input type="submit" name="submit" value="{% trans 'Submit' %}" class="btn btn-primary" />
       </form>
       <p><small class="muted">
-        {% trans 'By submitting your ChipChap user/password you give permission to this site to access to your ChipChap wallet.' %}<br />
-        {% trans 'Your password won\'t be stored, it\'s just necessary to check your identity in ChipChap.' %}
+        {% trans "By submitting your ChipChap user/password you give permission to this site to access to your ChipChap wallet." %}<br />
+        {% trans "Your password won't be stored, it's just necessary to check your identity in ChipChap." %}
       </small></p>
     </div>
   </div>

@@ -8,9 +8,9 @@ from django.contrib import messages
 from django.utils.dateparse import parse_datetime
 
 from valuenetwork.valueaccounting.models import EconomicAgent
-from fairpay.models import FairpayOauth2
-from fairpay.forms import ChipChapAuthForm, ChipChapAuthDeleteForm
-from fairpay.utils import ChipChapAuthConnection, ChipChapAuthError
+from multicurrency.models import MulticurrencyAuth
+from multicurrency.forms import MulticurrencyAuthForm, MulticurrencyAuthDeleteForm
+from multicurrency.utils import ChipChapAuthConnection, ChipChapAuthError
 
 def get_agents(request, agent_id):
 
@@ -41,7 +41,7 @@ def auth(request, agent_id):
         raise PermissionDenied
 
     if request.method == 'POST':
-        form = ChipChapAuthForm(request.POST)
+        form = MulticurrencyAuthForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
             password = form.cleaned_data['password']
@@ -51,12 +51,12 @@ def auth(request, agent_id):
                 response = connection.new_client(name, password)
             except ChipChapAuthError:
                 messages.error(request, 'Authentication failed.')
-                return redirect('fairpay_auth', agent_id=agent_id)
+                return redirect('multicurrency_auth', agent_id=agent_id)
 
             try:
-                FairpayOauth2.objects.create(
+                MulticurrencyAuth.objects.create(
                     agent = agent,
-                    fairpay_user = name,
+                    auth_user = name,
                     access_key = response['access_key'],
                     access_secret = response['access_secret'],
                     created_by = request.user,
@@ -67,17 +67,17 @@ def auth(request, agent_id):
 
             messages.success(request,
                 'Your ChipChap user has been succesfully authenticated.')
-            return redirect('fairpay_auth', agent_id=agent_id)
+            return redirect('multicurrency_auth', agent_id=agent_id)
 
     else:
         try:
-            oauths = FairpayOauth2.objects.filter(agent=agent)
-        except FairpayOauth2.DoesNotExist:
+            oauths = MulticurrencyAuth.objects.filter(agent=agent)
+        except MulticurrencyAuth.DoesNotExist:
             oauths = None
 
-        form = ChipChapAuthForm()
-        delete_form = ChipChapAuthDeleteForm()
-        return render(request, 'fairpay_auth.html', {
+        form = MulticurrencyAuthForm()
+        delete_form = MulticurrencyAuthDeleteForm()
+        return render(request, 'multicurrency_auth.html', {
             'agent': agent,
             'user_agent': user_agent,
             'oauths': oauths,
@@ -92,8 +92,8 @@ def deleteauth(request, agent_id, oauth_id):
         raise PermissionDenied
 
     try:
-        oauths = FairpayOauth2.objects.filter(agent=agent)
-    except FairpayOauth2.DoesNotExist:
+        oauths = MulticurrencyAuth.objects.filter(agent=agent)
+    except MulticurrencyAuth.DoesNotExist:
         raise Http404
 
     oauth = None
@@ -105,12 +105,12 @@ def deleteauth(request, agent_id, oauth_id):
         raise Http404
 
     if request.method == 'POST':
-        form = ChipChapAuthDeleteForm(request.POST)
+        form = MulticurrencyAuthDeleteForm(request.POST)
         if form.is_valid():
             oauth.delete()
             messages.success(request,
                 'Your ChipChap user has been succesfully logged out.')
-    return redirect('fairpay_auth', agent_id=agent_id)
+    return redirect('multicurrency_auth', agent_id=agent_id)
 
 
 @login_required
@@ -120,8 +120,8 @@ def history(request, agent_id, oauth_id):
         raise PermissionDenied
 
     try:
-        oauths = FairpayOauth2.objects.filter(agent=agent)
-    except FairpayOauth2.DoesNotExist:
+        oauths = MulticurrencyAuth.objects.filter(agent=agent)
+    except MulticurrencyAuth.DoesNotExist:
         raise PermissionDenied
 
     oauth = None
@@ -151,7 +151,7 @@ def history(request, agent_id, oauth_id):
     except ChipChapAuthError:
         messages.error(request,
             'Something was wrong connecting to chip-chap.')
-        return redirect('fairpay_auth', agent_id=agent_id)
+        return redirect('multicurrency_auth', agent_id=agent_id)
 
     if data['status'] == 'ok':
         methods = {
@@ -200,11 +200,11 @@ def history(request, agent_id, oauth_id):
                         'limit': str(items_per_page),
                         'offset': str(int(data['data']['start']) - items_per_page)
                     }
-        return render(request, 'fairpay_history.html', {
+        return render(request, 'multicurrency_history.html', {
             'table_caption': table_caption,
             'table_headers': table_headers,
             'table_rows': table_rows,
-            'fairpay_user': oauth.fairpay_user,
+            'auth_user': oauth.auth_user,
             'oauth_id': oauth.id,
             'agent': agent,
             'offset': offset,
@@ -213,4 +213,4 @@ def history(request, agent_id, oauth_id):
     else:
         messages.error(request,
             'Something was wrong connecting to chip-chap.')
-        return redirect('fairpay_auth', agent_id=agent_id)
+        return redirect('multicurrency_auth', agent_id=agent_id)

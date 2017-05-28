@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 
-{% block head_title %}{% trans "ChipChap authentication: " %}{{ agent.name }}{% endblock %}
+{% block head_title %}{% trans "Multicurrency authentication: " %}{{ agent.name }}{% endblock %}
 
 {% block body_base %}
 
@@ -20,14 +20,14 @@
           </tr>
         {% for oauth in oauths %}
           <tr>
-            <td><strong>{{ oauth.fairpay_user }}</strong></td>
+            <td><strong>{{ oauth.auth_user }}</strong></td>
             <td style="text-align:right;">
-              <a class="btn btn-primary btn-mini" href="{% url 'fairpay_history' agent_id=agent.id oauth_id=oauth.id %}">
+              <a class="btn btn-primary btn-mini" href="{% url 'multicurrency_history' agent_id=agent.id oauth_id=oauth.id %}">
                 {% trans 'Access' %}
               </a>
             </td>
             <td style="text-align:right;">
-              <form id="deleteForm" class="validateMe" action="{% url 'fairpay_deleteauth' agent_id=agent.id oauth_id=oauth.id %}" method="POST" >
+              <form id="deleteForm" class="validateMe" action="{% url 'multicurrency_deleteauth' agent_id=agent.id oauth_id=oauth.id %}" method="POST" >
                   {% csrf_token %}
                   {{ delete_form }}
                   <input type="submit" name="submit" value="{% trans "Log Out" %}" class="btn btn-primary btn-mini" />
@@ -36,7 +36,7 @@
           </tr>
         {% empty %}
           <tr><td><p>{% trans "You don't have any authenticated user." %}<br />
-            {% trans "Use the form below with to access." %}
+            {% trans "Use the form below to create an access." %}
           </td><td></td><td></td></tr>
         {% endfor %}
       </table>

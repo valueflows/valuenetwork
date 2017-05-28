@@ -5,9 +5,9 @@ from django.contrib.auth.models import User
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 
-class FairpayOauth2(models.Model):
+class MulticurrencyAuth(models.Model):
     agent = models.ForeignKey(EconomicAgent, on_delete=models.CASCADE)
-    fairpay_user = models.CharField(max_length=100, editable=False)
+    auth_user = models.CharField(max_length=100, editable=False)
     access_key = models.CharField(max_length=100, editable=False)
     access_secret = models.CharField(max_length=100, editable=False)
     created_by = models.ForeignKey(User, null=True, on_delete=models.CASCADE)

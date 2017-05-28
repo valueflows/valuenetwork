@@ -3,5 +3,5 @@ from __future__ import unicode_literals
 from django.apps import AppConfig
 
 
-class FairpayConfig(AppConfig):
-    name = 'fairpay'
+class MulticurrencyConfig(AppConfig):
+    name = 'multicurrency'

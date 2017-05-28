@@ -11,7 +11,7 @@ class ChipChapAuthError(Exception):
 class ChipChapAuthConnection(object):
 
     def __init__(self):
-        connecting_data = settings.FAIRPAY
+        connecting_data = settings.MULTICURRENCY
         self.client_id = connecting_data['client_id']
         self.client_secret = connecting_data['client_secret']
         self.access_key = connecting_data['access_key']

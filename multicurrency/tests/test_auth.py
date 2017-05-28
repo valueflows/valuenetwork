@@ -6,8 +6,8 @@ from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
-from fairpay.models import FairpayOauth2
-from fairpay.utils import ChipChapAuthConnection, ChipChapAuthError
+from multicurrency.models import MulticurrencyAuth
+from multicurrency.utils import ChipChapAuthConnection, ChipChapAuthError
 from valuenetwork.valueaccounting.models import AgentType, EconomicAgent, AgentUser
 
 
@@ -27,7 +27,7 @@ def create_user_agent():
     return test_agent
 
 def fake_new_client(self, username, password):
-    if username == 'fairpay_user' and password == 'fairpay_user_passwd':
+    if username == 'auth_user' and password == 'auth_user_passwd':
         response = {
             'username': username,
             'access_key': 'TestAccessKey',
@@ -39,7 +39,7 @@ def fake_new_client(self, username, password):
 
 def fake_wallet_history(self, access_key, access_secret, limit=10, offset=0):
     if access_key == 'TestAccessKey' and access_secret == 'TestAccessSecret':
-        with open('fairpay/tests/chipchap_test_tx.json', 'r') as data_file:
+        with open('multicurrency/tests/chipchap_test_tx.json', 'r') as data_file:
             response = json.load(data_file)
         return response
     else:
@@ -53,33 +53,33 @@ class ChipChapAuthTest(TestCase):
 
     @patch.object(ChipChapAuthConnection, 'new_client', fake_new_client)
     @patch.object(ChipChapAuthConnection, 'wallet_history', fake_wallet_history)
-    def test_create_fairpayoauth2(self):
+    def test_create_multicurrency_auth(self):
         self.client.login(username='test_user', password='test_user_passwd')
 
-        url = reverse('fairpay_auth', args=[self.agent.id])
+        url = reverse('multicurrency_auth', args=[self.agent.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         # Authenticate ChipChap user
         data = {
-            "name": "fairpay_user",
-            "password": "fairpay_user_passwd",
+            "name": "auth_user",
+            "password": "auth_user_passwd",
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
 
-        auth = FairpayOauth2.objects.filter(agent=self.agent)
+        auth = MulticurrencyAuth.objects.filter(agent=self.agent)
         self.assertEqual(auth.count(), 1)
 
         # Visit tx list of agent/user
-        url = reverse('fairpay_history', args=[self.agent.id, auth[0].id])
+        url = reverse('multicurrency_history', args=[self.agent.id, auth[0].id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
         # Logout ChipChap user
-        url = reverse('fairpay_deleteauth', args=[self.agent.id, auth[0].id])
+        url = reverse('multicurrency_deleteauth', args=[self.agent.id, auth[0].id])
         response = self.client.post(url, data = {'hidden_delete': 'delete'})
         self.assertEqual(response.status_code, 302)
 
-        auth = FairpayOauth2.objects.all()
+        auth = MulticurrencyAuth.objects.all()
         self.assertEqual(auth.count(), 0)

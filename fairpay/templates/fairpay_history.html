@@ -6,10 +6,13 @@
 
 {% block body_base %}
   <div class="container">
+    <h3>Movements of {{ fairpay_user }} (Agent {{ agent.name }})</h3>
+    <br />
     <table class="table table-condensed table-striped centered">
       <caption style="text-align:left;">{{ table_caption }}</caption>
       <thead>
         <tr>
+          <th></th>
           {% for header in table_headers %}
             <th>{{ header }}</th>
           {% endfor %}
@@ -18,11 +21,23 @@
       <tbody>
           {% for row in table_rows %}
             <tr>
+              <td>{{ forloop.counter|add:offset }}</td>
               {% for td in row %}
                 <td>{{ td }}</td>
               {% endfor %}
             </tr>
           {% endfor %}
     </table>
+    <div>
+      {% if paginator.previous %}
+        <a href="{% url 'fairpay_history' agent_id=agent.id oauth_id=oauth_id %}?limit={{ paginator.previous.limit }}&offset={{ paginator.previous.offset }}">&#60;&#60;&#32;previous movements</a>
+      {% endif %}
+      {% if paginator.previous and paginator.next %}
+        <span>&#32;&#124;&#32;</span>
+      {% endif %}
+      {% if paginator.next %}
+        <a href="{% url 'fairpay_history' agent_id=agent.id oauth_id=oauth_id %}?limit={{ paginator.next.limit }}&offset={{ paginator.next.offset }}">next movements&#32;&#62;&#62;</a>
+      {% endif %}
+    </div>
   </div>
 {% endblock %}

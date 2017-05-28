@@ -9,8 +9,8 @@ from django.utils.dateparse import parse_datetime
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 from fairpay.models import FairpayOauth2
-from fairpay.forms import FairpayOauth2Form, FairpayOauth2DeleteForm
-from fairpay.utils import FairpayOauth2Connection, FairpayOauth2Error
+from fairpay.forms import ChipChapAuthForm, ChipChapAuthDeleteForm
+from fairpay.utils import ChipChapAuthConnection, ChipChapAuthError
 
 def get_agents(request, agent_id):
 
@@ -41,15 +41,15 @@ def auth(request, agent_id):
         raise PermissionDenied
 
     if request.method == 'POST':
-        form = FairpayOauth2Form(request.POST)
+        form = ChipChapAuthForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
             password = form.cleaned_data['password']
-            connection = FairpayOauth2Connection.get()
+            connection = ChipChapAuthConnection.get()
 
             try:
                 response = connection.new_client(name, password)
-            except FairpayOauth2Error:
+            except ChipChapAuthError:
                 messages.error(request, 'Authentication failed.')
                 return redirect('fairpay_auth', agent_id=agent_id)
 
@@ -75,8 +75,8 @@ def auth(request, agent_id):
         except FairpayOauth2.DoesNotExist:
             oauths = None
 
-        form = FairpayOauth2Form()
-        delete_form = FairpayOauth2DeleteForm()
+        form = ChipChapAuthForm()
+        delete_form = ChipChapAuthDeleteForm()
         return render(request, 'fairpay_auth.html', {
             'agent': agent,
             'user_agent': user_agent,
@@ -105,7 +105,7 @@ def deleteauth(request, agent_id, oauth_id):
         raise Http404
 
     if request.method == 'POST':
-        form = FairpayOauth2DeleteForm(request.POST)
+        form = ChipChapAuthDeleteForm(request.POST)
         if form.is_valid():
             oauth.delete()
             messages.success(request,
@@ -132,16 +132,23 @@ def history(request, agent_id, oauth_id):
     if not oauth:
         raise PermissionDenied
 
-    connection = FairpayOauth2Connection.get()
+    items_per_page = 25
+    try:
+        limit = int(request.GET.get('limit', str(items_per_page)))
+        offset = int(request.GET.get('offset', '0'))
+    except:
+        limit = items_per_page
+        offset = 0
 
+    connection = ChipChapAuthConnection.get()
     try:
         data = connection.wallet_history(
             oauth.access_key,
             oauth.access_secret,
-            limit=10,
-            offset=0
+            limit=limit,
+            offset=offset,
         )
-    except FairpayOauth2Error:
+    except ChipChapAuthError:
         messages.error(request,
             'Something was wrong connecting to chip-chap.')
         return redirect('fairpay_auth', agent_id=agent_id)
@@ -151,38 +158,57 @@ def history(request, agent_id, oauth_id):
             'fac': 'FAIR',
             'halcash_es': 'Halcash ES',
         }
-        table_caption = ("Showing from " + str(data['data']['start'])\
-            + " to " + str(data['data']['end'])\
-            + " -- Total movements: " + str(data['data']['total'])\
-            + " -- Agent: " + agent.name + " -- ChipChap user: "\
-            + oauth.fairpay_user)
+        table_caption = "Showing " + str(data['data']['start'] + 1) + " to "\
+            + str(data['data']['end']) + " of " + str(data['data']['total'])\
+            + " movements"
         table_headers = ['Created', 'Concept', 'Method in',
-            'Method out', 'Amount']
+            'Method out', 'Address', 'Amount']
         table_rows = []
+        paginator = {}
         if data['data']['total'] > 0:
             for i in range(data['data']['start'], data['data']['end']):
-                created = parse_datetime(data['data']['elements'][i]['created'])
-                method_in = data['data']['elements'][i]['method_in']
-                method_out = data['data']['elements'][i]['method_out']
-                amount = Decimal(data['data']['elements'][i]['amount'])
-                currency = data['data']['elements'][i]['currency']
-                if method_in in methods:
-                    method_in = methods[method_in]
-                if method_out in methods:
-                    method_out = methods[method_out]
+                tx = data['data']['elements'][i]
+                created = parse_datetime(tx['created']) if 'created' in tx else '--'
+                concept = tx['concept'] if 'concept' in tx else '--'
+                method_in = tx['method_in'] if 'method_in' in tx else '--'
+                method_out = tx['method_out'] if 'method_out' in tx else '--'
+                address = '--'
+                if 'data_in' in tx:
+                    address = tx['data_in']['address'] if 'address' in tx['data_in'] else '--'
+                if 'data_out' in tx and address == '--':
+                    address = tx['data_out']['address'] if 'address' in tx['data_out'] else '--'
+                amount = Decimal(tx['amount']) if 'amount' in tx else Decimal('0')
+                currency = tx['currency'] if 'currency' in tx else '--'
+                if method_in in methods: method_in = methods[method_in]
+                if method_out in methods: method_out = methods[method_out]
                 if currency == "FAC": currency = "FAIR"
                 table_rows.append([
                     created.strftime('%d/%m/%y %H:%M'),
-                    data['data']['elements'][i]['data_in']['concept'],
+                    concept,
                     method_in,
                     method_out,
+                    address,
                     str(amount.quantize(Decimal('0.01'))) + ' ' + currency,
                 ])
+                if data['data']['total'] > data['data']['end']:
+                    paginator['next'] = {
+                        'limit': str(items_per_page),
+                        'offset': str(data['data']['end'])
+                    }
+                if data['data']['start'] > items_per_page:
+                    paginator['previous'] = {
+                        'limit': str(items_per_page),
+                        'offset': str(int(data['data']['start']) - items_per_page)
+                    }
         return render(request, 'fairpay_history.html', {
             'table_caption': table_caption,
             'table_headers': table_headers,
             'table_rows': table_rows,
             'fairpay_user': oauth.fairpay_user,
+            'oauth_id': oauth.id,
+            'agent': agent,
+            'offset': offset,
+            'paginator': paginator,
         })
     else:
         messages.error(request,

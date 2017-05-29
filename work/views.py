@@ -4564,8 +4564,8 @@ def project_resource(request, agent_id, resource_id):
                 event.from_agent = event.context_agent
                 event.created_by = request.user
                 event.save()
-                return HttpResponseRedirect('/%s/%s/'
-                    % ('accounting/resource', resource.id))
+                return HttpResponseRedirect('/%s/%s/%s/%s'
+                    % ('work/agent', agent.id, 'resource', resource.id))
     if resource.is_digital_currency_resource():
         send_coins_form = None
         is_owner=False
@@ -4594,6 +4594,41 @@ def project_resource(request, agent_id, resource_id):
             "role_formset": role_formset,
             "agent": agent,
         })
+
+@login_required
+def change_resource(request, agent_id, resource_id):
+    if request.method == "POST":
+        resource = get_object_or_404(EconomicResource, pk=resource_id)
+        agent = get_object_or_404(EconomicAgent, pk=agent_id)
+        v_help = None
+        if resource.resource_type.unit_of_use:
+            v_help = "give me a usable widget"
+        form = EconomicResourceForm(data=request.POST, instance=resource, vpu_help=v_help)
+        if form.is_valid():
+            data = form.cleaned_data
+            resource = form.save(commit=False)
+            resource.changed_by=request.user
+            resource.save()
+            RraFormSet = modelformset_factory(
+                AgentResourceRole,
+                form=ResourceRoleAgentForm,
+                can_delete=True,
+                extra=4,
+                )
+            role_formset = RraFormSet(
+                prefix="role",
+                queryset=resource.agent_resource_roles.all(),
+                data=request.POST
+                )
+            if role_formset.is_valid():
+                saved_formset = role_formset.save(commit=False)
+                for role in saved_formset:
+                    role.resource = resource
+                    role.save()
+            return HttpResponseRedirect('/%s/%s/%s/%s'
+                % ('work/agent', agent.id, 'resources', resource_id))
+        else:
+            raise ValidationError(form.errors)
 
 
 

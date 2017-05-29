@@ -67,7 +67,7 @@
             <a href="{% url "event_history" resource_id=resource.id %}">{% trans "Event history" %}</a>&nbsp;&nbsp;
             <a href="{% url "incoming_value_flows" resource_id=resource.id %}">{% trans "Incoming Value Flow" %}</a> -->
 		</legend>
-    {% if agent %}
+    {% if request.user.is_superuser or request.user.agent.agent in agent.managers or request.user.agent.agent == agent %}
       <a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>&nbsp;&nbsp;
       {% if order_form %}
         <a href="#resourceOrderForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Plan Work Order" %}</a>&nbsp;&nbsp;
@@ -81,9 +81,26 @@
 				    <h3 id="resource-change-label">{% trans "Change" %} {{ resource }}</h3>
 			    </div>
 			    <div class="modal-body">
-				    <form id="resource-change-form" action="{% url "change_resource" resource_id=resource.id %}" method="POST" >
+				    <form id="resource-change-form" action="{% url "change_resource" agent_id=agent.id resource_id=resource.id %}" method="POST" >
 					    {% csrf_token %}
-					    {{ resource.change_form|as_bootstrap }}
+                        {% for fil in resource.change_form %}
+                            {% if resource.resource_type.is_virtual_account and fil.name == "current_location" %}
+
+                            {% else %}
+                              <div class="modal-field" >
+
+                                {% if resource.resource_type.is_virtual_account and fil.name == "price_per_unit" %}
+                                  <label>{% trans "Account Value" %}:</label>
+                                  {{ fil.value }}
+                                {% else %}
+                                  <label>{{ fil.label }}:</label>
+                                  {{ fil }}
+                                {% endif %}
+                                {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
+                              </div>
+                            {% endif %}
+                        {% endfor %}
+                        <br />
                         {{ role_formset.management_form }}
                         <table>
                             <tr>
@@ -143,6 +160,10 @@
                 <tr>
                     <th style="text-align: right;">{% trans "Quantity" %}</th>
                     <td>{{ resource.quantity }} {{ resource.unit_of_quantity }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: right;">{% if resource.resource_type.is_virtual_account %}{% trans "Account Value" %}{% else %}{% trans "Price" %}{% endif %}</th>
+                    <td>{{ resource.price_per_unit }}</td>
                 </tr>
 {% comment %}
                 <tr>

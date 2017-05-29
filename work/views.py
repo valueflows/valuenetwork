@@ -1078,6 +1078,7 @@ def members_agent(request, agent_id):
                         auto_resource += _("you need a")+" \"<b>"+rt.name+"</b>\"... "
                         auto_resource += _("It has been created for you automatically.")+"<br />"
 
+    auths = agent.multicurrencyauth_set.all()
 
     return render(request, "work/members_agent.html", {
         "agent": agent,
@@ -1105,6 +1106,7 @@ def members_agent(request, agent_id):
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Stype_form": Stype_form,
         "auto_resource": auto_resource,
+        "auths": auths,
     })
 
 

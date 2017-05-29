@@ -9,6 +9,13 @@
 
   <div class="container">
     {% include "_messages.html" %}
+    <legend>
+      <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a> >
+	        {% trans "Multicurrency-wallet Access" %}
+      <div class="subnav">
+
+      </div>
+    </legend>
     <div class="infobox span6">
     <h3>{% trans "Muticurrency wallet for agent " %}{{ agent.name }}</h3>
       <table class="table" style="max-width:530px;">

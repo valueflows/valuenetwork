@@ -217,10 +217,8 @@
                 {% if agent %}
                     {% for arr in agent.resource_relationships %}
                         {% if arr.resource.resource_type.ocp_artwork_type.clas == 'MulticurrencyAuth' %}
-                          {% if agent.multicurrencyAuth %}
-                            {{ agent.multicurrencyAuth }}
-                          {% else %}
-                            &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary">{% trans "Create Multicurrency Wallet Access" %}</a>
+                          {% if not agent.multicurrencyauth_set %}
+                              &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary">{% trans "Create Multicurrency Wallet Access" %}</a>
                           {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -389,10 +387,22 @@
                         </tr>
                   {% endif %}
 
+                  {% if agent.multicurrencyauth_set %}
+                      <tr>
+                          <th style="text-align: right; vertical-align: top; ">{% trans "Multicurrency Accounts" %}</th>
+                          <td>
+                              {% for au in agent.multicurrencyauth_set.all %}
+                                &nbsp; <a href="{% url "multicurrency_history" agent_id=agent.id oauth_id=au.id %}" class="btn btn-primary btn-mini">{% trans "Login as" %} {{ au.auth_user }}</a>
+                              {% endfor %}
+                              &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary btn-mini">+</a>
+                          </td>
+                      </tr>
+                  {% endif %}
+
                   {% if agent.faircoin_address %}
                         <tr>
                             <th style="text-align: right; vertical-align: top; ">{% trans "FairCoin address" %}</th>
-                            <td>{{ agent.faircoin_address }} {% if user_agent in agent.managers or user_is_agent %}{% if agent.faircoin_resource.id %} &nbsp; <b><a href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">Manage Account</a></b>{% endif %}{% endif %}</td>
+                            <td>{{ agent.faircoin_address }} {% if user_agent in agent.managers or user_is_agent %}{% if agent.faircoin_resource.id %} &nbsp; <b><a href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}" class="btn btn-primary btn-mini">Manage</a></b>{% endif %}{% endif %}</td>
                         </tr>
                   {% endif %}
                   {% if agent.reputation %}

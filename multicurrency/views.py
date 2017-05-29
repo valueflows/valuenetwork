@@ -183,7 +183,7 @@ def history(request, agent_id, oauth_id):
                 if method_out in methods: method_out = methods[method_out]
                 if currency == "FAC":
                     currency = "FAIR"
-                    amount = amount/1000000
+                    amount = amount/100000000
                 table_rows.append([
                     created.strftime('%d/%m/%y %H:%M'),
                     concept,

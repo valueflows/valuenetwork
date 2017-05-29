@@ -48,8 +48,8 @@ urlpatterns = [
 
 ]
 
-if 'fairpay' in settings.INSTALLED_APPS:
-    urlpatterns += [url(r'^fairpay/', include('fairpay.urls')),]
+if 'multicurrency' in settings.INSTALLED_APPS:
+    urlpatterns += [url(r'^multicurrency/', include('multicurrency.urls')),]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += staticfiles_urlpatterns()

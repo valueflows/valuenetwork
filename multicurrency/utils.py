@@ -1,6 +1,7 @@
 import requests, json, time, hashlib, hmac
 from random import randint
 from base64 import b64encode, b64decode
+
 from django.conf import settings
 
 class ChipChapAuthError(Exception):
@@ -47,7 +48,6 @@ class ChipChapAuthConnection(object):
 
     def new_client(self, username, password):
         if not self.able_to_connect:
-            messages.error(request, 'No data to connect.')
             raise ChipChapAuthError('Connection Error', 'No data to connect')
 
         headers = ChipChapAuthConnection.chipchap_x_signature(self.access_key, self.access_secret)
@@ -65,7 +65,6 @@ class ChipChapAuthConnection(object):
 
     def wallet_history(self, access_key, access_secret, limit=10, offset=0):
         if not self.able_to_connect:
-            messages.error(request, 'No data to connect.')
             raise ChipChapAuthError('Connection Error', 'No data to connect')
 
         headers = ChipChapAuthConnection.chipchap_x_signature(access_key, access_secret)

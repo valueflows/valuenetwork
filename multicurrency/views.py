@@ -49,7 +49,7 @@ def auth(request, agent_id):
 
             try:
                 response = connection.new_client(name, password)
-            except ChipChapAuthError:
+            except ChipChapAuthError as e:
                 messages.error(request, 'Authentication failed.')
                 return redirect('multicurrency_auth', agent_id=agent_id)
 

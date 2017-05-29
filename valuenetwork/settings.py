@@ -200,6 +200,7 @@ INSTALLED_APPS = [
     'valuenetwork.api',
     'account',
     'work.apps.WorkAppConfig',
+    'multicurrency',
 
     # general
     'general',
@@ -218,6 +219,9 @@ SUBSTITUTABLE_DEFAULT = True
 MAP_LATITUDE = 45.5601062
 MAP_LONGITUDE = -73.7120832
 MAP_ZOOM = 11
+
+# multicurrency settings
+MULTICURRENCY = {} #Fill the dict in local_settings.py with private data.
 
 PINAX_NOTIFICATIONS_QUEUE_ALL = True
 

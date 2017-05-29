@@ -11,13 +11,18 @@ class ChipChapAuthError(Exception):
 class ChipChapAuthConnection(object):
 
     def __init__(self):
-        connecting_data = settings.MULTICURRENCY
-        self.client_id = connecting_data['client_id']
-        self.client_secret = connecting_data['client_secret']
-        self.access_key = connecting_data['access_key']
-        self.access_secret = connecting_data['access_secret']
-        self.url_client = "https://api.chip-chap.com/oauth/v1/public"
-        self.url_history = "https://api.chip-chap.com/user/v2/wallet/transactions"
+        if 'client_id' in settings.MULTICURRENCY:
+            self.able_to_connect = True
+            cdata = settings.MULTICURRENCY
+            self.client_id = cdata['client_id']
+            self.client_secret = cdata['client_secret']
+            self.access_key = cdata['access_key']
+            self.access_secret = cdata['access_secret']
+            self.url_client = cdata['url_client']
+            self.url_history = cdata['url_history']
+        else:
+            self.able_to_connect = False
+
 
     @classmethod
     def get(cls):
@@ -41,6 +46,10 @@ class ChipChapAuthConnection(object):
         return headers
 
     def new_client(self, username, password):
+        if not self.able_to_connect:
+            messages.error(request, 'No data to connect.')
+            raise ChipChapAuthError('Connection Error', 'No data to connect')
+
         headers = ChipChapAuthConnection.chipchap_x_signature(self.access_key, self.access_secret)
         data = {
             'client_id': self.client_id,
@@ -55,6 +64,10 @@ class ChipChapAuthConnection(object):
             raise ChipChapAuthError('Error ' + str(response.status_code), response.text)
 
     def wallet_history(self, access_key, access_secret, limit=10, offset=0):
+        if not self.able_to_connect:
+            messages.error(request, 'No data to connect.')
+            raise ChipChapAuthError('Connection Error', 'No data to connect')
+
         headers = ChipChapAuthConnection.chipchap_x_signature(access_key, access_secret)
         data = {
             "limit": limit,

@@ -12,7 +12,5 @@ install:
   - pip install -r requirements.txt --trusted-host dist.pinaxproject.com --quiet
   - pip install Image --quiet
   - pip install tox --quiet
-  - echo -e "LOCAL_INSTALLED_APPS = ['multicurrency',]\n" > local_settings.py
-  - echo -e "MULTICURRENCY = {'client_id':'','client_secret':'','access_key':'','access_secret':'',}" >> local_settings.py
 script:
   - tox -e $TOXENV

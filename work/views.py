@@ -1077,7 +1077,7 @@ def members_agent(request, agent_id):
                         #import pdb; pdb.set_trace()
                         auto_resource += _("To participate in")+" <b>"+ag.has_associate.name+"</b> "
                         auto_resource += _("you need a")+" \"<b>"+rt.name+"</b>\"... "
-                        auto_resource += _("It has been created for you automatically.")+"<br />"
+                        auto_resource += _("It has been created for you automatically!")+"<br />"
 
 
     return render(request, "work/members_agent.html", {
@@ -1229,8 +1229,8 @@ def change_your_project(request, agent_id):
             data = agn_form.cleaned_data
             url = data["url"]
             if url and not url[0:3] == "http":
-              data["url"] = "http://" + url
-              agent.url = data["url"]
+                pass #data["url"] = "http://" + url
+            agent.url = data["url"]
             #agent.project = project
             agent = agn_form.save(commit=False)
             agent.is_context = True

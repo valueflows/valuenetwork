@@ -225,8 +225,8 @@ class JoinRequest(models.Model):
         help_text=_("this join request became this EconomicAgent"))
 
     fobi_data = models.OneToOneField(SavedFormDataEntry,
-        verbose_name=_('custom fobi id'), related_name='join_request',
-        blank=True, null=True,
+        verbose_name=_('custom fobi entry'), related_name='join_request',
+        blank=True, null=True, on_delete=models.CASCADE,
         help_text=_("this join request is linked to this custom form (fobi SavedFormDataEntry)"))
 
     state = models.CharField(_('state'),

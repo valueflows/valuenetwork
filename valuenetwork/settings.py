@@ -227,6 +227,8 @@ PINAX_NOTIFICATIONS_QUEUE_ALL = True
 
 THUMBNAIL_DEBUG = True
 
+FOBI_DEBUG = DEBUG
+
 #SOUTH_MIGRATION_MODULES = {
 #    'easy_thumbnails': 'easy_thumbnails.south_migrations',
 #}

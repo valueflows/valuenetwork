@@ -216,11 +216,11 @@
                 {% endif %}
                 {% if agent %}
                     {% for arr in agent.resource_relationships %}
-                        {% if arr.resource.resource_type.ocp_artwork_type.clas == 'FairpayOauth2' %}
-                          {% if agent.fairpayOauth2 %}
-                            {{ agent.fairpayOauth2 }}
+                        {% if arr.resource.resource_type.ocp_artwork_type.clas == 'MulticurrencyAuth' %}
+                          {% if agent.multicurrencyAuth %}
+                            {{ agent.multicurrencyAuth }}
                           {% else %}
-                            &nbsp; <a href="{% url "fairpay_auth" agent_id=agent.id %}" class="btn btn-primary">{% trans "Create Multicurrency Wallet Access" %}</a>
+                            &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary">{% trans "Create Multicurrency Wallet Access" %}</a>
                           {% endif %}
                         {% endif %}
                     {% endfor %}

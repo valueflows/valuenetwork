@@ -184,7 +184,7 @@
 		<div class="button-row">
 
             {% if user_agent in agent.managers or user_agent == agent or user_agent.is_staff %}
-                {% if auto_resource %}<div class="note">
+                {% if auto_resource %}<div class="alert">
                     {{ auto_resource|safe }}
                     </div>
                 {% endif %}
@@ -201,7 +201,7 @@
                   </div>
                   {% endif %}
                 {% endif %}
-                {% if not agent.faircoin_address %}
+                {% if not agent.faircoin_address and not agent.multicurrencyauth_set.count %}
                     <form
                         style="display: inline;"
                         class="faircoin-form indent"
@@ -214,10 +214,12 @@
                         </button>
                     </form>
                 {% endif %}
-                {% if agent %}
+                {% if user_agent in agent.managers or user_agent == agent %}
                     {% for arr in agent.resource_relationships %}
                         {% if arr.resource.resource_type.ocp_artwork_type.clas == 'MulticurrencyAuth' %}
-                          {% if not agent.multicurrencyauth_set %}
+                          {% if agent.multicurrencyauth_set.count %}
+
+                          {% else %}
                               &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary">{% trans "Create Multicurrency Wallet Access" %}</a>
                           {% endif %}
                         {% endif %}
@@ -387,7 +389,7 @@
                         </tr>
                   {% endif %}
 
-                  {% if agent.multicurrencyauth_set %}
+                  {% if agent.multicurrencyauth_set.count %}
                       <tr>
                           <th style="text-align: right; vertical-align: top; ">{% trans "Multicurrency Accounts" %}</th>
                           <td>
@@ -710,7 +712,7 @@
               </div>
           {% endif %}
 
-          {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+          {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members or request.user.is_staff %}
   	        <div class="span6 assoc infobox" style="width:100%;">
               <h3>
                 {% trans "Relations:" %}

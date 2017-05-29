@@ -1046,7 +1046,8 @@ def members_agent(request, agent_id):
     upload_form = UploadAgentForm(instance=agent)
 
     auto_resource = ''
-    for ag in is_associated_with:
+    if user_agent in agent.managers() or user_agent is agent:
+      for ag in is_associated_with:
         if hasattr(ag.has_associate, 'project'):
             rtsc = ag.has_associate.project.rts_with_clas()
             for rt in rtsc:
@@ -1078,7 +1079,6 @@ def members_agent(request, agent_id):
                         auto_resource += _("you need a")+" \"<b>"+rt.name+"</b>\"... "
                         auto_resource += _("It has been created for you automatically.")+"<br />"
 
-    auths = agent.multicurrencyauth_set.all()
 
     return render(request, "work/members_agent.html", {
         "agent": agent,
@@ -1106,7 +1106,6 @@ def members_agent(request, agent_id):
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Stype_form": Stype_form,
         "auto_resource": auto_resource,
-        "auths": auths,
     })
 
 

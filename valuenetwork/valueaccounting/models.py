@@ -10282,6 +10282,7 @@ TX_STATE_CHOICES = (
     ('broadcast', _('Broadcast')),
     ('confirmed', _('Confirmed')),
     ('external', _('External')),
+    ('error', _('Error')),
 )
 
 class EconomicEvent(models.Model):

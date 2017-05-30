@@ -31,7 +31,6 @@ from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
 from valuenetwork.valueaccounting import faircoin_utils
-from valuenetwork.valueaccounting.service import ExchangeService
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
@@ -467,6 +466,7 @@ def transfer_faircoins(request, resource_id):
                     transfer=transfer,
                     event_reference=address_end,
                     description=notes,
+                    created_by=request.user,
                     )
                 event.save()
                 if to_agent:
@@ -484,6 +484,7 @@ def transfer_faircoins(request, resource_id):
                         transfer=transfer,
                         event_reference=address_end,
                         description=notes,
+                        created_by=request.user,
                         )
                     event.save()
 
@@ -621,6 +622,7 @@ def share_payment(request, agent_id):
             quantity = quantity,
             transfer=transfer_fee,
             event_reference=address_end,
+            created_by=request.user,
             )
         event.save()
 
@@ -637,6 +639,7 @@ def share_payment(request, agent_id):
             quantity = quantity,
             transfer=transfer_fee,
             event_reference=address_end,
+            created_by=request.user,
             )
         event.save()
 
@@ -667,6 +670,7 @@ def share_payment(request, agent_id):
             resource=resource,
             quantity = quantity,
             transfer=transfer_membership,
+            created_by=request.user
             )
         event.save()
 
@@ -679,6 +683,7 @@ def share_payment(request, agent_id):
             resource=resource,
             quantity = quantity,
             transfer=transfer_membership,
+            created_by=request.user
             )
         event.save()
 

@@ -560,8 +560,9 @@ def share_payment(request, agent_id):
     share_price = share.price_per_unit
     number_of_shares = agent.number_of_shares()
     share_price = share_price * number_of_shares
+    network_fee = faircoin_utils.network_fee()
 
-    if share_price <= balance:
+    if share_price <= balance and network_fee:
         pay_to_id = settings.SEND_MEMBERSHIP_PAYMENT_TO
         pay_to_agent = EconomicAgent.objects.get(nick=pay_to_id)
         pay_to_account = pay_to_agent.faircoin_resource()
@@ -623,7 +624,7 @@ def share_payment(request, agent_id):
             )
         event.save()
 
-        quantity = quantity - Decimal(float(faircoin_utils.network_fee()) / 1.e6)
+        quantity = quantity - Decimal(float(network_fee) / 1.e6)
 
         event = EconomicEvent(
             event_type = et_receive,
@@ -695,6 +696,10 @@ def share_payment(request, agent_id):
             state="active",
             )
         fc_aa.save()
+
+    elif network_fee is None:
+        messages.error(request,
+            'Sorry, payment with faircoin is not available now. Try later.')
 
     return HttpResponseRedirect('/%s/'
         % ('work/home'))

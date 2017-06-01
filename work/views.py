@@ -1457,8 +1457,14 @@ def joinaproject_request(request, form_slug = False):
                         }
                     )
 
-            return HttpResponseRedirect('/%s/'
-                % ('joinaproject-thanks'))
+            return render(request, "work/joinaproject_thanks.html", {
+                "project": project,
+                "jn_req": jn,
+                #"fobi_form": fobi_form,
+                #"field_map": field_name_to_label_map,
+                #"post": escapejs(json.dumps(request.POST)),
+            })
+            #return HttpResponseRedirect(reverse('joinaproject_thanks', args=[project.agent.id]))
 
 
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
@@ -1675,6 +1681,29 @@ def joinaproject_request_internal(request, agent_id = False):
         "project": project,
         "post": escapejs(json.dumps(request.POST)),
     })
+
+
+import requests
+
+def payment_url(request, paymode, join_request_id):
+    #import pdb; pdb.set_trace()
+    url = ''
+    payload = {}
+    if settings.PAYMENT_GATEWAYS and paymode:
+        gates = settings.PAYMENT_GATEWAYS
+        url = gates[paymode]
+        req = get_object_or_404(JoinRequest, pk=join_request_id)
+        payload = {'order_id': str(join_request_id),
+                   'amount': req.pending_shares(),
+                   'first_name': req.name,
+                   'last_name': req.surname,
+                   'email': req.email_address,
+                   'lang': 'en',
+        }
+    #r = requests.post(url, data=payload) #, allow_redirects=True)
+    return HttpResponse(requests.post(url, data=payload), content_type="text/html")
+    # HttpResponseRedirect( url + '&order_id=' + join_request_id + '&amount=' + str(req.pending_shares()) + '&first_name=' + req.name + '&last_name=' + req.surname + '&email=' + req.email_address)
+    #return False
 
 
 

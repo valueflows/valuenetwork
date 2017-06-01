@@ -155,6 +155,24 @@ class Project(models.Model):
             return shr_ts
         return False
 
+    def payment_options(self):
+        pay_opts = []
+        if self.is_moderated() and self.fobi_slug:
+            form = self.fobi_form()
+            fields = form.formelemententry_set.all()
+            for fi in fields:
+                data = json.loads(fi.plugin_data)
+                name = data.get('name')
+                if name == "payment_mode":
+                    choi = data.get('choices')
+                    if choi:
+                        opts = choi.split('\r\n')
+                        for op in opts:
+                            opa = op.split(',')
+                            pay_opts.append(opa[1].strip())
+            return pay_opts
+        return False
+
 
 class SkillSuggestion(models.Model):
     skill = models.CharField(_('skill'), max_length=128,
@@ -305,6 +323,9 @@ class JoinRequest(models.Model):
                 if rt.ocp_artwork_type:
                     for key in self.fobi_items_keys():
                         if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
+                            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+                            entry = self.entries[0]
+                            self.data = json.loads(entry.saved_data)
                             val = self.data.get(key)
                             account_type = rt
                             for elem in self.fobi_data.form_entry.formelemententry_set.all():
@@ -342,6 +363,34 @@ class JoinRequest(models.Model):
 
         return '??'
 
+    def payment_option(self):
+        answer = {}
+        if self.project.joining_style == "moderated" and self.fobi_data.pk:
+            for key in self.fobi_items_keys():
+                if key == "payment_mode": # fieldname specially defined in the fobi form
+                    self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+                    entry = self.entries[0]
+                    self.data = json.loads(entry.saved_data)
+                    val = self.data.get(key)
+                    answer['val'] = val
+                    for elem in self.fobi_data.form_entry.formelemententry_set.all():
+                        data = json.loads(elem.plugin_data)
+                        choi = data.get('choices') # works with radio or select
+                        if choi:
+                            opts = choi.split('\r\n')
+                            for op in opts:
+                                opa = op.split(',')
+                                #import pdb; pdb.set_trace()
+                                if val.strip() == opa[1].strip():
+                                    answer['key'] = opa[0]
+        return answer
+
+    def payment_url(self):
+        payopt = self.payment_option()
+        if settings.PAYMENT_GATEWAYS and payopt:
+            gates = settings.PAYMENT_GATEWAYS
+            return gates[payopt['key']]
+        return False
 
 
 class NewFeature(models.Model):

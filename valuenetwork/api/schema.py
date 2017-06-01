@@ -13,12 +13,12 @@ from graphene_django.debug import DjangoDebug
 from django.conf import settings
 
 import valuenetwork.api.schemas.Auth
-import valuenetwork.api.schemas.EconomicAgent
+import valuenetwork.api.schemas.Agent
 from valuenetwork.api.schemas.helpers import hash_password
 
 
 class ViewerQuery(
-    valuenetwork.api.schemas.EconomicAgent.Query,
+    valuenetwork.api.schemas.Agent.Query,
     graphene.ObjectType
 ):
     def __init__(self, *args, **kwargs):

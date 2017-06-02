@@ -45,7 +45,11 @@ urlpatterns = [
     # DB Store plugin URLs
     url(r'^fobi/plugins/form-handlers/db-store/',
         include('fobi.contrib.plugins.form_handlers.db_store.urls')),
+
 ]
+
+if 'multicurrency' in settings.INSTALLED_APPS:
+    urlpatterns += [url(r'^multicurrency/', include('multicurrency.urls')),]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += staticfiles_urlpatterns()

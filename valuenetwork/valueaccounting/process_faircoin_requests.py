@@ -16,13 +16,22 @@ from valuenetwork.valueaccounting.lockfile import FileLock, AlreadyLocked, LockT
 #FAIRCOIN_DIVISOR = int(1000000)
 
 def init_electrum_fair():
-    #import pdb; pdb.set_trace()
     try:
-        assert(efn.daemon_is_up())
+        daemon = efn.daemon_is_up()
     except:
-        #handle failure better here
-        msg = "Can not init Electrum Network. Exiting."
+        msg = "Cannot connect with daemon. Exiting."
         assert False, msg
+
+    if not daemon or (daemon == 'ERROR'):
+        return False
+
+    try:
+        network = efn.is_connected()
+    except:
+        msg = "Cannot connect with electrum-server. Exiting."
+        assert False, msg
+
+    return network and (network != 'ERROR')
 
 def acquire_lock():
     lock = FileLock("broadcast-faircoins")
@@ -40,24 +49,24 @@ def acquire_lock():
     return lock
 
 def create_address_for_agent(agent):
-    #import pdb; pdb.set_trace()
     address = None
-    try:
-        address = efn.new_fair_address(
-            entity_id = agent.nick.encode('ascii','ignore'),
-            entity = agent.agent_type.name,
-            )
-    except Exception:
-        _, e, _ = sys.exc_info()
-        logger.critical("an exception occurred in creating a FairCoin address: {0}".format(e))
+    if init_electrum_fair():
+        try:
+            address = efn.new_fair_address(
+                entity_id = agent.nick.encode('ascii','ignore'),
+                entity = agent.agent_type.name,
+                )
+        except Exception:
+            _, e, _ = sys.exc_info()
+            logger.critical("an exception occurred in creating a FairCoin address: {0}".format(e))
 
-    if address:
-        used = EconomicResource.objects.filter(digital_currency_address=address)
-        if used.count():
-            msg = " ".join(["address already existent! (count[0]=", str(used[0]), ") when creating new address for", agent.name])
-            logger.critical(msg)
-            return None #create_address_for_agent(agent)
-        if address == 'ERROR':
+        if (address is not None) and (address != 'ERROR'):
+            used = EconomicResource.objects.filter(digital_currency_address=address)
+            if used.count():
+                msg = " ".join(["address already existent! (count[0]=", str(used[0]), ") when creating new address for", agent.name])
+                logger.critical(msg)
+                return None #create_address_for_agent(agent)
+        elif address == 'ERROR':
             msg = " ".join(["address string is ERROR. None returned. agent:", agent.name])
             logger.critical(msg)
             return None
@@ -88,18 +97,17 @@ def create_requested_addresses():
         return "failed to get FairCoin address requests"
 
     if requests:
-        init_electrum_fair()
-        logger.debug("broadcast_tx ready to process FairCoin address requests")
-        for resource in requests:
-            result = create_address_for_resource(resource)
+        if init_electrum_fair():
+            logger.debug("broadcast_tx ready to process FairCoin address requests")
+            for resource in requests:
+                result = create_address_for_resource(resource)
 
-        msg = " ".join(["created", str(requests.count()), "new faircoin addresses."])
+            msg = " ".join(["created", str(requests.count()), "new faircoin addresses."])
     else:
         msg = "No new faircoin address requests to process."
     return msg
 
 def broadcast_tx():
-    #import pdb; pdb.set_trace()
 
     try:
         events = EconomicEvent.objects.filter(
@@ -117,57 +125,54 @@ def broadcast_tx():
         return "failed to get events"
 
     try:
-        #import pdb; pdb.set_trace()
         successful_events = 0
         failed_events = 0
-        if events:
-            init_electrum_fair()
-            logger.critical("broadcast_tx ready to process events")
-        for event in events:
-            #do we need to check for missing digital_currency_address here?
-            #and create them?
-            #fee = efn.network_fee() # In Satoshis
-            #fee = Decimal("%s" %fee) / FAIRCOIN_DIVISOR
-            if event.resource:
-                if event.event_type.name=="Give":
-                    address_origin = event.resource.digital_currency_address
-                    address_end = event.event_reference
-                elif event.event_type.name=="Distribution":
-                    address_origin = event.from_agent.faircoin_address()
-                    address_end = event.resource.digital_currency_address
-                amount = float(event.quantity) * 1.e6 # In satoshis
-                if amount < 1001:
-                    event.digital_currency_tx_state = "broadcast"
-                    event.digital_currency_tx_hash = "Null"
-                    event.save()
-                    continue
+        if events and init_electrum_fair():
+            logger.debug("broadcast_tx ready to process events")
+            for event in events:
+                #do we need to check for missing digital_currency_address here?
+                #and create them?
+                #fee = efn.network_fee() # In Satoshis
+                #fee = Decimal("%s" %fee) / FAIRCOIN_DIVISOR
+                if event.resource:
+                    if event.event_type.name=="Give":
+                        address_origin = event.resource.digital_currency_address
+                        address_end = event.event_reference
+                    elif event.event_type.name=="Distribution":
+                        address_origin = event.from_agent.faircoin_address()
+                        address_end = event.resource.digital_currency_address
+                    amount = float(event.quantity) * 1.e6 # In satoshis
+                    if amount < 1001:
+                        event.digital_currency_tx_state = "broadcast"
+                        event.digital_currency_tx_hash = "Null"
+                        event.save()
+                        continue
 
-                logger.critical("about to make_transaction_from_address. Amount: %d" %(int(amount)))
-                #import pdb; pdb.set_trace()
-                tx_hash = None
-                try:
-                    tx_hash = efn.make_transaction_from_address(address_origin, address_end, int(amount))
-                except Exception:
-                    _, e, _ = sys.exc_info()
-                    logger.critical("an exception occurred in make_transaction_from_address: {0}".format(e))
+                    logger.critical("about to make_transaction_from_address. Amount: %d" %(int(amount)))
+                    tx_hash = None
+                    try:
+                        tx_hash = efn.make_transaction_from_address(address_origin, address_end, int(amount))
+                    except Exception:
+                        _, e, _ = sys.exc_info()
+                        logger.critical("an exception occurred in make_transaction_from_address: {0}".format(e))
 
-                if (tx_hash == "ERROR") or (not tx_hash):
-                    logger.warning("ERROR tx_hash, make tx failed without raising Exception")
-                    failed_events += 1
-                elif tx_hash:
-                    successful_events += 1
-                    event.digital_currency_tx_state = "broadcast"
-                    event.digital_currency_tx_hash = tx_hash
-                    event.save()
-                    transfer = event.transfer
-                    if transfer:
-                        revent = transfer.receive_event()
-                        if revent:
-                            revent.digital_currency_tx_state = "broadcast"
-                            revent.digital_currency_tx_hash = tx_hash
-                            revent.save()
-                    msg = " ".join([ "**** sent tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
-                    logger.debug(msg)
+                    if (tx_hash == "ERROR") or (not tx_hash):
+                        logger.warning("ERROR tx_hash, make tx failed without raising Exception")
+                        failed_events += 1
+                    elif tx_hash:
+                        successful_events += 1
+                        event.digital_currency_tx_state = "broadcast"
+                        event.digital_currency_tx_hash = tx_hash
+                        event.save()
+                        transfer = event.transfer
+                        if transfer:
+                            revent = transfer.receive_event()
+                            if revent:
+                                revent.digital_currency_tx_state = "broadcast"
+                                revent.digital_currency_tx_hash = tx_hash
+                                revent.save()
+                        msg = " ".join([ "**** sent tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
+                        logger.debug(msg)
     except Exception:
         _, e, _ = sys.exc_info()
         logger.critical("an exception occurred in processing events: {0}".format(e))

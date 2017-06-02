@@ -94,7 +94,6 @@ class EventSavingTest(TestCase):
             is_contribution=True,
         )
         event.save()
-        #import pdb; pdb.set_trace()
         summary = CachedEventSummary.objects.get(
             agent=self.agent1,
             context_agent=self.project1,
@@ -155,7 +154,6 @@ class EventSavingTest(TestCase):
         )
         event.save()
         
-        #import pdb; pdb.set_trace()
         event.context_agent = self.project2
         event.save()
 
@@ -185,7 +183,6 @@ class EventSavingTest(TestCase):
         )
         event.save()
         
-        #import pdb; pdb.set_trace()
         event.event_type = self.event_type_todo
         event.save()
            
@@ -237,7 +234,6 @@ class EventSavingTest(TestCase):
             quantity=Decimal("1"),
             event_date=datetime.date.today(),
         )
-        #import pdb; pdb.set_trace()
         event.save()
         summaries = CachedEventSummary.objects.all()
         self.assertEqual(summaries.count(), 0)

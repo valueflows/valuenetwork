@@ -92,7 +92,6 @@ class MembershipRequestForm(forms.ModelForm):
         exclude = ('agent',)
 
     def clean(self):
-        #import pdb; pdb.set_trace()
         data = super(MembershipRequestForm, self).clean()
         type_of_membership = data["type_of_membership"]
         number_of_shares = data["number_of_shares"]
@@ -133,7 +132,6 @@ class ProjectCreateForm(AgentCreateForm):
         self.fields["visibility"].choices = [(vi[0], vi[1]) for vi in VISIBILITY_CHOICES]
 
     def clean(self):
-        #import pdb; pdb.set_trace()
         data = super(ProjectCreateForm, self).clean()
         url = data["url"]
         if not url[0:3] == "http":
@@ -194,7 +192,6 @@ class JoinRequestForm(forms.ModelForm):
         exclude = ('agent', 'project', 'fobi_data',)
 
     def clean(self):
-        #import pdb; pdb.set_trace()
         data = super(JoinRequestForm, self).clean()
         type_of_user = data["type_of_user"]
         #number_of_shares = data["number_of_shares"]
@@ -225,7 +222,6 @@ class JoinRequestInternalForm(forms.ModelForm):
         exclude = ('agent', 'project', 'fobi_data', 'type_of_user', 'name', 'surname', 'requested_username', 'email_address', 'phone_number', 'address',)
 
     def clean(self):
-        #import pdb; pdb.set_trace()
         data = super(JoinRequestInternalForm, self).clean()
         #type_of_user = data["type_of_user"]
         #number_of_shares = data["number_of_shares"]
@@ -763,7 +759,6 @@ class WorkEventContextAgentForm(forms.ModelForm):
 
     def __init__(self, context_agent=None, *args, **kwargs):
         super(WorkEventContextAgentForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if context_agent:
             #self.context_agent = context_agent
             self.fields["from_agent"].queryset = context_agent.related_all_agents_queryset()
@@ -904,7 +899,6 @@ class ContextTransferForm(forms.Form):
 
     def __init__(self, transfer_type=None, context_agent=None, resource_type=None, ocp_resource_type=None, posting=False, *args, **kwargs):
         super(ContextTransferForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
 
         if transfer_type:
             rts = transfer_type.get_resource_types()
@@ -912,7 +906,6 @@ class ContextTransferForm(forms.Form):
               self.fields["resource_type"].queryset = EconomicResourceType.objects.filter(id=resource_type.id)
             else:
               self.fields["resource_type"].queryset = rts
-            #import pdb; pdb.set_trace()
             if posting:
                 self.fields["resource"].queryset = EconomicResource.objects.all()
                 self.fields["from_resource"].queryset = EconomicResource.objects.all()
@@ -1104,7 +1097,6 @@ class ContextTransferCommitmentForm(forms.Form):
 
     def __init__(self, transfer_type=None, context_agent=None, resource_type=None, ocp_resource_type=None, posting=False, *args, **kwargs):
         super(ContextTransferCommitmentForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if transfer_type:
             self.fields["resource_type"].queryset = transfer_type.get_resource_types()
             #if context_agent:
@@ -1130,7 +1122,6 @@ class ContextTransferCommitmentForm(forms.Form):
                 if hasattr(self.fields, 'ocp_resource_type'):
                   self.fields["ocp_resource_type"].label += " FALTA RT! " #+str(resource_type)
 
-            #import pdb; pdb.set_trace()
 
     def clean(self):
         data = super(ContextTransferCommitmentForm, self).clean()
@@ -1151,7 +1142,6 @@ class ContextTransferCommitmentForm(forms.Form):
               self.add_error('ocp_resource_type', "This type is too general, try a more specific")
         else:
           self.add_error('ocp_resource_type', "There is not resource_type, it is a required field")
-        #import pdb; pdb.set_trace()
         return data
 
 
@@ -1255,7 +1245,6 @@ class WorkTodoForm(forms.ModelForm):
         self.fields["context_agent"].choices = list(set([(ct.id, ct) for ct in contexts]))
         peeps = [agent,]
         from_agent_choices = [('', 'Unassigned'), (agent.id, agent),]
-        #import pdb; pdb.set_trace()
         for context in contexts:
             if agent.is_manager_of(context):
                 peeps.extend(context.task_assignment_candidates())
@@ -1264,7 +1253,6 @@ class WorkTodoForm(forms.ModelForm):
         from_agent_choices = [('', 'Unassigned')] + [(peep.id, peep) for peep in peeps]
 
         self.fields["from_agent"].choices = from_agent_choices
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             #self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
@@ -1367,5 +1355,4 @@ class InvoiceNumberForm(forms.ModelForm):
 
     def __init__(self, agent, *args, **kwargs):
         super(InvoiceNumberForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         self.fields["member"].queryset = agent.invoicing_candidates()

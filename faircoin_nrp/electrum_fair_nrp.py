@@ -4,7 +4,7 @@
 # Copyright (C) 2011 thomasv@gitorious
 #
 # Faircoin Payment For NRP
-# Copyright (C) 2015-2016 santi@punto0.org -- FairCoop 
+# Copyright (C) 2015-2016 santi@punto0.org -- FairCoop
 #
 # This version is based on https://github.com/Punto0/faircoin_nrp
 #
@@ -26,6 +26,7 @@ import time, sys, os
 import socket
 import logging
 import jsonrpclib
+import signal
 
 logger = logging.getLogger("faircoins")
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(message)s')
@@ -33,20 +34,41 @@ logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(mess
 my_host = "localhost"
 my_port = 8069
 
+class TimeoutError(Exception):
+    pass
+
+def handler_timeout(signum, frame):
+    raise TimeoutError("Timeout 7 secs")
+
+signal.signal(signal.SIGALRM, handler_timeout)
+
 # Send command to the daemon.
 def send_command(cmd, params):
     logging.debug('send command: %s --- params: %s' %(cmd, params))
     server = jsonrpclib.Server('http://%s:%d'%(my_host, my_port))
+
+    signal.alarm(7)
     try:
         f = getattr(server, cmd)
     except socket.error, (value, message):
-        logging.error("Can not connect to faircoin daemon. %d %s" %(value,message))
+        logging.error("Cannot connect to faircoin daemon. %d %s" %(value,message))
+        signal.alarm(0)
         return "ERROR"
+    except TimeoutError, e:
+        logging.error("Timeout connecting to faircoin daemon: %s" % e)
+        return "ERROR"
+
     try:
         out = f(*params)
     except socket.error, (value, message):
         logging.error("Can not send the command %d %s" %(value,message))
+        signal.alarm(0)
         return "ERROR"
+    except TimeoutError, e:
+        logging.error("Timeout sending command to faircoin daemon: %s" % e)
+        return "ERROR"
+
+    signal.alarm(0)
     logging.debug('response: %s' %(out))
     return out
 
@@ -91,12 +113,12 @@ def get_address_history(address):
     response = send_command('get_address_history', format_dict)
     return response
 
-# make a transfer from an adress of the wallet 
+# make a transfer from an adress of the wallet
 def make_transaction_from_address(address_origin, address_end, amount):
     format_dict = [address_origin, address_end, amount]
     response = send_command('make_transaction_from_address', format_dict)
     return response
-         
+
 def address_history_info(address, page = 0, items = 20):
     format_dict = [address, page, items]
     response = send_command('address_history_info', format_dict)

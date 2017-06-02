@@ -41,7 +41,6 @@ def log_equipment_use(request, scenario, equip_resource_id, context_agent_id, pa
     sale_pattern_id, equip_svc_rt_id, equip_fee_rt_id, tech_rt_id, consumable_rt_id, 
     payment_rt_id, tech_rel_id, ve_id, va_id, price_id, part_rt_id, cite_rt_id
 ):
-    #import pdb; pdb.set_trace()
     #scenario: 1=commercial, 2=project, 3=fablab, 4=techshop, 5=other
     equipment = get_object_or_404(EconomicResource, id=equip_resource_id)
     equipment_svc_rt = get_object_or_404(EconomicResourceType, id=equip_svc_rt_id)
@@ -62,7 +61,6 @@ def log_equipment_use(request, scenario, equip_resource_id, context_agent_id, pa
     process_form = ProcessForm(data=request.POST or None)
     
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         if equip_form.is_valid():
             data = equip_form.cleaned_data
             input_date = data["event_date"]
@@ -139,7 +137,6 @@ def log_equipment_use(request, scenario, equip_resource_id, context_agent_id, pa
                 )
                 tech_event.save()
                 total_price += tech_event.value
-            #import pdb; pdb.set_trace()
             if scenario == '3' or scenario == '4': #fablab, techshop
                 use_event = EconomicEvent(
                     event_type = et_use,
@@ -189,7 +186,6 @@ def log_equipment_use(request, scenario, equip_resource_id, context_agent_id, pa
             output_event.value = total_value
             output_event.save()
 
-            #import pdb; pdb.set_trace()
             if scenario == '2' and next_process:
                 cust = next_process.context_agent
             else:
@@ -258,7 +254,6 @@ def log_equipment_use(request, scenario, equip_resource_id, context_agent_id, pa
             printer_service.quantity = 0
             printer_service.save()
             
-            #import pdb; pdb.set_trace()
             if scenario == '1': 
                 next_process = Process(
                     name="Make commercial 3D printed part",
@@ -328,7 +323,6 @@ def log_equipment_use(request, scenario, equip_resource_id, context_agent_id, pa
                     )
                     svc_input_event.save()             
 
-            #import pdb; pdb.set_trace()
             if next_process:
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/%s/%s/%s/%s/%s/%s/%s/'
                     % ('equipment/pay-equipment-use', scenario, sale.id, process.id, payment_rt_id, equip_resource_id, mtnce_fee_event.id, ve_id, quantity, who.id, next_process.id, int(cite_rt_id)))
@@ -350,7 +344,6 @@ def pay_equipment_use(request, scenario, sale_id, process_id, payment_rt_id, equ
     mtnce_fee_event_id, ve_id, use_qty, who_id, next_process_id=None, cite_rt_id=None
 ):
     #scenario: 1=commercial, 2=project, 3=fablab, 4=techshop, 5=other
-    #import pdb; pdb.set_trace()
     sale = get_object_or_404(Exchange, id=sale_id)
     process = get_object_or_404(Process, id=process_id)
     payment_rt = EconomicResourceType.objects.get(id=payment_rt_id)
@@ -374,7 +367,6 @@ def pay_equipment_use(request, scenario, sale_id, process_id, payment_rt_id, equ
     pay_form = PaymentForm(data=request.POST or None)
 
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         if pay_form.is_valid():
             data = pay_form.cleaned_data
             payment_method = data["payment_method"]
@@ -416,7 +408,6 @@ def pay_equipment_use(request, scenario, sale_id, process_id, payment_rt_id, equ
             serialized_filters = {}
             dist_shipment = ship_events[0]
             buckets = ve.buckets.all()
-            #import pdb; pdb.set_trace()
             for bucket in buckets:
                 if bucket.filter_method:
                     #'{"shipments": [4836], "method": "Shipment"}'}
@@ -461,7 +452,6 @@ def pay_equipment_use(request, scenario, sale_id, process_id, payment_rt_id, equ
 
 @login_required
 def log_additional_inputs(request, cite_rt_id, process_id):
-    #import pdb; pdb.set_trace()
     process = get_object_or_404(Process, id=process_id)
     cite_rt = EconomicResourceType.objects.get(id=cite_rt_id)
     cite_unit = cite_rt.unit_of_use
@@ -470,7 +460,6 @@ def log_additional_inputs(request, cite_rt_id, process_id):
     done = None
 
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         cite = request.POST.get("cite")
         work = request.POST.get("work")
         done = request.POST.get("done")

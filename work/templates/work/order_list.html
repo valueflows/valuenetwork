@@ -63,7 +63,7 @@ h4 {
                 {% for order in orders %}
                     <li>
                         {% trans "Order:" %} <a href="{% url "order_schedule" order_id=order.id %}"><b>{{ order }}</b></a> {% trans "created by" %} {{ order.created_by }}
-                        {% if user = order.created_by or user.is_superuser %}
+                        {% if user == order.created_by or user.is_superuser %}
                             <form
                                 style="display: inline;"
                                 action="{% url "order_delete_confirmation_work" order_id=order.id %}"
@@ -98,7 +98,7 @@ h4 {
                 {% for rand in project.sales_orders.all %}
                     <li>
                         <b>{% trans "Order:" %}</b> <a href="{% url "order_plan" order_id=rand.id %}"><b>{{ rand }}</b></a>  {% trans "created by" %} {{ rand.created_by }}
-                        {% if user = rand.created_by or user.is_superuser or user.agent.agent in project.managers %}
+                        {% if user == rand.created_by or user.is_superuser or user.agent.agent in project.managers %}
                             <form
                                 style="display: inline;"
                                 action="{% url "change_project_order" order_id=rand.id %}"

@@ -89,7 +89,6 @@ class SendFairCoinsForm(forms.Form):
                 agent_resource_roles__resource__digital_currency_address__isnull=False)
 
     def clean(self):
-        #import pdb; pdb.set_trace()
         data = super(SendFairCoinsForm, self).clean()
         if data["to_address"]:
             data["to_address"] = data["to_address"].strip()
@@ -225,7 +224,6 @@ class ChangeLocationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ChangeLocationForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if self.instance:
             instance = self.instance
             agents = instance.agents_at_location.all()
@@ -242,7 +240,6 @@ class SelectResourceForm(forms.Form):
 
     def __init__(self, resource_type=None, *args, **kwargs):
         super(SelectResourceForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if resource_type:
             self.fields["resource"].queryset = EconomicResource.goods.filter(resource_type=resource_type)
 
@@ -563,7 +560,6 @@ class WorkflowProcessForm(forms.ModelForm):
             self.fields["start_date"] = next_date
             self.fields["end_date"] = next_date
         self.fields["process_pattern"].queryset = ProcessPattern.objects.recipe_patterns()
-        #import pdb; pdb.set_trace()
         self.fields["process_type"].queryset = order_item.available_workflow_process_types()
 
 
@@ -686,7 +682,6 @@ class UnplannedWorkEventForm(forms.ModelForm):
         fields = ('event_date', 'resource_type', 'from_agent', 'quantity', 'unit_of_quantity', 'is_contribution', 'description')
 
     def __init__(self, pattern=None, context_agent=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(UnplannedWorkEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
@@ -838,7 +833,6 @@ class ProcessOutputForm(forms.ModelForm):
 
     def __init__(self, pattern=None, *args, **kwargs):
         super(ProcessOutputForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         use_pattern = True
         if self.instance:
             if self.instance.id:
@@ -893,7 +887,6 @@ class UnplannedOutputForm(forms.ModelForm):
 
     def __init__(self, pattern=None, *args, **kwargs):
         super(UnplannedOutputForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.output_resource_types()
@@ -970,7 +963,6 @@ class UnorderedReceiptForm(forms.ModelForm):
 
     def __init__(self, pattern=None, context_agent=None, *args, **kwargs):
         super(UnorderedReceiptForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.receipt_resource_types()
@@ -1007,7 +999,6 @@ class SelectResourceOfTypeForm(forms.Form):
 
     def __init__(self, pattern=None, posting=False, *args, **kwargs):
         super(SelectResourceOfTypeForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             rts = pattern.receipt_resource_types_with_resources()
@@ -1058,7 +1049,6 @@ class SelectContrResourceOfTypeForm(forms.Form):
 
     def __init__(self, pattern=None, posting=False, *args, **kwargs):
         super(SelectContrResourceOfTypeForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             rts = pattern.matl_contr_resource_types_with_resources()
@@ -1102,7 +1092,6 @@ class TodoForm(forms.ModelForm):
 
     def __init__(self, pattern=None, agent=None, *args, **kwargs):
         super(TodoForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         self.fields["from_agent"].queryset = EconomicAgent.objects.with_user()
         if pattern:
             self.pattern = pattern
@@ -1141,7 +1130,6 @@ class ProcessCitationForm(forms.ModelForm):
         fields = ('resource_type', 'description')
 
     def __init__(self, pattern=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(ProcessCitationForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
@@ -1165,7 +1153,6 @@ class ProcessCitationCommitmentForm(forms.ModelForm):
         fields = ('resource_type', 'description', 'quantity')
 
     def __init__(self, pattern=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(ProcessCitationCommitmentForm, self).__init__(*args, **kwargs)
         use_pattern = True
         if self.instance:
@@ -1187,7 +1174,6 @@ class SelectCitationResourceForm(forms.Form):
     resource = forms.ChoiceField(widget=forms.Select(attrs={'class': 'input-xlarge'}))
 
     def __init__(self, pattern, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(SelectCitationResourceForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
@@ -1208,7 +1194,6 @@ class UnplannedCiteEventForm(forms.Form):
     #    widget=forms.Select(attrs={'readonly': 'readonly' }))
 
     def __init__(self, pattern, cite_unit=None, load_resources=False, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(UnplannedCiteEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
@@ -1235,10 +1220,8 @@ class UnplannedInputEventForm(forms.Form):
         widget=forms.Select())
 
     def __init__(self, pattern, load_resources=False, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(UnplannedInputEventForm, self).__init__(*args, **kwargs)
         if pattern:
-            #import pdb; pdb.set_trace()
             self.pattern = pattern
             prefix = kwargs["prefix"]
             if prefix == "unplannedusable":
@@ -1275,7 +1258,6 @@ class CashEventAgentForm(forms.ModelForm):
         fields = ('event_date', 'resource_type','quantity', 'description', 'from_agent')
 
     def __init__(self, agent=None, date=None, pattern=None, context_agent=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(CashEventAgentForm, self).__init__(*args, **kwargs)
         if date:
             self.event_date = date
@@ -1395,7 +1377,6 @@ class WorkEventAgentForm(forms.ModelForm):
 
     def __init__(self, context_agent=None, *args, **kwargs):
         super(WorkEventAgentForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if context_agent:
             self.context_agent = context_agent
             self.fields["from_agent"].queryset = context_agent.all_members()
@@ -1420,7 +1401,6 @@ class WorkCommitmentForm(forms.ModelForm):
         fields = ('due_date', 'resource_type','quantity', 'unit_of_quantity', 'description')
 
     def __init__(self, pattern=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(WorkCommitmentForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
@@ -1442,7 +1422,6 @@ class InviteCollaboratorForm(forms.ModelForm):
         fields = ('due_date', 'quantity', 'description')
 
     def __init__(self, qty_help=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(InviteCollaboratorForm, self).__init__(*args, **kwargs)
         if qty_help:
             self.fields["quantity"].help_text = qty_help
@@ -1467,7 +1446,6 @@ class ProcessWorkForm(forms.ModelForm):
         fields = ('resource_type','quantity', 'description')
 
     def __init__(self, pattern=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(ProcessWorkForm, self).__init__(*args, **kwargs)
         #if pattern:
         #    self.pattern = pattern
@@ -1720,7 +1698,6 @@ class TransferForm(forms.Form):
 
     def __init__(self, transfer_type=None, context_agent=None, resource_type=None, posting=False, *args, **kwargs):
         super(TransferForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if transfer_type:
             rts = transfer_type.get_resource_types()
             self.fields["resource_type"].queryset = rts
@@ -1783,7 +1760,6 @@ class TransferCommitmentForm(forms.Form):
 
     def __init__(self, transfer_type=None, context_agent=None, posting=False, *args, **kwargs):
         super(TransferCommitmentForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if transfer_type:
             self.fields["resource_type"].queryset = transfer_type.get_resource_types()
             if context_agent:
@@ -1890,7 +1866,6 @@ class CashReceiptForm(forms.ModelForm):
         fields = ('event_date', 'from_agent', 'to_agent', 'quantity', 'resource_type', 'resource', 'description', 'event_reference')
 
     def __init__(self, pattern=None, context_agent=None, posting=False, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(CashReceiptForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
@@ -2224,7 +2199,6 @@ class ExpenseEventForm(forms.ModelForm):
         super(ExpenseEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
-            #import pdb; pdb.set_trace()
             self.fields["resource_type"].queryset = pattern.expense_resource_types()
         if context_agent:
             self.context_agent = context_agent
@@ -2267,7 +2241,6 @@ class ProcessExpenseEventForm(forms.ModelForm):
         super(ProcessExpenseEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
-            #import pdb; pdb.set_trace()
             self.fields["resource_type"].queryset = pattern.process_expense_resource_types()
 
 class CashContributionEventForm(forms.ModelForm):
@@ -2312,7 +2285,6 @@ class CashContributionEventForm(forms.ModelForm):
 
     def __init__(self, pattern=None, context_agent=None, posting=False, *args, **kwargs):
         super(CashContributionEventForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             rts = pattern.cash_contr_resource_types()
@@ -2379,7 +2351,6 @@ class CashContributionResourceEventForm(forms.ModelForm):
         super(CashContributionResourceEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
-            #import pdb; pdb.set_trace()
             #self.fields["resource_type"].queryset = pattern.cash_contr_resource_types()
             rts = pattern.cash_contr_resource_types()
             rts_vas = []
@@ -2680,7 +2651,6 @@ class ResourceTypeSelectionForm(forms.Form):
 
     def __init__(self, qs=None, *args, **kwargs):
         super(ResourceTypeSelectionForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if qs:
             self.fields["resource_type"].queryset = qs
 
@@ -2910,7 +2880,6 @@ class EconomicResourceTypeChangeForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(EconomicResourceTypeChangeForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         parent_qs = possible_parent_resource_types()
         if self.instance:
             parent_qs = parent_qs.exclude(id=self.instance.id)
@@ -3101,7 +3070,6 @@ class ProcessTypeInputForm(forms.ModelForm):
 
     def __init__(self, process_type=None, *args, **kwargs):
         super(ProcessTypeInputForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         use_pattern = True
         pattern = None
         if process_type:
@@ -3140,7 +3108,6 @@ class ProcessTypeConsumableForm(forms.ModelForm):
 
     def __init__(self, process_type=None, *args, **kwargs):
         super(ProcessTypeConsumableForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         use_pattern = True
         pattern = None
         if process_type:
@@ -3188,7 +3155,6 @@ class ProcessTypeUsableForm(forms.ModelForm):
 
     def __init__(self, process_type=None, *args, **kwargs):
         super(ProcessTypeUsableForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         use_pattern = True
         pattern = None
         if process_type:
@@ -3227,7 +3193,6 @@ class ProcessTypeCitableForm(forms.ModelForm):
 
     def __init__(self, process_type=None, *args, **kwargs):
         super(ProcessTypeCitableForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         use_pattern = True
         pattern = None
         if process_type:
@@ -3261,7 +3226,6 @@ class ProcessTypeCitableStreamRecipeForm(forms.ModelForm):
 
     def __init__(self, process_type=None, *args, **kwargs):
         super(ProcessTypeCitableStreamRecipeForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         use_pattern = True
         pattern = None
         if process_type:
@@ -3299,7 +3263,6 @@ class ProcessTypeWorkForm(forms.ModelForm):
 
     def __init__(self, process_type=None, *args, **kwargs):
         super(ProcessTypeWorkForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         use_pattern = True
         pattern = None
         if process_type:
@@ -3467,7 +3430,6 @@ class SaleForm(forms.ModelForm):
         fields = ('exchange_type', 'process_pattern', 'context_agent', 'customer', 'order', 'start_date', 'notes')
 
     def __init__(self, context_agent=None, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(SaleForm, self).__init__(*args, **kwargs)
         use_case = UseCase.objects.get(identifier="sale")
         self.fields["process_pattern"].queryset = ProcessPattern.objects.usecase_patterns(use_case)
@@ -3523,7 +3485,6 @@ class DistributionValueEquationForm(forms.Form):
         widget=forms.Textarea(attrs={'class': 'item-description',}))
 
     def __init__(self, context_agent=None, pattern=None, post=False, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         super(DistributionValueEquationForm, self).__init__(*args, **kwargs)
         if post == False:
             if context_agent:
@@ -3540,7 +3501,6 @@ class DistributionValueEquationForm(forms.Form):
                     for res in rss:
                         resources.append(res)
             self.fields["resource"].choices = [('', '----------')] + [(res.id, res.identifier) for res in resources]
-        #import pdb; pdb.set_trace()
 
 class ResourceFlowForm(forms.ModelForm):
     context_agent = forms.ModelChoiceField(
@@ -3618,7 +3578,6 @@ class ResourceFlowForm(forms.ModelForm):
 
     def __init__(self, pattern, *args, **kwargs):
         super(ResourceFlowForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             et = EventType.objects.get(name="Change")
@@ -3738,7 +3697,6 @@ class ProjectFilterSetForm(forms.Form):
     def __init__(self, project, event_type, pattern, *args, **kwargs):
         super(ProjectFilterSetForm, self).__init__(*args, **kwargs)
         self.fields["process_types"].queryset = project.process_types_queryset()
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             self.fields["resource_types"].queryset = pattern.get_resource_types(event_type=event_type)
@@ -3747,7 +3705,6 @@ class ProjectFilterSetForm(forms.Form):
 
     def serialize(self):
         data = self.cleaned_data
-        #import pdb; pdb.set_trace()
         json = {"method": "Context",}
         start_date = data.get("start_date")
         if start_date:
@@ -3931,7 +3888,6 @@ class BucketRuleFilterSetForm(forms.Form):
             self.fields["process_types"].queryset = context_agent.process_types_queryset()
         else:
             self.fields["process_types"].queryset = ProcessType.objects.all()
-        #import pdb; pdb.set_trace()
         if pattern:
             self.pattern = pattern
             if event_type:
@@ -3943,7 +3899,6 @@ class BucketRuleFilterSetForm(forms.Form):
 
     def serialize(self):
         data = self.cleaned_data
-        #import pdb; pdb.set_trace()
         json = {}
         process_types = data.get("process_types")
         if process_types:
@@ -3951,12 +3906,10 @@ class BucketRuleFilterSetForm(forms.Form):
         resource_types = data.get("resource_types")
         if resource_types:
             json["resource_types"] = [pt.id for pt in resource_types]
-        #import pdb; pdb.set_trace()
         string = simplejson.dumps(json)
         return string
 
     def deserialize(self, json):
-        #import pdb; pdb.set_trace()
         json = simplejson.loads(json)
         dict = {}
         process_types = json.get("process_types")
@@ -3991,7 +3944,6 @@ class DateRangeForm(forms.Form):
 
     def serialize(self):
         data = self.cleaned_data
-        #import pdb; pdb.set_trace()
         json = {"method": "DateRange",}
         start_date = data.get("start_date")
         if start_date:
@@ -4030,7 +3982,6 @@ class OrderMultiSelectForm(forms.Form):
 
     def __init__(self, context_agent, *args, **kwargs):
         super(OrderMultiSelectForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         if kwargs.get("data"):
             self.fields["orders"].queryset = Order.objects.all()
         else:
@@ -4038,7 +3989,6 @@ class OrderMultiSelectForm(forms.Form):
 
     def serialize(self):
         data = self.cleaned_data
-        #import pdb; pdb.set_trace()
         json = {"method": "Order",}
         orders = data.get("orders")
         if orders:
@@ -4079,7 +4029,6 @@ class ShipmentMultiSelectForm(forms.Form):
 
     def serialize(self):
         data = self.cleaned_data
-        #import pdb; pdb.set_trace()
         json = {"method": "Shipment",}
         shipments = data.get("shipments")
         if shipments:
@@ -4109,7 +4058,6 @@ class ProcessMultiSelectForm(forms.Form):
 
     def __init__(self, context_agent, *args, **kwargs):
         super(ProcessMultiSelectForm, self).__init__(*args, **kwargs)
-        #import pdb; pdb.set_trace()
         #if kwargs.get("data"):
         #    self.fields["processes"].queryset = Order.objects.all()
         #else:
@@ -4118,7 +4066,6 @@ class ProcessMultiSelectForm(forms.Form):
 
     def serialize(self):
         data = self.cleaned_data
-        #import pdb; pdb.set_trace()
         json = {"method": "Process",}
         processes = data.get("processes")
         if processes:

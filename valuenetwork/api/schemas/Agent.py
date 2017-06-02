@@ -36,16 +36,19 @@ class Query(graphene.AbstractType):
 
     # load single agents
 
+    def _load_own_agent(self):
+        agentUser = AgentUser.objects.filter(user=self.user).first()
+        if agentUser is None:
+            raise PermissionDenied("Cannot find requested user")
+        return agentUser.agent
+
     def resolve_agent(self, args, *rargs):
         me = args.get('me')
 
         # load own agent
 
         if (me is not None):
-            agentUser = AgentUser.objects.filter(user=self.user).first()
-            if agentUser is None:
-                raise PermissionDenied("Cannot find requested user")
-            return agentUser.agent
+            self._load_own_agent()
 
     # load agents list
 
@@ -56,6 +59,6 @@ class Query(graphene.AbstractType):
     # (this gives the projects, collectives, groups that the user agent is any kind of member of)
 
     def resolve_my_context_agents(self, args, context, info):
-        my_agent = self.resolve_agent(args)
+        my_agent = self._load_own_agent()
         return my_agent.is_member_of()
     

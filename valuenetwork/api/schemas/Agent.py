@@ -64,4 +64,4 @@ class Query(graphene.AbstractType):
 
     def resolve_my_context_agents(self, args, context, info):
         my_agent = self._load_own_agent()
-        return my_agent.is_member_of()
+        return my_agent.member_associations()

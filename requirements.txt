@@ -28,3 +28,4 @@ PyJWT
 six
 selenium
 mock
+graphene_django

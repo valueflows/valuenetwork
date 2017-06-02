@@ -20,7 +20,7 @@ from valuenetwork.api.schemas.helpers import *
 class Agent(DjangoObjectType):
     class Meta:
         model = EconomicAgent
-        only_fields = ('id', 'name', 'nick', 'url', 'is_context')
+        only_fields = ('id', 'name', 'nick', 'url', 'photo_url', 'is_context')
 
 # define public query API
 
@@ -36,6 +36,9 @@ class Query(graphene.AbstractType):
 
     my_organizations = graphene.List(Agent,
                                      me=graphene.Boolean())
+    
+    organization_members = graphene.List(Agent,
+                                         id=graphene.Int())    
 
     # load single agents
 
@@ -65,3 +68,13 @@ class Query(graphene.AbstractType):
     def resolve_my_organizations(self, args, context, info):
         my_agent = self._load_own_agent()
         return my_agent.is_member_of()
+    
+    # load members of an organization (context agent)
+
+    def resolve_organization_members(self, args, context, info):
+        id = args.get('id')
+        if id is not None:
+            org = EconomicAgent.objects.get(pk=id)
+            if org:
+                return org.members()
+        return None

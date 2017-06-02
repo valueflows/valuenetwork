@@ -1,12 +1,12 @@
 from django.test import TestCase
 
 
-class EconomicAgentSchemaTest(TestCase):
+class AgentSchemaTest(TestCase):
     @classmethod
     def setUpClass(cls):
         import os
         os.environ['DJANGO_SETTINGS_MODULE'] = 'valuenetwork.settings'
-        super(EconomicAgentSchemaTest, cls).setUpClass()
+        super(AgentSchemaTest, cls).setUpClass()
         import django
         django.setup()
 

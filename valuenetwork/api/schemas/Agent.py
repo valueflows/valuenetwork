@@ -51,7 +51,7 @@ class Query(graphene.AbstractType):
         # load own agent
 
         if (me is not None):
-            self._load_own_agent()
+            return self._load_own_agent()
 
     # load agents list
 

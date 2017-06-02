@@ -92,7 +92,7 @@ class MembershipRequestTestCase(LiveServerTestCase):
         s.find_element_by_id("id_password1").send_keys("test_user01password")
         s.find_element_by_id("id_password2").send_keys("test_user01password")
         s.find_element_by_xpath('//button[contains(text(), "Save user")]').click()
-        self.wait_js(s, '//a[contains(text(), "FairCoin: Faircoin address for test_user01")]')
+        self.wait_js(s, '//td[contains(text(), "test_user01")]')
 
 
         # Admin defines associations (click Maintain Associations)

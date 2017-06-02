@@ -290,6 +290,8 @@ def register_skills(request):
 
 @login_required
 def manage_faircoin_account(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     send_coins_form = None
@@ -342,6 +344,8 @@ def manage_faircoin_account(request, resource_id):
     })
 
 def validate_faircoin_address_for_worker(request):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     data = request.GET
     address = data["to_address"].strip()
     answer = faircoin_utils.is_valid(address)
@@ -352,6 +356,8 @@ def validate_faircoin_address_for_worker(request):
 
 @login_required
 def change_faircoin_account(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     if request.method == "POST":
         resource = get_object_or_404(EconomicResource, pk=resource_id)
         form = EconomicResourceForm(data=request.POST, instance=resource)
@@ -385,6 +391,8 @@ def change_faircoin_account(request, resource_id):
 
 @login_required
 def transfer_faircoins(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     if request.method == "POST":
         resource = get_object_or_404(EconomicResource, id=resource_id)
         agent = get_agent(request)
@@ -497,6 +505,8 @@ def transfer_faircoins(request, resource_id):
 
 @login_required
 def faircoin_history(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     exchange_service = ExchangeService.get()
@@ -530,6 +540,8 @@ def faircoin_history(request, resource_id):
 
 @login_required
 def edit_faircoin_event_description(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     agent = get_agent(request)
     resource = EconomicResource.objects.get(id=resource_id)
     if request.method == "POST":

@@ -1200,6 +1200,15 @@ class EconomicAgent(models.Model):
     def individual_members(self):
         return self.members().filter(agent_type__party_type="individual")
 
+    def is_member_of(self):
+        assocs = self.is_associate_of.filter(
+            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")
+            ).filter(state="active")
+        agents = []
+        for assoc in assocs:
+            agents.append(assoc.has_associate)
+        return agents
+
     #  bum2
     def managers(self): #returns a list or None
         agent_ids = self.has_associates.filter(association_type__association_behavior="manager").filter(state="active").values_list('is_associate')

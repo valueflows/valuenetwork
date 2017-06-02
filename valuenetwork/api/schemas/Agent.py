@@ -34,8 +34,8 @@ class Query(graphene.AbstractType):
 
     all_agents = graphene.List(Agent)
 
-    my_context_agents = graphene.List(Agent,
-                                      me=graphene.Boolean())
+    my_organizations = graphene.List(Agent,
+                                     me=graphene.Boolean())
 
     # load single agents
 
@@ -58,10 +58,10 @@ class Query(graphene.AbstractType):
     def resolve_all_agents(self, args, context, info):
         return EconomicAgent.objects.all()
 
-    # load context agents that 'me' is related to with 'member' behavior
+    # load context agents that 'me' is related to with 'member' or 'manager' behavior
     # (this gives the projects, collectives, groups that the user agent is any
     # kind of member of)
 
-    def resolve_my_context_agents(self, args, context, info):
+    def resolve_my_organizations(self, args, context, info):
         my_agent = self._load_own_agent()
-        return my_agent.member_associations()
+        return my_agent.is_member_of()

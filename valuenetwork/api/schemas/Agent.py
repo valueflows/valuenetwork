@@ -11,17 +11,19 @@ from django.core.exceptions import PermissionDenied
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
+from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser, AgentAssociation
 from valuenetwork.api.schemas.helpers import *
 
 # bind Django models to Graphene types
 
 
 class Agent(DjangoObjectType):
+    type = graphene.String(source='type')
     image = graphene.String(source='image')
+    note = graphene.String(source='note')
     class Meta:
         model = EconomicAgent
-        only_fields = ('id', 'name', 'description', 'url')
+        only_fields = ('id', 'name', 'url')
 
 
 # define public query API
@@ -30,8 +32,10 @@ class Query(graphene.AbstractType):
 
     # define input query params
 
+    my_agent = graphene.Field(Agent)
+
     agent = graphene.Field(Agent,
-                           me=graphene.Boolean())
+                           id=graphene.Int())
 
     all_agents = graphene.List(Agent)
 
@@ -45,19 +49,23 @@ class Query(graphene.AbstractType):
 
     def _load_own_agent(self):
         agentUser = AgentUser.objects.filter(user=self.user).first()
-        if agentUser is None:
-            raise PermissionDenied("Cannot find requested user")
         return agentUser.agent
 
+    def resolve_my_agent(self, args, *rargs):
+        agent = self._load_own_agent()
+        if agent:
+            return agent
+        raise PermissionDenied("Cannot find requested user")
+
     def resolve_agent(self, args, *rargs):
-        me = args.get('me')
+        id = args.get('id')
+        if id is not None:
+            agent = EconomicAgent.objects.get(pk=id)
+            if agent:
+                return agent
+        raise PermissionDenied("Cannot find requested agent")        
 
-        # load own agent
-
-        if (me is not None):
-            return self._load_own_agent()
-
-    # load agents list
+    # load all agent lists
 
     def resolve_all_agents(self, args, context, info):
         return EconomicAgent.objects.all()

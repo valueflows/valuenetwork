@@ -504,12 +504,23 @@ class EconomicAgent(models.Model):
         return ('agent', (),
         { 'agent_id': str(self.id),})
 
-    @property
+    @property #ValueFlows
     def image(self):
         if self.photo_url:
             return self.photo_url #TODO: make a url out of the photo field and include here
         else:
             return ""
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def type(self):
+        tp = self.agent_type.name
+        if tp == "Individual":
+            tp = "Person"
+        return tp
 
     def membership_request(self):
         reqs = self.membership_requests.all()

@@ -18,12 +18,13 @@ from valuenetwork.api.schemas.helpers import *
 
 
 class Agent(DjangoObjectType):
+    image = graphene.String(source='image')
     class Meta:
         model = EconomicAgent
-        only_fields = ('id', 'name', 'nick', 'url', 'photo_url', 'is_context')
+        only_fields = ('id', 'name', 'description', 'url')
+
 
 # define public query API
-
 
 class Query(graphene.AbstractType):
 

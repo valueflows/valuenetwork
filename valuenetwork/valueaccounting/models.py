@@ -504,6 +504,13 @@ class EconomicAgent(models.Model):
         return ('agent', (),
         { 'agent_id': str(self.id),})
 
+    @property
+    def image(self):
+        if self.photo_url:
+            return self.photo_url #TODO: make a url out of the photo field and include here
+        else:
+            return ""
+
     def membership_request(self):
         reqs = self.membership_requests.all()
         if reqs:

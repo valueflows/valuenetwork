@@ -1427,6 +1427,10 @@ class EconomicAgent(models.Model):
         return AgentAssociation.objects.filter(
             Q(has_associate=self ) | Q(is_associate=self))
 
+    def all_active_associations(self):
+        return AgentAssociation.objects.filter(
+            Q(has_associate=self ) | Q(is_associate=self)).filter(state="active")
+
     def is_context_agent(self):
         return self.is_context
 
@@ -1670,6 +1674,19 @@ class AgentAssociation(models.Model):
             self.has_associate.nick,
             state,
             ])
+
+    @property #ValueFlows
+    def subject(self):
+        return self.is_associate
+
+    @property #ValueFlows
+    def object(self):
+        return self.has_associate
+
+    @property #ValueFlows
+    def relationship(self):
+        return self.association_type.label
+
 
 #todo exchange redesign fallout
 #many of these are obsolete

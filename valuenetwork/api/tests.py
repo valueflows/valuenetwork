@@ -77,3 +77,90 @@ class AgentSchemaTest(TestCase):
         self.assertEqual(None, result.data['viewer'])
         self.assertTrue(len(result.errors) == 1)
         self.assertEqual('Invalid password', str(result.errors[0]))
+
+'''
+query($token: String) {
+  viewer(token: $token) {
+    myAgent { 
+      id 
+      name
+      image
+      note
+      type
+    }
+  }
+} 
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:39) { 
+      id 
+      name
+      image
+      note
+      type
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allAgents { 
+      id 
+      name
+      image
+      note
+      type
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    myOrganizations { 
+      id 
+      name
+      image
+      note
+      type
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allAgentRelationshipRoles { 
+      id
+      label
+      inverseLabel
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allAgentRelationships { 
+      id
+      subject
+      relationship
+      object
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    organizationMembers (id: 39) { 
+      id 
+      name
+      image
+      note
+      type
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    agentRelationships (id: 39) { 
+      id
+      subject
+      relationship
+      object
+    }
+  }
+}
+'''

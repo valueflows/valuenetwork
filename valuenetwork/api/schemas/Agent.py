@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser, AgentAssociation
+from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser, AgentAssociation, AgentAssociationType
 from valuenetwork.api.schemas.helpers import *
 
 # bind Django models to Graphene types
@@ -23,8 +23,22 @@ class Agent(DjangoObjectType):
     note = graphene.String(source='note')
     class Meta:
         model = EconomicAgent
-        only_fields = ('id', 'name', 'url')
+        only_fields = ('id', 'name')
 
+class AgentRelationship(DjangoObjectType):
+    subject = graphene.String(source='subject')
+    object = graphene.String(source='object')
+    relationship = graphene.String(source='relationship')
+    class Meta:
+        model = AgentAssociation
+        only_fields = ('id')
+
+class AgentRelationshipRole(DjangoObjectType):
+    label = graphene.String(source='label')
+    inverse_label = graphene.String(source='inverse_label')
+    class Meta:
+        model = AgentAssociationType
+        only_fields = ('id')
 
 # define public query API
 
@@ -41,9 +55,16 @@ class Query(graphene.AbstractType):
 
     my_organizations = graphene.List(Agent,
                                      me=graphene.Boolean())
-    
+
+    all_agent_relationship_roles = graphene.List(AgentRelationshipRole)
+
+    all_agent_relationships = graphene.List(AgentRelationship)
+
     organization_members = graphene.List(Agent,
-                                         id=graphene.Int())    
+                                         id=graphene.Int())
+
+    agent_relationships = graphene.List(AgentRelationship,
+                                        id=graphene.Int())
 
     # load single agents
 
@@ -78,7 +99,7 @@ class Query(graphene.AbstractType):
         my_agent = self._load_own_agent()
         return my_agent.is_member_of()
     
-    # load members of an organization (context agent)
+    # load members (agents) of an organization (context agent)
 
     def resolve_organization_members(self, args, context, info):
         id = args.get('id')
@@ -86,4 +107,24 @@ class Query(graphene.AbstractType):
             org = EconomicAgent.objects.get(pk=id)
             if org:
                 return org.members()
+        return None
+
+    # load agent relationship role list, use to relate relationship label and inverse label
+
+    def resolve_all_agent_relationship_roles(self, args, context, info):
+        return AgentAssociationType.objects.all()
+
+    # load agent relationship lists
+
+    def resolve_all_agent_relationships(self, args, context, info):
+        return AgentAssociation.objects.all()
+
+    # load the relationships of one agent, both directions (subject, object)
+
+    def resolve_agent_relationships(self, args, context, info):
+        id = args.get('id')
+        if id is not None:
+            agent = EconomicAgent.objects.get(pk=id)
+            if agent:
+                return agent.all_active_associations()
         return None

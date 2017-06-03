@@ -12,7 +12,7 @@ class AgentSchemaTest(TestCase):
 
     def setUp(self):
         from django.contrib.auth.models import User
-        from valuenetwork.valueaccounting.models import EconomicAgent
+        from valuenetwork.valueaccounting.models import EconomicAgent, AgentAssociation, AgentType
         test_user, _ = User.objects.get_or_create(username='testUser11222')
         test_user.set_password('123456')
         test_user.save()
@@ -39,14 +39,14 @@ class AgentSchemaTest(TestCase):
         query = '''
         query {
           viewer(token: "''' + token + '''") {
-            agent(me: true) {
+            myAgent {
               name
             }
           }
         }
         '''
         result = schema.execute(query)
-        self.assertEqual('testUser11222', result.data['viewer']['agent']['name'])
+        self.assertEqual('testUser11222', result.data['viewer']['myAgent']['name'])
 
     def test_change_password(self):
         from .schema import schema
@@ -67,7 +67,7 @@ class AgentSchemaTest(TestCase):
         query = '''
                 query {
                   viewer(token: "''' + token + '''") {
-                    agent(me: true) {
+                    myAgent {
                       name
                     }
                   }

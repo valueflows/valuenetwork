@@ -4403,6 +4403,14 @@ class EconomicResource(models.Model):
     def resource_type_name(self):
         return self.resource_type.name
 
+    @property #ValueFlows
+    def numeric_value(self):
+        return self.quantity
+
+    @property #ValueFlows
+    def unit(self):
+        return self.resource_type.unit
+
     def label(self):
         return self.identifier or str(self.id)
 

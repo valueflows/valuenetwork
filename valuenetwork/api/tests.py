@@ -169,6 +169,8 @@ query($token: String) {
       id
       resourceType
       trackingIdentifier
+      numericValue
+      unit
       image
       note
     }
@@ -180,6 +182,8 @@ query($token: String) {
       id
       resourceType
       trackingIdentifier
+      numericValue
+      unit
       image
       note
     }
@@ -191,6 +195,8 @@ query($token: String) {
       id
       resourceType
       trackingIdentifier
+      numericValue
+      unit
       image
       note
     }
@@ -202,6 +208,8 @@ query($token: String) {
       id
       resourceType
       trackingIdentifier
+      numericValue
+      unit
       image
       note
     }
@@ -213,6 +221,8 @@ query($token: String) {
       id
       resourceType
       trackingIdentifier
+      numericValue
+      unit
       image
       note
     }

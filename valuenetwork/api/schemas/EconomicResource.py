@@ -19,15 +19,13 @@ class EconomicResourceAPI(DjangoObjectType):
     resource_type = graphene.String(source='resource_type_name') # need to figure this out with VF gang
     tracking_identifier = graphene.String(source='tracking_identifier')
     image = graphene.String(source='image')
+    numeric_value = graphene.Float(source='numeric_value')
+    unit = graphene.String(source='unit')
     note = graphene.String(source='note')
+
     class Meta:
         model = EconomicResource
         only_fields = ('id')
-        
-        #'vf:quantity':
-        #'@type': qudt:QuantityValue
-        #'qudt:unit': unit:Each
-        #'qudt:numericValue': 300
 
 
 # define public query API

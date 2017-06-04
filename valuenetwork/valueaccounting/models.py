@@ -1323,6 +1323,18 @@ class EconomicAgent(models.Model):
             resource__resource_type__behavior="account")
         return [var.resource for var in vars]
 
+    def owned_resources(self):
+        arrs = self.agent_resource_roles.filter(role__is_owner=True)
+        return [arr.resource for arr in arrs]
+
+    def owned_currency_resources(self):
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(resource__resource_type__behavior="other")
+        return [arr.resource for arr in arrs]
+
+    def owned_inventory_resources(self):
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).filter(resource__resource_type__behavior="other")
+        return [arr.resource for arr in arrs]
+
     def create_virtual_account(self, resource_type):
         role_types = AgentResourceRoleType.objects.filter(is_owner=True)
         owner_role_type = None
@@ -4299,6 +4311,9 @@ class EconomicResourceManager(models.Manager):
 
     def onhand(self):
         return EconomicResource.objects.filter(quantity__gt=0)
+    
+    def all_economic_resources(self):
+        return EconomicResource.objects.all()
 
 class EconomicResource(models.Model):
     resource_type = models.ForeignKey(EconomicResourceType,
@@ -4368,6 +4383,25 @@ class EconomicResource(models.Model):
     def get_absolute_url(self):
         return ('resource', (),
             { 'resource_id': str(self.id),})
+
+    @property #ValueFlows
+    def image(self):
+        if self.photo_url:
+            return self.photo_url #TODO: make a url out of the photo field and include here
+        else:
+            return ""
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
+    @property #ValueFlows
+    def tracking_identifier(self):
+        return self.identifier
+
+    @property #ValueFlows
+    def resource_type_name(self):
+        return self.resource_type.name
 
     def label(self):
         return self.identifier or str(self.id)

@@ -14,11 +14,13 @@ from django.conf import settings
 
 import valuenetwork.api.schemas.Auth
 import valuenetwork.api.schemas.Agent
+import valuenetwork.api.schemas.EconomicResource
 from valuenetwork.api.schemas.helpers import hash_password
 
 
 class ViewerQuery(
     valuenetwork.api.schemas.Agent.Query,
+    valuenetwork.api.schemas.EconomicResource.Query,
     graphene.ObjectType
 ):
     def __init__(self, *args, **kwargs):

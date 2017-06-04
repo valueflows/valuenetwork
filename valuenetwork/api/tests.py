@@ -163,4 +163,59 @@ query($token: String) {
     }
   }
 }
+query($token: String) {
+  viewer(token: $token) {
+    economicResource(id: 26) {
+      id
+      resourceType
+      trackingIdentifier
+      image
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allEconomicResources {
+      id
+      resourceType
+      trackingIdentifier
+      image
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    ownedEconomicResources (id: 26) {
+      id
+      resourceType
+      trackingIdentifier
+      image
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    ownedCurrencyEconomicResources (id: 26) {
+      id
+      resourceType
+      trackingIdentifier
+      image
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    ownedInventoryEconomicResources (id: 26) {
+      id
+      resourceType
+      trackingIdentifier
+      image
+      note
+    }
+  }
+}
 '''

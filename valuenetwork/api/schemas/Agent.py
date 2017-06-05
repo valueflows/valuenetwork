@@ -17,7 +17,7 @@ from valuenetwork.api.schemas.helpers import *
 # bind Django models to Graphene types
 
 
-class AgentAPI(DjangoObjectType):
+class Agent(DjangoObjectType):
     type = graphene.String(source='type')
     image = graphene.String(source='image')
     note = graphene.String(source='note')
@@ -25,7 +25,7 @@ class AgentAPI(DjangoObjectType):
         model = EconomicAgent
         only_fields = ('id', 'name')
 
-class AgentRelationshipAPI(DjangoObjectType):
+class AgentRelationship(DjangoObjectType):
     subject = graphene.String(source='subject')
     object = graphene.String(source='object')
     relationship = graphene.String(source='relationship')
@@ -33,7 +33,7 @@ class AgentRelationshipAPI(DjangoObjectType):
         model = AgentAssociation
         only_fields = ('id')
 
-class AgentRelationshipRoleAPI(DjangoObjectType):
+class AgentRelationshipRole(DjangoObjectType):
     label = graphene.String(source='label')
     inverse_label = graphene.String(source='inverse_label')
     class Meta:
@@ -46,24 +46,24 @@ class Query(graphene.AbstractType):
 
     # define input query params
 
-    my_agent = graphene.Field(AgentAPI)
+    my_agent = graphene.Field(Agent)
 
-    agent = graphene.Field(AgentAPI,
+    agent = graphene.Field(Agent,
                            id=graphene.Int())
 
-    all_agents = graphene.List(AgentAPI)
+    all_agents = graphene.List(Agent)
 
-    my_organizations = graphene.List(AgentAPI,
+    my_organizations = graphene.List(Agent,
                                      me=graphene.Boolean())
 
-    all_agent_relationship_roles = graphene.List(AgentRelationshipRoleAPI)
+    all_agent_relationship_roles = graphene.List(AgentRelationshipRole)
 
-    all_agent_relationships = graphene.List(AgentRelationshipAPI)
+    all_agent_relationships = graphene.List(AgentRelationship)
 
-    organization_members = graphene.List(AgentAPI,
+    organization_members = graphene.List(Agent,
                                          id=graphene.Int())
 
-    agent_relationships = graphene.List(AgentRelationshipAPI,
+    agent_relationships = graphene.List(AgentRelationship,
                                         id=graphene.Int())
 
     # load single agents

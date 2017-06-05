@@ -464,7 +464,7 @@
                             <th>{% trans "Payment Options:" %}</th>
                             <td><ul style="margin-left:15px;">
                               {% for typ in agent.project.payment_options %}
-                                <li>{{ typ }}</li>
+                                <li>{{ typ|safe }}</li>
                               {% endfor %}
                             </ul></td>
                           </tr>

@@ -5,7 +5,7 @@ import datetime
 
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseServerError, Http404, HttpResponseNotFound, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -1683,27 +1683,49 @@ def joinaproject_request_internal(request, agent_id = False):
     })
 
 
+from django.http import HttpResponse
+from django.utils.encoding import iri_to_uri
+
+class HttpResponseTemporaryRedirect(HttpResponse):
+    status_code = 307
+
+    def __init__(self, redirect_to):
+        HttpResponse.__init__(self)
+        self['Location'] = iri_to_uri(redirect_to)
+
 import requests
 
+#@mod.route('/payment-url/', methods=['GET', 'POST'])
 def payment_url(request, paymode, join_request_id):
     #import pdb; pdb.set_trace()
     url = ''
     payload = {}
+    req = get_object_or_404(JoinRequest, pk=join_request_id)
     if settings.PAYMENT_GATEWAYS and paymode:
         gates = settings.PAYMENT_GATEWAYS
-        url = gates[paymode]
-        req = get_object_or_404(JoinRequest, pk=join_request_id)
-        payload = {'order_id': str(join_request_id),
-                   'amount': req.pending_shares(),
-                   'first_name': req.name,
-                   'last_name': req.surname,
-                   'email': req.email_address,
-                   'lang': 'en',
-        }
-    #r = requests.post(url, data=payload) #, allow_redirects=True)
-    return HttpResponse(requests.post(url, data=payload), content_type="text/html")
-    # HttpResponseRedirect( url + '&order_id=' + join_request_id + '&amount=' + str(req.pending_shares()) + '&first_name=' + req.name + '&last_name=' + req.surname + '&email=' + req.email_address)
-    #return False
+        if req.project.fobi_slug and gates[req.project.fobi_slug]:
+            url = gates[req.project.fobi_slug][paymode]['url']
+            payload = {'order_id': str(join_request_id),
+                       'amount': req.pending_shares(),
+                       'first_name': req.name,
+                       'last_name': req.surname,
+                       'email': req.email_address,
+                       'lang': 'en',
+            }
+    if payload['amount'] and not url == '':
+        #r = requests.post(url, data=payload) #, allow_redirects=True)
+        #import urllib
+        #params = urllib.urlencode(payload)
+        request.method = "POST"
+        request.POST = payload #params
+        #resp = HttpResponse(r) #r, content_type="text/html")
+        #resp['Location'] = r.url
+
+        #return resp
+        return HttpResponse(requests.post(url, data=payload))
+        #return redirect(r.url, code=307)
+        #return HttpResponseRedirect( url + '&order_id=' + join_request_id + '&amount=' + str(req.pending_shares()) + '&first_name=' + req.name + '&last_name=' + req.surname + '&email=' + req.email_address)
+    return HttpResponse('Gateway not properly configured, contact an admin')
 
 
 

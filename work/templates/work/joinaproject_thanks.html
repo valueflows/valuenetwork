@@ -27,13 +27,16 @@
         <p style="text-align:center">{% trans "A project coordinator will send you an email soon with your OCP login credentials." %}</p>
         <p> &nbsp; </p>
         {% if project.payment_options and jn_req.pending_shares %}
-                <p style="text-align:center; font-size:120%; ">
-                    {% trans "You've choosed to pay your" %} <b>{{ jn_req.pending_shares }}</b> {% trans "Shares via" %} <span style="font-weight:bold;">{{ jn_req.payment_option.val }}</span>
-                </p>
+            <p style="text-align:center; font-size:120%; ">
+                {% trans "You've choosed to pay your" %} <b>{{ jn_req.pending_shares }}</b> {% trans "Shares via" %} <span style="font-weight:bold;">{{ jn_req.payment_option.val }}</span>
+            </p>
+            {% if jn_req.payment_url %}
                 <p style="text-align:center"><br />
-                    <a href="{% url 'payment_url' paymode=jn_req.payment_option.key join_request_id=jn_req.id %}" target="ocp_pay" class="btn btn-primary">{% trans "Pay your Shares now" %}</a><br />
-
+                    <a href="{% url 'payment_url' paymode=jn_req.payment_option.key join_request_id=jn_req.id %}" target="ocp_pay" class="btn btn-primary">{% if jn_req.payment_html %}{{ jn_req.payment_html }}{% else %}{% trans "Pay your Shares now" %}{% endif %}</a><br />
                 </p>
+            {% elif jn_req.payment_html %}
+                <p style="text-align:center">{{ jn_req.payment_html|safe }}</p>
+            {% endif %}
         {% endif %}
     </div>
 	<h4><a href="{{ agent.url }}">

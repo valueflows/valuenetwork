@@ -163,15 +163,35 @@ class Project(models.Model):
             for fi in fields:
                 data = json.loads(fi.plugin_data)
                 name = data.get('name')
-                if name == "payment_mode":
+                if name == "payment_mode": # name of the fobi field
                     choi = data.get('choices')
                     if choi:
                         opts = choi.split('\r\n')
                         for op in opts:
                             opa = op.split(',')
-                            pay_opts.append(opa[1].strip())
+                            key = opa[0].strip()
+                            val = opa[1].strip()
+                            ok = '<span class="error">config pending!</span>'
+                            gates = self.payment_gateways()
+                            if gates:
+                                try:
+                                    gate = gates[key]
+                                except:
+                                    gate = None
+                                if gate is not None:
+                                    ok = '<span style="color:#090">ok:</span>'
+                                    if gate['html']:
+                                        ok += ' <ul><li>'+str(gate['html'])+'</li></ul>'
+                            pay_opts.append(val+' &nbsp;'+ok)
             return pay_opts
         return False
+
+    def payment_gateways(self):
+        gates = False
+        if settings.PAYMENT_GATEWAYS and self.fobi_slug:
+            gates = settings.PAYMENT_GATEWAYS[self.fobi_slug]
+        return gates
+
 
 
 class SkillSuggestion(models.Model):
@@ -389,7 +409,20 @@ class JoinRequest(models.Model):
         payopt = self.payment_option()
         if settings.PAYMENT_GATEWAYS and payopt:
             gates = settings.PAYMENT_GATEWAYS
-            return gates[payopt['key']]
+            if self.project.fobi_slug and gates[self.project.fobi_slug]:
+                obj = gates[self.project.fobi_slug][payopt['key']]
+            if obj:
+                return obj['url']
+        return False
+
+    def payment_html(self):
+        payopt = self.payment_option()
+        if settings.PAYMENT_GATEWAYS and payopt:
+            gates = settings.PAYMENT_GATEWAYS
+            if self.project.fobi_slug and gates[self.project.fobi_slug]:
+                obj = gates[self.project.fobi_slug][payopt['key']]
+            if obj['html']:
+                return obj['html']
         return False
 
 

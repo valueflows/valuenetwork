@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
+from django.conf import settings
 import work.views
 
 urlpatterns = [
@@ -29,16 +30,9 @@ urlpatterns = [
     url(r'^update-skills/(?P<agent_id>\d+)/$', work.views.update_skills, name="update_skills"),
     url(r"^add-worker-to-location/(?P<location_id>\d+)/(?P<agent_id>\d+)/$", work.views.add_worker_to_location, name="add_worker_to_location"),
     url(r"^add-location-to-worker/(?P<agent_id>\d+)/$", work.views.add_location_to_worker, name="add_location_to_worker"),
-    url(r"^manage-faircoin-account/(?P<resource_id>\d+)/$", work.views.manage_faircoin_account, name="manage_faircoin_account"),
-    url(r"^transfer-faircoins/(?P<resource_id>\d+)/$", work.views.transfer_faircoins,
-        name="transfer_faircoins"),
-    url(r"^faircoin-history/(?P<resource_id>\d+)/$", work.views.faircoin_history,
-        name="faircoin_history"),
-    url(r"^change-faircoin-account/(?P<resource_id>\d+)/$", work.views.change_faircoin_account,
-        name="change_faircoin_account"),
     url(r'^membership-discussion/(?P<membership_request_id>\d+)/$', work.views.membership_discussion,
         name="membership_discussion"),
-    url(r"^validate-faircoin-address-for-worker/$", work.views.validate_faircoin_address_for_worker, name="validate_faircoin_address_for_worker"),
+
     url(r"^work-add-todo/$", work.views.work_add_todo, name="work_add_todo"),
     url(r"^work-todo-done/(?P<todo_id>\d+)/$", work.views.work_todo_done, name="work_todo_done"),
     url(r"^work-todo-time/$", work.views.work_todo_time, name="work_todo_time"),
@@ -105,7 +99,7 @@ urlpatterns = [
     url(r"^agent/(?P<agent_id>\d+)/resources/new/(?P<Rtype>[\w-]+)/$", work.views.new_resource_type, name="new_resource_type"),
     url(r"^agent/(?P<agent_id>\d+)/change-resource/(?P<resource_id>\d+)/$", work.views.change_resource, name="change_resource"),
 
-    url(r"^edit_event_notes/(?P<resource_id>\d+)/$", work.views.edit_faircoin_event_description, name="edit_faircoin_event_description"),
+
 
     url(r'^add-transfer/(?P<exchange_id>\d+)/(?P<transfer_type_id>\d+)/$', work.views.add_transfer,
         name="add_transfer"),
@@ -201,3 +195,18 @@ urlpatterns = [
 
 ]
 
+if settings.USE_FAIRCOIN:
+    urlpatterns += [
+        url(r"^manage-faircoin-account/(?P<resource_id>\d+)/$", work.views.manage_faircoin_account,
+            name="manage_faircoin_account"),
+        url(r"^transfer-faircoins/(?P<resource_id>\d+)/$", work.views.transfer_faircoins,
+            name="transfer_faircoins"),
+        url(r"^faircoin-history/(?P<resource_id>\d+)/$", work.views.faircoin_history,
+            name="faircoin_history"),
+        url(r"^change-faircoin-account/(?P<resource_id>\d+)/$", work.views.change_faircoin_account,
+            name="change_faircoin_account"),
+        url(r"^validate-faircoin-address-for-worker/$", work.views.validate_faircoin_address_for_worker,
+            name="validate_faircoin_address_for_worker"),
+        url(r"^edit_event_notes/(?P<resource_id>\d+)/$", work.views.edit_faircoin_event_description,
+            name="edit_faircoin_event_description"),
+    ]

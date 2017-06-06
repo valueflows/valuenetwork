@@ -160,7 +160,9 @@
                  {% endif %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
+                 {% if user_agent.need_exchanges %}
                    <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+                 {% endif %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent == agent %}
                    <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
@@ -170,12 +172,12 @@
                {% elif agent.project in user_agent.joinaproject_requests_projects %}
                  {% for req in user_agent.joinaproject_requests %}
                    {% if req.project == agent.project %}
-                     <a class="indent" href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">{% trans "Your Joining Feedback" %}</a>
+                     <a class="indent" href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">{% trans "Feedback" %}</a>
                    {% endif %}
                  {% endfor %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
-                   {% if agent.need_skills %}
+                   {% if user_agent.need_skills %}
                        <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
                    {% endif %}
                {% endif %}
@@ -852,7 +854,7 @@
       {% endif %}
 
       {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
-        {% if agent.need_skills %}
+        {% if False and agent.need_skills %}
         <div class="row-fluid" tyle="margin-bottom:2em;">
           <hr />
           <h3>{% trans "Cumulative Time" %}</h3>

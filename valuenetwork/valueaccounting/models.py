@@ -1026,7 +1026,22 @@ class EconomicAgent(models.Model):
             try:
                 if ag.project and ag.project.services():
                     if not 'faircoins' in ag.project.services():
-                        resp = False
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags) == len(noneed):
+            resp = False
+        return resp
+
+    def need_exchanges(self):
+        resp = True
+        ags = self.related_contexts()
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'exchanges' in ag.project.services():
+                        noneed.append(ag)
             except:
                 pass
         if len(ags) == len(noneed):

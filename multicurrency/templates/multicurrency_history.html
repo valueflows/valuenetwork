@@ -8,13 +8,12 @@
   <div class="container">
     <legend>
       <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a> >
-	        {% trans "Multicurrency-wallet Account" %}
+	        {% trans "Multicurrency-wallet Account (user:" %} {{ auth_user }})
       <div class="subnav">
 
       </div>
     </legend>
     {% include "_messages.html" %}
-    <h3>Movements of {{ auth_user }} (Agent {{ agent.name }})</h3>
     <div class="infobox span2" style="margin-left:0;">
       {% for bal in balance_clean %}{{ bal }}<br />{% endfor %}
     </div>

@@ -44,7 +44,7 @@ body {
 </head>
 
 
-  <body style="background-image: {% if background_url %}url({% static background_url %}){% else %}url({% static 'img/photo-OCP-1600x900_green.jpg' %}){% endif %}; text-align:center;">
+  <body style="background-image: {% if background_url %}url({% static background_url %}){% else %}url({% static 'img/photo-OCP-1600x900_green.jpg' %}){% endif %}; text-align:center; background-attachment:fixed;">
         <p>&nbsp;</p>
 
     <form action="{% url 'set_language' %}" method="post" id="lang-switch">{% csrf_token %}
@@ -69,6 +69,7 @@ body {
             {% endif %}
         </h4>
         <h1>{% if not project.agent.photo_url or project.agent.photo %}{{ project.agent.name }}{% endif %}</h1>
+        <br />
     <table class="landing" border="0" align="center" style="text-align:center">
       <tr>
         <td colspan="2">

@@ -24,6 +24,12 @@
 
     </style>
 
+    {% if css %}
+        <style>
+            {{ css }}
+        </style>
+    {% endif %}
+
     <script src="{% static "pinax/js/jquery.js" %}"></script>
     <script type="text/javascript">
 
@@ -70,7 +76,7 @@
     <title>{% trans "Request to Join: " %} {{ project.agent.name }}</title>
 
   </head>
-  <body style="background-image: url({% static 'img/photo-OCP-1600x900_green.jpg' %}); text-align:center;">
+  <body style="background-image: url({% if back %}{% static back %}{% else %}{% static 'img/photo-OCP-1600x900_green.jpg' %}{% endif %}); text-align:center; background-attachment:fixed;">
     <div style="font-weight:bold; position:absolute; left:13px; top:9px;">
       <a href="{% url 'project_login' form_slug=project.fobi_slug %}" style="color:#734279;">{% trans "Login" %} {{ project.agent.name }}</a>
     </div>
@@ -95,7 +101,7 @@
       <h1>
         {% if project.agent.url %}<a href="{{ project.agent.url }}" target="_blank">{{ project.agent.name }}</a>{% else %} {{ project.agent.name }} {% endif %}
       </h1>
-      <br/>
+      <p>&nbsp;</p>
       <!-- <p>
         {% trans "The first step to join this project is to fill the following form:" %}
       </p> -->

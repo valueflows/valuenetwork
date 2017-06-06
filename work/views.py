@@ -1288,7 +1288,7 @@ from account.forms import LoginUsernameForm
 def project_login(request, form_slug = False):
     #import pdb; pdb.set_trace()
     if form_slug:
-        project = Project.objects.get(fobi_slug=form_slug)
+        project = get_object_or_404(Project, fobi_slug=form_slug)
         if request.user.is_authenticated():
             return members_agent(request, agent_id=project.agent.id)
         html = ''
@@ -1526,12 +1526,22 @@ def joinaproject_request(request, form_slug = False):
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
     fobi_form = FormClass(**kwargs)
 
+    back = ''
+    css = ''
+    if settings.PROJECTS_LOGIN and project.fobi_slug:
+        data = settings.PROJECTS_LOGIN[project.fobi_slug]
+        if data:
+            back = data['background_url']
+            css = data['css']
+
     return render(request, "work/joinaproject_request.html", {
         "help": get_help("work_join_request"),
         "join_form": join_form,
         "fobi_form": fobi_form,
         "project": project,
         "post": escapejs(json.dumps(request.POST)),
+        "back": back,
+        "css": css,
     })
 
 

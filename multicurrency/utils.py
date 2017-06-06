@@ -21,6 +21,7 @@ class ChipChapAuthConnection(object):
             self.access_secret = cdata['access_secret']
             self.url_client = cdata['url_client']
             self.url_history = cdata['url_history']
+            self.url_balance = cdata['url_balance']
         else:
             self.able_to_connect = False
 
@@ -72,8 +73,9 @@ class ChipChapAuthConnection(object):
             "limit": limit,
             "offset": offset,
         }
-        response = requests.get(self.url_history, headers=headers, params=params)
-        if int(response.status_code) == 200:
-            return response.json()
+        tx_list = requests.get(self.url_history, headers=headers, params=params)
+        balance = requests.get(self.url_balance, headers=headers)
+        if int(tx_list.status_code) and int(balance.status_code)== 200:
+            return tx_list.json(), balance.json()
         else:
             raise ChipChapAuthError('Error ' + str(response.status_code), response.text)

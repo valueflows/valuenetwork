@@ -157,38 +157,40 @@ def history(request, agent_id, oauth_id):
         methods = {
             'fac': 'FAIR',
             'halcash_es': 'Halcash ES',
+            'exchange_EURtoFAC': 'EUR to FAIR',
+            'sepa': 'SEPA',
+            'wallet_to_wallet': 'wallet to wallet',
         }
         table_caption = "Showing " + str(data['data']['start'] + 1) + " to "\
             + str(data['data']['end']) + " of " + str(data['data']['total'])\
             + " movements"
-        table_headers = ['Created', 'Concept', 'Method in',
-            'Method out', 'Address', 'Amount']
+        table_headers = ['Created', 'Concept', 'Method', 'Address', 'Amount']
         table_rows = []
         paginator = {}
         if data['data']['total'] > 0:
-            for i in range(data['data']['start'], data['data']['end']):
-                tx = data['data']['elements'][i]
+            for tx in data['data']['elements']:
                 created = parse_datetime(tx['created']) if 'created' in tx else '--'
-                concept = tx['concept'] if 'concept' in tx else '--'
-                method_in = tx['method_in'] if 'method_in' in tx else '--'
-                method_out = tx['method_out'] if 'method_out' in tx else '--'
+                concept = '--'
                 address = '--'
-                if 'data_in' in tx:
-                    address = tx['data_in']['address'] if 'address' in tx['data_in'] else '--'
-                if 'data_out' in tx and address == '--':
-                    address = tx['data_out']['address'] if 'address' in tx['data_out'] else '--'
+                if 'pay_in_info' in tx:
+                    concept = tx['pay_in_info']['concept'] if 'concept' in tx['pay_in_info'] else '--'
+                    address = tx['pay_in_info']['address'] if 'address' in tx['pay_in_info'] else '--'
+                elif 'pay_out_info' in tx:
+                    concept = tx['pay_out_info']['concept'] if 'concept' in tx['pay_out_info'] else '--'
+                    address = tx['pay_out_info']['address'] if 'address' in tx['pay_out_info'] else '--'
+                method = tx['method'] if 'method' in tx else '--'
+                if method in methods: method = methods[method]
                 amount = Decimal(tx['amount']) if 'amount' in tx else Decimal('0')
+                if 'type' in tx:
+                    amount = -amount if tx['type'] == 'out' else amount
                 currency = tx['currency'] if 'currency' in tx else '--'
-                if method_in in methods: method_in = methods[method_in]
-                if method_out in methods: method_out = methods[method_out]
                 if currency == "FAC":
                     currency = "FAIR"
-                    amount = amount/1000000
+                    amount = amount/100000000
                 table_rows.append([
                     created.strftime('%d/%m/%y %H:%M'),
                     concept,
-                    method_in,
-                    method_out,
+                    method,
                     address,
                     str(amount.quantize(Decimal('0.01'))) + ' ' + currency,
                 ])
@@ -197,7 +199,7 @@ def history(request, agent_id, oauth_id):
                         'limit': str(items_per_page),
                         'offset': str(data['data']['end'])
                     }
-                if data['data']['start'] > items_per_page:
+                if data['data']['start'] >= items_per_page:
                     paginator['previous'] = {
                         'limit': str(items_per_page),
                         'offset': str(int(data['data']['start']) - items_per_page)

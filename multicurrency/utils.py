@@ -68,11 +68,11 @@ class ChipChapAuthConnection(object):
             raise ChipChapAuthError('Connection Error', 'No data to connect')
 
         headers = ChipChapAuthConnection.chipchap_x_signature(access_key, access_secret)
-        data = {
+        params = {
             "limit": limit,
             "offset": offset,
         }
-        response = requests.get(self.url_history, headers=headers, data=data)
+        response = requests.get(self.url_history, headers=headers, params=params)
         if int(response.status_code) == 200:
             return response.json()
         else:

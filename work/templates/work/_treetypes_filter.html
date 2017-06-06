@@ -3,7 +3,7 @@
 
 <h3>{% trans "Filter Resource Types:" %}</h3>
 <form id="category-form" action="." method="POST">
-  {% if request.user.is_staff %}<p><em>(full trees only shown to admins)</em></p>{% endif %}
+    {% if request.user.is_staff %}<p><em>(full trees only shown to admins)</em></p>{% endif %}
 
 	{% csrf_token %}
 	<p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All" %}
@@ -32,7 +32,7 @@
 
         <div class="" id="services">
           <p class="facet">
-            {% if facetvalues or request.user.is_staff %}{% trans "Skill related the resource above:" %}{% endif %}
+            {% if facetvalues and request.user.agent.agent.need_skills or request.user.is_staff %}{% trans "Skill related the resource above:" %}{% endif %}
           </p>
           <ul class="root" style="/*display: none;*/">
               {% recursetree Stype_tree %}

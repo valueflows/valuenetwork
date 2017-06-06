@@ -161,10 +161,12 @@ img {
 			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url "locations" %}">{% trans "Locations" %}</a> -->
 
         <div class="subnav">
-          {% if request.user.is_staff or request.user.agent.agent in agent.managers %}
+          {% if request.user.is_staff or request.user.agent.agent in agent.managers or request.user.agent.agent == agent %}
               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
           {% endif %}
-          <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% if request.user.agent.agent.need_projects %}
+              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% endif %}
         </div>
 	    </legend>
       {{ rtype }}

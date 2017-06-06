@@ -175,9 +175,15 @@
                  {% endfor %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
-                   <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
+                   {% if agent.need_skills %}
+                       <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
+                   {% endif %}
                {% endif %}
-               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+               {% if user_agent.need_projects %}
+                   <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+               {% elif user_agent == agent %}
+                   <a class="indent" href="{% url "work_account_settings" %}">{% trans "Settings" %}</a>
+               {% endif %}
                <!-- <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a> -->
         </div>
 		</legend>
@@ -202,6 +208,7 @@
                   {% endif %}
                 {% endif %}
                 {% if not agent.faircoin_address and not agent.multicurrencyauth_set.count %}
+                  {% if agent.need_faircoins %}
                     <form
                         style="display: inline;"
                         class="faircoin-form indent"
@@ -213,6 +220,7 @@
                             {% trans "Request FairCoin Address" %}
                         </button>
                     </form>
+                  {% endif %}
                 {% endif %}
                 {% if user_agent in agent.managers or user_agent == agent %}
                     {% for arr in agent.resource_relationships %}
@@ -301,7 +309,7 @@
 
                   <tr>
                     <th style="text-align: right; vertical-align: top; ">{% trans "Image" %}</th>
-                    <td>
+                    <td style="{% if agent.project.background_url %} background-image: url({% static agent.project.background_url %}); {% endif %}">
                       <div class="modal hide fade" id="uploadPicture" tabindex="-1" role="dialog" aria-labelledby="upload-label" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -322,7 +330,7 @@
                       {% if agent.photo %}
                         <img src="{% thumbnail agent.photo photo_size %}" />
                       {% elif agent.photo_url %}
-                        <img src="{{ agent.photo_url }}" width="128" height="96" />
+                        <img src="{{ agent.photo_url }}" width="300" />
                       {% endif %}
                       {% if user_agent in agent.managers or user_is_agent %}
                         <a href="#uploadPicture" role="button" class="btn btn-primary btn-mini" data-toggle="modal" style="float:right;">{% if agent.photo or agent.photo_url %}{% trans "Change" %}{% else %}{% trans "Set" %}{% endif %}</a>
@@ -373,8 +381,8 @@
                                 <td>{{ agent.email }}</td>
                             </tr>
                         {% endif %}
-
-                        <tr>
+                        {% if user_agent in agent.managers or user_is_agent or agent.primary_location %}
+                          <tr>
                             <th style="text-align: right; vertical-align: top; ">{% trans "Work Location" %}</th>
                             <td>
                                 {% if agent.primary_location %}
@@ -386,10 +394,12 @@
                                   {{ agent.address }}
                                 {% endif %}
                             </td>
-                        </tr>
+                          </tr>
+                        {% endif %}
                   {% endif %}
 
                   {% if agent.multicurrencyauth_set.count %}
+                    {% if user_agent in agent.managers or user_is_agent %}
                       <tr>
                           <th style="text-align: right; vertical-align: top; ">{% trans "Multicurrency Accounts" %}</th>
                           <td>
@@ -399,6 +409,7 @@
                               &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary btn-mini">+</a>
                           </td>
                       </tr>
+                    {% endif %}
                   {% endif %}
 
                   {% if agent.faircoin_address %}
@@ -465,6 +476,16 @@
                             <td><ul style="margin-left:15px;">
                               {% for typ in agent.project.payment_options %}
                                 <li>{{ typ|safe }}</li>
+                              {% endfor %}
+                            </ul></td>
+                          </tr>
+                        {% endif %}
+                        {% if agent.project.services %}
+                          <tr>
+                            <th>{% trans "Enabled Services:" %}</th>
+                            <td><ul style="margin-left:15px;">
+                              {% for typ in agent.project.services %}
+                                <li>{{ typ }}</li>
                               {% endfor %}
                             </ul></td>
                           </tr>
@@ -566,7 +587,7 @@
           {% endif %}{% endif %}
 
 
-          {% if agent.is_individual or user_is_agent %}
+          {% if agent.is_individual and agent.need_skills or user_is_agent and agent.need_skills %}
               <div class="span6 infobox skills-box" style="width:100%;">
                   <h3 class="">{% trans "Skills" %}:</h3>
                   {% if agent.skills %}
@@ -821,10 +842,9 @@
           {% endif %}
         </div>
 
-		  </div>
 
 
-      {% if agent.is_individual and user.is_staff %}
+      {% if agent.is_individual and agent.need_skills and user.is_staff %}
           <div class="span8">
               <h4 class="hdg"> {% trans "Cumulative Contributions" %}</h4>
               <div id="chart_div0"></div>
@@ -832,6 +852,7 @@
       {% endif %}
 
       {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+        {% if agent.need_skills %}
         <div class="row-fluid" tyle="margin-bottom:2em;">
           <hr />
           <h3>{% trans "Cumulative Time" %}</h3>
@@ -849,9 +870,10 @@
           <div id="chart_div3"></div>
 
         </div>
+        {% endif %}
       {% endif %}
 
-    </div>
+
 
   {% if agent.project and not user_agent in agent.managers and not agent in user_agent.related_contexts or agent.project in user_agent.joinaproject_requests_projects and not user_agent in agent.members %}
     <div id="join-this-project"  class="span5">
@@ -887,7 +909,8 @@
     </div>
 
   {% endif %}
-
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_script %}

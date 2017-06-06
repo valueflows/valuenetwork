@@ -34,7 +34,9 @@ urlpatterns = [
     url(r'^robots.txt$', lambda r: HttpResponse("User-agent: *\nAllow: /$\nDisallow: /", content_type="text/plain")),
 
     url(r'^joinaproject/(?P<form_slug>.+)/$', work.views.joinaproject_request, name="joinaproject_request"),
-    url(r'^joinaproject-thanks/$', TemplateView.as_view(template_name='work/joinaproject_thanks.html'), name='joinaproject_thanks'),
+    url(r'^join/(?P<form_slug>.+)/$', work.views.joinaproject_request, name="join_request"),
+    #url(r'^joinaproject/(?P<form_slug>.+)/thanks/$', work.views.joinaproject_thanks, name='joinaproject_thanks'), # TemplateView.as_view(template_name='work/joinaproject_thanks.html')),
+    url(r'^(?P<form_slug>.+)/$', work.views.project_login, name="project_login"),
 
     # View URLs
     url(r'^fobi/', include('fobi.urls.view')),

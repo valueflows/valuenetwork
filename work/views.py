@@ -159,8 +159,8 @@ def change_personal_info(request, agent_id):
     if request.method == "POST":
         if change_form.is_valid():
             agent = change_form.save()
-    return HttpResponseRedirect('/%s/'
-        % ('work/profile'))
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/agent', agent.id))
 
 @login_required
 def upload_picture(request, agent_id):
@@ -175,8 +175,8 @@ def upload_picture(request, agent_id):
         agt.changed_by=request.user
         agt.save()
 
-    return HttpResponseRedirect('/%s/'
-        % ('work/profile'))
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/agent', agent.id))
 
 @login_required
 def add_worker_to_location(request, location_id, agent_id):
@@ -1261,6 +1261,40 @@ from fobi.base import (
 #    FormHandlerPlugin, form_handler_plugin_registry, get_processed_form_data
 #)
 
+from account.forms import LoginUsernameForm
+
+def project_login(request, form_slug = False):
+    #import pdb; pdb.set_trace()
+    if form_slug:
+        project = Project.objects.get(fobi_slug=form_slug)
+        if request.user.is_authenticated():
+            return members_agent(request, agent_id=project.agent.id)
+        html = ''
+        back = ''
+        css = ''
+        if settings.PROJECTS_LOGIN and project.fobi_slug:
+            data = settings.PROJECTS_LOGIN[project.fobi_slug]
+            if data:
+                html = data['html']
+                back = data['background_url']
+                css = data['css']
+
+    return render(request, "work/project_login.html", {
+                "project": project,
+                "html": html,
+                "background_url": back,
+                "form": LoginUsernameForm,
+                "css": css,
+            })
+
+"""def joinaproject_thanks(request, form_slug = False):
+    if form_slug:
+      project = Project.objects.get(fobi_slug=form_slug)
+
+    return render(request, "work/joinaproject_thanks.html", {
+            "project": project,
+           })"""
+
 import simplejson as json
 from django.utils.html import escape, escapejs
 
@@ -1464,7 +1498,7 @@ def joinaproject_request(request, form_slug = False):
                 #"field_map": field_name_to_label_map,
                 #"post": escapejs(json.dumps(request.POST)),
             })
-            #return HttpResponseRedirect(reverse('joinaproject_thanks', args=[project.agent.id]))
+            #return HttpResponseRedirect(reverse('joinaproject_thanks', form_slug=project.fobi_slug))
 
 
     kwargs = {'initial': {'fobi_initial_data':form_slug} }

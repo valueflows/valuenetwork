@@ -79,11 +79,12 @@ TEMPLATES = [
 
 LOGIN_URL = '/account/login/'
 
-LOGIN_EXEMPT_URLS = (
+LOGIN_EXEMPT_URLS = [
     r"^$",
     r'^membership/',
     r'^membershipthanks/',
     r'^joinaproject/',
+    r'^join/',
     r'^joinaproject-thanks/',
     r'^work/payment-url/',
     r'^account/password/reset/',
@@ -91,7 +92,7 @@ LOGIN_EXEMPT_URLS = (
     r'^captcha/image/',
     r'^i18n/',
     r'^robots.txt$',
-)
+]
 
 
 MIDDLEWARE_CLASSES = [
@@ -211,7 +212,7 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
     'PAGINATE_BY': 10,
-   'URL_FIELD_NAME': 'api_url',
+    'URL_FIELD_NAME': 'api_url',
 }
 
 # valueaccounting settings

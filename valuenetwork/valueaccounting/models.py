@@ -995,6 +995,32 @@ class EconomicAgent(models.Model):
           ctx_ids.append(agent.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
+    def need_skills(self):
+        resp = True
+        ags = self.related_contexts()
+        for ag in ags:
+            if ag.project and ag.project.services():
+                if not 'skills' in ag.project.services():
+                    resp = False
+        return resp
+
+    def need_faircoins(self):
+        resp = True
+        ags = self.related_contexts()
+        for ag in ags:
+            if ag.project and ag.project.services():
+                if not 'faircoins' in ag.project.services():
+                    resp = False
+        return resp
+
+    def need_projects(self):
+        resp = True
+        ags = self.related_contexts()
+        if len(ags) < 2:
+            resp = False
+        return resp
+
+
     def invoicing_candidates(self):
         ctx = self.related_contexts()
         ids = [c.id for c in ctx if c.is_active_freedom_coop_member()]

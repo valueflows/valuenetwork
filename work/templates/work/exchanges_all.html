@@ -287,7 +287,9 @@ hr {
                 {% endif %}
                 <a class="indent" href="{% url "project_resources" agent_id=context_agent.id %}">{% trans "Resources" %}</a>
               {% endif %}
-              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+              {% if request.user.agent.agent.need_projects %}
+                  <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+              {% endif %}
             </div>
         </legend>
         <div class="span12">

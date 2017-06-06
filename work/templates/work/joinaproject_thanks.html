@@ -14,7 +14,7 @@
 </head>
 <body style="background-image: url({% static 'img/photo-OCP-verd-1600x900.jpg' %}); text-align:center;">
 <div style="font-weight:bold; position:absolute; left:13px; top:9px;">
-  <a href="{% url 'account_login' %}" style="color:#734279;">{% trans "Login" %}</a>
+  <a href="{% url 'project_login' form_slug=project.fobi_slug %}" style="color:#734279;">{% trans "Login" %} {{ project.agent.name }}</a>
 </div>
 <div class="container">
     {% include "_messages.html" %}

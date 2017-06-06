@@ -1005,19 +1005,32 @@ class EconomicAgent(models.Model):
     def need_skills(self):
         resp = True
         ags = self.related_contexts()
+        noneed = []
         for ag in ags:
-            if ag.project and ag.project.services():
-                if not 'skills' in ag.project.services():
-                    resp = False
+            try:
+                if ag.project and ag.project.services():
+                    if not 'skills' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags) == len(noneed):
+            resp = False
+        #import pdb; pdb.set_trace()
         return resp
 
     def need_faircoins(self):
         resp = True
         ags = self.related_contexts()
+        noneed = []
         for ag in ags:
-            if ag.project and ag.project.services():
-                if not 'faircoins' in ag.project.services():
-                    resp = False
+            try:
+                if ag.project and ag.project.services():
+                    if not 'faircoins' in ag.project.services():
+                        resp = False
+            except:
+                pass
+        if len(ags) == len(noneed):
+            resp = False
         return resp
 
     def need_projects(self):

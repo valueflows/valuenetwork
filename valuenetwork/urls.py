@@ -24,7 +24,6 @@ urlpatterns = [
     url(r"^equipment/", include("valuenetwork.equipment.urls")),
     url(r"^board/", include("valuenetwork.board.urls")),
     url(r"^work/", include("work.urls")),
-    url(r"^multicurrency/", include("multicurrency.urls")),
     url(r"^api/", include("valuenetwork.api.urls")),
     #url(r'^report_builder/', include('report_builder.urls')),
     url(r'^comments/', include('django_comments.urls')),
@@ -37,7 +36,6 @@ urlpatterns = [
     url(r'^joinaproject/(?P<form_slug>.+)/$', work.views.joinaproject_request, name="joinaproject_request"),
     url(r'^join/(?P<form_slug>.+)/$', work.views.joinaproject_request, name="join_request"),
     #url(r'^joinaproject/(?P<form_slug>.+)/thanks/$', work.views.joinaproject_thanks, name='joinaproject_thanks'), # TemplateView.as_view(template_name='work/joinaproject_thanks.html')),
-    url(r'^(?P<form_slug>.+)/$', work.views.project_login, name="project_login"),
 
     # View URLs
     url(r'^fobi/', include('fobi.urls.view')),
@@ -53,6 +51,10 @@ urlpatterns = [
 
 if 'multicurrency' in settings.INSTALLED_APPS:
     urlpatterns += [url(r'^multicurrency/', include('multicurrency.urls')),]
+
+urlpatterns += [
+    url(r'^(?P<form_slug>.+)/$', work.views.project_login, name="project_login"),
+]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += staticfiles_urlpatterns()

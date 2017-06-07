@@ -1021,6 +1021,8 @@ class EconomicAgent(models.Model):
     def need_faircoins(self):
         resp = True
         ags = self.related_contexts()
+        if not self in ags:
+            ags.append(self)
         noneed = []
         for ag in ags:
             try:
@@ -1029,8 +1031,9 @@ class EconomicAgent(models.Model):
                         noneed.append(ag)
             except:
                 pass
-        if len(ags) == len(noneed):
+        if len(ags)-1 == len(noneed):
             resp = False
+        #import pdb; pdb.set_trace()
         return resp
 
     def need_exchanges(self):

@@ -9,10 +9,16 @@
 <title>{% trans "Thank you for your request to join this project" %}</title>
 
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" media="all">
-  <link rel="stylesheet" href="{% static 'css/coop.css' %}">
+    <link rel="stylesheet" href="{% static 'css/coop.css' %}">
+
+    {% if project.custom_css %}
+        <style>
+            {{ project.custom_css }}
+        </style>
+    {% endif %}
 
 </head>
-<body style="background-image: url({% static 'img/photo-OCP-verd-1600x900.jpg' %}); text-align:center;">
+<body style="background-image: url({% if project.background_url %}{% static project.background_url %}{% else %}{% static 'img/photo-OCP-1600x900_green.jpg' %}{% endif %}); text-align:center;">
 <div style="font-weight:bold; position:absolute; left:13px; top:9px;">
   <a href="{% url 'project_login' form_slug=project.fobi_slug %}" style="color:#734279;">{% trans "Login" %} {{ project.agent.name }}</a>
 </div>
@@ -21,7 +27,18 @@
     <p>&nbsp;</p>
     <h2>
         {% trans "Thank you for your request to join" %}<br />
-        <br /><span style="font-size:180%">{% if project.agent.url %}<a href="{{ project.agent.url }}" target="_blank">{{ project.agent.name }}</a>{% else %}{{ project.agent.name }}{% endif %}</span>
+        {% if project.agent.photo or project.agent.photo_url %}
+            <br />
+            <a href="{{ agent.url }}">
+              {% if project.agent.photo %}
+                <img src="{% thumbnail project.agent.photo photo_size %}" title="{{ project.agent.name }}" />
+              {% elif project.agent.photo_url %}
+                <img src="{{ project.agent.photo_url }}" width="400" />
+              {% endif %}
+            </a>
+        {% else %}
+            <br /><span style="font-size:180%">{% if project.agent.url %}<a href="{{ project.agent.url }}" target="_blank">{{ project.agent.name }}</a>{% else %}{{ project.agent.name }}{% endif %}</span>
+        {% endif %}
     </h2>
     <div class="row-fluid">
         <p style="text-align:center">{% trans "A project coordinator will send you an email soon with your OCP login credentials." %}</p>
@@ -39,13 +56,7 @@
             {% endif %}
         {% endif %}
     </div>
-	<h4><a href="{{ agent.url }}">
-      {% if project.agent.photo %}
-        <img src="{% thumbnail project.agent.photo photo_size %}" title="{{ project.agent.name }}" />
-      {% elif project.agent.photo_url %}
-        <img src="{{ project.agent.photo_url }}" width="400" />
-      {% endif %}
-    </a></h4>
+
 </div>
 </body>
 </html>

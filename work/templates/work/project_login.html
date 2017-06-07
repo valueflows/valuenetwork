@@ -36,15 +36,15 @@ body {
     <link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet">
    <!-- <link href="{% static "bootstrap/css/bootstrap-responsive.css" %}" rel="stylesheet"> -->
 
-    {% if css %}
+    {% if project.custom_css %}
         <style>
-            {{ css }}
+            {{ project.custom_css }}
         </style>
     {% endif %}
 </head>
 
 
-  <body style="background-image: {% if background_url %}url({% static background_url %}){% else %}url({% static 'img/photo-OCP-1600x900_green.jpg' %}){% endif %}; text-align:center; background-attachment:fixed;">
+  <body style="background-image: {% if project.background_url %}url({% static project.background_url %}){% else %}url({% static 'img/photo-OCP-1600x900_green.jpg' %}){% endif %}; text-align:center; background-attachment:fixed;">
         <p>&nbsp;</p>
 
     <form action="{% url 'set_language' %}" method="post" id="lang-switch">{% csrf_token %}
@@ -75,7 +75,7 @@ body {
         <td colspan="2">
             {% if html %}{{ html|safe }}
             {% else %}
-              <p>{% trans "This is OCP, our Open Collaborative Platform. The OCP is the key organizational tool we offer to individuals, collectives, and project coordinators inside Freedom Coop." %}</p>
+              <p>{% trans "This is OCP, our Open Collaborative Platform. The OCP is the key organizational tool we offer to individuals, collectives, and project coordinators." %}</p>
               <p>{% trans "Therefore, it can be used to:" %}</p>
               <ul><li>{% trans "Boost open collaborative projects between people in different places." %}</li>
                 <li>{% trans "Manage open collective projects and their team work by setting up task forces." %}</li>
@@ -90,7 +90,7 @@ body {
 	<td width="50%" class="register-block">
           <h3>{% trans "Request Membership" %}</h3>
 	  <p>{% blocktrans %}The first step to become a member of this project and use OCP, is to fill the following membership form:{% endblocktrans %}</p>
-	  <h4><a class="btn" href="{% url 'join_request' form_slug=project.fobi_slug %}">{% trans "Join" %} {{ project.agent.name }}</a></h4>
+	  <h4><button class="btn" href="{% url 'join_request' form_slug=project.fobi_slug %}">{% trans "Join" %} {{ project.agent.name }}</button></h4>
           </h3>
         </td>
         <td width="50%" class="login-block">

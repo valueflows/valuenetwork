@@ -24,9 +24,9 @@
 
     </style>
 
-    {% if css %}
+    {% if project.custom_css %}
         <style>
-            {{ css }}
+            {{ project.custom_css }}
         </style>
     {% endif %}
 
@@ -76,7 +76,7 @@
     <title>{% trans "Request to Join: " %} {{ project.agent.name }}</title>
 
   </head>
-  <body style="background-image: url({% if back %}{% static back %}{% else %}{% static 'img/photo-OCP-1600x900_green.jpg' %}{% endif %}); text-align:center; background-attachment:fixed;">
+  <body style="background-image: url({% if project.background_url %}{% static project.background_url %}{% else %}{% static 'img/photo-OCP-1600x900_green.jpg' %}{% endif %}); text-align:center; background-attachment:fixed;">
     <div style="font-weight:bold; position:absolute; left:13px; top:9px;">
       <a href="{% url 'project_login' form_slug=project.fobi_slug %}" style="color:#734279;">{% trans "Login" %} {{ project.agent.name }}</a>
     </div>

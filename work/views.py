@@ -1526,22 +1526,12 @@ def joinaproject_request(request, form_slug = False):
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
     fobi_form = FormClass(**kwargs)
 
-    back = ''
-    css = ''
-    if settings.PROJECTS_LOGIN and project.fobi_slug:
-        data = settings.PROJECTS_LOGIN[project.fobi_slug]
-        if data:
-            back = data['background_url']
-            css = data['css']
-
     return render(request, "work/joinaproject_request.html", {
         "help": get_help("work_join_request"),
         "join_form": join_form,
         "fobi_form": fobi_form,
         "project": project,
         "post": escapejs(json.dumps(request.POST)),
-        "back": back,
-        "css": css,
     })
 
 

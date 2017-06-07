@@ -1300,22 +1300,11 @@ def project_login(request, form_slug = False):
         project = get_object_or_404(Project, fobi_slug=form_slug)
         if request.user.is_authenticated():
             return members_agent(request, agent_id=project.agent.id)
-        html = ''
-        #back = ''
-        #css = ''
-        if settings.PROJECTS_LOGIN and project.fobi_slug:
-            data = settings.PROJECTS_LOGIN[project.fobi_slug]
-            if data:
-                html = data['html']
-                #back = data['background_url']
-                #css = data['css']
 
     form = LoginUsernameForm(data=request.POST or None)
 
     if request.method == "POST":
-
         if form.is_valid():
-
             username = request.POST['username']
             password = request.POST['password']
             user = authenticate(username=username, password=password)
@@ -1328,8 +1317,6 @@ def project_login(request, form_slug = False):
 
     return render(request, "work/project_login.html", {
                 "project": project,
-                "html": html,
-                #"background_url": back,
                 "form": form,
                 "form_slug": form_slug,
                 "redirect_field_name": "next",

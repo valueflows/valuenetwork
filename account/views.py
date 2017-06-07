@@ -230,10 +230,12 @@ class LoginView(FormView):
 
     def get(self, *args, **kwargs):
         domain = self.request.META['HTTP_HOST'] #get_current_site(self.request)
-        if domain == 'testocp.bankofthecommons.coop' or domain == 'members.bankofthecommons.coop' or domain == '127.0.0.1:8000':
-            return redirect('project_login', form_slug='bank-of-the-commons')
-        elif domain == 'testocp.freedomcoop.eu' or domain == 'ocp.freedomcoop.eu':
-            return redirect('project_login', form_slug='freedom-coop')
+        if settings.PROJECTS_LOGIN:
+            obj = settings.PROJECTS_LOGIN
+            for pro in obj:
+                if obj[pro]['domains']:
+                    if domain in obj[pro]['domains']:
+                        return redirect('project_login', form_slug=pro)
         #import pdb; pdb.set_trace()
 
         if self.request.user.is_authenticated():

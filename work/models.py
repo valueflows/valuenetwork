@@ -46,7 +46,7 @@ class MembershipRequest(models.Model):
     #    help_text=_("you don't offer any product or service but want to consume through it and support the cooperative"))
     number_of_shares = models.IntegerField(_('Number of shares'),
         default=1,
-        help_text=_("How many shares would you like to underwrite? Each share is worth 30 Euros (600 Faircoin)"))
+        help_text=_("How many shares would you like to underwrite? Each share is worth 30 Euros"))
     #work_for_shares = models.BooleanField(_('work for one share'), default=False,
     #    help_text=_("You can get 1 share for 6 hours of work. If you choose this option, we will send you a list of tasks and the deadline. You won't have full access before the tasks are accomplished."))
     description = models.TextField(_('Description'),

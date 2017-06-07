@@ -94,6 +94,7 @@ LOGIN_EXEMPT_URLS = [
     r'^robots.txt$',
 ]
 
+PROJECTS_LOGIN = {}
 
 MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware',

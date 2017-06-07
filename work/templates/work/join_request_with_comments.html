@@ -153,7 +153,16 @@ th
             {% if req.pending_shares %}
               <tr><th>{% trans "Shares Pending" %}:</th>
                 <td><span class="error"><b>{{ req.pending_shares }}</b> shares</span>
-                {% if user_agent in req.agent.managers or user_agent == req.agent or request.user.is_superuser %}<a href="#" class="btn btn-primary">Pay your Shares</a>{% endif %}</td>
+                {% if user_agent in req.agent.managers or user_agent == req.agent or request.user.is_superuser %}
+                    {% if req.payment_url %}
+                        <a href="{% url 'payment_url' paymode=req.payment_option.key join_request_id=req.id %}" target="ocp_pay" class="btn btn-primary">{% if req.payment_html %}{{ req.payment_html }}{% else %}{% trans "Pay your Shares" %}{% endif %}</a>
+                    {% elif req.payment_html %}
+                        <br /> {{ req.payment_html|safe }}
+                    {% else %}
+                        <span class="error">ERROR</span>
+                    {% endif %}
+                {% endif %}
+                </td>
               </tr>
             {% endif %}
             <!-- <tr>
@@ -229,7 +238,7 @@ th
 
       $('th, td').each(function(e) {
         $(this).expander({
-            slicePoint:       75,  // default is 100
+            slicePoint: 200,  // default is 100
             expandSpeed: 0,
             expandEffect: 'show',
             collapseSpeed: 0,

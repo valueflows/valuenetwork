@@ -492,6 +492,18 @@
                             </ul></td>
                           </tr>
                         {% endif %}
+                        {% if agent.project.custom_html %}
+                          <tr>
+                            <th>{% trans "Custom Login Html:" %}</th>
+                            <td>{{ agent.project.custom_html|safe }}</td>
+                          </tr>
+                        {% endif %}
+                        {% if agent.project.custom_css %}
+                          <tr>
+                            <th>{% trans "Custom Login Css:" %}</th>
+                            <td>{{ agent.project.custom_css }}</td>
+                          </tr>
+                        {% endif %}
                       {% endif %}
                   {% endif %}
 

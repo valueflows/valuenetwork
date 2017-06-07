@@ -90,7 +90,8 @@ body {
 	<td width="50%" class="register-block">
           <h3>{% trans "Request Membership" %}</h3>
 	  <p>{% blocktrans %}The first step to become a member of this project and use OCP, is to fill the following membership form:{% endblocktrans %}</p>
-	  <h4><button class="btn" href="{% url 'join_request' form_slug=project.fobi_slug %}">{% trans "Join" %} {{ project.agent.name }}</button></h4>
+	  <h4>
+          <a class="btn" href="{% url 'join_request' form_slug=project.fobi_slug %}">{% trans "Join" %} {{ project.agent.name }}</a></h4>
           </h3>
         </td>
         <td width="50%" class="login-block">

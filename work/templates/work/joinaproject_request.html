@@ -78,7 +78,7 @@
   </head>
   <body style="background-image: url({% if project.background_url %}{% static project.background_url %}{% else %}{% static 'img/photo-OCP-1600x900_green.jpg' %}{% endif %}); text-align:center; background-attachment:fixed;">
     <div style="font-weight:bold; position:absolute; left:13px; top:9px;">
-      <a href="{% url 'project_login' form_slug=project.fobi_slug %}" style="color:#734279;">{% trans "Login" %} {{ project.agent.name }}</a>
+      <a href="{% url 'project_login' form_slug=project.fobi_slug %}" style="color:#734279;">{% trans "Login to" %} {{ project.agent.name }}</a>
     </div>
     <form action="{% url 'set_language' %}" method="post" id="lang-switch">{% csrf_token %}
       <input name="next" type="hidden" value="{{ redirect_to }}" />

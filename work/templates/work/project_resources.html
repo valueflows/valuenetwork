@@ -162,7 +162,9 @@ img {
 
         <div class="subnav">
           {% if request.user.is_staff or request.user.agent.agent in agent.managers or request.user.agent.agent == agent %}
+            {% if agent.need_exchanges %}
               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+            {% endif %}
           {% endif %}
           {% if request.user.agent.agent.need_projects %}
               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>

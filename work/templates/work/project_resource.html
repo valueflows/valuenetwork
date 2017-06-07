@@ -57,9 +57,13 @@
 
         <div class="subnav">
           {% if request.user.is_staff or request.user.agent.agent in agent.managers %}
+            {% if agent.need_exchanges %}
               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+            {% endif %}
           {% endif %}
-          <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% if request.user.agent.agent.need_projects %}
+              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% endif %}
         </div>
 
 			<!--{% trans "Resource" %}: {{ resource }} &nbsp;

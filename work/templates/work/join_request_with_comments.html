@@ -80,7 +80,9 @@ th
           </span>
           <div class="subnav">
             {% if user_agent in agent.managers or user_agent == agent %}
-              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+              {% if user_agent.need_projects %}
+                  <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+              {% endif %}
             {% else %}
               {% if jn_req.agent.is_active_freedom_coop_member %}
                 <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{% trans "View Project" %}</a>

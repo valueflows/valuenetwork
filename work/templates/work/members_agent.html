@@ -160,7 +160,7 @@
                  {% endif %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
-                 {% if user_agent.need_exchanges %}
+                 {% if agent.need_exchanges %}
                    <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
                  {% endif %}
                {% endif %}
@@ -177,7 +177,7 @@
                  {% endfor %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
-                   {% if user_agent.need_skills %}
+                   {% if agent.need_skills %}
                        <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
                    {% endif %}
                {% endif %}

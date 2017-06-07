@@ -57,9 +57,13 @@
 
         <div class="subnav">
           {% if request.user.is_staff or request.user.agent.agent in agent.managers %}
+            {% if agent.need_exchanges %}
               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+            {% endif %}
           {% endif %}
-          <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% if request.user.agent.agent.need_projects %}
+              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% endif %}
         </div>
 
 			<!--{% trans "Resource" %}: {{ resource }} &nbsp;
@@ -67,7 +71,7 @@
             <a href="{% url "event_history" resource_id=resource.id %}">{% trans "Event history" %}</a>&nbsp;&nbsp;
             <a href="{% url "incoming_value_flows" resource_id=resource.id %}">{% trans "Incoming Value Flow" %}</a> -->
 		</legend>
-    {% if agent %}
+    {% if request.user.is_superuser or request.user.agent.agent in agent.managers or request.user.agent.agent == agent %}
       <a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>&nbsp;&nbsp;
       {% if order_form %}
         <a href="#resourceOrderForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Plan Work Order" %}</a>&nbsp;&nbsp;
@@ -81,9 +85,26 @@
 				    <h3 id="resource-change-label">{% trans "Change" %} {{ resource }}</h3>
 			    </div>
 			    <div class="modal-body">
-				    <form id="resource-change-form" action="{% url "change_resource" resource_id=resource.id %}" method="POST" >
+				    <form id="resource-change-form" action="{% url "change_resource" agent_id=agent.id resource_id=resource.id %}" method="POST" >
 					    {% csrf_token %}
-					    {{ resource.change_form|as_bootstrap }}
+                        {% for fil in resource.change_form %}
+                            {% if resource.resource_type.is_virtual_account and fil.name == "current_location" %}
+
+                            {% else %}
+                              <div class="modal-field" >
+
+                                {% if resource.resource_type.is_virtual_account and fil.name == "price_per_unit" %}
+                                  <label>{% trans "Account Value" %}:</label>
+                                  {{ fil.value }}
+                                {% else %}
+                                  <label>{{ fil.label }}:</label>
+                                  {{ fil }}
+                                {% endif %}
+                                {% if fil.help_text %}<br/><span class="helptext">{{ fil.help_text }}</span>{% endif %}
+                              </div>
+                            {% endif %}
+                        {% endfor %}
+                        <br />
                         {{ role_formset.management_form }}
                         <table>
                             <tr>
@@ -129,110 +150,127 @@
 
 	  {% endif %}
 
-		<div class="row-fluid">
+    <div class="row-fluid">
 
-		    <div class="span6 resource">
+        <div class="span6 resource">
 
-	            <table class="table table-bordered" >
-	                <tr>
-                        <th style="text-align: right;">{% trans "Quantity" %}</th>
-                        <td>{{ resource.quantity }} {{ resource.unit_of_quantity }}</td>
+            <table class="table table-bordered" >
+                {% if resource.identifier %}
+                    <tr>
+                        <th style="text-align: right;">{% trans "Identifier" %}</th>
+                        <td>{{ resource.identifier }}</td>
                     </tr>
+                {% endif %}
+                <tr>
+                    <th style="text-align: right;">{% trans "Quantity" %}</th>
+                    <td>{{ resource.quantity }} {{ resource.unit_of_quantity }}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: right;">{% if resource.resource_type.is_virtual_account %}{% trans "Account Value" %}{% else %}{% trans "Price" %}{% endif %}</th>
+                    <td>{{ resource.price_per_unit }}</td>
+                </tr>
 {% comment %}
-                    <tr>
-                        <th style="text-align: right;">{% trans "Quality" %}</th>
-                        <td>{{ resource.quality }}</td>
-                    </tr>
+                <tr>
+                    <th style="text-align: right;">{% trans "Quality" %}</th>
+                    <td>{{ resource.quality }}</td>
+                </tr>
 {% endcomment %}
-                    {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Value per" %} {{ resource.resource_type.unit_of_use.abbrev }} {% trans "of use" %}</th>
-	                        <td>{{ resource.value_per_unit_of_use }}</td>
-                        </tr>
-                    {% endif %}
-
-	                {% if resource.url %}
-	                    <tr>
-	                        <th style="text-align: right;">{% trans "URL" %}</th>
-	                        <td>{{ resource.url|urlize }}</td>
-                        </tr>
-                    {% endif %}
-	                {% if resource.current_location %}
-	                    <tr>
-	                        <th style="text-align: right;">{% trans "Current Location" %}</th>
-	                        <td>{{ resource.current_location }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if resource.digital_currency_address %}
-                        <tr>
-                            <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
-                            <td>{{ resource.digital_currency_address }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if resource.notes %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Notes" %}</th>
-	                        <td>{{ resource.notes|urlize|linebreaks }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if resource.access_rules %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Access Rules" %}</th>
-	                        <td>{{ resource.access_rules|urlize|linebreaks }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if resource.photo %}
-	                	<tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
-	                        <td><img src="{% thumbnail resource.photo photo_size %}" /></td>
-                        </tr>
-                	{% elif resource.photo_url %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
-	                        <td><img src="{{ resource.photo_url }}" width="128" height="96" /></td>
-                        </tr>
-	                {% endif %}
-                    {% if resource.agent_resource_roles.all %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Assignments" %}</th>
-	                        <td>
-                                {% for item in resource.agent_resource_roles.all %}
-                                    {{ item.role.name }} : {{ item.agent.nick }}
-                                    {% if item.is_contact %} (Contact) {% endif %} <br />
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% endif %}
+                {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
                     <tr>
-                        <th style="text-align: right;">{% trans "Record created date" %}</th>
-                        <td>{{ resource.created_date }}</td>
+                        <th style="text-align: right; vertical-align: top; ">{% trans "Value per" %} {{ resource.resource_type.unit_of_use.abbrev }} {% trans "of use" %}</th>
+                        <td>{{ resource.value_per_unit_of_use }}</td>
                     </tr>
+                {% endif %}
+
+                {% if resource.url %}
+                    <tr>
+                        <th style="text-align: right;">{% trans "URL" %}</th>
+                        <td>{{ resource.url|urlize }}</td>
+                    </tr>
+                {% endif %}
+                {% if resource.current_location %}
+	                <tr>
+	                    <th style="text-align: right;">{% trans "Current Location" %}</th>
+	                    <td>{{ resource.current_location }}</td>
+                    </tr>
+                {% endif %}
+                {% if resource.digital_currency_address %}
+                    <tr>
+                        <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
+                        <td>{{ resource.digital_currency_address }}</td>
+                    </tr>
+                {% endif %}
+                {% if resource.notes %}
+                    <tr>
+	                    <th style="text-align: right; vertical-align: top; ">{% trans "Notes" %}</th>
+	                    <td>{{ resource.notes|urlize|linebreaks }}</td>
+                    </tr>
+                {% endif %}
+                {% if resource.access_rules %}
+                    <tr>
+                        <th style="text-align: right; vertical-align: top; ">{% trans "Access Rules" %}</th>
+                        <td>{{ resource.access_rules|urlize|linebreaks }}</td>
+                    </tr>
+                {% endif %}
+                {% if resource.photo %}
+                    <tr>
+                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
+                        <td><img src="{% thumbnail resource.photo photo_size %}" /></td>
+                    </tr>
+                {% elif resource.photo_url %}
+                    <tr>
+                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
+                        <td><img src="{{ resource.photo_url }}" width="128" height="96" /></td>
+                    </tr>
+                {% endif %}
+                {% if resource.agent_resource_roles.all %}
+                    <tr>
+	                      <th style="text-align: right; vertical-align: top; ">{% trans "Assignments" %}</th>
+	                      <td>
+                            {% for item in resource.agent_resource_roles.all %}
+                          {{ item.role.name }} : <a href="{% url 'members_agent' agent_id=item.agent.id %}">{{ item.agent.nick }}</a>
+                                {% if item.is_contact %} (Contact) {% endif %} <br />
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if resource.resource_type.ocp_artwork_type.clas and request.user.is_superuser %}
+                    <tr>
+	                      <th style="text-align: right; vertical-align: top; ">{% trans "Clas" %}</th>
+	                      <td>{{ resource.resource_type.ocp_artwork_type.clas }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th style="text-align: right;">{% trans "Created date" %}</th>
+                    <td>{{ resource.created_date }}</td>
+                </tr>
+                {% if request.user.is_staff %}
                     <tr>
                         <th style="text-align: right;">{% trans "Record created by" %}</th>
                         <td>{{ resource.created_by }}</td>
                     </tr>
+                {% endif %}
+            </table>
 
-	            </table>
+        </div>
 
-	        </div>
+        <div class="span6 info">
 
-	        <div class="span6 info">
+            {% if resource.demands %}
+                <h4 class="">{% trans "Demands" %}:</h4>
+                <ul>
+                {% for ct in resource.demands %}
+                    <li><a href="{{ ct.process.get_absolute_url }}">{{ ct }}</a></li>
+                {% endfor %}
+                </ul>
+            {% endif %}
 
-	            {% if resource.demands %}
-	                <h4 class="">{% trans "Demands" %}:</h4>
-	                <ul>
-	                {% for ct in resource.demands %}
-	                    <li><a href="{{ ct.process.get_absolute_url }}">{{ ct }}</a></li>
-	                {% endfor %}
-	                </ul>
-	            {% endif %}
+        </div>
 
-	        </div>
+    </div>
 
-		</div>
-
-        <div class="row-fluid" tyle="margin-top: 1em;">
-            <div class="span6">
+    <div class="row-fluid" tyle="margin-top: 1em;">
+          <div class="span6">
                 <h3 class="">{% trans "Where from" %}:</h3>
                 {% if resource.where_from_events %}
                     <ul>

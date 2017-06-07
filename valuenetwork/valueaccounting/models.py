@@ -1002,6 +1002,69 @@ class EconomicAgent(models.Model):
           ctx_ids.append(agent.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
 
+    def need_skills(self):
+        resp = True
+        ags = self.related_contexts()
+        if not self in ags:
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'skills' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-1 == len(noneed):
+            resp = False
+        #import pdb; pdb.set_trace()
+        return resp
+
+    def need_faircoins(self):
+        resp = True
+        ags = self.related_contexts()
+        if not self in ags:
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'faircoins' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-1 == len(noneed):
+            resp = False
+        #import pdb; pdb.set_trace()
+        return resp
+
+    def need_exchanges(self):
+        resp = True
+        ags = self.related_contexts()
+        if not self in ags:
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'exchanges' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-1 == len(noneed):
+            resp = False
+        return resp
+
+    def need_projects(self):
+        resp = True
+        ags = self.related_contexts()
+        if len(ags) < 2:
+            if ags[0].project and ags[0].project.services():
+                if not 'projects' in ags[0].project.services():
+                    resp = False
+        return resp
+
+
     def invoicing_candidates(self):
         ctx = self.related_contexts()
         ids = [c.id for c in ctx if c.is_active_freedom_coop_member()]

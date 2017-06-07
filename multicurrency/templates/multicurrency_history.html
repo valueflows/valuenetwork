@@ -6,10 +6,18 @@
 
 {% block body_base %}
   <div class="container">
-    <h3>User {{ auth_user }} (Agent {{ agent.name }})</h3>
+    <legend>
+      <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a> >
+	        {% trans "Multicurrency-wallet Account (user:" %} {{ auth_user }})
+      <div class="subnav">
+
+      </div>
+    </legend>
+    {% include "_messages.html" %}
     <div class="infobox span2" style="margin-left:0;">
       {% for bal in balance_clean %}{{ bal }}<br />{% endfor %}
     </div>
+    <br />
     <table class="table table-condensed table-striped centered">
       <caption style="text-align:left;">{{ table_caption }}</caption>
       <thead>

@@ -156,7 +156,7 @@ class ProjectCreateForm(AgentCreateForm):
         data = super(ProjectCreateForm, self).clean()
         url = data["url"]
         if not url[0:3] == "http":
-          data["url"] = "http://" + url
+            pass #data["url"] = "http://" + url
         #if type_of_user == "collective":
             #if int(number_of_shares) < 2:
             #    msg = "Number of shares must be at least 2 for a collective."

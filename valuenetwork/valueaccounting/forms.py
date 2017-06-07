@@ -1179,7 +1179,7 @@ class SelectCitationResourceForm(forms.Form):
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.citables_with_resources()
 
-            
+
 class UnplannedCiteEventForm(forms.Form):
     resource_type = FacetedModelChoiceField(
         queryset=EconomicResourceType.objects.all(),
@@ -1204,7 +1204,7 @@ class UnplannedCiteEventForm(forms.Form):
                 resources = EconomicResource.objects.all()
                 self.fields["resource"].choices = [('', '----------')] + [(r.id, r) for r in resources]
 
-                
+
 class UnplannedInputEventForm(forms.Form):
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
     resource_type = FacetedModelChoiceField(
@@ -1477,7 +1477,7 @@ class WorkEventChangeForm(forms.ModelForm):
     class Meta:
         model = EconomicEvent
         fields = ('id', 'event_date', 'quantity', 'is_contribution', 'description')
-        
+
 class NonHourWorkEventChangeForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput)
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
@@ -2647,6 +2647,7 @@ class ResourceTypeSelectionForm(forms.Form):
     resource_type = forms.ModelChoiceField(
         queryset=EconomicResourceType.objects.none(),
         label="Resource Type",
+        required=False,
         widget=forms.Select(attrs={'class': 'chzn-select input-xlarge'}))
 
     def __init__(self, qs=None, *args, **kwargs):
@@ -3833,7 +3834,7 @@ class ValueEquationBucketRuleForm(forms.ModelForm):
     class Meta:
         model = ValueEquationBucketRule
         fields = ('event_type', 'claim_rule_type', 'claim_creation_equation')
-        
+
     def __init__(self, *args, **kwargs):
         super(ValueEquationBucketRuleForm, self).__init__(*args, **kwargs)
         self.fields['event_type'].queryset = EventType.objects.used_for_value_equations().order_by("name")

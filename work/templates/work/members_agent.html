@@ -156,34 +156,46 @@
         <div class="subnav">
                {% if agent.faircoin_resource %}
                  {% if user_agent in agent.managers or user_agent == agent %}
-                  <a class="indent" href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">{% trans "Wallet" %}</a>
+                  <a class="indent" href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">{% trans "FairAccount" %}</a>
                  {% endif %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
+                 {% if agent.need_exchanges %}
                    <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+                 {% endif %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent == agent %}
                    <a class="indent" href="{% url "project_resources" agent_id=agent.id %}">{% trans "Resources" %}</a>
                {% endif %}
                {% if user_agent in agent.managers and agent.project.fobi_slug and agent.project.join_requests %}
-                  <a class="indent" href="join-requests">{% trans "Join Requests" %}</a>
+                  <a class="indent" href="{% url "join_requests" agent_id=agent.id %}">{% trans "Join Requests" %}</a>
                {% elif agent.project in user_agent.joinaproject_requests_projects %}
                  {% for req in user_agent.joinaproject_requests %}
                    {% if req.project == agent.project %}
-                     <a class="indent" href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">{% trans "Your Joining Feedback" %}</a>
+                     <a class="indent" href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">{% trans "Feedback" %}</a>
                    {% endif %}
                  {% endfor %}
                {% endif %}
                {% if user_agent.is_staff or user_agent in agent.managers or user_agent in agent.participants or user_agent == agent %}
-                   <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
+                   {% if agent.need_skills %}
+                       <a class="indent" href="{% url "project_history" agent_id=agent.id %}">{% trans "Contributions" %}</a>
+                   {% endif %}
                {% endif %}
-               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
-               <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
+               {% if user_agent.need_projects %}
+                   <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+               {% elif user_agent == agent %}
+                   <a class="indent" href="{% url "work_account_settings" %}">{% trans "Settings" %}</a>
+               {% endif %}
+               <!-- <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a> -->
         </div>
 		</legend>
 		<div class="button-row">
 
-            {% if user_agent in agent.managers or user_agent.is_staff %}
+            {% if user_agent in agent.managers or user_agent == agent or user_agent.is_staff %}
+                {% if auto_resource %}<div class="alert">
+                    {{ auto_resource|safe }}
+                    </div>
+                {% endif %}
                 {% if agent.is_context %}
                   <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">
                     {% if not agent.project %}
@@ -197,7 +209,8 @@
                   </div>
                   {% endif %}
                 {% endif %}
-                {% if not agent.faircoin_address%}
+                {% if not agent.faircoin_address and not agent.multicurrencyauth_set.count %}
+                  {% if agent.need_faircoins %}
                     <form
                         style="display: inline;"
                         class="faircoin-form indent"
@@ -209,6 +222,18 @@
                             {% trans "Request FairCoin Address" %}
                         </button>
                     </form>
+                  {% endif %}
+                {% endif %}
+                {% if user_agent in agent.managers or user_agent == agent %}
+                    {% for arr in agent.resource_relationships %}
+                        {% if arr.resource.resource_type.ocp_artwork_type.clas == 'MulticurrencyAuth' %}
+                          {% if agent.multicurrencyauth_set.count %}
+
+                          {% else %}
+                              &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary">{% trans "Create Multicurrency Wallet Access" %}</a>
+                          {% endif %}
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
             {% endif %}
 
@@ -286,7 +311,7 @@
 
                   <tr>
                     <th style="text-align: right; vertical-align: top; ">{% trans "Image" %}</th>
-                    <td>
+                    <td style="{% if agent.project.background_url %} background-image: url({% static agent.project.background_url %}); {% endif %}">
                       <div class="modal hide fade" id="uploadPicture" tabindex="-1" role="dialog" aria-labelledby="upload-label" aria-hidden="true">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -307,7 +332,7 @@
                       {% if agent.photo %}
                         <img src="{% thumbnail agent.photo photo_size %}" />
                       {% elif agent.photo_url %}
-                        <img src="{{ agent.photo_url }}" width="128" height="96" />
+                        <img src="{{ agent.photo_url }}" width="300" />
                       {% endif %}
                       {% if user_agent in agent.managers or user_is_agent %}
                         <a href="#uploadPicture" role="button" class="btn btn-primary btn-mini" data-toggle="modal" style="float:right;">{% if agent.photo or agent.photo_url %}{% trans "Change" %}{% else %}{% trans "Set" %}{% endif %}</a>
@@ -339,17 +364,17 @@
                             <td>{{ agent.unit_of_claim_value }}</td>
                         </tr>
                   {% endif %}
-	                {% if agent.url %}
-	                    <tr>
-	                        <th style="text-align: right;">{% trans "URL" %}</th>
-	                        <td><a href="{{ agent.url }}" target="_blank">{{ agent.url }}</a></td>
-                        </tr>
-                    {% endif %}
-	                {% if agent.description %}
-	                    <tr>
-	                        <th style="text-align: right;">{% trans "Description" %}</th>
-	                        <td>{{ agent.description|urlize|linebreaks }}</td>
-                        </tr>
+                  {% if agent.url %}
+                      <tr>
+                          <th style="text-align: right;">{% trans "URL" %}</th>
+                          <td><a href="{{ agent.url }}" target="_blank">{{ agent.url }}</a></td>
+                      </tr>
+                  {% endif %}
+                  {% if agent.description %}
+                      <tr>
+                          <th style="text-align: right;">{% trans "Description" %}</th>
+                          <td>{{ agent.description|urlize|linebreaks }}</td>
+                      </tr>
                   {% endif %}
                   {% if user_agent %}
                         {% if agent.email %}
@@ -358,8 +383,8 @@
                                 <td>{{ agent.email }}</td>
                             </tr>
                         {% endif %}
-
-                        <tr>
+                        {% if user_agent in agent.managers or user_is_agent or agent.primary_location %}
+                          <tr>
                             <th style="text-align: right; vertical-align: top; ">{% trans "Work Location" %}</th>
                             <td>
                                 {% if agent.primary_location %}
@@ -371,13 +396,28 @@
                                   {{ agent.address }}
                                 {% endif %}
                             </td>
-                        </tr>
+                          </tr>
+                        {% endif %}
+                  {% endif %}
+
+                  {% if agent.multicurrencyauth_set.count %}
+                    {% if user_agent in agent.managers or user_is_agent %}
+                      <tr>
+                          <th style="text-align: right; vertical-align: top; ">{% trans "Multicurrency Accounts" %}</th>
+                          <td>
+                              {% for au in agent.multicurrencyauth_set.all %}
+                                &nbsp; <a href="{% url "multicurrency_history" agent_id=agent.id oauth_id=au.id %}" class="btn btn-primary btn-mini">{% trans "Login as" %} {{ au.auth_user }}</a>
+                              {% endfor %}
+                              &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary btn-mini">+</a>
+                          </td>
+                      </tr>
+                    {% endif %}
                   {% endif %}
 
                   {% if agent.faircoin_address %}
                         <tr>
                             <th style="text-align: right; vertical-align: top; ">{% trans "FairCoin address" %}</th>
-                            <td>{{ agent.faircoin_address }} {% if user_agent in agent.managers or user_is_agent %}{% if agent.faircoin_resource.id %} &nbsp; <b><a href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}">Manage Account</a></b>{% endif %}{% endif %}</td>
+                            <td>{{ agent.faircoin_address }} {% if user_agent in agent.managers or user_is_agent %}{% if agent.faircoin_resource.id %} &nbsp; <b><a href="{% url "manage_faircoin_account" resource_id=agent.faircoin_resource.id %}" class="btn btn-primary btn-mini">Manage</a></b>{% endif %}{% endif %}</td>
                         </tr>
                   {% endif %}
                   {% if agent.reputation %}
@@ -422,6 +462,48 @@
                               {% endif %}
                           </td>
                         </tr>
+                        {% if agent.project.share_types %}
+                          <tr>
+                            <th>{% trans "Offered Shares:" %}</th>
+                            <td><ul style="margin-left:15px;">
+                              {% for typ in agent.project.share_types %}
+                                <li>{{ typ }}</li>
+                              {% endfor %}
+                            </ul></td>
+                          </tr>
+                        {% endif %}
+                        {% if agent.project.payment_options %}
+                          <tr>
+                            <th>{% trans "Payment Options:" %}</th>
+                            <td><ul style="margin-left:15px;">
+                              {% for typ in agent.project.payment_options %}
+                                <li>{{ typ|safe }}</li>
+                              {% endfor %}
+                            </ul></td>
+                          </tr>
+                        {% endif %}
+                        {% if agent.project.services %}
+                          <tr>
+                            <th>{% trans "Enabled Services:" %}</th>
+                            <td><ul style="margin-left:15px;">
+                              {% for typ in agent.project.services %}
+                                <li>{{ typ }}</li>
+                              {% endfor %}
+                            </ul></td>
+                          </tr>
+                        {% endif %}
+                        {% if agent.project.custom_html %}
+                          <tr>
+                            <th>{% trans "Custom Login Html:" %}</th>
+                            <td>{{ agent.project.custom_html|safe }}</td>
+                          </tr>
+                        {% endif %}
+                        {% if agent.project.custom_css %}
+                          <tr>
+                            <th>{% trans "Custom Login Css:" %}</th>
+                            <td>{{ agent.project.custom_css }}</td>
+                          </tr>
+                        {% endif %}
                       {% endif %}
                   {% endif %}
 
@@ -502,9 +584,10 @@
 
         <div class="span6">
           {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}{% if agent.project and form_entries and fobi_name and user_agent in agent.managers %}
-            <div class="requests span6">
+            <div class="requests span6" style="width:100%;">
               <h3>
-                {% trans "Pending to create user+agent:" %} <!-- <span style="font-weight:normal;">{{ fobi_name }}</span> -->
+                {% trans "Pending to create user+agent:" %} &nbsp;
+                <a class="btn btn-primary" href="{% url "join_requests" agent_id=agent.id %}">{% trans "Manage Join Requests" %}</a>
               </h3>
               <ul>
                 {% for req in form_entries %}
@@ -518,7 +601,7 @@
           {% endif %}{% endif %}
 
 
-          {% if agent.is_individual or user_is_agent %}
+          {% if agent.is_individual and agent.need_skills or user_is_agent and agent.need_skills %}
               <div class="span6 infobox skills-box" style="width:100%;">
                   <h3 class="">{% trans "Skills" %}:</h3>
                   {% if agent.skills %}
@@ -674,7 +757,7 @@
               </div>
           {% endif %}
 
-          {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+          {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members or request.user.is_staff %}
   	        <div class="span6 assoc infobox" style="width:100%;">
               <h3>
                 {% trans "Relations:" %}
@@ -773,10 +856,9 @@
           {% endif %}
         </div>
 
-		  </div>
 
 
-      {% if agent.is_individual and user.is_staff %}
+      {% if agent.is_individual and agent.need_skills and user.is_staff %}
           <div class="span8">
               <h4 class="hdg"> {% trans "Cumulative Contributions" %}</h4>
               <div id="chart_div0"></div>
@@ -784,6 +866,7 @@
       {% endif %}
 
       {% if user_agent in agent.managers or user_is_agent or user_agent in agent.members %}
+        {% if False and agent.need_skills %}
         <div class="row-fluid" tyle="margin-bottom:2em;">
           <hr />
           <h3>{% trans "Cumulative Time" %}</h3>
@@ -801,9 +884,10 @@
           <div id="chart_div3"></div>
 
         </div>
+        {% endif %}
       {% endif %}
 
-    </div>
+
 
   {% if agent.project and not user_agent in agent.managers and not agent in user_agent.related_contexts or agent.project in user_agent.joinaproject_requests_projects and not user_agent in agent.members %}
     <div id="join-this-project"  class="span5">
@@ -839,7 +923,8 @@
     </div>
 
   {% endif %}
-
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_script %}

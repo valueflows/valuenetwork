@@ -24,6 +24,12 @@
 
     </style>
 
+    {% if project.custom_css %}
+        <style>
+            {{ project.custom_css }}
+        </style>
+    {% endif %}
+
     <script src="{% static "pinax/js/jquery.js" %}"></script>
     <script type="text/javascript">
 
@@ -70,9 +76,9 @@
     <title>{% trans "Request to Join: " %} {{ project.agent.name }}</title>
 
   </head>
-  <body style="background-image: url({% static 'img/photo-OCP-1600x900_green.jpg' %}); text-align:center;">
+  <body style="background-image: url({% if project.background_url %}{% static project.background_url %}{% else %}{% static 'img/photo-OCP-1600x900_green.jpg' %}{% endif %}); text-align:center; background-attachment:fixed;">
     <div style="font-weight:bold; position:absolute; left:13px; top:9px;">
-      <a href="{% url 'account_login' %}" style="color:#734279;">{% trans "Login" %}</a>
+      <a href="{% url 'project_login' form_slug=project.fobi_slug %}" style="color:#734279;">{% trans "Login to" %} {{ project.agent.name }}</a>
     </div>
     <form action="{% url 'set_language' %}" method="post" id="lang-switch">{% csrf_token %}
       <input name="next" type="hidden" value="{{ redirect_to }}" />
@@ -95,7 +101,7 @@
       <h1>
         {% if project.agent.url %}<a href="{{ project.agent.url }}" target="_blank">{{ project.agent.name }}</a>{% else %} {{ project.agent.name }} {% endif %}
       </h1>
-      <br/>
+      <p>&nbsp;</p>
       <!-- <p>
         {% trans "The first step to join this project is to fill the following form:" %}
       </p> -->

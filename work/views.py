@@ -1284,6 +1284,15 @@ from fobi.base import (
 #)
 
 from account.forms import LoginUsernameForm
+from account.views import LoginView
+
+class WorkLoginView(LoginView):
+    template_name = "work/project_login.html"
+    form_class = LoginUsernameForm
+    form_kwargs = {}
+    redirect_field_name = "next"
+
+from django.contrib.auth import authenticate, login
 
 def project_login(request, form_slug = False):
     #import pdb; pdb.set_trace()
@@ -1292,21 +1301,39 @@ def project_login(request, form_slug = False):
         if request.user.is_authenticated():
             return members_agent(request, agent_id=project.agent.id)
         html = ''
-        back = ''
-        css = ''
+        #back = ''
+        #css = ''
         if settings.PROJECTS_LOGIN and project.fobi_slug:
             data = settings.PROJECTS_LOGIN[project.fobi_slug]
             if data:
                 html = data['html']
-                back = data['background_url']
-                css = data['css']
+                #back = data['background_url']
+                #css = data['css']
+
+    form = LoginUsernameForm(data=request.POST or None)
+
+    if request.method == "POST":
+
+        if form.is_valid():
+
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                # Redirect to a success page.
+                return HttpResponseRedirect(reverse('my_dashboard'))
+            else:
+                pass
 
     return render(request, "work/project_login.html", {
                 "project": project,
                 "html": html,
-                "background_url": back,
-                "form": LoginUsernameForm,
-                "css": css,
+                #"background_url": back,
+                "form": form,
+                "form_slug": form_slug,
+                "redirect_field_name": "next",
+                "redirect_field_value": "project_login", #+form_slug,
             })
 
 """def joinaproject_thanks(request, form_slug = False):

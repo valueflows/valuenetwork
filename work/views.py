@@ -1283,15 +1283,15 @@ from fobi.base import (
 #    FormHandlerPlugin, form_handler_plugin_registry, get_processed_form_data
 #)
 
+
+
+
+def home(request):
+    #import pdb; pdb.set_trace()
+    return HttpResponseRedirect('account_login')
+
+
 from account.forms import LoginUsernameForm
-from account.views import LoginView
-
-class WorkLoginView(LoginView):
-    template_name = "work/project_login.html"
-    form_class = LoginUsernameForm
-    form_kwargs = {}
-    redirect_field_name = "next"
-
 from django.contrib.auth import authenticate, login
 
 def project_login(request, form_slug = False):

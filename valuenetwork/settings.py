@@ -200,6 +200,7 @@ INSTALLED_APPS = [
     'valuenetwork.api',
     'account',
     'work.apps.WorkAppConfig',
+    'multicurrency',
 
     # general
     'general',
@@ -213,11 +214,16 @@ REST_FRAMEWORK = {
 }
 
 # valueaccounting settings
+# Set this with your specific data in local_settings.py
+MAIN_ORGANIZATION = "FreedomCoop"
 USE_WORK_NOW = True
 SUBSTITUTABLE_DEFAULT = True
 MAP_LATITUDE = 45.5601062
 MAP_LONGITUDE = -73.7120832
 MAP_ZOOM = 11
+
+# multicurrency settings
+MULTICURRENCY = {} #Fill the dict in local_settings.py with private data.
 
 PINAX_NOTIFICATIONS_QUEUE_ALL = True
 
@@ -282,6 +288,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 BROADCAST_FAIRCOINS_LOCK_WAIT_TIMEOUT = None
+# Set this to False in local_settings.py if don't use faircoin.
+USE_FAIRCOIN = True
 #id of the group to send payments to
 SEND_MEMBERSHIP_PAYMENT_TO = "FC MembershipRequest"
 

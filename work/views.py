@@ -43,14 +43,16 @@ else:
 def get_site_name(request=None):
     if request:
         domain = request.get_host()
-        if settings.PROJECTS_LOGIN:
+        try:
             obj = settings.PROJECTS_LOGIN
             for pro in obj:
                 if obj[pro]['domains']:
                     if domain in obj[pro]['domains']:
-                        proj = get_object_or_404(Project, form_slug=pro)
+                        proj = get_object_or_404(Project, fobi_slug=pro)
                         if proj:
                             return proj.agent.name
+        except:
+            pass
     return Site.objects.get_current().name
 
 def get_url_starter(request=None):

@@ -189,37 +189,43 @@ class Project(models.Model):
     def background_url(self):
         back = False
         if settings.PROJECTS_LOGIN and self.fobi_slug:
-            back = settings.PROJECTS_LOGIN[self.fobi_slug]['background_url']
+            if settings.PROJECTS_LOGIN[self.fobi_slug]:
+                back = settings.PROJECTS_LOGIN[self.fobi_slug]['background_url']
         return back
 
     def custom_css(self):
         css = False
         if settings.PROJECTS_LOGIN and self.fobi_slug:
-            css = settings.PROJECTS_LOGIN[self.fobi_slug]['css']
+            if settings.PROJECTS_LOGIN[self.fobi_slug]:
+                css = settings.PROJECTS_LOGIN[self.fobi_slug]['css']
         return css
 
     def custom_html(self):
         html = False
         if settings.PROJECTS_LOGIN and self.fobi_slug:
-            html = settings.PROJECTS_LOGIN[self.fobi_slug]['html']
+            if settings.PROJECTS_LOGIN[self.fobi_slug]:
+                html = settings.PROJECTS_LOGIN[self.fobi_slug]['html']
         return html
 
     def services(self):
         serv = False
         if settings.PROJECTS_LOGIN and self.fobi_slug:
-            serv = settings.PROJECTS_LOGIN[self.fobi_slug]['services']
+            if settings.PROJECTS_LOGIN[self.fobi_slug]:
+                serv = settings.PROJECTS_LOGIN[self.fobi_slug]['services']
         return serv
 
     def custom_login(self):
         resp = False
         if settings.PROJECTS_LOGIN and self.fobi_slug:
-            resp = settings.PROJECTS_LOGIN[self.fobi_slug]
+            if settings.PROJECTS_LOGIN[self.fobi_slug]:
+                resp = settings.PROJECTS_LOGIN[self.fobi_slug]
         return resp
 
     def payment_gateways(self):
         gates = False
         if settings.PAYMENT_GATEWAYS and self.fobi_slug:
-            gates = settings.PAYMENT_GATEWAYS[self.fobi_slug]
+            if settings.PAYMENT_GATEWAYS[self.fobi_slug]:
+                gates = settings.PAYMENT_GATEWAYS[self.fobi_slug]
         return gates
 
 

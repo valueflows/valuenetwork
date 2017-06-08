@@ -229,7 +229,7 @@ class LoginView(FormView):
     redirect_field_name = "next"
 
     def get(self, *args, **kwargs):
-        domain = self.request.META['HTTP_HOST'] #get_current_site(self.request)
+        domain = self.request.get_host() #get_current_site(self.request)
         if settings.PROJECTS_LOGIN:
             obj = settings.PROJECTS_LOGIN
             for pro in obj:

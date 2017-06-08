@@ -1288,7 +1288,7 @@ from fobi.base import (
 
 def home(request):
     #import pdb; pdb.set_trace()
-    return HttpResponseRedirect('account_login')
+    return HttpResponseRedirect('/account/login/')
 
 
 from account.forms import LoginUsernameForm

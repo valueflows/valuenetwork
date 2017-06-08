@@ -40,11 +40,25 @@ if "pinax.notifications" in settings.INSTALLED_APPS:
 else:
     notification = None
 
-def get_site_name():
+def get_site_name(request=None):
+    if request:
+        domain = request.get_host()
+        if settings.PROJECTS_LOGIN:
+            obj = settings.PROJECTS_LOGIN
+            for pro in obj:
+                if obj[pro]['domains']:
+                    if domain in obj[pro]['domains']:
+                        proj = get_object_or_404(Project, form_slug=pro)
+                        if proj:
+                            return proj.agent.name
     return Site.objects.get_current().name
 
-def get_url_starter():
-    return "".join(["https://", Site.objects.get_current().domain])
+def get_url_starter(request=None):
+    if request:
+        domain = request.get_host()
+    else:
+        domain = Site.objects.get_current().domain
+    return "".join(["https://", domain])
 
 def work_home(request):
 
@@ -260,9 +274,9 @@ def update_skills(request, agent_id):
                 suggester = request.user
             if notification:
                 users = User.objects.filter(is_staff=True)
-                suggestions_url = get_url_starter() + "/accounting/skill-suggestions/"
+                suggestions_url = get_url_starter(request) + "/accounting/skill-suggestions/"
                 if users:
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     notification.send(
                         users,
                         "work_skill_suggestion",
@@ -1482,7 +1496,7 @@ def joinaproject_request(request, form_slug = False):
             event_type = EventType.objects.get(relationship="todo")
             description = "Create an Agent and User for the Join Request from "
             description += name
-            join_url = get_url_starter() + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
+            join_url = get_url_starter(request) + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
             context_agent = jn_req.project.agent #EconomicAgent.objects.get(name__icontains="Membership Request")
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
@@ -1513,7 +1527,7 @@ def joinaproject_request(request, form_slug = False):
                   if manager.user():
                     users.append(manager.user().user)
                 if users:
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     notification.send(
                         users,
                         "work_join_request",
@@ -1689,10 +1703,9 @@ def joinaproject_request_internal(request, agent_id = False):
 
             description = "A new Join Request from OCP user "
             description += name
-            join_url = ''
+            join_url = get_url_starter(request) + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
 
             '''event_type = EventType.objects.get(relationship="todo")
-            join_url = get_url_starter() + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
             context_agent = jn_req.project.agent #EconomicAgent.objects.get(name__icontains="Membership Request")
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
@@ -1723,7 +1736,7 @@ def joinaproject_request_internal(request, agent_id = False):
                   if manager.user():
                     users.append(manager.user().user)
                 if users:
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     notification.send(
                         users,
                         "work_join_request",
@@ -1996,7 +2009,7 @@ def create_account_for_join_request(request, join_request_id):
                             #allusers = chain(users, agent)
                             #users = list(users)
                             #users.append(agent.user)
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             notification.send(
                                 users,
                                 "work_new_account",
@@ -2375,9 +2388,9 @@ def new_skill_type(request, agent_id):
                 suggester = request.user
               if notification:
                   users = User.objects.filter(is_staff=True)
-                  suggestions_url = get_url_starter() + "/accounting/skill-suggestions/"
-                  if users and get_site_name():
-                      site_name = get_site_name()
+                  suggestions_url = get_url_starter(request) + "/accounting/skill-suggestions/"
+                  if users and get_site_name(request):
+                      site_name = get_site_name(request)
                       notification.send(
                         users,
                         "work_skill_suggestion",
@@ -4922,7 +4935,7 @@ def add_todo(request):
                 if notification:
                     if todo.from_agent:
                         if todo.from_agent != agent:
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             user = todo.from_agent.user()
                             if user:
                                 notification.send(
@@ -5273,7 +5286,7 @@ def work_invite_collaborator(request, commitment_id):
         if notification:
             agent = get_agent(request)
             users = commitment.possible_work_users()
-            site_name = get_site_name()
+            site_name = get_site_name(request)
             if users:
                 notification.send(
                     users,
@@ -5473,7 +5486,7 @@ def work_add_todo(request):
                 if notification:
                     if todo.from_agent:
                         if todo.from_agent != agent:
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             user = todo.from_agent.user()
                             if user:
                                 notification.send(
@@ -5499,7 +5512,7 @@ def work_todo_delete(request, todo_id):
                 if todo.from_agent:
                     agent = get_agent(request)
                     if todo.from_agent != agent:
-                        site_name = get_site_name()
+                        site_name = get_site_name(request)
                         user = todo.from_agent.user()
                         if user:
                             notification.send(
@@ -5678,7 +5691,7 @@ def work_add_process_worker(request, process_id):
             if notification:
                 agent = get_agent(request)
                 users = ct.possible_work_users()
-                site_name = get_site_name()
+                site_name = get_site_name(request)
                 if users:
                     notification.send(
                         users,
@@ -6303,7 +6316,7 @@ def work_join_task(request, commitment_id):
             for worker in workers:
                 worker_users = [au.user for au in worker.users.all()]
                 users.extend(worker_users)
-            site_name = get_site_name()
+            site_name = get_site_name(request)
             if users:
                 notification.send(
                     users,
@@ -6840,7 +6853,7 @@ def plan_work(request, rand=0):
                         if not work_commitment.from_agent:
                             agent = get_agent(request)
                             users = work_commitment.possible_work_users()
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             if users:
                                 notification.send(
                                     users,

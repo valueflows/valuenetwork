@@ -455,21 +455,29 @@ class JoinRequest(models.Model):
 
     def payment_url(self):
         payopt = self.payment_option()
+        obj = None
         if settings.PAYMENT_GATEWAYS and payopt:
             gates = settings.PAYMENT_GATEWAYS
             if self.project.fobi_slug and gates[self.project.fobi_slug]:
-                obj = gates[self.project.fobi_slug][payopt['key']]
+                try:
+                    obj = gates[self.project.fobi_slug][payopt['key']]
+                except:
+                    pass
             if obj:
                 return obj['url']
         return False
 
     def payment_html(self):
         payopt = self.payment_option()
+        obj = None
         if settings.PAYMENT_GATEWAYS and payopt:
             gates = settings.PAYMENT_GATEWAYS
             if self.project.fobi_slug and gates[self.project.fobi_slug]:
-                obj = gates[self.project.fobi_slug][payopt['key']]
-            if obj['html']:
+                try:
+                    obj = gates[self.project.fobi_slug][payopt['key']]
+                except:
+                    pass
+            if obj and obj['html']:
                 return obj['html']
         return False
 

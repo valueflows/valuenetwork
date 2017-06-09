@@ -1269,6 +1269,10 @@ class WorkTodoForm(forms.ModelForm):
 
     def __init__(self, agent, pattern=None, *args, **kwargs): #agent is posting agent
         super(WorkTodoForm, self).__init__(*args, **kwargs)
+        commitment_instance = None
+        if 'instance' in kwargs:
+            commitment_instance = kwargs['instance']
+            commitment_context = commitment_instance.context_agent
         contexts = agent.related_contexts()
         self.fields["context_agent"].choices = list(set([(ct.id, ct) for ct in contexts]))
         peeps = [agent,]
@@ -1279,17 +1283,31 @@ class WorkTodoForm(forms.ModelForm):
         if len(peeps) > 1:
             peeps = list(OrderedDict.fromkeys(peeps))
         from_agent_choices = [('', 'Unassigned')] + [(peep.id, peep) for peep in peeps]
-
         self.fields["from_agent"].choices = from_agent_choices
         if pattern:
             self.pattern = pattern
             #self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
-            self.fields["resource_type"].queryset = pattern.todo_resource_types()
-
-
-
-
-
+            rts = pattern.todo_resource_types()
+        else:
+            rts = EconomicResourceType.objects.filter(behavior="work")
+        if commitment_instance:
+            try:
+                if commitment_context.project.resource_type_selection == "project":
+                    rts = rts.filter(context_agent=commitment_context)
+                else:
+                    rts = rts.filter(context_agent=None)
+            except:
+                rts = rts.filter(context_agent=None)
+        else:
+            first_agent = contexts[0]
+            try:
+                if first_agent.project.resource_type_selection == "project":
+                    rts = rts.filter(context_agent=first_agent)
+                else:
+                    rts = rts.filter(context_agent=None)
+            except:
+                rts = rts.filter(context_agent=None)
+        self.fields["resource_type"].queryset = rts
 
 
 class WorkCasualTimeContributionForm(forms.ModelForm):
@@ -1311,15 +1329,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
 
     class Meta:
         model = EconomicEvent
-        fields = ('event_date', 'resource_type', 'context_agent', 'quantity', 'is_contribution', 'url', 'description')
-
-
-
-
-
-
-
-
+        fields = ('event_date', 'context_agent', 'resource_type', 'quantity', 'is_contribution', 'url', 'description')
 
 
 

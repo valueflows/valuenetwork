@@ -4960,6 +4960,14 @@ def add_todo(request):
     return HttpResponseRedirect(next)
 
 
+def json_get_context_resource_types(request, context_id, pattern_id=None):
+    context_agent = get_object_or_404(EconomicAgent, pk=context_id)
+    if pattern_id:
+        pattern = get_object_or_404(ProcessPattern, pk=pattern_id)
+    else:
+        pattern = None
+    
+#TODO: BOB!
 
 
 #    P R O C E S S   T A S K S

@@ -951,7 +951,7 @@ def members_agent(request, agent_id):
         project = False
 
     if project:
-        init = {"joining_style": project.joining_style, "visibility": project.visibility, "fobi_slug": project.fobi_slug }
+        init = {"joining_style": project.joining_style, "visibility": project.visibility, "resource_type_selection": project.resource_type_selection, "fobi_slug": project.fobi_slug }
         change_form = ProjectCreateForm(instance=agent, initial=init)
     else:
         change_form = ProjectCreateForm(instance=agent) #AgentCreateForm(instance=agent)

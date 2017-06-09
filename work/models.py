@@ -87,7 +87,7 @@ VISIBILITY_CHOICES = (
 
 SELECTION_CHOICES = (
     ('project', _('your project')),
-    ('related', _('all related projects')),
+    #('related', _('all related projects')),
     ('all', _('all platform')),
 )
 

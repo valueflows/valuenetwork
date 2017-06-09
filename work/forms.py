@@ -146,11 +146,13 @@ class ProjectCreateForm(AgentCreateForm):
     # fields for Project model
     joining_style = forms.ChoiceField()
     visibility = forms.ChoiceField()
+    resource_type_selection = forms.ChoiceField()
 
     def __init__(self, *args, **kwargs):
         super(ProjectCreateForm, self).__init__(*args, **kwargs)
         self.fields["joining_style"].choices = [(js[0], js[1]) for js in JOINING_STYLE_CHOICES]
         self.fields["visibility"].choices = [(vi[0], vi[1]) for vi in VISIBILITY_CHOICES]
+        self.fields["resource_type_selection"].choices = [(rts[0], rts[1]) for rts in SELECTION_CHOICES]
 
     def clean(self):
         data = super(ProjectCreateForm, self).clean()
@@ -170,7 +172,7 @@ class ProjectCreateForm(AgentCreateForm):
     class Meta: #(AgentCreateForm.Meta):
         model = Project #EconomicAgent
         #removed address and is_context
-        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email', 'joining_style', 'visibility', 'fobi_slug')
+        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email', 'joining_style', 'visibility', 'resource_type_selection', 'fobi_slug')
         #exclude = ('is_context',)
 
 

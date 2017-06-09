@@ -271,7 +271,7 @@ class EconomicResourceForm(forms.ModelForm):
             'author',
             'custodian',
             'photo',
-            'quantity',
+            #'quantity',
             'quality',
             'independent_demand',
             'order_item',
@@ -279,7 +279,6 @@ class EconomicResourceForm(forms.ModelForm):
             'exchange_stage',
             'state',
             'stage',
-            'state',
             'value_per_unit',
             )
 

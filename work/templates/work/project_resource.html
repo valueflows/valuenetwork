@@ -90,6 +90,14 @@
                         {% for fil in resource.change_form %}
                             {% if resource.resource_type.is_virtual_account and fil.name == "current_location" %}
 
+                            {% elif resource.resource_type.is_virtual_account and fil.name == "quantity" and not request.user.is_superuser %}
+
+                            {% elif resource.resource_type.is_virtual_account and fil.name == "value_per_unit_of_use" %}
+
+                            {% elif resource.resource_type.is_virtual_account and fil.name == "created_date" %}
+                            {% elif resource.resource_type.is_virtual_account and fil.name == "photo_url" %}
+                            {% elif resource.resource_type.is_virtual_account and fil.name == "access_rules" %}
+
                             {% else %}
                               <div class="modal-field" >
 
@@ -105,24 +113,26 @@
                             {% endif %}
                         {% endfor %}
                         <br />
-                        {{ role_formset.management_form }}
-                        <table>
-                            <tr>
-                                <td>{% trans "Resource access role" %}</td>
-                                <td>{% trans "Assignment" %}</td>
-                                <td>{% trans "Is contact" %} &nbsp;</td>
-                                <td>{% trans "Delete" %}</td>
-                            </tr>
-	                        {% for form in role_formset %}
-                                {{ form.id }}
-	                            <tr class="role-row">
-	                                <td class="td-role">{{ form.role }}</td>
-	                                <td class="td-agent">{{ form.agent }}</td>
-	                                <td class="text-center">{{ form.is_contact }}</td>
-                                    <td class="text-center">{{ form.DELETE }}</td>
-	                            </tr>
-                           	{% endfor %}
-                        </table>
+                        {% if not resource.resource_type.is_virtual_account or request.user.is_superuser %}
+                            {{ role_formset.management_form }}
+                            <table>
+                                <tr>
+                                    <td>{% trans "Resource access role" %}</td>
+                                    <td>{% trans "Assignment" %}</td>
+                                    <td>{% trans "Is contact" %} &nbsp;</td>
+                                    <td>{% trans "Delete" %}</td>
+                                </tr>
+                                {% for form in role_formset %}
+                                    {{ form.id }}
+                                    <tr class="role-row">
+                                        <td class="td-role">{{ form.role }}</td>
+                                        <td class="td-agent">{{ form.agent }}</td>
+                                        <td class="text-center">{{ form.is_contact }}</td>
+                                        <td class="text-center">{{ form.DELETE }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        {% endif %}
 				        <div class="modal-footer">
 					      <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
 					      <button class="btn btn-primary">{% trans "Save changes" %}</button>

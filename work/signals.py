@@ -16,7 +16,8 @@ def comment_notification(sender, comment, **kwargs):
 
             if users:
                 site_name = Site.objects.get_current().name
-                membership_url= "https://" + Site.objects.get_current().domain +\
+                domain = Site.objects.get_current().domain
+                membership_url= "https://" + domain +\
                     "/work/membership-discussion/" + str(comment.content_object.id) + "/"
                 notification.send(
                     users,
@@ -25,6 +26,7 @@ def comment_notification(sender, comment, **kwargs):
                     "comment": comment.comment,
                     "site_name": site_name,
                     "membership_url": membership_url,
+                    "current_site": domain,
                     }
                 )
 
@@ -64,10 +66,11 @@ def comment_notification(sender, comment, **kwargs):
                     users,
                     "comment_join_request",
                     {"name": comment.name,
-                     "comment": comment.comment,
-                     "site_name": site_name,
-                     "joinrequest_url": joinrequest_url,
-                     "jn_req": comment.content_object,
+                    "comment": comment.comment,
+                    "site_name": site_name,
+                    "joinrequest_url": joinrequest_url,
+                    "jn_req": comment.content_object,
+                    "current_site": domain,
                     }
                 )
 

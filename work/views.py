@@ -6364,7 +6364,8 @@ def my_history(request): # tasks history
     user_is_agent = False
     if agent == user_agent:
         user_is_agent = True
-    event_list = agent.contributions()
+    #event_list = agent.contributions()
+    event_list = agent.given_events.all()
     no_bucket = 0
     with_bucket = 0
     event_value = Decimal("0.0")

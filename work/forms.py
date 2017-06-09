@@ -1256,7 +1256,7 @@ class WorkTodoForm(forms.ModelForm):
         queryset=EconomicAgent.objects.context_agents(),
         label=_("Context"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
+        widget=forms.Select(attrs={'class': 'chzn-select context-selector'}))
     due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
     description = forms.CharField(
         required=False,

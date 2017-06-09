@@ -52,8 +52,24 @@ def get_help(page_name):
     except Help.DoesNotExist:
         return None
 
-def get_site_name():
+#def get_site_name():
+#    return Site.objects.get_current().name
+
+def get_site_name(request=None):
+    if request:
+        domain = request.get_host()
+        try:
+            obj = settings.PROJECTS_LOGIN
+            for pro in obj:
+                if obj[pro]['domains']:
+                    if domain in obj[pro]['domains']:
+                        proj = get_object_or_404(Project, fobi_slug=pro)
+                        if proj:
+                            return proj.agent.name
+        except:
+            pass
     return Site.objects.get_current().name
+
 
 def home(request):
     layout = None
@@ -3888,7 +3904,7 @@ def add_todo(request):
                 if notification:
                     if todo.from_agent:
                         if todo.from_agent != agent:
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             user = todo.from_agent.user()
                             if user:
                                 notification.send(
@@ -4037,7 +4053,7 @@ def todo_delete(request, todo_id):
                 if todo.from_agent:
                     agent = get_agent(request)
                     if todo.from_agent != agent:
-                        site_name = get_site_name()
+                        site_name = get_site_name(request)
                         user = todo.from_agent.user()
                         if user:
                             notification.send(
@@ -4309,7 +4325,7 @@ def join_task(request, commitment_id):
             for worker in workers:
                 worker_users = [au.user for au in worker.users.all()]
                 users.extend(worker_users)
-            site_name = get_site_name()
+            site_name = get_site_name(request)
             if users:
                 notification.send(
                     users,
@@ -4727,7 +4743,7 @@ def new_process_worker(request, commitment_id):
             if notification:
                 agent = get_agent(request)
                 users = ct.possible_work_users()
-                site_name = get_site_name()
+                site_name = get_site_name(request)
                 if users:
                     notification.send(
                         users,
@@ -6383,7 +6399,7 @@ def add_process_worker(request, process_id):
             if notification:
                 agent = get_agent(request)
                 users = ct.possible_work_users()
-                site_name = get_site_name()
+                site_name = get_site_name(request)
                 if users:
                     notification.send(
                         users,
@@ -6436,7 +6452,7 @@ def invite_collaborator(request, commitment_id):
         if notification:
             agent = get_agent(request)
             users = commitment.possible_work_users()
-            site_name = get_site_name()
+            site_name = get_site_name(request)
             if users:
                 notification.send(
                     users,
@@ -9792,7 +9808,7 @@ def process_selections(request, rand=0):
                         if not work_commitment.from_agent:
                             agent = get_agent(request)
                             users = work_commitment.possible_work_users()
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             if users:
                                 notification.send(
                                     users,
@@ -9958,7 +9974,7 @@ def plan_from_recipe(request):
                     event_type__relationship="work")
                 for ct in work_cts:
                     users = ct.possible_work_users()
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     if users:
                         notification.send(
                             users,
@@ -10104,7 +10120,7 @@ def plan_from_rt_recipe(request, resource_type_id):
                     event_type__relationship="work")
                 for ct in work_cts:
                     users = ct.possible_work_users()
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     if users:
                         notification.send(
                             users,

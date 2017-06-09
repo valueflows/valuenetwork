@@ -43,14 +43,16 @@ else:
 def get_site_name(request=None):
     if request:
         domain = request.get_host()
-        if settings.PROJECTS_LOGIN:
+        try:
             obj = settings.PROJECTS_LOGIN
             for pro in obj:
                 if obj[pro]['domains']:
                     if domain in obj[pro]['domains']:
-                        proj = get_object_or_404(Project, form_slug=pro)
+                        proj = get_object_or_404(Project, fobi_slug=pro)
                         if proj:
                             return proj.agent.name
+        except:
+            pass
     return Site.objects.get_current().name
 
 def get_url_starter(request=None):
@@ -1349,35 +1351,43 @@ import simplejson as json
 from django.utils.html import escape, escapejs
 
 def joinaproject_request(request, form_slug = False):
+    if form_slug and form_slug == 'freedom-coop':
+        return membership_request(request)
+
     join_form = JoinRequestForm(data=request.POST or None)
     fobi_form = False
     cleaned_data = False
     form = False
     if form_slug:
-      project = Project.objects.get(fobi_slug=form_slug)
+        project = Project.objects.get(fobi_slug=form_slug)
 
-      try:
-        user_agent = request.user.agent.agent
-        if user_agent and request.user.is_authenticated and user_agent.is_active_freedom_coop_member or request.user.is_staff:
-          return joinaproject_request_internal(request, project.agent.id)
-      except:
-        user_agent = False
+        try:
+            user_agent = request.user.agent.agent
+            if user_agent and request.user.is_authenticated and user_agent.is_active_freedom_coop_member or request.user.is_staff:
+                return joinaproject_request_internal(request, project.agent.id)
+        except:
+            user_agent = False
 
-      if project.visibility != "public" and not user_agent:
-        return HttpResponseRedirect('/%s/' % ('home'))
+        if project.visibility != "public" and not user_agent:
+            return HttpResponseRedirect('/%s/' % ('home'))
 
-      fobi_slug = project.fobi_slug
-      form_entry = FormEntry.objects.get(slug=fobi_slug)
-      form_element_entries = form_entry.formelemententry_set.all()[:]
-      form_entry.project = project
+        fobi_slug = project.fobi_slug
+        form_entry = None
+        try:
+            form_entry = FormEntry.objects.get(slug=fobi_slug)
+        except:
+            pass
 
-      # This is where the most of the magic happens. Our form is being built
-      # dynamically.
-      FormClass = assemble_form_class(
-          form_entry,
-          form_element_entries = form_element_entries,
-          request = request
-      )
+        form_element_entries = form_entry.formelemententry_set.all()[:]
+        form_entry.project = project
+
+        # This is where the most of the magic happens. Our form is being built
+        # dynamically.
+        FormClass = assemble_form_class(
+            form_entry,
+            form_element_entries = form_element_entries,
+            request = request
+        )
 
 
     if request.method == "POST":

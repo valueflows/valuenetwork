@@ -5,19 +5,19 @@ from django.contrib.sites.models import Site
 
 def camelcase(name):
      return ''.join(x.capitalize() or ' ' for x in name.split(' '))
- 
+
 def camelcase_lower(name):
     pname = camelcase(name)
     return pname[0].lower() + pname[1:]
 
 def split_thousands(n, sep=','):
     s = str(n)
-    if len(s) <= 3: return s  
+    if len(s) <= 3: return s
     return split_thousands(s[:-3], sep) + sep + s[-3:]
 
 def dfs(node, all_nodes, depth):
     """
-    Performs a recursive depth-first search starting at ``node``. 
+    Performs a recursive depth-first search starting at ``node``.
     """
     to_return = [node,]
     for subnode in all_nodes:
@@ -69,7 +69,7 @@ def group_dfs_by_has_associate(root, node, all_associations, visited, depth):
                     to_return.extend(group_dfs_by_has_associate(root, association.is_associate, all_associations, visited, depth+1))
     return to_return
 
-def group_dfs_by_is_associate(root, node, all_associations, visited, depth): 
+def group_dfs_by_is_associate(root, node, all_associations, visited, depth):
     to_return = []
     if node not in visited:
         visited.append(node)
@@ -287,8 +287,16 @@ def get_project_id(p):
 
     return project_id
 
-def get_url_starter():
-    return "".join(["https://", Site.objects.get_current().domain])
+#def get_url_starter():
+#    return "".join(["https://", Site.objects.get_current().domain])
+
+def get_url_starter(request=None):
+    if request:
+        domain = request.get_host()
+    else:
+        domain = Site.objects.get_current().domain
+    return "".join(["https://", domain])
+
 
 def get_order_details(order, url_starter, processes):
     receiver_name = ""
@@ -315,7 +323,7 @@ def project_process_graph(project_list, process_list):
         d = {
             "name": p.name,
             }
-        projects[p.node_id()] = d   
+        projects[p.node_id()] = d
     for p in process_list:
         project_id = ""
         if p.context_agent:
@@ -373,8 +381,8 @@ def explode(process_type_relationship, nodes, edges, depth, depth_limit):
     #    return
     nodes.append(process_type_relationship.process_type)
     edges.append(Edge(
-        process_type_relationship.process_type, 
-        process_type_relationship.resource_type, 
+        process_type_relationship.process_type,
+        process_type_relationship.resource_type,
         process_type_relationship.event_type.label
     ))
     for rtr in process_type_relationship.process_type.consumed_and_used_resource_type_relationships():
@@ -401,7 +409,7 @@ def graphify(focus, depth_limit):
 def project_network():
     producers = [p for p in ProcessType.objects.all() if p.produced_resource_types()]
     nodes = []
-    edges = []        
+    edges = []
     for p in producers:
         for rt in p.produced_resource_types():
             for pt in rt.consuming_process_types():
@@ -647,7 +655,7 @@ class XbillNode(object):
 
 def xbill_dfs(node, all_nodes, visited, depth):
     """
-    Performs a recursive depth-first search starting at ``node``. 
+    Performs a recursive depth-first search starting at ``node``.
     """
     to_return = []
     if node not in visited:

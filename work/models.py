@@ -85,6 +85,12 @@ VISIBILITY_CHOICES = (
     ('public', _('public')),
 )
 
+SELECTION_CHOICES = (
+    ('project', _('your project')),
+    ('related', _('all related projects')),
+    ('all', _('all platform')),
+)
+
 class Project(models.Model):
     agent = models.OneToOneField(EconomicAgent,
         verbose_name=_('agent'), related_name='project')
@@ -94,6 +100,9 @@ class Project(models.Model):
     visibility = models.CharField(_('visibility'),
         max_length=12, choices=VISIBILITY_CHOICES,
         default="FCmembers")
+    resource_type_selection = models.CharField(_('resource type selection'),
+        max_length=12, choices=SELECTION_CHOICES,
+        default="all")
     fobi_slug = models.CharField(_('custom form slug'),
         max_length=255, blank=True)
 

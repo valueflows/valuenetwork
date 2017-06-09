@@ -1299,7 +1299,7 @@ class WorkTodoForm(forms.ModelForm):
             except:
                 rts = rts.filter(context_agent=None)
         else:
-            first_agent = contexts[0]
+            first_agent = self.fields["context_agent"].choices[0][1]
             try:
                 if first_agent.project.resource_type_selection == "project":
                     rts = rts.filter(context_agent=first_agent)

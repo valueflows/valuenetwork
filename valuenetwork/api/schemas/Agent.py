@@ -9,34 +9,21 @@
 from django.core.exceptions import PermissionDenied
 
 import graphene
-from graphene_django.types import DjangoObjectType
 
-from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser, AgentAssociation, AgentAssociationType
-from valuenetwork.api.schemas.helpers import *
+from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
 
-# bind Django models to Graphene types.
-# This defines which fields are output for matches against each Field/List in Query.
-
-class Agent(DjangoObjectType):
-    type = graphene.String(source='type')
-    image = graphene.String(source='image')
-    note = graphene.String(source='note')
-    class Meta:
-        model = EconomicAgent
-        only_fields = ('id', 'name')
-
-# define public query API
+from valuenetwork.api.types.Agent import AgentType
 
 class Query(graphene.AbstractType):
 
     # define input query params
 
-    my_agent = graphene.Field(Agent)
+    my_agent = graphene.Field(AgentType)
 
-    agent = graphene.Field(Agent,
+    agent = graphene.Field(AgentType,
                            id=graphene.Int())
 
-    all_agents = graphene.List(Agent)
+    all_agents = graphene.List(AgentType)
 
     # load single agents
 

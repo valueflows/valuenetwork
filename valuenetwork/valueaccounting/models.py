@@ -594,7 +594,7 @@ class EconomicAgent(models.Model):
             # resource type has unit
             va = EconomicResource(
                 resource_type=resource_type,
-                identifier="Faircoin address for " + self.nick,
+                identifier="Faircoin Ocp Account for " + self.nick,
                 digital_currency_address=address,
             )
             va.save()

@@ -1027,7 +1027,7 @@ class ContextTransferForm(forms.Form):
                     self.fields['quantity'].label += " ERROR: this facet is what? "+str(facet) #pass
             else:
                 if resource_type:
-                    if resource_type.name == "Faircoin Address":
+                    if resource_type.name == "Faircoin Ocp Account":
                         resource_type = EconomicResourceType.objects.get(name="FairCoin")
 
                     try:

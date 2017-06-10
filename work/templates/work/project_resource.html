@@ -90,7 +90,7 @@
                         {% for fil in resource.change_form %}
                             {% if resource.resource_type.is_virtual_account and fil.name == "current_location" %}
 
-                            {% elif resource.resource_type.is_virtual_account and fil.name == "quantity" and not request.user.is_superuser %}
+                            {% elif resource.resource_type.is_virtual_account and fil.name == "quantity" %}
 
                             {% elif resource.resource_type.is_virtual_account and fil.name == "value_per_unit_of_use" %}
 
@@ -103,7 +103,7 @@
 
                                 {% if resource.resource_type.is_virtual_account and fil.name == "price_per_unit" %}
                                   <label>{% trans "Account Value" %}:</label>
-                                  {{ fil.value }}
+                                  {% if request.user.agent.agent in resource.resource_type.context_agent.managers and resource.resource_type.unit_of_price.ocp_unit_type.clas == 'share' %} {{ fil }} {% else %} {{ fil.value }} {% endif %}
                                 {% else %}
                                   <label>{{ fil.label }}:</label>
                                   {{ fil }}
@@ -278,8 +278,8 @@
         </div>
 
     </div>
-
-    <div class="row-fluid" tyle="margin-top: 1em;">
+    {% if not resource.resource_type.is_virtual_account %}
+      <div class="row-fluid" tyle="margin-top: 1em;">
           <div class="span6">
                 <h3 class="">{% trans "Where from" %}:</h3>
                 {% if resource.where_from_events %}
@@ -393,7 +393,8 @@
             {% endif %}
 
 	    </div>
-    </div>
+      </div>
+    {% endif %}
 {% endblock %}
 
 {% block extra_script %}

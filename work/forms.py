@@ -1350,6 +1350,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
 
 class WorkProjectSelectionFormOptional(forms.Form):
     context_agent = forms.ChoiceField(
+        required=False,
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
 

@@ -5019,7 +5019,7 @@ def project_work(request):
             if ca_form.is_valid():
                 proj_data = ca_form.cleaned_data
                 proj_id = proj_data["context_agent"]
-                if proj_id.isdigit:
+                if proj_id:
                     context_id = proj_id
                     chosen_context_agent = EconomicAgent.objects.get(id=proj_id)
 

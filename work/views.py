@@ -1084,7 +1084,8 @@ def members_agent(request, agent_id):
     upload_form = UploadAgentForm(instance=agent)
 
     auto_resource = ''
-    if user_agent in agent.managers() or user_agent is agent:
+    if user_agent in agent.managers() or user_is_agent:
+      #import pdb; pdb.set_trace()
       for ag in is_associated_with:
         if hasattr(ag.has_associate, 'project'):
             rtsc = ag.has_associate.project.rts_with_clas()
@@ -1103,6 +1104,7 @@ def members_agent(request, agent_id):
                         resarr = res.identifier.split(ag.has_associate.nick)
                         res.identifier = ag.has_associate.nick+resarr[1]+agent.name #.identifier.split(ag.has_associate.nick)
                         res.quantity = 1
+                        res.price_per_unit = 0
                         res.save()
                         rol = AgentResourceRoleType.objects.filter(is_owner=True)[0]
                         arr = AgentResourceRole(
@@ -1352,7 +1354,7 @@ from django.utils.html import escape, escapejs
 
 def joinaproject_request(request, form_slug = False):
     if form_slug and form_slug == 'freedom-coop':
-        return membership_request(request)
+        return redirect('membership_request')
 
     join_form = JoinRequestForm(data=request.POST or None)
     fobi_form = False

@@ -781,8 +781,16 @@ th, td {
     {
         var selectedContext = event.target.value;
         var contextId = event.target.id;
-
-        var resourceTypeFieldId = "#id_resource_type";
+        var idSplit = contextId.split('-');
+        if (idSplit.length > 1)
+        {
+            var prefix = idSplit[0] + "-" + idSplit[1];
+            var resourceTypeFieldId = "#" + prefix + "-" + "resource_type";
+        }
+        else
+        {
+            var resourceTypeFieldId = "#id_resource_type";
+        }
         var jsonUrl = encodeURI("/work/json-context-resource_types/" + selectedContext + "/" + {{ pattern_id }} + "/" );
         $(resourceTypeFieldId).empty();
         $.get(jsonUrl,

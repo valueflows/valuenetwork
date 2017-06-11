@@ -4986,8 +4986,6 @@ def json_get_context_resource_types(request, context_id, pattern_id=None):
     return HttpResponse(json, content_type='application/json')
     
 
-
-
 #    P R O C E S S   T A S K S
 
 @login_required

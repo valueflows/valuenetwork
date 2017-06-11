@@ -4961,21 +4961,26 @@ def add_todo(request):
 
 
 def json_get_context_resource_types(request, context_id, pattern_id=None):
-    
     context_agent = get_object_or_404(EconomicAgent, pk=context_id)
     if pattern_id:
         pattern = get_object_or_404(ProcessPattern, pk=pattern_id)
     else:
         pattern = None
-    rts = EconomicResourceType.objects.filter(behavior="work")
-    if context_agent.project.resource_type_selection == "project":
-            rts = rts.filter(context_agent=context_agent)     
+    if pattern:
+        rts = pattern.todo_resource_types()
+    else:
+        rts = EconomicResourceType.objects.filter(behavior="work")
+    try:
+        if context_agent.project.resource_type_selection == "project":
+            rts = rts.filter(context_agent=context_agent)
+        else:
+            rts = rts.filter(context_agent=None)
+    except:
+        rts = rts.filter(context_agent=None)
     json = serializers.serialize("json", rts, fields=('name'))
-    #import pdb; pdb.set_trace()
     return HttpResponse(json, content_type='application/json')
     
-    
-#TODO: BOB!
+
 
 
 #    P R O C E S S   T A S K S

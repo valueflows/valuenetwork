@@ -4841,8 +4841,10 @@ def my_tasks(request):
     my_todos = Commitment.objects.todos().filter(from_agent=agent)
     init = {"from_agent": agent,}
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    pattern_id = 0
     if patterns:
         pattern = patterns[0].pattern
+        pattern_id = pattern.id
         todo_form = WorkTodoForm(agent=agent, pattern=pattern, initial=init)
     else:
         todo_form = WorkTodoForm(agent=agent, initial=init)
@@ -4854,6 +4856,7 @@ def my_tasks(request):
         #"other_unassigned": other_unassigned,
         "my_todos": my_todos,
         "todo_form": todo_form,
+        "pattern_id": pattern_id,
         #"work_now": work_now,
         "help": get_help("proc_log"),
     })

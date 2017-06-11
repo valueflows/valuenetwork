@@ -783,7 +783,7 @@ th, td {
         var contextId = event.target.id;
 
         var resourceTypeFieldId = "#id_resource_type";
-        var jsonUrl = encodeURI("/work/json-context-resource_types/" + selectedContext + "/");
+        var jsonUrl = encodeURI("/work/json-context-resource_types/" + selectedContext + "/" + {{ pattern_id }} + "/" );
         $(resourceTypeFieldId).empty();
         $.get(jsonUrl,
             function(data){

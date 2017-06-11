@@ -554,7 +554,7 @@ th, td {
         disable_search_threshold: 6,
     };
 
-		$(".chzn-select").chosen( ObjChosSingle );
+		//$(".chzn-select").chosen( ObjChosSingle );
 
 		$("textarea").resizable();
 
@@ -720,6 +720,28 @@ th, td {
 
 	}); // end document.ready
 
+    $(".context-selector").change(getResourceTypes);
+	    
+    function getResourceTypes(event)
+    {
+        var selectedContext = event.target.value;
+        var contextId = event.target.id;
+
+        var resourceTypeFieldId = "#id_resource_type";
+        var jsonUrl = encodeURI("/work/json-context-resource_types/" + selectedContext + "/" + {{ pattern_id }} + "/" );
+        $(resourceTypeFieldId).empty();
+        $.get(jsonUrl,
+            function(data){
+                for(var i=0 ; i<data.length ; i++)
+                {
+                    var id = data[i]['pk'];
+                    var name = data[i].fields['name'];
+                    $(resourceTypeFieldId).append('<option value="' + id + '">' + name + '</option>')
+                }
+            });
+            
+    }
+    
 	function saveTime(event)
 	{
         var timeInput = event.target;

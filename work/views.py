@@ -5006,8 +5006,10 @@ def project_work(request):
     ca_form = WorkProjectSelectionFormOptional(data=request.POST or None, context_agents=projects)
     chosen_context_agent = None
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    pattern_id = 0
     if patterns:
         pattern = patterns[0].pattern
+        pattern_id = pattern.id
         todo_form = WorkTodoForm(pattern=pattern, agent=agent)
     else:
         todo_form = WorkTodoForm(agent=agent)
@@ -5045,6 +5047,7 @@ def project_work(request):
         "todo_form": todo_form,
         "ca_form": ca_form,
         "todos": my_project_todos,
+        "pattern_id": pattern_id,
         "next": next,
         "help": get_help("project_work"),
     })

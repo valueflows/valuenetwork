@@ -5428,7 +5428,7 @@ def non_process_logging(request):
 
     init = []
     for i in range(0, 4):
-        init.append({"is_contribution": False,})
+        init.append({"is_contribution": True,})
     time_formset = TimeFormSet(
         queryset=EconomicEvent.objects.none(),
         initial = init,
@@ -6723,7 +6723,15 @@ def plan_work(request, rand=0):
             if selected_pattern:
                 slots = selected_pattern.event_types()
                 for slot in slots:
-                    slot.resource_types = selected_pattern.get_resource_types(slot)
+                    rts = selected_pattern.get_resource_types(slot)
+                    try:
+                        if selected_context_agent.project.resource_type_selection == "project":
+                            rts = rts.filter(context_agent=selected_context_agent)
+                        else:
+                            rts = rts.filter(context_agent=None)
+                    except:
+                        rts = rts.filter(context_agent=None)
+                    slot.resource_types = rts
             process_form = DateAndNameForm(initial=init)
             #demand_form = OrderSelectionFilteredForm(provider=selected_context_agent)
         else:

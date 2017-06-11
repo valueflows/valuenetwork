@@ -1354,7 +1354,7 @@ from django.utils.html import escape, escapejs
 
 def joinaproject_request(request, form_slug = False):
     if form_slug and form_slug == 'freedom-coop':
-        return membership_request(request)
+        return redirect('membership_request')
 
     join_form = JoinRequestForm(data=request.POST or None)
     fobi_form = False

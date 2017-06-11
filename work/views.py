@@ -5500,11 +5500,13 @@ def work_add_todo(request):
     if request.method == "POST":
         agent = get_agent(request)
         patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+        ca_id = request.POST["context_agent"]
+        context_agent_in = EconomicAgent.objects.get(id=int(ca_id))            
         if patterns:
             pattern = patterns[0].pattern
-            form = WorkTodoForm(agent=agent, pattern=pattern, data=request.POST)
+            form = WorkTodoForm(agent=agent, context_agent=context_agent_in, pattern=pattern, data=request.POST)
         else:
-            form = WorkTodoForm(agent=agent, data=request.POST)
+            form = WorkTodoForm(agent=agent, context_agent=context_agent_in, data=request.POST)
         next = request.POST.get("next")
         et = None
         ets = EventType.objects.filter(
@@ -5575,11 +5577,13 @@ def work_todo_change(request, todo_id):
             agent = get_agent(request)
             prefix = todo.form_prefix()
             patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+            ca_id = request.POST[prefix+"-context_agent"]
+            context_agent_in = EconomicAgent.objects.get(id=int(ca_id))
             if patterns:
                 pattern = patterns[0].pattern
-                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, instance=todo, prefix=prefix)
+                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, context_agent=context_agent_in, instance=todo, prefix=prefix)
             else:
-                form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
+                form = WorkTodoForm(data=request.POST, agent=agent, context_agent=context_agent_in, instance=todo, prefix=prefix)
             if form.is_valid():
                 todo = form.save()
 

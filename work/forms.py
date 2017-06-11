@@ -1267,7 +1267,7 @@ class WorkTodoForm(forms.ModelForm):
         model = Commitment
         fields = ('from_agent', 'context_agent', 'resource_type', 'due_date', 'description', 'url')
 
-    def __init__(self, agent, pattern=None, *args, **kwargs): #agent is posting agent
+    def __init__(self, agent, context_agent=None, pattern=None, *args, **kwargs): #agent is posting agent
         super(WorkTodoForm, self).__init__(*args, **kwargs)
         commitment_instance = None
         if 'instance' in kwargs:
@@ -1291,22 +1291,18 @@ class WorkTodoForm(forms.ModelForm):
         else:
             rts = EconomicResourceType.objects.filter(behavior="work")
         if commitment_instance:
-            try:
-                if commitment_context.project.resource_type_selection == "project":
-                    rts = rts.filter(context_agent=commitment_context)
-                else:
-                    rts = rts.filter(context_agent=None)
-            except:
-                rts = rts.filter(context_agent=None)
+            ca = commitment_context
         else:
-            first_agent = self.fields["context_agent"].choices[0][1]
-            try:
-                if first_agent.project.resource_type_selection == "project":
-                    rts = rts.filter(context_agent=first_agent)
-                else:
-                    rts = rts.filter(context_agent=None)
-            except:
+            ca = ca = self.fields["context_agent"].choices[0][1]
+        if context_agent:
+            ca = context_agent
+        try:
+            if ca.project.resource_type_selection == "project":
+                rts = rts.filter(context_agent=ca)
+            else:
                 rts = rts.filter(context_agent=None)
+        except:
+            rts = rts.filter(context_agent=None)
         self.fields["resource_type"].queryset = rts
 
 

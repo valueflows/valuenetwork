@@ -91,7 +91,7 @@
                             {% if resource.resource_type.is_virtual_account and fil.name == "current_location" %}
 
                             {% elif resource.resource_type.is_virtual_account and fil.name == "quantity" %}
-
+                                <input type="hidden" name="quantity" value="1" />
                             {% elif resource.resource_type.is_virtual_account and fil.name == "value_per_unit_of_use" %}
 
                             {% elif resource.resource_type.is_virtual_account and fil.name == "created_date" %}

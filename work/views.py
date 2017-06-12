@@ -1084,7 +1084,7 @@ def members_agent(request, agent_id):
     upload_form = UploadAgentForm(instance=agent)
 
     auto_resource = ''
-    if user_agent in agent.managers() or user_is_agent:
+    if user_agent in agent.managers() or user_is_agent or user_agent.is_staff:
       #import pdb; pdb.set_trace()
       for ag in is_associated_with:
         if hasattr(ag.has_associate, 'project'):

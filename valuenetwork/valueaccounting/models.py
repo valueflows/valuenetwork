@@ -1024,6 +1024,8 @@ class EconomicAgent(models.Model):
                 pass
         if len(ags)-add == len(noneed):
             resp = False
+        if self in noneed:
+            resp = False
         #import pdb; pdb.set_trace()
         return resp
 
@@ -1065,6 +1067,8 @@ class EconomicAgent(models.Model):
             except:
                 pass
         if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
             resp = False
         return resp
 

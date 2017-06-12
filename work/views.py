@@ -5150,6 +5150,13 @@ def process_logging(request, process_id):
                 instance=event,
                 prefix=str(event.id))
         output_resource_types = pattern.output_resource_types()
+        try:
+            if context_agent.project.resource_type_selection == "project":
+                output_resource_types = output_resource_types.filter(context_agent=context_agent)
+            else:
+                output_resource_types = output_resource_types.filter(context_agent=None)
+        except:
+            output_resource_types = output_resource_types.filter(context_agent=None)
         unplanned_output_form = UnplannedOutputForm(prefix='unplannedoutput')
         unplanned_output_form.fields["resource_type"].queryset = output_resource_types
         role_formset = resource_role_context_agent_formset(prefix="resource")
@@ -5174,6 +5181,13 @@ def process_logging(request, process_id):
                     "is_contribution": True,
                 }
                 work_resource_types = pattern.work_resource_types()
+                try:
+                    if context_agent.project.resource_type_selection == "project":
+                        work_resource_types = work_resource_types.filter(context_agent=context_agent)
+                    else:
+                        work_resource_types = work_resource_types.filter(context_agent=None)
+                except:
+                    work_resource_types = work_resource_types.filter(context_agent=None)
                 if work_resource_types:
                     work_unit = work_resource_types[0].unit
                     #work_init = {"unit_of_quantity": work_unit,}

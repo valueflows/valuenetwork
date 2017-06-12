@@ -4981,7 +4981,7 @@ def json_get_context_resource_types(request, context_id, pattern_id=None):
         if context_agent.project.resource_type_selection == "project":
             rts = rts.filter(context_agent=context_agent)
         else:
-            rts = rts.filter(context_agent=None)
+            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
     except:
         rts = rts.filter(context_agent=None)
     json = serializers.serialize("json", rts, fields=('name'))
@@ -5440,8 +5440,16 @@ def non_process_logging(request):
     if patterns:
         pattern = patterns[0].pattern
         pattern_id = pattern.id
+        rts = pattern.work_resource_types()
     else:
-        raise ValidationError("no non-production ProcessPattern")
+        rts = EconomicResourceType.objects.filter(behavior="work")
+    ctx_qs = member.related_context_queryset()
+    if ctx_qs:
+        context_agent = ctx_qs[0]
+        if context_agent.project.resource_type_selection == "project":
+            rts = rts.filter(context_agent=context_agent)
+        else:
+            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
     
     TimeFormSet = modelformset_factory(
         EconomicEvent,
@@ -5458,10 +5466,10 @@ def non_process_logging(request):
         queryset=EconomicEvent.objects.none(),
         initial = init,
         data=request.POST or None)
-    ctx_qs = member.related_context_queryset()
+
     for form in time_formset.forms:
         form.fields["context_agent"].queryset = ctx_qs
-        #form.fields["context_agent"].empty_label = "choose...";
+        form.fields["resource_type"].queryset = rts
     
     if request.method == "POST":
         keep_going = request.POST.get("keep-going")

@@ -1010,7 +1010,9 @@ class EconomicAgent(models.Model):
     def need_skills(self):
         resp = True
         ags = self.related_contexts()
+        add = 0
         if not self in ags:
+            add = 1
             ags.append(self)
         noneed = []
         for ag in ags:
@@ -1020,7 +1022,7 @@ class EconomicAgent(models.Model):
                         noneed.append(ag)
             except:
                 pass
-        if len(ags)-1 == len(noneed):
+        if len(ags)-add == len(noneed):
             resp = False
         #import pdb; pdb.set_trace()
         return resp
@@ -1028,7 +1030,9 @@ class EconomicAgent(models.Model):
     def need_faircoins(self):
         resp = True
         ags = self.related_contexts()
+        add = 0
         if not self in ags:
+            add = 1
             ags.append(self)
         noneed = []
         for ag in ags:
@@ -1038,7 +1042,9 @@ class EconomicAgent(models.Model):
                         noneed.append(ag)
             except:
                 pass
-        if len(ags)-1 == len(noneed):
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
             resp = False
         #import pdb; pdb.set_trace()
         return resp
@@ -1046,7 +1052,9 @@ class EconomicAgent(models.Model):
     def need_exchanges(self):
         resp = True
         ags = self.related_contexts()
+        add = 0
         if not self in ags:
+            add = 1
             ags.append(self)
         noneed = []
         for ag in ags:
@@ -1056,7 +1064,7 @@ class EconomicAgent(models.Model):
                         noneed.append(ag)
             except:
                 pass
-        if len(ags)-1 == len(noneed):
+        if len(ags)-add == len(noneed):
             resp = False
         return resp
 

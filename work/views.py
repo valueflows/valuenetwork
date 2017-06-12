@@ -1839,7 +1839,7 @@ def join_requests(request, agent_id):
     agent = EconomicAgent.objects.get(pk=agent_id)
     project = agent.project
     requests =  JoinRequest.objects.filter(state=state, project=project)
-    agent_form = JoinAgentSelectionForm()
+    agent_form = JoinAgentSelectionForm(project=project)
 
     fobi_slug = project.fobi_slug
     fobi_headers = []
@@ -2170,7 +2170,26 @@ def validate_username(request):
 @login_required
 def connect_agent_to_join_request(request, agent_id, join_request_id):
     mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
-    project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    project = mbr_req.project
+    if project.joining_style == 'moderated':
+      if request.user.agent.agent in project.agent.managers() or request.user.agent.agent is project.agent:
+        if not mbr_req.agent:
+            mbr_req.agent=agent
+            mbr_req.state = "new"
+            mbr_req.save()
+            association_type = AgentAssociationType.objects.get(identifier="participant")
+            aa = AgentAssociation(
+                is_associate=agent,
+                has_associate=project.agent,
+                association_type=association_type,
+                state="potential",
+                )
+            aa.save()
+            return HttpResponseRedirect('/%s/%s/%s/'
+                % ('work/agent', project.agent.id, 'join-requests'))
+    raise ValidationError('Not allowed to connect agent to join request')
+    """project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
     if request.method == "POST":
         agent_form = JoinAgentSelectionForm(data=request.POST)
         if agent_form.is_valid():
@@ -2179,9 +2198,12 @@ def connect_agent_to_join_request(request, agent_id, join_request_id):
             mbr_req.agent=agent
             mbr_req.state = "new"
             mbr_req.save()
+        else:
+            raise ValidationError(agent_form.errors)
 
     return HttpResponseRedirect('/%s/%s/%s/'
-        % ('work/agent', project_agent.id, 'join-requests'))
+        % ('work/agent', project_agent.id, 'join-requests'))"""
+
 
 from six import text_type, PY3
 from django.utils.encoding import force_text

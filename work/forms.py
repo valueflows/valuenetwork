@@ -260,8 +260,15 @@ class JoinRequestInternalForm(forms.ModelForm):
 
 class JoinAgentSelectionForm(forms.Form):
     created_agent = AgentModelChoiceField(
-        queryset=EconomicAgent.objects.without_join_request(),
+        queryset=EconomicAgent.objects.all(), #without_join_request(),
         required=False)
+
+    def __init__(self, project=None, *args, **kwargs):
+        super(JoinAgentSelectionForm, self).__init__(*args, **kwargs)
+        if project:
+            self.fields['created_agent'].queryset = EconomicAgent.objects.without_join_request()
+        else:
+            self.fields['created_agent'].queryset = EconomicAgent.objects.without_join_request()
 
 
 

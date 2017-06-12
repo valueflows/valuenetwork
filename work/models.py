@@ -152,7 +152,8 @@ class Project(models.Model):
                             for op in opts:
                                 shr_ts.append(op.strip(' /'))
 
-            return shr_ts
+            if len(shr_ts):
+                return shr_ts
         return False
 
     def payment_options(self):

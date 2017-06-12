@@ -396,7 +396,12 @@ class AgentManager(models.Manager):
     def without_membership_request(self):
         return self.filter(membership_requests__isnull=True).order_by("name")
 
-    def without_join_request(self):
+    def without_join_request(self, project=None):
+        if project:
+            ids = list(set([ag.id for ag in project.agent.managers()]))
+            if not project.agent.id in ids:
+                ids.append(project.agent.id)
+            return self.all().exclude(project_join_requests__isnull=False, project_join_requests__project__isnull=False, project_join_requests__project=project).exclude(id__in=ids).order_by('name')
         return self.filter(project_join_requests__isnull=True).order_by("name")
 
     def projects(self):

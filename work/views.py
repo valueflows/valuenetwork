@@ -4973,6 +4973,8 @@ def json_get_context_resource_types(request, context_id, pattern_id=None):
         pattern = None
     if pattern:
         rts = pattern.todo_resource_types()
+        if not rts:
+            rts = pattern.work_resource_types()
     else:
         rts = EconomicResourceType.objects.filter(behavior="work")
     try:
@@ -5432,6 +5434,15 @@ def non_process_logging(request):
         return HttpResponseRedirect('/%s/'
             % ('work/work-home'))
 
+    pattern = None
+    pattern_id = 0
+    patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
+    if patterns:
+        pattern = patterns[0].pattern
+        pattern_id = pattern.id
+    else:
+        raise ValidationError("no non-production ProcessPattern")
+    
     TimeFormSet = modelformset_factory(
         EconomicEvent,
         form=WorkCasualTimeContributionForm,
@@ -5451,17 +5462,13 @@ def non_process_logging(request):
     for form in time_formset.forms:
         form.fields["context_agent"].queryset = ctx_qs
         #form.fields["context_agent"].empty_label = "choose...";
+    
     if request.method == "POST":
         keep_going = request.POST.get("keep-going")
         just_save = request.POST.get("save")
         if time_formset.is_valid():
             events = time_formset.save(commit=False)
-            pattern = None
-            patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
-            if patterns:
-                pattern = patterns[0].pattern
-            else:
-                raise ValidationError("no non-production ProcessPattern")
+            
             if pattern:
                 unit = Unit.objects.filter(
                     unit_type="time",
@@ -5487,6 +5494,7 @@ def non_process_logging(request):
     return render(request, "work/non_process_logging.html", {
         "member": member,
         "time_formset": time_formset,
+        "pattern_id": pattern_id,
         "help": get_help("non_proc_log"),
     })
 

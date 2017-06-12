@@ -45,8 +45,8 @@ def initial_test_data():
         nick='Freedom Coop', agent_type=cooperative_at, is_context=True)
 
     # EconomicAgent for Memebership Request
-    EconomicAgent.objects.get_or_create(name='Membership Requests',
-        nick='FC MembershipRequest', agent_type=project_at, is_context=True)
+    EconomicAgent.objects.get_or_create(name='FreedomCoop Membership',
+        nick=settings.SEND_MEMBERSHIP_PAYMENT_TO, agent_type=project_at, is_context=True)
 
     # EventType for todos
     EventType.objects.get_or_create(name='Todo', label='todo',
@@ -61,4 +61,4 @@ def initial_test_data():
         value_per_unit_of_use=decimal.Decimal('1.00'), substitutable=True, behavior='dig_acct')
 
     AgentResourceRoleType.objects.get_or_create(name='Owner', is_owner=True)
-    
+

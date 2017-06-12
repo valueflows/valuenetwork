@@ -144,9 +144,12 @@ class ProjectCreateForm(AgentCreateForm):
     is_context = None # projects are always context_agents, hide the field
 
     # fields for Project model
-    joining_style = forms.ChoiceField()
-    visibility = forms.ChoiceField()
-    resource_type_selection = forms.ChoiceField()
+    joining_style = forms.ChoiceField(widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    visibility = forms.ChoiceField(widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    resource_type_selection = forms.ChoiceField(label=_("Resource type visibility"), widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
 
     def __init__(self, *args, **kwargs):
         super(ProjectCreateForm, self).__init__(*args, **kwargs)
@@ -1334,7 +1337,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
         model = EconomicEvent
         fields = ('event_date', 'context_agent', 'resource_type', 'quantity', 'is_contribution', 'url', 'description')
 
-    #def __init__(self, *args, **kwargs): 
+    #def __init__(self, *args, **kwargs):
     #    super(WorkCasualTimeContributionForm, self).__init__(*args, **kwargs)
     #    rts = EconomicResourceType.objects.filter(behavior="work")
     #    first_agent = self.fields["context_agent"].choices[0][1]

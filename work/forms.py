@@ -146,11 +146,13 @@ class ProjectCreateForm(AgentCreateForm):
     # fields for Project model
     joining_style = forms.ChoiceField()
     visibility = forms.ChoiceField()
+    resource_type_selection = forms.ChoiceField()
 
     def __init__(self, *args, **kwargs):
         super(ProjectCreateForm, self).__init__(*args, **kwargs)
         self.fields["joining_style"].choices = [(js[0], js[1]) for js in JOINING_STYLE_CHOICES]
         self.fields["visibility"].choices = [(vi[0], vi[1]) for vi in VISIBILITY_CHOICES]
+        self.fields["resource_type_selection"].choices = [(rts[0], rts[1]) for rts in SELECTION_CHOICES]
 
     def clean(self):
         data = super(ProjectCreateForm, self).clean()
@@ -170,7 +172,7 @@ class ProjectCreateForm(AgentCreateForm):
     class Meta: #(AgentCreateForm.Meta):
         model = Project #EconomicAgent
         #removed address and is_context
-        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email', 'joining_style', 'visibility', 'fobi_slug')
+        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email', 'joining_style', 'visibility', 'resource_type_selection', 'fobi_slug')
         #exclude = ('is_context',)
 
 
@@ -1261,7 +1263,7 @@ class WorkTodoForm(forms.ModelForm):
         queryset=EconomicAgent.objects.context_agents(),
         label=_("Context"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
+        widget=forms.Select(attrs={'class': 'chzn-select context-selector'}))
     due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
     description = forms.CharField(
         required=False,
@@ -1272,8 +1274,12 @@ class WorkTodoForm(forms.ModelForm):
         model = Commitment
         fields = ('from_agent', 'context_agent', 'resource_type', 'due_date', 'description', 'url')
 
-    def __init__(self, agent, pattern=None, *args, **kwargs): #agent is posting agent
+    def __init__(self, agent, context_agent=None, pattern=None, *args, **kwargs): #agent is posting agent
         super(WorkTodoForm, self).__init__(*args, **kwargs)
+        commitment_instance = None
+        if 'instance' in kwargs:
+            commitment_instance = kwargs['instance']
+            commitment_context = commitment_instance.context_agent
         contexts = agent.related_contexts()
         self.fields["context_agent"].choices = list(set([(ct.id, ct) for ct in contexts]))
         peeps = [agent,]
@@ -1284,17 +1290,27 @@ class WorkTodoForm(forms.ModelForm):
         if len(peeps) > 1:
             peeps = list(OrderedDict.fromkeys(peeps))
         from_agent_choices = [('', 'Unassigned')] + [(peep.id, peep) for peep in peeps]
-
         self.fields["from_agent"].choices = from_agent_choices
         if pattern:
             self.pattern = pattern
             #self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
-            self.fields["resource_type"].queryset = pattern.todo_resource_types()
-
-
-
-
-
+            rts = pattern.todo_resource_types()
+        else:
+            rts = EconomicResourceType.objects.filter(behavior="work")
+        if commitment_instance:
+            ca = commitment_context
+        else:
+            ca = ca = self.fields["context_agent"].choices[0][1]
+        if context_agent:
+            ca = context_agent
+        try:
+            if ca.project.resource_type_selection == "project":
+                rts = rts.filter(context_agent=ca)
+            else:
+                rts = rts.filter(context_agent=None)
+        except:
+            rts = rts.filter(context_agent=None)
+        self.fields["resource_type"].queryset = rts
 
 
 class WorkCasualTimeContributionForm(forms.ModelForm):
@@ -1316,16 +1332,20 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
 
     class Meta:
         model = EconomicEvent
-        fields = ('event_date', 'resource_type', 'context_agent', 'quantity', 'is_contribution', 'url', 'description')
+        fields = ('event_date', 'context_agent', 'resource_type', 'quantity', 'is_contribution', 'url', 'description')
 
-
-
-
-
-
-
-
-
+    #def __init__(self, *args, **kwargs): 
+    #    super(WorkCasualTimeContributionForm, self).__init__(*args, **kwargs)
+    #    rts = EconomicResourceType.objects.filter(behavior="work")
+    #    first_agent = self.fields["context_agent"].choices[0][1]
+    #    try:
+    #        if first_agent.project.resource_type_selection == "project":
+    #            rts = rts.filter(context_agent=first_agent)
+    #        else:
+    #            rts = rts.filter(context_agent=None)
+    #    except:
+    #        rts = rts.filter(context_agent=None)
+    #    self.fields["resource_type"].queryset = rts
 
 
 #    W O R K   O R D E R   P L A N
@@ -1333,6 +1353,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
 
 class WorkProjectSelectionFormOptional(forms.Form):
     context_agent = forms.ChoiceField(
+        required=False,
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
 

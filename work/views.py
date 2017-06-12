@@ -951,7 +951,7 @@ def members_agent(request, agent_id):
         project = False
 
     if project:
-        init = {"joining_style": project.joining_style, "visibility": project.visibility, "fobi_slug": project.fobi_slug }
+        init = {"joining_style": project.joining_style, "visibility": project.visibility, "resource_type_selection": project.resource_type_selection, "fobi_slug": project.fobi_slug }
         change_form = ProjectCreateForm(instance=agent, initial=init)
     else:
         change_form = ProjectCreateForm(instance=agent) #AgentCreateForm(instance=agent)
@@ -4863,8 +4863,10 @@ def my_tasks(request):
     my_todos = Commitment.objects.todos().filter(from_agent=agent)
     init = {"from_agent": agent,}
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    pattern_id = 0
     if patterns:
         pattern = patterns[0].pattern
+        pattern_id = pattern.id
         todo_form = WorkTodoForm(agent=agent, pattern=pattern, initial=init)
     else:
         todo_form = WorkTodoForm(agent=agent, initial=init)
@@ -4876,6 +4878,7 @@ def my_tasks(request):
         #"other_unassigned": other_unassigned,
         "my_todos": my_todos,
         "todo_form": todo_form,
+        "pattern_id": pattern_id,
         #"work_now": work_now,
         "help": get_help("proc_log"),
     })
@@ -4984,7 +4987,26 @@ def add_todo(request):
     return HttpResponseRedirect(next)
 
 
-
+def json_get_context_resource_types(request, context_id, pattern_id=None):
+    context_agent = get_object_or_404(EconomicAgent, pk=context_id)
+    if pattern_id:
+        pattern = get_object_or_404(ProcessPattern, pk=pattern_id)
+    else:
+        pattern = None
+    if pattern:
+        rts = pattern.todo_resource_types()
+    else:
+        rts = EconomicResourceType.objects.filter(behavior="work")
+    try:
+        if context_agent.project.resource_type_selection == "project":
+            rts = rts.filter(context_agent=context_agent)
+        else:
+            rts = rts.filter(context_agent=None)
+    except:
+        rts = rts.filter(context_agent=None)
+    json = serializers.serialize("json", rts, fields=('name'))
+    return HttpResponse(json, content_type='application/json')
+    
 
 #    P R O C E S S   T A S K S
 
@@ -5004,8 +5026,10 @@ def project_work(request):
     ca_form = WorkProjectSelectionFormOptional(data=request.POST or None, context_agents=projects)
     chosen_context_agent = None
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    pattern_id = 0
     if patterns:
         pattern = patterns[0].pattern
+        pattern_id = pattern.id
         todo_form = WorkTodoForm(pattern=pattern, agent=agent)
     else:
         todo_form = WorkTodoForm(agent=agent)
@@ -5017,7 +5041,7 @@ def project_work(request):
             if ca_form.is_valid():
                 proj_data = ca_form.cleaned_data
                 proj_id = proj_data["context_agent"]
-                if proj_id.isdigit:
+                if proj_id:
                     context_id = proj_id
                     chosen_context_agent = EconomicAgent.objects.get(id=proj_id)
 
@@ -5043,6 +5067,7 @@ def project_work(request):
         "todo_form": todo_form,
         "ca_form": ca_form,
         "todos": my_project_todos,
+        "pattern_id": pattern_id,
         "next": next,
         "help": get_help("project_work"),
     })
@@ -5497,11 +5522,13 @@ def work_add_todo(request):
     if request.method == "POST":
         agent = get_agent(request)
         patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+        ca_id = request.POST["context_agent"]
+        context_agent_in = EconomicAgent.objects.get(id=int(ca_id))            
         if patterns:
             pattern = patterns[0].pattern
-            form = WorkTodoForm(agent=agent, pattern=pattern, data=request.POST)
+            form = WorkTodoForm(agent=agent, context_agent=context_agent_in, pattern=pattern, data=request.POST)
         else:
-            form = WorkTodoForm(agent=agent, data=request.POST)
+            form = WorkTodoForm(agent=agent, context_agent=context_agent_in, data=request.POST)
         next = request.POST.get("next")
         et = None
         ets = EventType.objects.filter(
@@ -5572,11 +5599,13 @@ def work_todo_change(request, todo_id):
             agent = get_agent(request)
             prefix = todo.form_prefix()
             patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+            ca_id = request.POST[prefix+"-context_agent"]
+            context_agent_in = EconomicAgent.objects.get(id=int(ca_id))
             if patterns:
                 pattern = patterns[0].pattern
-                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, instance=todo, prefix=prefix)
+                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, context_agent=context_agent_in, instance=todo, prefix=prefix)
             else:
-                form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
+                form = WorkTodoForm(data=request.POST, agent=agent, context_agent=context_agent_in, instance=todo, prefix=prefix)
             if form.is_valid():
                 todo = form.save()
 
@@ -6380,7 +6409,8 @@ def my_history(request): # tasks history
     user_is_agent = False
     if agent == user_agent:
         user_is_agent = True
-    event_list = agent.contributions()
+    #event_list = agent.contributions()
+    event_list = agent.given_events.all()
     no_bucket = 0
     with_bucket = 0
     event_value = Decimal("0.0")

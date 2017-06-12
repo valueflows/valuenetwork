@@ -192,7 +192,8 @@ urlpatterns = [
         name="work_json_resource_type_citation_unit"),
     url(r"^join-task/(?P<commitment_id>\d+)/$", work.views.work_join_task,
         name="work_join_task"),
-
+    url(r"^json-context-resource_types/(?P<context_id>\d+)/(?P<pattern_id>\d+)/$", work.views.json_get_context_resource_types,
+        name="work_json_get_context_resource_types"),
 ]
 
 if settings.USE_FAIRCOIN:

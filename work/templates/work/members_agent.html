@@ -452,6 +452,10 @@
                         <th>{% trans "Project Visibility:" %}</th>
                         <td>{{ agent.project.visibility }}</td>
                       </tr>
+                      <tr>
+                        <th>{% trans "Resource Type Visibility:" %}</th>
+                        <td>{{ agent.project.resource_type_selection }}</td>
+                      </tr>
                       {% if agent.project.joining_style == 'moderated' %}
                         <tr>
                           <th>{% trans "Custom Form:" %}</th>

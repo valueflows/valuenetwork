@@ -61,8 +61,8 @@
 	        <thead>
 	            <tr class="headings">
 	                <th>{% trans "Date" %}</th>
-	                <th>{% trans "Type of work" %}</th>
 	                <th>{% trans "Project" %}</th>
+	                <th>{% trans "Type of work" %}</th>
 	                <th>{% trans "Time spent" %}</th>
 	                <th>{% trans "Credit for income" %}</th>
 	                <th>{% trans "Description" %}</th>
@@ -72,13 +72,13 @@
 	        {% for form in time_formset %}
 	            <tr>
 	                <td>{{ form.event_date }}</td>
-	                <td>{{ form.resource_type }}</td>
 	                <td>{{ form.context_agent }}</td>
+	                <td>{{ form.resource_type }}</td>
 	                <td style="white-space:nowrap;" >
 	                    {{ form.quantity }}</br>
 	                    {{ form.quantity.help_text }}
-                  </td>
-                  <td>{{ form.is_contribution }}</td>
+                    </td>
+                    <td>{{ form.is_contribution }}</td>
 	                <td>{{ form.description }}</td>
 	            </tr>
            	{% endfor %}

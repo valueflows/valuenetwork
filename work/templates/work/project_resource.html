@@ -91,7 +91,7 @@
                             {% if resource.resource_type.is_virtual_account and fil.name == "current_location" %}
 
                             {% elif resource.resource_type.is_virtual_account and fil.name == "quantity" %}
-
+                                <input type="hidden" name="quantity" value="1" />
                             {% elif resource.resource_type.is_virtual_account and fil.name == "value_per_unit_of_use" %}
 
                             {% elif resource.resource_type.is_virtual_account and fil.name == "created_date" %}
@@ -103,7 +103,7 @@
 
                                 {% if resource.resource_type.is_virtual_account and fil.name == "price_per_unit" %}
                                   <label>{% trans "Account Value" %}:</label>
-                                  {% if request.user.agent.agent in resource.resource_type.context_agent.managers and resource.resource_type.unit_of_price.ocp_unit_type.clas == 'share' %} {{ fil }} {% else %} {{ fil.value }} {% endif %}
+                                  {% if request.user.agent.agent in resource.resource_type.context_agent.managers and resource.resource_type.unit_of_price.ocp_unit_type.clas == 'share' %} {{ fil }} {% else %} {{ fil.value }} {% endif %} {% if resource.resource_type.unit_of_price %}{{ resource.resource_type.unit_of_price }}{% if fil.value == 1 %}{% else %}s{% endif %}{% endif %}
                                 {% else %}
                                   <label>{{ fil.label }}:</label>
                                   {{ fil }}
@@ -171,13 +171,15 @@
                         <td>{{ resource.identifier }}</td>
                     </tr>
                 {% endif %}
-                <tr>
-                    <th style="text-align: right;">{% trans "Quantity" %}</th>
-                    <td>{{ resource.quantity }} {{ resource.unit_of_quantity }}</td>
-                </tr>
+                {% if not resource.resource_type.is_virtual_account %}
+                    <tr>
+                        <th style="text-align: right;">{% trans "Quantity" %}</th>
+                        <td>{{ resource.quantity }} {{ resource.unit_of_quantity }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th style="text-align: right;">{% if resource.resource_type.is_virtual_account %}{% trans "Account Value" %}{% else %}{% trans "Price" %}{% endif %}</th>
-                    <td>{{ resource.price_per_unit }}</td>
+                    <td>{{ resource.price_per_unit }} {% if resource.resource_type.unit_of_price %}{{ resource.resource_type.unit_of_price }}{% if resource.price_per_unit == 1 %}{% else %}s{% endif %}{% else %}{% trans "Undefined unit" %}{% endif %} </td>
                 </tr>
 {% comment %}
                 <tr>

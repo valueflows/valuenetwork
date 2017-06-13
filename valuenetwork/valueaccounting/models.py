@@ -396,7 +396,12 @@ class AgentManager(models.Manager):
     def without_membership_request(self):
         return self.filter(membership_requests__isnull=True).order_by("name")
 
-    def without_join_request(self):
+    def without_join_request(self, project=None):
+        if project:
+            ids = list(set([ag.id for ag in project.agent.managers()]))
+            if not project.agent.id in ids:
+                ids.append(project.agent.id)
+            return self.all().exclude(project_join_requests__isnull=False, project_join_requests__project__isnull=False, project_join_requests__project=project).exclude(id__in=ids).order_by('name')
         return self.filter(project_join_requests__isnull=True).order_by("name")
 
     def projects(self):
@@ -1005,7 +1010,9 @@ class EconomicAgent(models.Model):
     def need_skills(self):
         resp = True
         ags = self.related_contexts()
+        add = 0
         if not self in ags:
+            add = 1
             ags.append(self)
         noneed = []
         for ag in ags:
@@ -1015,7 +1022,9 @@ class EconomicAgent(models.Model):
                         noneed.append(ag)
             except:
                 pass
-        if len(ags)-1 == len(noneed):
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
             resp = False
         #import pdb; pdb.set_trace()
         return resp
@@ -1023,7 +1032,9 @@ class EconomicAgent(models.Model):
     def need_faircoins(self):
         resp = True
         ags = self.related_contexts()
+        add = 0
         if not self in ags:
+            add = 1
             ags.append(self)
         noneed = []
         for ag in ags:
@@ -1033,7 +1044,9 @@ class EconomicAgent(models.Model):
                         noneed.append(ag)
             except:
                 pass
-        if len(ags)-1 == len(noneed):
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
             resp = False
         #import pdb; pdb.set_trace()
         return resp
@@ -1041,7 +1054,9 @@ class EconomicAgent(models.Model):
     def need_exchanges(self):
         resp = True
         ags = self.related_contexts()
+        add = 0
         if not self in ags:
+            add = 1
             ags.append(self)
         noneed = []
         for ag in ags:
@@ -1051,7 +1066,9 @@ class EconomicAgent(models.Model):
                         noneed.append(ag)
             except:
                 pass
-        if len(ags)-1 == len(noneed):
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
             resp = False
         return resp
 

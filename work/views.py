@@ -4973,13 +4973,15 @@ def json_get_context_resource_types(request, context_id, pattern_id=None):
         pattern = None
     if pattern:
         rts = pattern.todo_resource_types()
+        if not rts:
+            rts = pattern.work_resource_types()
     else:
         rts = EconomicResourceType.objects.filter(behavior="work")
     try:
         if context_agent.project.resource_type_selection == "project":
             rts = rts.filter(context_agent=context_agent)
         else:
-            rts = rts.filter(context_agent=None)
+            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
     except:
         rts = rts.filter(context_agent=None)
     json = serializers.serialize("json", rts, fields=('name'))
@@ -5449,6 +5451,23 @@ def non_process_logging(request):
         return HttpResponseRedirect('/%s/'
             % ('work/work-home'))
 
+    pattern = None
+    pattern_id = 0
+    patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
+    if patterns:
+        pattern = patterns[0].pattern
+        pattern_id = pattern.id
+        rts = pattern.work_resource_types()
+    else:
+        rts = EconomicResourceType.objects.filter(behavior="work")
+    ctx_qs = member.related_context_queryset()
+    if ctx_qs:
+        context_agent = ctx_qs[0]
+        if context_agent.project.resource_type_selection == "project":
+            rts = rts.filter(context_agent=context_agent)
+        else:
+            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
+    
     TimeFormSet = modelformset_factory(
         EconomicEvent,
         form=WorkCasualTimeContributionForm,
@@ -5464,21 +5483,17 @@ def non_process_logging(request):
         queryset=EconomicEvent.objects.none(),
         initial = init,
         data=request.POST or None)
-    ctx_qs = member.related_context_queryset()
+
     for form in time_formset.forms:
         form.fields["context_agent"].queryset = ctx_qs
-        #form.fields["context_agent"].empty_label = "choose...";
+        form.fields["resource_type"].queryset = rts
+    
     if request.method == "POST":
         keep_going = request.POST.get("keep-going")
         just_save = request.POST.get("save")
         if time_formset.is_valid():
             events = time_formset.save(commit=False)
-            pattern = None
-            patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
-            if patterns:
-                pattern = patterns[0].pattern
-            else:
-                raise ValidationError("no non-production ProcessPattern")
+            
             if pattern:
                 unit = Unit.objects.filter(
                     unit_type="time",
@@ -5504,6 +5519,7 @@ def non_process_logging(request):
     return render(request, "work/non_process_logging.html", {
         "member": member,
         "time_formset": time_formset,
+        "pattern_id": pattern_id,
         "help": get_help("non_proc_log"),
     })
 

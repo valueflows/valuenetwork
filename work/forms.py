@@ -1315,7 +1315,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
         queryset=EconomicAgent.objects.context_agents(),
         label=_("Context"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
+        widget=forms.Select(attrs={'class': 'chzn-select context-selector'}))
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))

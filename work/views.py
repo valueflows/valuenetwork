@@ -5234,15 +5234,36 @@ def process_logging(request, process_id):
                 add_citation_form.fields["resource_type"].queryset = cite_resource_types
                 
         if "consume" in slots:
-            unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=pattern)
+            unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=None)
+            consumable_resource_types = pattern.consumables_with_resources()
+            try:
+                if context_agent.project.resource_type_selection == "project":
+                    consumable_resource_types = consumable_resource_types.filter(context_agent=context_agent)
+                else:
+                    consumable_resource_types = consumable_resource_types.filter(context_agent=None)
+            except:
+                consumable_resource_types = consumable_resource_types.filter(context_agent=None)
+            unplanned_consumption_form.fields["resource_type"].queryset = consumable_resource_types
             if logger:
-                add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=pattern)
+                add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=None)
+                add_consumable_form.fields["resource_type"].queryset = consumable_resource_types
+                
         if "use" in slots:
-            unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=pattern)
+            unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=None)
+            usable_resource_types = pattern.usables_with_resources()
+            try:
+                if context_agent.project.resource_type_selection == "project":
+                    usable_resource_types = usable_resource_types.filter(context_agent=context_agent)
+                else:
+                    usable_resource_types = usable_resource_types.filter(context_agent=None)
+            except:
+                usable_resource_types = usable_resource_types.filter(context_agent=None)
+            unplanned_use_form.fields["resource_type"].queryset = usable_resource_types
             if logger:
-                add_usable_form = ProcessUsableForm(prefix='usable', pattern=pattern)
-        if "payexpense" in slots:
-            process_expense_form = ProcessExpenseEventForm(prefix='processexpense', pattern=pattern)
+                add_usable_form = ProcessUsableForm(prefix='usable', pattern=None)
+                add_usable_form.fields["resource_type"].queryset = usable_resource_types
+        #if "payexpense" in slots:
+        #    process_expense_form = ProcessExpenseEventForm(prefix='processexpense', pattern=pattern)
 
     cited_ids = [c.resource.id for c in process.citations()]
     citation_requirements = process.citation_requirements()

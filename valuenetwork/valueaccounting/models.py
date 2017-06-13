@@ -3037,7 +3037,7 @@ class ProcessPattern(models.Model):
         return EconomicResource.objects.filter(resource_type__in=rts)
 
     def input_resource_types(self):
-        #must be changed, in no longer covers
+        #TODO must be changed, in no longer covers
         # or event types must be changed so all ins are ins
         #return self.resource_types_for_relationship("in")
         answer = list(self.resource_types_for_relationship("in"))

@@ -308,7 +308,8 @@ th, td {
                             <th>{% trans "Url" %}</th>
                             <th>&nbsp;</th>
                             <th>{% trans "Did" %}:</th>
-                            <th>{% trans "Hours" %}:</th>
+                            <th>{% trans "Qty" %}:</th>
+                            <th>{% trans "Unit" %}:</th>
                             <th>&nbsp;</th>
                         </tr>
                     </thead>
@@ -394,15 +395,10 @@ th, td {
 
                             {% if agent == todo.from_agent %}
                                 {% with todo.todo_event as event %}
-                                <!-- <tr class="entry-row {{ rowcolors }}" >
-                                    <th class="entry-label" >{% trans "Did" %}:</td> -->
                                     <td colspan="1" class="did" >
                                         <textarea class="input-block-level did" id="{{ todo.id }}-didId" name="{{ todo.id }}-did" rows="3"
-                                        />{% if event %}{{ event.description }}{% endif %}</textarea>
+                                        />{% if event %}{% if event.description %}{{ event.description }}{% endif %}{% endif %}</textarea>
                                     </td>
-                                    <!-- <th class="entry-label">
-                                        {% trans "Hours" %}:
-                                    </th> -->
                                     <td class="todo-input" >
                                         <form class="timeForm"id="timeForm-{{ todo.id }}" action="{% url "work_todo_time" %}" method="POST" >
                                             {% csrf_token %}
@@ -412,7 +408,10 @@ th, td {
                                         </form>
                                     </td>
                                     <td>
-                                        <form class="doneForm" id="timeForm-{{ todo.id }}" action="{% url "work_todo_done" todo_id=todo.id %}" method="POST" >
+                                        {{ todo.resource_type.unit }}
+                                    </td>
+                                    <td>
+                                        <form class="doneForm" id="doneForm-{{ todo.id }}" action="{% url "work_todo_done" todo_id=todo.id %}" method="POST" >
                                             {% csrf_token %}
                                             <input type="hidden" name="next" value="{% url "my_tasks" %}" />
                                             <input type="submit" name="submit" class="btn btn-info btn-mini"  title="Done" value="{% trans 'Done' %}" />

@@ -1319,6 +1319,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
+    #todo: shd be changed to qty of unit
     quantity = forms.DecimalField(required=False,
         widget=DecimalDurationWidget,
         help_text="hrs, mins")

@@ -5634,6 +5634,11 @@ def work_todo_decline(request, todo_id):
     return HttpResponseRedirect(next)
 
 @login_required
+#todo: change this to work_todo_qty -
+#it's not always hours.
+#The template correctly shows Qty of Unit
+#but the internal names shd be changed
+#to prevent future confusion.
 def work_todo_time(request):
     if request.method == "POST":
         todo_id = request.POST.get("todoId")

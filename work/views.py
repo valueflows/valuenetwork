@@ -1841,7 +1841,7 @@ def join_requests(request, agent_id):
 
     agent = EconomicAgent.objects.get(pk=agent_id)
     project = agent.project
-    requests =  JoinRequest.objects.filter(state=state, project=project)
+    requests =  JoinRequest.objects.filter(state=state, project=project).order_by('request_date')
     agent_form = JoinAgentSelectionForm(project=project)
 
     fobi_slug = project.fobi_slug

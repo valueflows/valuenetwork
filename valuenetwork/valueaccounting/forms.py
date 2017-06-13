@@ -1192,16 +1192,16 @@ class UnplannedCiteEventForm(forms.Form):
     #    queryset=Unit.objects.all(),
     #    widget=forms.Select(attrs={'readonly': 'readonly' }))
 
-    def __init__(self, pattern, cite_unit=None, load_resources=False, *args, **kwargs):
+    def __init__(self, pattern=None, cite_unit=None, load_resources=False, *args, **kwargs):
         super(UnplannedCiteEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
             self.fields["resource_type"].queryset = pattern.citables_with_resources()
-            if cite_unit:
-                self.fields["unit_of_quantity"] = cite_unit.name
-            if load_resources:
-                resources = EconomicResource.objects.all()
-                self.fields["resource"].choices = [('', '----------')] + [(r.id, r) for r in resources]
+        if cite_unit:
+            self.fields["unit_of_quantity"] = cite_unit.name
+        if load_resources:
+            resources = EconomicResource.objects.all()
+            self.fields["resource"].choices = [('', '----------')] + [(r.id, r) for r in resources]
 
 
 class UnplannedInputEventForm(forms.Form):
@@ -1218,7 +1218,7 @@ class UnplannedInputEventForm(forms.Form):
         queryset=Unit.objects.exclude(unit_type='value'),
         widget=forms.Select())
 
-    def __init__(self, pattern, load_resources=False, *args, **kwargs):
+    def __init__(self, pattern=None, load_resources=False, *args, **kwargs):
         super(UnplannedInputEventForm, self).__init__(*args, **kwargs)
         if pattern:
             self.pattern = pattern
@@ -1227,9 +1227,9 @@ class UnplannedInputEventForm(forms.Form):
                 self.fields["resource_type"].queryset = pattern.usables_with_resources()
             else:
                 self.fields["resource_type"].queryset = pattern.consumables_with_resources()
-            if load_resources:
-                resources = EconomicResource.objects.all()
-                self.fields["resource"].choices = [('', '----------')] + [(r.id, r) for r in resources]
+        if load_resources:
+            resources = EconomicResource.objects.all()
+            self.fields["resource"].choices = [('', '----------')] + [(r.id, r) for r in resources]
 
 '''
 class CashEventAgentForm(forms.ModelForm):

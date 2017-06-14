@@ -312,9 +312,12 @@ def manage_faircoin_account(request, resource_id):
     if not settings.USE_FAIRCOIN:
         raise Http404
     resource = get_object_or_404(EconomicResource, id=resource_id)
-    agent = get_agent(request)
+    user_agent = get_agent(request)
     send_coins_form = None
     limit = 0
+
+    if not resource.owner() == user_agent or not resource.owner() in user_agent.managed_projects():
+        return render(request, 'work/no_permission.html')
 
     payment_due = False
     candidate_membership = None
@@ -324,20 +327,20 @@ def manage_faircoin_account(request, resource_id):
     faircoin_account = False
     balance = False
 
-    if agent:
-        if agent.owns(resource) or resource.owner() in agent.managed_projects():
+    if user_agent:
+        if resource.owner() is user_agent or resource.owner() in user_agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             limit = resource.spending_limit()
 
-        candidate_membership = agent.candidate_membership()
+        candidate_membership = user_agent.candidate_membership()
         if candidate_membership:
-            faircoin_account = agent.faircoin_resource()
+            faircoin_account = user_agent.faircoin_resource()
             balance = 0
             if faircoin_account:
                 balance = faircoin_account.digital_currency_balance_unconfirmed()
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
-            number_of_shares = agent.number_of_shares()
+            number_of_shares = user_agent.number_of_shares()
             share_price = share_price * number_of_shares
             payment_due = False
             if not agent.owns_resource_of_type(share):
@@ -758,7 +761,7 @@ def membership_request(request):
             description = "Create an Agent and User for the Membership Request from "
             description += name
             membership_url= get_url_starter() + "/accounting/membership-request/" + str(mbr_req.id) + "/"
-            context_agent=EconomicAgent.objects.get(name__icontains="Membership Request")
+            context_agent=EconomicAgent.objects.get(nick=settings.SEND_MEMBERSHIP_PAYMENT_TO)
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
                 Q(name__icontains="Admin")|
@@ -1084,7 +1087,7 @@ def members_agent(request, agent_id):
     upload_form = UploadAgentForm(instance=agent)
 
     auto_resource = ''
-    if user_agent in agent.managers() or user_is_agent:
+    if user_agent in agent.managers() or user_is_agent or request.user.is_staff:
       #import pdb; pdb.set_trace()
       for ag in is_associated_with:
         if hasattr(ag.has_associate, 'project'):
@@ -1838,8 +1841,8 @@ def join_requests(request, agent_id):
 
     agent = EconomicAgent.objects.get(pk=agent_id)
     project = agent.project
-    requests =  JoinRequest.objects.filter(state=state, project=project)
-    agent_form = JoinAgentSelectionForm()
+    requests =  JoinRequest.objects.filter(state=state, project=project).order_by('request_date')
+    agent_form = JoinAgentSelectionForm(project=project)
 
     fobi_slug = project.fobi_slug
     fobi_headers = []
@@ -2170,7 +2173,26 @@ def validate_username(request):
 @login_required
 def connect_agent_to_join_request(request, agent_id, join_request_id):
     mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
-    project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    project = mbr_req.project
+    if project.joining_style == 'moderated':
+      if request.user.agent.agent in project.agent.managers() or request.user.agent.agent is project.agent:
+        if not mbr_req.agent:
+            mbr_req.agent=agent
+            mbr_req.state = "new"
+            mbr_req.save()
+            association_type = AgentAssociationType.objects.get(identifier="participant")
+            aa = AgentAssociation(
+                is_associate=agent,
+                has_associate=project.agent,
+                association_type=association_type,
+                state="potential",
+                )
+            aa.save()
+            return HttpResponseRedirect('/%s/%s/%s/'
+                % ('work/agent', project.agent.id, 'join-requests'))
+    raise ValidationError('Not allowed to connect agent to join request')
+    """project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
     if request.method == "POST":
         agent_form = JoinAgentSelectionForm(data=request.POST)
         if agent_form.is_valid():
@@ -2179,9 +2201,12 @@ def connect_agent_to_join_request(request, agent_id, join_request_id):
             mbr_req.agent=agent
             mbr_req.state = "new"
             mbr_req.save()
+        else:
+            raise ValidationError(agent_form.errors)
 
     return HttpResponseRedirect('/%s/%s/%s/'
-        % ('work/agent', project_agent.id, 'join-requests'))
+        % ('work/agent', project_agent.id, 'join-requests'))"""
+
 
 from six import text_type, PY3
 from django.utils.encoding import force_text
@@ -4717,7 +4742,7 @@ def project_resource(request, agent_id, resource_id):
         is_owner=False
         limit = 0
         if agent:
-            is_owner = agent.owns(resource)
+            is_owner = user_agent.owns(resource) or resource.owner() in user_agent.managed_projects()
             if is_owner:
                 if resource.address_is_activated():
                     send_coins_form = SendFairCoinsForm()
@@ -4986,7 +5011,7 @@ def json_get_context_resource_types(request, context_id, pattern_id=None):
         rts = rts.filter(context_agent=None)
     json = serializers.serialize("json", rts, fields=('name'))
     return HttpResponse(json, content_type='application/json')
-    
+
 
 #    P R O C E S S   T A S K S
 
@@ -5569,7 +5594,7 @@ def work_add_todo(request):
         agent = get_agent(request)
         patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
         ca_id = request.POST["context_agent"]
-        context_agent_in = EconomicAgent.objects.get(id=int(ca_id))            
+        context_agent_in = EconomicAgent.objects.get(id=int(ca_id))
         if patterns:
             pattern = patterns[0].pattern
             form = WorkTodoForm(agent=agent, context_agent=context_agent_in, pattern=pattern, data=request.POST)

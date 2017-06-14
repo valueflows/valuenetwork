@@ -144,9 +144,12 @@ class ProjectCreateForm(AgentCreateForm):
     is_context = None # projects are always context_agents, hide the field
 
     # fields for Project model
-    joining_style = forms.ChoiceField()
-    visibility = forms.ChoiceField()
-    resource_type_selection = forms.ChoiceField()
+    joining_style = forms.ChoiceField(widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    visibility = forms.ChoiceField(widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    resource_type_selection = forms.ChoiceField(label=_("Resource type visibility"), widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
 
     def __init__(self, *args, **kwargs):
         super(ProjectCreateForm, self).__init__(*args, **kwargs)
@@ -262,8 +265,15 @@ class JoinRequestInternalForm(forms.ModelForm):
 
 class JoinAgentSelectionForm(forms.Form):
     created_agent = AgentModelChoiceField(
-        queryset=EconomicAgent.objects.without_join_request(),
+        queryset=EconomicAgent.objects.all(), #without_join_request(),
         required=False)
+
+    def __init__(self, project=None, *args, **kwargs):
+        super(JoinAgentSelectionForm, self).__init__(*args, **kwargs)
+        if project:
+            self.fields['created_agent'].queryset = EconomicAgent.objects.without_join_request()
+        else:
+            self.fields['created_agent'].queryset = EconomicAgent.objects.without_join_request()
 
 
 

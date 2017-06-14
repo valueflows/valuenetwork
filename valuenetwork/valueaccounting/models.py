@@ -9438,11 +9438,14 @@ class Commitment(models.Model):
         return arts
 
     def possible_work_users(self):
-        srcs = self.resource_type.work_agents()
-        members = self.context_agent.all_members_list()
-        agents = [agent for agent in srcs if agent in members]
-        users = [a.user() for a in agents if a.user()]
-        return [u.user for u in users]
+        if self.context_agent:
+            srcs = self.resource_type.work_agents()
+            members = self.context_agent.all_members_list()
+            agents = [agent for agent in srcs if agent in members]
+            users = [a.user() for a in agents if a.user()]
+            return [u.user for u in users]
+        else:
+            return []
 
     def workers(self):
         answer = []

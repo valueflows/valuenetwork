@@ -9245,6 +9245,23 @@ class Commitment(models.Model):
                 if self.fulfillment_events.filter(resource=resource):
                     answer.append(resource)
         return answer
+        
+    def onhand_for_citation(self):
+        answer = []
+        rt = self.resource_type
+        if self.stage:
+            resources = EconomicResource.goods.filter(
+                stage=self.stage,
+                resource_type=rt)
+        else:
+            resources = EconomicResource.goods.filter(resource_type=rt)
+        for resource in resources:
+            if resource.quantity > 0:
+                answer.append(resource)
+            else:
+                if self.fulfillment_events.filter(resource=resource):
+                    answer.append(resource)
+        return answer
 
     def onhand_with_fulfilled_quantity(self):
         resources = self.onhand()

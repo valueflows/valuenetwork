@@ -77,6 +77,38 @@ class AgentSchemaTest(TestCase):
         self.assertEqual(None, result.data['viewer'])
         self.assertTrue(len(result.errors) == 1)
         self.assertEqual('Invalid password', str(result.errors[0]))
+        
+'''
+fragment coreAgentFields on AgentBaseType {
+  id
+  name
+  image
+  note
+  type
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    myAgent {
+      ...coreAgentFields
+      organizations {
+        id
+        name
+        members {
+          name
+        }
+      }
+    }
+    organization(id: 80) {
+      ...coreAgentFields
+      members {
+        name
+      }
+    }
+  }
+}
+'''
+
 
 '''
 query($token: String) {

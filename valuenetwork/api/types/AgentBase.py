@@ -8,7 +8,7 @@
 
 import graphene
 
-from valuenetwork.valueaccounting.models import EconomicAgent
+#from valuenetwork.valueaccounting.models import EconomicAgent
 
 class AgentBaseType(graphene.Interface):
     id = graphene.String()

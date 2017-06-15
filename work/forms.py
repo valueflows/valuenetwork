@@ -204,7 +204,7 @@ class AssociationForm(forms.Form):
 
 # public join form
 class JoinRequestForm(forms.ModelForm):
-    captcha = CaptchaField()
+    captcha = CaptchaField(help_text=_("Is a math operation: Please put the result (don't copy the symbols)"),)
 
     project = None
     '''forms.ModelChoiceField(

@@ -106,7 +106,7 @@
         </h3>
         <ul class="managed-project">
         {% for node in projects %}
-            {% if True or not node.name == 'Freedom Coop' %}
+            {% if not node.name == 'Freedom Coop' %}
               {% if node in agent.managed_projects %}
                   <li><h4><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b></h4>
                     <!-- {% if False and node.supply_exchange_count > 0 or node.demand_exchange_count > 0 or node.internal_exchange_count > 0 %}&nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>{% endif %} -->

@@ -1368,7 +1368,7 @@ def joinaproject_request(request, form_slug = False):
 
         try:
             user_agent = request.user.agent.agent
-            if user_agent and request.user.is_authenticated and user_agent.is_active_freedom_coop_member or request.user.is_staff:
+            if user_agent and request.user.is_authenticated: # and user_agent.is_active_freedom_coop_member or request.user.is_staff:
                 return joinaproject_request_internal(request, project.agent.id)
         except:
             user_agent = False
@@ -1489,13 +1489,13 @@ def joinaproject_request(request, form_slug = False):
                     saved_data = json.dumps(cleaned_data)
                     )
                 saved_form_data_entry.save()
-                jn = JoinRequest.objects.get(pk=jn_req.pk)
-                jn.fobi_data = saved_form_data_entry
+                jn_req = JoinRequest.objects.get(pk=jn_req.pk)
+                jn_req.fobi_data = saved_form_data_entry
                 #messages.info(
                 #    request,
                 #    _("JoinRequest {0} was submitted successfully. {1}").format(jn.fobi_data, saved_form_data_entry.pk)
                 #)
-                jn.save()
+                jn_req.save()
 
             # add relation candidate
             #ass_type = get_object_or_404(AgentAssociationType, identifier="participant")
@@ -1558,7 +1558,7 @@ def joinaproject_request(request, form_slug = False):
 
             return render(request, "work/joinaproject_thanks.html", {
                 "project": project,
-                "jn_req": jn,
+                "jn_req": jn_req,
                 #"fobi_form": fobi_form,
                 #"field_map": field_name_to_label_map,
                 #"post": escapejs(json.dumps(request.POST)),
@@ -1583,6 +1583,8 @@ def joinaproject_request_internal(request, agent_id = False):
     proj_agent = get_object_or_404(EconomicAgent, id=agent_id)
     project = proj_agent.project
     form_slug = project.fobi_slug
+    if form_slug and form_slug == 'freedom-coop':
+        return redirect('membership_request')
     join_form = JoinRequestInternalForm(data=request.POST or None)
     fobi_form = False
     cleaned_data = False
@@ -1696,13 +1698,13 @@ def joinaproject_request_internal(request, agent_id = False):
                     saved_data = json.dumps(cleaned_data)
                     )
                 saved_form_data_entry.save()
-                jn = JoinRequest.objects.get(pk=jn_req.pk)
-                jn.fobi_data = saved_form_data_entry
+                jn_req = JoinRequest.objects.get(pk=jn_req.pk)
+                jn_req.fobi_data = saved_form_data_entry
                 #messages.info(
                 #    request,
                 #    _("JoinRequest {0} was submitted successfully. {1}").format(jn.fobi_data, saved_form_data_entry.pk)
                 #)
-                jn.save()
+                jn_req.save()
 
             # add relation candidate
             if jn_req.agent:

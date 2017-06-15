@@ -507,7 +507,10 @@ class EconomicAgent(models.Model):
     @property #ValueFlows
     def image(self):
         if self.photo_url:
-            return self.photo_url #TODO: make a url out of the photo field and include here
+            return self.photo_url
+        elif self.photo:
+            from valuenetwork.valueaccounting.utils import get_url_starter
+            return get_url_starter() + self.photo.url
         else:
             return ""
 
@@ -4387,7 +4390,10 @@ class EconomicResource(models.Model):
     @property #ValueFlows
     def image(self):
         if self.photo_url:
-            return self.photo_url #TODO: make a url out of the photo field and include here
+            return self.photo_url
+        elif self.photo:
+            from valuenetwork.valueaccounting.utils import get_url_starter
+            return get_url_starter() + self.photo.url
         else:
             return ""
 

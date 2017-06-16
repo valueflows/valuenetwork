@@ -316,7 +316,7 @@ def manage_faircoin_account(request, resource_id):
     send_coins_form = None
     limit = 0
 
-    if not resource.owner() == user_agent or not resource.owner() in user_agent.managed_projects():
+    if not (resource.owner() == user_agent or resource.owner() in user_agent.managed_projects()):
         return render(request, 'work/no_permission.html')
 
     payment_due = False
@@ -328,7 +328,7 @@ def manage_faircoin_account(request, resource_id):
     balance = False
 
     if user_agent:
-        if resource.owner() is user_agent or resource.owner() in user_agent.managed_projects():
+        if resource.owner() == user_agent or resource.owner() in user_agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             limit = resource.spending_limit()
 

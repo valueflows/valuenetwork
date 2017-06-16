@@ -549,11 +549,22 @@
 
 	            </table>
 
-
-              {% if user.is_staff or user_agent in agent.managers or user_is_agent %}
+              {% if user.is_staff or user_agent in agent.managers or user_is_agent or related_rts %}
               <!-- <div class="row-fluid" tyle="margin-top:2em;"> -->
                 <div class="span6 infobox" style="width:100%;">
                   <h3 class="">{% trans "Resources" %}:</h3>
+                  {% if related_rts %}
+                    <h4 class="hdg">{% trans "Related Resources" %}:</h4>
+                    <ul>
+                        {% for rel in agent.resource_relationships %}
+                            {% if rel.resource.resource_type in related_rts %}
+                                <li>
+                                    <a href="{% url "project_resource" agent_id=agent.id resource_id=rel.resource.id %}"> {{ rel.resource }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                  {% else %}
                   {% if agent.resources_created %}
                     <h4 class="hdg">{% trans "Resources Created" %}:</h4>
                     <ul>
@@ -576,6 +587,7 @@
                             </li>
                         {% endfor %}
                     </ul>
+                  {% endif %}
                   {% endif %}
                 </div>
 
@@ -792,6 +804,12 @@
                               <form id="assnForm" enctype="multipart/form-data" action="{% url "edit_relations" agent_id=agent.id %}" method="POST" >
                                   {% csrf_token %}
                                   {{ assn_form|as_bootstrap }}
+                                  <p>
+                                       &nbsp;
+                                  </p>
+                                  <p>
+                                       &nbsp;
+                                  </p>
 
                                   <div class="modal-footer">
                                   <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

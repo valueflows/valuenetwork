@@ -1086,6 +1086,16 @@ def members_agent(request, agent_id):
 
     upload_form = UploadAgentForm(instance=agent)
 
+    related_rts = []
+    if agent.project_join_requests:
+        for req in agent.project_join_requests.all():
+            if req.project.agent in user_agent.managed_projects() or user_agent is req.project.agent:
+                rtsc = req.project.rts_with_clas()
+                rts = list(set([arr.resource.resource_type for arr in agent.resource_relationships()]))
+                for rt in rtsc:
+                    if rt in rts:
+                        related_rts.append(rt)
+
     auto_resource = ''
     if user_agent in agent.managers() or user_is_agent or request.user.is_staff:
       #import pdb; pdb.set_trace()
@@ -1149,6 +1159,7 @@ def members_agent(request, agent_id):
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Stype_form": Stype_form,
         "auto_resource": auto_resource,
+        "related_rts": related_rts,
     })
 
 
@@ -4682,7 +4693,15 @@ def project_resource(request, agent_id, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    if not (agent == user_agent or user_agent in agent.managers() or request.user.is_superuser):
+    user_agent.managed_rts = []
+    for ag in user_agent.managed_projects():
+        if ag.project and ag.project.rts_with_clas():
+            rts = ag.project.rts_with_clas()
+            for rt in rts:
+                if not rt in user_agent.managed_rts:
+                    user_agent.managed_rts.append(rt)
+
+    if not (agent == user_agent or user_agent in agent.managers() or request.user.is_superuser or resource.resource_type in user_agent.managed_rts ):
         return render(request, 'work/no_permission.html')
 
     RraFormSet = modelformset_factory(
@@ -4766,6 +4785,7 @@ def project_resource(request, agent_id, resource_id):
             "order_form": order_form,
             "role_formset": role_formset,
             "agent": agent,
+            "user_agent": user_agent,
         })
 
 @login_required

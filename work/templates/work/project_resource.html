@@ -56,12 +56,12 @@
 			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url "locations" %}">{% trans "Locations" %}</a> -->
 
         <div class="subnav">
-          {% if request.user.is_staff or request.user.agent.agent in agent.managers %}
+          {% if request.user.is_staff or user_agent in agent.managers %}
             {% if agent.need_exchanges %}
               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
             {% endif %}
           {% endif %}
-          {% if request.user.agent.agent.need_projects %}
+          {% if user_agent.need_projects %}
               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
           {% endif %}
         </div>
@@ -71,7 +71,7 @@
             <a href="{% url "event_history" resource_id=resource.id %}">{% trans "Event history" %}</a>&nbsp;&nbsp;
             <a href="{% url "incoming_value_flows" resource_id=resource.id %}">{% trans "Incoming Value Flow" %}</a> -->
 		</legend>
-    {% if request.user.is_superuser or request.user.agent.agent in agent.managers or request.user.agent.agent == agent %}
+    {% if request.user.is_superuser or user_agent in agent.managers or user_agent == agent or resource.resource_type in user_agent.managed_rts %}
       <a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>&nbsp;&nbsp;
       {% if order_form %}
         <a href="#resourceOrderForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Plan Work Order" %}</a>&nbsp;&nbsp;

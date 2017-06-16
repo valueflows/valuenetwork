@@ -22,4 +22,4 @@ class OrganizationMemberType(DjangoObjectType):
     class Meta:
         interfaces = (AgentBase.AgentBaseType, )
         model = EconomicAgent
-        only_fields = ('id', 'name')
+        only_fields = ('id', 'name', 'image')

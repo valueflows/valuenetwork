@@ -1327,15 +1327,17 @@ class EconomicAgent(models.Model):
         return [var.resource for var in vars]
 
     def owned_resources(self):
-        arrs = self.agent_resource_roles.filter(role__is_owner=True)
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(resource__quantity=0)
         return [arr.resource for arr in arrs]
 
     def owned_currency_resources(self):
-        arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(resource__resource_type__behavior="other")
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(
+            resource__resource_type__behavior="other").exclude(resource__quantity=0)
         return [arr.resource for arr in arrs]
 
     def owned_inventory_resources(self):
-        arrs = self.agent_resource_roles.filter(role__is_owner=True).filter(resource__resource_type__behavior="other")
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).filter(
+            resource__resource_type__behavior="other").exclude(resource__quantity=0)
         return [arr.resource for arr in arrs]
 
     def create_virtual_account(self, resource_type):

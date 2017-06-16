@@ -852,7 +852,7 @@ def your_projects(request):
           aat.assoc_count = node.associate_count_of_type(aat.identifier)
           assoc_list = node.all_has_associates_by_type(aat.identifier)
           for assoc in assoc_list:
-            association = AgentAssociation.objects.get(is_associate=assoc, has_associate=node, association_type=aat)#
+            association = AgentAssociation.objects.filter(is_associate=assoc, has_associate=node, association_type=aat)[0]#
             assoc.state = association.state
           aat.assoc_list = assoc_list
           if not aat in aats:
@@ -4695,11 +4695,13 @@ def project_resource(request, agent_id, resource_id):
     user_agent = get_agent(request)
     user_agent.managed_rts = []
     for ag in user_agent.managed_projects():
-        if ag.project and ag.project.rts_with_clas():
+        try:
             rts = ag.project.rts_with_clas()
             for rt in rts:
                 if not rt in user_agent.managed_rts:
                     user_agent.managed_rts.append(rt)
+        except:
+            pass
 
     if not (agent == user_agent or user_agent in agent.managers() or request.user.is_superuser or resource.resource_type in user_agent.managed_rts ):
         return render(request, 'work/no_permission.html')

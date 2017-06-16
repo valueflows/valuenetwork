@@ -9,7 +9,7 @@
 #
 
 import graphene
-from . import AgentBase, OrganizationMember, OrganizationResource
+from . import AgentBase, OrganizationMember, OrganizationResource, OrganizationProcess
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
@@ -28,25 +28,37 @@ class OrganizationType(DjangoObjectType):
 
     owned_inventory_economic_resources = graphene.List(OrganizationResource.OrganizationResourceType)
 
+    unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcessType)
+
     def resolve_members(self, args, context, info):
         org = EconomicAgent.objects.get(pk=self.id)
         if org:
             return org.members()
+        return None
 
     def resolve_owned_economic_resources(self, args, context, info):
         org = EconomicAgent.objects.get(pk=self.id)
         if org:
             return org.owned_resources()
+        return None
     
     def resolve_owned_currency_economic_resources(self, args, context, info):
         org = EconomicAgent.objects.get(pk=self.id)
         if org:
             return org.owned_currency_resources()
+        return None
     
     def resolve_owned_inventory_economic_resources(self, args, context, info):
         org = EconomicAgent.objects.get(pk=self.id)
         if org:
             return org.owned_inventory_resources()
+        return None
+
+    def resolve_unfinished_processes(self, args, context, info):
+        org = EconomicAgent.objects.get(pk=self.id)
+        if org:
+            return org.active_context_processes()
+        return None
 
     class Meta:
         interfaces = (AgentBase.AgentBaseType, )

@@ -6306,6 +6306,18 @@ class Process(models.Model):
                     event.to_agent = self.context_agent
                 event.save()
 
+    @property #ValueFlows
+    def planned_start(self):
+        return self.start_date
+
+    @property #ValueFlows
+    def planned_duration(self):
+        return self.end_date - self.start_date
+    
+    @property #ValueFlows
+    def is_finished(self):
+        return self.finished
+
     def is_deletable(self):
         if self.events.all():
             return False

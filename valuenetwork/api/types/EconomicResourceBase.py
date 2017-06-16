@@ -5,8 +5,6 @@
 
 import graphene
 
-#from valuenetwork.valueaccounting.models import EconomicAgent
-
 class EconomicResourceBaseType(graphene.Interface):
     id = graphene.String()
     resource_type = graphene.String(source='resource_type_name') # need to figure this out with VF gang

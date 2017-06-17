@@ -5,6 +5,11 @@
 
 import graphene
 
+class EconomicResourceCategory(graphene.Enum):
+    NONE = None
+    CURRENCY = "currency"
+    INVENTORY = "inventory"
+
 class EconomicResourceBase(graphene.Interface):
     id = graphene.String()
     resource_type = graphene.String(source='resource_type_name') # need to figure this out with VF gang

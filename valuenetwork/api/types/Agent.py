@@ -10,7 +10,8 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
-from . import AgentBase, OrganizationResource, OrganizationProcess
+from . import OrganizationResource, OrganizationProcess
+from EconomicResourceBase import EconomicResourceCategory
 
 
 # Economic agent base type
@@ -27,36 +28,28 @@ class Agent(graphene.Interface):
 
     organizations = graphene.List(lambda: Organization)
 
-    owned_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
-
-    owned_currency_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
-
-    owned_inventory_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
+    owned_economic_resources = graphene.List(OrganizationResource.OrganizationResource,
+                                            category=EconomicResourceCategory())
 
     unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcess)
 
     # Resolvers
 
     def resolve_organizations(self, args, context, info):
-        agent = EconomicAgent.objects.get(pk=self.id)   # you can reference input data on `self`.
-        return agent.is_member_of()
+        agent = EconomicAgent.objects.get(pk=self.id)
+        if agent:
+            return agent.is_member_of()
+        return None
 
     def resolve_owned_economic_resources(self, args, context, info):
+        type = args.get('category', EconomicResourceCategory.NONE)
         org = EconomicAgent.objects.get(pk=self.id)
         if org:
+            if type == EconomicResourceCategory.CURRENCY:
+                return org.owned_currency_resources()
+            elif type == EconomicResourceCategory.INVENTORY:
+                return org.owned_inventory_resources()
             return org.owned_resources()
-        return None
-
-    def resolve_owned_currency_economic_resources(self, args, context, info):
-        org = EconomicAgent.objects.get(pk=self.id)
-        if org:
-            return org.owned_currency_resources()
-        return None
-
-    def resolve_owned_inventory_economic_resources(self, args, context, info):
-        org = EconomicAgent.objects.get(pk=self.id)
-        if org:
-            return org.owned_inventory_resources()
         return None
 
     def resolve_unfinished_processes(self, args, context, info):

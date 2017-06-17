@@ -1,5 +1,5 @@
 #
-# EconomicAgent type def
+# EconomicAgent type def and subclasses
 #
 # @package: OCP
 # @author:  pospi <pospi@spadgos.com>
@@ -7,22 +7,77 @@
 #
 
 import graphene
-from . import AgentBase, Organization
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
+from . import OrganizationResource, OrganizationProcess
 
+# Generic economic agent
 class AgentType(DjangoObjectType):
 
-    id = graphene.String()  # This will get filled by schemas.Agent.Query for any agent bound to the graphene.Field. Magic!
+    # fields common to all agent types
 
-    organizations = graphene.List(Organization.OrganizationType)
+    id = graphene.String()
+    name = graphene.String()
+    type = graphene.String(source='type')
+    image = graphene.String(source='image')
+    note = graphene.String(source='note')
+
+    owned_economic_resources = graphene.List(OrganizationResource.OrganizationResourceType)
+
+    owned_currency_economic_resources = graphene.List(OrganizationResource.OrganizationResourceType)
+
+    owned_inventory_economic_resources = graphene.List(OrganizationResource.OrganizationResourceType)
+
+    unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcessType)
+
+    # For individuals (:TODO: how do we apply these only to a subtype that ensures it's a valid type of agent?)
+
+    organizations = graphene.List(lambda: AgentType)
+
+    # For organizations (:TODO: how do we apply these only to the relevant subtype?)
+
+    members = graphene.List(lambda: AgentType)
+
+    # Resolvers
 
     def resolve_organizations(self, args, context, info):
         agent = EconomicAgent.objects.get(pk=self.id)   # you can reference input data on `self`.
         return agent.is_member_of()
 
+    def resolve_members(self, args, context, info):
+        org = EconomicAgent.objects.get(pk=self.id)
+        if org:
+            return org.members()
+        return None
+
+    def resolve_owned_economic_resources(self, args, context, info):
+        org = EconomicAgent.objects.get(pk=self.id)
+        if org:
+            return org.owned_resources()
+        return None
+
+    def resolve_owned_currency_economic_resources(self, args, context, info):
+        org = EconomicAgent.objects.get(pk=self.id)
+        if org:
+            return org.owned_currency_resources()
+        return None
+
+    def resolve_owned_inventory_economic_resources(self, args, context, info):
+        org = EconomicAgent.objects.get(pk=self.id)
+        if org:
+            return org.owned_inventory_resources()
+        return None
+
+    def resolve_unfinished_processes(self, args, context, info):
+        org = EconomicAgent.objects.get(pk=self.id)
+        if org:
+            return org.active_context_processes()
+        return None
+
+    # Django model binding
+
     class Meta:
-        interfaces = (AgentBase.AgentBaseType, )
         model = EconomicAgent
         only_fields = ('id', 'name')
+

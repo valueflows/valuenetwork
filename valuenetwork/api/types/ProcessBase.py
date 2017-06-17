@@ -4,7 +4,7 @@
 
 import graphene
 
-class ProcessBaseType(graphene.Interface):
+class ProcessBase(graphene.Interface):
     id = graphene.String()
     name = graphene.String()
     planned_start = graphene.String(source='planned_start')

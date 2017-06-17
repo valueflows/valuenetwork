@@ -8,11 +8,11 @@ from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import Process
 
-class OrganizationProcessType(DjangoObjectType):
+class OrganizationProcess(DjangoObjectType):
 
     id = graphene.String()
 
     class Meta:
-        interfaces = (ProcessBase.ProcessBaseType, )
+        interfaces = (ProcessBase.ProcessBase, )
         model = Process
         only_fields = ('id', 'name')

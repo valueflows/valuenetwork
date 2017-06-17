@@ -10,15 +10,15 @@ import graphene
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 
-from valuenetwork.api.types.Agent import AgentType
+from valuenetwork.api.types.Agent import Agent
 
 class Query(graphene.AbstractType):
 
     # define input query params
 
-    my_organizations = graphene.List(AgentType)
+    my_organizations = graphene.List(Agent)
 
-    organization = graphene.Field(AgentType,
+    organization = graphene.Field(Agent,
                                   id=graphene.Int())
 
     # load context agents that 'me' is related to with 'member' or 'manager' behavior

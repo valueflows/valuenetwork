@@ -13,7 +13,7 @@ from valuenetwork.valueaccounting.models import EconomicAgent
 from . import OrganizationResource, OrganizationProcess
 
 # Generic economic agent
-class AgentType(DjangoObjectType):
+class Agent(DjangoObjectType):
 
     # fields common to all agent types
 
@@ -23,21 +23,21 @@ class AgentType(DjangoObjectType):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
 
-    owned_economic_resources = graphene.List(OrganizationResource.OrganizationResourceType)
+    owned_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
 
-    owned_currency_economic_resources = graphene.List(OrganizationResource.OrganizationResourceType)
+    owned_currency_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
 
-    owned_inventory_economic_resources = graphene.List(OrganizationResource.OrganizationResourceType)
+    owned_inventory_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
 
-    unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcessType)
+    unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcess)
 
     # For individuals (:TODO: how do we apply these only to a subtype that ensures it's a valid type of agent?)
 
-    organizations = graphene.List(lambda: AgentType)
+    organizations = graphene.List(lambda: Agent)
 
     # For organizations (:TODO: how do we apply these only to the relevant subtype?)
 
-    members = graphene.List(lambda: AgentType)
+    members = graphene.List(lambda: Agent)
 
     # Resolvers
 

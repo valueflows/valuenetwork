@@ -12,18 +12,18 @@ import graphene
 
 from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
 
-from valuenetwork.api.types.Agent import AgentType
+from valuenetwork.api.types.Agent import Agent
 
 class Query(graphene.AbstractType):
 
     # define input query params
 
-    my_agent = graphene.Field(AgentType)
+    my_agent = graphene.Field(Agent)
 
-    agent = graphene.Field(AgentType,
+    agent = graphene.Field(Agent,
                            id=graphene.Int())
 
-    all_agents = graphene.List(AgentType)
+    all_agents = graphene.List(Agent)
 
     # load single agents
 

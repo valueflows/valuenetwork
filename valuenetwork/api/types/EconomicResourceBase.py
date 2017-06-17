@@ -5,7 +5,7 @@
 
 import graphene
 
-class EconomicResourceBaseType(graphene.Interface):
+class EconomicResourceBase(graphene.Interface):
     id = graphene.String()
     resource_type = graphene.String(source='resource_type_name') # need to figure this out with VF gang
     tracking_identifier = graphene.String(source='tracking_identifier')

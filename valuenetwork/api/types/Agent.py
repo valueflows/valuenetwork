@@ -14,6 +14,13 @@ from . import OrganizationResource, OrganizationProcess
 from EconomicResourceBase import EconomicResourceCategory
 
 
+# Helpers (can't call between methods of the base class since DjangoObjectType
+# overrides `self` to be the bound Django model instance)
+
+def _load_identified_agent(self):
+    return EconomicAgent.objects.get(pk=self.id)
+
+
 # Economic agent base type
 
 class Agent(graphene.Interface):
@@ -36,14 +43,14 @@ class Agent(graphene.Interface):
     # Resolvers
 
     def resolve_organizations(self, args, context, info):
-        agent = EconomicAgent.objects.get(pk=self.id)
+        agent = _load_identified_agent(self)
         if agent:
             return agent.is_member_of()
         return None
 
     def resolve_owned_economic_resources(self, args, context, info):
         type = args.get('category', EconomicResourceCategory.NONE)
-        org = EconomicAgent.objects.get(pk=self.id)
+        org = _load_identified_agent(self)
         if org:
             if type == EconomicResourceCategory.CURRENCY:
                 return org.owned_currency_resources()
@@ -53,7 +60,7 @@ class Agent(graphene.Interface):
         return None
 
     def resolve_unfinished_processes(self, args, context, info):
-        org = EconomicAgent.objects.get(pk=self.id)
+        org = _load_identified_agent(self)
         if org:
             return org.active_context_processes()
         return None
@@ -76,7 +83,7 @@ class Organization(DjangoObjectType):
     members = graphene.List(lambda: Agent)
 
     def resolve_members(self, args, context, info):
-        org = EconomicAgent.objects.get(pk=self.id)
+        org = _load_identified_agent(self)
         if org:
             return org.members()
         return None

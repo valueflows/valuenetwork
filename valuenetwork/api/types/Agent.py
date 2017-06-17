@@ -12,8 +12,10 @@ from graphene_django.types import DjangoObjectType
 from valuenetwork.valueaccounting.models import EconomicAgent
 from . import OrganizationResource, OrganizationProcess
 
-# Generic economic agent
-class Agent(DjangoObjectType):
+
+# Economic agent base type
+
+class Agent(graphene.Interface):
 
     # fields common to all agent types
 
@@ -23,6 +25,8 @@ class Agent(DjangoObjectType):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
 
+    organizations = graphene.List(lambda: Organization)
+
     owned_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
 
     owned_currency_economic_resources = graphene.List(OrganizationResource.OrganizationResource)
@@ -31,25 +35,11 @@ class Agent(DjangoObjectType):
 
     unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcess)
 
-    # For individuals (:TODO: how do we apply these only to a subtype that ensures it's a valid type of agent?)
-
-    organizations = graphene.List(lambda: Agent)
-
-    # For organizations (:TODO: how do we apply these only to the relevant subtype?)
-
-    members = graphene.List(lambda: Agent)
-
     # Resolvers
 
     def resolve_organizations(self, args, context, info):
         agent = EconomicAgent.objects.get(pk=self.id)   # you can reference input data on `self`.
         return agent.is_member_of()
-
-    def resolve_members(self, args, context, info):
-        org = EconomicAgent.objects.get(pk=self.id)
-        if org:
-            return org.members()
-        return None
 
     def resolve_owned_economic_resources(self, args, context, info):
         org = EconomicAgent.objects.get(pk=self.id)
@@ -75,9 +65,32 @@ class Agent(DjangoObjectType):
             return org.active_context_processes()
         return None
 
-    # Django model binding
 
+# ValueFlows type for a Person (singular) Agent.
+# In OCP these don't have anything a regular Agent doesn't have, but the distinction is important for ValueFlows.
+
+class Person(DjangoObjectType):
     class Meta:
+        interfaces = (Agent, )
         model = EconomicAgent
         only_fields = ('id', 'name')
 
+
+# Organization type- an Agent which can have other Agents as members
+
+class Organization(DjangoObjectType):
+
+    members = graphene.List(lambda: Agent)
+
+    def resolve_members(self, args, context, info):
+        org = EconomicAgent.objects.get(pk=self.id)
+        if org:
+            return org.members()
+        return None
+
+    # Django model binding
+
+    class Meta:
+        interfaces = (Agent, )
+        model = EconomicAgent
+        only_fields = ('id', 'name')

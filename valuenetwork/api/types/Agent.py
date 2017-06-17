@@ -10,7 +10,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
-from . import OrganizationResource, OrganizationProcess
+from . import AgentBase, OrganizationResource, OrganizationProcess
 
 
 # Economic agent base type

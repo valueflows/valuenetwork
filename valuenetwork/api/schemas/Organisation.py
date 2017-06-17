@@ -10,9 +10,10 @@ import graphene
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 
+from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Organization
 
-class Query(graphene.AbstractType):
+class Query(AgentBase, graphene.AbstractType):
 
     # define input query params
 
@@ -26,7 +27,7 @@ class Query(graphene.AbstractType):
     # kind of member of)
 
     def resolve_my_organizations(self, args, context, info):
-        my_agent = self._load_own_agent()   # :NOTE: this method is defined in Agent.py and available via multiple inheritance in ViewerQuery
+        my_agent = self._load_own_agent() # provided by AgentBase
         return my_agent.is_member_of()
 
     # load any organisation

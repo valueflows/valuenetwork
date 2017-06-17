@@ -12,9 +12,10 @@ import graphene
 
 from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
 
+from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Agent
 
-class Query(graphene.AbstractType):
+class Query(AgentBase, graphene.AbstractType):
 
     # define input query params
 
@@ -45,9 +46,3 @@ class Query(graphene.AbstractType):
 
     def resolve_all_agents(self, args, context, info):
         return EconomicAgent.objects.all()
-
-    # internals
-
-    def _load_own_agent(self):
-        agentUser = AgentUser.objects.filter(user=self.user).first()
-        return agentUser.agent

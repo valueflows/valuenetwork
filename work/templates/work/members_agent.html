@@ -411,6 +411,21 @@
                               &nbsp; <a href="{% url "multicurrency_auth" agent_id=agent.id %}" class="btn btn-primary btn-mini">+</a>
                           </td>
                       </tr>
+                    {% elif related_rts %}
+                        {% for rel in agent.resource_relationships %}
+                            {% if rel.resource.resource_type in related_rts %}
+                                {% if rel.resource.resource_type.ocp_artwork_type.clas == 'MulticurrencyAuth' %}
+                                    <tr>
+                                      <th style="text-align: right; vertical-align: top; ">{% trans "Multicurrency Accounts" %}</th>
+                                      <td>
+                                          {% for au in agent.multicurrencyauth_set.all %}
+                                            {% trans "User:" %} <b>{{ au.auth_user }}</b> &nbsp;
+                                          {% endfor %}
+                                      </td>
+                                    </tr>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
                   {% endif %}
 

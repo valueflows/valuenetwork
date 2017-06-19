@@ -4762,7 +4762,7 @@ def project_resource(request, agent_id, resource_id):
                     % ('work/agent', agent.id, 'resource', resource.id))
     if resource.is_digital_currency_resource():
         return manage_faircoin_account(request, resource.id) #HttpResponseRedirect(reverse('manage_faircoin_account', kwargs={'resource_id': resource.id}))
-        send_coins_form = None
+        """send_coins_form = None
         is_owner=False
         limit = 0
         if agent:
@@ -4779,7 +4779,7 @@ def project_resource(request, agent_id, resource_id):
             "is_owner": is_owner,
             "send_coins_form": send_coins_form,
             "limit": limit,
-        })
+        })"""
     else:
         return render(request, "work/project_resource.html", {
             "resource": resource,

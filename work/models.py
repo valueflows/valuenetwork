@@ -443,7 +443,7 @@ class JoinRequest(models.Model):
 
     def payment_option(self):
         answer = {}
-        if self.project.joining_style == "moderated" and self.fobi_data.pk:
+        if self.project.joining_style == "moderated" and self.fobi_data:
             for key in self.fobi_items_keys():
                 if key == "payment_mode": # fieldname specially defined in the fobi form
                     self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')

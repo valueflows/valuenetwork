@@ -633,19 +633,27 @@ class EconomicAgent(models.Model):
         else:
             return None
 
-    def candidate_membership(self):
-        aa = self.candidate_association()
+    def candidate_membership(self, project_agent=None):
+        aa = self.candidate_association(project_agent)
         if aa:
             if aa.state == "potential":
                 return aa.has_associate
         return None
 
-    def candidate_association(self):
+    def candidate_association(self, project_agent=None):
         aas = self.is_associate_of.all()
+        if not project_agent:
+            try:
+                project_agent = EconomicAgent.objects.get(nick=settings.SEND_MEMBERSHIP_PAYMENT_TO)
+            except:
+                pass
         if aas:
-            aa = aas[0]
-            if aa.state == "potential":
-                return aa
+            for aa in aas:
+                #import pdb; pdb.set_trace() #aa = aas[0]
+                if project_agent and aa.has_associate == project_agent:
+                    if aa.state == "potential":
+                        return aa
+        return None
 
     def number_of_shares(self):
         if self.agent_type.party_type == "individual":

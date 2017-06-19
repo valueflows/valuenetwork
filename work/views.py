@@ -332,25 +332,25 @@ def manage_faircoin_account(request, resource_id):
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             limit = resource.spending_limit()
 
-        candidate_membership = user_agent.candidate_membership()
+        candidate_membership = resource.owner().candidate_membership()
         if candidate_membership:
-            faircoin_account = user_agent.faircoin_resource()
+            faircoin_account = resource.owner().faircoin_resource()
             balance = 0
             if faircoin_account:
                 balance = faircoin_account.digital_currency_balance_unconfirmed()
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
-            number_of_shares = user_agent.number_of_shares()
+            number_of_shares = resource.owner().number_of_shares()
             share_price = share_price * number_of_shares
-            payment_due = False
-            if not agent.owns_resource_of_type(share):
-                payment_due = True
+            payment_due = True
+            if resource.owner().owns_resource_of_type(share):
+                payment_due = False
             can_pay = balance >= share_price
 
     return render(request, "work/faircoin_account.html", {
         "resource": resource,
         "photo_size": (128, 128),
-        "agent": agent,
+        "agent": resource.owner(),
         "send_coins_form": send_coins_form,
         "limit": limit,
 
@@ -4708,9 +4708,9 @@ def project_resource(request, agent_id, resource_id):
 
     RraFormSet = modelformset_factory(
         AgentResourceRole,
-        form=ResourceRoleAgentForm,
+        form=ResourceRoleContextAgentForm,
         can_delete=True,
-        extra=4,
+        extra=2,
         )
     role_formset = RraFormSet(
         prefix="role",
@@ -4761,6 +4761,7 @@ def project_resource(request, agent_id, resource_id):
                 return HttpResponseRedirect('/%s/%s/%s/%s'
                     % ('work/agent', agent.id, 'resource', resource.id))
     if resource.is_digital_currency_resource():
+        return manage_faircoin_account(request, resource.id) #HttpResponseRedirect(reverse('manage_faircoin_account', kwargs={'resource_id': resource.id}))
         send_coins_form = None
         is_owner=False
         limit = 0
@@ -4804,22 +4805,24 @@ def change_resource(request, agent_id, resource_id):
             resource = form.save(commit=False)
             resource.changed_by=request.user
             resource.save()
-            RraFormSet = modelformset_factory(
-                AgentResourceRole,
-                form=ResourceRoleAgentForm,
-                can_delete=True,
-                extra=4,
-                )
-            role_formset = RraFormSet(
-                prefix="role",
-                queryset=resource.agent_resource_roles.all(),
-                data=request.POST
-                )
-            if role_formset.is_valid():
-                saved_formset = role_formset.save(commit=False)
-                for role in saved_formset:
-                    role.resource = resource
-                    role.save()
+            if not resource.resource_type.is_virtual_account() or request.user.is_superuser:
+                RraFormSet = modelformset_factory(
+                    AgentResourceRole,
+                    form=ResourceRoleContextAgentForm,
+                    can_delete=True,
+                    extra=2,
+                    )
+                role_formset = RraFormSet(
+                    prefix="role",
+                    queryset=resource.agent_resource_roles.all(),
+                    data=request.POST
+                    )
+                #import pdb; pdb.set_trace()
+                if role_formset.is_valid():
+                    saved_formset = role_formset.save(commit=False)
+                    for role in saved_formset:
+                        role.resource = resource
+                        role.save()
             return HttpResponseRedirect('/%s/%s/%s/%s'
                 % ('work/agent', agent.id, 'resources', resource_id))
         else:

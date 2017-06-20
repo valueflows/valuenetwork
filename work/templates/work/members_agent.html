@@ -491,6 +491,13 @@
                             </ul></td>
                           </tr>
                         {% endif %}
+                        {% if agent.project.share_totals %}
+                          <tr>
+                            <th>{% trans "Distributed Shares:" %}</th>
+                            <td><b>{{ agent.project.share_totals }}</b> ({{ agent.project.share_holders }} {% trans "holders" %})
+                            </td>
+                          </tr>
+                        {% endif %}
                         {% if agent.project.payment_options %}
                           <tr>
                             <th>{% trans "Payment Options:" %}</th>

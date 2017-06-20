@@ -71,7 +71,7 @@ def create_address_from_file(entity_id, entity):
     with open(filename, 'w') as fout:
         try:
            fout.writelines(data[1:])
-       except:
+        except:
            logger.critical("Error writting new faircoin addresses file.")
     logger.debug("Private key succesfully imported to wallet for "
         + str(entity) + ": " + str(entity_id))

@@ -4531,7 +4531,7 @@ class EconomicResource(models.Model):
             return 0
         limit = 0
         address = self.digital_currency_address
-        if address:
+        if address and self.is_wallet_address():
             balance = self.digital_currency_balance()
             newbalance = self.digital_currency_balance_unconfirmed()
             try:

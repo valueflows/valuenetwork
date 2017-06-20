@@ -332,9 +332,14 @@ def manage_faircoin_account(request, resource_id):
         if resource.owner() == user_agent or resource.owner() in user_agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             wallet = faircoin_utils.fairwallet_obj()
-            if wallet:
-                limit = resource.spending_limit()
+            if False and wallet:
+                if resource.is_wallet_address():
+                    limit = resource.spending_limit()
+                else:
+                    wallet = False
+                    limit = 0
             else:
+                wallet = False
                 limit = 0
 
         candidate_membership = resource.owner().candidate_membership()
@@ -538,8 +543,11 @@ def faircoin_history(request, resource_id):
     agent = get_agent(request)
     wallet = faircoin_utils.fairwallet_obj()
     if wallet:
-        exchange_service = ExchangeService.get()
-        exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
+        if resource.is_wallet_address():
+            exchange_service = ExchangeService.get()
+            exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
+        else:
+            wallet = False
     event_list = resource.events.all()
     init = {"quantity": resource.quantity,}
     unit = resource.resource_type.unit

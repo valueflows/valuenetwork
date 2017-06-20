@@ -141,7 +141,7 @@
                                 <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
                             {% endif %}
                         {% else %}
-                            <td class="error"><b>{% trans "Not available now" %}</b></td>
+                            <td><span class="error">{% trans "Not available now" %}</span></td>
                         {% endif %}
                       </tr>
                     {% endif %}
@@ -173,10 +173,14 @@
                     {% if resource.digital_currency_address %}
                         <tr>
                             <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
-                            <td>{% if resource.is_wallet_address == False %}
-                                <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
+                            <td>{% if wallet %}
+                                    {% if resource.is_wallet_address == False %}
+                                        <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
+                                    {% else %}
+                                        {{ resource.digital_currency_address }}
+                                    {% endif %}
                                 {% else %}
-                                {{ resource.digital_currency_address }}
+                                    {{ resource.digital_currency_address }} &nbsp; <span class="error">{% trans "No wallet?" %}</span>
                                 {% endif %}
                             </td>
                         </tr>

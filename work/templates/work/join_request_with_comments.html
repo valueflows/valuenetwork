@@ -159,7 +159,7 @@ th
                     {% elif req.payment_html %}
                         <br /> {{ req.payment_html|safe }}
                     {% else %}
-                        <span class="error">ERROR</span>
+                        <span class="error">{% trans "ERROR: request without a payment option!" %}</span>
                     {% endif %}
                 {% endif %}
                 </td>

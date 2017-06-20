@@ -19,8 +19,8 @@ def init_electrum_fair():
     try:
         daemon = efn.daemon_is_up()
     except:
-        msg = "Cannot connect with daemon. Exiting."
-        assert False, msg
+        logger.critical("Cannot connect with daemon.")
+        return False
 
     if not daemon or (daemon == 'ERROR'):
         return False
@@ -28,8 +28,8 @@ def init_electrum_fair():
     try:
         network = efn.is_connected()
     except:
-        msg = "Cannot connect with electrum-server. Exiting."
-        assert False, msg
+        logger.critical("Cannot connect with electrum-server.")
+        return False
 
     return network and (network != 'ERROR')
 
@@ -73,7 +73,8 @@ def create_address_from_file(entity_id, entity):
            fout.writelines(data[1:])
        except:
            logger.critical("Error writting new faircoin addresses file.")
-
+    logger.debug("Private key succesfully imported to wallet for "
+        + str(entity) + ": " + str(entity_id))
     return address
 
 def create_address_for_agent(agent):

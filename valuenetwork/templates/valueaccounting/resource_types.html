@@ -55,7 +55,7 @@
         {% include "_messages.html" %}
 	<div class="row-fluid">
 		<div class="span9">
-		
+
 			<legend>
                 {% trans "Resource Types" %}&nbsp;&nbsp;&nbsp;
                 <a href="{% url "resource_type_lists" %}">{% trans "Resource Type Lists" %}</a>&nbsp;&nbsp;&nbsp;
@@ -97,51 +97,54 @@
                 </div>
 			{% endif %}
 
-	
+
 		    <ul>
 			    {% for resource_type in roots %}
-			    		        
+
 				    <li>
-					    <span class="name"><a href="{% url "resource_type" resource_type_id=resource_type.id %}">{{ resource_type }}</a></span> 
+					      <span class="name"><a href="{% url "resource_type" resource_type_id=resource_type.id %}">{{ resource_type }}</a></span>
 
-					    {% if resource_type.photo %}
-			                <img src="{% thumbnail resource_type.photo photo_size %}" />
-		                {% elif resource_type.photo_url %}
-                    	    <img src="{{ resource_type.photo_url }}" width="128" height="96" />
-		                {% endif %}
+					      {% if resource_type.photo %}
+			               <img src="{% thumbnail resource_type.photo photo_size %}" />
+		            {% elif resource_type.photo_url %}
+                     <img src="{{ resource_type.photo_url }}" width="128" height="96" />
+		            {% endif %}
 
-		                {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
-		                {% if resource_type.producing_process_type_relationships %}
-		                  {% if resource_type.recipe_is_staged %}
+		            {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
+		            {% if resource_type.producing_process_type_relationships %}
+		                {% if resource_type.recipe_is_staged %}
                             <a href="{% url "view_stream_recipe" resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
 
-		                  {% else %}
+		                {% else %}
 			                <a href="{% url "extended_bill" resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
-		                  {% endif %}
-                        {% endif %}
+		                {% endif %}
+                {% endif %}
 
-                        {% if resource_type.parent or resource_type.resource_class %}
-                            <div class="parent" >
-                                {% if resource_type.parent %}
-                                    {% trans "Parent" %}: 
-                                    {{ resource_type.parent }}                             
-                                {% endif %}
-                                {% if resource_type.parent and resource_type.resource_class %}
-                                &mdash;
-                                {% endif %}
-                                {% if resource_type.resource_class %}
-                                    {% trans "Resource class" %}: 
-                                    {{ resource_type.resource_class }}                                
-                                {% endif %}
-                            </div>
+                {% if resource_type.parent or resource_type.resource_class %}
+                    <div class="parent" >
+                        {% if resource_type.parent %}
+                            {% trans "Parent" %}:
+                            {{ resource_type.parent }}
                         {% endif %}
-                        
-		                <div class="facets" >{{ resource_type.facet_list }}</div>
-                        {% if resource_type.description %}
-                            <div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
+                        {% if resource_type.parent and resource_type.resource_class %}
+                            &mdash;
                         {% endif %}
+                        {% if resource_type.resource_class %}
+                            {% trans "Resource class" %}:
+                            {{ resource_type.resource_class }}
+                        {% endif %}
+                    </div>
+                {% endif %}
 
-			        </li>
+                {% if resource_type.context_agent %}
+                    <div class="context" >- Context: <b>{{ resource_type.context_agent }}</b></div>
+                {% endif %}
+		            <div class="facets" >{{ resource_type.facet_list }}</div>
+                {% if resource_type.description %}
+                    <div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
+                {% endif %}
+
+			       </li>
 
 			    {% endfor %}
 		    </ul>
@@ -181,7 +184,7 @@
 
 		$( "#help" ).toggle( function(){
             $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help"); 
+            $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
@@ -198,7 +201,7 @@
 			}
 		});
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
 		        label
 			        .text('').addClass('valid')
@@ -206,8 +209,8 @@
 	        }
         });
 
-        
-		$('.category').click(function() 
+
+		$('.category').click(function()
 		{
 			var checkedVals = [];
 			var checkedBox = $(this)[0];
@@ -240,7 +243,7 @@
         jQuery.validator.addMethod("unique", function(value, element, param) {
             return this.optional(element) || $.inArray(value, param) < 0; // <-- Check if the value is not in the array.
         }, "Name is not unique.");
-        
+
         jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);

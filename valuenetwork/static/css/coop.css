@@ -146,8 +146,14 @@ td.login-block, td.register-block {
 	vertical-align:top;
 	width: 50%;
 }
-td.login-block div.log {
-	/*padding: 0 20px 20px;*/
+td.login-block p {
+    margin: 5px 0 !important;
+}
+td.register-block p {
+    margin: 5px 0 20px !important;
+}
+td.login-block div#div_id_username {
+	padding-top: 10px !important;
 }
 .form-horizontal .control-group:before, .form-horizontal .control-group:after {
 	display: none !important;

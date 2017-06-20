@@ -131,7 +131,8 @@
 		    <div class="span6 resource">
 
 	            <table class="table table-bordered" >
-	                <tr>
+                    {% if resource.owner == request.user.agent.agent or resource.owner in request.user.agent.agent.managed_projects %}
+	                  <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
                         {% if wallet %}
                             {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
@@ -142,7 +143,8 @@
                         {% else %}
                             <td class="error"><b>{% trans "Not available now" %}</b></td>
                         {% endif %}
-                    </tr>
+                      </tr>
+                    {% endif %}
 {% comment %}
                     <tr>
                         <th style="text-align: right;">{% trans "Quality" %}</th>

@@ -12,9 +12,12 @@
 
 </head>
 <body style="background-image: url({% static 'img/photo-OCP-verd-1600x900.jpg' %}); text-align:center;">
-<div class="container">
+  <div style="font-weight:bold; position:absolute; left:13px; top:9px;">
+    <a href="{% url 'account_login' %}" style="color:#734279;">{% trans "Login" %}</a>
+  </div>
+  <div class="container">
         {% include "_messages.html" %}
-	<p>&nbsp;</p>
+	  <p>&nbsp;</p>
         <h2>
             {% trans "Thank you for your membership request" %}
         </h2>
@@ -22,8 +25,8 @@
         <div class="row-fluid">
             <h5>{% trans "A Freedom Coop administrator will send you an email soon." %}</h5>
         </div>
-	<h4><a href="https://freedomcoop.eu"><img src="{% static 'img/logoFreedomCoop_terebum4_widealpha_white--.png' %}" title="{% trans "Freedom Coop" %}"></a></h4>
-</div>
+	  <h4><a href="https://freedomcoop.eu"><img src="{% static 'img/logoFreedomCoop_terebum4_widealpha_white--.png' %}" title="{% trans "Freedom Coop" %}"></a></h4>
+  </div>
 </body>
 </html>
 

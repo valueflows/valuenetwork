@@ -1,5 +1,6 @@
 import datetime
 from decimal import *
+from django.conf import settings
 
 from valuenetwork.valueaccounting.models import (
     EconomicResource,
@@ -120,6 +121,8 @@ class ExchangeService(object):
 
 
     def send_faircoins(self, from_agent, recipient, qty, resource, notes=None):
+        if not settings.USE_FAIRCOIN:
+            return None
         to_resources = EconomicResource.objects.filter(digital_currency_address=recipient)
         to_resource = None
         to_agent = None
@@ -201,6 +204,8 @@ class ExchangeService(object):
         return exchange
 
     def include_blockchain_tx_as_event(self, agent, resource):
+        if not settings.USE_FAIRCOIN:
+            return []
         faircoin_address = str(resource.digital_currency_address)
         tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
         if not tx_in_blockchain: # Something wrong in daemon or network.

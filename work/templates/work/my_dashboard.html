@@ -178,17 +178,13 @@ th, td {
   {% include "_messages.html" %}
 
 	<legend>
-      {% if agent.is_active_freedom_coop_member %}
-		    {% trans "Welcome to the Freedom Coop!" %}
-      {% else %}
-        {% trans "Welcome to the Open Collaborative Platform!" %}
-      {% endif %}
+      {% trans "Welcome to the Open Collaborative Platform!" %}
   </legend>
 
 	<div class="row-fluid">
   {% if agent.is_active_freedom_coop_member %}
     <p>
-      {% trans "This are the available tools for members:" %}
+      {% trans "This are the available tools for members of Freedom Coop:" %}
     </p>
   {% else %}
     {% if agent.membership_request %}
@@ -202,9 +198,9 @@ th, td {
         {% trans "When you have enough Faircoins in your new online account, you will see a button to make the transaction for your shares. Once pushed you'll become a full member of Freedom Coop and will have more tools available." %}
       </p>
     {% elif agent.is_participant %}
-      <p>
-        {% trans "As a <b>participant</b> in a project, you can collaborate doing tasks." %}
-      </p>
+      <!-- <p>
+        {% trans "As an <b>active participant</b> in a project, you can collaborate doing tasks." %}
+      </p> -->
     {% elif agent.is_participant_candidate %}
       <p>
         {% trans "As a <b>participant candidate</b> in a project, you should be accepted by the project coordinators before you can collaborate doing project tasks." %}
@@ -215,7 +211,7 @@ th, td {
     </p>
   {% endif %}
 
-  {% if agent.is_active_freedom_coop_member %}
+  {% if agent.is_active_freedom_coop_member or agent.need_projects %}
     <div id="home-projects" class="home-block" >
       <h3>
         {% trans "Projects:" %}
@@ -240,7 +236,7 @@ th, td {
       </ul>
     </div>
   {% endif %}
-
+  {% if agent.need_tasks %}
     <div id="home-tasks" class="home-block" >
       <h3>
         {% trans "Tasks:" %}
@@ -260,8 +256,8 @@ th, td {
         </li>
       </ul>
     </div>
-
-    {% if agent.joinaproject_requests %}
+  {% endif %}
+  {% if agent.joinaproject_requests %}
       <div id="joinaprojects" class="home-block">
         <h3>
           {% trans "Joining Projects:" %}
@@ -274,15 +270,15 @@ th, td {
         {% endfor %}
         </ul>
       </div>
-    {% endif %}
+  {% endif %}
 
-    {% if request.user.agent.agent.faircoin_resource and not agent.joinaproject_requests %}
+  {% if request.user.agent.agent.faircoin_resource and not agent.joinaproject_requests %}
     <div id="home-account" class="home-block" >
       <h3><a href="{% url "manage_faircoin_account" resource_id=request.user.agent.agent.faircoin_resource.id %}">{% trans "Faircoin Account" %}</a></h3>
       <p>{% trans "Here you can manage your online Faircoin account in the OCP. In this account you will receive internal payments for the tasks you did. You can see your Faircoin address and you can send here external Faircoins from your personal wallet (or from Euros using <a href='https://getfaircoin.net' target='_blank'>https://getfaircoin.net</a>) if you need to pay something in OCP and have not earned enough Faircoins doing tasks." %}
       </p>
     </div>
-    {% endif %}
+  {% endif %}
 
     {% with request.user.agent.agent.membership_request as mreq %}
     {% if mreq %}
@@ -309,7 +305,7 @@ th, td {
 
     <div id="home-profile" class="home-block" >
       <h3><a href="{% url "profile" %}">{% trans "Profile" %}</a></h3>
-      <p>{% trans "In this page you can see and edit your personal data and image, see your relations to projects, and also define your working skills." %}
+      <p>{% trans "In this page you can see and edit your personal data and image, see your relations to projects and resources." %}
       </p>
     </div>
 

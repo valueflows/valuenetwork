@@ -5,7 +5,7 @@ import datetime
 
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseServerError, Http404, HttpResponseNotFound, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -31,7 +31,6 @@ from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
 from valuenetwork.valueaccounting import faircoin_utils
-from valuenetwork.valueaccounting.service import ExchangeService
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
@@ -41,11 +40,27 @@ if "pinax.notifications" in settings.INSTALLED_APPS:
 else:
     notification = None
 
-def get_site_name():
+def get_site_name(request=None):
+    if request:
+        domain = request.get_host()
+        try:
+            obj = settings.PROJECTS_LOGIN
+            for pro in obj:
+                if obj[pro]['domains']:
+                    if domain in obj[pro]['domains']:
+                        proj = get_object_or_404(Project, fobi_slug=pro)
+                        if proj:
+                            return proj.agent.name
+        except:
+            pass
     return Site.objects.get_current().name
 
-def get_url_starter():
-    return "".join(["https://", Site.objects.get_current().domain])
+def get_url_starter(request=None):
+    if request:
+        domain = request.get_host()
+    else:
+        domain = Site.objects.get_current().domain
+    return "".join(["https://", domain])
 
 def work_home(request):
 
@@ -95,7 +110,9 @@ def map(request):
 @login_required
 def profile(request):
     agent = get_agent(request)
-    change_form = WorkAgentCreateForm(instance=agent)
+    return members_agent(request, agent.id)
+
+    """change_form = WorkAgentCreateForm(instance=agent)
     skills = EconomicResourceType.objects.filter(behavior="work")
     et_work = EventType.objects.get(name="Time Contribution")
     arts = agent.resource_types.filter(event_type=et_work)
@@ -144,7 +161,7 @@ def profile(request):
         #"share_price": share_price,
         #"number_of_shares": number_of_shares,
         #"can_pay": can_pay,
-    })
+    }, context_instance=RequestContext(request))"""
 
 
 @login_required
@@ -157,15 +174,15 @@ def change_personal_info(request, agent_id):
     if request.method == "POST":
         if change_form.is_valid():
             agent = change_form.save()
-    return HttpResponseRedirect('/%s/'
-        % ('work/profile'))
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/agent', agent.id))
 
 @login_required
 def upload_picture(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
     if not user_agent:
-        return render(request, 'valueaccounting/no_permission.html')
+        return render(request, 'work/no_permission.html')
     form = UploadAgentForm(instance=agent, data=request.POST, files=request.FILES)
     if form.is_valid():
         data = form.cleaned_data
@@ -173,8 +190,8 @@ def upload_picture(request, agent_id):
         agt.changed_by=request.user
         agt.save()
 
-    return HttpResponseRedirect('/%s/'
-        % ('work/profile'))
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/agent', agent.id))
 
 @login_required
 def add_worker_to_location(request, location_id, agent_id):
@@ -221,7 +238,8 @@ def update_skills(request, agent_id):
         agent = get_object_or_404(EconomicAgent, id=agent_id)
         user_agent = get_agent(request)
         if not user_agent:
-            return render(request, 'valueaccounting/no_permission.html')
+            return render(request, 'work/no_permission.html')
+
         et_work = EventType.objects.get(name="Time Contribution")
         arts = agent.resource_types.filter(event_type=et_work)
         old_skill_rts = []
@@ -258,9 +276,9 @@ def update_skills(request, agent_id):
                 suggester = request.user
             if notification:
                 users = User.objects.filter(is_staff=True)
-                suggestions_url = get_url_starter() + "/accounting/skill-suggestions/"
+                suggestions_url = get_url_starter(request) + "/accounting/skill-suggestions/"
                 if users:
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     notification.send(
                         users,
                         "work_skill_suggestion",
@@ -291,10 +309,15 @@ def register_skills(request):
 
 @login_required
 def manage_faircoin_account(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     resource = get_object_or_404(EconomicResource, id=resource_id)
-    agent = get_agent(request)
+    user_agent = get_agent(request)
     send_coins_form = None
     limit = 0
+
+    if not (resource.owner() == user_agent or resource.owner() in user_agent.managed_projects()):
+        return render(request, 'work/no_permission.html')
 
     payment_due = False
     candidate_membership = None
@@ -305,8 +328,8 @@ def manage_faircoin_account(request, resource_id):
     balance = False
     wallet = False
 
-    if agent:
-        if agent.owns(resource) or resource.owner() in agent.managed_projects():
+    if user_agent:
+        if resource.owner() == user_agent or resource.owner() in user_agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             wallet = faircoin_utils.fairwallet_obj()
             if wallet:
@@ -314,25 +337,25 @@ def manage_faircoin_account(request, resource_id):
             else:
                 limit = 0
 
-        candidate_membership = agent.candidate_membership()
+        candidate_membership = resource.owner().candidate_membership()
         if candidate_membership:
-            faircoin_account = agent.faircoin_resource()
+            faircoin_account = resource.owner().faircoin_resource()
             balance = 0
             if faircoin_account and wallet:
                 balance = faircoin_account.digital_currency_balance_unconfirmed()
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
-            number_of_shares = agent.number_of_shares()
+            number_of_shares = resource.owner().number_of_shares()
             share_price = share_price * number_of_shares
-            payment_due = False
-            if not agent.owns_resource_of_type(share):
-                payment_due = True
+            payment_due = True
+            if resource.owner().owns_resource_of_type(share):
+                payment_due = False
             can_pay = balance >= share_price
 
     return render(request, "work/faircoin_account.html", {
         "resource": resource,
         "photo_size": (128, 128),
-        "agent": agent,
+        "agent": resource.owner(),
         "send_coins_form": send_coins_form,
         "limit": limit,
         "wallet": wallet,
@@ -348,6 +371,8 @@ def manage_faircoin_account(request, resource_id):
     })
 
 def validate_faircoin_address_for_worker(request):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     data = request.GET
     address = data["to_address"].strip()
     answer = faircoin_utils.is_valid(address)
@@ -358,6 +383,8 @@ def validate_faircoin_address_for_worker(request):
 
 @login_required
 def change_faircoin_account(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     if request.method == "POST":
         resource = get_object_or_404(EconomicResource, pk=resource_id)
         form = EconomicResourceForm(data=request.POST, instance=resource)
@@ -391,6 +418,8 @@ def change_faircoin_account(request, resource_id):
 
 @login_required
 def transfer_faircoins(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     if request.method == "POST":
         resource = get_object_or_404(EconomicResource, id=resource_id)
         agent = get_agent(request)
@@ -472,6 +501,7 @@ def transfer_faircoins(request, resource_id):
                     transfer=transfer,
                     event_reference=address_end,
                     description=notes,
+                    created_by=request.user,
                     )
                 event.save()
                 if to_agent:
@@ -489,6 +519,7 @@ def transfer_faircoins(request, resource_id):
                         transfer=transfer,
                         event_reference=address_end,
                         description=notes,
+                        created_by=request.user,
                         )
                     event.save()
 
@@ -501,6 +532,8 @@ def transfer_faircoins(request, resource_id):
 
 @login_required
 def faircoin_history(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     wallet = faircoin_utils.fairwallet_obj()
@@ -537,6 +570,8 @@ def faircoin_history(request, resource_id):
 
 @login_required
 def edit_faircoin_event_description(request, resource_id):
+    if not settings.USE_FAIRCOIN:
+        raise Http404
     agent = get_agent(request)
     resource = EconomicResource.objects.get(id=resource_id)
     if request.method == "POST":
@@ -568,8 +603,9 @@ def share_payment(request, agent_id):
     share_price = share.price_per_unit
     number_of_shares = agent.number_of_shares()
     share_price = share_price * number_of_shares
+    network_fee = faircoin_utils.network_fee()
 
-    if share_price <= balance:
+    if share_price <= balance and network_fee:
         pay_to_id = settings.SEND_MEMBERSHIP_PAYMENT_TO
         pay_to_agent = EconomicAgent.objects.get(nick=pay_to_id)
         pay_to_account = pay_to_agent.faircoin_resource()
@@ -628,10 +664,11 @@ def share_payment(request, agent_id):
             quantity = quantity,
             transfer=transfer_fee,
             event_reference=address_end,
+            created_by=request.user,
             )
         event.save()
 
-        quantity = quantity - Decimal(float(faircoin_utils.network_fee()) / 1.e6)
+        quantity = quantity - Decimal(float(network_fee) / 1.e6)
 
         event = EconomicEvent(
             event_type = et_receive,
@@ -644,6 +681,7 @@ def share_payment(request, agent_id):
             quantity = quantity,
             transfer=transfer_fee,
             event_reference=address_end,
+            created_by=request.user,
             )
         event.save()
 
@@ -674,6 +712,7 @@ def share_payment(request, agent_id):
             resource=resource,
             quantity = quantity,
             transfer=transfer_membership,
+            created_by=request.user
             )
         event.save()
 
@@ -686,6 +725,7 @@ def share_payment(request, agent_id):
             resource=resource,
             quantity = quantity,
             transfer=transfer_membership,
+            created_by=request.user
             )
         event.save()
 
@@ -703,6 +743,10 @@ def share_payment(request, agent_id):
             state="active",
             )
         fc_aa.save()
+
+    elif network_fee is None:
+        messages.error(request,
+            'Sorry, payment with faircoin is not available now. Try later.')
 
     return HttpResponseRedirect('/%s/'
         % ('work/home'))
@@ -725,7 +769,7 @@ def membership_request(request):
             description = "Create an Agent and User for the Membership Request from "
             description += name
             membership_url= get_url_starter() + "/accounting/membership-request/" + str(mbr_req.id) + "/"
-            context_agent=EconomicAgent.objects.get(name__icontains="Membership Request")
+            context_agent=EconomicAgent.objects.get(nick=settings.SEND_MEMBERSHIP_PAYMENT_TO)
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
                 Q(name__icontains="Admin")|
@@ -816,7 +860,7 @@ def your_projects(request):
           aat.assoc_count = node.associate_count_of_type(aat.identifier)
           assoc_list = node.all_has_associates_by_type(aat.identifier)
           for assoc in assoc_list:
-            association = AgentAssociation.objects.get(is_associate=assoc, has_associate=node, association_type=aat)#
+            association = AgentAssociation.objects.filter(is_associate=assoc, has_associate=node, association_type=aat)[0]#
             assoc.state = association.state
           aat.assoc_list = assoc_list
           if not aat in aats:
@@ -893,6 +937,8 @@ def create_your_project(request):
     return HttpResponseRedirect("/work/your-projects/")
 
 
+#    A G E N T   P A G E
+
 @login_required
 def members_agent(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
@@ -916,7 +962,7 @@ def members_agent(request, agent_id):
         project = False
 
     if project:
-        init = {"joining_style": project.joining_style, "visibility": project.visibility, "fobi_slug": project.fobi_slug }
+        init = {"joining_style": project.joining_style, "visibility": project.visibility, "resource_type_selection": project.resource_type_selection, "fobi_slug": project.fobi_slug }
         change_form = ProjectCreateForm(instance=agent, initial=init)
     else:
         change_form = ProjectCreateForm(instance=agent) #AgentCreateForm(instance=agent)
@@ -929,6 +975,9 @@ def members_agent(request, agent_id):
                 ext = data["exchange_type"]
             return HttpResponseRedirect('/%s/%s/%s/%s/'
                 % ('work/exchange', ext.id, 0, agent.id))
+
+    context_ids = [c.id for c in agent.related_all_agents()]
+    context_ids.append(agent.id)
     user_form = None
 
     if not agent.username():
@@ -949,6 +998,8 @@ def members_agent(request, agent_id):
     entries = []
     fobi_name = 'None'
 
+    et_work = EventType.objects.get(name="Time Contribution")
+
     if agent.is_individual():
         contributions = agent.given_events.filter(is_contribution=True)
         agents_stats = {}
@@ -958,6 +1009,25 @@ def members_agent(request, agent_id):
         for key, value in agents_stats.items():
             individual_stats.append((key, value))
         individual_stats.sort(lambda x, y: cmp(y[1], x[1]))
+
+        skills = EconomicResourceType.objects.filter(behavior="work")
+        arts = agent.resource_types.filter(event_type=et_work)
+        agent.skills = []
+        user = agent.user().user
+        suggestions = user.skill_suggestion.all()
+        agent.suggested_skills = [sug.resource_type for sug in suggestions]
+        for art in arts:
+            agent.skills.append(art.resource_type)
+        for skil in agent.skills:
+            skil.checked = True
+            if skil in agent.suggested_skills:
+                skil.thanks = True
+        for skill in skills:
+            skill.checked = False
+            if skill in agent.skills:
+                skill.checked = True
+            if skill in agent.suggested_skills:
+                skill.thanks = True
 
     elif agent.is_context_agent():
         try:
@@ -1019,6 +1089,57 @@ def members_agent(request, agent_id):
             roles_height = len(member_hours_roles) * 20
 
     #artwork = get_object_or_404(Artwork_Type, clas="Material")
+    add_skill_form = AddUserSkillForm(agent=agent, data=request.POST or None)
+    Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
+
+    upload_form = UploadAgentForm(instance=agent)
+
+    related_rts = []
+    if agent.project_join_requests:
+        for req in agent.project_join_requests.all():
+            if req.project.agent in user_agent.managed_projects() or user_agent is req.project.agent:
+                rtsc = req.project.rts_with_clas()
+                rts = list(set([arr.resource.resource_type for arr in agent.resource_relationships()]))
+                for rt in rtsc:
+                    if rt in rts:
+                        related_rts.append(rt)
+
+    auto_resource = ''
+    if user_agent in agent.managers() or user_is_agent or request.user.is_staff:
+      #import pdb; pdb.set_trace()
+      for ag in is_associated_with:
+        if hasattr(ag.has_associate, 'project'):
+            rtsc = ag.has_associate.project.rts_with_clas()
+            for rt in rtsc:
+                is_account = False
+                ancs = rt.ocp_artwork_type.get_ancestors(True, True)
+                for anc in ancs:
+                    if anc.clas == 'accounts':
+                        is_account = True
+                if is_account:
+                    rts = list(set([arr.resource.resource_type for arr in agent.resource_relationships()]))
+                    if not rt in rts:
+                        res = ag.has_associate.agent_resource_roles.filter(resource__resource_type=rt)[0].resource
+                        res.id = None
+                        res.pk = None
+                        resarr = res.identifier.split(ag.has_associate.nick)
+                        res.identifier = ag.has_associate.nick+resarr[1]+agent.name #.identifier.split(ag.has_associate.nick)
+                        res.quantity = 1
+                        res.price_per_unit = 0
+                        res.save()
+                        rol = AgentResourceRoleType.objects.filter(is_owner=True)[0]
+                        arr = AgentResourceRole(
+                            agent=agent,
+                            resource=res,
+                            role=rol,
+                            owner_percentage=100
+                        )
+                        arr.save()
+                        #import pdb; pdb.set_trace()
+                        auto_resource += _("To participate in")+" <b>"+ag.has_associate.name+"</b> "
+                        auto_resource += _("you need a")+" \"<b>"+rt.name+"</b>\"... "
+                        auto_resource += _("It has been created for you automatically!")+"<br />"
+
 
     return render(request, "work/members_agent.html", {
         "agent": agent,
@@ -1028,6 +1149,7 @@ def members_agent(request, agent_id):
         "user_form": user_form,
         "nav_form": nav_form,
         "assn_form": assn_form,
+        "upload_form": upload_form,
         "user_agent": user_agent,
         "user_is_agent": user_is_agent,
         "has_associations": has_associations,
@@ -1041,7 +1163,11 @@ def members_agent(request, agent_id):
         "help": get_help("members_agent"),
         "form_entries": entries,
         "fobi_name": fobi_name,
-        #"artwork_pk": artwork.pk,
+        "add_skill_form": add_skill_form,
+        "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
+        "Stype_form": Stype_form,
+        "auto_resource": auto_resource,
+        "related_rts": related_rts,
     })
 
 
@@ -1049,7 +1175,7 @@ def members_agent(request, agent_id):
 def edit_relations(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    if user_agent in agent.managers():
+    if user_agent in agent.managers() or request.user.is_superuser:
         assn_form = AssociationForm(agent=agent,data=request.POST)
         if assn_form.is_valid():
             member_assn = AgentAssociation.objects.get(id=int(request.POST.get("member")))
@@ -1059,6 +1185,84 @@ def edit_relations(request, agent_id):
 
     return HttpResponseRedirect('/%s/%s/'
         % ('work/agent', agent.id))
+
+
+@login_required
+def assign_skills(request, agent_id):
+    if request.method == "POST":
+        agent = get_object_or_404(EconomicAgent, id=agent_id)
+        user_agent = get_agent(request)
+        if not user_agent:
+            return render(request, 'work/no_permission.html')
+        et_work = EventType.objects.get(name="Time Contribution")
+        arts = agent.resource_types.filter(event_type=et_work)
+        old_skill_rts = []
+        for art in arts:
+            old_skill_rts.append(art.resource_type)
+
+        add_skill_form = AddUserSkillForm(agent=agent, data=request.POST)
+        if add_skill_form.is_valid():
+            skill_type = Ocp_Skill_Type.objects.get(id=int(request.POST.get('skill_type')))
+            if not skill_type.resource_type:
+                #pass # TODO create it?
+                #out = None
+                root = EconomicAgent.objects.root_ocp_agent()
+                new_rt = EconomicResourceType(
+                  name=skill_type.name,
+                  description=skill_type.description,
+                  #unit=out,
+                  #price_per_unit=data["price_per_unit"],
+                  substitutable=False, #data["substitutable"],
+                  context_agent=root,
+                  #url=data["url"],
+                  #photo_url=data["photo_url"],
+                  #parent=data["parent"],
+                  created_by=request.user,
+                  behavior="work",
+                  inventory_rule="never",
+                )
+                new_rt.save()
+                skill_type.resource_type = new_rt
+                skill_type.save()
+
+            if skill_type.resource_type in old_skill_rts:
+                pass # TODO already assigned warn or hide from choices
+            else:
+                art = AgentResourceType(
+                    agent=agent,
+                    resource_type=skill_type.resource_type,
+                    event_type=et_work,
+                    created_by=request.user,
+                )
+                art.save()
+
+        new_skills_list = request.POST.getlist('skillChoice')
+        if new_skills_list:
+            new_skill_rts = []
+            for rt_id in new_skills_list:
+                skill = EconomicResourceType.objects.get(id=int(rt_id))
+                new_skill_rts.append(skill)
+
+            #import pdb; pdb.set_trace()
+            for skill in old_skill_rts:
+                if skill not in new_skill_rts:
+                    arts = AgentResourceType.objects.filter(agent=agent).filter(resource_type=skill)
+                    if arts:
+                        art = arts[0]
+                        art.delete()
+            """for skill in new_skill_rts:
+                if skill not in old_skill_rts:
+                    art = AgentResourceType(
+                        agent=agent,
+                        resource_type=skill,
+                        event_type=et_work,
+                        created_by=request.user,
+                    )
+                    #art.save()"""
+
+    return HttpResponseRedirect('/%s/%s/'
+        % ('work/agent', agent.id))
+
 
 
 @login_required
@@ -1087,8 +1291,8 @@ def change_your_project(request, agent_id):
             data = agn_form.cleaned_data
             url = data["url"]
             if url and not url[0:3] == "http":
-              data["url"] = "http://" + url
-              agent.url = data["url"]
+                pass #data["url"] = "http://" + url
+            agent.url = data["url"]
             #agent.project = project
             agent = agn_form.save(commit=False)
             agent.is_context = True
@@ -1119,39 +1323,95 @@ from fobi.base import (
 #    FormHandlerPlugin, form_handler_plugin_registry, get_processed_form_data
 #)
 
+
+
+
+def home(request):
+    #import pdb; pdb.set_trace()
+    return HttpResponseRedirect('/account/login/')
+
+
+from account.forms import LoginUsernameForm
+from django.contrib.auth import authenticate, login
+
+def project_login(request, form_slug = False):
+    #import pdb; pdb.set_trace()
+    if form_slug:
+        project = get_object_or_404(Project, fobi_slug=form_slug)
+        if request.user.is_authenticated():
+            return members_agent(request, agent_id=project.agent.id)
+
+    form = LoginUsernameForm(data=request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                # Redirect to a success page.
+                return HttpResponseRedirect(reverse('my_dashboard'))
+            else:
+                pass
+
+    return render(request, "work/project_login.html", {
+                "project": project,
+                "form": form,
+                "form_slug": form_slug,
+                "redirect_field_name": "next",
+                "redirect_field_value": "project_login", #+form_slug,
+            })
+
+"""def joinaproject_thanks(request, form_slug = False):
+    if form_slug:
+      project = Project.objects.get(fobi_slug=form_slug)
+
+    return render(request, "work/joinaproject_thanks.html", {
+            "project": project,
+           })"""
+
 import simplejson as json
 from django.utils.html import escape, escapejs
 
 def joinaproject_request(request, form_slug = False):
+    if form_slug and form_slug == 'freedom-coop':
+        return redirect('membership_request')
+
     join_form = JoinRequestForm(data=request.POST or None)
     fobi_form = False
     cleaned_data = False
     form = False
     if form_slug:
-      project = Project.objects.get(fobi_slug=form_slug)
+        project = Project.objects.get(fobi_slug=form_slug)
 
-      try:
-        user_agent = request.user.agent.agent
-        if user_agent and request.user.is_authenticated and user_agent.is_active_freedom_coop_member or request.user.is_staff:
-          return joinaproject_request_internal(request, project.agent.id)
-      except:
-        user_agent = False
+        try:
+            user_agent = request.user.agent.agent
+            if user_agent and request.user.is_authenticated: # and user_agent.is_active_freedom_coop_member or request.user.is_staff:
+                return joinaproject_request_internal(request, project.agent.id)
+        except:
+            user_agent = False
 
-      if project.visibility != "public" and not user_agent:
-        return HttpResponseRedirect('/%s/' % ('home'))
+        if project.visibility != "public" and not user_agent:
+            return HttpResponseRedirect('/%s/' % ('home'))
 
-      fobi_slug = project.fobi_slug
-      form_entry = FormEntry.objects.get(slug=fobi_slug)
-      form_element_entries = form_entry.formelemententry_set.all()[:]
-      form_entry.project = project
+        fobi_slug = project.fobi_slug
+        form_entry = None
+        try:
+            form_entry = FormEntry.objects.get(slug=fobi_slug)
+        except:
+            pass
 
-      # This is where the most of the magic happens. Our form is being built
-      # dynamically.
-      FormClass = assemble_form_class(
-          form_entry,
-          form_element_entries = form_element_entries,
-          request = request
-      )
+        form_element_entries = form_entry.formelemententry_set.all()[:]
+        form_entry.project = project
+
+        # This is where the most of the magic happens. Our form is being built
+        # dynamically.
+        FormClass = assemble_form_class(
+            form_entry,
+            form_element_entries = form_element_entries,
+            request = request
+        )
 
 
     if request.method == "POST":
@@ -1248,13 +1508,13 @@ def joinaproject_request(request, form_slug = False):
                     saved_data = json.dumps(cleaned_data)
                     )
                 saved_form_data_entry.save()
-                jn = JoinRequest.objects.get(pk=jn_req.pk)
-                jn.fobi_data = saved_form_data_entry
+                jn_req = JoinRequest.objects.get(pk=jn_req.pk)
+                jn_req.fobi_data = saved_form_data_entry
                 #messages.info(
                 #    request,
                 #    _("JoinRequest {0} was submitted successfully. {1}").format(jn.fobi_data, saved_form_data_entry.pk)
                 #)
-                jn.save()
+                jn_req.save()
 
             # add relation candidate
             #ass_type = get_object_or_404(AgentAssociationType, identifier="participant")
@@ -1270,7 +1530,7 @@ def joinaproject_request(request, form_slug = False):
             event_type = EventType.objects.get(relationship="todo")
             description = "Create an Agent and User for the Join Request from "
             description += name
-            join_url = get_url_starter() + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
+            join_url = get_url_starter(request) + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
             context_agent = jn_req.project.agent #EconomicAgent.objects.get(name__icontains="Membership Request")
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
@@ -1301,7 +1561,7 @@ def joinaproject_request(request, form_slug = False):
                   if manager.user():
                     users.append(manager.user().user)
                 if users:
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     notification.send(
                         users,
                         "work_join_request",
@@ -1315,8 +1575,14 @@ def joinaproject_request(request, form_slug = False):
                         }
                     )
 
-            return HttpResponseRedirect('/%s/'
-                % ('joinaproject-thanks'))
+            return render(request, "work/joinaproject_thanks.html", {
+                "project": project,
+                "jn_req": jn_req,
+                #"fobi_form": fobi_form,
+                #"field_map": field_name_to_label_map,
+                #"post": escapejs(json.dumps(request.POST)),
+            })
+            #return HttpResponseRedirect(reverse('joinaproject_thanks', form_slug=project.fobi_slug))
 
 
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
@@ -1336,6 +1602,8 @@ def joinaproject_request_internal(request, agent_id = False):
     proj_agent = get_object_or_404(EconomicAgent, id=agent_id)
     project = proj_agent.project
     form_slug = project.fobi_slug
+    if form_slug and form_slug == 'freedom-coop':
+        return redirect('membership_request')
     join_form = JoinRequestInternalForm(data=request.POST or None)
     fobi_form = False
     cleaned_data = False
@@ -1449,13 +1717,13 @@ def joinaproject_request_internal(request, agent_id = False):
                     saved_data = json.dumps(cleaned_data)
                     )
                 saved_form_data_entry.save()
-                jn = JoinRequest.objects.get(pk=jn_req.pk)
-                jn.fobi_data = saved_form_data_entry
+                jn_req = JoinRequest.objects.get(pk=jn_req.pk)
+                jn_req.fobi_data = saved_form_data_entry
                 #messages.info(
                 #    request,
                 #    _("JoinRequest {0} was submitted successfully. {1}").format(jn.fobi_data, saved_form_data_entry.pk)
                 #)
-                jn.save()
+                jn_req.save()
 
             # add relation candidate
             if jn_req.agent:
@@ -1471,10 +1739,9 @@ def joinaproject_request_internal(request, agent_id = False):
 
             description = "A new Join Request from OCP user "
             description += name
-            join_url = ''
+            join_url = get_url_starter(request) + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
 
             '''event_type = EventType.objects.get(relationship="todo")
-            join_url = get_url_starter() + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
             context_agent = jn_req.project.agent #EconomicAgent.objects.get(name__icontains="Membership Request")
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
@@ -1505,7 +1772,7 @@ def joinaproject_request_internal(request, agent_id = False):
                   if manager.user():
                     users.append(manager.user().user)
                 if users:
-                    site_name = get_site_name()
+                    site_name = get_site_name(request)
                     notification.send(
                         users,
                         "work_join_request",
@@ -1535,6 +1802,51 @@ def joinaproject_request_internal(request, agent_id = False):
     })
 
 
+from django.http import HttpResponse
+from django.utils.encoding import iri_to_uri
+
+class HttpResponseTemporaryRedirect(HttpResponse):
+    status_code = 307
+
+    def __init__(self, redirect_to):
+        HttpResponse.__init__(self)
+        self['Location'] = iri_to_uri(redirect_to)
+
+import requests
+
+#@mod.route('/payment-url/', methods=['GET', 'POST'])
+def payment_url(request, paymode, join_request_id):
+    #import pdb; pdb.set_trace()
+    url = ''
+    payload = {}
+    req = get_object_or_404(JoinRequest, pk=join_request_id)
+    if settings.PAYMENT_GATEWAYS and paymode:
+        gates = settings.PAYMENT_GATEWAYS
+        if req.project.fobi_slug and gates[req.project.fobi_slug]:
+            url = gates[req.project.fobi_slug][paymode]['url']
+            payload = {'order_id': str(join_request_id),
+                       'amount': req.pending_shares(),
+                       'first_name': req.name,
+                       'last_name': req.surname,
+                       'email': req.email_address,
+                       'lang': 'en',
+            }
+    if payload['amount'] and not url == '':
+        #r = requests.post(url, data=payload) #, allow_redirects=True)
+        #import urllib
+        #params = urllib.urlencode(payload)
+        request.method = "POST"
+        request.POST = payload #params
+        #resp = HttpResponse(r) #r, content_type="text/html")
+        #resp['Location'] = r.url
+
+        #return resp
+        return HttpResponse(requests.post(url, data=payload))
+        #return redirect(r.url, code=307)
+        #return HttpResponseRedirect( url + '&order_id=' + join_request_id + '&amount=' + str(req.pending_shares()) + '&first_name=' + req.name + '&last_name=' + req.surname + '&email=' + req.email_address)
+    return HttpResponse('Gateway not properly configured, contact an admin')
+
+
 
 @login_required
 def join_requests(request, agent_id):
@@ -1550,8 +1862,8 @@ def join_requests(request, agent_id):
 
     agent = EconomicAgent.objects.get(pk=agent_id)
     project = agent.project
-    requests =  JoinRequest.objects.filter(state=state, project=project)
-    agent_form = JoinAgentSelectionForm()
+    requests =  JoinRequest.objects.filter(state=state, project=project).order_by('request_date')
+    agent_form = JoinAgentSelectionForm(project=project)
 
     fobi_slug = project.fobi_slug
     fobi_headers = []
@@ -1559,7 +1871,7 @@ def join_requests(request, agent_id):
 
     if fobi_slug and requests:
         form_entry = FormEntry.objects.get(slug=fobi_slug)
-        req = requests[0]
+        req = requests.last()
         if req.fobi_data and req.fobi_data.pk:
             req.entries = SavedFormDataEntry.objects.filter(pk=req.fobi_data.pk).select_related('form_entry')
             entry = req.entries[0]
@@ -1733,7 +2045,7 @@ def create_account_for_join_request(request, join_request_id):
                             #allusers = chain(users, agent)
                             #users = list(users)
                             #users.append(agent.user)
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             notification.send(
                                 users,
                                 "work_new_account",
@@ -1882,7 +2194,26 @@ def validate_username(request):
 @login_required
 def connect_agent_to_join_request(request, agent_id, join_request_id):
     mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
-    project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    agent = get_object_or_404(EconomicAgent, pk=agent_id)
+    project = mbr_req.project
+    if project.joining_style == 'moderated':
+      if request.user.agent.agent in project.agent.managers() or request.user.agent.agent is project.agent:
+        if not mbr_req.agent:
+            mbr_req.agent=agent
+            mbr_req.state = "new"
+            mbr_req.save()
+            association_type = AgentAssociationType.objects.get(identifier="participant")
+            aa = AgentAssociation(
+                is_associate=agent,
+                has_associate=project.agent,
+                association_type=association_type,
+                state="potential",
+                )
+            aa.save()
+            return HttpResponseRedirect('/%s/%s/%s/'
+                % ('work/agent', project.agent.id, 'join-requests'))
+    raise ValidationError('Not allowed to connect agent to join request')
+    """project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
     if request.method == "POST":
         agent_form = JoinAgentSelectionForm(data=request.POST)
         if agent_form.is_valid():
@@ -1891,9 +2222,12 @@ def connect_agent_to_join_request(request, agent_id, join_request_id):
             mbr_req.agent=agent
             mbr_req.state = "new"
             mbr_req.save()
+        else:
+            raise ValidationError(agent_form.errors)
 
     return HttpResponseRedirect('/%s/%s/%s/'
-        % ('work/agent', project_agent.id, 'join-requests'))
+        % ('work/agent', project_agent.id, 'join-requests'))"""
+
 
 from six import text_type, PY3
 from django.utils.encoding import force_text
@@ -2015,6 +2349,285 @@ def create_project_user_and_agent(request, agent_id):
 '''
 
 
+#   S K I L L S
+
+@login_required
+def new_skill_type(request, agent_id):
+    agent = EconomicAgent.objects.get(id=agent_id)
+    new_skill = request.POST.get("new_skill_type")
+    if not new_skill:
+        edit_skill = request.POST.get("edit_skill_type")
+        if edit_skill:
+          #raise ValidationError("Edit skill type? redirect")
+          return edit_skill_type(request, agent.id)
+        else:
+          raise ValidationError("New skill type, invalid")
+
+    Stype_form = NewSkillTypeForm(agent=agent, data=request.POST)
+    if Stype_form.is_valid():
+        #raise ValidationError("New resource type, valid")
+        data = Stype_form.cleaned_data
+        if hasattr(data["parent_type"], 'id'):
+            parent_rt = Ocp_Skill_Type.objects.get(id=data["parent_type"].id)
+            if parent_rt.id:
+              out = None
+              if hasattr(data["unit_type"], 'id'):
+                gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
+                out = gut.ocpUnitType_ocp_unit
+              new_rt = EconomicResourceType(
+                name=data["name"],
+                description=data["description"],
+                unit=out,
+                price_per_unit=data["price_per_unit"],
+                substitutable=False, #data["substitutable"],
+                context_agent=data["context_agent"],
+                url=data["url"],
+                photo_url=data["photo_url"],
+                #parent=data["parent"],
+                created_by=request.user,
+                behavior="work",
+                inventory_rule="never",
+              )
+              new_rt.save()
+
+              # mptt: get_ancestors(ascending=False, include_self=False)
+              ancs = parent_rt.get_ancestors(True, True)
+              for an in ancs:
+                #if an.clas != 'Artwork':
+                  an = Ocp_Skill_Type.objects.get(id=an.id)
+                  if an.resource_type:
+                    new_rtfv = None
+                    for fv in an.resource_type.facets.all():  # inherit first facetvalue from the parents
+                      new_rtfv = ResourceTypeFacetValue(
+                        resource_type=new_rt,
+                        facet_value=fv.facet_value
+                      )
+                      new_rtfv.save()
+                    if new_rtfv:
+                      break
+                  if an.facet_value:                          # if no fvs (didn't break) and the parent has one, relate that fv to the new skill
+                    new_rtfv = ResourceTypeFacetValue(
+                        resource_type=new_rt,
+                        facet_value=an.facet_value
+                    )
+                    new_rtfv.save()
+                    break
+
+              new_oat = Ocp_Skill_Type(
+                  name=data["name"],
+                  verb=data["verb"],
+                  gerund=data["gerund"],
+                  description=data["description"],
+                  resource_type=new_rt,
+                  ocp_artwork_type=data["related_type"],
+              )
+              # mptt: insert_node(node, target, position='last-child', save=False)
+              new_ski = Ocp_Skill_Type.objects.insert_node(new_oat, parent_rt, 'last-child', True)
+
+              et_work = EventType.objects.get(name="Time Contribution")
+              art = AgentResourceType(
+                    agent=agent,
+                    resource_type=new_rt,
+                    event_type=et_work,
+                    created_by=request.user,
+              )
+              art.save()
+
+              suggestion = SkillSuggestion(
+                  skill=data["name"],
+                  suggested_by=request.user,
+                  resource_type=new_rt,
+                  state="accepted"
+              )
+              suggestion.save()
+              try:
+                suggester = request.user.agent.agent
+              except:
+                suggester = request.user
+              if notification:
+                  users = User.objects.filter(is_staff=True)
+                  suggestions_url = get_url_starter(request) + "/accounting/skill-suggestions/"
+                  if users and get_site_name(request):
+                      site_name = get_site_name(request)
+                      notification.send(
+                        users,
+                        "work_skill_suggestion",
+                        {"skill": suggestion.skill,
+                         "suggested_by": suggester.name,
+                         "suggestions_url": suggestions_url,
+                        }
+                      )
+              #nav_form = ExchangeNavForm(agent=agent, data=None)
+              #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+              #Stype_form = NewSkillTypeForm(agent=agent, data=None)
+
+            else: # have no parent_type id
+              pass
+        else: # have no parent resource field
+            pass
+    else: # is not valid
+        pass #raise ValidationError(Rtype_form.errors)
+
+    next = request.POST.get("next")
+    if next == "exchanges_all":
+        return HttpResponseRedirect('/%s/%s/%s/'
+            % ('work/agent', agent.id, 'exchanges'))
+    elif next == "members_agent":
+        return HttpResponseRedirect('/%s/%s/'
+            % ('work/agent', agent.id))
+    else:
+        raise ValidationError("Has no next page specified! "+str(next))
+
+
+@login_required
+def edit_skill_type(request, agent_id):
+    edit_skill = request.POST.get("edit_skill_type")
+    if not edit_skill:
+        new_skill = request.POST.get("new_skill_type")
+        if new_skill:
+          raise ValidationError("New skill type? redirect")
+        else:
+          raise ValidationError("Edit skill type, invalid")
+
+    agent = EconomicAgent.objects.get(id=agent_id)
+    Stype_form = NewSkillTypeForm(agent=agent, data=request.POST)
+    if Stype_form.is_valid():
+        data = Stype_form.cleaned_data
+        if hasattr(data["parent_type"], 'id'):
+          parent_st = Ocp_Skill_Type.objects.get(id=data["parent_type"].id)
+          if parent_st.id:
+            out = None
+            if hasattr(data["unit_type"], 'id'):
+              gut = Ocp_Unit_Type.objects.get(id=data["unit_type"].id)
+              out = gut.ocpUnitType_ocp_unit
+            edid = request.POST.get("edid")
+            if edid == '':
+              raise ValidationError("Missing id of the edited skill! (edid)")
+            else:
+              idar = edid.split('_')
+              if idar[0] == "Sid":
+                grt = Ocp_Skill_Type.objects.get(id=idar[1])
+                grt.name = data["name"]
+                grt.description = data["description"]
+                grt.verb = data["verb"]
+                grt.gerund = data["gerund"]
+
+                moved = False
+                if not grt.parent == parent_st:
+                  # mptt: move_to(target, position='first-child')
+                  grt.move_to(parent_st, 'last-child')
+                  moved = True
+
+                grt.ocp_artwork_type = data["related_type"]
+                try:
+                  grt.save()
+                except:
+                  raise ValidationError("The skill name already exists and they are unique")
+
+                if not grt.resource_type:
+                  #pass #raise ValidationError("There's no resource type! create it?")
+                  new_rt = EconomicResourceType(
+                    name=data["name"],
+                    description=data["description"],
+                    unit=out,
+                    price_per_unit=data["price_per_unit"],
+                    substitutable=False, #data["substitutable"],
+                    context_agent=data["context_agent"],
+                    url=data["url"],
+                    photo_url=data["photo_url"],
+                    created_by=request.user,
+                    behavior="work",
+                    inventory_rule="never",
+                  )
+                  new_rt.save()
+                  grt.resource_type = new_rt
+                  grt.save()
+
+                  # mptt: get_ancestors(ascending=False, include_self=False)
+                  ancs = parent_st.get_ancestors(True, True)   # note: they're General.Job
+                  for an in ancs:
+                    #if an.clas != 'Artwork':
+                      an = Ocp_Skill_Type.objects.get(id=an.id)
+                      if an.resource_type:
+                        new_rtfv = None
+                        for fv in an.resource_type.facets.all():
+                          new_rtfv = ResourceTypeFacetValue(
+                            resource_type=new_rt,
+                            facet_value=fv.facet_value
+                          )
+                          new_rtfv.save()
+                        if new_rtfv:
+                          break
+                      if an.facet_value:
+                        new_rtfv = ResourceTypeFacetValue(
+                            resource_type=new_rt,
+                            facet_value=an.facet_value
+                        )
+                        new_rtfv.save()
+                        break
+
+                else:
+                  rt = grt.resource_type;
+                  rt.name = data["name"]
+                  rt.description = data["description"]
+                  rt.unit = out
+                  rt.price_per_unit = data["price_per_unit"]
+                  rt.substitutable = False #data["substitutable"]
+                  rt.context_agent = data["context_agent"]
+                  rt.url = data["url"]
+                  rt.photo_url = data["photo_url"]
+                  #rt.parent = data["parent"]
+                  rt.edited_by = request.user
+                  if moved:
+                    old_rtfvs = ResourceTypeFacetValue.objects.filter(resource_type=rt)
+                    for rtfv in old_rtfvs:
+                      rtfv.delete()
+                    # mptt: get_ancestors(ascending=False, include_self=False)
+                    ancs = parent_st.get_ancestors(True, True)   # note: they're General.Job
+                    for an in ancs:
+                      #if an.clas != 'Artwork':
+                        an = Ocp_Skill_Type.objects.get(id=an.id)
+                        if an.resource_type:
+                          new_rtfv = None
+                          for fv in an.resource_type.facets.all():
+                            new_rtfv = ResourceTypeFacetValue(
+                              resource_type=rt,
+                              facet_value=fv.facet_value
+                            )
+                            new_rtfv.save()
+                          if new_rtfv:
+                            break
+                        if an.facet_value:
+                          new_rtfv = ResourceTypeFacetValue(
+                              resource_type=rt,
+                              facet_value=an.facet_value
+                          )
+                          new_rtfv.save()
+                          break
+                  rt.save()
+
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
+
+              else: # is not Sid
+                pass
+          else: # have no parent_type id
+            pass
+        else: # have no parent resource field
+          pass
+
+    next = request.POST.get("next")
+    if next == "exchanges_all":
+        return HttpResponseRedirect('/%s/%s/%s/'
+            % ('work/agent', agent.id, 'exchanges'))
+    elif next == "members_agent":
+        return HttpResponseRedirect('/%s/%s/'
+            % ('work/agent', agent.id))
+    else:
+        raise ValidationError("Has no next page specified! "+str(next))
+
+
 
 #    E X C H A N G E S   A L L
 
@@ -2053,6 +2666,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
     Rtype_form = NewResourceTypeForm(agent=agent, data=request.POST or None)
     Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
 
+    #import pdb; pdb.set_trace()
     if request.method == "POST":
         new_exchange = request.POST.get("new_exchange")
         if new_exchange:
@@ -2078,10 +2692,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       gen_sk = Ocp_Skill_Type.objects.get(id=data["skill_type"].id)
 
 
-                    if gen_rt and gen_ext.ocp_artwork_type and gen_ext.ocp_artwork_type == gen_rt: # we have the related RT in the ET! do nothing.
+                    if gen_rt and hasattr(gen_ext, 'ocp_artwork_type') and gen_ext.ocp_artwork_type and gen_ext.ocp_artwork_type == gen_rt: # we have the related RT in the ET! do nothing.
                       return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                               % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
-                    if gen_sk and gen_ext.ocp_skill_type and gen_ext.ocp_skill_type == gen_sk: # we have the related RT in the ET! do nothing.
+                    if gen_sk and hasattr(gen_ext, 'ocp_skill_type') and gen_ext.ocp_skill_type and gen_ext.ocp_skill_type == gen_sk: # we have the related RT in the ET! do nothing.
                       return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                               % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
@@ -2112,10 +2726,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       try:
                         new_ext = ExchangeType.objects.get(name=name)
                         if new_ext:
-                          if new_ext.context_agent and not new_ext.context_agent == agnt:
-                            if agnt.parent():
-                              new_ext.context_agent = agnt.parent()
-                            else:
+                          if new_ext.context_agent and not new_ext.context_agent == agnt: # if the ext exists and the context_agent is not the
+                            if agnt.parent():                                             # same, set the parent agent or the new agent as
+                              new_ext.context_agent = agnt.parent()                       # a new context. TODO: check if the old context has
+                            else:                                                         # the same parent (so the ext keeps showing for them)
                               new_ext.context_agent = agnt
 
                             new_ext.edited_by = request.user
@@ -2216,7 +2830,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         % ('work/agent', agent.id, 'exchange-logging-work', ext.id, 0))
 
                   else: # endif ext
-                    # the ocp record type still not have an ocp exchange type, create it? TODO
+                    # the parent ocp record type still not have an ocp exchange type, create it? TODO
                     pass
 
                   #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
@@ -2268,14 +2882,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       if an.clas != 'Artwork':
                         an = Ocp_Artwork_Type.objects.get(id=an.id)
                         if an.resource_type:
+                          new_rtfv = None
                           for fv in an.resource_type.facets.all():
                             new_rtfv = ResourceTypeFacetValue(
                               resource_type=new_rt,
                               facet_value=fv.facet_value
                             )
                             new_rtfv.save()
-                          break
-                        elif an.facet_value:
+                          if new_rtfv:
+                            break
+                        if an.facet_value:
                           new_rtfv = ResourceTypeFacetValue(
                               resource_type=new_rt,
                               facet_value=an.facet_value
@@ -2291,11 +2907,17 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       rrt_ancs = rrt.get_ancestors(False, True)
                       for an in rrt_ancs: # see if is child of material or non-material
                         if an.clas == 'Material':
-                          mat = Material_Type.objects.get(id=rrt.id)
+                          try:
+                            mat = Material_Type.objects.get(id=rrt.id)
+                          except:
+                            mat = Ocp_Artwork_Type.objects.update_to_general('Material_Type', rrt.id)
                           rel_material = mat
                           break
                         if an.clas == 'Nonmaterial':
-                          non = Nonmaterial_Type.objects.get(id=rrt.id)
+                          try:
+                            non = Nonmaterial_Type.objects.get(id=rrt.id)
+                          except:
+                            non = Ocp_Artwork_Type.objects.update_to_general('Nonmaterial_Type', rrt.id)
                           rel_nonmaterial = non
                           break
 
@@ -2313,9 +2935,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                       raise ValidationError('Cannot insert node:'+str(new_oat)+' Parent:'+str(parent_rt))
 
 
-                    nav_form = ExchangeNavForm(agent=agent, data=None)
-                    Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                    Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                    #nav_form = ExchangeNavForm(agent=agent, data=None)
+                    #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                    #Stype_form = NewSkillTypeForm(agent=agent, data=None)
 
                   else: # have no parent_type id
                     pass
@@ -2359,15 +2981,21 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                           rrt_ancs = rrt.get_ancestors(False, True)
                           for an in rrt_ancs: # see if is child of material or non-material
                             if an.clas == 'Material':
-                              mat = Material_Type.objects.get(id=rrt.id)
+                              try:
+                                mat = Material_Type.objects.get(id=rrt.id)
+                              except:
+                                mat = Ocp_Artwork_Type.objects.update_to_general('Material_Type', rrt.id)
                               rel_material = mat
                               break
                             if an.clas == 'Nonmaterial':
-                              non = Nonmaterial_Type.objects.get(id=rrt.id)
+                              try:
+                                non = Nonmaterial_Type.objects.get(id=rrt.id)
+                              except:
+                                non = Ocp_Artwork_Type.objects.update_to_general('Nonmaterial_Type', rrt.id)
                               rel_nonmaterial = non
                               break
-                          grt.ocpArtworkType_material_type = rel_material
-                          grt.ocpArtworkType_nonmaterial_type = rel_nonmaterial
+                        grt.ocpArtworkType_material_type = rel_material
+                        grt.ocpArtworkType_nonmaterial_type = rel_nonmaterial
 
                         grt.save()
 
@@ -2399,14 +3027,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                             if an.clas != 'Artwork':
                               an = Ocp_Artwork_Type.objects.get(id=an.id)
                               if an.resource_type:
+                                new_rtfv = None
                                 for fv in an.resource_type.facets.all():
                                   new_rtfv = ResourceTypeFacetValue(
                                     resource_type=new_rt,
                                     facet_value=fv.facet_value
                                   )
                                   new_rtfv.save()
-                                break
-                              elif an.facet_value:
+                                if new_rtfv:
+                                  break
+                              if an.facet_value:
                                 new_rtfv = ResourceTypeFacetValue(
                                     resource_type=new_rt,
                                     facet_value=an.facet_value
@@ -2436,14 +3066,16 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                               if an.clas != 'Artwork':
                                 an = Ocp_Artwork_Type.objects.get(id=an.id)
                                 if an.resource_type:
+                                  new_rtfv = None
                                   for fv in an.resource_type.facets.all():
                                     new_rtfv = ResourceTypeFacetValue(
                                       resource_type=rt,
                                       facet_value=fv.facet_value
                                     )
                                     new_rtfv.save()
-                                  break
-                                elif an.facet_value:
+                                  if new_rtfv:
+                                    break
+                                if an.facet_value:
                                   new_rtfv = ResourceTypeFacetValue(
                                       resource_type=rt,
                                       facet_value=an.facet_value
@@ -2452,9 +3084,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                                   break
                           rt.save()
 
-                        nav_form = ExchangeNavForm(agent=agent, data=None)
-                        Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                        Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                        #nav_form = ExchangeNavForm(agent=agent, data=None)
+                        #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                        #Stype_form = NewSkillTypeForm(agent=agent, data=None)
 
                       else: # is not Rid
                         pass
@@ -2465,7 +3097,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   pass
 
         # there's no new_resource_type = request.POST.get("new_resource_type")
-        new_skill_type = request.POST.get("new_skill_type")
+        """new_skill_type = request.POST.get("new_skill_type")
         if new_skill_type:
             if Stype_form.is_valid():
                 #raise ValidationError("New resource type, valid")
@@ -2534,10 +3166,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                 else: # have no parent resource field
                   pass
             else:
-                pass #raise ValidationError(Rtype_form.errors)
+                pass #raise ValidationError(Rtype_form.errors)"""
 
 
-        edit_skill_type = request.POST.get("edit_skill_type")
+        """edit_skill_type = request.POST.get("edit_skill_type")
         if edit_skill_type:
             if Stype_form.is_valid():
                 data = Stype_form.cleaned_data
@@ -2660,7 +3292,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   else: # have no parent_type id
                     pass
                 else: # have no parent resource field
-                  pass
+                  pass"""
 
 
         edit_exchange_type = request.POST.get("edit_exchange_type") # TODO the detail about transfertypes
@@ -2689,13 +3321,10 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                   if ext:
                     ext.save()
 
-                nav_form = ExchangeNavForm(agent=agent, data=None)
-                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
                 #raise ValidationError("Editing Exchange Type! "+data['parent_type'].name+' ext:'+str(new_parent)+' moved:'+str(moved))
-                #uca = data["use_case"]
-                #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                #    % ('work/agent', agent.id, 'new-exchange-type', uca.id, 0)) # TODO page to add exchange type
 
         dt_selection_form = DateSelectionForm(data=request.POST)
         if dt_selection_form.is_valid():
@@ -2724,9 +3353,9 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                             exchanges_included.append(ex)
                     exchanges = exchanges_included
 
-                nav_form = ExchangeNavForm(agent=agent, data=None)
-                Rtype_form = NewResourceTypeForm(agent=agent, data=None)
-                Stype_form = NewSkillTypeForm(agent=agent, data=None)
+                #nav_form = ExchangeNavForm(agent=agent, data=None)
+                #Rtype_form = NewResourceTypeForm(agent=agent, data=None)
+                #Stype_form = NewSkillTypeForm(agent=agent, data=None)
         else:
           exchanges = Exchange.objects.filter(context_agent=agent) #.none()
           selected_values = "all"
@@ -2786,8 +3415,11 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                         for an in ancs:
                           if an.clas == "currency":
                             rt.cur = True
-                        if rt.cur:
-                          to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name)+sign+' - '
+                        if rt.cur and rt.ocp_artwork_type.ocpArtworkType_unit_type:
+                          if rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type:
+                            to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name)+sign+' - '
+                          else:
+                            to['debug'] += str(transfer.quantity())+'-'+str(rt.ocp_artwork_type)+sign+'-MISSING UNIT! '
                           for ttr in total_transfers:
                             if ttr['unit'] == rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.id:
                               ttr['name'] = rt.ocp_artwork_type.ocpArtworkType_unit_type.ocp_unit_type.name
@@ -4025,8 +4657,11 @@ def project_all_resources(request, agent_id):
                 #resource_types.sort(key=lambda rt: rt.label())
     else:
         for rt in rts:
-            if rt.onhand_qty()>0:
-                resource_types.append(rt)
+            #if rt.onhand_qty()>0:
+            if not rt in resource_types:
+              resource_types.append(rt)
+            if rt.facets.count():
+              if rt.facets.all():
                 fvs.append(rt.facets.all()[0].facet_value) # add first facetvalue
         if fcr and not fcr.resource_type in resource_types:
             resource_types.append(fcr.resource_type)
@@ -4066,14 +4701,24 @@ def project_resource(request, agent_id, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    if not (agent == user_agent or user_agent in agent.managers()):
+    user_agent.managed_rts = []
+    for ag in user_agent.managed_projects():
+        try:
+            rts = ag.project.rts_with_clas()
+            for rt in rts:
+                if not rt in user_agent.managed_rts:
+                    user_agent.managed_rts.append(rt)
+        except:
+            pass
+
+    if not (agent == user_agent or user_agent in agent.managers() or request.user.is_superuser or resource.resource_type in user_agent.managed_rts ):
         return render(request, 'work/no_permission.html')
 
     RraFormSet = modelformset_factory(
         AgentResourceRole,
-        form=ResourceRoleAgentForm,
+        form=ResourceRoleContextAgentForm,
         can_delete=True,
-        extra=4,
+        extra=2,
         )
     role_formset = RraFormSet(
         prefix="role",
@@ -4121,14 +4766,15 @@ def project_resource(request, agent_id, resource_id):
                 event.from_agent = event.context_agent
                 event.created_by = request.user
                 event.save()
-                return HttpResponseRedirect('/%s/%s/'
-                    % ('accounting/resource', resource.id))
+                return HttpResponseRedirect('/%s/%s/%s/%s'
+                    % ('work/agent', agent.id, 'resource', resource.id))
     if resource.is_digital_currency_resource():
-        send_coins_form = None
+        return manage_faircoin_account(request, resource.id) #HttpResponseRedirect(reverse('manage_faircoin_account', kwargs={'resource_id': resource.id}))
+        """send_coins_form = None
         is_owner=False
         limit = 0
         if agent:
-            is_owner = agent.owns(resource)
+            is_owner = user_agent.owns(resource) or resource.owner() in user_agent.managed_projects()
             if is_owner:
                 if resource.address_is_activated():
                     send_coins_form = SendFairCoinsForm()
@@ -4141,7 +4787,7 @@ def project_resource(request, agent_id, resource_id):
             "is_owner": is_owner,
             "send_coins_form": send_coins_form,
             "limit": limit,
-        })
+        })"""
     else:
         return render(request, "work/project_resource.html", {
             "resource": resource,
@@ -4150,7 +4796,45 @@ def project_resource(request, agent_id, resource_id):
             "order_form": order_form,
             "role_formset": role_formset,
             "agent": agent,
+            "user_agent": user_agent,
         })
+
+@login_required
+def change_resource(request, agent_id, resource_id):
+    if request.method == "POST":
+        resource = get_object_or_404(EconomicResource, pk=resource_id)
+        agent = get_object_or_404(EconomicAgent, pk=agent_id)
+        v_help = None
+        if resource.resource_type.unit_of_use:
+            v_help = "give me a usable widget"
+        form = EconomicResourceForm(data=request.POST, instance=resource, vpu_help=v_help)
+        if form.is_valid():
+            data = form.cleaned_data
+            resource = form.save(commit=False)
+            resource.changed_by=request.user
+            resource.save()
+            if not resource.resource_type.is_virtual_account() or request.user.is_superuser:
+                RraFormSet = modelformset_factory(
+                    AgentResourceRole,
+                    form=ResourceRoleContextAgentForm,
+                    can_delete=True,
+                    extra=2,
+                    )
+                role_formset = RraFormSet(
+                    prefix="role",
+                    queryset=resource.agent_resource_roles.all(),
+                    data=request.POST
+                    )
+                #import pdb; pdb.set_trace()
+                if role_formset.is_valid():
+                    saved_formset = role_formset.save(commit=False)
+                    for role in saved_formset:
+                        role.resource = resource
+                        role.save()
+            return HttpResponseRedirect('/%s/%s/%s/%s'
+                % ('work/agent', agent.id, 'resources', resource_id))
+        else:
+            raise ValidationError(form.errors)
 
 
 
@@ -4217,8 +4901,10 @@ def my_tasks(request):
     my_todos = Commitment.objects.todos().filter(from_agent=agent)
     init = {"from_agent": agent,}
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    pattern_id = 0
     if patterns:
         pattern = patterns[0].pattern
+        pattern_id = pattern.id
         todo_form = WorkTodoForm(agent=agent, pattern=pattern, initial=init)
     else:
         todo_form = WorkTodoForm(agent=agent, initial=init)
@@ -4230,6 +4916,7 @@ def my_tasks(request):
         #"other_unassigned": other_unassigned,
         "my_todos": my_todos,
         "todo_form": todo_form,
+        "pattern_id": pattern_id,
         #"work_now": work_now,
         "help": get_help("proc_log"),
     })
@@ -4323,7 +5010,7 @@ def add_todo(request):
                 if notification:
                     if todo.from_agent:
                         if todo.from_agent != agent:
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             user = todo.from_agent.user()
                             if user:
                                 notification.send(
@@ -4338,6 +5025,25 @@ def add_todo(request):
     return HttpResponseRedirect(next)
 
 
+def json_get_context_resource_types(request, context_id, pattern_id=None):
+    context_agent = get_object_or_404(EconomicAgent, pk=context_id)
+    if pattern_id:
+        pattern = get_object_or_404(ProcessPattern, pk=pattern_id)
+    else:
+        pattern = None
+    if pattern:
+        rts = pattern.todo_resource_types()
+    else:
+        rts = EconomicResourceType.objects.filter(behavior="work")
+    try:
+        if context_agent.project.resource_type_selection == "project":
+            rts = rts.filter(context_agent=context_agent)
+        else:
+            rts = rts.filter(context_agent=None)
+    except:
+        rts = rts.filter(context_agent=None)
+    json = serializers.serialize("json", rts, fields=('name'))
+    return HttpResponse(json, content_type='application/json')
 
 
 #    P R O C E S S   T A S K S
@@ -4358,8 +5064,10 @@ def project_work(request):
     ca_form = WorkProjectSelectionFormOptional(data=request.POST or None, context_agents=projects)
     chosen_context_agent = None
     patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+    pattern_id = 0
     if patterns:
         pattern = patterns[0].pattern
+        pattern_id = pattern.id
         todo_form = WorkTodoForm(pattern=pattern, agent=agent)
     else:
         todo_form = WorkTodoForm(agent=agent)
@@ -4371,7 +5079,7 @@ def project_work(request):
             if ca_form.is_valid():
                 proj_data = ca_form.cleaned_data
                 proj_id = proj_data["context_agent"]
-                if proj_id.isdigit:
+                if proj_id:
                     context_id = proj_id
                     chosen_context_agent = EconomicAgent.objects.get(id=proj_id)
 
@@ -4397,6 +5105,7 @@ def project_work(request):
         "todo_form": todo_form,
         "ca_form": ca_form,
         "todos": my_project_todos,
+        "pattern_id": pattern_id,
         "next": next,
         "help": get_help("project_work"),
     })
@@ -4674,7 +5383,7 @@ def work_invite_collaborator(request, commitment_id):
         if notification:
             agent = get_agent(request)
             users = commitment.possible_work_users()
-            site_name = get_site_name()
+            site_name = get_site_name(request)
             if users:
                 notification.send(
                     users,
@@ -4851,11 +5560,13 @@ def work_add_todo(request):
     if request.method == "POST":
         agent = get_agent(request)
         patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+        ca_id = request.POST["context_agent"]
+        context_agent_in = EconomicAgent.objects.get(id=int(ca_id))
         if patterns:
             pattern = patterns[0].pattern
-            form = WorkTodoForm(agent=agent, pattern=pattern, data=request.POST)
+            form = WorkTodoForm(agent=agent, context_agent=context_agent_in, pattern=pattern, data=request.POST)
         else:
-            form = WorkTodoForm(agent=agent, data=request.POST)
+            form = WorkTodoForm(agent=agent, context_agent=context_agent_in, data=request.POST)
         next = request.POST.get("next")
         et = None
         ets = EventType.objects.filter(
@@ -4874,7 +5585,7 @@ def work_add_todo(request):
                 if notification:
                     if todo.from_agent:
                         if todo.from_agent != agent:
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             user = todo.from_agent.user()
                             if user:
                                 notification.send(
@@ -4900,7 +5611,7 @@ def work_todo_delete(request, todo_id):
                 if todo.from_agent:
                     agent = get_agent(request)
                     if todo.from_agent != agent:
-                        site_name = get_site_name()
+                        site_name = get_site_name(request)
                         user = todo.from_agent.user()
                         if user:
                             notification.send(
@@ -4926,11 +5637,13 @@ def work_todo_change(request, todo_id):
             agent = get_agent(request)
             prefix = todo.form_prefix()
             patterns = PatternUseCase.objects.filter(use_case__identifier='todo')
+            ca_id = request.POST[prefix+"-context_agent"]
+            context_agent_in = EconomicAgent.objects.get(id=int(ca_id))
             if patterns:
                 pattern = patterns[0].pattern
-                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, instance=todo, prefix=prefix)
+                form = WorkTodoForm(data=request.POST, pattern=pattern, agent=agent, context_agent=context_agent_in, instance=todo, prefix=prefix)
             else:
-                form = WorkTodoForm(data=request.POST, agent=agent, instance=todo, prefix=prefix)
+                form = WorkTodoForm(data=request.POST, agent=agent, context_agent=context_agent_in, instance=todo, prefix=prefix)
             if form.is_valid():
                 todo = form.save()
 
@@ -5079,7 +5792,7 @@ def work_add_process_worker(request, process_id):
             if notification:
                 agent = get_agent(request)
                 users = ct.possible_work_users()
-                site_name = get_site_name()
+                site_name = get_site_name(request)
                 if users:
                     notification.send(
                         users,
@@ -5704,7 +6417,7 @@ def work_join_task(request, commitment_id):
             for worker in workers:
                 worker_users = [au.user for au in worker.users.all()]
                 users.extend(worker_users)
-            site_name = get_site_name()
+            site_name = get_site_name(request)
             if users:
                 notification.send(
                     users,
@@ -5734,7 +6447,8 @@ def my_history(request): # tasks history
     user_is_agent = False
     if agent == user_agent:
         user_is_agent = True
-    event_list = agent.contributions()
+    #event_list = agent.contributions()
+    event_list = agent.given_events.all()
     no_bucket = 0
     with_bucket = 0
     event_value = Decimal("0.0")
@@ -6241,7 +6955,7 @@ def plan_work(request, rand=0):
                         if not work_commitment.from_agent:
                             agent = get_agent(request)
                             users = work_commitment.possible_work_users()
-                            site_name = get_site_name()
+                            site_name = get_site_name(request)
                             if users:
                                 notification.send(
                                     users,

@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.template.defaultfilters import slugify
 import json as simplejson
 from django.db.models.functions import Lower
+from django.conf import settings
 
 from valuenetwork.valueaccounting import faircoin_utils
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -395,7 +396,12 @@ class AgentManager(models.Manager):
     def without_membership_request(self):
         return self.filter(membership_requests__isnull=True).order_by("name")
 
-    def without_join_request(self):
+    def without_join_request(self, project=None):
+        if project:
+            ids = list(set([ag.id for ag in project.agent.managers()]))
+            if not project.agent.id in ids:
+                ids.append(project.agent.id)
+            return self.all().exclude(project_join_requests__isnull=False, project_join_requests__project__isnull=False, project_join_requests__project=project).exclude(id__in=ids).order_by('name')
         return self.filter(project_join_requests__isnull=True).order_by("name")
 
     def projects(self):
@@ -437,6 +443,13 @@ class AgentManager(models.Manager):
         except EconomicAgent.DoesNotExist:
             raise ValidationError("FreedomCoop Projects group does not exist by 'FC_Projects' nickname.")
         return fc
+
+    def root_ocp_agent(self):
+        try:
+            ocp = EconomicAgent.objects.get(nick="OCP")
+        except EconomicAgent.DoesNotExist:
+            raise ValidationError("OCP main root Agent does not exist by 'OCP' nickname.")
+        return ocp
 
     def open_projects(self):
         return EconomicAgent.objects.filter(project__visibility="public") #is_public="True")
@@ -550,6 +563,8 @@ class EconomicAgent(models.Model):
             return None
 
     def request_faircoin_address(self):
+        if not settings.USE_FAIRCOIN:
+            return None
         address = self.faircoin_address()
         if not address:
             address = "address_requested"
@@ -565,6 +580,8 @@ class EconomicAgent(models.Model):
         return address
 
     def create_faircoin_resource(self, address):
+        if not settings.USE_FAIRCOIN:
+            return None
         role_types = AgentResourceRoleType.objects.filter(is_owner=True)
         owner_role_type = None
         if role_types:
@@ -582,7 +599,7 @@ class EconomicAgent(models.Model):
             # resource type has unit
             va = EconomicResource(
                 resource_type=resource_type,
-                identifier="Faircoin address for " + self.nick,
+                identifier="Faircoin Ocp Account for " + self.nick,
                 digital_currency_address=address,
             )
             va.save()
@@ -598,6 +615,8 @@ class EconomicAgent(models.Model):
             return None
 
     def faircoin_address(self):
+        if not settings.USE_FAIRCOIN:
+            return None
         fcr = self.faircoin_resource()
         if fcr:
             return fcr.digital_currency_address
@@ -614,19 +633,27 @@ class EconomicAgent(models.Model):
         else:
             return None
 
-    def candidate_membership(self):
-        aa = self.candidate_association()
+    def candidate_membership(self, project_agent=None):
+        aa = self.candidate_association(project_agent)
         if aa:
             if aa.state == "potential":
                 return aa.has_associate
         return None
 
-    def candidate_association(self):
+    def candidate_association(self, project_agent=None):
         aas = self.is_associate_of.all()
+        if not project_agent:
+            try:
+                project_agent = EconomicAgent.objects.get(nick=settings.SEND_MEMBERSHIP_PAYMENT_TO)
+            except:
+                pass
         if aas:
-            aa = aas[0]
-            if aa.state == "potential":
-                return aa
+            for aa in aas:
+                #import pdb; pdb.set_trace() #aa = aas[0]
+                if project_agent and aa.has_associate == project_agent:
+                    if aa.state == "potential":
+                        return aa
+        return None
 
     def number_of_shares(self):
         if self.agent_type.party_type == "individual":
@@ -987,6 +1014,81 @@ class EconomicAgent(models.Model):
         if agent:
           ctx_ids.append(agent.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
+
+    def need_skills(self):
+        resp = True
+        ags = self.related_contexts()
+        add = 0
+        if not self in ags:
+            add = 1
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'skills' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
+            resp = False
+        #import pdb; pdb.set_trace()
+        return resp
+
+    def need_faircoins(self):
+        resp = True
+        ags = self.related_contexts()
+        add = 0
+        if not self in ags:
+            add = 1
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'faircoins' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
+            resp = False
+        #import pdb; pdb.set_trace()
+        return resp
+
+    def need_exchanges(self):
+        resp = True
+        ags = self.related_contexts()
+        add = 0
+        if not self in ags:
+            add = 1
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'exchanges' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
+            resp = False
+        return resp
+
+    def need_projects(self):
+        resp = True
+        ags = self.related_contexts()
+        if len(ags) < 2:
+            if ags[0].project and ags[0].project.services():
+                if not 'projects' in ags[0].project.services():
+                    resp = False
+        return resp
+
 
     def invoicing_candidates(self):
         ctx = self.related_contexts()
@@ -4270,7 +4372,7 @@ class EconomicResource(models.Model):
     author = models.ForeignKey(EconomicAgent, related_name="authored_resources",
         verbose_name=_('author'), blank=True, null=True)
     quantity = models.DecimalField(_('quantity'), max_digits=8, decimal_places=2,
-        default=Decimal("0.00"), editable=False)
+        default=Decimal("0.00"))
     quality = models.DecimalField(_('quality'), max_digits=3, decimal_places=0,
         default=Decimal("0"), blank=True, null=True)
     notes = models.TextField(_('notes'), blank=True, null=True)
@@ -4358,6 +4460,8 @@ class EconomicResource(models.Model):
         return False
 
     def digital_currency_history(self):
+        if not settings.USE_FAIRCOIN:
+            return None
         history = []
         address = self.digital_currency_address
         if address:
@@ -4365,6 +4469,8 @@ class EconomicResource(models.Model):
         return history
 
     def digital_currency_balance(self):
+        if not settings.USE_FAIRCOIN:
+            return None
         bal = 0
         address = self.digital_currency_address
         if address:
@@ -4378,6 +4484,8 @@ class EconomicResource(models.Model):
         return bal
 
     def digital_currency_balance_unconfirmed(self):
+        if not settings.USE_FAIRCOIN:
+            return "Not accessible now"
         bal = 0
         unconfirmed = 0
         address = self.digital_currency_address
@@ -4402,6 +4510,8 @@ class EconomicResource(models.Model):
         return bal
 
     def is_wallet_address(self):
+        if not settings.USE_FAIRCOIN:
+            return None
         address = self.digital_currency_address
         if address:
           if self.is_address_requested():
@@ -4417,6 +4527,8 @@ class EconomicResource(models.Model):
             return False
 
     def spending_limit(self):
+        if not settings.USE_FAIRCOIN:
+            return 0
         limit = 0
         address = self.digital_currency_address
         if address:
@@ -9876,7 +9988,7 @@ class ValueEquation(models.Model):
             va = None
             #todo faircoin distribution
             to_agent = dist_event.to_agent
-            if money_resource.is_digital_currency_resource():
+            if money_resource.is_digital_currency_resource() and settings.USE_FAIRCOIN:
                 #if testing:
                     # TODO faircoin distribution: shd put this into models
                     # faircoins are the only digital currency we handle now
@@ -10008,7 +10120,7 @@ class ValueEquation(models.Model):
             dist_event.event_date = distribution.distribution_date
             #todo faircoin distribution
             #digital_currency_resources for to_agents were created earlier in this method
-            if dist_event.resource.is_digital_currency_resource():
+            if dist_event.resource.is_digital_currency_resource() and settings.USE_FAIRCOIN:
                 address_origin = self.context_agent.faircoin_address()
                 address_end = dist_event.resource.digital_currency_address
                 # what about network_fee?
@@ -10282,6 +10394,7 @@ TX_STATE_CHOICES = (
     ('broadcast', _('Broadcast')),
     ('confirmed', _('Confirmed')),
     ('external', _('External')),
+    ('error', _('Error')),
 )
 
 class EconomicEvent(models.Model):
@@ -10557,6 +10670,8 @@ class EconomicEvent(models.Model):
         return nexts
 
     def transaction_state(self):
+        if not settings.USE_FAIRCOIN:
+            return None
         state = self.digital_currency_tx_state
         new_state = None
         if state == "external" or state == "pending" or state == "broadcast":
@@ -10575,6 +10690,8 @@ class EconomicEvent(models.Model):
         return state
 
     def to_faircoin_address(self):
+        if not settings.USE_FAIRCOIN:
+            return None
         if self.resource.is_digital_currency_resource():
             event_reference = self.event_reference
             if event_reference:

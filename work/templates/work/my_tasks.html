@@ -698,7 +698,7 @@ th, td {
 
 		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
-		$(".chzn-select").chosen();
+		//$(".chzn-select").chosen();
 		$("textarea").resizable();
 
 		jQuery.validator.setDefaults({
@@ -771,8 +771,39 @@ th, td {
 
 		$('.optional-quantity').blur(saveTime);
 		$('.did').blur(saveDescription);
+		
+		
+    $(".context-selector").change(getResourceTypes);
 
 	}); // end document.ready
+	
+	function getResourceTypes(event)
+    {
+        var selectedContext = event.target.value;
+        var contextId = event.target.id;
+        var idSplit = contextId.split('-');
+        if (idSplit.length > 1)
+        {
+            var prefix = idSplit[0] + "-" + idSplit[1];
+            var resourceTypeFieldId = "#" + prefix + "-" + "resource_type";
+        }
+        else
+        {
+            var resourceTypeFieldId = "#id_resource_type";
+        }
+        var jsonUrl = encodeURI("/work/json-context-resource_types/" + selectedContext + "/" + {{ pattern_id }} + "/" );
+        $(resourceTypeFieldId).empty();
+        $.get(jsonUrl,
+            function(data){
+                for(var i=0 ; i<data.length ; i++)
+                {
+                    var id = data[i]['pk'];
+                    var name = data[i].fields['name'];
+                    $(resourceTypeFieldId).append('<option value="' + id + '">' + name + '</option>')
+                }
+            });
+            
+    }
 
 	function saveTime(event)
 	{

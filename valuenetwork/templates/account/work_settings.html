@@ -1,18 +1,17 @@
 {% extends "work_base.html" %}
 
-
 {% load bootstrap_tags %}
 {% load i18n %}
+{% load staticfiles %}
 
-{% block head_title %}{% trans "Account" %}{% endblock %}
+{% block head_title %}{% trans "OCP Settings" %}{% endblock %}
 
 {% block body %}
-    <form method="POST" action="{% url "work_account_settings" %}">
-        <legend>
-          {% trans "Account Settings" %}
+    <legend>
+        <a class="indent" href="{% url 'profile' %}">{{ request.user.agent.agent.name }}</a> > {% trans "Settings" %}
 
-          <div class="subnav">
-            <a class="indent" href="{% url "profile" %}">{% trans "Your Profile" %}</a>
+        <div class="subnav">
+            <a class="indent" href="{% url "work_account_password" %}" >{% trans "Change password" %}</a>
             {% if request.user.agent.agent.faircoin_resource %}
               <a class="indent" href="{% url "manage_faircoin_account" resource_id=request.user.agent.agent.faircoin_resource.id %}"
                           title="{% trans 'Your personal faircoin wallet in OCP' %}"
@@ -30,13 +29,38 @@
                         </a>
                    {% endif %}
             {% endwith %}
-          </div>
-        </legend>
+        </div>
+    </legend>
+    <form method="POST" action="{% url "work_account_settings" %}">
         {% csrf_token %}
         {{ form|as_bootstrap }}
-        <div class="form-actions">
-            <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+        <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+        <hr />
+        <div class="">
+            <p><a href="{% url "work_account_password" %}" class="btn btn-primary" >{% trans "Change password" %}</a></p>
         </div>
-        <p><a href="{% url "work_account_password" %}">{% trans "Change password" %}</a></p>
     </form>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="https://code.jquery.com/jquery-1.12.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+{% block extra_body %}
+    <script type="text/javascript">
+	    $(document).ready(function(){
+
+            var ObjChos = {
+              //allow_single_deselect: true,
+              width: "290px",
+              no_results_text: "Oops, nothing found!",
+              max_selected_options: 1,
+              disable_search_threshold: 6,
+            };
+
+            //$(".chzn-select").chosen(ObjChos);
+
+        });
+    </script>
 {% endblock %}

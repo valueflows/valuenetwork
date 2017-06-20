@@ -16,7 +16,8 @@ def comment_notification(sender, comment, **kwargs):
 
             if users:
                 site_name = Site.objects.get_current().name
-                membership_url= "https://" + Site.objects.get_current().domain +\
+                domain = Site.objects.get_current().domain
+                membership_url= "https://" + domain +\
                     "/work/membership-discussion/" + str(comment.content_object.id) + "/"
                 notification.send(
                     users,
@@ -25,6 +26,7 @@ def comment_notification(sender, comment, **kwargs):
                     "comment": comment.comment,
                     "site_name": site_name,
                     "membership_url": membership_url,
+                    "current_site": domain,
                     }
                 )
 
@@ -43,18 +45,32 @@ def comment_notification(sender, comment, **kwargs):
                     users.append(manager.user().user)
 
             if users:
+                #import pdb; pdb.set_trace()
                 site_name = Site.objects.get_current().name
-                joinrequest_url= "https://" + Site.objects.get_current().domain +\
+                domain = Site.objects.get_current().domain
+                try:
+                    slug = comment.content_object.project.fobi_slug
+                    if settings.PROJECTS_LOGIN:
+                        obj = settings.PROJECTS_LOGIN
+                        for pro in obj:
+                            if pro == slug:
+                                site_name = comment.content_object.project.agent.name
+                                domain = kwargs['request'].get_host()
+                except:
+                    pass
+
+                joinrequest_url= "https://" + domain +\
                     "/work/project-feedback/" + str(comment.content_object.project.agent.id) +\
                     "/" + str(comment.content_object.id) + "/"
                 notification.send(
                     users,
                     "comment_join_request",
                     {"name": comment.name,
-                     "comment": comment.comment,
-                     "site_name": site_name,
-                     "joinrequest_url": joinrequest_url,
-                     "jn_req": comment.content_object,
+                    "comment": comment.comment,
+                    "site_name": site_name,
+                    "joinrequest_url": joinrequest_url,
+                    "jn_req": comment.content_object,
+                    "current_site": domain,
                     }
                 )
 

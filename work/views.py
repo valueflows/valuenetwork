@@ -332,7 +332,7 @@ def manage_faircoin_account(request, resource_id):
         if resource.owner() == user_agent or resource.owner() in user_agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             wallet = faircoin_utils.fairwallet_obj()
-            if False and wallet:
+            if wallet:
                 if resource.is_wallet_address():
                     limit = resource.spending_limit()
                 else:

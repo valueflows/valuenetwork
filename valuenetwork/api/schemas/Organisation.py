@@ -22,6 +22,8 @@ class Query(AgentBase, graphene.AbstractType):
     organization = graphene.Field(Organization,
                                   id=graphene.Int())
 
+    all_organizations = graphene.List(Organization)
+
     # load context agents that 'me' is related to with 'member' or 'manager' behavior
     # (this gives the projects, collectives, groups that the user agent is any
     # kind of member of)
@@ -37,3 +39,8 @@ class Query(AgentBase, graphene.AbstractType):
         if id is not None:
             return EconomicAgent.objects.get(pk=id, is_context=True)    # :TODO: @fosterlynn what's correct here?
         return None
+
+    # load all organizations
+
+    def resolve_all_organizations(self, args, context, info):
+        return EconomicAgent.objects.all(is_context=True)   # :TODO: @fosterlynn what's correct here?

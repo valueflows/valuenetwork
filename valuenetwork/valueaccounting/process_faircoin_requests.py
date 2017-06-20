@@ -48,8 +48,42 @@ def acquire_lock():
     logger.debug("lock acquired.")
     return lock
 
+def create_address_from_file(entity_id, entity):
+    filename = settings.NEW_FAIRCOIN_ADDRESSES_FILE
+    address = None
+    with open(filename, 'r') as fin:
+        try:
+            data = fin.read().splitlines(True)
+            address_in_file, privkey = data[0].strip().split(',')
+        except:
+            logger.critical("Error reading new faircoin addresses file.")
+            return None
+    try:
+        status, address = efn.import_key(privkey, entity_id, entity)
+    except:
+        logger.critical("Error importing key: " + address)
+        return None
+    if status == 'ERROR':
+        logger.critical("Error importing key: " + address)
+        return None
+    if address != address_in_file:
+        logger.warning("Address returned on importing key is different from the file one.")
+    with open(filename, 'w') as fout:
+        try:
+           fout.writelines(data[1:])
+       except:
+           logger.critical("Error writting new faircoin addresses file.")
+
+    return address
+
 def create_address_for_agent(agent):
     address = None
+    if hasattr(settings, 'NEW_FAIRCOIN_ADDRESSES_FILE'):
+        address = create_address_from_file(
+            entity_id = agent.nick.encode('ascii','ignore'),
+            entity = agent.agent_type.name,
+            )
+        return address
     if init_electrum_fair():
         try:
             address = efn.new_fair_address(

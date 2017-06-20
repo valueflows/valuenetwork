@@ -154,3 +154,9 @@ def daemon_is_up():
 def get_wallet_info():
      response = send_command('get_wallet_info', '')
      return response
+
+#import private key and label address
+def import_key(privkey, entity_id, entity = 'generic'):
+    format_dict = [privkey, entity_id, entity]
+    response = send_command('import_key', format_dict)
+    return response

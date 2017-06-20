@@ -19,8 +19,8 @@ def init_electrum_fair():
     try:
         daemon = efn.daemon_is_up()
     except:
-        msg = "Cannot connect with daemon. Exiting."
-        assert False, msg
+        logger.critical("Cannot connect with daemon.")
+        return False
 
     if not daemon or (daemon == 'ERROR'):
         return False
@@ -28,8 +28,8 @@ def init_electrum_fair():
     try:
         network = efn.is_connected()
     except:
-        msg = "Cannot connect with electrum-server. Exiting."
-        assert False, msg
+        logger.critical("Cannot connect with electrum-server.")
+        return False
 
     return network and (network != 'ERROR')
 
@@ -48,8 +48,43 @@ def acquire_lock():
     logger.debug("lock acquired.")
     return lock
 
+def create_address_from_file(entity_id, entity):
+    filename = settings.NEW_FAIRCOIN_ADDRESSES_FILE
+    address = None
+    with open(filename, 'r') as fin:
+        try:
+            data = fin.read().splitlines(True)
+            address_in_file, privkey = data[0].strip().split(',')
+        except:
+            logger.critical("Error reading new faircoin addresses file.")
+            return None
+    try:
+        status, address = efn.import_key(privkey, entity_id, entity)
+    except:
+        logger.critical("Error importing key: " + address)
+        return None
+    if status == 'ERROR':
+        logger.critical("Error importing key: " + address)
+        return None
+    if address != address_in_file:
+        logger.warning("Address returned on importing key is different from the file one.")
+    with open(filename, 'w') as fout:
+        try:
+           fout.writelines(data[1:])
+       except:
+           logger.critical("Error writting new faircoin addresses file.")
+    logger.debug("Private key succesfully imported to wallet for "
+        + str(entity) + ": " + str(entity_id))
+    return address
+
 def create_address_for_agent(agent):
     address = None
+    if hasattr(settings, 'NEW_FAIRCOIN_ADDRESSES_FILE'):
+        address = create_address_from_file(
+            entity_id = agent.nick.encode('ascii','ignore'),
+            entity = agent.agent_type.name,
+            )
+        return address
     if init_electrum_fair():
         try:
             address = efn.new_fair_address(

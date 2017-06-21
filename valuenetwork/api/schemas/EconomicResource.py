@@ -14,24 +14,8 @@ from graphene_django.types import DjangoObjectType
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicAgent
 from valuenetwork.api.schemas.helpers import *
 
-#from valuenetwork.api.types.EconomicResource import EconomicResourceType
+from valuenetwork.api.types.EconomicResource import EconomicResource
 
-# bind Django models to Graphene types
-
-class EconomicResource(DjangoObjectType):
-    resource_type = graphene.String(source='resource_type_name') # need to figure this out with VF gang
-    tracking_identifier = graphene.String(source='tracking_identifier')
-    image = graphene.String(source='image')
-    numeric_value = graphene.Float(source='numeric_value')
-    unit = graphene.String(source='unit')
-    note = graphene.String(source='note')
-
-    class Meta:
-        model = EconomicResourceProxy
-        only_fields = ('id')
-
-
-# define public query API
 
 class Query(graphene.AbstractType):
 
@@ -50,6 +34,7 @@ class Query(graphene.AbstractType):
 
     #owned_inventory_economic_resources = graphene.List(EconomicResource,
     #                                                   id=graphene.Int())
+
     # load single resource
 
     def resolve_economic_resource(self, args, *rargs):

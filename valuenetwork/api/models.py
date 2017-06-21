@@ -19,6 +19,7 @@ class Organization(models.Model):
     note = models.TextField(blank=True, null=True)
     image = models.CharField(max_length=255, blank=True)
     is_context = models.BooleanField(default=False)
+    type = models.CharField(max_length=255)
 
     class Meta:
         managed = False
@@ -30,6 +31,7 @@ class Person(models.Model):
     note = models.TextField(blank=True, null=True)
     image = models.CharField(max_length=255, blank=True)
     is_context = models.BooleanField(default=False)
+    type = models.CharField(max_length=255, default="Person")
 
     class Meta:
         managed = False

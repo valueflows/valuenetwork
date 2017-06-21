@@ -55,8 +55,7 @@ class Query(AgentBase, graphene.AbstractType):
                     id=agent.id,
                     name = agent.name,
                     note = agent.description,
-                    image = agent.image,
-                    is_context = False)
+                    image = agent.image)
                 mixed_list.append(person)
             else:
                 org = Organization(
@@ -64,6 +63,7 @@ class Query(AgentBase, graphene.AbstractType):
                     name = agent.name,
                     note = agent.description,
                     image = agent.image,
-                    is_context = agent.is_context)
+                    is_context = agent.is_context,
+                    type = agent.agent_type)
                 mixed_list.append(org)
         return mixed_list

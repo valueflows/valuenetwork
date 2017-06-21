@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 import graphene
 
 from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
+from valuenetwork.api.models import Organization, Person
 
 from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Agent
@@ -45,4 +46,24 @@ class Query(AgentBase, graphene.AbstractType):
     # load all agent lists
 
     def resolve_all_agents(self, args, context, info):
-        return EconomicAgent.objects.all()
+        #return EconomicAgent.objects.all()
+        all_agents = EconomicAgent.objects.all()
+        mixed_list = []
+        for agent in all_agents:
+            if agent.agent_type.party_type == "individual":
+                person = Person(
+                    id=agent.id,
+                    name = agent.name,
+                    note = agent.description,
+                    image = agent.image,
+                    is_context = False)
+                mixed_list.append(person)
+            else:
+                org = Organization(
+                    id=agent.id,
+                    name = agent.name,
+                    note = agent.description,
+                    image = agent.image,
+                    is_context = agent.is_context)
+                mixed_list.append(org)
+        return mixed_list

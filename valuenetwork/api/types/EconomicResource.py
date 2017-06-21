@@ -20,6 +20,7 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
     image = graphene.String(source='image')
     numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
     unit = graphene.String(source='unit')
+    #quantity_value = 
     note = graphene.String(source='note')
     category = graphene.String(source='category')
     

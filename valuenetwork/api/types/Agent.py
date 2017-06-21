@@ -13,6 +13,7 @@ from valuenetwork.valueaccounting.models import EconomicAgent
 from EconomicResource import EconomicResourceCategory, EconomicResource
 from Process import Process
 from EconomicEvent import EconomicEvent
+from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel
 
 
 def _load_identified_agent(self):
@@ -33,7 +34,7 @@ class Agent(graphene.Interface):
 
     organizations = graphene.List(lambda: Organization)
 
-    owned_economic_resources = graphene.List(lambda: EconomicResource, 
+    owned_economic_resources = graphene.List(lambda: EconomicResource,
                                              category=EconomicResourceCategory())
 
     agent_processes = graphene.List(lambda: Process,
@@ -90,8 +91,8 @@ class Agent(graphene.Interface):
 class Person(DjangoObjectType):
     class Meta:
         interfaces = (Agent, )
-        model = EconomicAgent
-        only_fields = ('id', 'name')
+        model = PersonModel #EconomicAgent
+        only_fields = ('id', 'name', 'image')
 
 
 # Organization type- an Agent which can have other Agents as members
@@ -111,5 +112,5 @@ class Organization(DjangoObjectType):
 
     class Meta:
         interfaces = (Agent, )
-        model = EconomicAgent
-        only_fields = ('id', 'name')
+        model = OrganizationModel #EconomicAgent
+        only_fields = ('id', 'name', 'image', 'category', 'note')

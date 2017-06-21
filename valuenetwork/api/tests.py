@@ -77,7 +77,7 @@ class AgentSchemaTest(TestCase):
         self.assertEqual(None, result.data['viewer'])
         self.assertTrue(len(result.errors) == 1)
         self.assertEqual('Invalid password', str(result.errors[0]))
-        
+
 '''
 ## Complex queries ##
 
@@ -98,13 +98,10 @@ query ($token: String) {
         name
         members {
           name
+          organizations {
+            name
+          }
         }
-      }
-    }
-    organization(id: 80) {
-      ...coreAgentFields
-      members {
-        name
       }
     }
   }
@@ -114,19 +111,8 @@ query ($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    myAgent { 
-      id 
-      name
-      image
-      note
-      type
-    }
-  }
-} 
-query($token: String) {
-  viewer(token: $token) {
-    agent(id:39) { 
-      id 
+    myAgent {
+      id
       name
       image
       note
@@ -136,8 +122,8 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    allAgents { 
-      id 
+    agent(id:39) {
+      id
       name
       image
       note
@@ -147,8 +133,8 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    myOrganizations { 
-      id 
+    allAgents {
+      id
       name
       image
       note
@@ -158,7 +144,29 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    allAgentRelationshipRoles { 
+    allAgents {
+      id
+      name
+      image
+      note
+      __typename
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    myOrganizations {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allAgentRelationshipRoles {
       id
       label
       inverseLabel
@@ -167,7 +175,7 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    allAgentRelationships { 
+    allAgentRelationships {
       id
       subject
       relationship
@@ -177,7 +185,7 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    agentRelationships (id: 39) { 
+    agentRelationships (id: 39) {
       id
       subject
       relationship
@@ -262,8 +270,8 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    process(id:3) { 
-      id 
+    process(id:3) {
+      id
       name
       plannedStart
       plannedDuration
@@ -274,8 +282,8 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    allProcesses { 
-      id 
+    allProcesses {
+      id
       name
       plannedStart
       plannedDuration
@@ -288,8 +296,8 @@ query($token: String) {
   viewer(token: $token) {
     agent(id:26) {
       name
-      agentProcesses { 
-        id 
+      agentProcesses {
+        id
         name
         plannedStart
         plannedDuration
@@ -303,8 +311,8 @@ query($token: String) {
   viewer(token: $token) {
     agent(id:26) {
       name
-      agentProcesses (isFinished: false) { 
-        id 
+      agentProcesses (isFinished: false) {
+        id
         name
         plannedStart
         plannedDuration
@@ -342,7 +350,7 @@ query($token: String) {
   viewer(token: $token) {
     agent(id:6) {
       name
-      economicEvents { 
+      economicEvents {
         id
         action
         start

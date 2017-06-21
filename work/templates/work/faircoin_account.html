@@ -134,12 +134,20 @@
                     {% if resource.owner == request.user.agent.agent or resource.owner in request.user.agent.agent.managed_projects %}
 	                  <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        {% if wallet %}
+                        {% if wallet and wallet.network %}
+                          {% if resource.balance and resource.newbalance %}
+                            {% if not resource.balance == resource.newbalance %}
+                                <td>{{ resource.balance }} (-> {{ resource.newbalance }}) {{ resource.unit_of_quantity }}</td>
+                            {% else %}
+                                <td>{{ resource.balance }} {{ resource.unit_of_quantity }}</td>
+                            {% endif %}
+                          {% else %}
                             {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
                                 <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
                             {% else %}
                                 <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
                             {% endif %}
+                          {% endif %}
                         {% else %}
                             <td><span class="error">{% trans "Not available now" %}</span></td>
                         {% endif %}

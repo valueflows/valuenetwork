@@ -347,7 +347,11 @@ def manage_faircoin_account(request, resource_id):
             faircoin_account = resource.owner().faircoin_resource()
             balance = 0
             if faircoin_account and wallet:
-                balance = faircoin_account.digital_currency_balance_unconfirmed()
+                if not resource.newbalance:
+                    balance = faircoin_account.digital_currency_balance_unconfirmed()
+                    resource.newbalance = balance
+                else:
+                    balance = resource.newbalance
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
             number_of_shares = resource.owner().number_of_shares()

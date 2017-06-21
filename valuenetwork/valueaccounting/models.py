@@ -4483,6 +4483,8 @@ class EconomicResource(models.Model):
                     self.balance = bal
             except:
                 bal = "Not accessible now"
+          else:
+            bal = self.balance
         return bal
 
     def digital_currency_balance_unconfirmed(self):

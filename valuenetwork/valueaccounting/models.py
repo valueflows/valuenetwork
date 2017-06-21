@@ -4474,11 +4474,13 @@ class EconomicResource(models.Model):
         bal = 0
         address = self.digital_currency_address
         if address:
+          if not self.balance:
             try:
                 balance = faircoin_utils.get_address_balance(address)
                 balance = balance[0]
                 if balance:
                     bal = Decimal(balance) / FAIRCOIN_DIVISOR
+                    self.balance = bal
             except:
                 bal = "Not accessible now"
         return bal
@@ -4490,6 +4492,7 @@ class EconomicResource(models.Model):
         unconfirmed = 0
         address = self.digital_currency_address
         if address:
+          if not self.newbalance:
             try:
                 balance = faircoin_utils.get_address_balance(address)
                 balance1 = balance[0]
@@ -4505,8 +4508,11 @@ class EconomicResource(models.Model):
                 bal = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
                 if newadd:
                     bal += newadd
+                self.newbalance = bal
             except:
                 bal = "Not accessible now"
+          else:
+            bal = self.newbalance
         return bal
 
     def is_wallet_address(self):

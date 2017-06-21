@@ -4474,7 +4474,7 @@ class EconomicResource(models.Model):
         bal = 0
         address = self.digital_currency_address
         if address:
-          if not self.balance:
+          if not hasattr(self, 'balance'):
             try:
                 balance = faircoin_utils.get_address_balance(address)
                 balance = balance[0]
@@ -4492,7 +4492,7 @@ class EconomicResource(models.Model):
         unconfirmed = 0
         address = self.digital_currency_address
         if address:
-          if not self.newbalance:
+          if not hasattr(self, 'newbalance'):
             try:
                 balance = faircoin_utils.get_address_balance(address)
                 balance1 = balance[0]

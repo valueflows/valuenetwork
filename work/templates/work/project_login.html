@@ -64,7 +64,7 @@ body {
         <h4>{% if project.agent.photo_url %}
                 <img src="{{ project.agent.photo_url }}" title="{{ project.agent.name }}">
             {% elif project.agent.photo %}
-                <img src="{% thumbnail project.agent.photo 300 %}" title="{{ project.agent.name }}">
+                <img src="{% thumbnail project.agent.photo 500x500 %}" title="{{ project.agent.name }}">
             {% endif %}
         </h4>
         <h1>{% if not project.agent.photo_url or project.agent.photo %}{{ project.agent.name }}{% endif %}</h1>

@@ -316,7 +316,7 @@ def manage_faircoin_account(request, resource_id):
     send_coins_form = None
     limit = 0
 
-    if not resource.owner() == user_agent or not resource.owner() in user_agent.managed_projects():
+    if not (resource.owner() == user_agent or resource.owner() in user_agent.managed_projects()):
         return render(request, 'work/no_permission.html')
 
     payment_due = False
@@ -328,29 +328,29 @@ def manage_faircoin_account(request, resource_id):
     balance = False
 
     if user_agent:
-        if resource.owner() is user_agent or resource.owner() in user_agent.managed_projects():
+        if resource.owner() == user_agent or resource.owner() in user_agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             limit = resource.spending_limit()
 
-        candidate_membership = user_agent.candidate_membership()
+        candidate_membership = resource.owner().candidate_membership()
         if candidate_membership:
-            faircoin_account = user_agent.faircoin_resource()
+            faircoin_account = resource.owner().faircoin_resource()
             balance = 0
             if faircoin_account:
                 balance = faircoin_account.digital_currency_balance_unconfirmed()
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
-            number_of_shares = user_agent.number_of_shares()
+            number_of_shares = resource.owner().number_of_shares()
             share_price = share_price * number_of_shares
-            payment_due = False
-            if not agent.owns_resource_of_type(share):
-                payment_due = True
+            payment_due = True
+            if resource.owner().owns_resource_of_type(share):
+                payment_due = False
             can_pay = balance >= share_price
 
     return render(request, "work/faircoin_account.html", {
         "resource": resource,
         "photo_size": (128, 128),
-        "agent": agent,
+        "agent": resource.owner(),
         "send_coins_form": send_coins_form,
         "limit": limit,
 
@@ -852,7 +852,7 @@ def your_projects(request):
           aat.assoc_count = node.associate_count_of_type(aat.identifier)
           assoc_list = node.all_has_associates_by_type(aat.identifier)
           for assoc in assoc_list:
-            association = AgentAssociation.objects.get(is_associate=assoc, has_associate=node, association_type=aat)#
+            association = AgentAssociation.objects.filter(is_associate=assoc, has_associate=node, association_type=aat)[0]#
             assoc.state = association.state
           aat.assoc_list = assoc_list
           if not aat in aats:
@@ -1086,6 +1086,16 @@ def members_agent(request, agent_id):
 
     upload_form = UploadAgentForm(instance=agent)
 
+    related_rts = []
+    if agent.project_join_requests:
+        for req in agent.project_join_requests.all():
+            if req.project.agent in user_agent.managed_projects() or user_agent is req.project.agent:
+                rtsc = req.project.rts_with_clas()
+                rts = list(set([arr.resource.resource_type for arr in agent.resource_relationships()]))
+                for rt in rtsc:
+                    if rt in rts:
+                        related_rts.append(rt)
+
     auto_resource = ''
     if user_agent in agent.managers() or user_is_agent or request.user.is_staff:
       #import pdb; pdb.set_trace()
@@ -1149,6 +1159,7 @@ def members_agent(request, agent_id):
         "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
         "Stype_form": Stype_form,
         "auto_resource": auto_resource,
+        "related_rts": related_rts,
     })
 
 
@@ -1368,7 +1379,7 @@ def joinaproject_request(request, form_slug = False):
 
         try:
             user_agent = request.user.agent.agent
-            if user_agent and request.user.is_authenticated and user_agent.is_active_freedom_coop_member or request.user.is_staff:
+            if user_agent and request.user.is_authenticated: # and user_agent.is_active_freedom_coop_member or request.user.is_staff:
                 return joinaproject_request_internal(request, project.agent.id)
         except:
             user_agent = False
@@ -1489,13 +1500,13 @@ def joinaproject_request(request, form_slug = False):
                     saved_data = json.dumps(cleaned_data)
                     )
                 saved_form_data_entry.save()
-                jn = JoinRequest.objects.get(pk=jn_req.pk)
-                jn.fobi_data = saved_form_data_entry
+                jn_req = JoinRequest.objects.get(pk=jn_req.pk)
+                jn_req.fobi_data = saved_form_data_entry
                 #messages.info(
                 #    request,
                 #    _("JoinRequest {0} was submitted successfully. {1}").format(jn.fobi_data, saved_form_data_entry.pk)
                 #)
-                jn.save()
+                jn_req.save()
 
             # add relation candidate
             #ass_type = get_object_or_404(AgentAssociationType, identifier="participant")
@@ -1558,7 +1569,7 @@ def joinaproject_request(request, form_slug = False):
 
             return render(request, "work/joinaproject_thanks.html", {
                 "project": project,
-                "jn_req": jn,
+                "jn_req": jn_req,
                 #"fobi_form": fobi_form,
                 #"field_map": field_name_to_label_map,
                 #"post": escapejs(json.dumps(request.POST)),
@@ -1583,6 +1594,8 @@ def joinaproject_request_internal(request, agent_id = False):
     proj_agent = get_object_or_404(EconomicAgent, id=agent_id)
     project = proj_agent.project
     form_slug = project.fobi_slug
+    if form_slug and form_slug == 'freedom-coop':
+        return redirect('membership_request')
     join_form = JoinRequestInternalForm(data=request.POST or None)
     fobi_form = False
     cleaned_data = False
@@ -1696,13 +1709,13 @@ def joinaproject_request_internal(request, agent_id = False):
                     saved_data = json.dumps(cleaned_data)
                     )
                 saved_form_data_entry.save()
-                jn = JoinRequest.objects.get(pk=jn_req.pk)
-                jn.fobi_data = saved_form_data_entry
+                jn_req = JoinRequest.objects.get(pk=jn_req.pk)
+                jn_req.fobi_data = saved_form_data_entry
                 #messages.info(
                 #    request,
                 #    _("JoinRequest {0} was submitted successfully. {1}").format(jn.fobi_data, saved_form_data_entry.pk)
                 #)
-                jn.save()
+                jn_req.save()
 
             # add relation candidate
             if jn_req.agent:
@@ -4680,14 +4693,24 @@ def project_resource(request, agent_id, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_object_or_404(EconomicAgent, id=agent_id)
     user_agent = get_agent(request)
-    if not (agent == user_agent or user_agent in agent.managers() or request.user.is_superuser):
+    user_agent.managed_rts = []
+    for ag in user_agent.managed_projects():
+        try:
+            rts = ag.project.rts_with_clas()
+            for rt in rts:
+                if not rt in user_agent.managed_rts:
+                    user_agent.managed_rts.append(rt)
+        except:
+            pass
+
+    if not (agent == user_agent or user_agent in agent.managers() or request.user.is_superuser or resource.resource_type in user_agent.managed_rts ):
         return render(request, 'work/no_permission.html')
 
     RraFormSet = modelformset_factory(
         AgentResourceRole,
-        form=ResourceRoleAgentForm,
+        form=ResourceRoleContextAgentForm,
         can_delete=True,
-        extra=4,
+        extra=2,
         )
     role_formset = RraFormSet(
         prefix="role",
@@ -4738,7 +4761,8 @@ def project_resource(request, agent_id, resource_id):
                 return HttpResponseRedirect('/%s/%s/%s/%s'
                     % ('work/agent', agent.id, 'resource', resource.id))
     if resource.is_digital_currency_resource():
-        send_coins_form = None
+        return manage_faircoin_account(request, resource.id) #HttpResponseRedirect(reverse('manage_faircoin_account', kwargs={'resource_id': resource.id}))
+        """send_coins_form = None
         is_owner=False
         limit = 0
         if agent:
@@ -4755,7 +4779,7 @@ def project_resource(request, agent_id, resource_id):
             "is_owner": is_owner,
             "send_coins_form": send_coins_form,
             "limit": limit,
-        })
+        })"""
     else:
         return render(request, "work/project_resource.html", {
             "resource": resource,
@@ -4764,6 +4788,7 @@ def project_resource(request, agent_id, resource_id):
             "order_form": order_form,
             "role_formset": role_formset,
             "agent": agent,
+            "user_agent": user_agent,
         })
 
 @login_required
@@ -4780,22 +4805,24 @@ def change_resource(request, agent_id, resource_id):
             resource = form.save(commit=False)
             resource.changed_by=request.user
             resource.save()
-            RraFormSet = modelformset_factory(
-                AgentResourceRole,
-                form=ResourceRoleAgentForm,
-                can_delete=True,
-                extra=4,
-                )
-            role_formset = RraFormSet(
-                prefix="role",
-                queryset=resource.agent_resource_roles.all(),
-                data=request.POST
-                )
-            if role_formset.is_valid():
-                saved_formset = role_formset.save(commit=False)
-                for role in saved_formset:
-                    role.resource = resource
-                    role.save()
+            if not resource.resource_type.is_virtual_account() or request.user.is_superuser:
+                RraFormSet = modelformset_factory(
+                    AgentResourceRole,
+                    form=ResourceRoleContextAgentForm,
+                    can_delete=True,
+                    extra=2,
+                    )
+                role_formset = RraFormSet(
+                    prefix="role",
+                    queryset=resource.agent_resource_roles.all(),
+                    data=request.POST
+                    )
+                #import pdb; pdb.set_trace()
+                if role_formset.is_valid():
+                    saved_formset = role_formset.save(commit=False)
+                    for role in saved_formset:
+                        role.resource = resource
+                        role.save()
             return HttpResponseRedirect('/%s/%s/%s/%s'
                 % ('work/agent', agent.id, 'resources', resource_id))
         else:

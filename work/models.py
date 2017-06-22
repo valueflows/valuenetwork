@@ -130,12 +130,16 @@ class Project(models.Model):
             return entry
         return False
 
-    def rts_with_clas(self):
+    def rts_with_clas(self, clas=None):
         rts_with_clas = []
         rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
         for rt in rts:
             if hasattr(rt, 'ocp_artwork_type') and rt.ocp_artwork_type and rt.ocp_artwork_type.clas:
-                rts_with_clas.append(rt)
+                if clas:
+                    if clas == rt.ocp_artwork_type.clas:
+                        rts_with_clas = rt
+                else:
+                    rts_with_clas.append(rt)
         return rts_with_clas
 
     def share_types(self):
@@ -164,6 +168,31 @@ class Project(models.Model):
             if len(shr_ts):
                 return shr_ts
         return False
+
+    def share_totals(self):
+        shr_ts = self.share_types()
+        shares_res = None
+        total = 0
+        self.holders = 0
+        if shr_ts:
+            rts = self.rts_with_clas()
+            shr_rt = None
+            for rt in rts:
+                if rt.ocp_artwork_type.ocpArtworkType_unit_type:
+                    if rt.ocp_artwork_type.ocpArtworkType_unit_type.clas == 'share':
+                        shr_rt = rt
+            if shr_rt:
+                shares_res = EconomicResource.objects.filter(resource_type=shr_rt)
+        if shares_res:
+            for res in shares_res:
+                if res.price_per_unit:
+                    total += res.price_per_unit
+                    self.holders += 1
+        return total
+
+    def share_holders(self):
+        if self.share_totals():
+            return self.holders
 
     def payment_options(self):
         pay_opts = []
@@ -305,7 +334,7 @@ class JoinRequest(models.Model):
         default="individual")
     name = models.CharField(_('Name'), max_length=255)
     surname = models.CharField(_('Surname (for individual join requests)'), max_length=255, blank=True)
-    requested_username = models.CharField(_('Requested username'), max_length=32, help_text=_("If you have already an account in OCP, you can put the same username."))
+    requested_username = models.CharField(_('Requested username'), max_length=32, help_text=_("If you have already an account in OCP, you can put the same username to have this project in the same account, or you can choose another username to have it separate."))
     email_address = models.EmailField(_('Email address'), max_length=96,)
     #    help_text=_("this field is optional, but we can't contact you via email without it"))
     phone_number = models.CharField(_('Phone number'), max_length=32, blank=True, null=True)
@@ -439,11 +468,11 @@ class JoinRequest(models.Model):
                 #import pdb; pdb.set_trace()
                 return 0
 
-        return '??'
+        return False #'??'
 
     def payment_option(self):
         answer = {}
-        if self.project.joining_style == "moderated" and self.fobi_data.pk:
+        if self.project.joining_style == "moderated" and self.fobi_data:
             for key in self.fobi_items_keys():
                 if key == "payment_mode": # fieldname specially defined in the fobi form
                     self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')

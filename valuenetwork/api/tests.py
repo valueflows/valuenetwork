@@ -79,7 +79,9 @@ class AgentSchemaTest(TestCase):
         self.assertEqual('Invalid password', str(result.errors[0]))
         
 '''
-fragment coreAgentFields on AgentBaseType {
+## Complex queries ##
+
+fragment coreAgentFields on Agent {
   id
   name
   image
@@ -111,6 +113,8 @@ query ($token: String) {
 
 
 '''
+## Basic queries for all entities ##
+
 query($token: String) {
   viewer(token: $token) {
     myAgent { 

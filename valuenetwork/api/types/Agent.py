@@ -11,7 +11,7 @@ from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 from . import OrganizationResource, OrganizationProcess
-from EconomicResourceBase import EconomicResourceCategory
+from EconomicResource import EconomicResourceCategory, EconomicResource
 
 
 # Helpers (can't call between methods of the base class since DjangoObjectType
@@ -35,8 +35,7 @@ class Agent(graphene.Interface):
 
     organizations = graphene.List(lambda: Organization)
 
-    owned_economic_resources = graphene.List(OrganizationResource.OrganizationResource,
-                                            category=EconomicResourceCategory())
+    owned_economic_resources = graphene.List(lambda: EconomicResource)
 
     unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcess)
 

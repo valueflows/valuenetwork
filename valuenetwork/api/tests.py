@@ -223,41 +223,19 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    ownedEconomicResources (id: 26) {
-      id
-      resourceType
-      trackingIdentifier
-      numericValue
-      unit
-      image
-      note
+    agent (id: 26) {
+      name
+      ownedEconomicResources {
+      	id
+      	resourceType
+      	trackingIdentifier
+      	numericValue
+      	unit
+      	image
+      	note        
+      }
     }
   }
 }
-query($token: String) {
-  viewer(token: $token) {
-    ownedCurrencyEconomicResources (id: 26) {
-      id
-      resourceType
-      trackingIdentifier
-      numericValue
-      unit
-      image
-      note
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    ownedInventoryEconomicResources (id: 26) {
-      id
-      resourceType
-      trackingIdentifier
-      numericValue
-      unit
-      image
-      note
-    }
-  }
-}
+
 '''

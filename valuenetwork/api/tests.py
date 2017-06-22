@@ -314,4 +314,43 @@ query($token: String) {
     }
   }
 }
+query ($token: String) {
+  viewer(token: $token) {
+    economicEvent(id: 296) {
+      id
+      action
+      start
+      numericValue
+      unit
+      note
+    }
+  }
+}
+query ($token: String) {
+  viewer(token: $token) {
+    allEconomicEvents {
+      id
+      action
+      start
+      numericValue
+      unit
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:6) {
+      name
+      economicEvents { 
+        id
+        action
+        start
+        numericValue
+        unit
+        note
+      }
+    }
+  }
+}
 '''

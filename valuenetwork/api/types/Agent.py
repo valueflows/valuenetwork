@@ -12,10 +12,8 @@ from graphene_django.types import DjangoObjectType
 from valuenetwork.valueaccounting.models import EconomicAgent
 from EconomicResource import EconomicResourceCategory, EconomicResource
 from Process import Process
+from EconomicEvent import EconomicEvent
 
-
-# Helpers (can't call between methods of the base class since DjangoObjectType
-# overrides `self` to be the bound Django model instance)
 
 def _load_identified_agent(self):
     return EconomicAgent.objects.get(pk=self.id)
@@ -41,6 +39,8 @@ class Agent(graphene.Interface):
     agent_processes = graphene.List(lambda: Process,
                                     is_finished=graphene.Boolean())
 
+    economic_events = graphene.List(lambda: EconomicEvent)
+
     # Resolvers
 
     def resolve_organizations(self, args, context, info):
@@ -60,17 +60,27 @@ class Agent(graphene.Interface):
             return org.owned_resources()
         return None
 
+    # if an organization, this returns processes done in that context
+    # if a person, this returns proceses the person has worked on
     def resolve_agent_processes(self, args, context, info):
-        org = _load_identified_agent(self)
-        if org:
+        agent = _load_identified_agent(self)
+        if agent:
+            agent_processes = agent.all_processes()
             finished = args.get('is_finished', None)
             if finished != None:
                 if not finished:
-                    return org.processes.filter(finished=False)
+                    return agent_processes.filter(finished=False)
                 else:
-                    return org.processes.filter(finished=True)
+                    return agent_processes.filter(finished=True)
             else:
-                return org.processes.all()
+                return agent_processes
+        return None
+
+    #returns events where an agent is a provider, receiver, or scope agent
+    def resolve_economic_events(self, args, context, info):
+        agent = _load_identified_agent(self)
+        if agent:
+            return agent.involved_in_events()
         return None
 
 
@@ -95,6 +105,7 @@ class Organization(DjangoObjectType):
         if org:
             return org.members()
         return None
+
 
     # Django model binding
 

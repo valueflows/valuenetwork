@@ -797,6 +797,9 @@ class EconomicAgent(models.Model):
 
     def contributions(self):
         return self.given_events.filter(is_contribution=True)
+    
+    def involved_in_events(self):
+        return EconomicEvent.objects.filter(Q(from_agent=self)|Q(to_agent=self)|Q(context_agent=self))
 
     def user(self):
         users = self.users.filter(user__is_active=True)
@@ -6323,6 +6326,14 @@ class Process(models.Model):
     def planned_duration(self):
         return self.end_date - self.start_date
     
+    #@property #ValueFlows
+    #def numeric_duration(self):
+    #    return self.end_date - self.start_date #TODO get in tune with VF, get VF resolved
+    
+    #@property #ValueFlows
+    #def temporal_unit(self):
+    #    return "Days" #TODO get in tune with VF, get VF resolved
+    
     @property #ValueFlows
     def is_finished(self):
         return self.finished
@@ -10526,6 +10537,40 @@ class EconomicEvent(models.Model):
             quantity_string,
             resource_string,
         ])
+
+    @property #ValueFlows
+    def action(self):
+        return self.event_type.label #TODO: translate to VF actions
+
+    @property #ValueFlows
+    def numeric_value(self):
+        return self.quantity
+
+    @property #ValueFlows
+    def unit(self):
+        return self.unit_of_quantity
+
+    @property #ValueFlows
+    def start(self):
+        return self.event_date
+
+    #@property #ValueFlows
+    #def numeric_duration(self):
+    #    if self.event_type.name == "Resource use" or self.event_type.name == "Time Contribution":
+    #        return self.quantity
+    #    else:
+    #        return None
+
+    #@property #ValueFlows
+    #def temporal_unit(self):
+    #    if self.event_type.name == "Resource use" or self.event_type.name == "Time Contribution":
+    #        return self.unit_of_quantity
+    #    else:
+    #        return None
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
 
     def undistributed_description(self):
         if self.unit_of_quantity:

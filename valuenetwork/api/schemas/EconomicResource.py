@@ -11,7 +11,6 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy
-from valuenetwork.api.schemas.helpers import *
 
 from valuenetwork.api.types.EconomicResource import EconomicResource
 

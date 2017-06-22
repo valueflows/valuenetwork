@@ -180,17 +180,6 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    organizationMembers (id: 39) { 
-      id 
-      name
-      image
-      note
-      type
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
     agentRelationships (id: 39) { 
       id
       subject

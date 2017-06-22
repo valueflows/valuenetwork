@@ -10,7 +10,7 @@ Password: {{ password }}
 
 The project related this new account is: {{ context_agent }}
 
-You can log in at https://{{ current_site }}
+You can log in at https://{{ request_host }}
 
 
 Welcome to th Open Collaborative Platform!

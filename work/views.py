@@ -1564,6 +1564,7 @@ def joinaproject_request(request, form_slug = False):
                         "site_name": site_name,
                         "join_url": join_url,
                         "context_agent": context_agent,
+                        "request_host": request.get_host(),
                         }
                     )
 
@@ -1775,6 +1776,7 @@ def joinaproject_request_internal(request, agent_id = False):
                         "site_name": site_name,
                         "join_url": join_url,
                         "context_agent": proj_agent,
+                        "request_host": request.get_host(),
                         }
                     )
 
@@ -2046,6 +2048,7 @@ def create_account_for_join_request(request, join_request_id):
                                 "password": password,
                                 "site_name": site_name,
                                 "context_agent": project.agent,
+                                "request_host": request.get_host(),
                                 }
                             )
 
@@ -5280,7 +5283,7 @@ def process_logging(request, process_id):
             unplanned_cite_form.fields["resource_type"].queryset = citable_resource_types
             if logger:
                 add_citation_form = ProcessCitationForm(prefix='citation', pattern=None)
-                cite_resource_types = pattern.citable_resource_types()  
+                cite_resource_types = pattern.citable_resource_types()
                 try:
                     if context_agent.project.resource_type_selection == "project":
                         cite_resource_types = cite_resource_types.filter(context_agent=context_agent)
@@ -5289,7 +5292,7 @@ def process_logging(request, process_id):
                 except:
                     cite_resource_types = cite_resource_types.filter(context_agent=None)
                 add_citation_form.fields["resource_type"].queryset = cite_resource_types
-                
+
         if "consume" in slots:
             unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=None)
             consumable_resource_types = pattern.consumables_with_resources()
@@ -5304,7 +5307,7 @@ def process_logging(request, process_id):
             if logger:
                 add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=None)
                 add_consumable_form.fields["resource_type"].queryset = consumable_resource_types
-                
+
         if "use" in slots:
             unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=None)
             usable_resource_types = pattern.usables_with_resources()
@@ -5545,7 +5548,7 @@ def non_process_logging(request):
             rts = rts.filter(context_agent=context_agent)
         else:
             rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
-    
+
     TimeFormSet = modelformset_factory(
         EconomicEvent,
         form=WorkCasualTimeContributionForm,
@@ -5565,13 +5568,13 @@ def non_process_logging(request):
     for form in time_formset.forms:
         form.fields["context_agent"].queryset = ctx_qs
         form.fields["resource_type"].queryset = rts
-    
+
     if request.method == "POST":
         keep_going = request.POST.get("keep-going")
         just_save = request.POST.get("save")
         if time_formset.is_valid():
             events = time_formset.save(commit=False)
-            
+
             if pattern:
                 unit = Unit.objects.filter(
                     unit_type="time",
@@ -6843,7 +6846,7 @@ def plan_work(request, rand=0):
     if request.method == "POST":
         input_resource_types = []
         input_process_types = []
-        
+
         done_process = request.POST.get("create-process")
         add_another = request.POST.get("add-another")
         edit_process = request.POST.get("edit-process")

@@ -35,7 +35,8 @@ class Agent(graphene.Interface):
 
     organizations = graphene.List(lambda: Organization)
 
-    owned_economic_resources = graphene.List(lambda: EconomicResource)
+    owned_economic_resources = graphene.List(lambda: EconomicResource, 
+                                             category=EconomicResourceCategory())
 
     unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcess)
 

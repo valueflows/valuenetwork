@@ -4419,6 +4419,15 @@ class EconomicResource(models.Model):
     def unit(self):
         return self.resource_type.unit
 
+    @property #ValueFlows
+    def category(self):
+        if self.resource_type.behavior == "other":
+            return "INVENTORY"
+        elif self.resource_type.behavior != "other" and self.resource_type.behavior != "work":
+            return "CURRENCY"
+        else:
+            return "NONE"
+
     def label(self):
         return self.identifier or str(self.id)
 

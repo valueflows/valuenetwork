@@ -21,6 +21,7 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
     numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
     unit = graphene.String(source='unit')
     note = graphene.String(source='note')
+    category = graphene.String(source='category')
     
     class Meta:
         model = EconomicResourceProxy

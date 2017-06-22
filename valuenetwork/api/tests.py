@@ -226,16 +226,48 @@ query($token: String) {
     agent (id: 26) {
       name
       ownedEconomicResources {
-      	id
-      	resourceType
-      	trackingIdentifier
-      	numericValue
-      	unit
-      	image
-      	note        
+        id
+        resourceType
+        trackingIdentifier
+        numericValue
+        unit
+        image
+        note
+        category
       }
     }
   }
 }
-
+query($token: String) {
+  viewer(token: $token) {
+    agent (id: 26) {
+      name
+      ownedEconomicResources (category: CURRENCY) {
+        id
+        resourceType
+        trackingIdentifier
+        numericValue
+        unit
+        image
+        note
+      }
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    agent (id: 26) {
+      name
+      ownedEconomicResources (category: INVENTORY) {
+        id
+        resourceType
+        trackingIdentifier
+        numericValue
+        unit
+        image
+        note
+      }
+    }
+  }
+}
 '''

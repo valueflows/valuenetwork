@@ -10,8 +10,8 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
-from . import OrganizationResource, OrganizationProcess
 from EconomicResource import EconomicResourceCategory, EconomicResource
+from Process import Process
 
 
 # Helpers (can't call between methods of the base class since DjangoObjectType
@@ -38,7 +38,8 @@ class Agent(graphene.Interface):
     owned_economic_resources = graphene.List(lambda: EconomicResource, 
                                              category=EconomicResourceCategory())
 
-    unfinished_processes = graphene.List(OrganizationProcess.OrganizationProcess)
+    agent_processes = graphene.List(lambda: Process,
+                                    is_finished=graphene.Boolean())
 
     # Resolvers
 
@@ -59,10 +60,17 @@ class Agent(graphene.Interface):
             return org.owned_resources()
         return None
 
-    def resolve_unfinished_processes(self, args, context, info):
+    def resolve_agent_processes(self, args, context, info):
         org = _load_identified_agent(self)
         if org:
-            return org.active_context_processes()
+            finished = args.get('is_finished', None)
+            if finished != None:
+                if not finished:
+                    return org.processes.filter(finished=False)
+                else:
+                    return org.processes.filter(finished=True)
+            else:
+                return org.processes.all()
         return None
 
 

@@ -10,7 +10,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicAgent
+from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy
 from valuenetwork.api.schemas.helpers import *
 
 from valuenetwork.api.types.EconomicResource import EconomicResource
@@ -24,15 +24,6 @@ class Query(graphene.AbstractType):
                                        id=graphene.Int())
 
     all_economic_resources = graphene.List(EconomicResource)
-
-    #owned_economic_resources = graphene.List(EconomicResource,
-    #                                         id=graphene.Int())
-
-    #owned_currency_economic_resources = graphene.List(EconomicResource,
-    #                                                  id=graphene.Int())
-
-    #owned_inventory_economic_resources = graphene.List(EconomicResource,
-    #                                                   id=graphene.Int())
 
     # load single resource
 
@@ -49,30 +40,3 @@ class Query(graphene.AbstractType):
     def resolve_all_economic_resources(self, args, context, info):
         return EconomicResourceProxy.objects.all()
 
-    # load resources owned by one agent
-
-    '''
-    def resolve_owned_economic_resources(self, args, context, info):
-        id = args.get('id')
-        if id is not None:
-            agent = EconomicAgent.objects.get(pk=id)
-            if agent:
-                return agent.owned_resources()
-        return None
-    
-    def resolve_owned_currency_economic_resources(self, args, context, info):
-        id = args.get('id')
-        if id is not None:
-            agent = EconomicAgent.objects.get(pk=id)
-            if agent:
-                return agent.owned_currency_resources()
-        return None
-    
-    def resolve_owned_inventory_economic_resources(self, args, context, info):
-        id = args.get('id')
-        if id is not None:
-            agent = EconomicAgent.objects.get(pk=id)
-            if agent:
-                return agent.owned_inventory_resources()
-        return None
-    '''

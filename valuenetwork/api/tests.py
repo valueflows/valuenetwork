@@ -263,4 +263,58 @@ query($token: String) {
     }
   }
 }
+query($token: String) {
+  viewer(token: $token) {
+    process(id:3) { 
+      id 
+      name
+      plannedStart
+      plannedDuration
+      isFinished
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allProcesses { 
+      id 
+      name
+      plannedStart
+      plannedDuration
+      isFinished
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:26) {
+      name
+      agentProcesses { 
+        id 
+        name
+        plannedStart
+        plannedDuration
+        isFinished
+        note
+      }
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:26) {
+      name
+      agentProcesses (isFinished: false) { 
+        id 
+        name
+        plannedStart
+        plannedDuration
+        isFinished
+        note
+      }
+    }
+  }
+}
 '''

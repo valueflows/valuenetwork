@@ -6326,6 +6326,10 @@ class Process(models.Model):
     @property #ValueFlows
     def is_finished(self):
         return self.finished
+    
+    @property #ValueFlows
+    def note(self):
+        return self.notes
 
     def is_deletable(self):
         if self.events.all():

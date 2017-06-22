@@ -109,10 +109,7 @@ query ($token: String) {
     }
   }
 }
-'''
 
-
-'''
 ## Basic queries for all entities ##
 
 query($token: String) {
@@ -233,7 +230,7 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
-    agent (id: 26) {
+    agent (id: 6) {
       name
       ownedEconomicResources (category: CURRENCY) {
         id

@@ -1839,6 +1839,19 @@ def payment_url(request, paymode, join_request_id):
     return HttpResponse('Gateway not properly configured, contact an admin')
 
 
+def project_total_shares(request, project_slug=None):
+    project = False
+    if project_slug:
+        project = get_object_or_404(Project, fobi_slug=project_slug)
+
+    return render(request, "work/project_shares_totals.html", {
+        "project": project,
+        "total_shares": project.share_totals(),
+        "total_holders": project.share_holders(),
+    })
+
+
+
 
 @login_required
 def join_requests(request, agent_id):

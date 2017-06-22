@@ -99,6 +99,7 @@ urlpatterns = [
     url(r"^agent/(?P<agent_id>\d+)/resources/new/(?P<Rtype>[\w-]+)/$", work.views.new_resource_type, name="new_resource_type"),
     url(r"^agent/(?P<agent_id>\d+)/change-resource/(?P<resource_id>\d+)/$", work.views.change_resource, name="change_resource"),
 
+    url(r"^total-shares/(?P<project_slug>[-\w]+)/$", work.views.project_total_shares, name="project_total_shares"),
 
 
     url(r'^add-transfer/(?P<exchange_id>\d+)/(?P<transfer_type_id>\d+)/$', work.views.add_transfer,

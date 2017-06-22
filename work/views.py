@@ -5255,8 +5255,13 @@ def process_logging(request, process_id):
                 else:
                     unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", pattern=pattern, context_agent=context_agent, initial=work_init)
                 if logger:
-                    date_init = {"due_date": process.end_date,}
-                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=date_init)
+                    work_init = {
+                        "from_agent": agent,
+                        "unit_of_quantity": work_unit,
+                        "is_contribution": True,
+                        "due_date": process.end_date,
+                    }
+                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=work_init)
                     add_work_form.fields["resource_type"].queryset = work_resource_types
 
         if "cite" in slots:
@@ -6838,6 +6843,7 @@ def plan_work(request, rand=0):
     if request.method == "POST":
         input_resource_types = []
         input_process_types = []
+        
         done_process = request.POST.get("create-process")
         add_another = request.POST.get("add-another")
         edit_process = request.POST.get("edit-process")
@@ -7044,15 +7050,15 @@ def plan_work(request, rand=0):
                                     }
                                 )
 
-            if done_process:
-                return HttpResponseRedirect('/%s/'
-                    % ('work/order-list'))
+            #if done_process:
+            #    return HttpResponseRedirect('/%s/'
+            #        % ('work/order-list'))
             #if add_another:
             #    return HttpResponseRedirect('/%s/%s/'
             #        % ('work/plan-work', rand))
-            if edit_process:
-                return HttpResponseRedirect('/%s/%s/'
-                    % ('work/process-logging', process.id))
+            #if edit_process:
+            return HttpResponseRedirect('/%s/%s/'
+                % ('work/process-logging', process.id))
 
     return render(request, "work/plan_work.html", {
         "slots": slots,

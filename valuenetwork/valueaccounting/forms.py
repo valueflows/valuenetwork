@@ -671,7 +671,7 @@ class UnplannedWorkEventForm(forms.ModelForm):
         queryset=Unit.objects.exclude(unit_type='value'),
         label=_("Unit"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'input-medium chzn-select',}))
+        widget=forms.Select(attrs={'class': 'input-medium',}))
     description = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))

@@ -86,7 +86,7 @@ class Agent(graphene.Interface):
 
 
 # ValueFlows type for a Person (singular) Agent.
-# In OCP these don't have anything a regular Agent doesn't have, but the distinction is important for ValueFlows.
+# In OCP there are no different properties, but some different behavior/filtering.
 
 class Person(DjangoObjectType):
     class Meta:

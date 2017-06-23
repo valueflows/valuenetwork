@@ -7,8 +7,11 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Process as ProcessProxy
-from valuenetwork.api.schemas.helpers import *
+from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
+from Process import Process
+from Agent import Agent #Pospi this doesn't compile
+from EconomicResource import EconomicResource
+from valuenetwork.api.models import formatAgent, Person, Organization
 
 
 class Action(graphene.Enum):
@@ -23,7 +26,7 @@ class Action(graphene.Enum):
 
 class EconomicEvent(DjangoObjectType):
     action = graphene.String(source='action')
-    #process = DjangoObjectType(source='process')
+    #process = lambda:Process(source='event_process')
     #provider = DjangoObjectType(source='provider')
     #receiver = DjangoObjectType(source='receiver')
     #scope = DjangoObjectType(source='scope')
@@ -37,4 +40,29 @@ class EconomicEvent(DjangoObjectType):
     class Meta:
         model = EconomicEventProxy
         only_fields = ('id')
+
+    process = graphene.Field(lambda: Process)
+
+    provider = graphene.Field(lambda: Agent)
+
+    receiver = graphene.Field(lambda: Agent)
+
+    scope = graphene.Field(lambda: Agent)
+
+    affected_resource = graphene.Field(lambda: EconomicResource)
+
+    def resolve_process(self, args, *rargs):
+        return self.process
+
+    def resolve_provider(self, args, *rargs):
+        return formatAgent(self.provider)
+
+    def resolve_receiver(self, args, *rargs):
+        return formatAgent(self.receiver)
     
+    def resolve_scope(self, args, *rargs):
+        return formatAgent(self.scope)
+    
+    def resolve_affected_resource(self, args, *rargs):
+        return self.affected_resource
+

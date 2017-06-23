@@ -10572,6 +10572,22 @@ class EconomicEvent(models.Model):
     def note(self):
         return self.description
 
+    @property #ValueFlows
+    def provider(self):
+        return self.from_agent
+
+    @property #ValueFlows
+    def receiver(self):
+        return self.to_agent
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def affected_resource(self):
+        return self.resource
+
     def undistributed_description(self):
         if self.unit_of_quantity:
             quantity_string = " ".join([str(self.undistributed_amount()), self.unit_of_quantity.abbrev])

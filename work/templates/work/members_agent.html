@@ -344,10 +344,10 @@
                         <th style="width: 150px; text-align: right;">{% trans "Nickname" %}</th>
                         <td>{{ agent.nick }}</td>
                   </tr>
-                  {% if False and user_agent and agent.username %}
+                  {% if request.user.is_superuser %}
                         <tr>
-                            <th style="text-align: right;">{% trans "Username" %}</th>
-                            <td>{{ agent.username }}</td>
+                            <th style="text-align: right;">{% trans "OCP role" %}</th>
+                            <td>Staff: {{ agent.user.is_staff }} - Superuser: {{ agent.user.is_superuser }}</td>
                         </tr>
                   {% endif %}
                   <tr>
@@ -445,7 +445,7 @@
                         <th style="text-align: right;">{% trans "Created date" %}</th>
                         <td>{{ agent.created_date }}</td>
                   </tr>
-                  {% if user_agent in agent.managers or user_is_agent %}
+                  {% if user_agent in agent.managers or user_is_agent or request.user.is_superuser %}
                     <tr>
                         <th style="text-align: right;">{% trans "Record created by" %}</th>
                         <td>{{ agent.created_by }}</td>

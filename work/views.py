@@ -1603,9 +1603,12 @@ def joinaproject_request_internal(request, agent_id = False):
     if form_slug:
       #project = Project.objects.get(fobi_slug=form_slug)
       fobi_slug = project.fobi_slug
-      form_entry = FormEntry.objects.get(slug=fobi_slug)
-      form_element_entries = form_entry.formelemententry_set.all()[:]
-      #form_entry.project = project
+      try:
+          form_entry = FormEntry.objects.get(slug=fobi_slug)
+          form_element_entries = form_entry.formelemententry_set.all()[:]
+          #form_entry.project = project
+      except:
+          return render(request, 'work/no_permission.html') # TODO a better message
 
       # This is where the most of the magic happens. Our form is being built
       # dynamically.
@@ -1615,7 +1618,7 @@ def joinaproject_request_internal(request, agent_id = False):
           request = request
       )
     else:
-      return render(request, 'work/no_permission.html')
+      return render(request, 'work/no_permission.html') # TODO a better message
 
     if request.method == "POST":
         fobi_form = FormClass(request.POST, request.FILES)

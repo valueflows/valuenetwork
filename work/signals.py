@@ -46,7 +46,7 @@ def comment_notification(sender, comment, **kwargs):
 
             if users:
                 site_name = Site.objects.get_current().name
-                domain = Site.objects.get_current().domain
+                domain = kwargs['request'].get_host()
                 try:
                     slug = comment.content_object.project.fobi_slug
                     if settings.PROJECTS_LOGIN:

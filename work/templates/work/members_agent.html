@@ -344,10 +344,10 @@
                         <th style="width: 150px; text-align: right;">{% trans "Nickname" %}</th>
                         <td>{{ agent.nick }}</td>
                   </tr>
-                  {% if request.user.is_superuser %}
+                  {% if request.user.is_superuser and agent.user %}
                         <tr>
                             <th style="text-align: right;">{% trans "OCP role" %}</th>
-                            <td>Staff: {{ agent.user.is_staff }} - Superuser: {{ agent.user.is_superuser }}</td>
+                            <td>{% if agent.user.is_superuser %} Superuser {% elif agent.user.is_staff %} Staff {% else %} User {% endif %}</td>
                         </tr>
                   {% endif %}
                   <tr>

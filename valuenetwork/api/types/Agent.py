@@ -13,6 +13,7 @@ from valuenetwork.valueaccounting.models import EconomicAgent
 from EconomicResource import EconomicResourceCategory, EconomicResource
 from Process import Process
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
+import datetime
 
 
 def _load_identified_agent(self):
@@ -39,7 +40,8 @@ class Agent(graphene.Interface):
     agent_processes = graphene.List(lambda: Process,
                                     is_finished=graphene.Boolean())
 
-    economic_events = graphene.List(lambda: EconomicEvent)
+    economic_events = graphene.List(lambda: EconomicEvent,
+                                    latest_number_of_days=graphene.Int())
 
     # Resolvers
 
@@ -80,7 +82,11 @@ class Agent(graphene.Interface):
     def resolve_economic_events(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
-            return agent.involved_in_events()
+            days = args.get('latest_number_of_days', 0)
+            if days > 0:
+                return agent.involved_in_events().filter(event_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
+            else:
+                return agent.involved_in_events()
         return None
 
 

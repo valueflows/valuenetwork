@@ -350,7 +350,7 @@ query($token: String) {
   viewer(token: $token) {
     agent(id:6) {
       name
-      economicEvents {
+      economicEvents (latestNumberOfDays: 30) {
         id
         action
         start
@@ -375,7 +375,7 @@ query ($token: String) {
         resourceType
         trackingIdentifier
       }
-      typeOfWork
+      workCategory
       provider {
         id
         name
@@ -409,7 +409,7 @@ query ($token: String) {
         resourceType
         trackingIdentifier
       }
-      typeOfWork
+      workCategory
       provider {
         id
         name

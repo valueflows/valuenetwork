@@ -10540,8 +10540,27 @@ class EconomicEvent(models.Model):
 
     @property #ValueFlows
     def action(self):
-        return self.event_type.label #TODO: translate to VF actions
-
+        if self.event_type.name == "Time Contribution" or self.event_type.name == "Todo":
+            return "work"
+        elif self.event_type.name == "Resource Consumption":
+            return "consume"
+        elif self.event_type.name == "Resource Production" or self.event_type.name == "Create Changeable":
+            return "produce"
+        elif self.event_type.name == "Resource use":
+            return "use"
+        elif self.event_type.name == "Citation":
+            return "cite"
+        elif self.event_type.name == "Change":
+            return "improve"
+        elif self.event_type.name == "To Be Changed":
+            return "accept"
+        elif self.event_type.name == "Give":
+            return "give"
+        elif self.event_type.name == "Receive":
+            return "receive"
+        else:
+            return self.event_type.label
+    
     @property #ValueFlows
     def numeric_value(self):
         return self.quantity
@@ -10588,8 +10607,8 @@ class EconomicEvent(models.Model):
     def affected_resource(self):
         return self.resource
 
-    @property #ValueFlows TODO not in VF now, need to add an issue
-    def type_of_work(self):
+    @property #ValueFlows TODO not in VF now
+    def work_category(self):
         if self.resource_type.behavior == "work":
             return self.resource_type
         return None

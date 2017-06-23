@@ -12,7 +12,6 @@ from graphene_django.types import DjangoObjectType
 from valuenetwork.valueaccounting.models import EconomicAgent
 from EconomicResource import EconomicResourceCategory, EconomicResource
 from Process import Process
-from EconomicEvent import EconomicEvent
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 
 
@@ -114,3 +113,6 @@ class Organization(DjangoObjectType):
         interfaces = (Agent, )
         model = OrganizationModel #EconomicAgent
         only_fields = ('id', 'name', 'image', 'category', 'note')
+
+# circular imports go at the bottom- @see http://effbot.org/zone/import-confusion.htm
+from EconomicEvent import EconomicEvent

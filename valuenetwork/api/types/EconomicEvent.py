@@ -9,7 +9,7 @@ from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
 from Process import Process
-from Agent import Agent #Pospi this doesn't compile
+from Agent import Agent
 from EconomicResource import EconomicResource
 from valuenetwork.api.models import formatAgent, Person, Organization
 

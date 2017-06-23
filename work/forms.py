@@ -151,6 +151,7 @@ class ProjectCreateForm(AgentCreateForm):
     resource_type_selection = forms.ChoiceField(label=_("Resource type visibility"), widget=forms.Select(
         attrs={'class': 'chzn-select'}))
     fobi_slug = forms.CharField(
+        required = False,
         label = "Custom project url slug",
         help_text = _("Used to reach your custom join form, but after the custom fields has been defined by you and configured by OCP Admins."),
         )

@@ -16,7 +16,7 @@ import valuenetwork.api.schemas.Auth
 import valuenetwork.api.schemas.Agent
 import valuenetwork.api.schemas.AgentRelationship
 import valuenetwork.api.schemas.AgentRelationshipRole
-import valuenetwork.api.schemas.Organisation
+import valuenetwork.api.schemas.Organization
 import valuenetwork.api.schemas.Person
 import valuenetwork.api.schemas.EconomicResource
 import valuenetwork.api.schemas.Process
@@ -28,7 +28,7 @@ class ViewerQuery(
     valuenetwork.api.schemas.Agent.Query,
     valuenetwork.api.schemas.AgentRelationship.Query,
     valuenetwork.api.schemas.AgentRelationshipRole.Query,
-    valuenetwork.api.schemas.Organisation.Query,
+    valuenetwork.api.schemas.Organization.Query,
     valuenetwork.api.schemas.Person.Query,
     valuenetwork.api.schemas.EconomicResource.Query,
     valuenetwork.api.schemas.Process.Query,

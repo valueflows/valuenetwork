@@ -10588,6 +10588,12 @@ class EconomicEvent(models.Model):
     def affected_resource(self):
         return self.resource
 
+    @property #ValueFlows TODO not in VF now, need to add an issue
+    def type_of_work(self):
+        if self.resource_type.behavior == "work":
+            return self.resource_type
+        return None
+
     def undistributed_description(self):
         if self.unit_of_quantity:
             quantity_string = " ".join([str(self.undistributed_amount()), self.unit_of_quantity.abbrev])

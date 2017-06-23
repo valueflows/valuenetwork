@@ -35,6 +35,7 @@ class EconomicEvent(DjangoObjectType):
     numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
     unit = graphene.String(source='unit')
     start = graphene.String(source='start')
+    type_of_work = graphene.String(source='type_of_work')
     note = graphene.String(source='note')
 
     class Meta:

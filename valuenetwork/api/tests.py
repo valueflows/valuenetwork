@@ -361,4 +361,72 @@ query($token: String) {
     }
   }
 }
+query ($token: String) {
+  viewer(token: $token) {
+    economicEvent(id: 296) {
+      id
+      action
+      start
+      numericValue
+      unit
+      note
+      affectedResource {
+        id
+        resourceType
+        trackingIdentifier
+      }
+      typeOfWork
+      provider {
+        id
+        name
+      }
+      receiver {
+        id
+        name
+      }
+      process {
+        id
+        name
+      }
+      scope {
+        id
+        name
+      }
+    }
+  }
+}
+query ($token: String) {
+  viewer(token: $token) {
+    economicEvent(id: 316) {
+      id
+      action
+      start
+      numericValue
+      unit
+      note
+      affectedResource {
+        id
+        resourceType
+        trackingIdentifier
+      }
+      typeOfWork
+      provider {
+        id
+        name
+      }
+      receiver {
+        id
+        name
+      }
+      process {
+        id
+        name
+      }
+      scope {
+        id
+        name
+      }
+    }
+  }
+}
 '''

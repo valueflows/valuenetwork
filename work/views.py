@@ -1623,9 +1623,12 @@ def joinaproject_request_internal(request, agent_id = False):
     if form_slug:
       #project = Project.objects.get(fobi_slug=form_slug)
       fobi_slug = project.fobi_slug
-      form_entry = FormEntry.objects.get(slug=fobi_slug)
-      form_element_entries = form_entry.formelemententry_set.all()[:]
-      #form_entry.project = project
+      try:
+          form_entry = FormEntry.objects.get(slug=fobi_slug)
+          form_element_entries = form_entry.formelemententry_set.all()[:]
+          #form_entry.project = project
+      except:
+          return render(request, 'work/no_permission.html') # TODO a better message
 
       # This is where the most of the magic happens. Our form is being built
       # dynamically.
@@ -1635,7 +1638,7 @@ def joinaproject_request_internal(request, agent_id = False):
           request = request
       )
     else:
-      return render(request, 'work/no_permission.html')
+      return render(request, 'work/no_permission.html') # TODO a better message
 
     if request.method == "POST":
         fobi_form = FormClass(request.POST, request.FILES)
@@ -1857,6 +1860,19 @@ def payment_url(request, paymode, join_request_id):
         #return redirect(r.url, code=307)
         #return HttpResponseRedirect( url + '&order_id=' + join_request_id + '&amount=' + str(req.pending_shares()) + '&first_name=' + req.name + '&last_name=' + req.surname + '&email=' + req.email_address)
     return HttpResponse('Gateway not properly configured, contact an admin')
+
+
+def project_total_shares(request, project_slug=None):
+    project = False
+    if project_slug:
+        project = get_object_or_404(Project, fobi_slug=project_slug)
+
+    return render(request, "work/project_shares_totals.html", {
+        "project": project,
+        "total_shares": project.share_totals(),
+        "total_holders": project.share_holders(),
+    })
+
 
 
 

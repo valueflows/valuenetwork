@@ -12,6 +12,7 @@ from valuenetwork.valueaccounting.models import EconomicAgent
 
 from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Person
+from valuenetwork.api.models import formatAgent, formatAgentList
 
 class Query(AgentBase, graphene.AbstractType):
 
@@ -26,10 +27,10 @@ class Query(AgentBase, graphene.AbstractType):
     def resolve_organization(self, args, context, info):
         id = args.get('id')
         if id is not None:
-            return EconomicAgent.objects.get(pk=id, is_context=False)    # :TODO: @fosterlynn what's correct here?
+            return formatAgent(EconomicAgent.objects.get(pk=id, is_context=False))    # :TODO: @fosterlynn what's correct here?
         return None
 
     # load all people
 
     def resolve_all_people(self, args, context, info):
-        return EconomicAgent.objects.all(is_context=False)  # :TODO: @fosterlynn what's correct here?
+        return formatAgentList(EconomicAgent.objects.all(is_context=False))  # :TODO: @fosterlynn what's correct here?

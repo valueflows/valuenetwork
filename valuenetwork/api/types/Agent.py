@@ -13,7 +13,7 @@ from valuenetwork.valueaccounting.models import EconomicAgent
 from EconomicResource import EconomicResourceCategory, EconomicResource
 from Process import Process
 from EconomicEvent import EconomicEvent
-from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel
+from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 
 
 def _load_identified_agent(self):
@@ -47,7 +47,7 @@ class Agent(graphene.Interface):
     def resolve_organizations(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
-            return agent.is_member_of()
+            return formatAgentList(agent.is_member_of())
         return None
 
     def resolve_owned_economic_resources(self, args, context, info):
@@ -104,7 +104,7 @@ class Organization(DjangoObjectType):
     def resolve_members(self, args, context, info):
         org = _load_identified_agent(self)
         if org:
-            return org.members()
+            return formatAgentList(org.members())
         return None
 
 

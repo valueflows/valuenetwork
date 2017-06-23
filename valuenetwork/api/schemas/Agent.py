@@ -10,8 +10,8 @@ from django.core.exceptions import PermissionDenied
 
 import graphene
 
-from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
-from valuenetwork.api.models import Organization, Person
+from valuenetwork.valueaccounting.models import EconomicAgent
+from valuenetwork.api.models import formatAgent, formatAgentList
 
 from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Agent
@@ -32,7 +32,7 @@ class Query(AgentBase, graphene.AbstractType):
     def resolve_my_agent(self, args, *rargs):
         agent = self._load_own_agent()
         if agent:
-            return agent
+            return formatAgent(agent)
         raise PermissionDenied("Cannot find requested agent")
 
     def resolve_agent(self, args, *rargs):
@@ -40,30 +40,10 @@ class Query(AgentBase, graphene.AbstractType):
         if id is not None:
             agent = EconomicAgent.objects.get(pk=id)
             if agent:
-                return agent
+                return formatAgent(agent)
         raise PermissionDenied("Cannot find requested agent")
 
     # load all agent lists
 
     def resolve_all_agents(self, args, context, info):
-        #return EconomicAgent.objects.all()
-        all_agents = EconomicAgent.objects.all()
-        mixed_list = []
-        for agent in all_agents:
-            if agent.agent_type.party_type == "individual":
-                person = Person(
-                    id=agent.id,
-                    name = agent.name,
-                    note = agent.description,
-                    image = agent.image)
-                mixed_list.append(person)
-            else:
-                org = Organization(
-                    id=agent.id,
-                    name = agent.name,
-                    note = agent.description,
-                    image = agent.image,
-                    is_context = agent.is_context,
-                    type = agent.agent_type)
-                mixed_list.append(org)
-        return mixed_list
+        return formatAgentList(EconomicAgent.objects.all())

@@ -22,7 +22,7 @@ class Action(graphene.Enum):
     CITE = "cite"
     PRODUCE = "produce"
     CHANGE = "change"
-    
+
 
 class EconomicEvent(DjangoObjectType):
     action = graphene.String(source='action')
@@ -59,10 +59,10 @@ class EconomicEvent(DjangoObjectType):
 
     def resolve_receiver(self, args, *rargs):
         return formatAgent(self.receiver)
-    
+
     def resolve_scope(self, args, *rargs):
         return formatAgent(self.scope)
-    
+
     def resolve_affected_resource(self, args, *rargs):
         return self.affected_resource
 

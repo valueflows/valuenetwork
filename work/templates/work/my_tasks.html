@@ -308,7 +308,8 @@ th, td {
                             <th>{% trans "Url" %}</th>
                             <th>&nbsp;</th>
                             <th>{% trans "Did" %}:</th>
-                            <th>{% trans "Hours" %}:</th>
+                            <th>{% trans "Qty" %}:</th>
+                            <th>{% trans "Unit" %}:</th>
                             <th>&nbsp;</th>
                         </tr>
                     </thead>
@@ -394,15 +395,12 @@ th, td {
 
                             {% if agent == todo.from_agent %}
                                 {% with todo.todo_event as event %}
-                                <!-- <tr class="entry-row {{ rowcolors }}" >
-                                    <th class="entry-label" >{% trans "Did" %}:</td> -->
+                                    
                                     <td colspan="1" class="did" >
                                         <textarea class="input-block-level did" id="{{ todo.id }}-didId" name="{{ todo.id }}-did" rows="3"
-                                        />{% if event %}{{ event.description }}{% endif %}</textarea>
+                                        />{% if event %}{% if event.description %}{{ event.description }}{% endif %}{% endif %}</textarea>
+                                        <span id="{{ todo.id }}-descSaving"></span>
                                     </td>
-                                    <!-- <th class="entry-label">
-                                        {% trans "Hours" %}:
-                                    </th> -->
                                     <td class="todo-input" >
                                         <form class="timeForm"id="timeForm-{{ todo.id }}" action="{% url "work_todo_time" %}" method="POST" >
                                             {% csrf_token %}
@@ -410,9 +408,14 @@ th, td {
                                                 {% if event %} value="{{ event.quantity }}" {% else %} value="0" {% endif %}
                                             />
                                         </form>
+                                        <span id="{{ todo.id }}-timeSaving"></span>
+                                    </td>
+                                    
+                                    <td>
+                                        {{ todo.resource_type.unit }}
                                     </td>
                                     <td>
-                                        <form class="doneForm" id="timeForm-{{ todo.id }}" action="{% url "work_todo_done" todo_id=todo.id %}" method="POST" >
+                                        <form class="doneForm" id="doneForm-{{ todo.id }}" action="{% url "work_todo_done" todo_id=todo.id %}" method="POST" >
                                             {% csrf_token %}
                                             <input type="hidden" name="next" value="{% url "my_tasks" %}" />
                                             <input type="submit" name="submit" class="btn btn-info btn-mini"  title="Done" value="{% trans 'Done' %}" />
@@ -812,18 +815,19 @@ th, td {
         formId = "#timeForm-" + id;
         var fieldSelector = "#" + id + "-timeId";
         var isValid = $(formId).validate().element(fieldSelector);
+        var savingId = "#" + id + "-timeSaving";
         if (isValid)
         {
             var hours = timeInput.value;
-            notifySaving();
+            notifySaving(savingId);
 		    var jqxhr = $.post("{% url "work_todo_time"  %}",  { todoId: id, hours: hours },
 			    function( data )
 			    {
-				    notifySaved();
+				    notifySaved(savingId);
 			    })
 			    .fail(function()
 			    {
-				    notifyProblem();
+				    notifyProblem(savingId);
 			    }
 		    );
         }
@@ -834,35 +838,38 @@ th, td {
         var didInput = event.target;
         var id = didInput.id.split('-')[0];;
         var did = didInput.value;
-        notifySaving();
+        var savingId = "#" + id + "-descSaving";
+        notifySaving(savingId);
 	    var jqxhr = $.post("{% url "work_todo_description"  %}",  { todoId: id, did: did },
 		    function( data )
 		    {
-			    notifySaved();
+			    notifySaved(savingId);
 		    })
 		    .fail(function()
 		    {
-			    notifyProblem();
+			    notifyProblem(savingId);
 		    }
 	    );
 	}
 
-	function notifySaving()
+	function notifySaving(savingId)
 	{
-		$("#saving").css("color","green");
-		$("#saving").text("Saving...");
+        $(savingId).show();
+		$(savingId).css("color","green");
+		$(savingId).text("Saving...");
 	}
 
-	function notifySaved()
+	function notifySaved(savingId)
 	{
-		$("#saving").css("color","green");
-		$("#saving").text("Saved");
+		$(savingId).css("color","green");
+		$(savingId).text("Saved");
+		$(savingId).fadeOut(1000);
 	}
 
-	function notifyProblem()
+	function notifyProblem(savingId)
 	{
-		$("#saving").css("color","red");
-		$("#saving").text("Problem saving");
+		$(savingId).css("color","red");
+		$(savingId).text("Problem saving");
 	}
 
 	$(document).ajaxSend(function(event, xhr, settings)

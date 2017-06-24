@@ -5,8 +5,8 @@ Type: {{ type_of_user }}
 
 Description: {{ description }}
 
-You can find this task in https://{{ current_site }}//work/project-work/
+You can find this task in https://{{ request_host }}//work/project-work/
 The new join request is at {{ join_url }}
 
 You can see all unfinished join requests here:{% endblocktrans %}
-https://{{ current_site }}/work/agent/{{ context_agent.id }}/join-requests/
+https://{{ request_host }}/work/agent/{{ context_agent.id }}/join-requests/

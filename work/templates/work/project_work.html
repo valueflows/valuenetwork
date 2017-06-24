@@ -392,7 +392,8 @@ th, td {
 		                        <th>{% trans "What to do" %}</th>
 		                        <th>{% trans "Url" %}</th>
 		                        <th>{% trans "Did what" %}</th>
-	                            <th>{% trans "Hours" %}</th>
+	                            <th>{% trans "Qty" %}:</th>
+                                <th>{% trans "Unit" %}:</th>
 		                        <th colspan="2">&nbsp;</th>
 		                    </tr>
 		                </thead>
@@ -432,7 +433,7 @@ th, td {
                                             {% with todo.todo_event as event %}
 	                                            <td class="did" >
 	                                                <textarea class="input-block-level did" id="{{ todo.id }}-didId" name="{{ todo.id }}-did" rows="3"
-	                                                />{% if event %}{{ event.description }}{% endif %}</textarea>
+	                                                />{% if event %}{% if event.description %}{{ event.description }}{% endif %}{% endif %}</textarea>
 	                                            </td>
 
 	                                            <td class="todo-input" >
@@ -443,6 +444,9 @@ th, td {
 	                                                    />
                                                     </form>
 	                                            </td>
+	                                            <td>
+                                                    {{ todo.resource_type.unit }}
+                                                </td>
 	                                            <td>
 	                                                <form class="doneForm" id="timeForm-{{ todo.id }}" action="{% url "work_todo_done" todo_id=todo.id %}" method="POST" >
 								                        {% csrf_token %}

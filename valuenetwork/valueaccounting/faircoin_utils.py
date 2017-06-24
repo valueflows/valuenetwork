@@ -31,8 +31,8 @@ def fairwallet_obj():
         return False
 
 def network_fee():
-    if not hasattr(efn, 'netfee'):
-        if init_electrum_fair() and not efn.netfee:
+    if not hasattr(efn, 'netfee') or not efn.netfee:
+        if init_electrum_fair(): # and not efn.netfee:
             network_fee = efn.network_fee()
             if network_fee != 'ERROR':
                 efn.netfee = network_fee

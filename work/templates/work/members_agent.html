@@ -1096,7 +1096,7 @@
             if(typeof drawChart_recent != 'undefined') google.setOnLoadCallback(drawChart_recent);
             function drawChart_recent() {
                 var data = google.visualization.arrayToDataTable([
-                ['Member', 'Hours'],
+                ['Member', 'Qty'],
                 {% for member, hours in member_hours_recent %}
                     ['{{ member }}',  {{ hours }} ],
                 {% endfor %}
@@ -1114,7 +1114,7 @@
             if(typeof drawChart_stats != 'undefined') google.setOnLoadCallback(drawChart_stats);
             function drawChart_stats() {
                 var data = google.visualization.arrayToDataTable([
-                ['Member', 'Hours'],
+                ['Member', 'Qty'],
                 {% for member, hours in member_hours_stats %}
                     ['{{ member }}',  {{ hours }} ],
                 {% endfor %}
@@ -1159,7 +1159,7 @@
                     {
                         'isStacked': true,
                         'legend': 'top',
-                        'hAxis': {'title': 'Hours'},
+                        'hAxis': {'title': 'Qty'},
                         'chartArea':{'width': '80%', 'height':'100%'}
                     }
                 );

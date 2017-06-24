@@ -45,9 +45,8 @@ def comment_notification(sender, comment, **kwargs):
                     users.append(manager.user().user)
 
             if users:
-                #import pdb; pdb.set_trace()
                 site_name = Site.objects.get_current().name
-                domain = Site.objects.get_current().domain
+                domain = kwargs['request'].get_host()
                 try:
                     slug = comment.content_object.project.fobi_slug
                     if settings.PROJECTS_LOGIN:
@@ -55,7 +54,6 @@ def comment_notification(sender, comment, **kwargs):
                         for pro in obj:
                             if pro == slug:
                                 site_name = comment.content_object.project.agent.name
-                                domain = kwargs['request'].get_host()
                 except:
                     pass
 
@@ -70,7 +68,7 @@ def comment_notification(sender, comment, **kwargs):
                     "site_name": site_name,
                     "joinrequest_url": joinrequest_url,
                     "jn_req": comment.content_object,
-                    "current_site": domain,
+                    "current_site": kwargs['request'].get_host(),
                     }
                 )
 

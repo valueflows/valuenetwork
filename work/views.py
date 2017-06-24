@@ -1584,6 +1584,7 @@ def joinaproject_request(request, form_slug = False):
                         "site_name": site_name,
                         "join_url": join_url,
                         "context_agent": context_agent,
+                        "request_host": request.get_host(),
                         }
                     )
 
@@ -1798,6 +1799,7 @@ def joinaproject_request_internal(request, agent_id = False):
                         "site_name": site_name,
                         "join_url": join_url,
                         "context_agent": proj_agent,
+                        "request_host": request.get_host(),
                         }
                     )
 
@@ -2082,6 +2084,7 @@ def create_account_for_join_request(request, join_request_id):
                                 "password": password,
                                 "site_name": site_name,
                                 "context_agent": project.agent,
+                                "request_host": request.get_host(),
                                 }
                             )
 
@@ -5061,13 +5064,15 @@ def json_get_context_resource_types(request, context_id, pattern_id=None):
         pattern = None
     if pattern:
         rts = pattern.todo_resource_types()
+        if not rts:
+            rts = pattern.work_resource_types()
     else:
         rts = EconomicResourceType.objects.filter(behavior="work")
     try:
         if context_agent.project.resource_type_selection == "project":
             rts = rts.filter(context_agent=context_agent)
         else:
-            rts = rts.filter(context_agent=None)
+            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
     except:
         rts = rts.filter(context_agent=None)
     json = serializers.serialize("json", rts, fields=('name'))
@@ -5237,13 +5242,20 @@ def process_logging(request, process_id):
                 context_agent=context_agent,
                 instance=event,
                 prefix=str(event.id))
-        output_resource_types = pattern.output_resource_types()
-        unplanned_output_form = UnplannedOutputForm(prefix='unplannedoutput')
-        unplanned_output_form.fields["resource_type"].queryset = output_resource_types
         role_formset = resource_role_context_agent_formset(prefix="resource")
         produce_et = EventType.objects.get(name="Resource Production")
         change_et = EventType.objects.get(name="Change")
         if "out" in slots:
+            output_resource_types = pattern.output_resource_types()
+            try:
+                if context_agent.project.resource_type_selection == "project":
+                    output_resource_types = output_resource_types.filter(context_agent=context_agent)
+                else:
+                    output_resource_types = output_resource_types.filter(context_agent=None)
+            except:
+                output_resource_types = output_resource_types.filter(context_agent=None)
+            unplanned_output_form = UnplannedOutputForm(prefix='unplannedoutput')
+            unplanned_output_form.fields["resource_type"].queryset = output_resource_types
             if logger:
                 if change_et in event_types:
                     to_be_changed_requirement = process.to_be_changed_requirements()
@@ -5262,6 +5274,13 @@ def process_logging(request, process_id):
                     "is_contribution": True,
                 }
                 work_resource_types = pattern.work_resource_types()
+                try:
+                    if context_agent.project.resource_type_selection == "project":
+                        work_resource_types = work_resource_types.filter(context_agent=context_agent)
+                    else:
+                        work_resource_types = work_resource_types.filter(context_agent=None)
+                except:
+                    work_resource_types = work_resource_types.filter(context_agent=None)
                 if work_resource_types:
                     work_unit = work_resource_types[0].unit
                     #work_init = {"unit_of_quantity": work_unit,}
@@ -5272,32 +5291,75 @@ def process_logging(request, process_id):
                     }
                     unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", context_agent=context_agent, initial=work_init)
                     unplanned_work_form.fields["resource_type"].queryset = work_resource_types
-                    #if logger:
-                    #    add_work_form = WorkCommitmentForm(initial=work_init, prefix='work', pattern=pattern)
                 else:
                     unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", pattern=pattern, context_agent=context_agent, initial=work_init)
-                    #is this correct? see commented-out lines above
                 if logger:
-                    date_init = {"due_date": process.end_date,}
-                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=date_init)
+                    work_init = {
+                        "from_agent": agent,
+                        "unit_of_quantity": work_unit,
+                        "is_contribution": True,
+                        "due_date": process.end_date,
+                    }
+                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=work_init)
+                    add_work_form.fields["resource_type"].queryset = work_resource_types
 
         if "cite" in slots:
             cite_unit = None
             if context_agent.unit_of_claim_value:
                 cite_unit = context_agent.unit_of_claim_value
-            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=pattern, cite_unit=cite_unit)
+            citable_resource_types = pattern.citables_with_resources()
+            try:
+                if context_agent.project.resource_type_selection == "project":
+                    citable_resource_types = citable_resource_types.filter(context_agent=context_agent)
+                else:
+                    citable_resource_types = citable_resource_types.filter(context_agent=None)
+            except:
+                citable_resource_types = citable_resource_types.filter(context_agent=None)
+            unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=None, cite_unit=cite_unit)
+            unplanned_cite_form.fields["resource_type"].queryset = citable_resource_types
             if logger:
-                add_citation_form = ProcessCitationForm(prefix='citation', pattern=pattern)
+                add_citation_form = ProcessCitationForm(prefix='citation', pattern=None)
+                cite_resource_types = pattern.citable_resource_types()
+                try:
+                    if context_agent.project.resource_type_selection == "project":
+                        cite_resource_types = cite_resource_types.filter(context_agent=context_agent)
+                    else:
+                        cite_resource_types = cite_resource_types.filter(context_agent=None)
+                except:
+                    cite_resource_types = cite_resource_types.filter(context_agent=None)
+                add_citation_form.fields["resource_type"].queryset = cite_resource_types
+
         if "consume" in slots:
-            unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=pattern)
+            unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=None)
+            consumable_resource_types = pattern.consumables_with_resources()
+            try:
+                if context_agent.project.resource_type_selection == "project":
+                    consumable_resource_types = consumable_resource_types.filter(context_agent=context_agent)
+                else:
+                    consumable_resource_types = consumable_resource_types.filter(context_agent=None)
+            except:
+                consumable_resource_types = consumable_resource_types.filter(context_agent=None)
+            unplanned_consumption_form.fields["resource_type"].queryset = consumable_resource_types
             if logger:
-                add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=pattern)
+                add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=None)
+                add_consumable_form.fields["resource_type"].queryset = consumable_resource_types
+
         if "use" in slots:
-            unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=pattern)
+            unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=None)
+            usable_resource_types = pattern.usables_with_resources()
+            try:
+                if context_agent.project.resource_type_selection == "project":
+                    usable_resource_types = usable_resource_types.filter(context_agent=context_agent)
+                else:
+                    usable_resource_types = usable_resource_types.filter(context_agent=None)
+            except:
+                usable_resource_types = usable_resource_types.filter(context_agent=None)
+            unplanned_use_form.fields["resource_type"].queryset = usable_resource_types
             if logger:
-                add_usable_form = ProcessUsableForm(prefix='usable', pattern=pattern)
-        if "payexpense" in slots:
-            process_expense_form = ProcessExpenseEventForm(prefix='processexpense', pattern=pattern)
+                add_usable_form = ProcessUsableForm(prefix='usable', pattern=None)
+                add_usable_form.fields["resource_type"].queryset = usable_resource_types
+        #if "payexpense" in slots:
+        #    process_expense_form = ProcessExpenseEventForm(prefix='processexpense', pattern=pattern)
 
     cited_ids = [c.resource.id for c in process.citations()]
     citation_requirements = process.citation_requirements()
@@ -5506,6 +5568,23 @@ def non_process_logging(request):
         return HttpResponseRedirect('/%s/'
             % ('work/work-home'))
 
+    pattern = None
+    pattern_id = 0
+    patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
+    if patterns:
+        pattern = patterns[0].pattern
+        pattern_id = pattern.id
+        rts = pattern.work_resource_types()
+    else:
+        rts = EconomicResourceType.objects.filter(behavior="work")
+    ctx_qs = member.related_context_queryset()
+    if ctx_qs:
+        context_agent = ctx_qs[0]
+        if context_agent.project.resource_type_selection == "project":
+            rts = rts.filter(context_agent=context_agent)
+        else:
+            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
+
     TimeFormSet = modelformset_factory(
         EconomicEvent,
         form=WorkCasualTimeContributionForm,
@@ -5516,26 +5595,22 @@ def non_process_logging(request):
 
     init = []
     for i in range(0, 4):
-        init.append({"is_contribution": False,})
+        init.append({"is_contribution": True,})
     time_formset = TimeFormSet(
         queryset=EconomicEvent.objects.none(),
         initial = init,
         data=request.POST or None)
-    ctx_qs = member.related_context_queryset()
+
     for form in time_formset.forms:
         form.fields["context_agent"].queryset = ctx_qs
-        #form.fields["context_agent"].empty_label = "choose...";
+        form.fields["resource_type"].queryset = rts
+
     if request.method == "POST":
         keep_going = request.POST.get("keep-going")
         just_save = request.POST.get("save")
         if time_formset.is_valid():
             events = time_formset.save(commit=False)
-            pattern = None
-            patterns = PatternUseCase.objects.filter(use_case__identifier='non_prod')
-            if patterns:
-                pattern = patterns[0].pattern
-            else:
-                raise ValidationError("no non-production ProcessPattern")
+
             if pattern:
                 unit = Unit.objects.filter(
                     unit_type="time",
@@ -5561,6 +5636,7 @@ def non_process_logging(request):
     return render(request, "work/non_process_logging.html", {
         "member": member,
         "time_formset": time_formset,
+        "pattern_id": pattern_id,
         "help": get_help("non_proc_log"),
     })
 
@@ -5692,6 +5768,11 @@ def work_todo_decline(request, todo_id):
     return HttpResponseRedirect(next)
 
 @login_required
+#todo: change this to work_todo_qty -
+#it's not always hours.
+#The template correctly shows Qty of Unit
+#but the internal names shd be changed
+#to prevent future confusion.
 def work_todo_time(request):
     if request.method == "POST":
         todo_id = request.POST.get("todoId")
@@ -6801,6 +6882,7 @@ def plan_work(request, rand=0):
     if request.method == "POST":
         input_resource_types = []
         input_process_types = []
+
         done_process = request.POST.get("create-process")
         add_another = request.POST.get("add-another")
         edit_process = request.POST.get("edit-process")
@@ -6811,7 +6893,15 @@ def plan_work(request, rand=0):
             if selected_pattern:
                 slots = selected_pattern.event_types()
                 for slot in slots:
-                    slot.resource_types = selected_pattern.get_resource_types(slot)
+                    rts = selected_pattern.get_resource_types(slot)
+                    try:
+                        if selected_context_agent.project.resource_type_selection == "project":
+                            rts = rts.filter(context_agent=selected_context_agent)
+                        else:
+                            rts = rts.filter(context_agent=None)
+                    except:
+                        rts = rts.filter(context_agent=None)
+                    slot.resource_types = rts
             process_form = DateAndNameForm(initial=init)
             #demand_form = OrderSelectionFilteredForm(provider=selected_context_agent)
         else:
@@ -6999,15 +7089,15 @@ def plan_work(request, rand=0):
                                     }
                                 )
 
-            if done_process:
-                return HttpResponseRedirect('/%s/'
-                    % ('work/order-list'))
+            #if done_process:
+            #    return HttpResponseRedirect('/%s/'
+            #        % ('work/order-list'))
             #if add_another:
             #    return HttpResponseRedirect('/%s/%s/'
             #        % ('work/plan-work', rand))
-            if edit_process:
-                return HttpResponseRedirect('/%s/%s/'
-                    % ('work/process-logging', process.id))
+            #if edit_process:
+            return HttpResponseRedirect('/%s/%s/'
+                % ('work/process-logging', process.id))
 
     return render(request, "work/plan_work.html", {
         "slots": slots,

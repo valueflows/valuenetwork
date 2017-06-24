@@ -3062,7 +3062,7 @@ class ProcessPattern(models.Model):
         return EconomicResource.objects.filter(resource_type__in=rts)
 
     def input_resource_types(self):
-        #must be changed, in no longer covers
+        #TODO must be changed, in no longer covers
         # or event types must be changed so all ins are ins
         #return self.resource_types_for_relationship("in")
         answer = list(self.resource_types_for_relationship("in"))
@@ -9263,6 +9263,23 @@ class Commitment(models.Model):
                 if self.fulfillment_events.filter(resource=resource):
                     answer.append(resource)
         return answer
+        
+    def onhand_for_citation(self):
+        answer = []
+        rt = self.resource_type
+        if self.stage:
+            resources = EconomicResource.goods.filter(
+                stage=self.stage,
+                resource_type=rt)
+        else:
+            resources = EconomicResource.goods.filter(resource_type=rt)
+        for resource in resources:
+            if resource.quantity > 0:
+                answer.append(resource)
+            else:
+                if self.fulfillment_events.filter(resource=resource):
+                    answer.append(resource)
+        return answer
 
     def onhand_with_fulfilled_quantity(self):
         resources = self.onhand()
@@ -9473,11 +9490,14 @@ class Commitment(models.Model):
         return arts
 
     def possible_work_users(self):
-        srcs = self.resource_type.work_agents()
-        members = self.context_agent.all_members_list()
-        agents = [agent for agent in srcs if agent in members]
-        users = [a.user() for a in agents if a.user()]
-        return [u.user for u in users]
+        if self.context_agent:
+            srcs = self.resource_type.work_agents()
+            members = self.context_agent.all_members_list()
+            agents = [agent for agent in srcs if agent in members]
+            users = [a.user() for a in agents if a.user()]
+            return [u.user for u in users]
+        else:
+            return []
 
     def workers(self):
         answer = []

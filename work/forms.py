@@ -1327,13 +1327,14 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
         empty_label=None,
         widget=forms.Select(attrs={'class': 'chzn-select'}))
     context_agent = forms.ModelChoiceField(
-        queryset=EconomicAgent.objects.open_projects(),
+        queryset=EconomicAgent.objects.context_agents(),
         label=_("Context"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
+        widget=forms.Select(attrs={'class': 'chzn-select context-selector'}))
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
+    #todo: shd be changed to qty of unit
     quantity = forms.DecimalField(required=False,
         widget=DecimalDurationWidget,
         help_text="hrs, mins")
@@ -1342,18 +1343,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
         model = EconomicEvent
         fields = ('event_date', 'context_agent', 'resource_type', 'quantity', 'is_contribution', 'url', 'description')
 
-    #def __init__(self, *args, **kwargs):
-    #    super(WorkCasualTimeContributionForm, self).__init__(*args, **kwargs)
-    #    rts = EconomicResourceType.objects.filter(behavior="work")
-    #    first_agent = self.fields["context_agent"].choices[0][1]
-    #    try:
-    #        if first_agent.project.resource_type_selection == "project":
-    #            rts = rts.filter(context_agent=first_agent)
-    #        else:
-    #            rts = rts.filter(context_agent=None)
-    #    except:
-    #        rts = rts.filter(context_agent=None)
-    #    self.fields["resource_type"].queryset = rts
+
 
 
 #    W O R K   O R D E R   P L A N

@@ -134,7 +134,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
         logging.error("Amount negative: %d" %(amount_total) )
         return False
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, fixed_fee=int(net_fee), change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))

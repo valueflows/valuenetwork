@@ -1867,7 +1867,7 @@ def payment_url(request, paymode, join_request_id):
 def project_total_shares(request, project_slug=None):
     project = False
     if project_slug:
-        project = get_object_or_404(Project, fobi_slug=project_slug)
+        project = get_object_or_404(Project, fobi_slug=project_slug.strip('/'))
 
     return render(request, "work/project_shares_totals.html", {
         "project": project,

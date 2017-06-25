@@ -38,6 +38,8 @@ urlpatterns = [
     url(r'^join/(?P<form_slug>.+)/$', work.views.joinaproject_request, name="join_request"),
     #url(r'^joinaproject/(?P<form_slug>.+)/thanks/$', work.views.joinaproject_thanks, name='joinaproject_thanks'), # TemplateView.as_view(template_name='work/joinaproject_thanks.html')),
 
+    url(r"^total-shares/(?P<project_slug>[-\w]+)/$", work.views.project_total_shares, name="project_total_shares"),
+
     # View URLs
     url(r'^fobi/', include('fobi.urls.view')),
 

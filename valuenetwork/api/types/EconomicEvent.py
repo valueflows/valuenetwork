@@ -24,12 +24,11 @@ class Action(graphene.Enum):
 
 class EconomicEvent(DjangoObjectType):
     action = graphene.String(source='action')
-    #process = lambda:Process(source='event_process')
-    #provider = DjangoObjectType(source='provider')
-    #receiver = DjangoObjectType(source='receiver')
-    #scope = DjangoObjectType(source='scope')
-    #affected_resource = graphene.DjangoObjectType(source='affected_resource')
-    #affected_quantity = graphene.(source='affected_quantity')
+    process = graphene.Field(lambda: Process)
+    provider = graphene.Field(lambda: Agent)
+    receiver = graphene.Field(lambda: Agent)
+    scope = graphene.Field(lambda: Agent)
+    affected_resource = graphene.Field(lambda: EconomicResource)
     numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
     unit = graphene.String(source='unit')
     start = graphene.String(source='start')
@@ -39,16 +38,6 @@ class EconomicEvent(DjangoObjectType):
     class Meta:
         model = EconomicEventProxy
         only_fields = ('id')
-
-    process = graphene.Field(lambda: Process)
-
-    provider = graphene.Field(lambda: Agent)
-
-    receiver = graphene.Field(lambda: Agent)
-
-    scope = graphene.Field(lambda: Agent)
-
-    affected_resource = graphene.Field(lambda: EconomicResource)
 
     def resolve_process(self, args, *rargs):
         return self.process

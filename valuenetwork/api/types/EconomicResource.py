@@ -1,13 +1,11 @@
 #
-# Base class for all EconomicResource types
-#
+# EconomicResource:
 #
 
 import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy
-#from valuenetwork.api.schemas.helpers import *
 
 class EconomicResourceCategory(graphene.Enum):
     NONE = None

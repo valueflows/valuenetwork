@@ -106,6 +106,26 @@ query ($token: String) {
     }
   }
 }
+fragment coreEventFields on EconomicEvent {
+  action
+  start
+  numericValue
+  unit
+  note
+}
+query($token: String) {
+  viewer(token: $token) {
+    process(id:6) {
+      name
+      inputs {
+        ...coreEventFields
+      }
+      outputs {
+        ...coreEventFields
+      }
+    }
+  }
+}
 
 ## Basic queries for all entities ##
 

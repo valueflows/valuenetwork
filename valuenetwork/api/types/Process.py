@@ -1,12 +1,11 @@
 #
-# Base class for all Process types
-
+# Process: 
 
 import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import Process as ProcessProxy
-#from valuenetwork.api.schemas.helpers import *
+
 
 class Process(DjangoObjectType):
     planned_start = graphene.String(source='planned_start')
@@ -17,3 +16,16 @@ class Process(DjangoObjectType):
     class Meta:
         model = ProcessProxy
         only_fields = ('id', 'name')
+
+
+    inputs = graphene.List(lambda: EconomicEvent)
+    
+    outputs = graphene.List(lambda: EconomicEvent)
+
+
+    def resolve_inputs(self, args, context, info):
+        return self.incoming_events()
+
+    def resolve_outputs(self, args, context, info):
+        return self.outputs()
+

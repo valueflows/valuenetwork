@@ -1,5 +1,5 @@
 #
-# Graphene schema for exposing EconomicAgent and related models
+# Economic Event: An inflow or outflow of an economic resource in relation to a process and/or exchange. This could reflect a change in the quantity of a EconomicResource. It is also defined by its behavior in relation to the EconomicResource and a Process (consume, use, produce, etc.)" .
 #
 
 #from django.core.exceptions import PermissionDenied

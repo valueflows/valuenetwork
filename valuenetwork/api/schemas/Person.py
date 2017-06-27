@@ -18,7 +18,7 @@ class Query(AgentBase, graphene.AbstractType):
 
     # define input query params
 
-    person = graphene.List(Person,
+    person = graphene.Field(Person,
                            id=graphene.Int())
 
     all_people = graphene.List(Person)
@@ -29,8 +29,9 @@ class Query(AgentBase, graphene.AbstractType):
         id = args.get('id')
         if id is not None:
             person = EconomicAgent.objects.get(pk=id)
-            if person.agent_type.party_type == "individual":
-                return formatAgent(person)
+            if person:
+                if person.agent_type.party_type == "individual":
+                    return formatAgent(person)
         return None
 
     # load all people
@@ -38,3 +39,25 @@ class Query(AgentBase, graphene.AbstractType):
     def resolve_all_people(self, args, context, info):
         people = EconomicAgent.objects.filter(agent_type__party_type="individual")
         return formatAgentList(people)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

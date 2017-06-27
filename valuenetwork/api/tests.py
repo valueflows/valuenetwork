@@ -164,6 +164,53 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
+    person(id:6) {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allPeople {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    organization(id:26) {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allOrganizations {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
     myOrganizations {
       id
       name

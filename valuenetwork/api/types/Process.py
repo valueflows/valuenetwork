@@ -1,5 +1,6 @@
 #
-# Process: 
+# Process: An activity that changes inputs into outputs.  It could transform or transport EconomicResource(s), as well as simply issuing a resource so that it is available.
+#
 
 import graphene
 from graphene_django.types import DjangoObjectType

@@ -1,5 +1,5 @@
 #
-# QuantityValue type def
+# QuantityValue: A numeric amount and a unit, bundled.
 #
 
 import graphene

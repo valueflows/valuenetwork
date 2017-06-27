@@ -1,5 +1,5 @@
 #
-# EconomicAgent type def and subclasses
+# EconomicAgent:A person or group or organization with economic agency.
 #
 # @package: OCP
 # @author:  pospi <pospi@spadgos.com>
@@ -100,7 +100,7 @@ class Person(DjangoObjectType):
         only_fields = ('id', 'name', 'image')
 
 
-# Organization type- an Agent which can have other Agents as members
+# Organization type- an Agent which is not a Person
 
 class Organization(DjangoObjectType):
 
@@ -118,7 +118,7 @@ class Organization(DjangoObjectType):
     class Meta:
         interfaces = (Agent, )
         model = OrganizationModel #EconomicAgent
-        only_fields = ('id', 'name', 'image', 'category', 'note')
+        only_fields = ('id', 'name', 'image', 'note')
 
 
 

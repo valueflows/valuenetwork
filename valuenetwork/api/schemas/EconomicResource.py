@@ -28,12 +28,12 @@ class Query(graphene.AbstractType):
         if id is not None:
             resource = EconomicResourceProxy.objects.get(pk=id)
             if resource:
-                resource.current_quantity = self._current_quantity(quantity=resource.quantity, unit=resource.unit)
+                #resource.current_quantity = self._current_quantity(quantity=resource.quantity, unit=resource.unit)
                 return resource
         return None   
 
     def resolve_all_economic_resources(self, args, context, info):
         resources = EconomicResourceProxy.objects.all()
-        for resource in resources:
-            resource.current_quantity = self._current_quantity(quantity=resource.quantity, unit=resource.unit)
+        #for resource in resources:
+        #    resource.current_quantity = self._current_quantity(quantity=resource.quantity, unit=resource.unit)
         return resources

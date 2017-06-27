@@ -88,7 +88,6 @@ fragment coreAgentFields on Agent {
   note
   type
 }
-
 query ($token: String) {
   viewer(token: $token) {
     myAgent {

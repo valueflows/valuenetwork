@@ -11,7 +11,6 @@ import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
 from valuenetwork.api.models import formatAgent, Person, Organization
 
-#import Process.Process
 
 class Action(graphene.Enum):
     NONE = None
@@ -25,11 +24,11 @@ class Action(graphene.Enum):
 
 class EconomicEvent(DjangoObjectType):
     action = graphene.String(source='action')
-    process = graphene.Field(lambda: Process)
-    provider = graphene.Field(lambda: Agent)
-    receiver = graphene.Field(lambda: Agent)
-    scope = graphene.Field(lambda: Agent)
-    affected_resource = graphene.Field(lambda: EconomicResource)
+    process = graphene.Field(lambda: types.Process)
+    provider = graphene.Field(lambda: types.Agent)
+    receiver = graphene.Field(lambda: types.Agent)
+    scope = graphene.Field(lambda: types.Agent)
+    affected_resource = graphene.Field(lambda: types.EconomicResource)
     numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
     unit = graphene.String(source='unit')
     start = graphene.String(source='start')

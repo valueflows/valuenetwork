@@ -19,7 +19,7 @@ class Process(DjangoObjectType):
 
 
     inputs = graphene.List(lambda: types.EconomicEvent)
-    
+
     outputs = graphene.List(lambda: types.EconomicEvent)
 
 

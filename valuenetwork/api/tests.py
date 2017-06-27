@@ -158,16 +158,6 @@ query($token: String) {
       image
       note
       type
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allAgents {
-      id
-      name
-      image
-      note
       __typename
     }
   }

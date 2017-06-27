@@ -11,15 +11,14 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import Process as ProcessProxy
-from valuenetwork.api.schemas.helpers import *
-
+from valuenetwork.api.schemas.helpers import * #TODO is this needed?
 from valuenetwork.api.types.Process import Process
 
 
 class Query(graphene.AbstractType):
 
     # define input query params
-    
+
     process = graphene.Field(Process,
                             id=graphene.Int())
 

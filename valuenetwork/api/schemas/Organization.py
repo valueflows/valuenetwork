@@ -38,10 +38,18 @@ class Query(AgentBase, graphene.AbstractType):
     def resolve_organization(self, args, context, info):
         id = args.get('id')
         if id is not None:
-            return formatAgent(EconomicAgent.objects.get(pk=id, is_context=True))    # :TODO: @fosterlynn what's correct here?
+            #return formatAgent(EconomicAgent.objects.get(pk=id, agent_type__party_type!="individual"))  didn't compile
+            org = EconomicAgent.objects.get(pk=id)
+            if org:
+                if org.agent_type.party_type == "individual":
+                    return None
+                else:
+                    return formatAgent(org)
+            else:
+                return None
         return None
 
     # load all organizations
 
     def resolve_all_organizations(self, args, context, info):
-        return formatAgentList(EconomicAgent.objects.all(is_context=True))   # :TODO: @fosterlynn what's correct here?
+        return formatAgentList(EconomicAgent.objects.filter(agent_type__party_type!="individual"))

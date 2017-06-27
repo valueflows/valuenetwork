@@ -21,6 +21,7 @@ import valuenetwork.api.schemas.Person
 import valuenetwork.api.schemas.EconomicResource
 import valuenetwork.api.schemas.Process
 import valuenetwork.api.schemas.EconomicEvent
+import valuenetwork.api.schemas.QuantityValue
 from valuenetwork.api.schemas.helpers import hash_password
 
 
@@ -33,6 +34,7 @@ class ViewerQuery(
     valuenetwork.api.schemas.EconomicResource.Query,
     valuenetwork.api.schemas.Process.Query,
     valuenetwork.api.schemas.EconomicEvent.Query,
+    valuenetwork.api.schemas.QuantityValue.Query,
     graphene.ObjectType
 ):
     def __init__(self, *args, **kwargs):

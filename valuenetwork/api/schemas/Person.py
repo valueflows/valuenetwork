@@ -1,5 +1,5 @@
 #
-# Graphene schema for exposing individual user query endpoints ("Person" in VF terms)
+# Graphene schema for exposing individual agent query endpoints ("Person" in VF terms)
 #
 # @package: OCP
 # @author:  pospi <pospi@spadgos.com>
@@ -18,19 +18,23 @@ class Query(AgentBase, graphene.AbstractType):
 
     # define input query params
 
-    person = graphene.List(Person)
+    person = graphene.List(Person,
+                           id=graphene.Int())
 
     all_people = graphene.List(Person)
 
     # load any person
 
-    def resolve_organization(self, args, context, info):
+    def resolve_person(self, args, context, info):
         id = args.get('id')
         if id is not None:
-            return formatAgent(EconomicAgent.objects.get(pk=id, is_context=False))    # :TODO: @fosterlynn what's correct here?
+            person = EconomicAgent.objects.get(pk=id)
+            if person.agent_type.party_type == "individual":
+                return formatAgent(person)
         return None
 
     # load all people
 
     def resolve_all_people(self, args, context, info):
-        return formatAgentList(EconomicAgent.objects.all(is_context=False))  # :TODO: @fosterlynn what's correct here?
+        people = EconomicAgent.objects.filter(agent_type__party_type="individual")
+        return formatAgentList(people)

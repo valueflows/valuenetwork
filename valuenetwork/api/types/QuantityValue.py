@@ -3,17 +3,15 @@
 #
 
 import graphene
-from . import QuantityValueBase
 from graphene_django.types import DjangoObjectType
-from valuenetwork.api.models import QuantityValue
+from valuenetwork.api.models import QuantityValue as QuantityValueProxy
 
 
 class QuantityValue(DjangoObjectType):
 
-    numeric_value = graphene.Float(source='numeric_value')
-    unit = graphene.String(source='unit')
+    #numeric_value = graphene.Float(source='numeric_value')
+    #unit = graphene.String(source='unit')
 
     class Meta:
-        model = QuantityValue
+        model = QuantityValueProxy
         only_fields = ('numeric_value', 'unit')
-

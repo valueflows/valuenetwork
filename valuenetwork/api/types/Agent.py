@@ -40,7 +40,7 @@ class Agent(graphene.Interface):
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
 
-    economic_events = graphene.List(lambda: types.EconomicEvent,
+    agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                     latest_number_of_days=graphene.Int())
 
     # Resolvers
@@ -79,7 +79,7 @@ class Agent(graphene.Interface):
         return None
 
     #returns events where an agent is a provider, receiver, or scope agent
-    def resolve_economic_events(self, args, context, info):
+    def resolve_agent_economic_events(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
             days = args.get('latest_number_of_days', 0)

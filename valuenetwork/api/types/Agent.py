@@ -10,7 +10,8 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
-from EconomicResource import EconomicResourceCategory
+#from EconomicResource import EconomicResourceCategory
+import valuenetwork.api.types as types
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 import datetime
 
@@ -33,13 +34,13 @@ class Agent(graphene.Interface):
 
     organizations = graphene.List(lambda: Organization)
 
-    owned_economic_resources = graphene.List(lambda: EconomicResource,
-                                             category=EconomicResourceCategory())
+    owned_economic_resources = graphene.List(lambda: types.EconomicResource,
+                                             category=types.EconomicResourceCategory())
 
-    agent_processes = graphene.List(lambda: Process,
+    agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
 
-    economic_events = graphene.List(lambda: EconomicEvent,
+    economic_events = graphene.List(lambda: types.EconomicEvent,
                                     latest_number_of_days=graphene.Int())
 
     # Resolvers

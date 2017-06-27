@@ -52,12 +52,12 @@ class Agent(graphene.Interface):
         return None
 
     def resolve_owned_economic_resources(self, args, context, info):
-        type = args.get('category', EconomicResourceCategory.NONE)
+        type = args.get('category', types.EconomicResourceCategory.NONE)
         org = _load_identified_agent(self)
         if org:
-            if type == EconomicResourceCategory.CURRENCY:
+            if type == types.EconomicResourceCategory.CURRENCY:
                 return org.owned_currency_resources()
-            elif type == EconomicResourceCategory.INVENTORY:
+            elif type == types.EconomicResourceCategory.INVENTORY:
                 return org.owned_inventory_resources()
             return org.owned_resources()
         return None

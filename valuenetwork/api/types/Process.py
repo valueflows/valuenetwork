@@ -3,7 +3,7 @@
 
 import graphene
 from graphene_django.types import DjangoObjectType
-
+import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import Process as ProcessProxy
 
 
@@ -18,9 +18,9 @@ class Process(DjangoObjectType):
         only_fields = ('id', 'name')
 
 
-    inputs = graphene.List(lambda: EconomicEvent)
+    inputs = graphene.List(lambda: types.EconomicEvent)
     
-    outputs = graphene.List(lambda: EconomicEvent)
+    outputs = graphene.List(lambda: types.EconomicEvent)
 
 
     def resolve_inputs(self, args, context, info):

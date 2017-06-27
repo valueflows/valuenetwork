@@ -198,10 +198,16 @@ INSTALLED_APPS = [
     'valuenetwork.valueaccounting.apps.ValueAccountingAppConfig',
     'valuenetwork.equipment',
     'valuenetwork.board',
-    'valuenetwork.api',
     'account',
     'work.apps.WorkAppConfig',
     'multicurrency',
+    'valuenetwork.api',
+    #'valuenetwork.api.apps.ApiAppConfig',
+    #'valuenetwork.api.schemas.apps.ApiSchemasAppConfig',
+    'valuenetwork.api.types.apps.ApiTypesAppConfig',
+    #'valuenetwork.api.schemas',
+    #'valuenetwork.api.types',
+    
 
     # general
     'general',

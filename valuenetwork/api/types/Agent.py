@@ -10,7 +10,8 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
-from EconomicResource import EconomicResourceCategory
+#from EconomicResource import EconomicResourceCategory
+import valuenetwork.api.types as types
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 import datetime
 
@@ -33,13 +34,13 @@ class Agent(graphene.Interface):
 
     organizations = graphene.List(lambda: Organization)
 
-    owned_economic_resources = graphene.List(lambda: EconomicResource,
-                                             category=EconomicResourceCategory())
+    owned_economic_resources = graphene.List(lambda: types.EconomicResource,
+                                             category=types.EconomicResourceCategory())
 
-    agent_processes = graphene.List(lambda: Process,
+    agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
 
-    economic_events = graphene.List(lambda: EconomicEvent,
+    economic_events = graphene.List(lambda: types.EconomicEvent,
                                     latest_number_of_days=graphene.Int())
 
     # Resolvers
@@ -51,12 +52,12 @@ class Agent(graphene.Interface):
         return None
 
     def resolve_owned_economic_resources(self, args, context, info):
-        type = args.get('category', EconomicResourceCategory.NONE)
+        type = args.get('category', types.EconomicResourceCategory.NONE)
         org = _load_identified_agent(self)
         if org:
-            if type == EconomicResourceCategory.CURRENCY:
+            if type == types.EconomicResourceCategory.CURRENCY:
                 return org.owned_currency_resources()
-            elif type == EconomicResourceCategory.INVENTORY:
+            elif type == types.EconomicResourceCategory.INVENTORY:
                 return org.owned_inventory_resources()
             return org.owned_resources()
         return None

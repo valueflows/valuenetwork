@@ -7,10 +7,11 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
+import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
 from valuenetwork.api.models import formatAgent, Person, Organization
 
-import Process.Process
+#import Process.Process
 
 class Action(graphene.Enum):
     NONE = None

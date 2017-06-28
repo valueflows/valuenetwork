@@ -7,7 +7,8 @@ from graphene_django.types import DjangoObjectType
 
 import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy
-from valuenetwork.api.models import QuantityValue as QuantityValueProxy
+#from valuenetwork.api.models import QuantityValue as QuantityValueProxy
+from valuenetwork.api.types.QuantityValue import QuantityValue
 
 class EconomicResourceCategory(graphene.Enum):
     NONE = None
@@ -20,7 +21,7 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
     image = graphene.String(source='image')
     #numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
     #unit = graphene.String(source='unit')
-    current_quantity = graphene.Field(lambda: types.Agent) 
+    current_quantity = graphene.Field(lambda: QuantityValue)
     note = graphene.String(source='note')
     category = graphene.String(source='category')
 
@@ -29,4 +30,4 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
         only_fields = ('id')
 
     def resolve_current_quantity(self, args, *rargs):
-        return None #QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)
+        return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)

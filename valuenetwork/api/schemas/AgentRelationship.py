@@ -2,25 +2,13 @@
 # Agent relationship entity schema def
 #
 # @package: OCP
-# @author:  Lynn Foster
-# @since:   2017-06-10
 #
 
 import graphene
 from graphene_django.types import DjangoObjectType
 
+from valuenetwork.api.types.AgentRelationship import AgentRelationship
 from valuenetwork.valueaccounting.models import EconomicAgent, AgentAssociation
-
-# bind Django models to Graphene types.
-# This defines which fields are output for matches against each Field/List in Query.
-
-class AgentRelationship(DjangoObjectType):
-    subject = graphene.String(source='subject')
-    object = graphene.String(source='object')
-    relationship = graphene.String(source='relationship')
-    class Meta:
-        model = AgentAssociation
-        only_fields = ('id')
 
 # define public query API
 

@@ -16,11 +16,12 @@ class AgentRelationshipCategory(graphene.Enum):
     MEMBER = "member"
     PART = "part"
     PEER = "peer"
-    TRADINGPARTNER = "trading-partner" #what is the best way to do the 2 word items?
-    LEGALPARTNER = "legal-partner"
+    TRADINGPARTNER = "trading partner" #what is the best way to do the 2 word items?
+    LEGALPARTNER = "legal partner"
 
 class AgentRelationshipRole(DjangoObjectType):
-    category = graphene.String(source='category') #there is no graphene connection here, just in the models below, cheating I am guessing
+    category = graphene.Field(lambda: AgentRelationshipCategory)  #graphene.String(source='category')
+
     class Meta:
         model = AgentAssociationType
         only_fields = ('id', 'label', 'inverse_label')

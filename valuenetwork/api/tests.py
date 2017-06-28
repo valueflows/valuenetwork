@@ -92,12 +92,12 @@ query ($token: String) {
   viewer(token: $token) {
     myAgent {
       ...coreAgentFields
-      organizations {
+      memberOfOrganizations {
         id
         name
         members {
           name
-          organizations {
+          memberOfOrganizations {
             name
           }
         }
@@ -105,16 +105,31 @@ query ($token: String) {
     }
   }
 }
+
 fragment coreEventFields on EconomicEvent {
   action
   start
   numericValue
   unit
   note
+  affectedResource {
+    id
+    resourceType
+    trackingIdentifier
+  }
+  workCategory
+  provider {
+    id
+    name
+  }
+  receiver {
+    id
+    name
+  }
 }
-query($token: String) {
+query ($token: String) {
   viewer(token: $token) {
-    process(id:6) {
+    process(id: 6) {
       name
       inputs {
         ...coreEventFields

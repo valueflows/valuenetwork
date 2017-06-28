@@ -32,7 +32,7 @@ class Agent(graphene.Interface):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
 
-    organizations = graphene.List(lambda: Organization)
+    member_of_organizations = graphene.List(lambda: Organization)
 
     owned_economic_resources = graphene.List(lambda: types.EconomicResource,
                                              category=types.EconomicResourceCategory())
@@ -45,7 +45,7 @@ class Agent(graphene.Interface):
 
     # Resolvers
 
-    def resolve_organizations(self, args, context, info):
+    def resolve_member_of_organizations(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
             return formatAgentList(agent.is_member_of())

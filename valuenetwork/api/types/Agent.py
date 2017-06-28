@@ -100,7 +100,7 @@ class Person(DjangoObjectType):
         only_fields = ('id', 'name', 'image')
 
 
-# Organization type- an Agent which is not a Person
+# Organization type- an Agent which is not a Person, and can be further classified from there
 
 class Organization(DjangoObjectType):
 

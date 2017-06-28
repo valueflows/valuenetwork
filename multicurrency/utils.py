@@ -75,7 +75,7 @@ class ChipChapAuthConnection(object):
         }
         tx_list = requests.get(self.url_history, headers=headers, params=params)
         balance = requests.get(self.url_balance, headers=headers)
-        if int(tx_list.status_code) and int(balance.status_code)== 200:
+        if int(tx_list.status_code) == 200 and int(balance.status_code) == 200:
             return tx_list.json(), balance.json()
         else:
             raise ChipChapAuthError('Error ' + str(balance.status_code) + ' and '

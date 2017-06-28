@@ -78,4 +78,5 @@ class ChipChapAuthConnection(object):
         if int(tx_list.status_code) and int(balance.status_code)== 200:
             return tx_list.json(), balance.json()
         else:
-            raise ChipChapAuthError('Error ' + str(response.status_code), response.text)
+            raise ChipChapAuthError('Error ' + str(balance.status_code) + ' and '
+                + str(tx_list.status_code), balance.text + ' and ' + tx_list.text)

@@ -304,6 +304,28 @@ query ($token: String) {
     }
   }
 }
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationships(category: MEMBER) {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
 query($token: String) {
   viewer(token: $token) {
     economicResource(id: 26) {

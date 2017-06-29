@@ -1650,7 +1650,7 @@ class AgentAssociationType(models.Model):
         elif self.association_behavior == "peer":
             return "peer"
         else:
-            return None
+            return "none"
 
 
 from django.db.models.signals import post_migrate

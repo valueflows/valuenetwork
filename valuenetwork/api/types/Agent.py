@@ -13,6 +13,7 @@ from valuenetwork.valueaccounting.models import EconomicAgent
 #from EconomicResource import EconomicResourceCategory
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship
+from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipCategory
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 import datetime
 
@@ -44,7 +45,9 @@ class Agent(graphene.Interface):
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                     latest_number_of_days=graphene.Int())
 
-    agent_relationships = graphene.List(AgentRelationship)
+    agent_relationships = graphene.List(AgentRelationship,
+                                        category=AgentRelationshipCategory())
+
 
     # Resolvers
 
@@ -92,11 +95,20 @@ class Agent(graphene.Interface):
                 return agent.involved_in_events()
         return None
 
-    # returns relationships where an agent is a subject or object
+    # returns relationships where an agent is a subject or object, optionally filtered by role category
     def resolve_agent_relationships(self, args, context, info):
         agent = _load_identified_agent(self)
+        cat = args.get('category')
         if agent:
-            return agent.all_active_associations()
+            if cat:
+                assocs = agent.all_active_associations()
+                filtered_assocs = []
+                for assoc in assocs:
+                    if assoc.association_type.category == cat:
+                        filtered_assocs.append(assoc)
+                return filtered_assocs
+            else:
+                return agent.all_active_associations()
         return None
 
 

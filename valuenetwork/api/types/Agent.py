@@ -12,6 +12,7 @@ from graphene_django.types import DjangoObjectType
 from valuenetwork.valueaccounting.models import EconomicAgent
 #from EconomicResource import EconomicResourceCategory
 import valuenetwork.api.types as types
+from valuenetwork.api.types.AgentRelationship import AgentRelationship
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 import datetime
 
@@ -42,6 +43,8 @@ class Agent(graphene.Interface):
 
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                     latest_number_of_days=graphene.Int())
+
+    agent_relationships = graphene.List(AgentRelationship)
 
     # Resolvers
 
@@ -78,7 +81,7 @@ class Agent(graphene.Interface):
                 return agent_processes
         return None
 
-    #returns events where an agent is a provider, receiver, or scope agent
+    # returns events where an agent is a provider, receiver, or scope agent
     def resolve_agent_economic_events(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
@@ -87,6 +90,13 @@ class Agent(graphene.Interface):
                 return agent.involved_in_events().filter(event_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
             else:
                 return agent.involved_in_events()
+        return None
+
+    # returns relationships where an agent is a subject or object
+    def resolve_agent_relationships(self, args, context, info):
+        agent = _load_identified_agent(self)
+        if agent:
+            return agent.all_active_associations()
         return None
 
 

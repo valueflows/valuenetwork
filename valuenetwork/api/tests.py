@@ -245,6 +245,24 @@ query($token: String) {
     }
   }
 }
+query ($token: String) {
+  viewer(token: $token) {
+    agentRelationship(id:20) {
+      subject {
+        name
+        type
+      }
+      relationship {
+        label
+        category
+      }
+      object {
+        name
+        type
+      }
+    }
+  }
+}
 query($token: String) {
   viewer(token: $token) {
     allAgentRelationships {
@@ -264,21 +282,24 @@ query($token: String) {
     }
   }
 }
-query($token: String) {
+query ($token: String) {
   viewer(token: $token) {
-    agentRelationships (id: 39) {
-      id
-      subject {
-        name
-        type
-      }
-      relationship {
-        label
-        category
-      }
-      object {
-        name
-        type
+    agent(id: 39) {
+      name
+      agentRelationships {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
       }
     }
   }

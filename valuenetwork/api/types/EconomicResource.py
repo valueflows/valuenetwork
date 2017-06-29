@@ -8,7 +8,7 @@ from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy
 #from valuenetwork.api.models import QuantityValue as QuantityValueProxy
-from valuenetwork.api.types.QuantityValue import QuantityValue
+#from valuenetwork.api.types.QuantityValue import QuantityValue
 
 class EconomicResourceCategory(graphene.Enum):
     NONE = None
@@ -30,4 +30,5 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
         only_fields = ('id')
 
     #def resolve_current_quantity(self, args, *rargs):
+    #    import pdb; pdb.set_trace()
     #    return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)

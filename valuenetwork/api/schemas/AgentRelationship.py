@@ -14,22 +14,23 @@ from valuenetwork.valueaccounting.models import EconomicAgent, AgentAssociation
 
 class Query(graphene.AbstractType):
 
-    agent_relationships = graphene.List(AgentRelationship,
+    agent_relationship = graphene.Field(AgentRelationship,
                                         id=graphene.Int())
 
     all_agent_relationships = graphene.List(AgentRelationship)
 
     # load the relationships of one agent, both directions (subject, object)
 
-    def resolve_agent_relationships(self, args, context, info):
-        id = args.get('id')
-        if id is not None:
-            agent = EconomicAgent.objects.get(pk=id)
-            if agent:
-                return agent.all_active_associations()
-        return None
 
     # load agent relationship lists
+    
+    def resolve_agent_relationship(self, args, *rargs):
+        id = args.get('id')
+        if id is not None:
+            ar = AgentAssociation.objects.get(pk=id)
+            if ar:
+                return ar
+        return None
 
     def resolve_all_agent_relationships(self, args, context, info):
         return AgentAssociation.objects.all()

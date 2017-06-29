@@ -96,6 +96,6 @@ class ChipChapAuthConnection(object):
         else:
             error = str(balance.status_code) + ' and ' + str(tx_list.status_code)
             msg = balance.text + ' and ' + tx_list.text
-            self.logger.critical("History and balance request has returned "
+            self.logger.critical("Balance and history requests have returned "
                 + error + " status codes. Error: " + msg)
             raise ChipChapAuthError('Error ' + error, msg)

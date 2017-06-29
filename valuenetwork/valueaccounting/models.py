@@ -1451,6 +1451,14 @@ class EconomicAgent(models.Model):
         return AgentAssociation.objects.filter(
             Q(has_associate=self ) | Q(is_associate=self)).filter(state="active")
 
+    def active_association_types(self):
+        assocs = self.all_active_associations()
+        roles = []
+        for assoc in assocs:
+            if assoc.association_type not in roles:
+                roles.append(assoc.association_type)
+        return roles
+
     def is_context_agent(self):
         return self.is_context
 

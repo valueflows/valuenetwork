@@ -16,11 +16,12 @@ class AgentRelationshipCategory(graphene.Enum):
     LEGALPARTNER = "legal partner"
 
 class AgentRelationshipRole(DjangoObjectType):
-    category = graphene.Field(lambda: AgentRelationshipCategory)  #graphene.String(source='category')
+    category = graphene.Field(lambda: AgentRelationshipCategory)
 
     class Meta:
         model = AgentAssociationType
         only_fields = ('id', 'label', 'inverse_label')
+
 
     def resolve_category(self, args, *rargs):
         return self.category

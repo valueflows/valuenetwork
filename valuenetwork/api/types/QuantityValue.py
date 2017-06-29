@@ -6,6 +6,9 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from valuenetwork.api.models import QuantityValue as QuantityValueProxy
 
+#class Unit(DjangoObjectType):
+
+
 
 class QuantityValue(DjangoObjectType):
 

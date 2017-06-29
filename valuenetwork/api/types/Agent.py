@@ -10,10 +10,9 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import EconomicAgent
-#from EconomicResource import EconomicResourceCategory
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship
-from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipCategory
+from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 import datetime
 
@@ -46,8 +45,10 @@ class Agent(graphene.Interface):
                                     latest_number_of_days=graphene.Int())
 
     agent_relationships = graphene.List(AgentRelationship,
+                                        #role=AgentRelationshipRole(),
                                         category=AgentRelationshipCategory())
 
+    agent_roles = graphene.List(AgentRelationshipRole)
 
     # Resolvers
 
@@ -99,6 +100,7 @@ class Agent(graphene.Interface):
     def resolve_agent_relationships(self, args, context, info):
         agent = _load_identified_agent(self)
         cat = args.get('category')
+        #role = args.get('role')
         if agent:
             if cat:
                 assocs = agent.all_active_associations()
@@ -109,6 +111,13 @@ class Agent(graphene.Interface):
                 return filtered_assocs
             else:
                 return agent.all_active_associations()
+        return None
+
+    # returns relationships where an agent is a subject or object, optionally filtered by role category
+    def resolve_agent_roles(self, args, context, info):
+        agent = _load_identified_agent(self)
+        if agent:
+            return agent.active_association_types()
         return None
 
 

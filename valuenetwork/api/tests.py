@@ -326,6 +326,17 @@ query ($token: String) {
     }
   }
 }
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRoles {
+        label
+        category
+      }
+    }
+  }
+}
 query($token: String) {
   viewer(token: $token) {
     economicResource(id: 26) {

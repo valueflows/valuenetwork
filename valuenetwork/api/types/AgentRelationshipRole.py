@@ -1,10 +1,6 @@
 #
 # Agent relationship role schema
 #
-# @package: OCP
-# @author:  Lynn Foster
-# @since:   2017-06-10
-#
 
 import graphene
 from graphene_django.types import DjangoObjectType
@@ -16,7 +12,7 @@ class AgentRelationshipCategory(graphene.Enum):
     MEMBER = "member"
     PART = "part"
     PEER = "peer"
-    TRADINGPARTNER = "trading partner" #what is the best way to do the 2 word items?
+    TRADINGPARTNER = "trading partner"
     LEGALPARTNER = "legal partner"
 
 class AgentRelationshipRole(DjangoObjectType):
@@ -26,4 +22,5 @@ class AgentRelationshipRole(DjangoObjectType):
         model = AgentAssociationType
         only_fields = ('id', 'label', 'inverse_label')
 
-
+    def resolve_category(self, args, *rargs):
+        return self.category

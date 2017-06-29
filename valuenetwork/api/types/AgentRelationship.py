@@ -6,13 +6,24 @@ import graphene
 from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import AgentAssociation
+from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipRole
+from valuenetwork.api.models import formatAgent, Person, Organization
 
 
 class AgentRelationship(DjangoObjectType):
     subject = graphene.Field(lambda: types.Agent)
     object = graphene.Field(lambda: types.Agent)
-    relationship = graphene.Field(lambda: types.AgentRelationshipRole)
+    relationship = graphene.Field(lambda: AgentRelationshipRole)
 
     class Meta:
         model = AgentAssociation
         only_fields = ('id')
+
+    def resolve_subject(self, args, *rargs):
+        return formatAgent(self.subject)
+
+    def resolve_object(self, args, *rargs):
+        return formatAgent(self.object)
+
+    def resolve_relationship(self, args, *rargs):
+        return self.relationship

@@ -1635,6 +1635,24 @@ class AgentAssociationType(models.Model):
             if verbosity > 1:
                 print "Created %s AgentAssociationType" % name
 
+    @property #ValueFlows
+    def category(self):
+        if self.association_behavior == "member" or self.association_behavior == "manager":
+            return "member"
+        elif self.association_behavior == "child":
+            return "part"
+        elif self.association_behavior == "supplier" or self.association_behavior == "customer":
+            return "trading partner"
+        elif self.association_behavior == "child":
+            return "part"
+        elif self.association_behavior == "custodian":
+            return "legal partner"
+        elif self.association_behavior == "peer":
+            return "peer"
+        else:
+            return None
+
+
 from django.db.models.signals import post_migrate
 
 #def create_agent_types(app, **kwargs):
@@ -1705,7 +1723,7 @@ class AgentAssociation(models.Model):
 
     @property #ValueFlows
     def relationship(self):
-        return self.association_type.label
+        return self.association_type
 
 
 #todo exchange redesign fallout

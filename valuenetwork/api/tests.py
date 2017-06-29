@@ -241,6 +241,7 @@ query($token: String) {
       id
       label
       inverseLabel
+      category
     }
   }
 }
@@ -248,9 +249,18 @@ query($token: String) {
   viewer(token: $token) {
     allAgentRelationships {
       id
-      subject
-      relationship
-      object
+      subject {
+        name
+        type
+      }
+      relationship {
+        label
+        category
+      }
+      object {
+        name
+        type
+      }
     }
   }
 }
@@ -258,9 +268,18 @@ query($token: String) {
   viewer(token: $token) {
     agentRelationships (id: 39) {
       id
-      subject
-      relationship
-      object
+      subject {
+        name
+        type
+      }
+      relationship {
+        label
+        category
+      }
+      object {
+        name
+        type
+      }
     }
   }
 }

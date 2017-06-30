@@ -75,6 +75,27 @@ class SkillSuggestionForm(forms.ModelForm):
         fields = ('skill',)
 
 
+class AddUserSkillForm(forms.Form):
+    skill_type = TreeNodeChoiceField(
+        queryset=Ocp_Skill_Type.objects.all(),
+        empty_label=None,
+        level_indicator='. ',
+        required=False,
+        widget=forms.Select(
+          attrs={'class': 'id_skill_type chzn-select',
+                     'multiple':'',
+                     'data-placeholder':_("search Skill type...")}
+        )
+    )
+
+    def __init__(self, agent, *args, **kwargs):
+        super(AddUserSkillForm, self).__init__(*args, **kwargs)
+        if agent:
+            context_ids = [c.id for c in agent.related_all_agents()]
+            if not agent.id in context_ids:
+                context_ids.append(agent.id)
+            self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+
 
 
 
@@ -85,7 +106,7 @@ class MembershipRequestForm(forms.ModelForm):
     if settings.TESTING:
         captcha = None
     else:
-        captcha = CaptchaField()
+        captcha = CaptchaField(help_text=_("Is a math operation: Please put the result (don't copy the symbols)"))
 
     class Meta:
         model = MembershipRequest
@@ -123,19 +144,29 @@ class ProjectCreateForm(AgentCreateForm):
     is_context = None # projects are always context_agents, hide the field
 
     # fields for Project model
-    joining_style = forms.ChoiceField()
-    visibility = forms.ChoiceField()
+    joining_style = forms.ChoiceField(widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    visibility = forms.ChoiceField(widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    resource_type_selection = forms.ChoiceField(label=_("Resource type visibility"), widget=forms.Select(
+        attrs={'class': 'chzn-select'}))
+    fobi_slug = forms.CharField(
+        required = False,
+        label = "Custom project url slug",
+        help_text = _("Used to reach your custom join form, but after the custom fields has been defined by you and configured by OCP Admins."),
+        )
 
     def __init__(self, *args, **kwargs):
         super(ProjectCreateForm, self).__init__(*args, **kwargs)
         self.fields["joining_style"].choices = [(js[0], js[1]) for js in JOINING_STYLE_CHOICES]
         self.fields["visibility"].choices = [(vi[0], vi[1]) for vi in VISIBILITY_CHOICES]
+        self.fields["resource_type_selection"].choices = [(rts[0], rts[1]) for rts in SELECTION_CHOICES]
 
     def clean(self):
         data = super(ProjectCreateForm, self).clean()
         url = data["url"]
         if not url[0:3] == "http":
-          data["url"] = "http://" + url
+            pass #data["url"] = "http://" + url
         #if type_of_user == "collective":
             #if int(number_of_shares) < 2:
             #    msg = "Number of shares must be at least 2 for a collective."
@@ -149,7 +180,7 @@ class ProjectCreateForm(AgentCreateForm):
     class Meta: #(AgentCreateForm.Meta):
         model = Project #EconomicAgent
         #removed address and is_context
-        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email', 'joining_style', 'visibility', 'fobi_slug')
+        fields = ('name', 'nick', 'agent_type', 'description', 'url', 'email', 'joining_style', 'visibility', 'resource_type_selection', 'fobi_slug')
         #exclude = ('is_context',)
 
 
@@ -178,7 +209,7 @@ class AssociationForm(forms.Form):
 
 # public join form
 class JoinRequestForm(forms.ModelForm):
-    captcha = CaptchaField()
+    captcha = CaptchaField(help_text=_("Is a math operation: Please put the result (don't copy the symbols)"))
 
     project = None
     '''forms.ModelChoiceField(
@@ -239,8 +270,15 @@ class JoinRequestInternalForm(forms.ModelForm):
 
 class JoinAgentSelectionForm(forms.Form):
     created_agent = AgentModelChoiceField(
-        queryset=EconomicAgent.objects.without_join_request(),
+        queryset=EconomicAgent.objects.all(), #without_join_request(),
         required=False)
+
+    def __init__(self, project=None, *args, **kwargs):
+        super(JoinAgentSelectionForm, self).__init__(*args, **kwargs)
+        if project:
+            self.fields['created_agent'].queryset = EconomicAgent.objects.without_join_request()
+        else:
+            self.fields['created_agent'].queryset = EconomicAgent.objects.without_join_request()
 
 
 
@@ -605,22 +643,22 @@ class NewSkillTypeForm(forms.Form):
         required=False,
         widget=forms.Textarea(attrs={'class': 'item-description input-xxlarge', 'rows': 5,})
     )
+    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
+        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
+        required=False,
+        empty_label='', #_('. . .'),
+        level_indicator='. ',
+        label=_("Has a main related material or non-material resource type?"),
+        help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
+        widget=forms.Select(
+            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
+    )
     context_agent = forms.ModelChoiceField(
         empty_label=None,
         queryset=EconomicAgent.objects.none(),
         help_text=_('If the skill is only useful for your project or a parent sector collective, choose a smaller context here.'),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}),
-    )
-    related_type = TreeNodeChoiceField( #forms.ModelChoiceField(
-        queryset=Ocp_Artwork_Type.objects.none(), #filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id),
-        required=False,
-        empty_label='', #_('. . .'),
-        level_indicator='. ',
-        label=_("Has a main related resource type?"),
-        help_text=_('If this skill type is mainly related a resource type or branch, choose it here.'),
-        widget=forms.Select(
-            attrs={'class': 'ocp-resource-type input-xlarge chzn-select-single', 'data-placeholder':_("search Resource type...")}),
     )
     unit_type = TreeNodeChoiceField( #forms.ModelChoiceField(
         queryset=Ocp_Unit_Type.objects.all(),
@@ -663,8 +701,13 @@ class NewSkillTypeForm(forms.Form):
             context_ids = [c.id for c in agent.related_all_agents()]
             if not agent.id in context_ids:
                 context_ids.append(agent.id)
-            self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
-            self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
+            contexts = agent.related_all_contexts_queryset(agent, False) # 2nd arg: include childs
+            initial = contexts.last()
+            for ag in contexts:
+              if ag.is_root():
+                initial = ag
+            self.fields["context_agent"].queryset = contexts
+            self.fields["context_agent"].initial = initial #self.fields["context_agent"].queryset.last()
 
             self.fields["parent_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
             self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
@@ -1001,7 +1044,7 @@ class ContextTransferForm(forms.Form):
                     self.fields['quantity'].label += " ERROR: this facet is what? "+str(facet) #pass
             else:
                 if resource_type:
-                    if resource_type.name == "Faircoin Address":
+                    if resource_type.name == "Faircoin Ocp Account":
                         resource_type = EconomicResourceType.objects.get(name="FairCoin")
 
                     try:
@@ -1228,7 +1271,7 @@ class WorkTodoForm(forms.ModelForm):
         queryset=EconomicAgent.objects.context_agents(),
         label=_("Context"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
+        widget=forms.Select(attrs={'class': 'chzn-select context-selector'}))
     due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'input-small date-entry',}))
     description = forms.CharField(
         required=False,
@@ -1239,8 +1282,12 @@ class WorkTodoForm(forms.ModelForm):
         model = Commitment
         fields = ('from_agent', 'context_agent', 'resource_type', 'due_date', 'description', 'url')
 
-    def __init__(self, agent, pattern=None, *args, **kwargs): #agent is posting agent
+    def __init__(self, agent, context_agent=None, pattern=None, *args, **kwargs): #agent is posting agent
         super(WorkTodoForm, self).__init__(*args, **kwargs)
+        commitment_instance = None
+        if 'instance' in kwargs:
+            commitment_instance = kwargs['instance']
+            commitment_context = commitment_instance.context_agent
         contexts = agent.related_contexts()
         self.fields["context_agent"].choices = list(set([(ct.id, ct) for ct in contexts]))
         peeps = [agent,]
@@ -1251,17 +1298,27 @@ class WorkTodoForm(forms.ModelForm):
         if len(peeps) > 1:
             peeps = list(OrderedDict.fromkeys(peeps))
         from_agent_choices = [('', 'Unassigned')] + [(peep.id, peep) for peep in peeps]
-
         self.fields["from_agent"].choices = from_agent_choices
         if pattern:
             self.pattern = pattern
             #self.fields["resource_type"].choices = [(rt.id, rt) for rt in pattern.todo_resource_types()]
-            self.fields["resource_type"].queryset = pattern.todo_resource_types()
-
-
-
-
-
+            rts = pattern.todo_resource_types()
+        else:
+            rts = EconomicResourceType.objects.filter(behavior="work")
+        if commitment_instance:
+            ca = commitment_context
+        else:
+            ca = ca = self.fields["context_agent"].choices[0][1]
+        if context_agent:
+            ca = context_agent
+        try:
+            if ca.project.resource_type_selection == "project":
+                rts = rts.filter(context_agent=ca)
+            else:
+                rts = rts.filter(context_agent=None)
+        except:
+            rts = rts.filter(context_agent=None)
+        self.fields["resource_type"].queryset = rts
 
 
 class WorkCasualTimeContributionForm(forms.ModelForm):
@@ -1270,27 +1327,21 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
         empty_label=None,
         widget=forms.Select(attrs={'class': 'chzn-select'}))
     context_agent = forms.ModelChoiceField(
-        queryset=EconomicAgent.objects.open_projects(),
+        queryset=EconomicAgent.objects.context_agents(),
         label=_("Context"),
         empty_label=None,
-        widget=forms.Select(attrs={'class': 'chzn-select'}))
+        widget=forms.Select(attrs={'class': 'chzn-select context-selector'}))
     event_date = forms.DateField(required=False, widget=forms.TextInput(attrs={'class': 'item-date date-entry',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
+    #todo: shd be changed to qty of unit
     quantity = forms.DecimalField(required=False,
         widget=DecimalDurationWidget,
         help_text="hrs, mins")
 
     class Meta:
         model = EconomicEvent
-        fields = ('event_date', 'resource_type', 'context_agent', 'quantity', 'is_contribution', 'url', 'description')
-
-
-
-
-
-
-
+        fields = ('event_date', 'context_agent', 'resource_type', 'quantity', 'is_contribution', 'url', 'description')
 
 
 
@@ -1300,6 +1351,7 @@ class WorkCasualTimeContributionForm(forms.ModelForm):
 
 class WorkProjectSelectionFormOptional(forms.Form):
     context_agent = forms.ChoiceField(
+        required=False,
         widget=forms.Select(
             attrs={'class': 'chzn-select'}))
 

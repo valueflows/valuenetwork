@@ -63,7 +63,7 @@ def do_stop(password):
     #if password != my_password:
     #    return "wrong password"
     stopping = True
-    logging.debug("Stopping")    
+    logging.debug("Stopping")
     return "ok"
 
 def send_command(cmd, params):
@@ -74,7 +74,7 @@ def send_command(cmd, params):
     except socket.error:
         logging.error("Can not connect to the server.")
         return 1
-        
+
     try:
         out = f(*params)
     except socket.error:
@@ -108,7 +108,7 @@ def is_mine(address):
 def get_address_history(address):
     return wallet.get_address_history(address)
 
-# make a transfer from an adress of the wallet 
+# make a transfer from an adress of the wallet
 def make_transaction_from_address(address_origin, address_end, amount):
     logging.debug("Trying broadcast transaction\n       Origin : %s\n       End    : %s\n       Amount : %s" %(address_origin, address_end, amount))
     if not is_valid(address_end):
@@ -134,7 +134,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
         logging.error("Amount negative: %d" %(amount_total) )
         return False
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, fixed_fee=int(net_fee), change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))
@@ -147,7 +147,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
     else:
          logging.error("Sending %s fairs to the address %s" %(amount_total, address_end ) )
          return False
-         
+
 def address_history_info(address, page = 0, items = 20):
     """Return list with info of last 20 transactions of the address history"""
     return_history = []
@@ -164,7 +164,7 @@ def address_history_info(address, page = 0, items = 20):
 
 # create new address for users or any other entity
 def new_fair_address(entity_id, entity = 'generic'):
-    """ Return a new address labeled or False if there's no network connection. 
+    """ Return a new address labeled or False if there's no network connection.
     The label is for debugging proposals. It's like 'entity: id'
     We can label like "user: 213" or "user: pachamama" or "order: 67".
     """
@@ -175,8 +175,8 @@ def new_fair_address(entity_id, entity = 'generic'):
         wallet.up_to_date = False
         check_label = wallet.get_label(new_address)
         check_history = cmd_wallet.getaddresshistory(new_address)
-        # It checks if address is labeled or has history yet, a gap limit protection. 
-        # This can be removed when we have good control of gap limit.     
+        # It checks if address is labeled or has history yet, a gap limit protection.
+        # This can be removed when we have good control of gap limit.
         if not check_label[0] and not check_history:
             wallet.set_label(new_address, entity + ': ' + str(entity_id))
             return new_address
@@ -197,13 +197,25 @@ def is_connected():
     return network.is_connected()
 
 def daemon_is_up():
-    return True    
+    return True
 
 def get_wallet_info():
     return {"name" : wallet.basename(), "version" : wallet.electrum_version}
 
+def import_key(privkey, entity_id, entity = 'generic'):
+    try:
+        address = wallet.import_key(privkey, password)
+    except Exception as e:
+        return 'ERROR', str(e)
+    try:
+        wallet.set_label(address, entity + ': ' + str(entity_id))
+    except:
+        pass
+
+    return 'ok', address
+
 if __name__ == '__main__':
-    
+
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
         params = sys.argv[2:]
@@ -236,7 +248,7 @@ if __name__ == '__main__':
         wallet = electrum_fair.wallet.Wallet(storage)
 
     wallet.synchronize = lambda: None # prevent address creation by the wallet
-    #wallet.change_gap_limit(100)  
+    #wallet.change_gap_limit(100)
     wallet.start_threads(network)
     #network.register_callback('updated', on_wallet_update)
     cmd_wallet = electrum_fair.commands.Commands(c, wallet, network)
@@ -258,7 +270,8 @@ if __name__ == '__main__':
     server.register_function(is_mine,'is_mine')
     server.register_function(is_valid,'is_valid')
     server.register_function(get_address_balance,'get_address_balance')
-    server.register_function(get_balance,'get_balance')  
+    server.register_function(get_balance,'get_balance')
+    server.register_function(import_key,'import_key')
     server.socket.settimeout(1)
 
     while not stopping:
@@ -266,7 +279,7 @@ if __name__ == '__main__':
             server.handle_request()
         except socket.timeout:
             continue
-    
+
     network.stop_daemon()
     if network.is_connected():
         time.sleep(1)

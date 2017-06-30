@@ -396,7 +396,12 @@ class AgentManager(models.Manager):
     def without_membership_request(self):
         return self.filter(membership_requests__isnull=True).order_by("name")
 
-    def without_join_request(self):
+    def without_join_request(self, project=None):
+        if project:
+            ids = list(set([ag.id for ag in project.agent.managers()]))
+            if not project.agent.id in ids:
+                ids.append(project.agent.id)
+            return self.all().exclude(project_join_requests__isnull=False, project_join_requests__project__isnull=False, project_join_requests__project=project).exclude(id__in=ids).order_by('name')
         return self.filter(project_join_requests__isnull=True).order_by("name")
 
     def projects(self):
@@ -438,6 +443,13 @@ class AgentManager(models.Manager):
         except EconomicAgent.DoesNotExist:
             raise ValidationError("FreedomCoop Projects group does not exist by 'FC_Projects' nickname.")
         return fc
+
+    def root_ocp_agent(self):
+        try:
+            ocp = EconomicAgent.objects.get(nick="OCP")
+        except EconomicAgent.DoesNotExist:
+            raise ValidationError("OCP main root Agent does not exist by 'OCP' nickname.")
+        return ocp
 
     def open_projects(self):
         return EconomicAgent.objects.filter(project__visibility="public") #is_public="True")
@@ -608,7 +620,7 @@ class EconomicAgent(models.Model):
             # resource type has unit
             va = EconomicResource(
                 resource_type=resource_type,
-                identifier="Faircoin address for " + self.nick,
+                identifier="Faircoin Ocp Account for " + self.nick,
                 digital_currency_address=address,
             )
             va.save()
@@ -642,19 +654,27 @@ class EconomicAgent(models.Model):
         else:
             return None
 
-    def candidate_membership(self):
-        aa = self.candidate_association()
+    def candidate_membership(self, project_agent=None):
+        aa = self.candidate_association(project_agent)
         if aa:
             if aa.state == "potential":
                 return aa.has_associate
         return None
 
-    def candidate_association(self):
+    def candidate_association(self, project_agent=None):
         aas = self.is_associate_of.all()
+        if not project_agent:
+            try:
+                project_agent = EconomicAgent.objects.get(nick=settings.SEND_MEMBERSHIP_PAYMENT_TO)
+            except:
+                pass
         if aas:
-            aa = aas[0]
-            if aa.state == "potential":
-                return aa
+            for aa in aas:
+                #import pdb; pdb.set_trace() #aa = aas[0]
+                if project_agent and aa.has_associate == project_agent:
+                    if aa.state == "potential":
+                        return aa
+        return None
 
     def number_of_shares(self):
         if self.agent_type.party_type == "individual":
@@ -1018,6 +1038,81 @@ class EconomicAgent(models.Model):
         if agent:
           ctx_ids.append(agent.id)
         return EconomicAgent.objects.filter(id__in=ctx_ids)
+
+    def need_skills(self):
+        resp = True
+        ags = self.related_contexts()
+        add = 0
+        if not self in ags:
+            add = 1
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'skills' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
+            resp = False
+        #import pdb; pdb.set_trace()
+        return resp
+
+    def need_faircoins(self):
+        resp = True
+        ags = self.related_contexts()
+        add = 0
+        if not self in ags:
+            add = 1
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'faircoins' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
+            resp = False
+        #import pdb; pdb.set_trace()
+        return resp
+
+    def need_exchanges(self):
+        resp = True
+        ags = self.related_contexts()
+        add = 0
+        if not self in ags:
+            add = 1
+            ags.append(self)
+        noneed = []
+        for ag in ags:
+            try:
+                if ag.project and ag.project.services():
+                    if not 'exchanges' in ag.project.services():
+                        noneed.append(ag)
+            except:
+                pass
+        if len(ags)-add == len(noneed):
+            resp = False
+        if self in noneed:
+            resp = False
+        return resp
+
+    def need_projects(self):
+        resp = True
+        ags = self.related_contexts()
+        if len(ags) < 2:
+            if ags[0].project and ags[0].project.services():
+                if not 'projects' in ags[0].project.services():
+                    resp = False
+        return resp
+
 
     def invoicing_candidates(self):
         ctx = self.related_contexts()
@@ -3057,7 +3152,7 @@ class ProcessPattern(models.Model):
         return EconomicResource.objects.filter(resource_type__in=rts)
 
     def input_resource_types(self):
-        #must be changed, in no longer covers
+        #TODO must be changed, in no longer covers
         # or event types must be changed so all ins are ins
         #return self.resource_types_for_relationship("in")
         answer = list(self.resource_types_for_relationship("in"))
@@ -4370,7 +4465,7 @@ class EconomicResource(models.Model):
     author = models.ForeignKey(EconomicAgent, related_name="authored_resources",
         verbose_name=_('author'), blank=True, null=True)
     quantity = models.DecimalField(_('quantity'), max_digits=8, decimal_places=2,
-        default=Decimal("0.00"), editable=False)
+        default=Decimal("0.00"))
     quality = models.DecimalField(_('quality'), max_digits=3, decimal_places=0,
         default=Decimal("0"), blank=True, null=True)
     notes = models.TextField(_('notes'), blank=True, null=True)
@@ -4511,13 +4606,17 @@ class EconomicResource(models.Model):
         bal = 0
         address = self.digital_currency_address
         if address:
+          if not hasattr(self, 'balance'):
             try:
                 balance = faircoin_utils.get_address_balance(address)
                 balance = balance[0]
                 if balance:
                     bal = Decimal(balance) / FAIRCOIN_DIVISOR
+                    self.balance = bal
             except:
                 bal = "Not accessible now"
+          else:
+            bal = self.balance
         return bal
 
     def digital_currency_balance_unconfirmed(self):
@@ -4527,6 +4626,7 @@ class EconomicResource(models.Model):
         unconfirmed = 0
         address = self.digital_currency_address
         if address:
+          if not hasattr(self, 'newbalance'):
             try:
                 balance = faircoin_utils.get_address_balance(address)
                 balance1 = balance[0]
@@ -4542,8 +4642,11 @@ class EconomicResource(models.Model):
                 bal = Decimal(balance1+unconfirmed) / FAIRCOIN_DIVISOR
                 if newadd:
                     bal += newadd
+                self.newbalance = bal
             except:
                 bal = "Not accessible now"
+          else:
+            bal = self.newbalance
         return bal
 
     def is_wallet_address(self):
@@ -4568,9 +4671,11 @@ class EconomicResource(models.Model):
             return 0
         limit = 0
         address = self.digital_currency_address
-        if address:
+        if address and self.is_wallet_address():
             balance = self.digital_currency_balance()
+            self.balance = balance
             newbalance = self.digital_currency_balance_unconfirmed()
+            self.newbalance = newbalance
             try:
                 if balance:
                     if newbalance < balance:
@@ -9314,6 +9419,23 @@ class Commitment(models.Model):
                 if self.fulfillment_events.filter(resource=resource):
                     answer.append(resource)
         return answer
+        
+    def onhand_for_citation(self):
+        answer = []
+        rt = self.resource_type
+        if self.stage:
+            resources = EconomicResource.goods.filter(
+                stage=self.stage,
+                resource_type=rt)
+        else:
+            resources = EconomicResource.goods.filter(resource_type=rt)
+        for resource in resources:
+            if resource.quantity > 0:
+                answer.append(resource)
+            else:
+                if self.fulfillment_events.filter(resource=resource):
+                    answer.append(resource)
+        return answer
 
     def onhand_with_fulfilled_quantity(self):
         resources = self.onhand()
@@ -9524,11 +9646,14 @@ class Commitment(models.Model):
         return arts
 
     def possible_work_users(self):
-        srcs = self.resource_type.work_agents()
-        members = self.context_agent.all_members_list()
-        agents = [agent for agent in srcs if agent in members]
-        users = [a.user() for a in agents if a.user()]
-        return [u.user for u in users]
+        if self.context_agent:
+            srcs = self.resource_type.work_agents()
+            members = self.context_agent.all_members_list()
+            agents = [agent for agent in srcs if agent in members]
+            users = [a.user() for a in agents if a.user()]
+            return [u.user for u in users]
+        else:
+            return []
 
     def workers(self):
         answer = []

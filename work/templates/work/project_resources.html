@@ -161,10 +161,14 @@ img {
 			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url "locations" %}">{% trans "Locations" %}</a> -->
 
         <div class="subnav">
-          {% if request.user.is_staff or request.user.agent.agent in agent.managers %}
+          {% if request.user.is_staff or request.user.agent.agent in agent.managers or request.user.agent.agent == agent %}
+            {% if agent.need_exchanges %}
               <a class="indent" href="{% url "exchanges_all" agent_id=agent.id %}">{% trans "Exchanges" %}</a>
+            {% endif %}
           {% endif %}
-          <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% if request.user.agent.agent.need_projects %}
+              <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
+          {% endif %}
         </div>
 	    </legend>
       {{ rtype }}
@@ -187,16 +191,16 @@ img {
               <li><h4><a href="{% url "resource_type" resource_type_id=rt.id %}">{{ rt.name }}</a> ( {{ rt.facet_list }} ) </h4>
                 <ul>
                 {% for resource in rt.items %}
-                    <li><div class="res">
-                     <a href="{% url "project_resource" agent_id=agent.id resource_id=resource.id %}" title="
+                  <li><div class="res">
+                    <a href="{% url "project_resource" agent_id=agent.id resource_id=resource.id %}" title="
                         {{ resource.notes }}
                         {{ resource.access_rules }}
                         ">{{ resource.label }}
                     </a>
-		             {% if resource.photo %}
-		            	<img src="{% thumbnail resource.photo photo_size %}" />
-	            	 {% elif resource.photo_url %}
-		            	<img src="{{ resource.photo_url }}" width="128" height="96" />
+                    {% if resource.photo %}
+                        <img src="{% thumbnail resource.photo photo_size %}" />
+                    {% elif resource.photo_url %}
+                        <img src="{{ resource.photo_url }}" width="128" height="96" />
                     {% endif %}
                     {% if resource.stage %}
                         ~ Stage: {{ resource.stage }}
@@ -214,8 +218,8 @@ img {
                     {% if resource.url %}
                         ~ <a href="{{ resource.url }}">{% trans "Documentation" %}</a>
                     {% endif %}
-                    </div></li>
-                    {% comment %}<div class="info">Quality: {{ resource.quality }} </div>{% endcomment %}
+                  </div></li>
+                  {% comment %}<div class="info">Quality: {{ resource.quality }} </div>{% endcomment %}
                 {% endfor %}
                 </ul>
               </li>
@@ -236,13 +240,13 @@ img {
             </ul></li>
           </ul>
         </div>
-		  </div>
+      </div>
 
-		  <div class="span4 filter miniform">
+      <div class="span4 filter miniform">
 
         {% include "work/_treetypes_filter.html" %}
 
-		  </div>
+      </div>
 {% endblock %}
 {% block extra_script %}
     <!-- <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script> -->
@@ -253,22 +257,22 @@ img {
     <script src="{% static 'js/chosen.jquery.js' %}"></script>
 {% endblock %}
 {% block extra_body %}
-	{{ block.super }}
-    <script type="text/javascript">
+  {{ block.super }}
+<script type="text/javascript">
 
-      Array.prototype.unique = function() {
-          var a = this.concat();
-          for(var i=0; i<a.length; ++i) {
-              for(var j=i+1; j<a.length; ++j) {
-                  if(a[i] === a[j])
-                      a.splice(j--, 1);
-              }
+  Array.prototype.unique = function() {
+      var a = this.concat();
+      for(var i=0; i<a.length; ++i) {
+          for(var j=i+1; j<a.length; ++j) {
+              if(a[i] === a[j])
+                  a.splice(j--, 1);
           }
+      }
 
-          return a;
-      };
+      return a;
+  };
 
-	$(document).ready(function(){
+  $(document).ready(function(){
 
     var selectedCats = "{{ selected_values }}";
 
@@ -365,37 +369,37 @@ img {
       }
     });
 
-		$('#inventory').addClass('active');
+    $('#inventory').addClass('active');
 
-		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help");
-        }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow");
-            $( "#help" ).text("Show Help");
+    $( "#help" ).toggle( function(){
+        $('#help-content').show("slide", { direction: "right" }, "slow" );
+        $( "#help" ).text("Hide Help");
+      }, function() {
+        $('#help-content').hide("slide", { direction: "right" }, "slow");
+        $( "#help" ).text("Show Help");
     });
 
 
 
     var checkedCats = [];
-		$('.category').click(function(){
+    $('.category').click(function(){
 
         var checkedBox = $(this)[0];
         var allBox = $('#all')[0];
         if (checkedBox == allBox) {
             $('.category').each(function(){
-		            $(this).prop('checked', false);
-				    });
+              $(this).prop('checked', false);
+            });
             checkedCats = [];
             $('.fancytree-selected .fancytree-checkbox').click();
-				    $('#all').prop('checked', true);
-				    checkedCats.push('all');
-			  }
+            $('#all').prop('checked', true);
+            checkedCats.push('all');
+        }
 
-			  $('#categories').attr('value', checkedCats);
-		});
+        $('#categories').attr('value', checkedCats);
+    });
 
-	}); // end document.ready
+  }); // end document.ready
 
-    </script>
+</script>
 {% endblock %}

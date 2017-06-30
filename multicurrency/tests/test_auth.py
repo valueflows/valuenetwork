@@ -39,9 +39,11 @@ def fake_new_client(self, username, password):
 
 def fake_wallet_history(self, access_key, access_secret, limit=10, offset=0):
     if access_key == 'TestAccessKey' and access_secret == 'TestAccessSecret':
-        with open('multicurrency/tests/chipchap_test_tx.json', 'r') as data_file:
-            response = json.load(data_file)
-        return response
+        with open('multicurrency/tests/chipchap_test_tx.json', 'r') as tx_file:
+            tx_list = json.load(tx_file)
+        with open('multicurrency/tests/chipchap_test_balance.json', 'r') as balance_file:
+            balance = json.load(balance_file)
+        return tx_list, balance
     else:
         raise ChipChapAuthError('Error Testing', 'Receiving transaction list failed.')
 

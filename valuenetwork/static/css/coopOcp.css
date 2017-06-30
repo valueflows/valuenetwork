@@ -66,7 +66,7 @@ legend .subnav .indent {
 }
 
 span.error {
-  color: #944;
+  color: #b34;
   font-weight: bold;
 }
 
@@ -90,7 +90,7 @@ span.error {
 }
 
 .error {
-  color: #c00;
+  color: #b34;
 }
 
 .link-normal {
@@ -377,8 +377,35 @@ form#stateForm {
   display: block;
   font-size: 0.9em;
   color: #887;
+  margin-top: 3px;
+}
+.modal input {
+  margin-bottom: 0;
 }
 .modal label {
+  margin-top: 15px;
   /*font-weight: bold;
   font-size: 1.05em;*/
+}
+
+
+/*   T R E E S   */
+
+div.fancytree-radio {
+  /*float: left;*/
+  display: inline-table;
+}
+div ul.fancytree-container {
+  background: none;
+  border: none;
+}
+span.fancytree-title span.edit a {
+  color: #734279;
+  cursor: pointer;
+}
+span.fancytree-title span.edit a:hover {
+  text-decoration: underline;
+}
+span.fancytree-selected span.fancytree-title {
+    font-style: inherit;
 }

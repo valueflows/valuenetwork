@@ -142,7 +142,7 @@ def history(request, agent_id, oauth_id):
 
     connection = ChipChapAuthConnection.get()
     try:
-        data = connection.wallet_history(
+        tx_list, balance = connection.wallet_history(
             oauth.access_key,
             oauth.access_secret,
             limit=limit,
@@ -153,56 +153,65 @@ def history(request, agent_id, oauth_id):
             'Something was wrong connecting to chip-chap.')
         return redirect('multicurrency_auth', agent_id=agent_id)
 
-    if data['status'] == 'ok':
+    if tx_list['status'] == 'ok' and balance['status'] == 'ok':
+        balance_clean = []
+        for bal in balance['data']:
+            if int(bal['balance']) != 0:
+                clean_bal = Decimal(int(bal['balance']))/(10**int(bal['scale']))
+                clean_currency = bal['currency'] if bal['currency'] != 'FAC' else 'FAIR'
+                balance_clean.append(str(clean_bal.quantize(Decimal('0.01'))) + ' ' + clean_currency)
         methods = {
             'fac': 'FAIR',
             'halcash_es': 'Halcash ES',
+            'exchange_EURtoFAC': 'EUR to FAIR',
+            'sepa': 'SEPA',
+            'wallet_to_wallet': 'wallet to wallet',
         }
-        table_caption = "Showing " + str(data['data']['start'] + 1) + " to "\
-            + str(data['data']['end']) + " of " + str(data['data']['total'])\
+        table_caption = "Showing " + str(tx_list['data']['start'] + 1) + " to "\
+            + str(tx_list['data']['end']) + " of " + str(tx_list['data']['total'])\
             + " movements"
-        table_headers = ['Created', 'Concept', 'Method in',
-            'Method out', 'Address', 'Amount']
+        table_headers = ['Created', 'Concept', 'Method', 'Address', 'Amount']
         table_rows = []
         paginator = {}
-        if data['data']['total'] > 0:
-            for i in range(data['data']['start'], data['data']['end']):
-                tx = data['data']['elements'][i]
+        if tx_list['data']['total'] > 0:
+            for tx in tx_list['data']['elements']:
                 created = parse_datetime(tx['created']) if 'created' in tx else '--'
-                concept = tx['concept'] if 'concept' in tx else '--'
-                method_in = tx['method_in'] if 'method_in' in tx else '--'
-                method_out = tx['method_out'] if 'method_out' in tx else '--'
+                concept = '--'
                 address = '--'
-                if 'data_in' in tx:
-                    address = tx['data_in']['address'] if 'address' in tx['data_in'] else '--'
-                if 'data_out' in tx and address == '--':
-                    address = tx['data_out']['address'] if 'address' in tx['data_out'] else '--'
+                if 'pay_in_info' in tx:
+                    concept = tx['pay_in_info']['concept'] if 'concept' in tx['pay_in_info'] else '--'
+                    address = tx['pay_in_info']['address'] if 'address' in tx['pay_in_info'] else '--'
+                elif 'pay_out_info' in tx:
+                    concept = tx['pay_out_info']['concept'] if 'concept' in tx['pay_out_info'] else '--'
+                    address = tx['pay_out_info']['address'] if 'address' in tx['pay_out_info'] else '--'
+                method = tx['method'] if 'method' in tx else '--'
+                if method in methods: method = methods[method]
                 amount = Decimal(tx['amount']) if 'amount' in tx else Decimal('0')
+                scale = int(tx['scale']) if 'scale' in tx else 0
+                amount = amount/(10**scale)
+                if 'type' in tx:
+                    amount = -amount if tx['type'] == 'out' else amount
                 currency = tx['currency'] if 'currency' in tx else '--'
-                if method_in in methods: method_in = methods[method_in]
-                if method_out in methods: method_out = methods[method_out]
-                if currency == "FAC":
-                    currency = "FAIR"
-                    amount = amount/1000000
+                if currency == "FAC": currency = "FAIR"
                 table_rows.append([
                     created.strftime('%d/%m/%y %H:%M'),
                     concept,
-                    method_in,
-                    method_out,
+                    method,
                     address,
                     str(amount.quantize(Decimal('0.01'))) + ' ' + currency,
                 ])
-                if data['data']['total'] > data['data']['end']:
+                if tx_list['data']['total'] > tx_list['data']['end']:
                     paginator['next'] = {
                         'limit': str(items_per_page),
-                        'offset': str(data['data']['end'])
+                        'offset': str(tx_list['data']['end'])
                     }
-                if data['data']['start'] > items_per_page:
+                if tx_list['data']['start'] >= items_per_page:
                     paginator['previous'] = {
                         'limit': str(items_per_page),
-                        'offset': str(int(data['data']['start']) - items_per_page)
+                        'offset': str(int(tx_list['data']['start']) - items_per_page)
                     }
         return render(request, 'multicurrency_history.html', {
+            'balance_clean': balance_clean,
             'table_caption': table_caption,
             'table_headers': table_headers,
             'table_rows': table_rows,

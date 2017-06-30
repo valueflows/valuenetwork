@@ -51,6 +51,8 @@ urlpatterns = [
     url(r"^agent/(?P<agent_id>\d+)/$", work.views.members_agent, name="members_agent"),
     url(r"^agent/(?P<agent_id>\d+)/join-requests/$", work.views.join_requests, name="join_requests"),
     #url(r"^agent/(?P<agent_id>\d+)/create-user-agent/$", work.views.create_project_user_and_agent, name="create_project_user_and_agent"),
+    url(r'^assign-skills/(?P<agent_id>\d+)/$', work.views.assign_skills, name="assign_skills"),
+    url(r'^new_skill_type/(?P<agent_id>\d+)/$', work.views.new_skill_type, name="new_skill_type"),
     url(r'^my-tasks/$', work.views.my_tasks, name="my_tasks"),
     url(r'^take-new-tasks/$', work.views.take_new_tasks, name="take_new_tasks"),
     url(r'^home/$', work.views.my_dashboard, name="home"),
@@ -83,6 +85,8 @@ urlpatterns = [
         name="create_account_for_join_request"),
     url(r"^comments/$", work.views.comments, name="comments"),
 
+    url(r'^payment-url/(?P<paymode>.+)/(?P<join_request_id>\d+)/$', work.views.payment_url, name="payment_url"),
+
     url(r'^share-payment/(?P<agent_id>\d+)/$', work.views.share_payment, name="share_payment"),
     url(r"^validate-nick/$", work.views.validate_nick, name="validate_nick"),
     url(r"^validate-username/$", work.views.validate_username, name="validate_username"),
@@ -93,7 +97,7 @@ urlpatterns = [
     url(r"^agent/(?P<agent_id>\d+)/resources/$", work.views.project_all_resources, name="project_resources"),
     url(r"^agent/(?P<agent_id>\d+)/resources/(?P<resource_id>\d+)/$", work.views.project_resource, name="project_resource"),
     url(r"^agent/(?P<agent_id>\d+)/resources/new/(?P<Rtype>[\w-]+)/$", work.views.new_resource_type, name="new_resource_type"),
-
+    url(r"^agent/(?P<agent_id>\d+)/change-resource/(?P<resource_id>\d+)/$", work.views.change_resource, name="change_resource"),
 
 
     url(r'^add-transfer/(?P<exchange_id>\d+)/(?P<transfer_type_id>\d+)/$', work.views.add_transfer,
@@ -187,7 +191,8 @@ urlpatterns = [
         name="work_json_resource_type_citation_unit"),
     url(r"^join-task/(?P<commitment_id>\d+)/$", work.views.work_join_task,
         name="work_join_task"),
-
+    url(r"^json-context-resource_types/(?P<context_id>\d+)/(?P<pattern_id>\d+)/$", work.views.json_get_context_resource_types,
+        name="work_json_get_context_resource_types"),
 ]
 
 if settings.USE_FAIRCOIN:

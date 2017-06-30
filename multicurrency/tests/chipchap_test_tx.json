@@ -1,1 +1,124 @@
-{"data":{"total":59,"start":0,"end":10,"daily":[],"scales":[],"elements":[{"created":"2017-05-11T17:27:46+0200","updated":"2017-05-11T17:48:08+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"expired","version":1,"data_in":{"amount":"15000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"data_out":{"amount":295050734911,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"created","final":false},"currency":"EUR","amount":15000,"variable_fee":0,"fixed_fee":0,"total":15000,"scale":2,"notified":false,"pay_in_info":{"amount":295050734911,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"expired","final":false},"pay_out_info":{"amount":"15000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"method_in":"fac","method_out":"halcash_es","type":"swift","price":5,"client":40,"client_data":[],"group_data":"","email_notification":""},{"created":"2017-04-28T13:09:18+0200","updated":"2017-04-28T13:27:05+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"success","version":1,"data_in":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":"sent","halcashticket":"002091000884546"},"data_out":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":43400000000,"min_confirmations":1,"confirmations":2,"status":"success","final":true},"currency":"EUR","amount":2000,"variable_fee":0,"fixed_fee":0,"total":2000,"scale":2,"notification_tries":3,"notified":false,"pay_in_info":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":43400000000,"min_confirmations":1,"confirmations":2,"status":"success","final":true},"pay_out_info":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":"sent","halcashticket":"002091000884546"},"method_in":"fac","method_out":"halcash_es","type":"swift","price":5,"client":40,"faircoop_node":310,"client_data":[],"group_data":"","email_notification":""},{"created":"2017-04-27T18:38:44+0200","updated":"2017-04-27T18:59:05+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"expired","version":1,"data_in":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"data_out":{"amount":49871233414,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"created","final":false},"currency":"EUR","amount":2000,"variable_fee":0,"fixed_fee":0,"total":2000,"scale":2,"notified":false,"pay_in_info":{"amount":49871233414,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"expired","final":false},"pay_out_info":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"method_in":"fac","method_out":"halcash_es","type":"swift","price":4,"client":40,"client_data":[],"group_data":"","email_notification":""},{"created":"2017-04-27T13:54:48+0200","updated":"2017-04-27T13:54:48+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","method":"fac-halcash_es","status":"success","data_in":{"previous_transaction":"5901d89014227ece3f8b4567","transaction_amount":2000,"total_fee":170},"currency":"EUR","amount":0,"variable_fee":0,"fixed_fee":0,"total":0,"scale":2,"fee_info":{"previous_transaction":"5901d89014227ece3f8b4567","previous_amount":2000,"amount":0,"currency":"EUR","scale":2,"concept":"refund fac-halcash_es->fee","status":"success"},"type":"fee","client":1,"client_data":[],"group_data":""},{"created":"2017-04-27T13:40:00+0200","updated":"2017-04-27T13:54:48+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"refund","version":1,"data_in":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":"sent","halcashticket":"002091000883581"},"data_out":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":43400000000,"min_confirmations":1,"confirmations":1,"status":"success","final":true},"currency":"EUR","amount":2000,"variable_fee":0,"fixed_fee":0,"total":2000,"scale":2,"notification_tries":4,"notified":false,"pay_in_info":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":43400000000,"min_confirmations":1,"confirmations":1,"status":"refund","final":true,"refund_info":{"amount":43400000000,"address":"fTestAddressTestAddressTestAddress","concept":"Btc out Transaction","currency":"FAC","scale":8,"final":true,"status":"sent","txid":"ffff0e488420e3f3d8652978bc38d82eaef6b795b2d34ad34b478e2516e5ffff"}},"pay_out_info":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":"cancelled","halcashticket":false},"method_in":"fac","method_out":"halcash_es","type":"swift","price":5,"client":40,"faircoop_node":295,"client_data":[],"group_data":"","email_notification":""},{"created":"2017-04-27T01:57:33+0200","updated":"2017-04-27T01:57:33+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","method":"fac-halcash_es","status":"success","data_in":{"previous_transaction":"59008ac214227ed5118b4567","transaction_amount":2000,"total_fee":170},"currency":"EUR","amount":0,"variable_fee":0,"fixed_fee":0,"total":0,"scale":2,"fee_info":{"previous_transaction":"59008ac214227ed5118b4567","previous_amount":2000,"amount":0,"currency":"EUR","scale":2,"concept":"refund fac-halcash_es->fee","status":"success"},"type":"fee","client":1,"client_data":[],"group_data":""},{"created":"2017-04-26T13:55:46+0200","updated":"2017-04-27T01:57:33+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"refund","version":1,"data_in":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":"sent","halcashticket":"002091000882736"},"data_out":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":43400000000,"min_confirmations":1,"confirmations":2,"status":"success","final":true},"currency":"EUR","amount":2000,"variable_fee":0,"fixed_fee":0,"total":2000,"scale":2,"notification_tries":2,"notified":false,"pay_in_info":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":43400000000,"min_confirmations":1,"confirmations":2,"status":"refund","final":true,"refund_info":{"amount":43400000000,"address":"fTestAddressTestAddressTestAddress","concept":"Btc out Transaction","currency":"FAC","scale":8,"final":true,"status":"sent","txid":"ffff4005f0c35dc74256bba5c50fda1cce973cec548244b9c0ff83f81fdffff"}},"pay_out_info":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":"cancelled","halcashticket":false},"method_in":"fac","method_out":"halcash_es","type":"swift","price":5,"client":40,"faircoop_node":295,"client_data":[],"group_data":"","email_notification":""},{"created":"2017-04-26T18:59:27+0200","updated":"2017-04-26T19:21:04+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"expired","version":1,"data_in":{"amount":"2000","phone":"666666666","prefix":"31","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"data_out":{"amount":50145315307,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"created","final":false},"currency":"EUR","amount":2000,"variable_fee":0,"fixed_fee":0,"total":2000,"scale":2,"notified":false,"pay_in_info":{"amount":50145315307,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"expired","final":false},"pay_out_info":{"amount":"2000","phone":"666666666","prefix":"31","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"method_in":"fac","method_out":"halcash_es","type":"swift","price":4,"client":40,"client_data":[],"group_data":"","email_notification":""},{"created":"2017-04-26T14:07:05+0200","updated":"2017-04-26T14:28:04+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"expired","version":1,"data_in":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"data_out":{"amount":50919439696,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"created","final":false},"currency":"EUR","amount":2000,"variable_fee":0,"fixed_fee":0,"total":2000,"scale":2,"notified":false,"pay_in_info":{"amount":50919439696,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"expired","final":false},"pay_out_info":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","find_token":"abcdef","pin":8888,"final":false,"status":false},"method_in":"fac","method_out":"halcash_es","type":"swift","price":4,"client":40,"client_data":[],"group_data":"","email_notification":""},{"created":"2017-04-26T14:06:21+0200","updated":"2017-04-26T14:27:04+0200","id":"012345678901234567890123","group":211,"service":"fac-halcash_es","ip":"77.77.77.77","status":"expired","version":1,"data_in":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":false},"data_out":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"created","final":false},"currency":"EUR","amount":2000,"variable_fee":0,"fixed_fee":0,"total":2000,"scale":2,"notified":false,"pay_in_info":{"amount":43400000000,"currency":"FAC","scale":8,"address":"fTestAddressTestAddressTestAddress","expires_in":1200,"received":0,"min_confirmations":1,"confirmations":0,"status":"expired","final":false},"pay_out_info":{"amount":"2000","phone":"666666666","prefix":"34","concept":"webApp swift transaction","url_notification":"https://pre-faircoop.chip-chap.com/api/notification/99","faircoop_admin_id":"007","find_token":"abcdef","pin":8888,"final":false,"status":false},"method_in":"fac","method_out":"halcash_es","type":"swift","price":5,"client":40,"faircoop_node":295,"client_data":[],"group_data":"","email_notification":""}]},"status":"ok","message":"Request successful"}
+{
+    "data": {
+        "daily": [],
+        "elements": [
+            {
+                "amount": 71500000000,
+                "client_data": [],
+                "created": "2017-06-02T14:50:28+0200",
+                "currency": "FAC",
+                "debug_data": {
+                    "deposit_id": 259,
+                    "token_id": 269
+                },
+                "fixed_fee": 0,
+                "group": 250,
+                "group_data": "",
+                "id": "51234f14c2e965855c8b1234",
+                "ip": "",
+                "method": "fac",
+                "notified": false,
+                "pay_in_info": {
+                    "address": "ftestM78m7kKtPqsjkQCMdZFFvC3aitest",
+                    "amount": 71500000000,
+                    "concept": "Concept by Default",
+                    "confirmations": 1,
+                    "currency": "FAC",
+                    "expires_in": 1200,
+                    "final": true,
+                    "min_confirmations": 1,
+                    "received": 9705998340000,
+                    "scale": 8,
+                    "status": "success"
+                },
+                "scale": 8,
+                "service": "fac",
+                "status": "success",
+                "total": 71500000000,
+                "type": "in",
+                "updated": "2017-06-02T14:56:44+0200",
+                "user": -1,
+                "variable_fee": 0,
+                "version": 1
+            },
+            {
+                "amount": 899550224888,
+                "client_data": [],
+                "created": "2017-06-01T15:52:54+0200",
+                "currency": "FAC",
+                "data_in": {
+                    "amount": 899550224888,
+                    "from": "EUR",
+                    "to": "FAC"
+                },
+                "fixed_fee": 0,
+                "group": 250,
+                "group_data": "",
+                "id": "51234c36c2e965945b8b1234",
+                "ip": "",
+                "max_notification_tries": 3,
+                "method": "exchange_EURtoFAC",
+                "notification_tries": 0,
+                "notified": false,
+                "pay_in_info": {
+                    "amount": 899550224888,
+                    "concept": "Exchange EUR to FAC",
+                    "currency": "FAC",
+                    "price": 14992503.748126,
+                    "scale": 8
+                },
+                "scale": 8,
+                "service": "exchange_EURtoFAC",
+                "status": "success",
+                "total": 899550224888,
+                "type": "in",
+                "updated": "2017-06-01T15:52:54+0200",
+                "user": 305,
+                "variable_fee": 0,
+                "version": 1
+            },
+            {
+                "amount": 60000,
+                "client_data": [],
+                "created": "2017-06-01T15:52:54+0200",
+                "currency": "EUR",
+                "data_in": {
+                    "amount": 0,
+                    "from": "EUR",
+                    "to": "FAC"
+                },
+                "fixed_fee": 0,
+                "group": 250,
+                "group_data": "",
+                "id": "51234c36c2e965945b8b1234",
+                "ip": "",
+                "max_notification_tries": 3,
+                "method": "exchange_EURtoFAC",
+                "notification_tries": 0,
+                "notified": false,
+                "pay_out_info": {
+                    "amount": 60000,
+                    "concept": "Exchange EUR to FAC",
+                    "currency": "EUR",
+                    "price": 14992503.748126,
+                    "scale": 2
+                },
+                "scale": 2,
+                "service": "exchange_EURtoFAC",
+                "status": "success",
+                "total": -60000,
+                "type": "out",
+                "updated": "2017-06-01T15:52:54+0200",
+                "user": 305,
+                "variable_fee": 0,
+                "version": 1
+            }
+        ],
+        "end": 25,
+        "scales": [],
+        "start": 0,
+        "total": 139
+    },
+    "message": "Request successful",
+    "status": "ok"
+}

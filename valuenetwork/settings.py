@@ -79,19 +79,22 @@ TEMPLATES = [
 
 LOGIN_URL = '/account/login/'
 
-LOGIN_EXEMPT_URLS = (
+LOGIN_EXEMPT_URLS = [
     r"^$",
     r'^membership/',
     r'^membershipthanks/',
     r'^joinaproject/',
+    r'^join/',
     r'^joinaproject-thanks/',
+    r'^work/payment-url/',
     r'^account/password/reset/',
     r'^account/password_reset_sent/',
     r'^captcha/image/',
     r'^i18n/',
     r'^robots.txt$',
-)
+]
 
+PROJECTS_LOGIN = {}
 
 MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware',
@@ -235,6 +238,8 @@ MULTICURRENCY = {} #Fill the dict in local_settings.py with private data.
 PINAX_NOTIFICATIONS_QUEUE_ALL = True
 
 THUMBNAIL_DEBUG = True
+
+FOBI_DEBUG = DEBUG
 
 #SOUTH_MIGRATION_MODULES = {
 #    'easy_thumbnails': 'easy_thumbnails.south_migrations',

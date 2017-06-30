@@ -94,6 +94,12 @@
                     <tr class="{% cycle 'odd' 'even' %}">
                       {% if True or state != "accepted" %}
                             <td>
+                                {% if project.share_types %}
+                                  {% trans "Shares:" %}
+                                  {% if req.pending_shares %}<span class="error">{% trans "Pending" %}</span>
+                                  {% else %}{% trans "Acquired" %}{% endif %}
+                                {% endif %}
+
                                 {% if state == "declined" %}
                                     <form
                                         class="action-form"
@@ -114,14 +120,16 @@
                                     </form>
                                 {% else %}
                                   {% if req.agent %}
-                                    <form
+                                    {% if not req.pending_shares or not project.share_types %}
+                                      <form
                                         class="action-form"
                                         id="accept-form{{ req.id }}"
                                         action="{% url "accept_request" join_request_id=req.id %}"
                                         method="POST" >
                                         {% csrf_token %}
                                         <input type="submit" class="btn btn-mini btn-primary" name="submit" value='{% trans "Accept Member" %}' />
-                                    </form>
+                                      </form>
+                                    {% endif %}
                                     <form
                                         class="action-form"
                                         id="decline-form{{ req.id }}"
@@ -131,9 +139,10 @@
                                         <input type="submit" class="btn btn-mini btn-warning" name="submit" value='{% trans "Decline" %}' />
                                     </form>
                                   {% else %}
-                                    {% if req.possible_agent %}
-                                      "{{ req.possible_agent }}" {% trans "is taken, choose agent?" %}
-                                      <form
+                                    {% if req.possible_agent %}<br>
+                                      "<a href="{% url 'members_agent' agent_id=req.possible_agent.id %}">{{ req.possible_agent }}</a>" {% trans "is taken, choose this agent?" %}
+                                      <a href="{% url "connect_agent_to_join_request" agent_id=req.possible_agent.id join_request_id=req.id %}" class="btn btn-primary" style="margin-bottom:20px;">{% trans "Connect to" %} {{ req.possible_agent }}</a> <br />
+                                      <!-- <form
                                           style="display: inline;"
                                           class="agent-form"
                                           id="agent-form{{ req.id }}"
@@ -142,7 +151,7 @@
                                           {% csrf_token %}
                                           {{ agent_form.created_agent }}
                                           <input type="submit" class="btn btn-mini btn-primary" name="submit" value='{% trans "Save" %}' />
-                                      </form>
+                                      </form> -->
                                     {% endif %}
                                     <a href="#create-agent{{ req.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal">{% trans "Create OCP Account" %}</a>
                                     <div class="modal hide fade" id="create-agent{{ req.id }}" tabindex="-1" role="dialog" aria-labelledby="agent-label" aria-hidden="true">
@@ -212,7 +221,7 @@
                           {% if req.agent %}
 
                              {% if request.user.agent.agent.is_staff %}
-                                <a href="{{ req.agent.get_absolute_url }}">{{ req.name }} {{ req.surname }}</a>
+                                <a href="{% url 'members_agent' agent_id=req.agent.id %}">{{ req.name }} {{ req.surname }}</a>
                              {% else %}
                                 <a href="{% url "members_agent" agent_id=req.agent.id %}">
                                   {% if req.name %} {{ req.name }} {{ req.surname }} {% else %} <em>{{ req.agent.name }}</em> {% endif %}</a>

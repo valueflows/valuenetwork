@@ -1,12 +1,13 @@
-from django.db import models
+from django.db import models, connection
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from django.utils.translation import ugettext_lazy as _
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from valuenetwork.valueaccounting.models import *
-#from fobi.models import FormEntry
+from fobi.models import FormEntry
 
 from mptt.fields import TreeForeignKey
 
@@ -45,7 +46,7 @@ class MembershipRequest(models.Model):
     #    help_text=_("you don't offer any product or service but want to consume through it and support the cooperative"))
     number_of_shares = models.IntegerField(_('Number of shares'),
         default=1,
-        help_text=_("How many shares would you like to underwrite? Each share is worth 30 Euros (600 Faircoin)"))
+        help_text=_("How many shares would you like to underwrite? Each share is worth 30 Euros"))
     #work_for_shares = models.BooleanField(_('work for one share'), default=False,
     #    help_text=_("You can get 1 share for 6 hours of work. If you choose this option, we will send you a list of tasks and the deadline. You won't have full access before the tasks are accomplished."))
     description = models.TextField(_('Description'),
@@ -84,6 +85,12 @@ VISIBILITY_CHOICES = (
     ('public', _('public')),
 )
 
+SELECTION_CHOICES = (
+    ('project', _('your project')),
+    #('related', _('all related projects')),
+    ('all', _('all platform')),
+)
+
 class Project(models.Model):
     agent = models.OneToOneField(EconomicAgent,
         verbose_name=_('agent'), related_name='project')
@@ -93,6 +100,9 @@ class Project(models.Model):
     visibility = models.CharField(_('visibility'),
         max_length=12, choices=VISIBILITY_CHOICES,
         default="FCmembers")
+    resource_type_selection = models.CharField(_('resource type selection'),
+        max_length=12, choices=SELECTION_CHOICES,
+        default="all")
     fobi_slug = models.CharField(_('custom form slug'),
         max_length=255, blank=True)
 
@@ -113,6 +123,161 @@ class Project(models.Model):
 
     def is_public(self):
         return self.visibility == 'public'
+
+    def fobi_form(self):
+        if self.fobi_slug:
+            entry = FormEntry.objects.get(slug=self.fobi_slug)
+            return entry
+        return False
+
+    def rts_with_clas(self, clas=None):
+        rts_with_clas = []
+        rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
+        for rt in rts:
+            if hasattr(rt, 'ocp_artwork_type') and rt.ocp_artwork_type and rt.ocp_artwork_type.clas:
+                if clas:
+                    if clas == rt.ocp_artwork_type.clas:
+                        rts_with_clas = rt
+                else:
+                    rts_with_clas.append(rt)
+        return rts_with_clas
+
+    def share_types(self):
+        shr_ts = []
+        if self.is_moderated() and self.fobi_slug:
+            form = self.fobi_form()
+            fields = form.formelemententry_set.all()
+            for fi in fields:
+                data = json.loads(fi.plugin_data)
+                name = data.get('name')
+                for rt in self.rts_with_clas():
+                    if rt.ocp_artwork_type.clas == name: # matches the rt clas identifier with the fobi field name
+                        choi = data.get('choices')
+                        if choi:
+                            opts = choi.split('\r\n')
+                            for op in opts:
+                                opa = op.split(',')
+                                shr_ts.append(opa[1].strip())
+                        else:
+                            #import pdb; pdb.set_trace()
+                            text = data.get('help_text')
+                            opts = text.split('\r\n')
+                            for op in opts:
+                                shr_ts.append(op.strip(' /'))
+
+            if len(shr_ts):
+                return shr_ts
+        return False
+
+    def share_totals(self):
+        shr_ts = self.share_types()
+        shares_res = None
+        total = 0
+        self.holders = 0
+        if shr_ts:
+            rts = self.rts_with_clas()
+            shr_rt = None
+            for rt in rts:
+                if rt.ocp_artwork_type.ocpArtworkType_unit_type:
+                    if rt.ocp_artwork_type.ocpArtworkType_unit_type.clas == 'share':
+                        shr_rt = rt
+            if shr_rt:
+                shares_res = EconomicResource.objects.filter(resource_type=shr_rt)
+        if shares_res:
+            for res in shares_res:
+                if res.price_per_unit:
+                    total += res.price_per_unit
+                    self.holders += 1
+        return total
+
+    def share_holders(self):
+        if self.share_totals():
+            return self.holders
+
+    def payment_options(self):
+        pay_opts = []
+        if self.is_moderated() and self.fobi_slug:
+            form = self.fobi_form()
+            fields = form.formelemententry_set.all()
+            for fi in fields:
+                data = json.loads(fi.plugin_data)
+                name = data.get('name')
+                if name == "payment_mode": # name of the fobi field
+                    choi = data.get('choices')
+                    if choi:
+                        opts = choi.split('\r\n')
+                        for op in opts:
+                            opa = op.split(',')
+                            key = opa[0].strip()
+                            val = opa[1].strip()
+                            ok = '<span class="error">config pending!</span>'
+                            gates = self.payment_gateways()
+                            if gates:
+                                try:
+                                    gate = gates[key]
+                                except:
+                                    gate = None
+                                if gate is not None:
+                                    ok = '<span style="color:#090">ok:</span>'
+                                    if gate['html']:
+                                        ok += ' <ul><li>'+str(gate['html'])+'</li></ul>'
+                            pay_opts.append(val+' &nbsp;'+ok)
+            return pay_opts
+        return False
+
+    def background_url(self):
+        back = False
+        if settings.PROJECTS_LOGIN and self.fobi_slug:
+            try:
+                back = settings.PROJECTS_LOGIN[self.fobi_slug]['background_url']
+            except:
+                pass
+        return back
+
+    def custom_css(self):
+        css = False
+        if settings.PROJECTS_LOGIN and self.fobi_slug:
+            try:
+                css = settings.PROJECTS_LOGIN[self.fobi_slug]['css']
+            except:
+                pass
+        return css
+
+    def custom_html(self):
+        html = False
+        if settings.PROJECTS_LOGIN and self.fobi_slug:
+            try:
+                html = settings.PROJECTS_LOGIN[self.fobi_slug]['html']
+            except:
+                pass
+        return html
+
+    def services(self):
+        serv = False
+        if settings.PROJECTS_LOGIN and self.fobi_slug:
+            try:
+                serv = settings.PROJECTS_LOGIN[self.fobi_slug]['services']
+            except:
+                pass
+        return serv
+
+    def custom_login(self):
+        resp = False
+        if settings.PROJECTS_LOGIN and self.fobi_slug:
+            try:
+                resp = settings.PROJECTS_LOGIN[self.fobi_slug]
+            except:
+                pass
+        return resp
+
+    def payment_gateways(self):
+        gates = False
+        if settings.PAYMENT_GATEWAYS and self.fobi_slug:
+            try:
+                gates = settings.PAYMENT_GATEWAYS[self.fobi_slug]
+            except:
+                pass
+        return gates
 
 
 
@@ -147,6 +312,8 @@ class SkillSuggestion(models.Model):
 
 from nine.versions import DJANGO_LTE_1_5
 from fobi.contrib.plugins.form_handlers.db_store.models import SavedFormDataEntry
+import simplejson as json
+
 
 USER_TYPE_CHOICES = (
     #('participant', _('project participant (no membership)')),
@@ -167,7 +334,7 @@ class JoinRequest(models.Model):
         default="individual")
     name = models.CharField(_('Name'), max_length=255)
     surname = models.CharField(_('Surname (for individual join requests)'), max_length=255, blank=True)
-    requested_username = models.CharField(_('Requested username'), max_length=32)
+    requested_username = models.CharField(_('Requested username'), max_length=32, help_text=_("If you have already an account in OCP, you can put the same username to have this project in the same account, or you can choose another username to have it separate."))
     email_address = models.EmailField(_('Email address'), max_length=96,)
     #    help_text=_("this field is optional, but we can't contact you via email without it"))
     phone_number = models.CharField(_('Phone number'), max_length=32, blank=True, null=True)
@@ -183,8 +350,8 @@ class JoinRequest(models.Model):
         help_text=_("this join request became this EconomicAgent"))
 
     fobi_data = models.OneToOneField(SavedFormDataEntry,
-        verbose_name=_('custom fobi id'), related_name='join_request',
-        blank=True, null=True,
+        verbose_name=_('custom fobi entry'), related_name='join_request',
+        blank=True, null=True, on_delete=models.CASCADE,
         help_text=_("this join request is linked to this custom form (fobi SavedFormDataEntry)"))
 
     state = models.CharField(_('state'),
@@ -227,6 +394,131 @@ class JoinRequest(models.Model):
         if agent_type:
             init["agent_type"] = agent_type
         return ProjectAgentCreateForm(initial=init, prefix=self.form_prefix())
+
+    def fobi_items_keys(self):
+        fobi_headers = []
+        fobi_keys = []
+        if self.fobi_data and self.fobi_data.pk:
+            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+            entry = self.entries[0]
+            self.form_headers = json.loads(entry.form_data_headers)
+            for val in self.form_headers:
+                fobi_headers.append(self.form_headers[val])
+                fobi_keys.append(val)
+        return fobi_keys
+
+    def fobi_items_data(self):
+        self.items_data = None
+        if self.fobi_data and self.fobi_data.pk:
+            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+            entry = self.entries[0]
+            self.data = json.loads(entry.saved_data)
+            self.items = self.data.items()
+            self.items_data = []
+            for key in self.fobi_items_keys():
+                self.items_data.append(self.data.get(key))
+        return self.items_data
+
+    def pending_shares(self):
+        answer = ''
+        account_type = None
+        balance = 0
+        amount = 0
+        if self.project.joining_style == "moderated" and self.fobi_data:
+            rts = list(set([arr.resource.resource_type for arr in self.project.agent.resource_relationships()]))
+            for rt in rts:
+                if rt.ocp_artwork_type:
+                    for key in self.fobi_items_keys():
+                        if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
+                            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+                            entry = self.entries[0]
+                            self.data = json.loads(entry.saved_data)
+                            val = self.data.get(key)
+                            account_type = rt
+                            for elem in self.fobi_data.form_entry.formelemententry_set.all():
+                                data = json.loads(elem.plugin_data)
+                                choi = data.get('choices')
+                                if choi:
+                                    opts = choi.split('\r\n')
+                                    for op in opts:
+                                      opa = op.split(',')
+                                      #import pdb; pdb.set_trace()
+                                      if type(val) is str and opa[1].encode('utf-8').strip() == val.encode('utf-8').strip():
+                                        amount = int(opa[0])
+                                        break
+                                elif type(val) is int and val:
+                                    amount = val
+                                    break
+
+
+        if self.agent:
+            user_rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
+            for rt in user_rts:
+                if rt == account_type: #.ocp_artwork_type:
+                    rss = list(set([arr.resource for arr in self.agent.resource_relationships()]))
+                    for rs in rss:
+                        if rs.resource_type == rt:
+                            balance = rs.price_per_unit # TODO: update the price_per_unit with wallet balance
+
+        if amount:
+            answer = amount - balance
+            if answer > 0:
+                return int(answer)
+            else:
+                #import pdb; pdb.set_trace()
+                return 0
+
+        return False #'??'
+
+    def payment_option(self):
+        answer = {}
+        if self.project.joining_style == "moderated" and self.fobi_data:
+            for key in self.fobi_items_keys():
+                if key == "payment_mode": # fieldname specially defined in the fobi form
+                    self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+                    entry = self.entries[0]
+                    self.data = json.loads(entry.saved_data)
+                    val = self.data.get(key)
+                    answer['val'] = val
+                    for elem in self.fobi_data.form_entry.formelemententry_set.all():
+                        data = json.loads(elem.plugin_data)
+                        choi = data.get('choices') # works with radio or select
+                        if choi:
+                            opts = choi.split('\r\n')
+                            for op in opts:
+                                opa = op.split(',')
+                                #import pdb; pdb.set_trace()
+                                if val.strip() == opa[1].strip():
+                                    answer['key'] = opa[0]
+        return answer
+
+    def payment_url(self):
+        payopt = self.payment_option()
+        obj = None
+        if settings.PAYMENT_GATEWAYS and payopt:
+            gates = settings.PAYMENT_GATEWAYS
+            if self.project.fobi_slug and gates[self.project.fobi_slug]:
+                try:
+                    obj = gates[self.project.fobi_slug][payopt['key']]
+                except:
+                    pass
+            if obj:
+                return obj['url']
+        return False
+
+    def payment_html(self):
+        payopt = self.payment_option()
+        obj = None
+        if settings.PAYMENT_GATEWAYS and payopt:
+            gates = settings.PAYMENT_GATEWAYS
+            if self.project.fobi_slug and gates[self.project.fobi_slug]:
+                try:
+                    obj = gates[self.project.fobi_slug][payopt['key']]
+                except:
+                    pass
+            if obj and obj['html']:
+                return obj['html']
+        return False
 
 
 class NewFeature(models.Model):
@@ -307,6 +599,49 @@ class Ocp_Artwork_TypeManager(TreeManager):
 
     def update_from_general(self): # TODO, if general.Artwork_Type (or Type) changes independently, update the subclass with new items
         return False
+
+    def update_to_general(self, table=None, ide=None): # update material and non-material general tables if not matching
+        if table and ide:
+            if table == 'Material_Type':
+                try:
+                    genm = Material_Type.objects.get(id=ide)
+                except:
+                    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+                        with connection.cursor() as cursor:
+                            cursor.execute("PRAGMA foreign_keys=OFF")
+                            cursor.execute("INSERT INTO general_material_type (materialType_artwork_type_id) VALUES (%s)", [ide])
+                            cursor.execute("PRAGMA foreign_keys=ON")
+                            return Material_Type.objects.get(id=ide)
+            elif table == 'Nonmaterial_Type':
+                try:
+                    genm = Nonmaterial_Type.objects.get(id=ide)
+                except:
+                    if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+                        with connection.cursor() as cursor:
+                            cursor.execute("PRAGMA foreign_keys=OFF")
+                            cursor.execute("INSERT INTO general_nonmaterial_type (nonmaterialType_artwork_type_id) VALUES (%s)", [ide])
+                            cursor.execute("PRAGMA foreign_keys=ON")
+                            return Nonmaterial_Type.objects.get(id=ide)
+            else:
+                raise ValidationError("Unknown table for update_to_general ! "+table)
+
+        else: # update all
+            pass
+            ocp_mat = Ocp_Artwork_Type.objects.get(clas='Material')
+            ocp_mats_c = ocp_mat.get_descendant_count() # self not included, like at general_material_type
+            gen_mats_c = Material_Type.objects.count()
+            if not ocp_mats_c == gen_mats_c:
+                ocp_mats = ocp_mat.get_descendants()
+                gen_mats = Material_Type.objects.all()
+                for ocpm in ocp_mats:
+                    try:
+                        genm = Material_Type.objects.get(id=ocpm.id)
+                    except:
+                        if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+                            with connection.cursor() as cursor:
+                                cursor.execute("PRAGMA foreign_keys=OFF")
+                                cursor.execute("INSERT INTO general_material_type (materialType_artwork_type_id) VALUES (%s)", [ocpm.id])
+                                cursor.execute("PRAGMA foreign_keys=ON")
 
 
 class Ocp_Artwork_Type(Artwork_Type):
@@ -448,7 +783,7 @@ class Ocp_Skill_Type(Job):
 
     def __unicode__(self):
       if self.resource_type:
-        if self.ocp_artwork_type:
+        if self.ocp_artwork_type and not self.ocp_artwork_type.name.lower() in self.get_gerund().lower():
           return self.get_gerund()+' - '+self.ocp_artwork_type.name.lower()+' <'
         else:
           return self.get_gerund()+' <' #name #+'  ('+self.resource_type.name+')'

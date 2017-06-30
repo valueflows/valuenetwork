@@ -78,7 +78,7 @@
       </div>
 		</legend>
 
-    {% if resource.digital_currency_balance == "Not accessible now" %}
+    {% if not wallet %}
       <div class="alert alert-warning">
         <strong>{% trans "Warning:" %}</strong>
         {% trans "Operations with your online wallet are not available temporarily. Please, come back later." %}
@@ -131,18 +131,28 @@
 		    <div class="span6 resource">
 
 	            <table class="table table-bordered" >
-	                <tr>
+                    {% if resource.owner == request.user.agent.agent or resource.owner in request.user.agent.agent.managed_projects %}
+	                  <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        {% if not resource.digital_currency_balance == "Not accessible now" %}
+                        {% if wallet %}
+                          {% if resource.balance and resource.newbalance %}
+                            {% if not resource.balance == resource.newbalance %}
+                                <td>{{ resource.balance }} (-> {{ resource.newbalance }}) {{ resource.unit_of_quantity }}</td>
+                            {% else %}
+                                <td>{{ resource.balance }} {{ resource.unit_of_quantity }}</td>
+                            {% endif %}
+                          {% else %}
                             {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
                                 <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
                             {% else %}
                                 <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
                             {% endif %}
+                          {% endif %}
                         {% else %}
-                            <td class="error"><b>{% trans "Not available now" %}</b></td>
+                            <td><span class="error">{% trans "Not available now" %}</span></td>
                         {% endif %}
-                    </tr>
+                      </tr>
+                    {% endif %}
 {% comment %}
                     <tr>
                         <th style="text-align: right;">{% trans "Quality" %}</th>
@@ -171,10 +181,14 @@
                     {% if resource.digital_currency_address %}
                         <tr>
                             <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
-                            <td>{% if resource.is_wallet_address == False %}
-                                <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
+                            <td>{% if wallet %}
+                                    {% if resource.is_wallet_address == False %}
+                                        <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
+                                    {% else %}
+                                        {{ resource.digital_currency_address }}
+                                    {% endif %}
                                 {% else %}
-                                {{ resource.digital_currency_address }}
+                                    {{ resource.digital_currency_address }} &nbsp; <span class="error">{% trans "No wallet?" %}</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -272,6 +286,8 @@
                           <em>{% trans "(available when the address pertains to this wallet)" %}</em>
                         {% elif resource.is_address_requested %}
                           <em>{% trans "(please wait about a minute to have a new fair-address and refresh the page)" %}</em>
+                        {% elif not wallet %}
+                          <em>{% trans "(sorry, the wallet is not available now, try later)" %}</em>
                         {% else %}
                           {% csrf_token %}
                           {{ send_coins_form|as_bootstrap }}

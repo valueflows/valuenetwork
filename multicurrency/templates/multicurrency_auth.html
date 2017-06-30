@@ -8,10 +8,17 @@
 {% block body_base %}
 
   <div class="container">
+    <legend>
+      <a class="indent" href="{% url 'members_agent' agent_id=agent.id %}">{{ agent.name }}</a> >
+	        {% trans "Multicurrency-wallet Access" %}
+      <div class="subnav">
+
+      </div>
+    </legend>
     {% include "_messages.html" %}
     <div class="infobox span6">
-    <h3>{% trans "Muticurrency wallet for agent " %}{{ agent.name }}</h3>
-      <table class="table" style="max-width:530px;">
+    <h3>{% trans "Muticurrency-wallet users for" %} {{ agent.name }}</h3>
+      <table class="table" style="">
         <thead>
           <tr>
             <th class="span8">ChipChap User</th>
@@ -22,7 +29,7 @@
           <tr>
             <td><strong>{{ oauth.auth_user }}</strong></td>
             <td style="text-align:right;">
-              <a class="btn btn-primary btn-mini" href="{% url 'multicurrency_history' agent_id=agent.id oauth_id=oauth.id %}">
+              <a class="btn btn-primary" href="{% url 'multicurrency_history' agent_id=agent.id oauth_id=oauth.id %}">
                 {% trans 'Access' %}
               </a>
             </td>
@@ -35,14 +42,15 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td><p>{% trans "You don't have any authenticated user." %}<br />
-            {% trans "Use the form below to create an access." %}
-          </td><td></td><td></td></tr>
+          <tr><td colspan="3"><p>{% trans "You don't have any authenticated user." %}<br />
+            {% trans "Use the form below to add an access." %}<br />
+            {% trans "If you don't have any access to ChipChap's panel, create it by clicking" %} <a href="https://commerce.chip-chap.com/login/bankofthecommons" target="_blank" ><b>HERE</b></a> <br />{% trans "...and come back to add your access below." %}
+          </td></tr>
         {% endfor %}
       </table>
     </div>
     <br /><br />
-    <div class="infobox span6">
+    <div class="span6 miniform" style="margin-left:0">
       <h3>{% trans "Authenticate another user in ChipChap" %}:</h3>
       <form id="oauthForm" class="validateMe" action="." method="POST" >
           {% csrf_token %}

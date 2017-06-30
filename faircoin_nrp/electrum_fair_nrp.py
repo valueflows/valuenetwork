@@ -1,75 +1,50 @@
-#!/usr/bin/env python
-#
-# Electrum - lightweight Bitcoin client
-# Copyright (C) 2011 thomasv@gitorious
-#
-# Faircoin Payment For NRP
-# Copyright (C) 2015-2016 santi@punto0.org -- FairCoop
-#
-# This version is based on https://github.com/Punto0/faircoin_nrp
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+import requests, json, logging
+from random import randint
 
-import time, sys, os
-import socket
-import logging
-import jsonrpclib
-import signal
+from django.conf import settings
 
-logger = logging.getLogger("faircoins")
-logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(message)s')
+def init_logger():
+    logger = logging.getLogger("faircoins")
+    logger.setLevel(logging.WARNING)
+    fhpath = "/".join([settings.PROJECT_ROOT, "faircoins.log",])
+    fh = logging.handlers.TimedRotatingFileHandler(fhpath, when="d", interval=1, backupCount=7)
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    return logger
 
-my_host = "localhost"
-my_port = 8069
-
-class TimeoutError(Exception):
-    pass
-
-def handler_timeout(signum, frame):
-    raise TimeoutError("Timeout 7 secs")
-
-signal.signal(signal.SIGALRM, handler_timeout)
+url = "http://localhost:8069"
+timeout = 7
+logger = init_logger()
 
 # Send command to the daemon.
 def send_command(cmd, params):
-    logging.debug('send command: %s --- params: %s' %(cmd, params))
-    server = jsonrpclib.Server('http://%s:%d'%(my_host, my_port))
-
-    signal.alarm(7)
-    try:
-        f = getattr(server, cmd)
-    except socket.error, (value, message):
-        logging.error("Cannot connect to faircoin daemon. %d %s" %(value,message))
-        signal.alarm(0)
-        return "ERROR"
-    except TimeoutError, e:
-        logging.error("Timeout connecting to faircoin daemon: %s" % e)
-        return "ERROR"
+    if params == '': params = []
+    random_id = randint(1,10000)
+    headers = {'content-type': 'application/json'}
+    data = json.dumps({'method': cmd, 'params': params, 'jsonrpc': '2.0', 'id': random_id })
+    logger.debug('Command: %s (params: %s)' %(cmd, params))
 
     try:
-        out = f(*params)
-    except socket.error, (value, message):
-        logging.error("Can not send the command %d %s" %(value,message))
-        signal.alarm(0)
+        response = requests.post(url, headers=headers, data=data, timeout=timeout)
+    except requests.exceptions.ConnectionError as e:
+        logger.error("Cannot connect to faircoin daemon: %s" % e)
         return "ERROR"
-    except TimeoutError, e:
-        logging.error("Timeout sending command to faircoin daemon: %s" % e)
+    except requests.exceptions.Timeout as e:
+        logger.error("Timeout connecting to faircoin daemon: %s" % e)
         return "ERROR"
 
-    signal.alarm(0)
-    logging.debug('response: %s' %(out))
+    try:
+        r = response.json()
+        if int(response.status_code) == 200:
+            logger.debug('Response: %s' %(r['result']))
+            out = r['result']
+        else:
+            out = 'ERROR'
+    except:
+        out = 'ERROR'
+
     return out
 
 # Get the network fee

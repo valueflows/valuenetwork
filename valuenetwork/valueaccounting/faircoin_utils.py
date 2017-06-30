@@ -1,8 +1,9 @@
 import faircoin_nrp.electrum_fair_nrp as efn
 
-def fairwallet_obj():
-    if efn.is_connected() != 'ERROR':
-        return efn
+def is_connected():
+    is_connected = efn.is_connected()
+    if is_connected != 'ERROR':
+        return is_connected
     else:
         return False
 

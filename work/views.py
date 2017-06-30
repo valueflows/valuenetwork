@@ -331,7 +331,7 @@ def manage_faircoin_account(request, resource_id):
     if user_agent:
         if resource.owner() == user_agent or resource.owner() in user_agent.managed_projects():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
-            wallet = faircoin_utils.fairwallet_obj()
+            wallet = faircoin_utils.is_connected()
             if wallet:
                 if resource.is_wallet_address():
                     limit = resource.spending_limit()
@@ -545,7 +545,7 @@ def faircoin_history(request, resource_id):
         raise Http404
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
-    wallet = faircoin_utils.fairwallet_obj()
+    wallet = faircoin_utils.is_connected()
     if wallet:
         if resource.is_wallet_address():
             exchange_service = ExchangeService.get()

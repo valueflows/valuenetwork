@@ -8,8 +8,9 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 import valuenetwork.api.types as types
+from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
-from valuenetwork.api.models import formatAgent, Person, Organization
+from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy
 
 
 class Action(graphene.Enum):
@@ -29,8 +30,9 @@ class EconomicEvent(DjangoObjectType):
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
     affected_resource = graphene.Field(lambda: types.EconomicResource)
-    numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit; really should be double
-    unit = graphene.String(source='unit')
+    #numeric_value = graphene.Float(source='numeric_value') 
+    #unit = graphene.String(source='unit')
+    affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
     work_category = graphene.String(source='work_category')
     #fulfills = graphene.Field(lambda: types.Commitment)
@@ -55,4 +57,6 @@ class EconomicEvent(DjangoObjectType):
     def resolve_affected_resource(self, args, *rargs):
         return self.affected_resource
 
+    def resolve_affected_quantity(self, args, *rargs):
+        return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
 

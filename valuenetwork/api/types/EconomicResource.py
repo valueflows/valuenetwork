@@ -30,9 +30,5 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
         model = EconomicResourceProxy
         only_fields = ('id')
 
-    def resolve_unit(self, args, *rargs):
-        return self.unit
-
     def resolve_current_quantity(self, args, *rargs):
-        #import pdb; pdb.set_trace()
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)

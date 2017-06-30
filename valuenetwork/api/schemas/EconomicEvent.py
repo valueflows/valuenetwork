@@ -3,9 +3,8 @@
 #
 
 import graphene
-
+#import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
-
 from valuenetwork.api.types.EconomicEvent import EconomicEvent
 
 
@@ -26,7 +25,7 @@ class Query(graphene.AbstractType):
             event = EconomicEventProxy.objects.get(pk=id)
             if event:
                 return event
-        return None        
+        return None
 
     def resolve_all_economic_events(self, args, context, info):
         return EconomicEventProxy.objects.all()

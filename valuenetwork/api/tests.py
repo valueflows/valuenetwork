@@ -509,22 +509,70 @@ query ($token: String) {
       id
       action
       start
-      numericValue
-      unit
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
       note
+      affectedResource {
+        id
+        resourceType
+        trackingIdentifier
+      }
+      workCategory
+      provider {
+        id
+        name
+      }
+      receiver {
+        id
+        name
+      }
+      process {
+        id
+        name
+      }
+      scope {
+        id
+        name
+      }
     }
   }
 }
-query($token: String) {
+query ($token: String) {
   viewer(token: $token) {
-    agent(id:6) {
+    agent(id: 6) {
       name
-      agentEconomicEvents (latestNumberOfDays: 30) {
+      agentEconomicEvents(latestNumberOfDays: 30) {
         id
         action
         start
-        numericValue
-        unit
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+        affectedResource {
+          id
+          resourceType
+          trackingIdentifier
+        }
+        workCategory
+        provider {
+          id
+          name
+        }
+        receiver {
+          id
+          name
+        }
+        process {
+          id
+          name
+        }
         note
       }
     }
@@ -536,8 +584,12 @@ query ($token: String) {
       id
       action
       start
-      numericValue
-      unit
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
       note
       affectedResource {
         id
@@ -564,14 +616,19 @@ query ($token: String) {
     }
   }
 }
+
 query ($token: String) {
   viewer(token: $token) {
     economicEvent(id: 316) {
       id
       action
       start
-      numericValue
-      unit
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
       note
       affectedResource {
         id
@@ -598,4 +655,5 @@ query ($token: String) {
     }
   }
 }
+
 '''

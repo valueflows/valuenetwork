@@ -17,9 +17,12 @@ class Unit(DjangoObjectType):
 
 class QuantityValue(DjangoObjectType):
 
-    #numeric_value = graphene.Float(source='numeric_value')
-    #unit = graphene.String(source='unit')
+    numeric_value = graphene.Float(source='numeric_value')
+    unit = graphene.Field(Unit)
 
     class Meta:
         model = QuantityValueProxy
         only_fields = ('numeric_value', 'unit')
+
+    def resolve_unit(self, args, *rargs):
+        return self.unit

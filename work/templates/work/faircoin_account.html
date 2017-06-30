@@ -134,7 +134,7 @@
                     {% if resource.owner == request.user.agent.agent or resource.owner in request.user.agent.agent.managed_projects %}
 	                  <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        {% if wallet and wallet.network %}
+                        {% if wallet %}
                           {% if resource.balance and resource.newbalance %}
                             {% if not resource.balance == resource.newbalance %}
                                 <td>{{ resource.balance }} (-> {{ resource.newbalance }}) {{ resource.unit_of_quantity }}</td>

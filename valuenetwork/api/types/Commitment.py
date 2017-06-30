@@ -1,39 +1,29 @@
 #
-# Economic Event: An inflow or outflow of an economic resource in relation to a process and/or exchange. This could reflect a change in the quantity of a EconomicResource. It is also defined by its behavior in relation to the EconomicResource and a Process (consume, use, produce, etc.)" .
+# Commitment: A planned economic event or transfer that has been promised by an agent to another agent..
 #
 
-#from django.core.exceptions import PermissionDenied
 
 import graphene
 from graphene_django.types import DjangoObjectType
 
 import valuenetwork.api.types as types
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
+from valuenetwork.api.types.EconomicEvent import Action
+from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy
 from valuenetwork.api.models import formatAgent, Person, Organization
 
 
-class Action(graphene.Enum):
-    NONE = None
-    WORK = "work"
-    CONSUME = "consume"
-    USE = "use"
-    CITE = "cite"
-    PRODUCE = "produce"
-    CHANGE = "change"
-
-
-class EconomicEvent(DjangoObjectType):
+class Commitment(DjangoObjectType):
     action = graphene.String(source='action')
     process = graphene.Field(lambda: types.Process)
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
-    affected_resource = graphene.Field(lambda: types.EconomicResource)
-    numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit; really should be double
+    committed_resource = graphene.Field(lambda: types.EconomicResource)
+    #committed_taxonomy_item = graphene.Field(
+    numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
     unit = graphene.String(source='unit')
     start = graphene.String(source='start')
     work_category = graphene.String(source='work_category')
-    #fulfills = graphene.Field(lambda: types.Commitment)
     note = graphene.String(source='note')
 
     class Meta:

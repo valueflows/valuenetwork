@@ -339,12 +339,32 @@ query ($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
+    unit(id:8) {
+      id
+      name
+      symbol
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allUnits {
+      id
+      name
+      symbol
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
     economicResource(id: 26) {
       id
       resourceType
       trackingIdentifier
       numericValue
-      unit
+      unit {
+        name
+      }
       image
       note
     }
@@ -357,22 +377,26 @@ query($token: String) {
       resourceType
       trackingIdentifier
       numericValue
-      unit
+      unit {
+        name
+      }
       image
       note
     }
   }
 }
-query($token: String) {
+query ($token: String) {
   viewer(token: $token) {
-    agent (id: 26) {
+    agent(id: 26) {
       name
       ownedEconomicResources {
         id
         resourceType
         trackingIdentifier
         numericValue
-        unit
+        unit {
+          name
+        }
         image
         note
         category
@@ -389,7 +413,9 @@ query($token: String) {
         resourceType
         trackingIdentifier
         numericValue
-        unit
+        unit {
+          name
+        }
         image
         note
       }
@@ -405,7 +431,9 @@ query($token: String) {
         resourceType
         trackingIdentifier
         numericValue
-        unit
+        unit {
+          name
+        }
         image
         note
       }

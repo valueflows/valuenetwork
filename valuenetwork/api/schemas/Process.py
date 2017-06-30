@@ -8,7 +8,6 @@
 #from django.core.exceptions import PermissionDenied
 
 import graphene
-from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import Process as ProcessProxy
 from valuenetwork.api.types.Process import Process

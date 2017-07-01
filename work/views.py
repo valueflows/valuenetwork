@@ -319,8 +319,8 @@ def manage_faircoin_account(request, resource_id):
     send_coins_form = None
     limit = 0
 
-    if not (resource.owner() == user_agent or resource.owner() in user_agent.managed_projects()):
-        return render(request, 'work/no_permission.html')
+    if not user_agent or not (resource.owner() == user_agent or resource.owner() in user_agent.managed_projects()):
+        raise Http404
 
     payment_due = False
     candidate_membership = None
@@ -328,36 +328,29 @@ def manage_faircoin_account(request, resource_id):
     number_of_shares = False
     can_pay = False
     faircoin_account = False
+    limit = 0
     confirmed_balance = None
     unconfirmed_balance = None
-    wallet = False
 
-    if user_agent:
-        if resource.owner() == user_agent or resource.owner() in user_agent.managed_projects():
+    wallet = faircoin_utils.is_connected()
+    if wallet:
+        if resource.is_wallet_address():
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
-            wallet = faircoin_utils.is_connected()
-            if wallet:
-                if resource.is_wallet_address():
-                    limit = resource.spending_limit()
-                else:
-                    wallet = False
-                    limit = 0
-            else:
-                wallet = False
-                limit = 0
+            limit = resource.spending_limit()
+            try:
+                balances = faircoin_utils.get_address_balance(resource.digital_currency_address)
+                confirmed_balance = Decimal(balances[0]) / FAIRCOIN_DIVISOR
+                unconfirmed_balance =  Decimal(balances[0] + balances[1]) / FAIRCOIN_DIVISOR
+                unconfirmed_balance += resource.balance_in_tx_state_new()
+            except:
+                confirmed_balance = "Not accessible now"
+        else:
+            wallet = False
 
-        candidate_membership = resource.owner().candidate_membership()
-        if candidate_membership:
-            faircoin_account = resource.owner().faircoin_resource()
-            if faircoin_account and wallet:
-                try:
-                    balances = faircoin_utils.get_address_balance(resource.digital_currency_address)
-                    confirmed_balance = Decimal(balances[0]) / FAIRCOIN_DIVISOR
-                    unconfirmed_balance =  Decimal(balances[0] + balances[1]) / FAIRCOIN_DIVISOR
-                    unconfirmed_balance += resource.balance_in_tx_state_new()
-                except:
-                    confirmed_balance = "Not accessible now"
-                    unconfirmed_balance = "Not accessible now"
+    candidate_membership = resource.owner().candidate_membership()
+    if candidate_membership:
+        faircoin_account = resource.owner().faircoin_resource()
+        if faircoin_account and wallet:
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
             number_of_shares = resource.owner().number_of_shares()
@@ -365,7 +358,8 @@ def manage_faircoin_account(request, resource_id):
             payment_due = True
             if resource.owner().owns_resource_of_type(share):
                 payment_due = False
-            can_pay = balance >= share_price
+            if confirmed_balance and confirmed_balance != "Not accessible now":
+                can_pay = confirmed_balance >= share_price
 
     return render(request, "work/faircoin_account.html", {
         "resource": resource,

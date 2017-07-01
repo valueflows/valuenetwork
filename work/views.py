@@ -316,18 +316,15 @@ def manage_faircoin_account(request, resource_id):
         raise Http404
     resource = get_object_or_404(EconomicResource, id=resource_id)
     user_agent = get_agent(request)
-    send_coins_form = None
-    limit = 0
-
     if not user_agent or not (resource.owner() == user_agent or resource.owner() in user_agent.managed_projects()):
         raise Http404
 
     payment_due = False
-    candidate_membership = None
     share_price = False
     number_of_shares = False
     can_pay = False
     faircoin_account = False
+    send_coins_form = None
     limit = 0
     confirmed_balance = None
     unconfirmed_balance = None
@@ -344,6 +341,7 @@ def manage_faircoin_account(request, resource_id):
                 unconfirmed_balance += resource.balance_in_tx_state_new()
             except:
                 confirmed_balance = "Not accessible now"
+                unconfirmed_balance = "Not accessible now"
         else:
             wallet = False
 

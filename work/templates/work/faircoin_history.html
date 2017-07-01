@@ -49,10 +49,10 @@
         <p>
             {% trans "Current Balance" %}:
               {% if wallet %}
-                {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
-                    {{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }})
+                {% if not confirmed_balance == unconfirmed_balance %}
+                    {{ confirmed_balance }} (-> {{ unconfirmed_balance }})
                 {% else %}
-                    {{ resource.digital_currency_balance }}
+                    {{ confirmed_balance }}
                 {% endif %}
                 {{ resource.unit_of_quantity }}
               {% else %}

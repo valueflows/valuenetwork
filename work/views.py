@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from decimal import Decimal
 
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseServerError, Http404, HttpResponseNotFound, HttpResponseRedirect
@@ -39,6 +40,8 @@ if "pinax.notifications" in settings.INSTALLED_APPS:
     from pinax.notifications import models as notification
 else:
     notification = None
+
+FAIRCOIN_DIVISOR = Decimal("1000000.00")
 
 def get_site_name(request=None):
     if request:
@@ -325,7 +328,8 @@ def manage_faircoin_account(request, resource_id):
     number_of_shares = False
     can_pay = False
     faircoin_account = False
-    balance = False
+    confirmed_balance = None
+    unconfirmed_balance = None
     wallet = False
 
     if user_agent:
@@ -345,13 +349,15 @@ def manage_faircoin_account(request, resource_id):
         candidate_membership = resource.owner().candidate_membership()
         if candidate_membership:
             faircoin_account = resource.owner().faircoin_resource()
-            balance = 0
             if faircoin_account and wallet:
-                if not resource.newbalance:
-                    balance = faircoin_account.digital_currency_balance_unconfirmed()
-                    resource.newbalance = balance
-                else:
-                    balance = resource.newbalance
+                try:
+                    balances = faircoin_utils.get_address_balance(resource.digital_currency_address)
+                    confirmed_balance = Decimal(balances[0]) / FAIRCOIN_DIVISOR
+                    unconfirmed_balance =  Decimal(balances[0] + balances[1]) / FAIRCOIN_DIVISOR
+                    unconfirmed_balance += resource.balance_in_tx_state_new()
+                except:
+                    confirmed_balance = "Not accessible now"
+                    unconfirmed_balance = "Not accessible now"
             share = EconomicResourceType.objects.membership_share()
             share_price = share.price_per_unit
             number_of_shares = resource.owner().number_of_shares()
@@ -366,6 +372,8 @@ def manage_faircoin_account(request, resource_id):
         "photo_size": (128, 128),
         "agent": resource.owner(),
         "send_coins_form": send_coins_form,
+        "confirmed_balance": confirmed_balance,
+        "unconfirmed_balance": unconfirmed_balance,
         "limit": limit,
         "wallet": wallet,
         "payment_due": payment_due,
@@ -375,8 +383,6 @@ def manage_faircoin_account(request, resource_id):
         "number_of_shares": number_of_shares,
         "can_pay": can_pay,
         "faircoin_account": faircoin_account,
-        "balance": balance,
-
     })
 
 def validate_faircoin_address_for_worker(request):
@@ -402,24 +408,6 @@ def change_faircoin_account(request, resource_id):
             resource = form.save(commit=False)
             resource.changed_by=request.user
             resource.save()
-            """
-            RraFormSet = modelformset_factory(
-                AgentResourceRole,
-                form=ResourceRoleAgentForm,
-                can_delete=True,
-                extra=4,
-                )
-            role_formset = RraFormSet(
-                prefix="role",
-                queryset=resource.agent_resource_roles.all(),
-                data=request.POST
-                )
-            if role_formset.is_valid():
-                saved_formset = role_formset.save(commit=False)
-                for role in saved_formset:
-                    role.resource = resource
-                    role.save()
-            """
             return HttpResponseRedirect('/%s/%s/'
                 % ('work/manage-faircoin-account', resource_id))
         else:
@@ -546,10 +534,20 @@ def faircoin_history(request, resource_id):
     resource = get_object_or_404(EconomicResource, id=resource_id)
     agent = get_agent(request)
     wallet = faircoin_utils.is_connected()
+    confirmed_balance = None
+    unconfirmed_balance = None
     if wallet:
         if resource.is_wallet_address():
             exchange_service = ExchangeService.get()
             exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
+            try:
+                balances = faircoin_utils.get_address_balance(resource.digital_currency_address)
+                confirmed_balance = Decimal(balances[0]) / FAIRCOIN_DIVISOR
+                unconfirmed_balance =  Decimal(balances[0] + balances[1]) / FAIRCOIN_DIVISOR
+                unconfirmed_balance += resource.balance_in_tx_state_new()
+            except:
+                confirmed_balance = "Not accessible now"
+                unconfirmed_balance = "Not accessible now"
         else:
             wallet = False
     event_list = resource.events.all()
@@ -571,6 +569,8 @@ def faircoin_history(request, resource_id):
         return render(request, "work/faircoin_history.html", {
             "resource": resource,
             "agent": agent,
+            "confirmed_balance": confirmed_balance,
+            "unconfirmed_balance": unconfirmed_balance,
             "unit": unit,
             "events": events,
             "wallet": wallet,

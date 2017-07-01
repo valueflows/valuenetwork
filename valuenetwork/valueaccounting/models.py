@@ -4517,6 +4517,17 @@ class EconomicResource(models.Model):
             bal = self.newbalance
         return bal
 
+    def balance_in_tx_state_new(self):
+        newtxs = self.events.filter(digital_currency_tx_state="new")
+        newadd = 0
+        for ev in newtxs:
+            if Decimal(ev.quantity):
+                if ev.from_agent == self.owner(): # sended fairs
+                    newadd -= Decimal(ev.quantity)
+                else: # new received fairs
+                    newadd += Decimal(ev.quantity)
+        return newadd
+
     def is_wallet_address(self):
         if not settings.USE_FAIRCOIN:
             return None
@@ -9263,7 +9274,7 @@ class Commitment(models.Model):
                 if self.fulfillment_events.filter(resource=resource):
                     answer.append(resource)
         return answer
-        
+
     def onhand_for_citation(self):
         answer = []
         rt = self.resource_type

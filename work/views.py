@@ -337,15 +337,17 @@ def manage_faircoin_account(request, resource_id):
             if resource.is_address_requested(): is_wallet_address = True
         if is_wallet_address:
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
-            limit = resource.spending_limit()
             try:
                 balances = faircoin_utils.get_address_balance(resource.digital_currency_address)
                 confirmed_balance = Decimal(balances[0]) / FAIRCOIN_DIVISOR
                 unconfirmed_balance =  Decimal(balances[0] + balances[1]) / FAIRCOIN_DIVISOR
                 unconfirmed_balance += resource.balance_in_tx_state_new()
+                fee = Decimal(faircoin_utils.network_fee()) / FAIRCOIN_DIVISOR
+                limit = min(confirmed_balance, unconfirmed_balance) - fee
             except:
                 confirmed_balance = "Not accessible now"
                 unconfirmed_balance = "Not accessible now"
+                limit = Decimal("0.0")
         else:
             wallet = False
 
@@ -4798,24 +4800,6 @@ def project_resource(request, agent_id, resource_id):
                     % ('work/agent', agent.id, 'resource', resource.id))
     if resource.is_digital_currency_resource():
         return manage_faircoin_account(request, resource.id) #HttpResponseRedirect(reverse('manage_faircoin_account', kwargs={'resource_id': resource.id}))
-        """send_coins_form = None
-        is_owner=False
-        limit = 0
-        if agent:
-            is_owner = user_agent.owns(resource) or resource.owner() in user_agent.managed_projects()
-            if is_owner:
-                if resource.address_is_activated():
-                    send_coins_form = SendFairCoinsForm()
-                    limit = resource.spending_limit()
-        return render(request, "work/faircoin_account.html", {
-            "resource": resource,
-            "photo_size": (128, 128),
-            "role_formset": role_formset,
-            "agent": agent,
-            "is_owner": is_owner,
-            "send_coins_form": send_coins_form,
-            "limit": limit,
-        })"""
     else:
         return render(request, "work/project_resource.html", {
             "resource": resource,

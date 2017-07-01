@@ -319,19 +319,23 @@ def manage_faircoin_account(request, resource_id):
     if not user_agent or not (resource.owner() == user_agent or resource.owner() in user_agent.managed_projects()):
         raise Http404
 
+    send_coins_form = None
+    is_wallet_address = None
+    limit = 0
+    confirmed_balance = None
+    unconfirmed_balance = None
+    faircoin_account = False
     payment_due = False
     share_price = False
     number_of_shares = False
     can_pay = False
-    faircoin_account = False
-    send_coins_form = None
-    limit = 0
-    confirmed_balance = None
-    unconfirmed_balance = None
 
     wallet = faircoin_utils.is_connected()
     if wallet:
-        if resource.is_wallet_address():
+        is_wallet_address = faircoin_utils.is_mine(resource.digital_currency_address)
+        if not is_wallet_address:
+            if resource.is_address_requested(): is_wallet_address = True
+        if is_wallet_address:
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             limit = resource.spending_limit()
             try:
@@ -363,18 +367,19 @@ def manage_faircoin_account(request, resource_id):
         "resource": resource,
         "photo_size": (128, 128),
         "agent": resource.owner(),
+        "wallet": wallet,
         "send_coins_form": send_coins_form,
+        "is_wallet_address": is_wallet_address,
         "confirmed_balance": confirmed_balance,
         "unconfirmed_balance": unconfirmed_balance,
         "limit": limit,
-        "wallet": wallet,
-        "payment_due": payment_due,
+        "faircoin_account": faircoin_account,
         "candidate_membership": candidate_membership,
-        "help": get_help("profile"),
+        "payment_due": payment_due,
         "share_price": share_price,
         "number_of_shares": number_of_shares,
         "can_pay": can_pay,
-        "faircoin_account": faircoin_account,
+        "help": get_help("profile"),
     })
 
 def validate_faircoin_address_for_worker(request):

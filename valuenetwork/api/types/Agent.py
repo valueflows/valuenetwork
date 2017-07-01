@@ -45,7 +45,7 @@ class Agent(graphene.Interface):
                                     latest_number_of_days=graphene.Int())
 
     agent_relationships = graphene.List(AgentRelationship,
-                                        #role=AgentRelationshipRole(),
+                                        role_id=graphene.Int(),
                                         category=AgentRelationshipCategory())
 
     agent_roles = graphene.List(AgentRelationshipRole)
@@ -100,11 +100,16 @@ class Agent(graphene.Interface):
     def resolve_agent_relationships(self, args, context, info):
         agent = _load_identified_agent(self)
         cat = args.get('category')
-        #role = args.get('role')
+        role_id = args.get('role_id')
         if agent:
+            assocs = agent.all_active_associations()
+            filtered_assocs = []
+            if role_id: #try the most specific first
+                for assoc in assocs:
+                    if assoc.association_type.id == role_id:
+                        filtered_assocs.append(assoc)
+                return filtered_assocs
             if cat:
-                assocs = agent.all_active_associations()
-                filtered_assocs = []
                 for assoc in assocs:
                     if assoc.association_type.category == cat:
                         filtered_assocs.append(assoc)

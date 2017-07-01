@@ -79,7 +79,107 @@ class AgentSchemaTest(TestCase):
         self.assertEqual('Invalid password', str(result.errors[0]))
 
 '''
-## Complex queries ##
+# test queries, full coverage
+
+query($token: String) {
+  viewer(token: $token) {
+    myAgent {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:39) {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allAgents {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    person(id:6) {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allPeople {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    organization(id:26) {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allOrganizations {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    myOrganizations {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
 
 fragment coreAgentFields on Agent {
   id
@@ -101,6 +201,355 @@ query ($token: String) {
             name
           }
         }
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allAgentRelationshipRoles {
+      id
+      label
+      inverseLabel
+      category
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agentRelationship(id:20) {
+      subject {
+        name
+        type
+      }
+      relationship {
+        label
+        category
+      }
+      object {
+        name
+        type
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allAgentRelationships {
+      id
+      subject {
+        name
+        type
+      }
+      relationship {
+        label
+        category
+      }
+      object {
+        name
+        type
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationships {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationships(category: MEMBER) {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationships(roleId: 2) {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRoles {
+        label
+        category
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    unit(id:8) {
+      id
+      name
+      symbol
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allUnits {
+      id
+      name
+      symbol
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    resourceTaxonomyItem(id:38) {
+      id
+      name
+      image
+      category
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allResourceTaxonomyItems {
+      id
+      name
+      image
+      category
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    economicResource(id: 26) {
+      id
+      model {
+        name
+        category
+      }
+      trackingIdentifier
+      currentQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      image
+      category
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allEconomicResources {
+      id
+      model {
+        name
+        category
+      }
+      trackingIdentifier
+      currentQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      image
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 26) {
+      name
+      ownedEconomicResources {
+        id
+        model {
+          name
+          category
+        }
+        trackingIdentifier
+        currentQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+        image
+        note
+        category
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 6) {
+      name
+      ownedEconomicResources(category: CURRENCY) {
+        id
+        model {
+          name
+          category
+        }
+        trackingIdentifier
+        currentQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+        image
+        note
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 26) {
+      name
+      ownedEconomicResources(category: INVENTORY) {
+        id
+        model {
+          name
+          category
+        }
+        trackingIdentifier
+        currentQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+        image
+        note
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    process(id:3) {
+      id
+      name
+      plannedStart
+      plannedDuration
+      isFinished
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allProcesses {
+      id
+      name
+      plannedStart
+      plannedDuration
+      isFinished
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:26) {
+      name
+      agentProcesses {
+        id
+        name
+        plannedStart
+        plannedDuration
+        isFinished
+        note
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:26) {
+      name
+      agentProcesses (isFinished: false) {
+        id
+        name
+        plannedStart
+        plannedDuration
+        isFinished
+        note
       }
     }
   }
@@ -141,407 +590,6 @@ query ($token: String) {
   }
 }
 
-## Basic queries for all entities ##
-
-query($token: String) {
-  viewer(token: $token) {
-    myAgent {
-      id
-      name
-      image
-      note
-      type
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    agent(id:39) {
-      id
-      name
-      image
-      note
-      type
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allAgents {
-      id
-      name
-      image
-      note
-      type
-      __typename
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    person(id:6) {
-      id
-      name
-      image
-      note
-      type
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allPeople {
-      id
-      name
-      image
-      note
-      type
-      __typename
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    organization(id:26) {
-      id
-      name
-      image
-      note
-      type
-      __typename
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allOrganizations {
-      id
-      name
-      image
-      note
-      type
-      __typename
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    myOrganizations {
-      id
-      name
-      image
-      note
-      type
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allAgentRelationshipRoles {
-      id
-      label
-      inverseLabel
-      category
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    agentRelationship(id:20) {
-      subject {
-        name
-        type
-      }
-      relationship {
-        label
-        category
-      }
-      object {
-        name
-        type
-      }
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allAgentRelationships {
-      id
-      subject {
-        name
-        type
-      }
-      relationship {
-        label
-        category
-      }
-      object {
-        name
-        type
-      }
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    agent(id: 39) {
-      name
-      agentRelationships {
-        id
-        subject {
-          name
-          type
-        }
-        relationship {
-          label
-          category
-        }
-        object {
-          name
-          type
-        }
-      }
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    agent(id: 39) {
-      name
-      agentRelationships(category: MEMBER) {
-        id
-        subject {
-          name
-          type
-        }
-        relationship {
-          label
-          category
-        }
-        object {
-          name
-          type
-        }
-      }
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    agent(id: 39) {
-      name
-      agentRoles {
-        label
-        category
-      }
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    unit(id:8) {
-      id
-      name
-      symbol
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allUnits {
-      id
-      name
-      symbol
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    resourceTaxonomyItem(id:38) {
-      id
-      name
-      image
-      category
-      note
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allResourceTaxonomyItems {
-      id
-      name
-      image
-      category
-      note
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    economicResource(id: 26) {
-      id
-      model {
-        name
-        category
-      }
-      trackingIdentifier
-      currentQuantity {
-        numericValue
-        unit {
-          name
-        }
-      }
-      image
-      category
-      note
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    allEconomicResources {
-      id
-      model {
-        name
-        category
-      }
-      trackingIdentifier
-      currentQuantity {
-        numericValue
-        unit {
-          name
-        }
-      }
-      image
-      note
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    agent(id: 26) {
-      name
-      ownedEconomicResources {
-        id
-        model {
-          name
-          category
-        }
-        trackingIdentifier
-        currentQuantity {
-          numericValue
-          unit {
-            name
-          }
-        }
-        image
-        note
-        category
-      }
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    agent(id: 6) {
-      name
-      ownedEconomicResources(category: CURRENCY) {
-        id
-        model {
-          name
-          category
-        }
-        trackingIdentifier
-        currentQuantity {
-          numericValue
-          unit {
-            name
-          }
-        }
-        image
-        note
-      }
-    }
-  }
-}
-query ($token: String) {
-  viewer(token: $token) {
-    agent(id: 26) {
-      name
-      ownedEconomicResources(category: INVENTORY) {
-        id
-        model {
-          name
-          category
-        }
-        trackingIdentifier
-        currentQuantity {
-          numericValue
-          unit {
-            name
-          }
-        }
-        image
-        note
-      }
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    process(id:3) {
-      id
-      name
-      plannedStart
-      plannedDuration
-      isFinished
-      note
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    allProcesses {
-      id
-      name
-      plannedStart
-      plannedDuration
-      isFinished
-      note
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    agent(id:26) {
-      name
-      agentProcesses {
-        id
-        name
-        plannedStart
-        plannedDuration
-        isFinished
-        note
-      }
-    }
-  }
-}
-query($token: String) {
-  viewer(token: $token) {
-    agent(id:26) {
-      name
-      agentProcesses (isFinished: false) {
-        id
-        name
-        plannedStart
-        plannedDuration
-        isFinished
-        note
-      }
-    }
-  }
-}
 query ($token: String) {
   viewer(token: $token) {
     allEconomicEvents {
@@ -580,6 +628,7 @@ query ($token: String) {
     }
   }
 }
+
 query ($token: String) {
   viewer(token: $token) {
     agent(id: 6) {
@@ -617,6 +666,7 @@ query ($token: String) {
     }
   }
 }
+
 query ($token: String) {
   viewer(token: $token) {
     economicEvent(id: 296) {

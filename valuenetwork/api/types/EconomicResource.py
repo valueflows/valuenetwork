@@ -5,8 +5,8 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-import valuenetwork.api.types as types
-from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy
+#import valuenetwork.api.types as types
+from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType
 from valuenetwork.api.models import QuantityValue as QuantityValueProxy
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 
@@ -14,14 +14,23 @@ class EconomicResourceCategory(graphene.Enum):
     NONE = None
     CURRENCY = "currency"
     INVENTORY = "inventory"
+    WORK = "work"
+
+
+class ResourceTaxonomyItem(DjangoObjectType):
+    image = graphene.String(source='image')
+    note = graphene.String(source='note')
+    category = graphene.String(source='category')
+
+    class Meta:
+        model = EconomicResourceType
+        only_fields = ('id', 'name')
 
 
 class EconomicResource(DjangoObjectType):  #graphene.Interface):
-    resource_type = graphene.String(source='resource_type_name') # need to figure this out with VF gang
+    model = graphene.Field(ResourceTaxonomyItem)
     tracking_identifier = graphene.String(source='tracking_identifier')
     image = graphene.String(source='image')
-    #numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
-    #unit = graphene.Field(Unit)
     current_quantity = graphene.Field(QuantityValue)
     note = graphene.String(source='note')
     category = graphene.String(source='category')
@@ -32,3 +41,6 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
 
     def resolve_current_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)
+
+    def resolve_model(self, args, *rargs):
+        return self.resource_type

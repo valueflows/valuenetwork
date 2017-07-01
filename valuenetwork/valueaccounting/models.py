@@ -2169,6 +2169,31 @@ class EconomicResourceType(models.Model):
         return ('resource_type', (),
             { 'resource_type_id': str(self.id),})
 
+    @property #ValueFlows
+    def image(self):
+        if self.photo_url:
+            return self.photo_url
+        elif self.photo:
+            from valuenetwork.valueaccounting.utils import get_url_starter
+            return get_url_starter() + self.photo.url
+        else:
+            return ""
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def category(self):
+        if self.behavior == "other":
+            return "INVENTORY"
+        elif self.behavior == "work":
+            return "WORK"
+        elif self.behavior != "other" and self.behavior != "work":
+            return "CURRENCY"
+        else:
+            return "NONE"
+
     def label(self):
         return self.__unicode__()
 

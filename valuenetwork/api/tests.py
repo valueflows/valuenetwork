@@ -357,9 +357,34 @@ query($token: String) {
 }
 query($token: String) {
   viewer(token: $token) {
+    resourceTaxonomyItem(id:38) {
+      id
+      name
+      image
+      category
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
+    allResourceTaxonomyItems {
+      id
+      name
+      image
+      category
+      note
+    }
+  }
+}
+query($token: String) {
+  viewer(token: $token) {
     economicResource(id: 26) {
       id
-      resourceType
+      model {
+        name
+        category
+      }
       trackingIdentifier
       currentQuantity {
         numericValue
@@ -368,6 +393,7 @@ query($token: String) {
         }
       }
       image
+      category
       note
     }
   }
@@ -376,7 +402,10 @@ query ($token: String) {
   viewer(token: $token) {
     allEconomicResources {
       id
-      resourceType
+      model {
+        name
+        category
+      }
       trackingIdentifier
       currentQuantity {
         numericValue
@@ -395,7 +424,10 @@ query ($token: String) {
       name
       ownedEconomicResources {
         id
-        resourceType
+        model {
+          name
+          category
+        }
         trackingIdentifier
         currentQuantity {
           numericValue
@@ -410,12 +442,16 @@ query ($token: String) {
     }
   }
 }
+query ($token: String) {
   viewer(token: $token) {
     agent(id: 6) {
       name
       ownedEconomicResources(category: CURRENCY) {
         id
-        resourceType
+        model {
+          name
+          category
+        }
         trackingIdentifier
         currentQuantity {
           numericValue
@@ -435,7 +471,10 @@ query ($token: String) {
       name
       ownedEconomicResources(category: INVENTORY) {
         id
-        resourceType
+        model {
+          name
+          category
+        }
         trackingIdentifier
         currentQuantity {
           numericValue

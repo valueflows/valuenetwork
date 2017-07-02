@@ -10029,7 +10029,7 @@ class ValueEquation(models.Model):
             va = None
             #todo faircoin distribution
             to_agent = dist_event.to_agent
-            if money_resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS::
+            if money_resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
                 #if testing:
                     # TODO faircoin distribution: shd put this into models
                     # faircoins are the only digital currency we handle now
@@ -10161,7 +10161,7 @@ class ValueEquation(models.Model):
             dist_event.event_date = distribution.distribution_date
             #todo faircoin distribution
             #digital_currency_resources for to_agents were created earlier in this method
-            if dist_event.resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS::
+            if dist_event.resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
                 address_origin = self.context_agent.faircoin_address()
                 address_end = dist_event.resource.digital_currency_address
                 # what about network_fee?

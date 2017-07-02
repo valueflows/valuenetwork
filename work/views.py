@@ -31,7 +31,7 @@ from valuenetwork.valueaccounting.service import ExchangeService
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
 #from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
-from valuenetwork.valueaccounting import faircoin_utils
+from faircoin import utils as faircoin_utils
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type

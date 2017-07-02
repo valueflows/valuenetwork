@@ -16,7 +16,7 @@ import json as simplejson
 from django.db.models.functions import Lower
 from django.conf import settings
 
-from valuenetwork.valueaccounting import faircoin_utils
+from faircoin import utils as faircoin_utils
 from easy_thumbnails.fields import ThumbnailerImageField
 
 """Models based on REA

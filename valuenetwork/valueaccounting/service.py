@@ -13,7 +13,7 @@ from valuenetwork.valueaccounting.models import (
     EconomicEvent,
 )
 
-from valuenetwork.valueaccounting import faircoin_utils
+from faircoin import utils as faircoin_utils
 
 class ExchangeService(object):
     @classmethod

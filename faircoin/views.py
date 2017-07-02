@@ -13,7 +13,7 @@ from django.conf import settings
 from valuenetwork.valueaccounting.models import EconomicResource, EconomicResourceType, Help
 from valuenetwork.valueaccounting.forms import EconomicResourceForm
 from valuenetwork.valueaccounting.service import ExchangeService
-from valuenetwork.valueaccounting import faircoin_utils
+from faircoin import utils as faircoin_utils
 from faircoin.forms import SendFairCoinsForm
 
 FAIRCOIN_DIVISOR = Decimal("1000000.00")

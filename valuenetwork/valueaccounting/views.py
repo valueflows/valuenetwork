@@ -27,7 +27,7 @@ from django_comments.models import Comment, CommentFlag
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
 from valuenetwork.valueaccounting.service import ExchangeService
-from valuenetwork.valueaccounting.utils import *
+from faircoin.utils import *
 from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
 from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
 from work.utils import *
@@ -1276,7 +1276,7 @@ def send_faircoins(request, resource_id):
                 % ('accounting/resource', resource.id))
 
 def validate_faircoin_address(request):
-    from valuenetwork.valueaccounting.faircoin_utils import is_valid
+    from faircoin.utils import is_valid
     data = request.GET
     address = data["to_address"]
     answer = is_valid(address)

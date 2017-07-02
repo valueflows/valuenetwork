@@ -42,7 +42,10 @@ class Agent(graphene.Interface):
                                     is_finished=graphene.Boolean())
 
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
-                                    latest_number_of_days=graphene.Int())
+                                          latest_number_of_days=graphene.Int())
+
+    agent_commitments = graphene.List(lambda: types.Commitment,
+                                      latest_number_of_days=graphene.Int())
 
     agent_relationships = graphene.List(AgentRelationship,
                                         role_id=graphene.Int(),
@@ -94,6 +97,17 @@ class Agent(graphene.Interface):
                 return agent.involved_in_events().filter(event_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
             else:
                 return agent.involved_in_events()
+        return None
+
+    # returns commitments where an agent is a provider, receiver, or scope agent
+    def resolve_agent_commitments(self, args, context, info):
+        agent = _load_identified_agent(self)
+        if agent:
+            days = args.get('latest_number_of_days', 0)
+            if days > 0:
+                return agent.involved_in_commitments().filter(commitment_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
+            else:
+                return agent.involved_in_commitments()
         return None
 
     # returns relationships where an agent is a subject or object, optionally filtered by role category

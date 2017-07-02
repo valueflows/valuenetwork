@@ -820,6 +820,9 @@ class EconomicAgent(models.Model):
     
     def involved_in_events(self):
         return EconomicEvent.objects.filter(Q(from_agent=self)|Q(to_agent=self)|Q(context_agent=self))
+    
+    def involved_in_commitments(self):
+        return Commitment.objects.filter(Q(from_agent=self)|Q(to_agent=self)|Q(context_agent=self))
 
     def user(self):
         users = self.users.filter(user__is_active=True)

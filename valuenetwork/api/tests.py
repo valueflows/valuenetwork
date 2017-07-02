@@ -673,6 +673,34 @@ query ($token: String) {
         }
         note
       }
+      agentCommitments(latestNumberOfDays: 30) {
+        id
+        action
+        commitmentDate
+        committedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+        committedTaxonomyItem {
+          name
+          category
+        }
+        provider {
+          id
+          name
+        }
+        receiver {
+          id
+          name
+        }
+        process {
+          id
+          name
+        }
+        note
+      }
     }
   }
 }

@@ -27,8 +27,8 @@ class ResourceTaxonomyItem(DjangoObjectType):
         only_fields = ('id', 'name')
 
 
-class EconomicResource(DjangoObjectType):  #graphene.Interface):
-    model = graphene.Field(ResourceTaxonomyItem)
+class EconomicResource(DjangoObjectType):
+    resource_taxonomy_item = graphene.Field(ResourceTaxonomyItem)
     tracking_identifier = graphene.String(source='tracking_identifier')
     image = graphene.String(source='image')
     current_quantity = graphene.Field(QuantityValue)
@@ -42,5 +42,5 @@ class EconomicResource(DjangoObjectType):  #graphene.Interface):
     def resolve_current_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)
 
-    def resolve_model(self, args, *rargs):
+    def resolve_resource_taxonomy_item(self, args, *rargs):
         return self.resource_type

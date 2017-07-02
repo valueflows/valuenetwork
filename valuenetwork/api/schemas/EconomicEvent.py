@@ -16,7 +16,7 @@ class Query(graphene.AbstractType):
                                     id=graphene.Int())
 
     all_economic_events = graphene.List(EconomicEvent)
-    
+
     # resolvers
 
     def resolve_economic_event(self, args, *rargs):

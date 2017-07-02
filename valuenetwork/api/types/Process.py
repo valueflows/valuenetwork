@@ -11,7 +11,7 @@ from valuenetwork.valueaccounting.models import Process as ProcessProxy
 class Process(DjangoObjectType):
     planned_start = graphene.String(source='planned_start')
     planned_duration = graphene.String(source='planned_duration')
-    is_finished = graphene.String(source='is_finished')
+    is_finished = graphene.Boolean(source='is_finished')
     note = graphene.String(source='note')
 
     class Meta:

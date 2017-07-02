@@ -385,7 +385,7 @@ query($token: String) {
   viewer(token: $token) {
     economicResource(id: 26) {
       id
-      model {
+      resourceTaxonomyItem {
         name
         category
       }
@@ -407,7 +407,7 @@ query ($token: String) {
   viewer(token: $token) {
     allEconomicResources {
       id
-      model {
+      resourceTaxonomyItem {
         name
         category
       }
@@ -430,7 +430,7 @@ query ($token: String) {
       name
       ownedEconomicResources {
         id
-        model {
+        resourceTaxonomyItem {
           name
           category
         }
@@ -455,7 +455,7 @@ query ($token: String) {
       name
       ownedEconomicResources(category: CURRENCY) {
         id
-        model {
+        resourceTaxonomyItem {
           name
           category
         }
@@ -479,7 +479,7 @@ query ($token: String) {
       name
       ownedEconomicResources(category: INVENTORY) {
         id
-        model {
+        resourceTaxonomyItem {
           name
           category
         }
@@ -558,15 +558,21 @@ query($token: String) {
 fragment coreEventFields on EconomicEvent {
   action
   start
-  numericValue
-  unit
+  affectedQuantity {
+    numericValue
+    unit {
+      name
+    }
+  }
   note
   affectedResource {
     id
-    resourceType
+    resourceTaxonomyItem {
+      name
+      category
+    }
     trackingIdentifier
   }
-  workCategory
   provider {
     id
     name
@@ -605,10 +611,12 @@ query ($token: String) {
       note
       affectedResource {
         id
-        resourceType
+        resourceTaxonomyItem {
+          name
+          category
+        }
         trackingIdentifier
       }
-      workCategory
       provider {
         id
         name
@@ -645,10 +653,12 @@ query ($token: String) {
         }
         affectedResource {
           id
-          resourceType
+          resourceTaxonomyItem {
+            name
+            category
+          }
           trackingIdentifier
         }
-        workCategory
         provider {
           id
           name
@@ -682,10 +692,12 @@ query ($token: String) {
       note
       affectedResource {
         id
-        resourceType
+        resourceTaxonomyItem {
+          name
+          category
+        }
         trackingIdentifier
       }
-      workCategory
       provider {
         id
         name
@@ -721,10 +733,12 @@ query ($token: String) {
       note
       affectedResource {
         id
-        resourceType
+        resourceTaxonomyItem {
+          name
+          category
+        }
         trackingIdentifier
       }
-      workCategory
       provider {
         id
         name
@@ -740,6 +754,110 @@ query ($token: String) {
       scope {
         id
         name
+      }
+      fulfills {
+        commitmentDate
+        committedQuantity {
+          numericValue
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allCommitments {
+      id
+      action
+      committedStart
+      committedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      committedTaxonomyItem {
+        name
+        category
+      }
+      committedResource {
+        id
+        resourceTaxonomyItem {
+          name
+          category
+        }
+        trackingIdentifier
+      }
+      provider {
+        id
+        name
+      }
+      receiver {
+        id
+        name
+      }
+      process {
+        id
+        name
+      }
+      scope {
+        id
+        name
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    commitment(id: 325) {
+      id
+      action
+      commitmentDate
+      committedStart
+      committedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      committedTaxonomyItem {
+        name
+        category
+      }
+      committedResource {
+        id
+        resourceTaxonomyItem {
+          name
+          category
+        }
+        trackingIdentifier
+      }
+      provider {
+        id
+        name
+      }
+      receiver {
+        id
+        name
+      }
+      process {
+        id
+        name
+      }
+      scope {
+        id
+        name
+      }
+      fulfilledBy {
+        action
+        start
+        provider {
+          name
+        }
       }
     }
   }

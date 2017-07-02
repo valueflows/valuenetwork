@@ -7,9 +7,9 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 import valuenetwork.api.types as types
-from valuenetwork.api.types.EconomicEvent import Action
+from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy
-from valuenetwork.api.models import formatAgent, Person, Organization
+from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy
 
 
 class Commitment(DjangoObjectType):
@@ -18,17 +18,21 @@ class Commitment(DjangoObjectType):
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
+    committed_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
     committed_resource = graphene.Field(lambda: types.EconomicResource)
-    #committed_taxonomy_item = graphene.Field(
-    numeric_value = graphene.Float(source='numeric_value') #need to implement as quantity-value with unit
-    unit = graphene.String(source='unit')
-    start = graphene.String(source='start')
     work_category = graphene.String(source='work_category')
+    committed_quantity = graphene.Field(QuantityValue)
+    commitment_date = graphene.String(source='commitment_date')
+    committed_start = graphene.String(source='start')
+    due = graphene.String(source='due')
+    is_finished = graphene.Boolean(source='is_finished')
     note = graphene.String(source='note')
 
     class Meta:
-        model = EconomicEventProxy
+        model = CommitmentProxy
         only_fields = ('id')
+
+    fulfilled_by = graphene.List(lambda: types.EconomicEvent)
 
     def resolve_process(self, args, *rargs):
         return self.process
@@ -42,7 +46,14 @@ class Commitment(DjangoObjectType):
     def resolve_scope(self, args, *rargs):
         return formatAgent(self.scope)
 
-    def resolve_affected_resource(self, args, *rargs):
-        return self.affected_resource
+    def resolve_committed_resource(self, args, *rargs):
+        return self.committed_resource
 
+    def resolve_committed_taxonomy_item(self, args, *rargs):
+        return self.committed_taxonomy_item
 
+    def resolve_committed_quantity(self, args, *rargs):
+        return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
+
+    def resolve_fulfilled_by(self, args, context, info):
+        return self.fulfilled_by.all()

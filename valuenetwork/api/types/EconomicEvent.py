@@ -30,12 +30,10 @@ class EconomicEvent(DjangoObjectType):
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
     affected_resource = graphene.Field(lambda: types.EconomicResource)
-    #numeric_value = graphene.Float(source='numeric_value') 
-    #unit = graphene.String(source='unit')
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
-    work_category = graphene.String(source='work_category')
-    #fulfills = graphene.Field(lambda: types.Commitment)
+    #work_category = graphene.String(source='work_category')
+    fulfills = graphene.Field(lambda: types.Commitment)
     note = graphene.String(source='note')
 
     class Meta:
@@ -60,3 +58,5 @@ class EconomicEvent(DjangoObjectType):
     def resolve_affected_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
 
+    def resolve_fulfills(self, args, *rargs):
+        return self.fulfills

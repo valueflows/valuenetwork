@@ -9015,6 +9015,77 @@ class Commitment(models.Model):
                 self.due_date.strftime('%Y-%m-%d'),
         ])
 
+    @property #ValueFlows
+    def action(self):
+        if self.event_type.name == "Time Contribution" or self.event_type.name == "Todo":
+            return "work"
+        elif self.event_type.name == "Resource Consumption":
+            return "consume"
+        elif self.event_type.name == "Resource Production" or self.event_type.name == "Create Changeable":
+            return "produce"
+        elif self.event_type.name == "Resource use":
+            return "use"
+        elif self.event_type.name == "Citation":
+            return "cite"
+        elif self.event_type.name == "Change":
+            return "improve"
+        elif self.event_type.name == "To Be Changed":
+            return "accept"
+        elif self.event_type.name == "Give":
+            return "give"
+        elif self.event_type.name == "Receive":
+            return "receive"
+        else:
+            return self.event_type.label
+
+    @property #ValueFlows
+    def numeric_value(self):
+        return self.quantity
+
+    @property #ValueFlows
+    def unit(self):
+        return self.unit_of_quantity
+
+    @property #ValueFlows
+    def committed_start(self):
+        return self.start_date.isoformat()
+
+    @property #ValueFlows
+    def due(self):
+        return self.due_date.isoformat()
+
+    @property #ValueFlows
+    def is_finished(self):
+        return self.finished
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def provider(self):
+        return self.from_agent
+
+    @property #ValueFlows
+    def receiver(self):
+        return self.to_agent
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def committed_resource(self):
+        return self.resource
+
+    @property #ValueFlows
+    def committed_taxonomy_item(self):
+        return self.resource_type
+
+    @property #ValueFlows
+    def fulfilled_by(self):
+        return self.fulfillment_events.all()
+
     def shorter_label(self):
         quantity_string = str(self.quantity)
         resource_name = ""
@@ -10758,7 +10829,7 @@ class EconomicEvent(models.Model):
 
     @property #ValueFlows
     def start(self):
-        return self.event_date
+        return self.event_date.isoformat()
 
     #@property #ValueFlows
     #def numeric_duration(self):
@@ -10794,11 +10865,15 @@ class EconomicEvent(models.Model):
     def affected_resource(self):
         return self.resource
 
-    @property #ValueFlows TODO not in VF now
-    def work_category(self):
-        if self.resource_type.behavior == "work":
-            return self.resource_type
-        return None
+    #@property #ValueFlows TODO not in VF now
+    #def work_category(self):
+    #    if self.resource_type.behavior == "work":
+    #        return self.resource_type
+    #    return None
+
+    @property #ValueFlows
+    def fulfills(self):
+        return self.commitment
 
     def undistributed_description(self):
         if self.unit_of_quantity:

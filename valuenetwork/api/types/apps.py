@@ -17,15 +17,18 @@ class ApiTypesAppConfig(AppConfig):
         comments.CommentMixin = CommentsMixin
         """
         
-        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory
+        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory, ResourceTaxonomyItem
         types.EconomicResource = EconomicResource
         types.EconomicResourceCategory = EconomicResourceCategory
+        types.ResourceTaxonomyItem = ResourceTaxonomyItem
         from valuenetwork.api.types.Agent import Agent
         types.Agent = Agent
         from valuenetwork.api.types.Process import Process
         types.Process = Process
         from valuenetwork.api.types.EconomicEvent import EconomicEvent
         types.EconomicEvent = EconomicEvent
+        from valuenetwork.api.types.Commitment import Commitment
+        types.Commitment = Commitment
         super(ApiTypesAppConfig, self).ready()
 
         

@@ -345,7 +345,7 @@ class ValueEquationTest(TestCase):
 
 
     def test_faircoin_distribution(self):
-        if settings.USE_FAIRCOIN:
+        if 'faircoin' in settings.INSTALLED_APPS:
             ve = self.recipe.value_equation
             context_agent = ve.context_agent
             testing = False

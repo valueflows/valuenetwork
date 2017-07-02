@@ -204,6 +204,7 @@ INSTALLED_APPS = [
     'account',
     'work.apps.WorkAppConfig',
     'multicurrency',
+    'faircoin',
 
     # general
     'general',

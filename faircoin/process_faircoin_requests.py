@@ -3,12 +3,12 @@ import time
 import logging
 from decimal import *
 
-logger = logging.getLogger("faircoins")
+logger = logging.getLogger("faircoin")
 
 from django.conf import settings
 from django.db.models import Q
 
-import faircoin_nrp.electrum_fair_nrp as efn
+import faircoin.utils as efn
 
 from valuenetwork.valueaccounting.models import EconomicAgent, EconomicEvent, EconomicResource
 from valuenetwork.valueaccounting.lockfile import FileLock, AlreadyLocked, LockTimeout, LockFailed

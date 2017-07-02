@@ -1,4 +1,4 @@
-import faircoin_nrp.electrum_fair_nrp as efn
+import faircoin.utils as efn
 
 def is_connected():
     is_connected = efn.is_connected()

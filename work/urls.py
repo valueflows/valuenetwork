@@ -194,19 +194,3 @@ urlpatterns = [
     url(r"^json-context-resource_types/(?P<context_id>\d+)/(?P<pattern_id>\d+)/$", work.views.json_get_context_resource_types,
         name="work_json_get_context_resource_types"),
 ]
-
-if settings.USE_FAIRCOIN:
-    urlpatterns += [
-        url(r"^manage-faircoin-account/(?P<resource_id>\d+)/$", work.views.manage_faircoin_account,
-            name="manage_faircoin_account"),
-        url(r"^transfer-faircoins/(?P<resource_id>\d+)/$", work.views.transfer_faircoins,
-            name="transfer_faircoins"),
-        url(r"^faircoin-history/(?P<resource_id>\d+)/$", work.views.faircoin_history,
-            name="faircoin_history"),
-        url(r"^change-faircoin-account/(?P<resource_id>\d+)/$", work.views.change_faircoin_account,
-            name="change_faircoin_account"),
-        url(r"^validate-faircoin-address-for-worker/$", work.views.validate_faircoin_address_for_worker,
-            name="validate_faircoin_address_for_worker"),
-        url(r"^edit_event_notes/(?P<resource_id>\d+)/$", work.views.edit_faircoin_event_description,
-            name="edit_faircoin_event_description"),
-    ]

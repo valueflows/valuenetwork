@@ -144,96 +144,14 @@ def transfer_faircoins(request, resource_id):
             address_origin = resource.digital_currency_address
             network_fee = faircoin_utils.network_fee()
             if address_origin and address_end and network_fee:
-                from_agent = resource.owner()
-                to_resources = EconomicResource.objects.filter(digital_currency_address=address_end)
-                to_agent = None
-                if to_resources:
-                    to_resource = to_resources[0] #shd be only one
-                    to_agent = to_resource.owner()
-                et_give = EventType.objects.get(name="Give")
-                if to_agent:
-                    tt = ExchangeService.faircoin_internal_transfer_type()
-                    xt = tt.exchange_type
-                    date = datetime.date.today()
-                    exchange = Exchange(
-                        exchange_type=xt,
-                        use_case=xt.use_case,
-                        name="Transfer Faircoins",
-                        start_date=date,
-                        notes=notes,
-                        #context_agent=from_agent, # don't set it to allow to_agent to see the exchange
-                    )
-                    exchange.save()
-                    transfer = Transfer(
-                        transfer_type=tt,
-                        exchange=exchange,
-                        transfer_date=date,
-                        name="Transfer Faircoins",
-                        notes=notes,
-                        context_agent=from_agent,
-                    )
-                    transfer.save()
-                else:
-                    tt = ExchangeService.faircoin_outgoing_transfer_type()
-                    xt = tt.exchange_type
-                    date = datetime.date.today()
-                    exchange = Exchange(
-                        exchange_type=xt,
-                        use_case=xt.use_case,
-                        name="Send Faircoins",
-                        start_date=date,
-                        notes=notes,
-                        context_agent=from_agent,
-                    )
-                    exchange.save()
-                    transfer = Transfer(
-                        transfer_type=tt,
-                        exchange=exchange,
-                        transfer_date=date,
-                        name="Send Faircoins",
-                        notes=notes,
-                        context_agent=from_agent,
-                    )
-                    transfer.save()
-
-                # network_fee is subtracted from quantity
-                # so quantity is correct for the giving event
-                # but receiving event will get quantity - network_fee
-                state =  "new"
-                event = EconomicEvent(
-                    event_type = et_give,
-                    event_date = date,
-                    from_agent=from_agent,
-                    to_agent=to_agent,
-                    resource_type=resource.resource_type,
-                    resource=resource,
-                    digital_currency_tx_state = state,
-                    quantity = quantity,
-                    transfer=transfer,
-                    event_reference=address_end,
-                    description=notes,
-                    created_by=request.user,
-                    )
-                event.save()
-                if to_agent:
-                    quantity = quantity - Decimal(float(network_fee) / 1.e6)
-                    et_receive = EventType.objects.get(name="Receive")
-                    event = EconomicEvent(
-                        event_type = et_receive,
-                        event_date = date,
-                        from_agent=from_agent,
-                        to_agent=to_agent,
-                        resource_type=to_resource.resource_type,
-                        resource=to_resource,
-                        digital_currency_tx_state = state,
-                        quantity = quantity,
-                        transfer=transfer,
-                        event_reference=address_end,
-                        description=notes,
-                        created_by=request.user,
-                        )
-                    event.save()
-
+                exchange_service = ExchangeService.get()
+                exchange = exchange_service.send_faircoins(
+                    from_agent = resource.owner(),
+                    recipient = address_end,
+                    qty = quantity,
+                    resource = resource,
+                    notes = notes
+                )
                 return HttpResponseRedirect('/%s/%s/'
                     % ('faircoin/faircoin-history', resource.id))
 

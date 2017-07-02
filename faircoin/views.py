@@ -86,7 +86,7 @@ def manage_faircoin_account(request, resource_id):
             if confirmed_balance and confirmed_balance != "Not accessible now":
                 can_pay = confirmed_balance >= share_price
 
-    return render(request, "work/faircoin_account.html", {
+    return render(request, "faircoin/faircoin_account.html", {
         "resource": resource,
         "photo_size": (128, 128),
         "agent": resource.owner(),
@@ -125,7 +125,7 @@ def change_faircoin_account(request, resource_id):
             resource.changed_by=request.user
             resource.save()
             return HttpResponseRedirect('/%s/%s/'
-                % ('work/manage-faircoin-account', resource_id))
+                % ('faircoin/manage-faircoin-account', resource_id))
         else:
             raise ValidationError(form.errors)
 
@@ -235,10 +235,10 @@ def transfer_faircoins(request, resource_id):
                     event.save()
 
                 return HttpResponseRedirect('/%s/%s/'
-                    % ('work/faircoin-history', resource.id))
+                    % ('faircoin/faircoin-history', resource.id))
 
         return HttpResponseRedirect('/%s/%s/'
-                % ('work/manage-faircoin-account', resource.id))
+                % ('faircoin/manage-faircoin-account', resource.id))
 
 
 @login_required
@@ -278,7 +278,7 @@ def faircoin_history(request, resource_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         events = paginator.page(paginator.num_pages)
     if resource.owner() == agent or resource.owner() in agent.managed_projects() or agent.is_staff():
-        return render(request, "work/faircoin_history.html", {
+        return render(request, "faircoin/faircoin_history.html", {
             "resource": resource,
             "agent": agent,
             "confirmed_balance": confirmed_balance,

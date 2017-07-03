@@ -4504,7 +4504,10 @@ def project_resource(request, agent_id, resource_id):
                 return HttpResponseRedirect('/%s/%s/%s/%s'
                     % ('work/agent', agent.id, 'resource', resource.id))
     if resource.is_digital_currency_resource():
-        return manage_faircoin_account(request, resource.id) #HttpResponseRedirect(reverse('manage_faircoin_account', kwargs={'resource_id': resource.id}))
+        #return manage_faircoin_account(request, resource.id)
+        #HttpResponseRedirect(reverse('manage_faircoin_account', kwargs={'resource_id': resource.id}))
+        return HttpResponseRedirect('/%s/%s/'
+            % ('faircoin/manage-faircoin-account', resource_id))
     else:
         return render(request, "work/project_resource.html", {
             "resource": resource,

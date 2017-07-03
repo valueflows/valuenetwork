@@ -4,9 +4,9 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from django.conf import settings
 
-logger = logging.getLogger("faircoin")
+logger = logging.getLogger("faircoin_cron")
 logger.setLevel(logging.WARNING)
-fhpath = "/".join([settings.PROJECT_ROOT, "faircoin/faircoin.log",])
+fhpath = "/".join([settings.PROJECT_ROOT, "faircoin/faircoin_cron.log",])
 fh = TimedRotatingFileHandler(fhpath,
                             when="d",
                             interval=1,

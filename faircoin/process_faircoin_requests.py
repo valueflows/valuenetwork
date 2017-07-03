@@ -3,7 +3,7 @@ import time
 import logging
 from decimal import *
 
-logger = logging.getLogger("faircoin")
+logger = logging.getLogger("faircoin_cron.process")
 
 from django.conf import settings
 from django.db.models import Q

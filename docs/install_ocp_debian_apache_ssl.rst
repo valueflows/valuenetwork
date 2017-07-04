@@ -3,7 +3,7 @@ This is a howto for installing ocp in a debian/ubuntu system.
 - Install dependencies in the system: ::
 
     sudo apt-get install virtualenv git libjpeg-dev zlib1g-dev build-essential
-    sudo apt-get install python-setuptools python2.7-dev python-imaging python-qt4 
+    sudo apt-get install python-setuptools python2.7-dev python-imaging python-qt4
 
 - Install electrum-fair and daemon dependencies in the system: ::
 
@@ -14,26 +14,30 @@ This is a howto for installing ocp in a debian/ubuntu system.
 
     electrum-fair create
 
-(this gives you seed to keep in safe place, and ask for password to encript the wallet. All the electrum-fair data will be created in /home/user/.electrum-fair/ directory)
+This gives you seed to keep in safe place, and ask for password to encript the wallet.
+All the electrum-fair data will be created in /home/user/.electrum-fair/ directory.
+Be carefull if you already have an electrum-fair wallet installed with the same user.
 
 - Download from github and copy daemon sample files: ::
 
     cd [installation dir]
     git clone https://github.com/FreedomCoop/valuenetwork.git
-    cp valuenetwork/faircoin_nrp/daemon/daemon_service.sample valuenetwork/faircoin_nrp/daemon/daemon_service
-    chmod a+x valuenetwork/faircoin_nrp/daemon/daemon_service
-    cp valuenetwork/faircoin_nrp/daemon/daemon.py.sample valuenetwork/faircoin_nrp/daemon/daemon.py
-    chmod a+x valuenetwork/faircoin_nrp/daemon/daemon.py
-    cp valuenetwork/faircoin_nrp/daemon/daemon.conf.sample valuenetwork/faircoin_nrp/daemon/daemon.conf
+    cd valuenetwork
+    cp faircoin/daemon/daemon_service.sample /faircoin/daemon/daemon_service
+    chmod a+x faircoin/daemon/daemon_service
+    cp faircoin/daemon/daemon.py.sample faircoin/daemon/daemon.py
+    chmod a+x faircoin/daemon/daemon.py
+    cp faircoin/daemon/daemon.conf.sample faircoin/daemon/daemon.conf
 
 - Setup daemon: ::
 
-    vim valuenetwork/faircoin_nrp/daemon/daemon_service #Set paths and user for starting the daemon.
-    vim valuenetwork/faircoin_nrp/daemon/daemon.conf #Set wallet config
-    sudo ./valuenetwork/faircoin_nrp/daemon/daemon_service start
-    sudo ./valuenetwork/faircoin_nrp/daemon/daemon_service status
+    vim faircoin/daemon/daemon_service #Set paths and user for starting the daemon.
+    vim faircoin/daemon/daemon.conf #Set wallet config
+    sudo ./faircoin/daemon/daemon_service start
+    sudo ./faircoin/daemon/daemon_service status
 
-If daemon runs ok, *daemon_service status* returns *Running*. For ocp instances in production, better to move daemon_service to */etc/init.d/* and daemon.conf to */etc/*
+If daemon runs ok, *daemon_service status* returns *Running*.
+For ocp instances in production, better to move daemon_service to */etc/init.d/* and daemon.conf to */etc/*
 
 - Create virtual enviroment and update pip and setuptools: ::
 
@@ -52,20 +56,16 @@ If daemon runs ok, *daemon_service status* returns *Running*. For ocp instances 
 
 - Create database, load some data, run tests and start with dev server: ::
 
-    ./manage.py makemigrations
-    ./manage.py migrate
-    
+    python manage.py makemigrations
+    python manage.py migrate
+
 (Note: these fixtures are broken now. Will be fixed, but in the meantime, get a test database from somebody.) ::
 
-    ./manage.py loaddata ./fixtures/starters.json
-    ./manage.py loaddata ./fixtures/help.json
+    python manage.py loaddata ./fixtures/starters.json
+    python manage.py loaddata ./fixtures/help.json
 
-    ./manage.py test valuenetwork.valueaccounting.tests
-    ./manage.py runserver
-
-If ./manage.py doesn't work, you need to update shebang in manage.py with the absolute path to the virtualenv python: ::
-
-    #!/path/to/installation/env/bin/python 
+    python manage.py test valuenetwork.valueaccounting.tests
+    python manage.py runserver
 
 - Check everything is ok in http://127.0.0.1:8000 with web browser.
 
@@ -109,18 +109,18 @@ This is a sample of the file: ::
             ErrorLog ${APACHE_LOG_DIR}/error.log
             CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-            WSGIScriptAlias / /absolute/path/to/installation/valuenetwork/valuenetwork/wsgi.py:/absolute/path/to/installation/env/lib/python2.7/site-packages 
+            WSGIScriptAlias / /absolute/path/to/installation/valuenetwork/valuenetwork/wsgi.py:/absolute/path/to/installation/env/lib/python2.7/site-packages
 
             Alias /site_media/static/ /absolute/path/to/installation/static/
             Alias /static/ /absolute/path/to/installation/static/
 
-            <Directory /absolute/path/to/installation/valuenetwork/valuenetwork/> 
-                <Files wsgi.py> 
+            <Directory /absolute/path/to/installation/valuenetwork/valuenetwork/>
+                <Files wsgi.py>
                     Require all granted
-                </Files> 
-            </Directory> 
+                </Files>
+            </Directory>
 
-            <Directory /absolute/path/to/installation/env/lib/python2.7/site-packages/> 
+            <Directory /absolute/path/to/installation/env/lib/python2.7/site-packages/>
                 Require all granted
             </Directory>
 

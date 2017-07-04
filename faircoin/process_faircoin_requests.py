@@ -33,6 +33,7 @@ def acquire_lock():
 def create_address_from_file(entity_id, entity):
     filename = settings.NEW_FAIRCOIN_ADDRESSES_FILE
     address = None
+    logger.info("About import privkey for " + str(entity) + ": " + str(entity_id))
     with open(filename, 'r') as fin:
         try:
             data = fin.read().splitlines(True)
@@ -55,8 +56,8 @@ def create_address_from_file(entity_id, entity):
            fout.writelines(data[1:])
         except:
            logger.critical("Error writting new faircoin addresses file.")
-    logger.debug("Private key succesfully imported to wallet for "
-        + str(entity) + ": " + str(entity_id))
+    logger.info("Private key succesfully imported to wallet for "
+        + str(entity) + ": " + str(entity_id) + " (address: " + address + ")")
     return address
 
 def create_address_for_agent(agent):
@@ -161,7 +162,7 @@ def broadcast_tx():
                         event.save()
                         continue
 
-                    logger.critical("about to make_transaction_from_address. Amount: %d" %(int(amount)))
+                    logger.info("About to build transaction. Amount: %d" %(int(amount)))
                     tx_hash = None
                     try:
                         tx_hash = efn.make_transaction_from_address(address_origin, address_end, int(amount))
@@ -184,8 +185,8 @@ def broadcast_tx():
                                 revent.digital_currency_tx_state = "broadcast"
                                 revent.digital_currency_tx_hash = tx_hash
                                 revent.save()
-                        msg = " ".join([ "**** sent tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
-                        logger.debug(msg)
+                        msg = " ".join([ "Broadcasted tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
+                        logger.info(msg)
     except Exception:
         _, e, _ = sys.exc_info()
         logger.critical("an exception occurred in processing events: {0}".format(e))

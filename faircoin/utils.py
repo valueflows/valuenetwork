@@ -6,10 +6,10 @@ from django.conf import settings
 
 def init_logger():
     logger = logging.getLogger("faircoin")
-    logger.setLevel(logging.WARNING)
+    logger.setLevel(logging.INFO)
     fhpath = "/".join([settings.PROJECT_ROOT, "faircoin/faircoin.log",])
     fh = TimedRotatingFileHandler(fhpath, when="d", interval=1, backupCount=7)
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     fh.setFormatter(formatter)
     logger.addHandler(fh)

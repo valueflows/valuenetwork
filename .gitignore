@@ -24,9 +24,8 @@ valuenetwork/site_media/media/photos/*.jpeg
 valuenetwork/site_media/media/photos/*.JPEG
 valuenetwork/site_media/media/photos/*.png
 valuenetwork/site_media/media/photos/*.PNG
-faircoin_nrp/daemon/daemon.conf
-faircoin_nrp/daemon/daemon.py
-faircoin_nrp/daemon/daemon_service
-faircoin_nrp/daemon/new_privkeys.txt
+faircoin/daemon/daemon.conf
+faircoin/daemon/daemon.py
+faircoin/daemon/daemon_service
+faircoin/daemon/new_privkeys.txt
 fixtures/*.json
-

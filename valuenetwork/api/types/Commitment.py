@@ -1,5 +1,5 @@
 #
-# Commitment: A planned economic event or transfer that has been promised by an agent to another agent..
+# Commitment: A planned economic event or transfer that has been promised by an agent to another agent.
 #
 
 
@@ -20,10 +20,9 @@ class Commitment(DjangoObjectType):
     scope = graphene.Field(lambda: types.Agent)
     committed_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
     committed_resource = graphene.Field(lambda: types.EconomicResource)
-    work_category = graphene.String(source='work_category')
     committed_quantity = graphene.Field(QuantityValue)
-    commitment_date = graphene.String(source='commitment_date')
-    committed_start = graphene.String(source='start')
+    committed_on = graphene.String(source='committed_on')
+    commitment_start = graphene.String(source='commitment_start')
     due = graphene.String(source='due')
     is_finished = graphene.Boolean(source='is_finished')
     note = graphene.String(source='note')

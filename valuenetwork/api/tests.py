@@ -582,6 +582,30 @@ fragment coreEventFields on EconomicEvent {
     name
   }
 }
+fragment coreCommitmentFields on Commitment {
+  action
+  commitmentStart
+  committedOn
+  due
+  committedQuantity {
+    numericValue
+    unit {
+      name
+    }
+  }
+  committedTaxonomyItem {
+    name
+    category
+  }
+  provider {
+    id
+    name
+  }
+  receiver {
+    id
+    name
+  }
+}
 query ($token: String) {
   viewer(token: $token) {
     process(id: 6) {
@@ -591,6 +615,18 @@ query ($token: String) {
       }
       outputs {
         ...coreEventFields
+      }
+      committedInputs {
+        ...coreCommitmentFields
+      }
+      committedOutputs {
+        ...coreCommitmentFields
+      }
+      nextProcesses {
+        name
+      }
+      previousProcesses {
+        name
       }
     }
   }
@@ -676,7 +712,9 @@ query ($token: String) {
       agentCommitments(latestNumberOfDays: 30) {
         id
         action
-        commitmentDate
+        commitmentStart
+        committedOn
+        due
         committedQuantity {
           numericValue
           unit {
@@ -798,7 +836,9 @@ query ($token: String) {
     allCommitments {
       id
       action
-      committedStart
+      commitmentStart
+      committedOn
+      due
       committedQuantity {
         numericValue
         unit {
@@ -843,8 +883,9 @@ query ($token: String) {
     commitment(id: 325) {
       id
       action
-      commitmentDate
-      committedStart
+      commitmentStart
+      committedOn
+      due
       committedQuantity {
         numericValue
         unit {

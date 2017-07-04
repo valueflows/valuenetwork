@@ -9050,8 +9050,12 @@ class Commitment(models.Model):
         return self.unit_of_quantity
 
     @property #ValueFlows
-    def committed_start(self):
+    def commitment_start(self):
         return self.start_date.isoformat()
+
+    @property #ValueFlows
+    def committed_on(self):
+        return self.commitment_date.isoformat()
 
     @property #ValueFlows
     def due(self):

@@ -1,13 +1,14 @@
-import requests, json, logging
+import requests, json, logging, time
 from random import randint
+from logging.handlers import TimedRotatingFileHandler
 
 from django.conf import settings
 
 def init_logger():
-    logger = logging.getLogger("faircoins")
+    logger = logging.getLogger("faircoin")
     logger.setLevel(logging.WARNING)
-    fhpath = "/".join([settings.PROJECT_ROOT, "faircoins.log",])
-    fh = logging.handlers.TimedRotatingFileHandler(fhpath, when="d", interval=1, backupCount=7)
+    fhpath = "/".join([settings.PROJECT_ROOT, "faircoin/faircoin.log",])
+    fh = TimedRotatingFileHandler(fhpath, when="d", interval=1, backupCount=7)
     fh.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     fh.setFormatter(formatter)
@@ -47,46 +48,81 @@ def send_command(cmd, params):
 
     return out
 
-# Get the network fee
+# Check if wallet is connected to the electum network.
+def is_connected():
+    response = send_command('is_connected', '')
+    if response == 'ERROR':
+        return False
+    else:
+        return response
+
+# Get the network fee.
 def network_fee():
     response = send_command('fee', '')
-    return response
+    if response == 'ERROR':
+        return False
+    else:
+        return response
 
-# Stop electrum
-def do_stop():
-    response = send_command('do_stop', '')
-    return response
+# A mock function for tests in valueaccounting app.
+def send_fake_faircoins(address_origin, address_end, amount):
+    tx = str(time.time())
+    broadcasted = True
+    print "sent fake faircoins"
+    return tx, broadcasted
 
-# get the total balance for the wallet
-# Returns a tupla with 3 values: Confirmed, Unmature, Unconfirmed
-def get_balance():
-    response = send_command('get_balance', '')
-    return response
-
-# get the balance for a determined address
+# Get the balance for a determined address
 # Returns a tupla with 3 values: Confirmed, Unmature, Unconfirmed
 def get_address_balance(address):
     format_dict = [address]
     response = send_command('get_address_balance', format_dict)
-    return response
+    if response != 'ERROR':
+        return response
 
-#check if an address is valid
-def is_valid(address):
-    format_dict = [address]
-    response = send_command('is_valid', format_dict)
-    return response
-
-#check if an address is from the wallet
-def is_mine(address):
-    format_dict = [address]
-    response = send_command('is_mine', format_dict)
-    return response
-
-#read the history of an address
+# Gets the transactions history of an address
 def get_address_history(address):
     format_dict = [address]
     response = send_command('get_address_history', format_dict)
-    return response
+    if response != 'ERROR':
+        return response
+
+# Check if an address is valid
+def is_valid(address):
+    format_dict = [address]
+    response = send_command('is_valid', format_dict)
+    if response != 'ERROR':
+        return response
+
+# Check if an address belongs to the wallet
+def is_mine(address):
+    format_dict = [address]
+    response = send_command('is_mine', format_dict)
+    if response != 'ERROR':
+        return response
+
+# Get the confirmations in the faircoin network of a transaction.
+def get_confirmations(tx):
+    format_dict = [tx]
+    response = send_command('get_confirmations', format_dict)
+    if response != 'ERROR':
+        return response
+    else:
+        return None, None
+
+# Gets the transaction amount and created time from tx hash and output address.
+def get_transaction_info(tx_hash, address):
+    format_dict = [tx_hash]
+    transaction = send_command('get_transaction', format_dict)
+    if transaction != 'ERROR':
+        amount = 0
+        for output in transaction['outputs']:
+            if str(output['address']) == address:
+                amount += int(output['value'])
+
+        time = transaction['time']
+        return (amount, time)
+    else:
+        return None, None
 
 # make a transfer from an adress of the wallet
 def make_transaction_from_address(address_origin, address_end, amount):
@@ -94,41 +130,11 @@ def make_transaction_from_address(address_origin, address_end, amount):
     response = send_command('make_transaction_from_address', format_dict)
     return response
 
-def address_history_info(address, page = 0, items = 20):
-    format_dict = [address, page, items]
-    response = send_command('address_history_info', format_dict)
-    return response
-
-# create new address for users or any other entity
+# create a new labeled address
 def new_fair_address(entity_id, entity = 'generic'):
     format_dict = [entity_id, entity]
     response = send_command('new_fair_address', format_dict)
     return response
-
-def get_confirmations(tx):
-    format_dict = [tx]
-    response = send_command('get_confirmations', format_dict)
-    return response
-
-def get_transaction(tx_hash):
-    format_dict = [tx_hash]
-    response = send_command('get_transaction', format_dict)
-    return response
-
-#Check if it is connected to the electum network
-def is_connected():
-    response = send_command('is_connected', '')
-    return response
-
-#Check if daemon is up and connected.
-def daemon_is_up():
-    response = send_command('daemon_is_up', '')
-    return response
-
-#get wallet info.
-def get_wallet_info():
-     response = send_command('get_wallet_info', '')
-     return response
 
 #import private key and label address
 def import_key(privkey, entity_id, entity = 'generic'):

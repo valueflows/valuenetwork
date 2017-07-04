@@ -572,7 +572,7 @@ def agent(request, agent_id):
         "individual_stats": individual_stats,
         "roles_height": roles_height,
         "help": get_help("agent"),
-        "use_faircoin": settings.USE_FAIRCOIN,
+        "use_faircoin": True if 'faircoin' in settings.INSTALLED_APPS else False,
     })
 
 def accounting(request, agent_id):
@@ -1276,7 +1276,7 @@ def send_faircoins(request, resource_id):
                 % ('accounting/resource', resource.id))
 
 def validate_faircoin_address(request):
-    from valuenetwork.valueaccounting.faircoin_utils import is_valid
+    from faircoin.utils import is_valid
     data = request.GET
     address = data["to_address"]
     answer = is_valid(address)

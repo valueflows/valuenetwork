@@ -55,6 +55,9 @@ urlpatterns = [
 if 'multicurrency' in settings.INSTALLED_APPS:
     urlpatterns += [url(r'^multicurrency/', include('multicurrency.urls')),]
 
+if 'faircoin' in settings.INSTALLED_APPS:
+    urlpatterns += [url(r'^faircoin/', include('faircoin.urls')),]
+
 urlpatterns += [
     url(r'^(?P<form_slug>.+)/$', work.views.project_login, name="project_login"),
 ]

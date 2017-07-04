@@ -13,7 +13,7 @@ from valuenetwork.valueaccounting.models import (
     EconomicEvent,
 )
 
-from valuenetwork.valueaccounting import faircoin_utils
+from faircoin import utils as faircoin_utils
 
 class ExchangeService(object):
     @classmethod
@@ -121,7 +121,7 @@ class ExchangeService(object):
 
 
     def send_faircoins(self, from_agent, recipient, qty, resource, notes=None):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         to_resources = EconomicResource.objects.filter(digital_currency_address=recipient)
         to_resource = None
@@ -204,7 +204,7 @@ class ExchangeService(object):
         return exchange
 
     def include_blockchain_tx_as_event(self, agent, resource):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return []
         faircoin_address = str(resource.digital_currency_address)
         tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)

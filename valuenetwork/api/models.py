@@ -6,20 +6,21 @@ from decimal import *
 # Helpers for dealing with Agent polymorphism
 
 def formatAgent(agent):
-    if agent.agent_type.party_type == "individual":
-        return Person(
-            id=agent.id,
-            name = agent.name,
-            note = agent.description,
-            image = agent.image)
-    else:
-        return Organization(
-            id=agent.id,
-            name = agent.name,
-            note = agent.description,
-            image = agent.image,
-            is_context = agent.is_context,
-            type = agent.agent_type)
+    if agent:
+        if agent.agent_type.party_type == "individual":
+            return Person(
+                id=agent.id,
+                name = agent.name,
+                note = agent.description,
+                image = agent.image)
+        else:
+            return Organization(
+                id=agent.id,
+                name = agent.name,
+                note = agent.description,
+                image = agent.image,
+                is_context = agent.is_context,
+                type = agent.agent_type)
 
 def formatAgentList(agent_list):
     mixed_list = []

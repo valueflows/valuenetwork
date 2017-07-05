@@ -8,7 +8,8 @@ local_settings.py
 *.swp
 *.swo
 *.log
-faircoins.log.*
+faircoin/faircoin.log*
+faircoin/faircoin_cron.log*
 .vagrant
 bin/
 cmd/create-user.sh

@@ -6,6 +6,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import Process as ProcessProxy
+from valuenetwork.api.models import formatAgent
 
 
 class Process(DjangoObjectType):
@@ -39,6 +40,13 @@ class Process(DjangoObjectType):
 
     previous_processes = graphene.List(lambda: types.Process)
 
+    working_agents = graphene.List(lambda: types.Agent)
+
+    #next_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
+
+    #previous_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
+
+
     def resolve_inputs(self, args, context, info):
         return self.incoming_events()
 
@@ -68,3 +76,16 @@ class Process(DjangoObjectType):
 
     def resolve_previous_processes(self, args, context, info):
         return self.previous_processes()
+
+    def resolve_working_agents(self, args, context, info):
+        agents = self.all_working_agents()
+        formatted_agents = []
+        for agent in agents:
+            formatted_agents.append(formatAgent(agent))
+        return formatted_agents
+
+    #def resolve_next_resource_taxonomy_items(self, args, context, info):
+    #    return self.output_resource_types()
+
+    #def resolve_previous_resource_taxonomy_items(self, args, context, info):
+    #    return self.previous_processes()

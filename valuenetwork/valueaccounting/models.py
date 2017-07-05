@@ -6869,6 +6869,13 @@ class Process(models.Model):
         reqs = self.work_requirements()
         return [req.from_agent for req in reqs if req.from_agent]
 
+    def all_working_agents(self): #from both commitments and events
+        agents = self.working_agents()
+        work_events = self.work_events()
+        for event in work_events:
+            agents.append(event.from_agent)
+        return agents
+
     def work_events(self):
         return self.events.filter(
             event_type__relationship='work')

@@ -645,6 +645,19 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    process(id: 52) {
+      name
+      workingAgents {
+        name
+        image
+        __typename
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     allEconomicEvents {
       id
       action

@@ -155,7 +155,16 @@ th
                 <td><span class="error"><b>{{ req.pending_shares }}</b> shares</span>
                 {% if user_agent in req.agent.managers or user_agent == req.agent or request.user.is_superuser %}
                     {% if req.payment_url %}
-                        <a href="{% url 'payment_url' paymode=req.payment_option.key join_request_id=req.id %}" target="ocp_pay" class="btn btn-primary">{% if req.payment_html %}{{ req.payment_html }}{% else %}{% trans "Pay your Shares" %}{% endif %}</a>
+                        <form action="{{ req.payment_url }}" method="POST" style="display:inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" id="order_id" value="{{ req.pk }}" />
+                            <input type="hidden" name="amount" id="amount" value="{{ req.pending_shares }}" />
+                            <input type="hidden" name="email" id="email" value="{{ req.email_address }}" />
+                            <input type="hidden" name="first_name" id="first_name" value="{{ req.name }}" />
+                            <input type="hidden" name="last_name" id="last_name" value="{{ req.surname }}" />
+                            <input type="hidden" name="lang" id="lang" value="en" />
+                            <input type="submit" value="{% if req.payment_html %}{{ req.payment_html }}{% else %}{% trans "Pay your Shares" %}{% endif %}" class="btn btn-primary" />
+                        </form> <!-- <a href="{% url 'payment_url' paymode=req.payment_option.key join_request_id=req.id %}" target="ocp_pay" class="btn btn-primary">{% if req.payment_html %}{{ req.payment_html }}{% else %}{% trans "Pay your Shares" %}{% endif %}</a> -->
                     {% elif req.payment_html %}
                         <br /> {{ req.payment_html|safe }}
                     {% else %}

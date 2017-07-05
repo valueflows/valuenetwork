@@ -6874,7 +6874,7 @@ class Process(models.Model):
         work_events = self.work_events()
         for event in work_events:
             agents.append(event.from_agent)
-        return agents
+        return set(list(agents))
 
     def work_events(self):
         return self.events.filter(

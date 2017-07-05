@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from valuenetwork.valueaccounting.process_faircoin_requests import create_address_for_agent
-from valuenetwork.valueaccounting.faircoin_utils import is_mine as is_address_in_wallet
+from faircoin.utils import is_mine as is_address_in_wallet
 from valuenetwork.valueaccounting.models import EconomicAgent
 
 

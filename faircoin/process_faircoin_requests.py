@@ -3,35 +3,17 @@ import time
 import logging
 from decimal import *
 
-logger = logging.getLogger("faircoins")
+logger = logging.getLogger("faircoin_cron.process")
 
 from django.conf import settings
 from django.db.models import Q
 
-import faircoin_nrp.electrum_fair_nrp as efn
+import faircoin.utils as efn
 
 from valuenetwork.valueaccounting.models import EconomicAgent, EconomicEvent, EconomicResource
 from valuenetwork.valueaccounting.lockfile import FileLock, AlreadyLocked, LockTimeout, LockFailed
 
 #FAIRCOIN_DIVISOR = int(1000000)
-
-def init_electrum_fair():
-    try:
-        daemon = efn.daemon_is_up()
-    except:
-        logger.critical("Cannot connect with daemon.")
-        return False
-
-    if not daemon or (daemon == 'ERROR'):
-        return False
-
-    try:
-        network = efn.is_connected()
-    except:
-        logger.critical("Cannot connect with electrum-server.")
-        return False
-
-    return network and (network != 'ERROR')
 
 def acquire_lock():
     lock = FileLock("broadcast-faircoins")
@@ -51,6 +33,7 @@ def acquire_lock():
 def create_address_from_file(entity_id, entity):
     filename = settings.NEW_FAIRCOIN_ADDRESSES_FILE
     address = None
+    logger.info("About import privkey for " + str(entity) + ": " + str(entity_id))
     with open(filename, 'r') as fin:
         try:
             data = fin.read().splitlines(True)
@@ -73,8 +56,8 @@ def create_address_from_file(entity_id, entity):
            fout.writelines(data[1:])
         except:
            logger.critical("Error writting new faircoin addresses file.")
-    logger.debug("Private key succesfully imported to wallet for "
-        + str(entity) + ": " + str(entity_id))
+    logger.info("Private key succesfully imported to wallet for "
+        + str(entity) + ": " + str(entity_id) + " (address: " + address + ")")
     return address
 
 def create_address_for_agent(agent):
@@ -85,7 +68,7 @@ def create_address_for_agent(agent):
             entity = agent.agent_type.name,
             )
         return address
-    if init_electrum_fair():
+    if efn.is_connected():
         try:
             address = efn.new_fair_address(
                 entity_id = agent.nick.encode('ascii','ignore'),
@@ -132,7 +115,7 @@ def create_requested_addresses():
         return "failed to get FairCoin address requests"
 
     if requests:
-        if init_electrum_fair():
+        if efn.is_connected():
             logger.debug("broadcast_tx ready to process FairCoin address requests")
             for resource in requests:
                 result = create_address_for_resource(resource)
@@ -162,13 +145,9 @@ def broadcast_tx():
     try:
         successful_events = 0
         failed_events = 0
-        if events and init_electrum_fair():
+        if events and efn.is_connected():
             logger.debug("broadcast_tx ready to process events")
             for event in events:
-                #do we need to check for missing digital_currency_address here?
-                #and create them?
-                #fee = efn.network_fee() # In Satoshis
-                #fee = Decimal("%s" %fee) / FAIRCOIN_DIVISOR
                 if event.resource:
                     if event.event_type.name=="Give":
                         address_origin = event.resource.digital_currency_address
@@ -183,7 +162,7 @@ def broadcast_tx():
                         event.save()
                         continue
 
-                    logger.critical("about to make_transaction_from_address. Amount: %d" %(int(amount)))
+                    logger.info("About to build transaction. Amount: %d" %(int(amount)))
                     tx_hash = None
                     try:
                         tx_hash = efn.make_transaction_from_address(address_origin, address_end, int(amount))
@@ -206,8 +185,8 @@ def broadcast_tx():
                                 revent.digital_currency_tx_state = "broadcast"
                                 revent.digital_currency_tx_hash = tx_hash
                                 revent.save()
-                        msg = " ".join([ "**** sent tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
-                        logger.debug(msg)
+                        msg = " ".join([ "Broadcasted tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
+                        logger.info(msg)
     except Exception:
         _, e, _ = sys.exc_info()
         logger.critical("an exception occurred in processing events: {0}".format(e))

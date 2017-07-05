@@ -134,18 +134,18 @@
                     {% if resource.owner == request.user.agent.agent or resource.owner in request.user.agent.agent.managed_projects %}
 	                  <tr>
                         <th style="text-align: right;">{% trans "Balance" %}</th>
-                        {% if wallet and wallet.network %}
-                          {% if resource.balance and resource.newbalance %}
-                            {% if not resource.balance == resource.newbalance %}
-                                <td>{{ resource.balance }} (-> {{ resource.newbalance }}) {{ resource.unit_of_quantity }}</td>
+                        {% if wallet %}
+                          {% if confirmed_balance and unconfirmed_balance %}
+                            {% if not confirmed_balance == unconfirmed_balance %}
+                                <td>{{ confirmed_balance }} (-> {{ unconfirmed_balance }}) {{ resource.unit_of_quantity }}</td>
                             {% else %}
-                                <td>{{ resource.balance }} {{ resource.unit_of_quantity }}</td>
+                                <td>{{ confirmed_balance }} {{ resource.unit_of_quantity }}</td>
                             {% endif %}
                           {% else %}
-                            {% if not resource.digital_currency_balance == resource.digital_currency_balance_unconfirmed %}
-                                <td>{{ resource.digital_currency_balance }} (-> {{ resource.digital_currency_balance_unconfirmed }}) {{ resource.unit_of_quantity }}</td>
+                            {% if not confirmed_balance == unconfirmed_balance %}
+                                <td>{{ confirmed_balance }} (-> {{ unconfirmed_balance }}) {{ resource.unit_of_quantity }}</td>
                             {% else %}
-                                <td>{{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}</td>
+                                <td>{{ confirmed_balance }} {{ resource.unit_of_quantity }}</td>
                             {% endif %}
                           {% endif %}
                         {% else %}
@@ -182,7 +182,7 @@
                         <tr>
                             <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
                             <td>{% if wallet %}
-                                    {% if resource.is_wallet_address == False %}
+                                    {% if is_wallet_address == False %}
                                         <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
                                     {% else %}
                                         {{ resource.digital_currency_address }}
@@ -267,7 +267,7 @@
                             <br/>
                             <p><em><b>
                             {% blocktrans %}
-                                Your FairCoin account balance of {{ balance }} ƒ
+                                Your FairCoin account balance of {{ confirmed_balance }} ƒ
                                 is too low to pay {{ share_price }} ƒ now.
                                 If you transfer enough Faircoins into your account, you'll see here the button to pay your shares.
                             {% endblocktrans %}
@@ -282,7 +282,7 @@
                         {% if payment_due %}
                           {{ send_coins_form|as_bootstrap }}
                           <em>{% trans "(available when full member)" %}</em>
-                        {% elif resource.is_wallet_address == False %}
+                        {% elif is_wallet_address == False %}
                           <em>{% trans "(available when the address pertains to this wallet)" %}</em>
                         {% elif resource.is_address_requested %}
                           <em>{% trans "(please wait about a minute to have a new fair-address and refresh the page)" %}</em>
@@ -291,7 +291,7 @@
                         {% else %}
                           {% csrf_token %}
                           {{ send_coins_form|as_bootstrap }}
-                          {% if not resource.digital_currency_balance == "Not accessible now" %}
+                          {% if not confirmed_balance == "Not accessible now" %}
                               <button class="btn btn-primary" name="sendCoins" value="coins">{% trans "Send" %}</button>
                           {% else %}
                               <button class="btn btn-danger disabled" disabled><b>{% trans "Not available now" %}</b></button>
@@ -405,7 +405,7 @@
             rules: {
                 to_address: {
                     //required: true,
-                    remote: "/work/validate-faircoin-address-for-worker/"
+                    remote: "/faircoin/validate-faircoin-address-for-worker/"
                 },
                 quantity: {
                     number: true,

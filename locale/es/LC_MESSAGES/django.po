@@ -2,8 +2,7 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#: work/templates/work/exchanges_all.html:326
+# 
 #, fuzzy
 msgid ""
 msgstr ""
@@ -11,14 +10,12 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-06-06 12:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Damian Emil Piotraschke Borkowski <depb@mailchuck.com>, "
-"2016\n"
-"Language-Team: Spanish (https://www.transifex.com/freedomcoop/teams/65382/"
-"es/)\n"
-"Language: es\n"
+"Last-Translator: skoria <skoria@gmail.com>, 2017\n"
+"Language-Team: Spanish (https://www.transifex.com/freedomcoop/teams/65382/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: account/forms.py:24 account/forms.py:100
@@ -56,7 +53,7 @@ msgstr "Debes escribir la misma contraseña cada vez."
 
 #: account/forms.py:74
 msgid "Remember Me"
-msgstr "Recuerdame"
+msgstr "Recuérdame"
 
 #: account/forms.py:86
 msgid "This account is inactive."
@@ -82,8 +79,8 @@ msgstr "Correo electrónico"
 #: account/forms.py:116
 msgid "The email address and/or password you specified are not correct."
 msgstr ""
-"La dirección de correo electrónico y/o la contraseña que has especificado no "
-"son correctas."
+"La dirección de correo electrónico y/o la contraseña que has especificado no"
+" son correctas."
 
 #: account/forms.py:127
 msgid "Current Password"
@@ -99,11 +96,11 @@ msgstr "Nueva contraseña (otra vez)"
 
 #: account/forms.py:145
 msgid "Please type your current password."
-msgstr "Por favor, escribe tu contraseña actual."
+msgstr "Escribe tu contraseña actual."
 
 #: account/forms.py:167
 msgid "Email address can not be found."
-msgstr "La dirección de correo electrónico no puede ser encontrada."
+msgstr "No encuentro la dirección de correo."
 
 #: account/forms.py:193
 msgid "Timezone"
@@ -127,7 +124,7 @@ msgstr "idioma"
 
 #: account/models.py:243 valuenetwork/valueaccounting/models.py:456
 msgid "email address"
-msgstr "dirección de email"
+msgstr "dirección de correo electrónico"
 
 #: account/models.py:244
 msgid "email addresses"
@@ -175,8 +172,8 @@ msgid ""
 "Your account is now inactive and your data will be expunged in the next "
 "%(expunge_hours)d hours."
 msgstr ""
-"Tu cuenta está ahora inactiva y tus datos serán eliminados durante las "
-"siguientes %(expunge_hours)d horas."
+"Tu cuenta está inactiva, y tus datos serán eliminados durante las siguientes"
+" %(expunge_hours)d horas."
 
 #: general/models.py:43 general/models.py:513 general/models.py:577
 #: general/models.py:681
@@ -195,7 +192,7 @@ msgstr "Nombre"
 
 #: general/models.py:43
 msgid "The name of the Concept"
-msgstr ""
+msgstr "Nombre del Concepto"
 
 #: general/models.py:44 general/models.py:516 general/models.py:683
 #: valuenetwork/templates/valueaccounting/agent.html:253
@@ -246,134 +243,116 @@ msgstr "Descripción"
 
 #: general/models.py:52
 msgid "Concept"
-msgstr ""
+msgstr "Concepto"
 
 #: general/models.py:53
-#, fuzzy
-#| msgid "All Contexts"
 msgid "c- Concepts"
-msgstr "Todos los contextos"
+msgstr "c- Conceptos"
 
 #: general/models.py:59 general/models.py:537 general/models.py:558
 msgid "Class"
-msgstr ""
+msgstr "Clase"
 
 #: general/models.py:60
 msgid "Django model or python class associated to the Type"
-msgstr ""
+msgstr "Modelo de Django o clase de Python asociada al Tipo"
 
 #: general/models.py:64
-#, fuzzy
-#| msgid "Type"
 msgid "c- Type"
-msgstr "Tipo"
+msgstr "c- Tipo"
 
 #: general/models.py:108
-#, fuzzy
-#| msgid "Type of membership"
 msgid "Type of entity"
-msgstr "Tipo de membresía"
+msgstr "Tipo de entidad"
 
 #: general/models.py:109
 msgid "e--> Types of entities"
-msgstr ""
+msgstr "e-- Tipos de entidades"
 
 #: general/models.py:306
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Project"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de Proyecto"
 
 #: general/models.py:307
 msgid "e-> Types of Projects"
-msgstr ""
+msgstr "e-- Tipos de Proyectos"
 
 #: general/models.py:323
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Company"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de Entidad"
 
 #: general/models.py:324
 msgid "e-> Types of Companies"
-msgstr ""
+msgstr "e-- Tipos de Entidades"
 
 #: general/models.py:513
 msgid "The name of the Art"
-msgstr ""
+msgstr "El nombre del Arte"
 
 #: general/models.py:514
 msgid "Verb"
-msgstr ""
+msgstr "Verbo"
 
 #: general/models.py:514
 msgid "The verb of the action, infinitive"
-msgstr ""
+msgstr "El verbo de la acción, infinitivo"
 
 #: general/models.py:515
 msgid "Gerund"
-msgstr ""
+msgstr "Gerundio"
 
 #: general/models.py:515
 msgid "The verb in gerund, present"
-msgstr ""
+msgstr "El verbo en gerundio, presente"
 
 #: general/models.py:530
 msgid "Art"
-msgstr ""
+msgstr "Arte"
 
 #: general/models.py:531
 msgid "a- Arts"
-msgstr ""
+msgstr "a- Artes"
 
 #: general/models.py:538
 msgid "Django model or python class associated to the Relation"
-msgstr ""
+msgstr "Modelo de Django o clase de Python asociada a la Relación"
 
 #: general/models.py:540
-#, fuzzy
-#| msgid "Relationship"
 msgid "Relation"
 msgstr "Relación"
 
 #: general/models.py:541
-#, fuzzy
-#| msgid "Relationship"
 msgid "a- Relations"
-msgstr "Relación"
+msgstr "a- Relaciones"
 
 #: general/models.py:559
 msgid "Django model or python class associated to the Job'"
-msgstr ""
+msgstr "Modelo de Django o clase de Python asociada al trabajo"
 
 #: general/models.py:562
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:53
 msgid "Skill"
-msgstr ""
+msgstr "Habilidad"
 
 #: general/models.py:563
 msgid "a- Skills"
-msgstr ""
+msgstr "a- Habilidades"
 
 #: general/models.py:577
 msgid "The name of the Space"
-msgstr ""
+msgstr "El nombre del Espacio"
 
 #: general/models.py:591
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Space"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de Espacio"
 
 #: general/models.py:592
 msgid "s--> Types of Spaces"
-msgstr ""
+msgstr "s-- Tipos de Espacios"
 
 #: general/models.py:598
-#, fuzzy
-#| msgid "To Address"
 msgid "Type of address"
-msgstr "Para la dirección"
+msgstr "Tipo de dirección"
 
 #: general/models.py:599 general/models.py:628
 #: valuenetwork/templates/valueaccounting/membership_request.html:98
@@ -386,171 +365,135 @@ msgstr "Dirección"
 
 #: general/models.py:599
 msgid "Postal address able to receive by post"
-msgstr ""
+msgstr "Dirección postal para recepción de envíos"
 
 #: general/models.py:600
 msgid "Town"
-msgstr ""
+msgstr "Localidad"
 
 #: general/models.py:600
 msgid "Town or City"
-msgstr ""
+msgstr "Localidad o Ciudad"
 
 #: general/models.py:601
 msgid "Postal/Zip code"
-msgstr ""
+msgstr "Código postal"
 
 #: general/models.py:602 general/models.py:666
 msgid "Region"
-msgstr ""
+msgstr "Región"
 
 #: general/models.py:605
 msgid "Is a Larder?"
-msgstr ""
+msgstr "¿Es una despensa?"
 
 #: general/models.py:607
 msgid "Size"
-msgstr ""
+msgstr "Tamaño"
 
 #: general/models.py:607
 msgid "Number of units (accept 2 decimals)"
-msgstr ""
+msgstr "Número de unidades (acepta 2 decimales)"
 
 #: general/models.py:608 work/forms.py:502
-#, fuzzy
-#| msgid "Unit of Value"
 msgid "Unit of measure"
-msgstr "Unidad de Valor"
+msgstr "Unidad de medida"
 
 #: general/models.py:609
-#, fuzzy
-#| msgid "longitude"
 msgid "Longitude (geo)"
-msgstr "longitud"
+msgstr "Longitud (geo)"
 
 #: general/models.py:610
-#, fuzzy
-#| msgid "latitude"
 msgid "Latitude (geo)"
-msgstr "latitud"
+msgstr "Latitud (geo)"
 
 #: general/models.py:612
-#, fuzzy
-#| msgid "related to"
 msgid "Related Jobs"
-msgstr "relacionado a"
+msgstr "Trabajos relacionados"
 
 #: general/models.py:614
-#, fuzzy
-#| msgid "Description of work done"
 msgid "Description of the Address"
-msgstr "Descripción del trabajo realizado"
+msgstr "Descripción de la dirección"
 
 #: general/models.py:614
 msgid "Exact localization, indications to arrive or comments"
-msgstr ""
+msgstr "Localización exacta, cómo llegar o comentarios"
 
 #: general/models.py:621
 msgid "nobody"
-msgstr ""
+msgstr "nadie"
 
 #: general/models.py:623
-#, fuzzy
-#| msgid "email address"
 msgid "Main address of"
-msgstr "dirección de email"
+msgstr "Dirección principal de"
 
 #: general/models.py:629
-#, fuzzy
-#| msgid "Address"
 msgid "s- Addresses"
-msgstr "Dirección"
+msgstr "s- Direcciones"
 
 #: general/models.py:653
-#, fuzzy
-#| msgid "To Address"
 msgid "Type of Address"
-msgstr "Para la dirección"
+msgstr "Tipo de Dirección"
 
 #: general/models.py:654
-#, fuzzy
-#| msgid "To Address"
 msgid "s-> Types of Addresses"
-msgstr "Para la dirección"
+msgstr "s-- Tipos de Direcciones"
 
 #: general/models.py:660
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of region"
-msgstr "Tipo de trabajo"
+msgstr "tipo de región"
 
 #: general/models.py:663
-#, fuzzy
-#| msgid "Description of association"
 msgid "Description of the Region"
-msgstr "Descripción de asociación"
+msgstr "Descripción de la Región"
 
 #: general/models.py:667
 msgid "s- Regions"
-msgstr ""
+msgstr "s- Región"
 
 #: general/models.py:672
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Region"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de Región"
 
 #: general/models.py:673
 msgid "s-> Types of Regions"
-msgstr ""
+msgstr "Tipos de Regiones"
 
 #: general/models.py:694
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Artwork"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de Obra de arte"
 
 #: general/models.py:695
-#, fuzzy
-#| msgid "Type of work"
 msgid "o--> Types of Artworks"
-msgstr "Tipo de trabajo"
+msgstr "o-- Tipos de Obras de arte"
 
 #: general/models.py:774
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Non-material artwork"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de Obra de arte inmaterial"
 
 #: general/models.py:775
 msgid "o-> Types of Non-material artworks"
-msgstr ""
+msgstr "o-- Tipos de Obras de arte inmaterial"
 
 #: general/models.py:909
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Material artwork"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de Obra de arte material"
 
 #: general/models.py:910
 msgid "o-> Types of Material artworks"
-msgstr ""
+msgstr "o-- Tipos de Obras de arte materiales"
 
 #: general/models.py:939 general/models.py:956
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Unit"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de unidad"
 
 #: general/models.py:940
 msgid "Code or Symbol"
-msgstr ""
+msgstr "Código o Símbolo"
 
 #: general/models.py:942
-#, fuzzy
-#| msgid "related to"
 msgid "related use Region"
-msgstr "relacionado a"
+msgstr "Región de uso relacionado"
 
 #: general/models.py:946
 #: valuenetwork/templates/valueaccounting/change_process.html:89
@@ -582,133 +525,109 @@ msgid "Unit"
 msgstr "Unidad"
 
 #: general/models.py:947
-#, fuzzy
-#| msgid "Unit"
 msgid "o- Units"
-msgstr "Unidad"
+msgstr "o- Unidades"
 
 #: general/models.py:957
 msgid "o-> Types of Units"
-msgstr ""
+msgstr "o-- Tipos de Unidades"
 
 #: general/models.py:965 general/models.py:985
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of Record"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de expediente"
 
 #: general/models.py:967
 msgid "Record"
-msgstr ""
+msgstr "Expediente"
 
 #: general/models.py:968
 msgid "o- Records"
-msgstr ""
+msgstr "o- Expedientes"
 
 #: general/models.py:986
-#, fuzzy
-#| msgid "Type of work"
 msgid "o-> Types of Records"
-msgstr "Tipo de trabajo"
+msgstr "o-- Tipos de Expediente"
 
 #: general/models.py:993
-#, fuzzy
-#| msgid "Unit"
 msgid "in Unit"
-msgstr "Unidad"
+msgstr "Unidad de entrada"
 
 #: general/models.py:994
 msgid "Ratio multiplier"
-msgstr ""
+msgstr "Factor de multiplicación"
 
 #: general/models.py:995
-#, fuzzy
-#| msgid "Unit"
 msgid "out Unit"
-msgstr "Unidad"
+msgstr "Unidad de salida"
 
 #: general/models.py:997
 msgid "Equivalence between Units"
-msgstr ""
+msgstr "Equivalencia entre Unidades"
 
 #: general/models.py:998
 msgid "o- Equivalences between Units"
-msgstr ""
+msgstr "o- Equivalencias entre Unidades"
 
 #: general/templates/admin/general/human/change_list.html:11
 msgid "Persona"
-msgstr ""
+msgstr "Persona"
 
 #: general/templates/admin/general/human/change_list.html:16
-#, fuzzy
-#| msgid "Project"
 msgid "Projecte"
 msgstr "Proyecto"
 
 #: general/templates/admin/general/human/change_list.html:21
 msgid "Empresa"
-msgstr ""
+msgstr "Empresa"
 
 #: general/templates/related-widget-wrapper-manytomany.html:6
 #: general/widgets.py:240
 msgid "Afegeix"
-msgstr ""
+msgstr "Añade"
 
 #: general/templatetags/related_widget_wrapper_result_list.py:380
-#, fuzzy
-#| msgid "All Orders"
 msgid "All dates"
-msgstr "Todos los Pedidos"
+msgstr "Todas las fechas"
 
 #: general/widgets.py:181 general/widgets.py:239 general/widgets.py:363
-#, fuzzy
-#| msgid "Add work"
 msgid "Add Another"
-msgstr "Agregar trabajo"
+msgstr "Añadir otra"
 
 #: general/widgets.py:206 general/widgets.py:307
 msgid "Treu"
-msgstr ""
+msgstr "Treu"
 
 #: general/widgets.py:213 general/widgets.py:288
-#, fuzzy
-#| msgid "Change todo"
 msgid "Change related model"
-msgstr "Cambiar por hacer"
+msgstr "Cambiar modelo relacionado"
 
 #: general/widgets.py:227 general/widgets.py:299
-#, fuzzy
-#| msgid "Deleted Todo"
 msgid "Delete related model"
-msgstr "Por Hacer borrado"
+msgstr "Borrar modelo relacionado"
 
 #: general/widgets.py:244 general/widgets.py:339
 msgid "Lookup"
-msgstr ""
+msgstr "Busca"
 
 #: multicurrency/templates/403.html:5
 msgid "Forbidden"
-msgstr ""
+msgstr "Prohibido"
 
 #: multicurrency/templates/403.html:10
-#, fuzzy
-#| msgid "You do not have permission to access the requested page."
 msgid "You don't have required permissions to access here. "
-msgstr "No tiene permisos para acceder a la página solicitada."
+msgstr "No tienes los permisos necesarios para entrar aquí."
 
 #: multicurrency/templates/multicurrency_auth.html:6
 msgid "Multicurrency authentication: "
-msgstr ""
+msgstr "Autenticación de multidivisa"
 
 #: multicurrency/templates/multicurrency_auth.html:13
 msgid "Muticurrency wallet for agent "
-msgstr ""
+msgstr "Monedero multidivisa para agente"
 
 #: multicurrency/templates/multicurrency_auth.html:26
-#, fuzzy
-#| msgid "Access Rules"
 msgid "Access"
-msgstr "Reglas de Acceso"
+msgstr "Acceso"
 
 #: multicurrency/templates/multicurrency_auth.html:33
 #: valuenetwork/templates/_account_bar.html:29
@@ -718,15 +637,15 @@ msgstr "Cerrar sesión"
 
 #: multicurrency/templates/multicurrency_auth.html:38
 msgid "You don't have any authenticated user."
-msgstr ""
+msgstr "No tienes un usuario autenticado."
 
 #: multicurrency/templates/multicurrency_auth.html:39
 msgid "Use the form below to create an access."
-msgstr ""
+msgstr "Usa el formulario más abajo para crear un acceso."
 
 #: multicurrency/templates/multicurrency_auth.html:46
 msgid "Authenticate another user in ChipChap"
-msgstr ""
+msgstr "Autenticar otro usuario en ChipChap"
 
 #: multicurrency/templates/multicurrency_auth.html:50
 #: valuenetwork/templates/valueaccounting/bucket_filter.html:43
@@ -742,16 +661,20 @@ msgid ""
 "By submitting your ChipChap user/password you give permission to this site "
 "to access to your ChipChap wallet."
 msgstr ""
+"Al enviar tu usuario/contraseña de ChipChap, nos das acceso a tu monedero de"
+" ChipChap."
 
 #: multicurrency/templates/multicurrency_auth.html:54
 msgid ""
-"Your password won't be stored, it's just necessary to check your identity in "
-"ChipChap."
+"Your password won't be stored, it's just necessary to check your identity in"
+" ChipChap."
 msgstr ""
+"Tu contraseña no será almacenada, sólo es para comprobar tu identidad en "
+"ChipChap."
 
 #: multicurrency/templates/multicurrency_history.html:5
 msgid "Transactions list"
-msgstr ""
+msgstr "Lista de transacciones"
 
 #: valuenetwork/board/forms.py:35 valuenetwork/board/forms.py:66
 #: valuenetwork/board/forms.py:183 valuenetwork/valueaccounting/forms.py:3360
@@ -792,8 +715,8 @@ msgstr "Error de servidor"
 
 #: valuenetwork/templates/500.html:9
 msgid ""
-"There's been an error. It's been reported to the site administrators via e-"
-"mail and will be fixed. Thanks for your patience."
+"There's been an error. It's been reported to the site administrators via "
+"e-mail and will be fixed. Thanks for your patience."
 msgstr ""
 "Ha habido un error. Ha sido reportado a los administradores del sitio vía "
 "correo electrónico y será arreglado. Gracias por tu paciencia."
@@ -992,13 +915,13 @@ msgstr "Confirmar tu dirección de correo electrónico"
 msgid ""
 "We have sent you an email to <b>%(email)s</b> for verification. Follow the "
 "link provided to finalize the signup process. If you do not receive it "
-"within a few minutes, contact us at <a href=\"mailto:"
-"%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
+"within a few minutes, contact us at <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 msgstr ""
 "Te hemos enviado un correo electrónico a <b>%(email)s</b> para verificarlo. "
 "Sigue el enlace facilitado para finalizar el proceso de registro. Si no lo "
-"recibieras en pocos minutos, contacta con nosotros en <a href=\"mailto:"
-"%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
+"recibieras en pocos minutos, contacta con nosotros en <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 
 #: valuenetwork/templates/account/email_confirmation_sent.html:12
 msgid "Go back"
@@ -1036,8 +959,8 @@ msgid ""
 "coordinators inside Freedom Coop."
 msgstr ""
 "Esto es PAC, nuestra Plataforma Colaborativa Abierta. PAC es la herramienta "
-"organizativa clave que ofrecemos a individuos, colectivos y coordinadores de "
-"proyecto en Freedom Coop."
+"organizativa clave que ofrecemos a individuos, colectivos y coordinadores de"
+" proyecto en Freedom Coop."
 
 #: valuenetwork/templates/account/login.html:65
 msgid "Therefore, it can be used to:"
@@ -1076,7 +999,8 @@ msgstr ""
 
 #: valuenetwork/templates/account/login.html:70
 msgid "Manage an online Faircoin wallet to accept and make payments."
-msgstr "Gestionar un monedero Faircoin en línea para aceptar y realizar pagos."
+msgstr ""
+"Gestionar un monedero Faircoin en línea para aceptar y realizar pagos."
 
 #: valuenetwork/templates/account/login.html:71
 msgid ""
@@ -1296,13 +1220,12 @@ msgstr "Restablecer mi contraseña"
 #: valuenetwork/templates/account/password_reset.html:25
 #, python-format
 msgid ""
-"If you have any trouble resetting your password, contact us at <a href="
-"\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</"
-"a>."
+"If you have any trouble resetting your password, contact us at <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 msgstr ""
 "Si tiene algún problema al restablecer su contraseña, póngase en contacto "
-"con nosotros mediante <a href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">"
-"%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
+"con nosotros mediante <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 
 #: valuenetwork/templates/account/password_reset_sent.html:7
 #: valuenetwork/templates/account/password_reset_sent.html:10
@@ -1313,13 +1236,12 @@ msgstr "Restablecimiento de contraseña enviado"
 #, python-format
 msgid ""
 "We have sent you an email. If you do not receive it within a few minutes, "
-"try resending or contact us at <a href=\"mailto:"
-"%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
+"try resending or contact us at <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 msgstr ""
-"Le hemos enviado un correo electrónico. Si no lo recibe dentro de unos pocos "
-"minutos, intente reenviar o póngase en contacto con nosotros mediante <a "
-"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">"
-"%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
+"Le hemos enviado un correo electrónico. Si no lo recibe dentro de unos pocos"
+" minutos, intente reenviar o póngase en contacto con nosotros mediante <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 
 #: valuenetwork/templates/account/password_reset_sent.html:18
 msgid "Resend"
@@ -1329,12 +1251,12 @@ msgstr "Reenviar"
 #, python-format
 msgid ""
 "We have resent the password email. If you do not receive it within a few "
-"minutes, contact us at <a href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">"
-"%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
+"minutes, contact us at <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 msgstr ""
-"Hemos reenviado la contraseña de email. Si no la recibe dentro de unos pocos "
-"minutos, contáctse con nosotros a <a href=\"mailto:"
-"%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
+"Hemos reenviado la contraseña de email. Si no la recibe dentro de unos pocos"
+" minutos, contáctse con nosotros a <a "
+"href=\"mailto:%(THEME_ACCOUNT_CONTACT_EMAIL)s\">%(THEME_ACCOUNT_CONTACT_EMAIL)s</a>."
 
 #: valuenetwork/templates/account/password_reset_token.html:7
 #: valuenetwork/templates/account/password_reset_token.html:11
@@ -1353,8 +1275,8 @@ msgid ""
 "used.  Please request a <a href=\"%(url)s\">new password reset</a>."
 msgstr ""
 "El vínculo de reestablecimiento de contraseña era no válido, posiblmente "
-"porque ya había sido usado. Por favor solicite un <a href=\"%(url)s\"> nuevo "
-"reestablecimiento de contraseña."
+"porque ya había sido usado. Por favor solicite un <a href=\"%(url)s\"> nuevo"
+" reestablecimiento de contraseña."
 
 #: valuenetwork/templates/account/signup_closed.html:7
 #: valuenetwork/templates/account/signup_closed.html:10
@@ -1373,7 +1295,7 @@ msgstr "El registro está cerrado al público en general."
 #: work/templates/work/join_request_with_comments.html:84
 #: work/templates/work/membership_request_with_comments.html:70
 msgid "Your Profile"
-msgstr ""
+msgstr "Tu perfil"
 
 #: valuenetwork/templates/account/work_settings.html:18
 #: work/templates/new_base.html:159
@@ -1381,7 +1303,7 @@ msgstr ""
 #: work/templates/work/membership_request_with_comments.html:73
 #: work/templates/work/profile.html:99
 msgid "Your personal faircoin wallet in OCP"
-msgstr ""
+msgstr "Tu monedero faircoin personal en OCP"
 
 #: valuenetwork/templates/account/work_settings.html:19
 #: work/templates/_settings_bar.html:24 work/templates/new_base.html:160
@@ -1390,26 +1312,22 @@ msgstr ""
 #: work/templates/work/my_dashboard.html:281
 #: work/templates/work/profile.html:100
 msgid "Faircoin Account"
-msgstr ""
+msgstr "Cuenta Faircoin"
 
 #: valuenetwork/templates/account/work_settings.html:24
 #: work/templates/_settings_bar.html:47 work/templates/work/profile.html:87
 msgid "Your coop feedback page"
-msgstr ""
+msgstr "Tu página de respuestas sobre la cooperativa"
 
 #: valuenetwork/templates/account/work_settings.html:26
 #: work/templates/_settings_bar.html:50 work/templates/work/profile.html:89
-#, fuzzy
-#| msgid "Go back"
 msgid "Coop Feedback"
-msgstr "Regresar"
+msgstr "Opina sobre la cooperativa"
 
 #: valuenetwork/templates/account/work_settings.html:28
 #: work/templates/work/profile.html:91
-#, fuzzy
-#| msgid "Membership requests"
 msgid "Membership Process"
-msgstr "Solicitudes de membresía"
+msgstr "Proceso de Membresia"
 
 #: valuenetwork/templates/admin/base_site.html:4
 msgid "Value Network admin"
@@ -1742,28 +1660,28 @@ msgid ""
 "<p>This is OCP, our Open Collaborative Platform. The OCP is the key "
 "organizational tool we offer to individuals, collectives, and management "
 "inside Freedom Coop.</p><p>Therefore, it can be used to:</p><ul><li>Boost "
-"open collaborative projects between people in different places.</"
-"li><li>Manage open collective projects and their team work by setting up "
-"task forces.</li><li>Account the time spent by every member to use it as a "
-"base of income distribution and a way of self-actualization for any project."
-"</li><li>Execute a quarterly fee and tax distribution between Freedom Coop "
-"and their members.</li><li>Manage an online Faircoin wallet to accept and "
-"make payments.</li></ul><p>Freedom Coop, will use OCP for our collective "
-"organization as an open cooperative process.</p>"
+"open collaborative projects between people in different "
+"places.</li><li>Manage open collective projects and their team work by "
+"setting up task forces.</li><li>Account the time spent by every member to "
+"use it as a base of income distribution and a way of self-actualization for "
+"any project.</li><li>Execute a quarterly fee and tax distribution between "
+"Freedom Coop and their members.</li><li>Manage an online Faircoin wallet to "
+"accept and make payments.</li></ul><p>Freedom Coop, will use OCP for our "
+"collective organization as an open cooperative process.</p>"
 msgstr ""
 "<p>Esto es PAC, nuestra Plataforma Abierta Colaborativa. La PAC es la "
-"herramienta clave de organización que ofrecemos a los individuos, colectivos "
-"y a la gestión interna de Freedom Coop.</p><p> Por lo tanto, puede ser usada "
-"para:</p><ul><li>Impulsar proyectos de colaboración abierta entre las "
+"herramienta clave de organización que ofrecemos a los individuos, colectivos"
+" y a la gestión interna de Freedom Coop.</p><p> Por lo tanto, puede ser "
+"usada para:</p><ul><li>Impulsar proyectos de colaboración abierta entre las "
 "personas de diferentes lugares.</li><li>Gestionar proyectos colectivos "
-"abiertos y su trabajo en equipo mediante la creación de grupos de trabajo.</"
-"li><li>Dar cuenta del tiempo dedicado por cada miembro para utilizarlo como "
-"base para la distribución de ingresos y una forma de auto-actualización para "
-"cualquier proyecto.</li><li>Ejecutar una cuota trimestral y distribución "
-"fiscal entre Freedom Coop y sus miembros.</li><li>Gestionar un monedero "
-"Faircoin en línea, para aceptar y realizar pagos.</li></ul><p>Freedom Coop, "
-"utilizará PAC para nuestra organización colectiva como un proceso "
-"cooperativo abierto."
+"abiertos y su trabajo en equipo mediante la creación de grupos de "
+"trabajo.</li><li>Dar cuenta del tiempo dedicado por cada miembro para "
+"utilizarlo como base para la distribución de ingresos y una forma de auto-"
+"actualización para cualquier proyecto.</li><li>Ejecutar una cuota trimestral"
+" y distribución fiscal entre Freedom Coop y sus miembros.</li><li>Gestionar "
+"un monedero Faircoin en línea, para aceptar y realizar "
+"pagos.</li></ul><p>Freedom Coop, utilizará PAC para nuestra organización "
+"colectiva como un proceso cooperativo abierto."
 
 #: valuenetwork/templates/frontpage.html:31
 msgid "Enter the platform"
@@ -1779,13 +1697,7 @@ msgid "Welcome"
 msgstr "Bienvenido"
 
 #: valuenetwork/templates/pinax/notifications/email_body.txt:1
-#, fuzzy, python-format
-#| msgid ""
-#| "You have received the following notice from %(current_site.name)s:\n"
-#| "\n"
-#| "%(message)s\n"
-#| "\n"
-#| "To change how you receive notifications, please go to "
+#, python-format
 msgid ""
 "You have received the following notice from %(site_name)s:\n"
 "\n"
@@ -1793,11 +1705,11 @@ msgid ""
 "\n"
 "To change how you receive notifications, please go to "
 msgstr ""
-"Ha recibido el siguiente aviso de %(current_site.name)s:\n"
+"Has recibido la siguiente notificación de %(site_name)s\n"
 "\n"
-" %(message)s\n"
+"%(message)s\n"
 "\n"
-"Para cambiar la forma en la que recibe las notificaciones, por favor vaya a"
+"Para cambiar la forma de recibir notificaciones, ve a"
 
 #: valuenetwork/templates/pinax/notifications/email_subject.txt:1
 #, python-format
@@ -1818,16 +1730,14 @@ msgid ""
 "\n"
 "        <p class=\"alert alert-warning\">\n"
 "            <span class=\"warning\">Note</span>:\n"
-"            You do not have a verified email address to which notices can be "
-"sent. <a href=\"%(email_url)s\">Add one</a> now.\n"
+"            You do not have a verified email address to which notices can be sent. <a href=\"%(email_url)s\">Add one</a> now.\n"
 "        </p>\n"
 "        "
 msgstr ""
 "\n"
 " <p class=\"alert alert-warning\">\n"
 " <span class=\"warning\">Nota</span>:\n"
-" No tiene una dirección de email verificada a la cual poder enviar "
-"notificaciones.  <a href=\"%(email_url)s\">Add one</a> now.\n"
+" No tiene una dirección de email verificada a la cual poder enviar notificaciones.  <a href=\"%(email_url)s\">Add one</a> now.\n"
 " </p> "
 
 #: valuenetwork/templates/pinax/notifications/notice_settings.html:27
@@ -1985,8 +1895,8 @@ msgstr "Mostrar ayuda"
 #: valuenetwork/templates/theme_bootstrap/base.html:104
 msgid "This page has no help yet.  Ask an Admin to create some."
 msgstr ""
-"Esta página todavía no tiene ninguna ayuda. Pregunte a un administrador para "
-"crear algo."
+"Esta página todavía no tiene ninguna ayuda. Pregunte a un administrador para"
+" crear algo."
 
 #: valuenetwork/templates/valueaccounting/_facet_filter.html:3
 #: valuenetwork/templates/valueaccounting/cash_report.html:204
@@ -2814,18 +2724,14 @@ msgstr "Discusión de miembros"
 #: valuenetwork/templates/valueaccounting/agent.html:384
 #: work/templates/work/my_dashboard.html:297
 #: work/templates/work/your_projects.html:196
-#, fuzzy
-#| msgid "commitment"
 msgid "comment"
-msgstr "compromiso"
+msgstr "comentario"
 
 #: valuenetwork/templates/valueaccounting/agent.html:386
 #: work/templates/work/my_dashboard.html:299
 #: work/templates/work/your_projects.html:198
-#, fuzzy
-#| msgid "Comments"
 msgid "comments"
-msgstr "Comentarios"
+msgstr "comentarios"
 
 #: valuenetwork/templates/valueaccounting/agent.html:412
 #: work/templates/work/members_agent.html:574
@@ -3559,10 +3465,8 @@ msgid "Transfer Type"
 msgstr "Tipo de Transferencia"
 
 #: valuenetwork/templates/valueaccounting/change_exchange_type.html:186
-#, fuzzy
-#| msgid "unit type"
 msgid "(inherit types)"
-msgstr "tipo de unidad"
+msgstr "(heredar tipos)"
 
 #: valuenetwork/templates/valueaccounting/change_exchange_type.html:195
 msgid "Change Transfer Type"
@@ -3908,38 +3812,28 @@ msgstr "Pedidos de Trabajo Cerrados"
 
 #: valuenetwork/templates/valueaccounting/comments.html:8
 #: valuenetwork/templates/valueaccounting/comments.html:20
-#, fuzzy
-#| msgid "Comments"
 msgid "All Comments"
-msgstr "Comentarios"
+msgstr "Todos los comentarios"
 
 #: valuenetwork/templates/valueaccounting/comments.html:27
-#, fuzzy
-#| msgid "used by"
 msgid "Posted by"
-msgstr "usado por"
+msgstr "Posteado por"
 
 #: valuenetwork/templates/valueaccounting/comments.html:27
-#, fuzzy
-#| msgid "Done"
 msgid "on"
-msgstr "Terminado"
+msgstr "en"
 
 #: valuenetwork/templates/valueaccounting/comments.html:28
 msgid "About"
-msgstr ""
+msgstr "Sobre"
 
 #: valuenetwork/templates/valueaccounting/comments.html:29
-#, fuzzy
-#| msgid "Membership requests"
 msgid "Membership Request for"
-msgstr "Solicitudes de membresía"
+msgstr "Solicitud de membresia para"
 
 #: valuenetwork/templates/valueaccounting/comments.html:31
-#, fuzzy
-#| msgid "Comments"
 msgid "Comment"
-msgstr "Comentarios"
+msgstr "Comentario"
 
 #: valuenetwork/templates/valueaccounting/create_distribution.html:31
 msgid "Distribution in"
@@ -5471,22 +5365,18 @@ msgstr "Solicitud de membresía para Freedom Coop"
 #: valuenetwork/templates/valueaccounting/membership_requests.html:55
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:51
 #: work/templates/work/join_requests.html:77
-#, fuzzy
-#| msgid "Locations"
 msgid "Actions"
-msgstr "Ubicaciones"
+msgstr "Acciones"
 
 #: valuenetwork/templates/valueaccounting/membership_requests.html:57
 msgid "Links"
-msgstr ""
+msgstr "Enlaces"
 
 #: valuenetwork/templates/valueaccounting/membership_requests.html:87
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:101
 #: work/templates/work/join_requests.html:104
-#, fuzzy
-#| msgid "Decline"
 msgid "Undecline"
-msgstr "Declinar"
+msgstr "Desrechazar"
 
 #: valuenetwork/templates/valueaccounting/membership_requests.html:96
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:92
@@ -5530,7 +5420,8 @@ msgid ""
 "but can be used for any context agent."
 msgstr ""
 "Ellos se presentan para un agente de contacto representante "
-"(%(context_agent)s), pero pueden ser usador por cualquier agente de contexto."
+"(%(context_agent)s), pero pueden ser usador por cualquier agente de "
+"contexto."
 
 #: valuenetwork/templates/valueaccounting/misc.html:28
 #, python-format
@@ -6544,23 +6435,21 @@ msgstr "Producción Programada"
 #, python-format
 msgid ""
 "\n"
-"\t\t\t\t\t\t<b>%(resource_type)s</b> will be removed as an input to the "
-"Process Type <b>%(proc_type)s</b>\n"
+"\t\t\t\t\t\t<b>%(resource_type)s</b> will be removed as an input to the Process Type <b>%(proc_type)s</b>\n"
 "\t\t\t\t\t\t"
 msgstr ""
 "\n"
-"\t\t\t\t\t\t<b>%(resource_type)s</b> será eliminado como entrada del Tipo de "
-"Proceo <b>%(proc_type)s</b>\n"
+"\t\t\t\t\t\t<b>%(resource_type)s</b> será eliminado como entrada del Tipo de Proceo <b>%(proc_type)s</b>\n"
 "\t\t\t\t\t\t"
 
 #: valuenetwork/templates/valueaccounting/resource_type_delete_confirmation.html:27
 #, python-format
 msgid ""
-"The Process Type <b>%(pt)s</b> for making <b>%(resource_type)s</b> will also "
-"be deleted"
+"The Process Type <b>%(pt)s</b> for making <b>%(resource_type)s</b> will also"
+" be deleted"
 msgstr ""
-"El Tipo de Proceso <b>%(pt)s</b> para hacer <b>%(resource_type)s</b> también "
-"será borrado"
+"El Tipo de Proceso <b>%(pt)s</b> para hacer <b>%(resource_type)s</b> también"
+" será borrado"
 
 #: valuenetwork/templates/valueaccounting/resource_type_delete_confirmation.html:29
 msgid "along with all of its input and output relationships"
@@ -6604,7 +6493,7 @@ msgstr ""
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:7
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:37
 msgid "Skill Suggestions"
-msgstr ""
+msgstr "Recomendaciones de Habilidades"
 
 #: valuenetwork/templates/valueaccounting/resource_types.html:67
 msgid "Create new Resource Type"
@@ -6657,27 +6546,21 @@ msgid "Get session"
 msgstr "Obtener sesión"
 
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:54
-#, fuzzy
-#| msgid "used by"
 msgid "Suggested by"
-msgstr "usado por"
+msgstr "Recomendada por"
 
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:55
-#, fuzzy
-#| msgid "Distribution date"
 msgid "Suggestion date"
-msgstr "Fecha de distribución"
+msgstr "Fecha de recomendación"
 
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:56
 msgid "Discussion"
-msgstr ""
+msgstr "Debate"
 
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:68
 #: valuenetwork/templates/valueaccounting/skill_suggestions.html:72
-#, fuzzy
-#| msgid "Create Sale"
 msgid "Create Skill"
-msgstr "Crear Venta"
+msgstr "Crear Habilidad"
 
 #: valuenetwork/templates/valueaccounting/start.html:178
 msgid "My contributions"
@@ -6807,7 +6690,7 @@ msgstr "Total requerido"
 #: valuenetwork/templates/valueaccounting/supply.html:142
 #: valuenetwork/templates/valueaccounting/supply.html:170
 msgid "Score"
-msgstr "Puntaje"
+msgstr "Puntuacion"
 
 #: valuenetwork/templates/valueaccounting/supply.html:111
 #: valuenetwork/templates/valueaccounting/supply.html:136
@@ -6933,8 +6816,8 @@ msgstr ""
 #: valuenetwork/templates/valueaccounting/tutorials.html:26
 msgid ""
 "Your first job is to create a model of your network, how it's organized, "
-"what it creates, and what it needs to do that. The first 5 slide decks below "
-"should help."
+"what it creates, and what it needs to do that. The first 5 slide decks below"
+" should help."
 msgstr ""
 "Su primer trabajo es crear un modelo de su red, cómo está organizada, qué "
 "produce, y qué necesita para hacerlo. Las primeras 5 diapositivas debajo "
@@ -6958,8 +6841,7 @@ msgid ""
 "The work of <span class=\"this\">%(commitment.resource_type.name)s</span> \n"
 "                    contributes to This Process. "
 msgstr ""
-"El trabajo de <span class=\"this\">%(commitment.resource_type.name)s</"
-"span> \n"
+"El trabajo de <span class=\"this\">%(commitment.resource_type.name)s</span> \n"
 "                    contribuye a Este Proceso."
 
 #: valuenetwork/templates/valueaccounting/unfold.html:79
@@ -7246,13 +7128,12 @@ msgstr "Mostrar todo"
 #: valuenetwork/valueaccounting/forms.py:73
 msgid "If you send to an OCP agent, choose it here to get the address:"
 msgstr ""
+"Si envías a un agente de OCP, escógelo aquí para obtener la dirección:"
 
 #: valuenetwork/valueaccounting/forms.py:125 work/forms.py:250
 #: work/templates/work/members_agent.html:261
-#, fuzzy
-#| msgid "name"
 msgid "Nickname"
-msgstr "nombre"
+msgstr "Alias"
 
 #: valuenetwork/valueaccounting/forms.py:126
 #: valuenetwork/valueaccounting/models.py:450 work/forms.py:251
@@ -7268,24 +7149,20 @@ msgid "Remove Agents from this Location"
 msgstr "Quitar Agentes de esta Ubicación"
 
 #: valuenetwork/valueaccounting/forms.py:318
-#, fuzzy
-#| msgid "Work Done"
 msgid "Work done by"
-msgstr "Trabajo Realizado"
+msgstr "Trabajo hecho por"
 
 #: valuenetwork/valueaccounting/forms.py:319
 msgid "Required only if not logging work inputs"
-msgstr ""
+msgstr "Requerido solo si no se registran entradas de trabajo"
 
 #: valuenetwork/valueaccounting/forms.py:325
 msgid "For example, lot number or serial number."
-msgstr ""
+msgstr "Por ejemplo, número de lote o de serie."
 
 #: valuenetwork/valueaccounting/forms.py:330
-#, fuzzy
-#| msgid "Quantity"
 msgid "Quantity produced"
-msgstr "Cantidad"
+msgstr "Cantidad producida"
 
 #: valuenetwork/valueaccounting/forms.py:538
 msgid "Select an existing Process Type..."
@@ -7322,7 +7199,8 @@ msgstr ""
 
 #: valuenetwork/valueaccounting/forms.py:2577
 msgid ""
-"Transfer To (optional - this will limit the choices when creating a transfer)"
+"Transfer To (optional - this will limit the choices when creating a "
+"transfer)"
 msgstr ""
 "Transferir a (opcional - esto limitará las opciones cuando se crea una "
 "transferencia)"
@@ -7357,8 +7235,8 @@ msgid ""
 "if you selected only one distribution source, you may distribute only part "
 "of it"
 msgstr ""
-"si Ud. seleccionó sólo una fuente de distribución, Ud. puede distribuir sólo "
-"parte de la misma"
+"si Ud. seleccionó sólo una fuente de distribución, Ud. puede distribuir sólo"
+" parte de la misma"
 
 #: valuenetwork/valueaccounting/forms.py:3656
 #: valuenetwork/valueaccounting/forms.py:3689
@@ -7587,11 +7465,11 @@ msgstr "ayuda"
 
 #: valuenetwork/valueaccounting/models.py:210
 msgid "Material_Type"
-msgstr ""
+msgstr "Tipo_Material"
 
 #: valuenetwork/valueaccounting/models.py:211
 msgid "Nonmaterial_Type"
-msgstr ""
+msgstr "Tipo_Inmaterial"
 
 #: valuenetwork/valueaccounting/models.py:215
 #: valuenetwork/valueaccounting/models.py:263
@@ -7624,7 +7502,7 @@ msgstr "nombre"
 
 #: valuenetwork/valueaccounting/models.py:218
 msgid "clas"
-msgstr ""
+msgstr "clase"
 
 #: valuenetwork/valueaccounting/models.py:236
 msgid "facet"
@@ -7723,10 +7601,8 @@ msgid "community"
 msgstr "comunidad"
 
 #: valuenetwork/valueaccounting/models.py:288
-#, fuzzy
-#| msgid "component"
 msgid "company"
-msgstr "componente"
+msgstr "Entidad"
 
 #: valuenetwork/valueaccounting/models.py:334
 #: valuenetwork/valueaccounting/models.py:1925
@@ -8659,10 +8535,8 @@ msgid "receive agent association type"
 msgstr "tipo de asociación del agente receptor"
 
 #: valuenetwork/valueaccounting/models.py:7129
-#, fuzzy
-#| msgid "Get resource types"
 msgid "inherit resource types"
-msgstr "Obtener tipos de recursos"
+msgstr "Heredar tipos de recurso"
 
 #: valuenetwork/valueaccounting/models.py:7250
 #: valuenetwork/valueaccounting/models.py:7903
@@ -8741,8 +8615,8 @@ msgstr "comportamiento del porcentaje"
 #: valuenetwork/valueaccounting/models.py:9863
 #, python-format
 msgid ""
-"Remaining percentage uses the %% of the remaining amount to be distributed.  "
-"Straight percentage uses the %% of the total distribution amount."
+"Remaining percentage uses the %% of the remaining amount to be distributed."
+"  Straight percentage uses the %% of the total distribution amount."
 msgstr ""
 "El porcentaje restante usa el %% del monto restante a ser distribuido. el "
 "porcentaje directo usa el %% del monto de distribución total."
@@ -8795,14 +8669,12 @@ msgid "Confirmed"
 msgstr "Confirmado"
 
 #: valuenetwork/valueaccounting/models.py:10301
-#, fuzzy
-#| msgid "external agent"
 msgid "External"
-msgstr "agente externo"
+msgstr "Externa"
 
 #: valuenetwork/valueaccounting/models.py:10302
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: valuenetwork/valueaccounting/models.py:10308
 msgid "event date"
@@ -9009,58 +8881,44 @@ msgid "we have received a new membership request"
 msgstr "hemos recibido una nueva solicitud de membresía"
 
 #: valuenetwork/valueaccounting/signals.py:15
-#, fuzzy
-#| msgid "Project roles"
 msgid "Project Join Request"
-msgstr "Roles del proyecto"
+msgstr "Solicitud de alta en el Proyecto"
 
 #: valuenetwork/valueaccounting/signals.py:15
-#, fuzzy
-#| msgid "we have received a new membership request"
 msgid "we have received a new join request"
-msgstr "hemos recibido una nueva solicitud de membresía"
+msgstr "Hemos recibido una nueva solicitud de alta"
 
 #: valuenetwork/valueaccounting/signals.py:16
-#, fuzzy
-#| msgid "Delete My Account"
 msgid "Project New OCP Account"
-msgstr "Borrar Mi Cuenta"
+msgstr "Nueva cuenta OCP del proyecto"
 
 #: valuenetwork/valueaccounting/signals.py:16
 msgid "a new OCP account details"
-msgstr ""
+msgstr "Detalles de una nueva cuenta de OCP"
 
 #: valuenetwork/valueaccounting/signals.py:17
-#, fuzzy
-#| msgid "Freedom Coop Membership Request"
 msgid "Comment in Freedom Coop Membership Request"
-msgstr "Solicitud de membresía para Freedom Coop"
+msgstr "Comentario en Solicitud de Alta en Freedom Coop"
 
 #: valuenetwork/valueaccounting/signals.py:17
-#, fuzzy
-#| msgid "we have received a new membership request"
 msgid "we have received a new comment in a membership request"
-msgstr "hemos recibido una nueva solicitud de membresía"
+msgstr "nos ha llegado un nuevo comentario en una solicitud de alta"
 
 #: valuenetwork/valueaccounting/signals.py:18
 msgid "Comment in Project Join Request"
-msgstr ""
+msgstr "Comentario en Solicitud de Alta en Proyecto"
 
 #: valuenetwork/valueaccounting/signals.py:18
-#, fuzzy
-#| msgid "we have received a new membership request"
 msgid "we have received a new comment in a join request"
-msgstr "hemos recibido una nueva solicitud de membresía"
+msgstr "nos ha llegado un nuevo comentario en una solicitud de alta"
 
 #: valuenetwork/valueaccounting/signals.py:19
 msgid "Skill suggestion"
-msgstr ""
+msgstr "Petición de habilidad"
 
 #: valuenetwork/valueaccounting/signals.py:19
-#, fuzzy
-#| msgid "we have received a new membership request"
 msgid "we have received a new skill suggestion"
-msgstr "hemos recibido una nueva solicitud de membresía"
+msgstr "hemos recibido una petición para tomar en cuenta una nueva habilidad"
 
 #: valuenetwork/valueaccounting/templates/pinax/notifications/valnet_deleted_todo/full.txt:1
 #, python-format
@@ -9074,13 +8932,11 @@ msgstr "Un Por Hacer asignado a Ud. ha sido borrado"
 #: valuenetwork/valueaccounting/templates/pinax/notifications/valnet_distribution/full.txt:1
 #, python-format
 msgid ""
-"You got a %(distribution.distribution_quantity_formatted)s distribution from "
-"%(distribution.from_agent)s\n"
+"You got a %(distribution.distribution_quantity_formatted)s distribution from %(distribution.from_agent)s\n"
 "\n"
 "You can see it here:"
 msgstr ""
-"Ud. consiguió una  %(distribution.distribution_quantity_formatted)s "
-"distribución de %(distribution.from_agent)s\n"
+"Ud. consiguió una  %(distribution.distribution_quantity_formatted)s distribución de %(distribution.from_agent)s\n"
 "\n"
 "Puede verla aquí:"
 
@@ -9133,8 +8989,7 @@ msgid ""
 "\n"
 "for Process: %(process)s\n"
 "\n"
-"This message has been sent to you because you are working on this task or "
-"have assigned yourself to this task.\n"
+"This message has been sent to you because you are working on this task or have assigned yourself to this task.\n"
 "\n"
 "You can see the process here:"
 msgstr ""
@@ -9147,8 +9002,7 @@ msgstr ""
 "\n"
 "para Proceso: %(process)s\n"
 "\n"
-"Este mensaje le ha sido enviado a Ud. porque está trabajando en esta tarea o "
-"se ha asignado a sí mismo a esta tarea.\n"
+"Este mensaje le ha sido enviado a Ud. porque está trabajando en esta tarea o se ha asignado a sí mismo a esta tarea.\n"
 "\n"
 "Puede ver el proceso aquí:"
 
@@ -9176,8 +9030,7 @@ msgid ""
 msgstr ""
 "%(creator)s publicó una nueva tarea que se ajusta a sus habilidades:\n"
 "\n"
-"Trabajko requerido: %(resource_type)s, Duración estimada: %(hours)s "
-"%(unit)s\n"
+"Trabajko requerido: %(resource_type)s, Duración estimada: %(hours)s %(unit)s\n"
 "Vencimiento: %(due_date)s\n"
 "\n"
 "%(description)s\n"
@@ -9232,96 +9085,80 @@ msgstr "Tiene una solicitud de pago de"
 
 #: work/forms.py:70
 msgid "Your skill suggestions will be sent to Freedom Coop Admins"
-msgstr ""
+msgstr "Tus sugerimientos se mandarán a los administradoras de Freedom Coop"
 
 #: work/forms.py:162
-#, fuzzy
-#| msgid "Agent relationship"
 msgid "Choose a new relationship"
-msgstr "Relación de agente"
+msgstr "Escoge una nueva relación"
 
 #: work/forms.py:273
-#, fuzzy
-#| msgid "Change password"
 msgid "Login password"
-msgstr "Cambiar contraseña"
+msgstr "Contraseña de acceso"
 
 #: work/forms.py:301
-#, fuzzy
-#| msgid "exchange type"
 msgid "used Exchange type..."
-msgstr "tipo de intercambio"
+msgstr "Tipo de intercambio usado..."
 
 #: work/forms.py:312 work/forms.py:399
-#, fuzzy
-#| msgid "exchange type"
 msgid "search Exchange type..."
-msgstr "tipo de intercambio"
+msgstr "Buscar tipo de Intercambio..."
 
 #: work/forms.py:324 work/forms.py:410 work/forms.py:478 work/forms.py:523
 #: work/forms.py:623
-#, fuzzy
-#| msgid "Choose a Resource Type..."
 msgid "search Resource type..."
-msgstr "Elegir un Tipo de Recurso..."
+msgstr "Buscar tipo de Recurso..."
 
 #: work/forms.py:335
 msgid "search Skill type..."
-msgstr ""
+msgstr "buscar tipo de Habilidad"
 
 #: work/forms.py:388
 msgid "Name (automatic?)"
-msgstr ""
+msgstr "Nombre (¿automático?)"
 
 #: work/forms.py:407
-#, fuzzy
-#| msgid "Create Resource of type"
 msgid "Related Resource type"
-msgstr "Crear Recurso de tipo"
+msgstr "Tipo de Recurso relacionado"
 
 #: work/forms.py:418
 msgid "Related skill Service time"
-msgstr ""
+msgstr "Tiempo de servicio de la habilidad relacionada"
 
 #: work/forms.py:421
 msgid "search Skill service..."
-msgstr ""
+msgstr "Buscar servicio experto..."
 
 #: work/forms.py:427
 msgid ""
 "If the exchange type is only useful for your project or a parent sector "
 "collective, choose a smaller context here."
 msgstr ""
+"Si el tipo de intercambio sólo sirve para tu proyecto o para un colectivo de"
+" un sector padre, elige un contexto menor aquí."
 
 #: work/forms.py:469
-#, fuzzy
-#| msgid "Create a new Resource Type"
 msgid "Name of the Resource Type"
-msgstr "Crear un nuevo tipo de recurso"
+msgstr "Nombre del Tipo de Recurso"
 
 #: work/forms.py:476
-#, fuzzy
-#| msgid "Get resource types"
 msgid "Parent resource type"
-msgstr "Obtener tipos de recursos"
+msgstr "tipo de recurso padre"
 
 #: work/forms.py:487
 msgid ""
 "If the resource type is only useful for your project or a parent sector "
 "collective, choose a smaller context here."
 msgstr ""
+"Si el tipo de intercambio sólo sirve para tu proyecto o para un colectivo de"
+" un sector padre, elige un contexto menor aquí."
 
 #: work/forms.py:494
-#, fuzzy
-#| msgid ""
-#| "Can any resource of this type be substituted for any other resource of "
-#| "this type?"
 msgid ""
 "Check this if any resource of this type can be substituted for any other "
 "resource of this same type."
 msgstr ""
-"¿Puede ser sustituido cualquier recurso de este tipo por cualquier otro "
-"recurso de este tipo?"
+"Marca esto si algún recurso de este tipo puede ser sustituido por cualquier "
+"otro recurso del mismo tipo."
 
 #: work/forms.py:503
 msgid ""
@@ -9329,132 +9166,135 @@ msgid ""
 "accounting or measure for the resources of this type, or leave empty if "
 "unsure."
 msgstr ""
+"Elige 'Cada' para unidades discretas, o el más general 'Unidad de medida' "
+"para los recursos de este tipo, o déjalo vacío si dudas."
 
 #: work/forms.py:505 work/forms.py:633
 msgid "search Unit type..."
-msgstr ""
+msgstr "Buscar tipo de Unidad..."
 
 #: work/forms.py:511 work/forms.py:639
 msgid "Fixed Faircoin price per each unit?"
-msgstr ""
+msgstr "¿Precio en faircoin fijo por unidad?"
 
 #: work/forms.py:512
 msgid ""
 "Set only if all the resources of this type will have a fixed Faircoin price."
 msgstr ""
+"Activar sólo si todos los recursos de este tipo van a tener un precio en "
+"faircoin fijo."
 
 #: work/forms.py:520
 msgid "Has a main related resource type from another branch?"
-msgstr ""
+msgstr "¿Tiene un tipo de recurso relacionado principal de otra rama?"
 
 #: work/forms.py:521
 msgid ""
 "If this resource type is mainly related another resource type from a "
 "different branch, choose it here."
 msgstr ""
+"Si este tipo de recurso está principalmente relacionado con otro tipo de "
+"recurso de otra rama, elígelo aquí."
 
 #: work/forms.py:529
 msgid "Inherit a Recipe from another resource type?"
-msgstr ""
+msgstr "Heredar una receta de otro tipo de recurso?"
 
 #: work/forms.py:530
 msgid ""
 "If the resource type must inherit a Recipe from another resource type, "
 "choose it here."
 msgstr ""
+"Si el tipo de recurso debe heredar desde otro tipo de recurso, escogerlo "
+"aquí."
 
 #: work/forms.py:532
-#, fuzzy
-#| msgid "Plan from Resource Type Recipe"
 msgid "search Resource type with Recipe..."
-msgstr "Plan desde Factura de Tipo de Recurso"
+msgstr "busca tipo de recurso con receta"
 
 #: work/forms.py:536
 msgid "Any related page URL for the type?"
-msgstr ""
+msgstr "¿Alguna URL de página relacionada para el tipo?"
 
 #: work/forms.py:541
 msgid "Any photo URL of the resource type?"
-msgstr ""
+msgstr "¿Alguna URL de imagen del tipo de recurso?"
 
 #: work/forms.py:585
 msgid "Name of the new Skill Type"
-msgstr ""
+msgstr "Nombre del nuevo Tipo de Habilidad"
 
 #: work/forms.py:589
 msgid "Verb of the action (infinitive)"
-msgstr ""
+msgstr "Verbo de la acción (infinitivo)"
 
 #: work/forms.py:593
 msgid "Gerund of the verb"
-msgstr ""
+msgstr "Gerundio del verbo"
 
 #: work/forms.py:598 work/forms.py:724 work/forms.py:802 work/forms.py:809
 #: work/forms.py:819 work/forms.py:838 work/forms.py:844 work/forms.py:852
 #: work/forms.py:887 work/forms.py:1053 work/forms.py:1060 work/forms.py:1070
 #: work/forms.py:1078 work/forms.py:1090 work/forms.py:1154 work/forms.py:1160
 msgid ". . ."
-msgstr ""
+msgstr ". . ."
 
 #: work/forms.py:600
-#, fuzzy
-#| msgid "agent type"
 msgid "Parent skill type"
-msgstr "tipo de agente"
+msgstr "Tipo de Habilidad Padre"
 
 #: work/forms.py:611
 msgid ""
 "If the skill is only useful for your project or a parent sector collective, "
 "choose a smaller context here."
 msgstr ""
+"Si esta habilidad sólo sirve para tu proyecto o para un colectivo de un "
+"sector padre, elige aquí un contexto menor."
 
 #: work/forms.py:620
-#, fuzzy
-#| msgid "can create resource"
 msgid "Has a main related resource type?"
-msgstr "puede crear recurso"
+msgstr "¿Tiene un tipo de recurso relacionado principal?"
 
 #: work/forms.py:621
 msgid ""
 "If this skill type is mainly related a resource type or branch, choose it "
 "here."
 msgstr ""
+"Si este tipo de habilidad está relacionada con un tipo de recurso o rama, "
+"elígelo aquí."
 
 #: work/forms.py:630
-#, fuzzy
-#| msgid "Unit of claim value"
 msgid "Unit of time measure"
-msgstr "Unidad de valor de la demanda"
+msgstr "Unidad de tiempo"
 
 #: work/forms.py:631
-msgid "Choose Hours or another time related unit to measure the skill service."
-msgstr ""
+msgid ""
+"Choose Hours or another time related unit to measure the skill service."
+msgstr "Elige horas o otra unidad de tiempo para medir el servicio."
 
 #: work/forms.py:640
 msgid ""
 "Set only if all the service time of this type will have a fixed Faircoin "
 "price."
 msgstr ""
+"Activar sólo si todos los servicios de tiempo de este tipo van a tener un "
+"precio en faircoins fijo"
 
 #: work/forms.py:645
 msgid "Any related URL for the Skill?"
-msgstr ""
+msgstr "¿Alguna URL relacionada con la Habilidad?"
 
 #: work/forms.py:650
 msgid "Any photo URL of the skill type?"
-msgstr ""
+msgstr "¿Alguna URL de imagen para el tipo de habilidad?"
 
 #: work/forms.py:1194
-#, fuzzy
-#| msgid "Agent type"
 msgid "Agent type (required)"
-msgstr "Tipo de Agente"
+msgstr "Tipo de agente (obligatorio)"
 
 #: work/forms.py:1348
-#, fuzzy
-#| msgid "Freedom Coop Membership Request"
 msgid "for Freedom Coop Member:"
-msgstr "Solicitud de membresía para Freedom Coop"
+msgstr "para el miembro de Freedom Coop:"
 
 #: work/models.py:15
 msgid "individual membership (min 1 share)"
@@ -9465,20 +9305,16 @@ msgid "collective membership (min 2 shares)"
 msgstr "membresía colectiva (min 2 participaciones)"
 
 #: work/models.py:20
-#, fuzzy
-#| msgid "New"
 msgid "new"
-msgstr "Nuevo"
+msgstr "nueva"
 
 #: work/models.py:21
 msgid "accepted"
-msgstr ""
+msgstr "aceptada"
 
 #: work/models.py:22
-#, fuzzy
-#| msgid "Decline"
 msgid "declined"
-msgstr "Declinar"
+msgstr "rechazada"
 
 #: work/models.py:28
 msgid "Surname (for individual memberships)"
@@ -9513,16 +9349,16 @@ msgid ""
 "Describe your project or collective and the skills or abilities you can "
 "offer the cooperative"
 msgstr ""
-"Describe tu proyecto o colectivo y las habilidades y capacidades que ofreces/"
-"ofrecéis a la cooperativa"
+"Describe tu proyecto o colectivo y las habilidades y capacidades que "
+"ofreces/ofrecéis a la cooperativa"
 
 #: work/models.py:55
 msgid ""
 "The username you use in the FairNetwork at <a href='https://fair.coop' "
 "target='_blank'>fair.coop</a>"
 msgstr ""
-"El nombre de usuario que usas en la FairNetwork en <a href='https://fair."
-"coop' target='_blank'>fair.coop</a>"
+"El nombre de usuario que usas en la FairNetwork en <a "
+"href='https://fair.coop' target='_blank'>fair.coop</a>"
 
 #: work/models.py:57
 msgid ""
@@ -9530,8 +9366,8 @@ msgid ""
 "target='_blank'>use.fair-coin.org</a> please add the URL to your profile."
 msgstr ""
 "Si tu estás en el directorio de <a href='https://use.fair-coin.org' "
-"target='_blank'>use.fair-coin.org</a> por favor añade la dirección web de tu "
-"perfil."
+"target='_blank'>use.fair-coin.org</a> por favor añade la dirección web de tu"
+" perfil."
 
 #: work/models.py:59
 msgid ""
@@ -9556,465 +9392,409 @@ msgstr "Comentarios y preguntas"
 
 #: work/models.py:67
 msgid "this membership request became this EconomicAgent"
-msgstr ""
+msgstr "Esta solicitud de membresía dio lugar a este AgenteEconomico"
 
 #: work/models.py:77
-#, fuzzy
-#| msgid "created"
 msgid "moderated"
-msgstr "creado"
+msgstr "moderada"
 
 #: work/models.py:78
 msgid "autojoin"
-msgstr ""
+msgstr "alta automática"
 
 #: work/models.py:82
 msgid "private"
-msgstr ""
+msgstr "privado"
 
 #: work/models.py:83
-#, fuzzy
-#| msgid "Type of membership"
 msgid "only FC members"
-msgstr "Tipo de membresía"
+msgstr "sólo miembros de FC"
 
 #: work/models.py:84
 msgid "public"
-msgstr ""
+msgstr "público"
 
 #: work/models.py:90
 msgid "joining style"
-msgstr ""
+msgstr "estilo de alta"
 
 #: work/models.py:93
-#, fuzzy
-#| msgid "Add availability"
 msgid "visibility"
-msgstr "Agregar Disponibilidad"
+msgstr "visibilidad"
 
 #: work/models.py:96
 msgid "custom form slug"
-msgstr ""
+msgstr "nombre corto del formulario personalizado"
 
 #: work/models.py:109
-#, fuzzy
-#| msgid "Project "
 msgid "Project: "
-msgstr "Proyecto"
+msgstr "Proyecto:"
 
 #: work/models.py:120
 msgid "skill"
-msgstr ""
+msgstr "habilidad"
 
 #: work/models.py:121
 msgid "A new skill that you want to offer that is not already listed"
-msgstr ""
+msgstr "Una nueva habilidad que quieras ofrecer, que no esté ya listada"
 
 #: work/models.py:122
-#, fuzzy
-#| msgid "used by"
 msgid "suggested by"
-msgstr "usado por"
+msgstr "recomendado por"
 
 #: work/models.py:126
-#, fuzzy
-#| msgid "resource type"
 msgid "resource_type"
-msgstr "tipo de recurso"
+msgstr "tipo_recurso"
 
 #: work/models.py:128
 msgid "this skill suggestion became this ResourceType"
-msgstr ""
+msgstr "esta sugerencia de habilidad dio lugar a este TipoRecurso"
 
 #: work/models.py:154
-#, fuzzy
-#| msgid "active"
 msgid "collective"
-msgstr "activo"
+msgstr "colectivo"
 
 #: work/models.py:162
 msgid "this join request is for joining this Project"
-msgstr ""
+msgstr "esta solicitud de alta es para unirse a este Proyecto"
 
 #: work/models.py:165
-#, fuzzy
-#| msgid "Type of work"
 msgid "Type of user"
-msgstr "Tipo de trabajo"
+msgstr "Tipo de usuario"
 
 #: work/models.py:169
-#, fuzzy
-#| msgid "Surname (for individual memberships)"
 msgid "Surname (for individual join requests)"
-msgstr "Apellido (para membresía individual)"
+msgstr "Apellido (para solicitudes individuales)"
 
 #: work/models.py:174
 msgid "Town/Region where you are based"
-msgstr ""
+msgstr "Localidad / Región de la sede"
 
 #: work/models.py:183
 msgid "this join request became this EconomicAgent"
-msgstr ""
+msgstr "esta solicitud de alta dio lugar a este AgenteEconomico"
 
 #: work/models.py:186
 msgid "custom fobi id"
-msgstr ""
+msgstr "id fobi personalizada"
 
 #: work/models.py:188
 msgid ""
 "this join request is linked to this custom form (fobi SavedFormDataEntry)"
 msgstr ""
+"esta solicitud de alta está vinculada a este formulario personalizado (fobi "
+"SavedFormDataEntry)"
 
 #: work/models.py:234
-#, fuzzy
-#| msgid "event date"
 msgid "deployment date"
-msgstr "fecha de evento"
+msgstr "fecha de implementación"
 
 #: work/models.py:236
-#, fuzzy
-#| msgid "Sessions"
 msgid "permissions"
-msgstr "Sesiones"
+msgstr "permisos"
 
 #: work/models.py:238
 msgid "screenshot"
-msgstr ""
+msgstr "captura de pantalla"
 
 #: work/models.py:249
-#, fuzzy
-#| msgid "Phone number"
 msgid "invoice number"
-msgstr "Número de teléfono"
+msgstr "número de factura"
 
 #: work/models.py:250
-#, fuzzy
-#| msgid "order date"
 msgid "invoice date"
-msgstr "fecha de pedido"
+msgstr "fecha de la factura"
 
 #: work/models.py:251
 msgid "year"
-msgstr ""
+msgstr "Año"
 
 #: work/models.py:252
 msgid "quarter"
-msgstr ""
+msgstr "trimestre"
 
 #: work/models.py:322
 msgid "general material_type"
-msgstr ""
+msgstr "tipo_material general"
 
 #: work/models.py:325
 msgid "a related General Material Type"
-msgstr ""
+msgstr "un Tipo de Material General relacionado"
 
 #: work/models.py:330
 msgid "general nonmaterial_type"
-msgstr ""
+msgstr "tipo_inmaterial general"
 
 #: work/models.py:333
 msgid "a related General Non-material Type"
-msgstr ""
+msgstr "un Tipo Inmaterial General relacionado"
 
 #: work/models.py:338 work/models.py:421
-#, fuzzy
-#| msgid "facet"
 msgid "ocp facet"
-msgstr "faceta"
+msgstr "faceta OCP"
 
 #: work/models.py:341 work/models.py:424
-#, fuzzy
-#| msgid "related to"
 msgid "a related OCP Facet"
-msgstr "relacionado a"
+msgstr "una Faceta OCP relacionada"
 
 #: work/models.py:346 work/models.py:429
-#, fuzzy
-#| msgid "facet value"
 msgid "ocp facet_value"
-msgstr "valor de faceta"
+msgstr "valor_faceta de OCP"
 
 #: work/models.py:349 work/models.py:432
 msgid "a related OCP FacetValue"
-msgstr ""
+msgstr "un ValorFaceta de OCP relacionado"
 
 #: work/models.py:354 work/models.py:413
-#, fuzzy
-#| msgid "resource type"
 msgid "ocp resource_type"
-msgstr "tipo de recurso"
+msgstr "tipo_recurso de OCP"
 
 #: work/models.py:357 work/models.py:416
-#, fuzzy
-#| msgid "Create new Resource Type"
 msgid "a related OCP ResourceType"
-msgstr "Crear nuevo Tipo de Recurso"
+msgstr "un TipoRecurso de OCP relacionado"
 
 #: work/models.py:364
 msgid "a related OCP context EconomicAgent"
-msgstr ""
+msgstr "un AgenteEconomico del contexto de OCP relacionado"
 
 #: work/models.py:369
-#, fuzzy
-#| msgid "unit type"
 msgid "general unit_type"
-msgstr "tipo de unidad"
+msgstr "tipo_unidad general"
 
 #: work/models.py:372
 msgid "a related General Unit Type"
-msgstr ""
+msgstr "un Tipo de Unidad General relacionado"
 
 #: work/models.py:378
 msgid "Type of General Artwork/Resource"
-msgstr ""
+msgstr "Tipo de Obra de Arte / Recurso"
 
 #: work/models.py:379
 msgid "o-> Types of General Artworks/Resources"
-msgstr ""
+msgstr "o-- Tipos de Obra de Arte/Recurso General"
 
 #: work/models.py:437 work/models.py:492
 msgid "general artwork_type"
-msgstr ""
+msgstr "tipo_obra_arte general"
 
 #: work/models.py:440 work/models.py:495
 msgid "a related General Artwork Type"
-msgstr ""
+msgstr "un Tipo de Obra de Arte General relacionado"
 
 #: work/models.py:446
 msgid "Type of General Skill Resources"
-msgstr ""
+msgstr "Tipo de Recurso de Habilidad General"
 
 #: work/models.py:447
 msgid "o-> Types of General Skill Resources"
-msgstr ""
+msgstr "o-- Tipos de Recurso de Habilidad General"
 
 #: work/models.py:486
-#, fuzzy
-#| msgid "exchange type"
 msgid "ocp exchange type"
-msgstr "tipo de intercambio"
+msgstr "Tipo de intercambio de OCP"
 
 #: work/models.py:500
 msgid "general skill_type"
-msgstr ""
+msgstr "tipo_habilidad general"
 
 #: work/models.py:503
 msgid "a related General Skill Type"
-msgstr ""
+msgstr "un Tipo de Habilidad General relacionado"
 
 #: work/models.py:509
 msgid "Type of General Record"
-msgstr ""
+msgstr "Tipo de Expediente General"
 
 #: work/models.py:510
 msgid "o-> Types of General Records"
-msgstr ""
+msgstr "o-- Tipos de Expediente General"
 
 #: work/models.py:606
-#, fuzzy
-#| msgid "of unit "
 msgid "ocp unit"
-msgstr "de la unidad"
+msgstr "Unidad de OCP"
 
 #: work/models.py:609
-#, fuzzy
-#| msgid "related to"
 msgid "a related OCP Unit"
-msgstr "relacionado a"
+msgstr "Una Unidad de OCP relacionada"
 
 #: work/models.py:614
-#, fuzzy
-#| msgid "value per unit"
 msgid "general unit"
-msgstr "valor unitario"
+msgstr "unidd general"
 
 #: work/models.py:617
 msgid "a related General Unit"
-msgstr ""
+msgstr "una Unidad General relacionada"
 
 #: work/models.py:623
-#, fuzzy
-#| msgid "Type of membership"
 msgid "Type of General Unit"
-msgstr "Tipo de membresía"
+msgstr "Tipo de Unidad General"
 
 #: work/models.py:624
 msgid "o-> Types of General Units"
-msgstr ""
+msgstr "o-- Tipos de Unidad General"
 
 #: work/templates/_settings_bar.html:16
 msgid "Coop Admin App"
-msgstr ""
+msgstr "Aplicación de Administración Cooperativa"
 
 #: work/templates/_settings_bar.html:23
 msgid "Your personal faircoin account in OCP"
-msgstr ""
+msgstr "Tu cuenta faircoin personal en OCP"
 
 #: work/templates/_settings_bar.html:31
 msgid "Your profile information and skills"
-msgstr ""
+msgstr "Tu información de perfil y habilidades"
 
 #: work/templates/_settings_bar.html:32 work/templates/new_base.html:207
 #: work/templates/work/my_dashboard.html:311
 #: work/templates/work/profile.html:8
 msgid "Profile"
-msgstr ""
+msgstr "Perfil"
 
 #: work/templates/_settings_bar.html:37
 #: work/templates/work/new_features.html:8
 #: work/templates/work/new_features.html:29
 msgid "New OCP Features"
-msgstr ""
+msgstr "Novedades de OCP"
 
 #: work/templates/_settings_bar.html:38
-#, fuzzy
-#| msgid "feature"
 msgid "New Features"
-msgstr "caracteristica"
+msgstr "Nuevas funciones"
 
 #: work/templates/_settings_bar.html:52 work/templates/new_base.html:152
 #: work/templates/work/my_dashboard.html:291
 msgid "Membership"
-msgstr ""
+msgstr "Membresía"
 
 #: work/templates/new_base.html:61
 msgid "Dashboard page with your available options"
-msgstr ""
+msgstr "Panel de control con tus opciones disponibles"
 
 #: work/templates/new_base.html:67
-#, fuzzy
-#| msgid "Change Project"
 msgid "Joining Projects"
-msgstr "Modificar proyecto"
+msgstr "Unirse a Proyectos"
 
 #: work/templates/new_base.html:74 work/templates/new_base.html:181
-#, fuzzy
-#| msgid "Work in process"
 msgid "Your join-a-project process"
-msgstr "Trabajo en proceso"
+msgstr "Tu proceso de alta en un proyecto"
 
 #: work/templates/new_base.html:75 work/templates/new_base.html:166
 #: work/templates/new_base.html:182 work/templates/work/members_agent.html:537
 msgid "Feedback"
-msgstr ""
+msgstr "Opina"
 
 #: work/templates/new_base.html:89
 msgid "Your projects list"
-msgstr ""
+msgstr "Lista de tus proyectos"
 
 #: work/templates/new_base.html:90 work/templates/work/my_dashboard.html:224
 msgid "Your projects"
-msgstr ""
+msgstr "Tus proyectos"
 
 #: work/templates/new_base.html:94
 msgid "List of project related tasks"
-msgstr ""
+msgstr "Lista de tareas relacionadas con el proyecto"
 
 #: work/templates/new_base.html:95 work/templates/work/my_dashboard.html:227
 msgid "Your project tasks"
-msgstr ""
+msgstr "Tus tareas del proyecto"
 
 #: work/templates/new_base.html:99
 msgid "Open orders in your projects"
-msgstr ""
+msgstr "Pedidos abiertos en tus proyectos"
 
 #: work/templates/new_base.html:100
 msgid "Your project open orders"
-msgstr ""
+msgstr "Los pedidos abiertos de tu proyecto"
 
 #: work/templates/new_base.html:104
-#, fuzzy
-#| msgid "Plan a Process for "
 msgid "Plan process tasks for a project"
-msgstr "Planificar un Proceso para"
+msgstr "Planifica tareas de proceso para un proyecto"
 
 #: work/templates/new_base.html:105
 msgid "Plan project process"
-msgstr ""
+msgstr "Plan de procesos del proyecto"
 
 #: work/templates/new_base.html:109
 msgid "How to create a project in OCP"
-msgstr ""
+msgstr "Cómo crear un proyecto en OCP"
 
 #: work/templates/new_base.html:110 work/templates/work/my_dashboard.html:237
 msgid "OCP project's tutorial"
-msgstr ""
+msgstr "Tutorial de proyectos OCP"
 
 #: work/templates/new_base.html:114
 msgid "Create a new project"
-msgstr ""
+msgstr "Crear nuevo proyecto"
 
 #: work/templates/new_base.html:115
 msgid "New Project"
-msgstr ""
+msgstr "Nuevo proyecto"
 
 #: work/templates/new_base.html:121 work/templates/work/my_tasks.html:519
 msgid "Tasks"
-msgstr ""
+msgstr "Tareas"
 
 #: work/templates/new_base.html:126
 msgid "Do your planned tasks"
-msgstr ""
+msgstr "Haz tus tareas planificadas"
 
 #: work/templates/new_base.html:127 work/templates/work/my_dashboard.html:249
 msgid "Your tasks"
-msgstr ""
+msgstr "Tus tareas"
 
 #: work/templates/new_base.html:131
 msgid "Take new tasks for your skills"
-msgstr ""
+msgstr "Asume una nueva tarea"
 
 #: work/templates/new_base.html:132 work/templates/work/my_dashboard.html:252
 msgid "Take a new task"
-msgstr ""
+msgstr "Asume esta tarea"
 
 #: work/templates/new_base.html:136
 msgid "Register other extra tasks you did"
-msgstr ""
+msgstr "Registra otras tareas extra que hayas hecho"
 
 #: work/templates/new_base.html:137 work/templates/work/my_dashboard.html:255
 msgid "Log extra tasks"
-msgstr ""
+msgstr "Apunta tareas extra"
 
 #: work/templates/new_base.html:141
 msgid "Your work history with payments"
-msgstr ""
+msgstr "Tu historia de trabajo con pagos"
 
 #: work/templates/new_base.html:142
 msgid "Tasks history"
-msgstr ""
+msgstr "Historial de tareas"
 
 #: work/templates/new_base.html:151 work/templates/new_base.html:172
 msgid "Your membership process"
-msgstr ""
+msgstr "Tu proceso de membresía"
 
 #: work/templates/new_base.html:173
-#, fuzzy
-#| msgid "Freedom Coop's"
 msgid "FreedomCoop Feedback"
-msgstr "Freedom Coop´s"
+msgstr "Opina sobre FreedomCoop"
 
 #: work/templates/new_base.html:192
 msgid "Member Options"
-msgstr ""
+msgstr "Opciones de miembro"
 
 #: work/templates/new_base.html:196
 msgid "Legal Tools"
-msgstr ""
+msgstr "Herramientas legales"
 
 #: work/templates/new_base.html:206
 msgid "Your personal information and skills"
-msgstr ""
+msgstr "Tu información personal y habilidades"
 
 #: work/templates/new_base.html:214
 msgid "Map of worker locations"
-msgstr ""
+msgstr "Mapa de localización de trabajadoras"
 
 #: work/templates/new_base.html:215 work/templates/work/map.html:6
 #: work/templates/work/map.html:67
 msgid "Map"
-msgstr ""
+msgstr "Mapa"
 
 #: work/templates/pinax/notifications/comment_join_request/full.txt:1
 #, python-format
@@ -10025,11 +9805,16 @@ msgid ""
 "\n"
 "You can answer the comment at"
 msgstr ""
+"Nuevo comentario de %(name)s en %(jn_req.project.agent)s:\n"
+"\n"
+"%(comment)s\n"
+"\n"
+"Puedes contestar al comentario en"
 
 #: work/templates/pinax/notifications/comment_join_request/short.txt:1
 #, python-format
 msgid "New comment at %(project)s by the %(user)s join request "
-msgstr ""
+msgstr "Nuevo comentario en %(project)s por la solicitud de alta de %(user)s"
 
 #: work/templates/pinax/notifications/comment_membership_request/full.txt:1
 #, python-format
@@ -10040,12 +9825,15 @@ msgid ""
 "\n"
 "You can answer the comment at"
 msgstr ""
+"Nuevo comentario de %(name)s:\n"
+"\n"
+"%(comment)s\n"
+"\n"
+"Puedes contestar al comentario en"
 
 #: work/templates/pinax/notifications/comment_membership_request/short.txt:1
-#, fuzzy
-#| msgid "Description from membership request"
 msgid "New comment in membership request"
-msgstr "Descripción de la solicitud de membresía"
+msgstr "Comentario nuevo en gestión de membresía"
 
 #: work/templates/pinax/notifications/work_join_request/full.txt:1
 #, python-format
@@ -10062,10 +9850,21 @@ msgid ""
 "\n"
 "You can see all unfinished join requests here:"
 msgstr ""
+"Nueva solicitud de alta en %(context_agent.name)s:\n"
+"\n"
+"Nombre: %(name)s%(surname)s\n"
+"Tipo: %(type_of_user)s\n"
+"\n"
+"Descripción: %(description)s\n"
+"\n"
+"Esta tarea está en https://%(current_site)s//work/project-work/\n"
+"La nueva solicitud de alta está en %(join_url)s\n"
+"\n"
+"Puedes ver todas las solicitudes abiertas aquí:"
 
 #: work/templates/pinax/notifications/work_join_request/short.txt:1
 msgid "New join request at"
-msgstr ""
+msgstr "Nueva petición de membresia en "
 
 #: work/templates/pinax/notifications/work_membership_request/full.txt:1
 #, python-format
@@ -10082,18 +9881,28 @@ msgid ""
 "\n"
 "You can see all unfinished membership requests here:"
 msgstr ""
+"Nueva petición de membesia:\n"
+"\n"
+"Nombre: %(name)s %(surname)s\n"
+"Tipo: %(type_of_membership)s\n"
+"\n"
+"Descripción: %(description)s\n"
+"\n"
+"Puede encontrar esta tarea en https://%(current_site)s//accounting/work/#todos\n"
+"La petición de membresia está en %(membership_url)s\n"
+"\n"
+"Puede ver todas las peticiones incompletas aquí:"
 
 #: work/templates/pinax/notifications/work_membership_request/short.txt:1
 msgid "New membership request"
-msgstr ""
+msgstr "Nueva solicitud de miembro"
 
 #: work/templates/pinax/notifications/work_new_account/full.txt:1
 #, python-format
 msgid ""
 "New OCP Account created for %(name)s\n"
 "\n"
-"Here are your initial login credentials, please change your password as soon "
-"as possible for the security of the system and your personal privacy.\n"
+"Here are your initial login credentials, please change your password as soon as possible for the security of the system and your personal privacy.\n"
 "\n"
 "\n"
 "Nickname: %(username)s\n"
@@ -10109,11 +9918,28 @@ msgid ""
 "Welcome to th Open Collaborative Platform!\n"
 "\n"
 msgstr ""
+"Nueva cuenta OCP creada para %(name)s\n"
+"\n"
+"Estos son tus credenciales iniciales para hacer login, se ruega cambiar la contraseña lo mas rapidamente posible, para la seguridad del sistema y de tu privacidad personal.\n"
+"\n"
+"\n"
+"Nombre de usuario: %(username)s\n"
+"\n"
+"Contraseña: %(password)s\n"
+"\n"
+"\n"
+"El proyecto relacionado a esta cuenta es: %(context_agent)s\n"
+"\n"
+"Puedes darte de alta en https://%(current_site)s\n"
+"\n"
+"\n"
+"Bienvenidas a la Open Collaborative Platform!\n"
+"\n"
 
 #: work/templates/pinax/notifications/work_new_account/short.txt:1
 #, python-format
 msgid "New OCP Account for %(username)s to join %(project)s "
-msgstr ""
+msgstr "Nueva Cuenta de OCP de %(username)s para unirse a %(project)s"
 
 #: work/templates/pinax/notifications/work_skill_suggestion/full.txt:1
 #, python-format
@@ -10126,22 +9952,23 @@ msgid ""
 "You can see all skill suggestions at\n"
 "%(suggestions_url)s"
 msgstr ""
+"Nueva sugerencia de habilidad:\n"
+"\n"
+"Habilidad sugerida: %(skill)s\n"
+"Sugerida por: %(suggested_by)s\n"
+"\n"
+"Puedes ver todas las sugerencias en\n"
+"%(suggestions_url)s"
 
 #: work/templates/pinax/notifications/work_skill_suggestion/short.txt:1
-#, fuzzy
-#| msgid "New Distribution"
 msgid "New skill suggestion"
-msgstr "Nueva Distribución"
+msgstr "Nueva sugerencia de habilidad"
 
 #: work/templates/work/_treetypes_filter.html:4
-#, fuzzy
-#| msgid "All Resource Types"
 msgid "Filter Resource Types:"
-msgstr "Todos los Tipos de Recurso"
+msgstr "Filtrar los Tipos de Recurso:"
 
 #: work/templates/work/_treetypes_filter.html:11
-#, fuzzy
-#| msgid "Filter the List"
 msgid "Filter the list"
 msgstr "Filtrar la lista"
 
@@ -10149,26 +9976,20 @@ msgstr "Filtrar la lista"
 #: work/templates/work/exchange_logging_work.html:262
 #: work/templates/work/exchange_logging_work.html:702
 #: work/templates/work/exchanges_all.html:513
-#, fuzzy
-#| msgid "Resource Type"
 msgid "New Resource Type"
-msgstr "Tipo de Recurso"
+msgstr "Nuevo Tipo de Recurso"
 
 #: work/templates/work/_treetypes_filter.html:35
 msgid "Skill related the resource above:"
-msgstr ""
+msgstr "Hablilidad relacionada con el recurso anterior:"
 
 #: work/templates/work/_treetypes_filter.html:55
-#, fuzzy
-#| msgid "All Contexts"
 msgid "Related contexts:"
-msgstr "Todos los contextos"
+msgstr "Contextos relacionados:"
 
 #: work/templates/work/_treetypes_filter.html:76
-#, fuzzy
-#| msgid "Create a new Resource Type"
 msgid "Add a new Material Resource Type:"
-msgstr "Crear un nuevo tipo de recurso"
+msgstr "Añadir un nuevo Tipo de Recurso Material:"
 
 #: work/templates/work/exchange_logging_work.html:161
 #: work/templates/work/exchanges_all.html:8
@@ -10178,31 +9999,25 @@ msgstr "Crear un nuevo tipo de recurso"
 #: work/templates/work/project_resources.html:165
 #: work/templates/work/your_projects.html:112
 #: work/templates/work/your_projects.html:212
-#, fuzzy
-#| msgid "Exchange"
 msgid "Exchanges"
-msgstr "Intercambiar"
+msgstr "Intercambios"
 
 #: work/templates/work/exchange_logging_work.html:182
 #: work/templates/work/exchanges_all.html:306
 #: work/templates/work/members_agent.html:136
 msgid "Wallet"
-msgstr ""
+msgstr "Monedero"
 
 #: work/templates/work/exchange_logging_work.html:184
-#, fuzzy
-#| msgid "Exchange"
 msgid "All Exchanges"
-msgstr "Intercambiar"
+msgstr "Todos los Intercambios"
 
 #: work/templates/work/exchange_logging_work.html:185
 #: work/templates/work/join_request_with_comments.html:82
 #: work/templates/work/joinaproject_request_internal.html:39
 #: work/templates/work/process_logging.html:206
-#, fuzzy
-#| msgid "Project"
 msgid "View Project"
-msgstr "Proyecto"
+msgstr "Ver Proyecto"
 
 #: work/templates/work/exchange_logging_work.html:186
 #: work/templates/work/exchanges_all.html:310
@@ -10219,13 +10034,11 @@ msgstr "Proyecto"
 #: work/templates/work/your_projects.html:7
 #: work/templates/work/your_projects.html:58
 msgid "Your Projects"
-msgstr ""
+msgstr "Tus Proyectos"
 
 #: work/templates/work/exchange_logging_work.html:251
-#, fuzzy
-#| msgid "Log a New "
 msgid "Log a new "
-msgstr "Registre un nuevo"
+msgstr "Registra un nuevo"
 
 #: work/templates/work/exchange_logging_work.html:261
 #: work/templates/work/exchange_logging_work.html:337
@@ -10234,10 +10047,8 @@ msgstr "Registre un nuevo"
 #: work/templates/work/exchange_logging_work.html:700
 #: work/templates/work/exchange_logging_work.html:775
 #: work/templates/work/exchange_logging_work.html:847
-#, fuzzy
-#| msgid "Log Resource"
 msgid "Type of Resource:"
-msgstr "Cargar Recurso"
+msgstr "Tipo de Recurso:"
 
 #: work/templates/work/exchange_logging_work.html:265
 #: work/templates/work/exchange_logging_work.html:339
@@ -10253,18 +10064,18 @@ msgstr "Cargar Recurso"
 #: work/templates/work/exchange_logging_work.html:1048
 msgid "Can't retrieve General types, try choosing a resource type below:"
 msgstr ""
+"No encuentro ningún tipo general, intenta escoger uno de los tipos a "
+"continuación:"
 
 #: work/templates/work/exchange_logging_work.html:325
 #: work/templates/work/exchange_logging_work.html:763
-#, fuzzy
-#| msgid "Log a New Commitment"
 msgid "Log a new Commitment:"
-msgstr "Registre un nuevo compromiso"
+msgstr "Registrar un nuevo compromiso"
 
 #: work/templates/work/exchange_logging_work.html:370
 #: work/templates/work/exchange_logging_work.html:809
 msgid "Create an external economic agent"
-msgstr ""
+msgstr "Crear un agente económico externo"
 
 #: work/templates/work/exchange_logging_work.html:398
 #: work/templates/work/exchange_logging_work.html:527
@@ -10272,10 +10083,8 @@ msgstr ""
 #: work/templates/work/exchange_logging_work.html:837
 #: work/templates/work/exchange_logging_work.html:966
 #: work/templates/work/exchange_logging_work.html:1036
-#, fuzzy
-#| msgid "created by"
 msgid "...created by you"
-msgstr "creado por"
+msgstr "...creado por ti"
 
 #: work/templates/work/exchange_logging_work.html:455
 #: work/templates/work/exchange_logging_work.html:605
@@ -10283,428 +10092,377 @@ msgstr "creado por"
 #: work/templates/work/exchange_logging_work.html:975
 #: work/templates/work/exchange_logging_work.html:1045
 msgid "Type of Resource transferred:"
-msgstr ""
+msgstr "Tipo de Recurso transferido:"
 
 #: work/templates/work/exchange_logging_work.html:689
-#, fuzzy
-#| msgid "Log new"
 msgid "Log a new:"
-msgstr "Cargar nuevo"
+msgstr "Registra un nuevo:"
 
 #: work/templates/work/exchanges_all.html:316
-#, fuzzy
-#| msgid "Totals"
 msgid "Totals:"
-msgstr "Totales"
+msgstr "Totales:"
 
 #: work/templates/work/exchanges_all.html:320
 msgid "There are no exchanges to count..."
-msgstr ""
+msgstr "No hay intercambios que contar..."
 
 #: work/templates/work/exchanges_all.html:328
-#, fuzzy
-#| msgid "Incoming Exchange"
 msgid "Incoming:"
-msgstr "Intercambio entrante"
+msgstr "Entrada:"
 
 #: work/templates/work/exchanges_all.html:331
-#, fuzzy
-#| msgid "Outgoing Exchange"
 msgid "Outgoing:"
-msgstr "Intercambio saliente"
+msgstr "Salida:"
 
 #: work/templates/work/exchanges_all.html:334
-#, fuzzy
-#| msgid "Balance"
 msgid "Balance:"
-msgstr "Balance"
+msgstr "Balance:"
 
 #: work/templates/work/exchanges_all.html:338
 msgid "(superusers debug)"
-msgstr ""
+msgstr "(depuración de superusuarios)"
 
 #: work/templates/work/exchanges_all.html:350
-#, fuzzy
-#| msgid "commitment"
 msgid "commited"
-msgstr "compromiso"
+msgstr "comprometida"
 
 #: work/templates/work/exchanges_all.html:368
 msgid ""
 "* Note these totals are meaningful only if the events selected all use the "
 "same currency. <br/>(We'll do a multi total per unit-type box soon)"
 msgstr ""
+"* Atención: estos totales sólo tienen significado si todos los eventos "
+"seleccionados usan la misma divisa. <br/> (Haremos una caja con multitotales"
+" pronto)"
 
 #: work/templates/work/exchanges_all.html:375
-#, fuzzy
-#| msgid "Create Exchange"
 msgid "Create a new Exchange"
-msgstr "Crear intercambio"
+msgstr "Crea intercambio nuevo"
 
 #: work/templates/work/exchanges_all.html:380
 msgid "Choose a previously used <b>Exchange Type</b> to copy the model:"
 msgstr ""
+"Elige un <b>Tipo de Intercambio</b> usado previamente para copiar el modelo:"
 
 #: work/templates/work/exchanges_all.html:383
-#, fuzzy
-#| msgid "Create exchange type"
 msgid "Or search an available exchange type:"
-msgstr "Crear tipo de intercambio"
+msgstr "O busca un tipo de cambio disponible:"
 
 #: work/templates/work/exchanges_all.html:386
 msgid "Or make a new one..."
-msgstr ""
+msgstr "O haz uno nuevo"
 
 #: work/templates/work/exchanges_all.html:388
 msgid ""
 "The new resource type request has some errors, click 'SHOW' to see them."
 msgstr ""
+"La nueva solicitud de tipo de recurso tiene errores, pulsa 'MOSTRAR' para "
+"verlos."
 
 #: work/templates/work/exchanges_all.html:404
 msgid "...choosing a <b>use case</b>:"
-msgstr ""
+msgstr "...eligiendo un <b>caso de usuario</b>:"
 
 #: work/templates/work/exchanges_all.html:443
 #: work/templates/work/exchanges_all.html:514
 msgid "...you created this type:"
-msgstr ""
+msgstr "...creaste este tipo:"
 
 #: work/templates/work/exchanges_all.html:443
 #: work/templates/work/exchanges_all.html:514
 #: work/templates/work/exchanges_all.html:580
 #: work/templates/work/exchanges_all.html:973
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: work/templates/work/exchanges_all.html:456
 msgid "Not found any related exchange type! contexts:"
-msgstr ""
+msgstr "No se encuentra ningun tipo de cambio relacionado!contextos: "
 
 #: work/templates/work/exchanges_all.html:465
 msgid "If you want to narrow your options,"
-msgstr ""
+msgstr "si quieres reducir tus opciones,"
 
 #: work/templates/work/exchanges_all.html:466
-#, fuzzy
-#| msgid "Choose a Resource Type..."
 msgid "choose a main <b>Resource Type</b> branch:"
-msgstr "Elegir un Tipo de Recurso..."
+msgstr "elige una rama de <b>Tipo de Recurso</b> principal:"
 
 #: work/templates/work/exchanges_all.html:513
 msgid "...if nothing fits:"
-msgstr ""
+msgstr "...si nada encaja:"
 
 #: work/templates/work/exchanges_all.html:530
 msgid "Or choose a related <b>Skill Verb</b> (service time):"
 msgstr ""
+"O elige un <b>Verbo de Habilidad</b> relacionado (tiempo de servicio):"
 
 #: work/templates/work/exchanges_all.html:579
 msgid "...if no one fits:"
-msgstr ""
+msgstr "...si ninguno encaja:"
 
 #: work/templates/work/exchanges_all.html:579
-#, fuzzy
-#| msgid "All Resource Types"
 msgid "New Skill Service Type"
-msgstr "Todos los Tipos de Recurso"
+msgstr "Nuevo tipo de servicio de habilidad"
 
 #: work/templates/work/exchanges_all.html:580
 msgid "...you created this skill:"
-msgstr ""
+msgstr "...creaste esta habilidad"
 
 #: work/templates/work/exchanges_all.html:598
-#, fuzzy
-#| msgid "can create resource"
 msgid "Not found any related resource type!"
-msgstr "puede crear recurso"
+msgstr "Tipo de recurso relacionado no encontrado"
 
 #: work/templates/work/exchanges_all.html:607
-#, fuzzy
-#| msgid "New Exchange Type"
 msgid "New Exchange"
-msgstr "Un nuevo tipo de intercambio"
+msgstr "Nuevo intercambio"
 
 #: work/templates/work/exchanges_all.html:612
 msgid "To create a new exchange Type, please request it to an Ocp admin."
-msgstr ""
+msgstr "Para crear un nuevo Tipo de Intercambio, pídeselo a un admin de OCP."
 
 #: work/templates/work/exchanges_all.html:620
-#, fuzzy
-#| msgid "Add a Bucket"
 msgid "Add a new "
-msgstr "Agregar un contenedor"
+msgstr "Añade un nuevo"
 
 #: work/templates/work/exchanges_all.html:620
-#, fuzzy
-#| msgid "Resource Type"
 msgid "Resource Type:"
-msgstr "Tipo de Recurso"
+msgstr "Tipo de recurso"
 
 #: work/templates/work/exchanges_all.html:646
-#, fuzzy
-#| msgid "Add a Bucket"
 msgid "Add a new"
-msgstr "Agregar un contenedor"
+msgstr "Añade un nuevo"
 
 #: work/templates/work/exchanges_all.html:646
 msgid "Skill Type:"
-msgstr ""
+msgstr "Tipo de habilidades"
 
 #: work/templates/work/exchanges_all.html:673
 msgid "Edit an "
-msgstr ""
+msgstr "Editar un"
 
 #: work/templates/work/exchanges_all.html:673
-#, fuzzy
-#| msgid "Exchange Type"
 msgid "Exchange Type:"
-msgstr "Tipo de Cambio"
+msgstr "Tipo de cambio"
 
 #: work/templates/work/exchanges_all.html:705
-#, fuzzy
-#| msgid "Go to Exchange"
 msgid "List of Exchanges"
-msgstr "ir a intercambio"
+msgstr "Lista de intercambios"
 
 #: work/templates/work/exchanges_all.html:706
-#, fuzzy
-#| msgid "related to"
 msgid "related to you"
-msgstr "relacionado a"
+msgstr "relacionado contigo"
 
 #: work/templates/work/exchanges_all.html:778
-#, fuzzy
-#| msgid "Filter demo"
 msgid "Filter by Type"
-msgstr "Filtrar Demo"
+msgstr "Filtro por tipos"
 
 #: work/templates/work/exchanges_all.html:1109
-#, fuzzy
-#| msgid "Add me,"
 msgid "Add new"
-msgstr "Agregarme,"
+msgstr "Añadir nuevo"
 
 #: work/templates/work/faircoin_account.html:7
 #: work/templates/work/faircoin_account.html:70
 #: work/templates/work/faircoin_history.html:40
 msgid "FairCoin Account"
-msgstr ""
+msgstr "Cuenta Faircoin"
 
 #: work/templates/work/faircoin_account.html:76
-#, fuzzy
-#| msgid "Accounting for"
 msgid "Account History"
-msgstr "Contabilidad para"
+msgstr "Historial de la cuenta"
 
 #: work/templates/work/faircoin_account.html:77
 #: work/templates/work/faircoin_history.html:45
 msgid "Blockchain"
-msgstr ""
+msgstr "Cadena de bloques"
 
 #: work/templates/work/faircoin_account.html:83
 msgid "Warning:"
-msgstr ""
+msgstr "Aviso"
 
 #: work/templates/work/faircoin_account.html:84
 msgid ""
 "Operations with your online wallet are not available temporarily. Please, "
 "come back later."
 msgstr ""
+"En este momento las operaciones de tu monedero online no están disponibles. "
+"Por favor, vuelve dentro de un rato."
 
 #: work/templates/work/faircoin_account.html:144
 #: work/templates/work/faircoin_account.html:282
 #: work/templates/work/faircoin_history.html:59
-#, fuzzy
-#| msgid "Available"
 msgid "Not available now"
-msgstr "Disponible"
+msgstr "No esta disponible ahora"
 
 #: work/templates/work/faircoin_account.html:236
 msgid "Get your membership shares:"
-msgstr ""
+msgstr "Adquiere las acciones para tu membresia"
 
 #: work/templates/work/faircoin_account.html:237
 msgid "You've requested to initially contribute buying"
-msgstr ""
+msgstr "Has solicitado contribuir inicialmente comprando"
 
 #: work/templates/work/faircoin_account.html:238
 msgid "Share"
-msgstr ""
+msgstr "Comparte"
 
 #: work/templates/work/faircoin_account.html:239
 msgid "in the Freedom Coop's membership form. This means"
-msgstr ""
+msgstr "En el formulario de membresia de Freedom Coop. Esto significa"
 
 #: work/templates/work/faircoin_account.html:239
 msgid "(faircoins)."
-msgstr ""
+msgstr "(faircoins)"
 
 #: work/templates/work/faircoin_account.html:240
 msgid ""
-"As soon as you have this amount here in your Faircoin account at OCP, you'll "
-"see below the <b>button to pay your shares</b>, click on it and you'll "
+"As soon as you have this amount here in your Faircoin account at OCP, you'll"
+" see below the <b>button to pay your shares</b>, click on it and you'll "
 "become a full member of Freedom Coop."
 msgstr ""
+"Tan pronto como tengas el importe en tu cuenta faircoin de OCP, verás aquí "
+"abajo el <b>botón para pagar tus participaciones</b>, haz clic en él y "
+"pasarás a ser un miembro de pleno derecho de Freedom Coop."
 
 #: work/templates/work/faircoin_account.html:250
 msgid "Pay your shares with"
-msgstr ""
+msgstr "Paga tus participaciones con"
 
 #: work/templates/work/faircoin_account.html:256
 #, python-format
 msgid ""
 "\n"
-"                                Your FairCoin account balance of %(balance)s "
-"ƒ\n"
+"                                Your FairCoin account balance of %(balance)s ƒ\n"
 "                                is too low to pay %(share_price)s ƒ now.\n"
-"                                If you transfer enough Faircoins into your "
-"account, you'll see here the button to pay your shares.\n"
+"                                If you transfer enough Faircoins into your account, you'll see here the button to pay your shares.\n"
 "                            "
 msgstr ""
+"\n"
+"                                El saldo de tu cuenta faircoin de %(balance)s ƒ\n"
+"                                es insuficiente para pagar %(share_price)s ƒ ahora.\n"
+"                                Si transfieres suficientes faircoins a tu cuenta, podrás ver aquí el botón para pagar tus participaciones.\n"
+"                            "
 
 #: work/templates/work/faircoin_account.html:271
 msgid "(available when full member)"
-msgstr ""
+msgstr "(disponible siendo miembro completo)"
 
 #: work/templates/work/faircoin_account.html:273
 msgid "(available when the address pertains to this wallet)"
-msgstr ""
+msgstr "(Disponible cuando la direccion pertenezca a este monedero)"
 
 #: work/templates/work/faircoin_account.html:275
 msgid ""
 "(please wait about a minute to have a new fair-address and refresh the page)"
 msgstr ""
+"(Por favor espera un miniute para obtener una nueva direccion Fair y "
+"refresca la pagina)"
 
 #: work/templates/work/faircoin_history.html:6
 msgid "Account History for"
-msgstr ""
+msgstr "Historial de cuenta de"
 
 #: work/templates/work/faircoin_history.html:42
-#, fuzzy
-#| msgid "Todo History"
 msgid "History"
-msgstr "Historia de por hacer"
+msgstr "Historial"
 
 #: work/templates/work/invoice_number.html:7
 #: work/templates/work/invoice_number.html:31
 #: work/templates/work/invoice_number.html:46
-#, fuzzy
-#| msgid "Phone number"
 msgid "Invoice Number"
-msgstr "Número de teléfono"
+msgstr "Numero de factura"
 
 #: work/templates/work/invoice_number.html:35
-#, fuzzy
-#| msgid "Create a new Resource Type"
 msgid "Create a new Invoice Number"
-msgstr "Crear un nuevo tipo de recurso"
+msgstr "Crear un nuevo número de factura"
 
 #: work/templates/work/invoice_number.html:43
 msgid "Your previous Invoice Numbers"
-msgstr ""
+msgstr "Tus numeros de faturas anteriores"
 
 #: work/templates/work/invoice_number.html:47
-#, fuzzy
-#| msgid "Member"
 msgid "For Member"
-msgstr "Miembro"
+msgstr "Para el miembro"
 
 #: work/templates/work/invoice_number.html:49
-#, fuzzy
-#| msgid "Created"
 msgid "Date Created"
-msgstr "Creado"
+msgstr "Fecha de creacion"
 
 #: work/templates/work/join_request_with_comments.html:8
-#, fuzzy
-#| msgid "Project Contributions for "
 msgid "Project Join Request for "
-msgstr "Contribuciones de Proyecto para"
+msgstr "Peticion de unirse al proyecto de"
 
 #: work/templates/work/join_request_with_comments.html:64
 #: work/templates/work/my_dashboard.html:272
 msgid "Feedback with"
-msgstr ""
+msgstr "Comentarios con"
 
 #: work/templates/work/join_request_with_comments.html:66
 #, python-format
 msgid "The joining request of %(user)s related \"%(project)s\" "
-msgstr ""
+msgstr "La solicitud de alta de %(user)s en relación a \"%(project)s\""
 
 #: work/templates/work/join_request_with_comments.html:68
-#, fuzzy
-#| msgid "Work in Process for "
 msgid "Your joining request for "
-msgstr "Trabajo en curso para"
+msgstr "Tu peticion de unirte a"
 
 #: work/templates/work/join_request_with_comments.html:72
-#, fuzzy
-#| msgid "ending"
 msgid "pending"
-msgstr "finalizando"
+msgstr "Pendiente"
 
 #: work/templates/work/join_request_with_comments.html:74
 msgid "MISSING THE OCP ACCOUNT!"
-msgstr ""
+msgstr "¡FALTA LA CUENTA DE OCP!"
 
 #: work/templates/work/join_request_with_comments.html:79
-#, fuzzy
-#| msgid "Blue oval = Project"
 msgid "Back to your Project"
-msgstr "óvalo azul = Proyecto"
+msgstr "Volver a tu proyecto"
 
 #: work/templates/work/join_request_with_comments.html:159
 #: work/templates/work/membership_request_with_comments.html:144
 msgid "Other comments"
-msgstr ""
+msgstr "Otros comentarios"
 
 #: work/templates/work/join_request_with_comments.html:172
 msgid "Talk with "
-msgstr ""
+msgstr "Habla con"
 
 #: work/templates/work/join_request_with_comments.html:174
 msgid "Talk with coordinators of "
-msgstr ""
+msgstr "Habla con los coordinadores de"
 
 #: work/templates/work/join_request_with_comments.html:182
 #: work/templates/work/membership_request_with_comments.html:162
 msgid "You have "
-msgstr ""
+msgstr "Ud. tiene"
 
 #: work/templates/work/join_request_with_comments.html:182
 #: work/templates/work/membership_request_with_comments.html:162
 msgid " comments:"
-msgstr ""
+msgstr "comentarios:"
 
 #: work/templates/work/join_request_with_comments.html:187
 #: work/templates/work/membership_request_with_comments.html:167
 msgid "Write a new comment:"
-msgstr ""
+msgstr "Escribe un nuevo comentario:"
 
 #: work/templates/work/join_requests.html:7
 msgid "Your Project Join Requests"
-msgstr ""
+msgstr "Peticiones de unirse a tu proyecto"
 
 #: work/templates/work/join_requests.html:30
 #: work/templates/work/members_agent.html:146
-#, fuzzy
-#| msgid "Payout Request"
 msgid "Join Requests"
-msgstr "Solicitud de Desembolso"
+msgstr "Unirse a las peticiones"
 
 #: work/templates/work/join_requests.html:34
 #: work/templates/work/your_projects.html:62
-#, fuzzy
-#| msgid "Create New Agent"
 msgid "Create New Project"
-msgstr "Crear Nuevo Agente"
+msgstr "Crear nuevo proyecto"
 
 #: work/templates/work/join_requests.html:39
 #: work/templates/work/your_projects.html:67
-#, fuzzy
-#| msgid "Create a New Agent"
 msgid "Create a New Project"
-msgstr "Crear un Nuevo Agente"
+msgstr "Crear nuevo proyecto"
 
 #: work/templates/work/join_requests.html:58
 #: work/templates/work/joinaproject_request_internal.html:41
@@ -10713,240 +10471,221 @@ msgstr "Crear un Nuevo Agente"
 #: work/templates/work/order_plan.html:111
 #: work/templates/work/plan_work.html:60
 #: work/templates/work/your_projects.html:84
-#, fuzzy
-#| msgid "Projects"
 msgid "Projects Tasks"
-msgstr "Proyectos"
+msgstr "Tareas de los proyectos"
 
 #: work/templates/work/join_requests.html:60
 #: work/templates/work/joinaproject_request_internal.html:43
-#, fuzzy
-#| msgid "Demand Side Exchanges"
 msgid "All demand exchanges"
-msgstr "Intercambios del lado de la demanda"
+msgstr "Todos los intercambios de demanda"
 
 #: work/templates/work/join_requests.html:90
 msgid "Fobi"
-msgstr ""
+msgstr "Fobi"
 
 #: work/templates/work/join_requests.html:123
-#, fuzzy
-#| msgid "Member"
 msgid "Accept Member"
-msgstr "Miembro"
+msgstr "Aceptar miembro"
 
 #: work/templates/work/join_requests.html:135
 msgid "is taken, choose agent?"
-msgstr ""
+msgstr "ya está en uso, ¿elegir agente?"
 
 #: work/templates/work/join_requests.html:147
 #: work/templates/work/join_requests.html:151
-#, fuzzy
-#| msgid "Delete Account"
 msgid "Create OCP Account"
-msgstr "Borrar cuenta"
+msgstr "Crear una cuenta en PAC"
 
 #: work/templates/work/joinaproject_request.html:70
 msgid "Request to Join: "
-msgstr ""
+msgstr "Solicitar unirse"
 
 #: work/templates/work/joinaproject_request.html:93
 #: work/templates/work/joinaproject_request_internal.html:30
 msgid "Request to join:"
-msgstr ""
+msgstr "Solicitar unirse"
 
 #: work/templates/work/joinaproject_request.html:100
-#, fuzzy
-#| msgid ""
-#| "The first step to become a member of Freedom Coop is to fill the "
-#| "following membership form:"
 msgid "The first step to join this project is to fill the following form:"
 msgstr ""
-"El primer paso para convertirse en miembro de Freedom Coop es rellenar el "
-"siguiente formulario de inscripción:"
+"El primer paso para unirte a este proyecto es rellenar este formulario"
 
 #: work/templates/work/joinaproject_request_internal.html:10
 msgid "Request to join a project"
-msgstr ""
+msgstr "Solicita unirte a un poyecto"
 
 #: work/templates/work/joinaproject_request_internal.html:54
 msgid "You already are an active participant of this project!"
-msgstr ""
+msgstr "Ya eres un participante activo de este proyecto"
 
 #: work/templates/work/joinaproject_thanks.html:8
 msgid "Thank you for your request to join this project"
-msgstr ""
+msgstr "Gracias por tu peticion de unirte a este proyecto"
 
 #: work/templates/work/joinaproject_thanks.html:19
 msgid "Thank you for your request to join this project!"
-msgstr ""
+msgstr "Gracias por tu peticion de unirte a este proyecto"
 
 #: work/templates/work/joinaproject_thanks.html:23
 msgid ""
 "A project coordinator will send you an email soon with your OCP login "
 "credentials."
 msgstr ""
+"Un coordinador del proyecto te enviara un email pronto con tus credenciales "
+"para el inicio de sesion en OCP"
 
 #: work/templates/work/joinaproject_thanks.html:25
 #: work/templates/work/membership_thanks.html:25
 msgid "Freedom Coop"
-msgstr ""
+msgstr "Freedom Coop"
 
 #: work/templates/work/map.html:42
 msgid "Current work location"
-msgstr ""
+msgstr "Lugar de trabajo actual"
 
 #: work/templates/work/map.html:43
 msgid "To change, select a marker on the map, or search for a new one."
 msgstr ""
+"Para cambiar, selecciona un nuevo marcador en el mapa, o busca uno nuevo"
 
 #: work/templates/work/map.html:45
 msgid "Where are you working? "
-msgstr ""
+msgstr "Donde trabajas?"
 
 #: work/templates/work/map.html:46
 msgid "Select a marker on the map, or search for a new one."
-msgstr ""
+msgstr "Selecciona un nuevo marcador en el mapa, o busca uno nuevo"
 
 #: work/templates/work/map.html:58
 msgid "Save new work location"
-msgstr ""
+msgstr "Guarda ubicacion para el nuevo trabajo"
 
 #: work/templates/work/members_agent.html:12
 msgid "Your Project"
-msgstr ""
+msgstr "Tu proyecto"
 
 #: work/templates/work/members_agent.html:14
 msgid "Other Agent"
-msgstr ""
+msgstr "Otro agente"
 
 #: work/templates/work/members_agent.html:150
 #: work/templates/work/members_agent.html:611
 msgid "Your Joining Feedback"
-msgstr ""
+msgstr "Comentarios sobre unirte"
 
 #: work/templates/work/members_agent.html:165
-#, fuzzy
-#| msgid "Networks and Projects"
 msgid "Upgrade to an OCP Project"
-msgstr "Redes y Proyectos"
+msgstr "Ascender a un Proyecto de OCP"
 
 #: work/templates/work/members_agent.html:167
-#, fuzzy
-#| msgid "Project"
 msgid "Edit Project"
-msgstr "Proyecto"
+msgstr "Editar proyecto"
 
 #: work/templates/work/members_agent.html:171
 msgid ""
 "This agent is not yet a regular ocp's 'project', only is pending to be "
 "defined the visibility and the joining style."
 msgstr ""
+"Este agente aún no es un 'proyecto' normal de OCP, sólo falta definir la "
+"visibilidad y el estilo de alta."
 
 #: work/templates/work/members_agent.html:355
-#, fuzzy
-#| msgid "Project roles"
 msgid "Project Joining Style:"
-msgstr "Roles del proyecto"
+msgstr "Estilo de Ingreso en Proyecto:"
 
 #: work/templates/work/members_agent.html:359
-#, fuzzy
-#| msgid "Change Requirement"
 msgid "Manage Requests"
-msgstr "Cambiar Requerimiento"
+msgstr "Gestionar peticiones"
 
 #: work/templates/work/members_agent.html:360
 msgid "View Form"
-msgstr ""
+msgstr "Ver formulario"
 
 #: work/templates/work/members_agent.html:365
 msgid "Project Visibility:"
-msgstr ""
+msgstr "Visibilidad del proyecto"
 
 #: work/templates/work/members_agent.html:370
-#, fuzzy
-#| msgid "Customer order"
 msgid "Custom Form:"
-msgstr "Pedido de cliente"
+msgstr "Formulario personalizado"
 
 #: work/templates/work/members_agent.html:372
 msgid "View Custom Form Fields"
-msgstr ""
+msgstr "Ver campos de formulario personalizados"
 
 #: work/templates/work/members_agent.html:374
 msgid ""
 "(custom form fields pending to setup, list your desired fields and ask an "
 "admin using the feedback page)"
 msgstr ""
+"(estamos pendientes de hacer los campos personalizados. Lista los campos que"
+" quieres y pregunta a un admin a través de Opinar)"
 
 #: work/templates/work/members_agent.html:459
 msgid "Pending to create user+agent:"
-msgstr ""
+msgstr "Pendiente de crear usuario+agente "
 
 #: work/templates/work/members_agent.html:474
-#, fuzzy
-#| msgid "Relationship"
 msgid "Relations:"
-msgstr "Relación"
+msgstr "Relaciones"
 
 #: work/templates/work/members_agent.html:492
-#, fuzzy
-#| msgid "Edit Value Equation"
 msgid "Edit member relations"
-msgstr "Editar Ecuación de Valor"
+msgstr "Editar relaciones entre miembros"
 
 #: work/templates/work/members_agent.html:496
-#, fuzzy
-#| msgid "Maintain Associations for"
 msgid "Maintain Associates for"
-msgstr "Mantener Asociaciones para"
+msgstr "Mantener Asociados para"
 
 #: work/templates/work/members_agent.html:603
-#, fuzzy
-#| msgid "Join this task"
 msgid "Join this project:"
-msgstr "Unirse a esta tarea"
+msgstr "Unete a este proyecto"
 
 #: work/templates/work/members_agent.html:608
 msgid ""
-"Sorry, you've tried to join this project but your request was <b>declined</"
-"b> for any reason. See the thread at"
+"Sorry, you've tried to join this project but your request was "
+"<b>declined</b> for any reason. See the thread at"
 msgstr ""
+"Lo sentimos, has intentado unirte al proyecto pero tu peticion ha sido "
+"<b>denegada</b> por alguna razon. Ver el hilo en"
 
 #: work/templates/work/members_agent.html:609
 msgid "Your Declined Joining Feedback"
-msgstr ""
+msgstr "Declinó unirse a los comentarios"
 
 #: work/templates/work/members_agent.html:611
 msgid ""
-"This project has a moderated access workflow, and you've requested access to "
-"join in. To keep track of the joining process go to"
+"This project has a moderated access workflow, and you've requested access to"
+" join in. To keep track of the joining process go to"
 msgstr ""
+"El acceso al flujo de trabajo de este proyecto esta moderado, y has "
+"solicitado unirte a el. Para seguir el proceso de unirte ves a"
 
 #: work/templates/work/members_agent.html:614
 msgid ""
-"This project has a moderated access workflow. Please fill the following form "
-"to request access, and then you will have a special feedback page to "
+"This project has a moderated access workflow. Please fill the following form"
+" to request access, and then you will have a special feedback page to "
 "comunicate with the project coordinators"
 msgstr ""
+"El flujo de trabajo de este proyecto esta moderado.Por favor rellena el "
+"siguiente formulario para solicitar acceso, y accederas a una pagina "
+"especial de comentarios para comunicarte con los coordinadores del proyecto"
 
 #: work/templates/work/members_agent.html:615
 msgid "Form to join"
-msgstr ""
+msgstr "Formulario para unirte"
 
 #: work/templates/work/members_agent.html:615
 msgid "Sorry, the form is not ready, try tomorrow"
-msgstr ""
+msgstr "Lo sentimos, este formulario no esta listo, intentalo mañana"
 
 #: work/templates/work/members_agent.html:620
 msgid "You can simply join this project with one click"
-msgstr ""
+msgstr "Puedes unirte a este proyecto simplemente con un click"
 
 #: work/templates/work/members_agent.html:627
-#, fuzzy
-#| msgid "Join Task"
 msgid "Join"
-msgstr "Unirse a la Tarea"
+msgstr "Unete"
 
 #: work/templates/work/membership_request.html:25
 msgid "Request Membership at FreedomCoop"
@@ -10965,46 +10704,46 @@ msgstr ""
 "siguiente formulario de inscripción:"
 
 #: work/templates/work/membership_request_with_comments.html:64
-#, fuzzy
-#| msgid "Join FreedomCoop"
 msgid "Feedback with Freedom Coop"
-msgstr "Unirse a FreedomCoop"
+msgstr "Opinar sobre Freedom Coop"
 
 #: work/templates/work/membership_request_with_comments.html:156
 msgid "Comments about the membership of "
-msgstr ""
+msgstr "Comentarios sobre la membresía de"
 
 #: work/templates/work/membership_thanks.html:8
 #: work/templates/work/membership_thanks.html:19
 msgid "Thank you for your membership request"
-msgstr ""
+msgstr "Gracias por su solicitud de membresía"
 
 #: work/templates/work/membership_thanks.html:23
 msgid "A Freedom Coop administrator will send you an email soon."
-msgstr ""
+msgstr "Un administrador de Freedom Coop le enviará un email pronto"
 
 #: work/templates/work/my_dashboard.html:8 work/templates/work/my_tasks.html:7
 #: work/templates/work/take_new_tasks.html:7
 msgid "My Dashboard"
-msgstr ""
+msgstr "Mi tablero de comandos"
 
 #: work/templates/work/my_dashboard.html:182
 msgid "Welcome to the Freedom Coop!"
-msgstr ""
+msgstr "¡Bienvenido a la Freedom Coop!"
 
 #: work/templates/work/my_dashboard.html:184
 msgid "Welcome to the Open Collaborative Platform!"
-msgstr ""
+msgstr "¡Bienvenido a la Plataforma Abierta Colaborativa!"
 
 #: work/templates/work/my_dashboard.html:191
 msgid "This are the available tools for members:"
-msgstr ""
+msgstr "Estas son las herramientas disponibles para los miembros:"
 
 #: work/templates/work/my_dashboard.html:196
 msgid ""
 "As you already received your login information you are currently a "
 "membership candidate:"
 msgstr ""
+"Como Ud. ya recibión su información de login Ud. ya es un candidato a "
+"miembro:"
 
 #: work/templates/work/my_dashboard.html:199
 msgid ""
@@ -11014,6 +10753,11 @@ msgid ""
 "amount of Faircoins to your new online Faircoin address in the <b>Faircoin "
 "account</b> page."
 msgstr ""
+"Para convertirse en un miembro pleno <b> el próximo paso >/b> es enviar "
+"suficientes Faircoins a su nueva cuenta de Faircoin OCP, para pagar la "
+"cantidad de acciones mencionadas en su formulario de registro de membresía ."
+" Por favor, transfiera por lo menos la cantidad equivalente de Faircoins a "
+"su nueva dirección de Faircoin en la página <b> cuenta de Faircoin </b>."
 
 #: work/templates/work/my_dashboard.html:202
 msgid ""
@@ -11021,73 +10765,92 @@ msgid ""
 "button to make the transaction for your shares. Once pushed you'll become a "
 "full member of Freedom Coop and will have more tools available."
 msgstr ""
+"Cuando Ud. tenga suficientes Faircoins en su nueva cuenta en línea, verá un "
+"botón para efectuar la transacción de sus acciones. Una vez que lo haya "
+"presionado se convertirá en un miembro pleno de Freedom Coop y dispondrá de "
+"más herramientas."
 
 #: work/templates/work/my_dashboard.html:206
 msgid "As a <b>participant</b> in a project, you can collaborate doing tasks."
 msgstr ""
+"Como <b>participante</b>en un proyecto, puedes colaborar cerrando tareas."
 
 #: work/templates/work/my_dashboard.html:210
 msgid ""
 "As a <b>participant candidate</b> in a project, you should be accepted by "
 "the project coordinators before you can collaborate doing project tasks."
 msgstr ""
+"Como <b>aspirante a participante</b> en un proyecto, tienes que ser aceptado"
+" por la Coordinación del proyecto antes de poder tomar tareas de éste."
 
 #: work/templates/work/my_dashboard.html:214
 msgid "The options you already have in OCP are:"
-msgstr ""
+msgstr "Las opciones que Ud. ya tiene en OCP son:"
 
 #: work/templates/work/my_dashboard.html:221
 msgid "Projects:"
-msgstr ""
+msgstr "Proyectos:"
 
 #: work/templates/work/my_dashboard.html:225
 msgid ""
 "Here you can see the projects you are involved in and their structure. If "
 "you are a project coordinator you can manage your project also here."
 msgstr ""
+"Aquí Ud. puede ver los proyectos en los que está involucrado y su "
+"estructura. Si Ud. es un coordinador de proyecto Ud. también puede gestionar"
+" su proyecto aquí. "
 
 #: work/templates/work/my_dashboard.html:228
 msgid "A complete list of tasks related to the projects you are involved in."
 msgstr ""
+"Lista completa de tareas relacionadas con los proyectos en los que "
+"participas"
 
 #: work/templates/work/my_dashboard.html:230
 msgid "Your project open work orders"
-msgstr ""
+msgstr "Ordenes abiertas de trabajo de tu proyecto"
 
 #: work/templates/work/my_dashboard.html:231
 msgid "A complete list of open work orders related your projects."
-msgstr ""
+msgstr "Lista completa de ordenes abiertas de trabajo para tus proyectos"
 
 #: work/templates/work/my_dashboard.html:233
 msgid "Plan project proceses"
-msgstr ""
+msgstr "Procesos de proyecto de plan"
 
 #: work/templates/work/my_dashboard.html:234
 msgid ""
 "Here you can define a work plan for your managed project and setup the "
 "needed process with work orders and tasks."
 msgstr ""
+"Aquí Ud. puede definir un plan de trabajo para el proyecto que gestiona y "
+"configurar el proceso necesario con pedidos de trabajo y tareas. "
 
 #: work/templates/work/my_dashboard.html:237
 msgid "(coming soon)"
-msgstr ""
+msgstr "(próximamente)"
 
 #: work/templates/work/my_dashboard.html:238
 msgid ""
 "To learn how to use OCP and structure your project and create process plans "
 "for it"
 msgstr ""
+"Para aprender cómo usar OCP y estructurar su proyecto y crear planes de "
+"proceso para el mismo"
 
 #: work/templates/work/my_dashboard.html:246
 msgid "Tasks:"
-msgstr ""
+msgstr "Tareas:"
 
 #: work/templates/work/my_dashboard.html:250
 msgid ""
-"The list of active tasks assigned to you by project proceses or simple tasks "
-"that you can also create by yourself. Here you can log the work you are "
+"The list of active tasks assigned to you by project proceses or simple tasks"
+" that you can also create by yourself. Here you can log the work you are "
 "doing."
 msgstr ""
+"La lista de taras activas asignadas a Ud. por procesos de proyecto o taras "
+"simples que Ud. también puede crear por sí mismo. Aquí Ud. puede cargar el "
+"trabajo que está haciendo."
 
 #: work/templates/work/my_dashboard.html:253
 msgid ""
@@ -11095,126 +10858,131 @@ msgid ""
 "them if you want. After that, these tasks will be assigned to you in 'your "
 "tasks' page."
 msgstr ""
+"He aquí una lista de tareas sin asignar que usan sus habilidades, de modo "
+"que Ud. puede asumir algunas de ellas si lo desea. Después de ello, estas "
+"tareas le sarán asignadas en la página \"sus tareas\"."
 
 #: work/templates/work/my_dashboard.html:256
 msgid ""
 "Here you can log other tasks you did related to a project, but are not part "
 "of a defined project process."
 msgstr ""
+"Aquí Ud. puede cargar otras tareas que realizó relacionadas a un proyecto, "
+"pero que no son parte de un proceso de proyecto definido. "
 
 #: work/templates/work/my_dashboard.html:258
 msgid "History of tasks"
-msgstr ""
+msgstr "Historia de tareas:"
 
 #: work/templates/work/my_dashboard.html:259
 msgid "The list of all the tasks you already did and log in the platform."
-msgstr ""
+msgstr "La lista de tareas que Ud. ya realizó y cartó en la plataforma."
 
 #: work/templates/work/my_dashboard.html:267
-#, fuzzy
-#| msgid "Change Project"
 msgid "Joining Projects:"
-msgstr "Modificar proyecto"
+msgstr "Unirse a proyectos:"
 
 #: work/templates/work/my_dashboard.html:282
 msgid ""
-"Here you can manage your online Faircoin account in the OCP. In this account "
-"you will receive internal payments for the tasks you did. You can see your "
-"Faircoin address and you can send here external Faircoins from your personal "
-"wallet (or from Euros using <a href='https://getfaircoin.net' "
-"target='_blank'>https://getfaircoin.net</a>) if you need to pay something in "
-"OCP and have not earned enough Faircoins doing tasks."
+"Here you can manage your online Faircoin account in the OCP. In this account"
+" you will receive internal payments for the tasks you did. You can see your "
+"Faircoin address and you can send here external Faircoins from your personal"
+" wallet (or from Euros using <a href='https://getfaircoin.net' "
+"target='_blank'>https://getfaircoin.net</a>) if you need to pay something in"
+" OCP and have not earned enough Faircoins doing tasks."
 msgstr ""
+"Aquí puedes gestionar tu cuenta de Faircoin on line en OCP. En esta cuenta "
+"podrás recibir pagos internos por las tareas que hayas realizado. Puedes ver"
+" tu dirección de Faircoin y enviar a otras cuentas de Faircoin externas "
+"desde tu monedero personal (o con Euros usando <a "
+"href='https://getfaircoin.net' target='_blank'>https://getfaircoin.net</a>) "
+"si necesitas pagar algo en OCP y no has ganado suficientes Faircoins "
+"realizando tareas."
 
 #: work/templates/work/my_dashboard.html:304
 msgid ""
-"Your FreedomCoop membership request data and a comments thread to comunicate "
-"with the Welcome Team about your particular case or project."
+"Your FreedomCoop membership request data and a comments thread to comunicate"
+" with the Welcome Team about your particular case or project."
 msgstr ""
+"Los datos de tu solicitud de membresía en FreedomCoop y el hilo de "
+"comentarios para comunicar con el Equipo de Bienvenida sobre tu proyecto o "
+"caso particular."
 
 #: work/templates/work/my_dashboard.html:312
 msgid ""
 "In this page you can see and edit your personal data and image, see your "
 "relations to projects, and also define your working skills."
 msgstr ""
+"En esta página puedes ver y editar tu información personal y tu imagen, ver "
+"tus relaciones con proyectos, y también definir tus competencias de trabajo."
 
 #: work/templates/work/my_history.html:69
 msgid "Your tasks history"
-msgstr ""
+msgstr "Tu histórico de Tareas"
 
 #: work/templates/work/my_history.html:72
 #: work/templates/work/non_process_logging.html:50
 #: work/templates/work/take_new_tasks.html:183
-#, fuzzy
-#| msgid "Join Task"
 msgid "Your Tasks"
-msgstr "Unirse a la Tarea"
+msgstr "Tus tareas"
 
 #: work/templates/work/my_history.html:73
 #: work/templates/work/my_tasks.html:194
 #: work/templates/work/non_process_logging.html:51
-#, fuzzy
-#| msgid "Take this task"
 msgid "Take New task"
-msgstr "Asume esta tarea"
+msgstr "Coge  nueva tarea"
 
 #: work/templates/work/my_history.html:74
 #: work/templates/work/my_tasks.html:195
 #: work/templates/work/take_new_tasks.html:184
 msgid "Log Extra Tasks"
-msgstr ""
+msgstr "Anota tareas extra"
 
 #: work/templates/work/my_history.html:89
 msgid "Total Value of Contributions"
-msgstr ""
+msgstr "Valor total de las contribuciones"
 
 #: work/templates/work/my_history.html:93
 msgid "Total Paid for"
-msgstr ""
+msgstr "Total pagado por"
 
 #: work/templates/work/my_history.html:97
 msgid "Total Outstanding"
-msgstr ""
+msgstr "Total pendiente"
 
 #: work/templates/work/my_history.html:101
 msgid "Total Other Distributions"
-msgstr ""
+msgstr "Total Otras Distribuciones"
 
 #: work/templates/work/my_history.html:155
 msgid "Process or Exchange"
-msgstr ""
+msgstr "Proceso o intercambio"
 
 #: work/templates/work/my_history.html:157
 msgid "Paid"
-msgstr ""
+msgstr "Pagado"
 
 #: work/templates/work/my_history.html:158
 msgid "Unpaid"
-msgstr ""
+msgstr "No pagado"
 
 #: work/templates/work/my_tasks.html:191
-#, fuzzy
-#| msgid "New Todo assigned to you"
 msgid "Tasks assigned to"
-msgstr "Nuevo Por Hacer asignado a Us."
+msgstr "Tareas asignadas a"
 
 #: work/templates/work/my_tasks.html:196
 #: work/templates/work/non_process_logging.html:52
 #: work/templates/work/take_new_tasks.html:185
-#, fuzzy
-#| msgid "Todo History"
 msgid "Tasks History"
-msgstr "Historia de por hacer"
+msgstr "Historial de tareas"
 
 #: work/templates/work/my_tasks.html:206
-#, fuzzy
-#| msgid "for process"
 msgid "Your process work"
-msgstr "para procesar"
+msgstr "Tu proceso de trabajo"
 
 #: work/templates/work/my_tasks.html:264
 msgid "Your simple tasks"
-msgstr ""
+msgstr "Tus tareas simples"
 
 #: work/templates/work/my_tasks.html:271 work/templates/work/my_tasks.html:278
 #: work/templates/work/project_work.html:356
@@ -11222,7 +10990,7 @@ msgstr ""
 #: work/templates/work/take_new_tasks.html:200
 #: work/templates/work/take_new_tasks.html:207
 msgid "Add a task"
-msgstr ""
+msgstr "Añadir tarea"
 
 #: work/templates/work/my_tasks.html:295
 #: work/templates/work/take_new_tasks.html:224
@@ -11230,302 +10998,265 @@ msgid ""
 "You don't have a group context to work in, so you can't add or take tasks. "
 "Please ask an administrator to assign you to a group."
 msgstr ""
+"No tienes un contexto de grupo en el que trabajar, así que no puedes añadir "
+"ni tomar tareas. Pide a un admin que te asigne a un grupo."
 
 #: work/templates/work/my_tasks.html:363 work/templates/work/my_tasks.html:642
 #: work/templates/work/project_work.html:507
 #: work/templates/work/take_new_tasks.html:296
 #: work/templates/work/take_new_tasks.html:641
 msgid "Change task"
-msgstr ""
+msgstr "Cambiar tarea"
 
 #: work/templates/work/new_features.html:35
-#, fuzzy
-#| msgid "event date"
 msgid "Deployment date"
-msgstr "fecha de evento"
+msgstr "Fecha de implementacion"
 
 #: work/templates/work/new_features.html:37
-#, fuzzy
-#| msgid "Sessions"
 msgid "Permissions"
-msgstr "Sesiones"
+msgstr "Permisos"
 
 #: work/templates/work/new_features.html:39
 msgid "Screenshot"
-msgstr ""
+msgstr "Captura de pantalla"
 
 #: work/templates/work/no_permission.html:26
-#, fuzzy
-#| msgid "You do not have permission to access the requested page."
 msgid "Sorry, you do not have permission to access the requested page."
-msgstr "No tiene permisos para acceder a la página solicitada."
+msgstr "Lo sentimos no tienes permiso para acceder a la pagina solicitada"
 
 #: work/templates/work/non_process_logging.html:47
 msgid "Log extra tasks for "
-msgstr ""
+msgstr "Anota tareas extra para"
 
 #: work/templates/work/non_process_logging.html:67
 msgid "Credit for income"
-msgstr ""
+msgstr "Crédito para entradas"
 
 #: work/templates/work/order_list.html:5
-#, fuzzy
-#| msgid "Orders"
 msgid "Order List"
-msgstr "Pedidos"
+msgstr "Lista de ordenes"
 
 #: work/templates/work/order_list.html:34
 msgid "Your projects open work orders"
-msgstr ""
+msgstr "Ordenes de trabajo abiertas de tus proyectos"
 
 #: work/templates/work/order_list.html:50
 msgid "New Work Plan"
-msgstr ""
+msgstr "Nuevo plan de trabajo"
 
 #: work/templates/work/order_list.html:100
 #: work/templates/work/project_work.html:324
-#, fuzzy
-#| msgid "Order"
 msgid "Order:"
 msgstr "Pedido"
 
 #: work/templates/work/order_plan.html:100
-#, fuzzy
-#| msgid "Order"
 msgid "Order: "
 msgstr "Pedido"
 
 #: work/templates/work/order_plan.html:109
 #: work/templates/work/plan_work.html:58
 #: work/templates/work/project_work.html:200
-#, fuzzy
-#| msgid "Open Work Orders"
 msgid "Open Orders"
-msgstr "Abrir Pedidos de Trabajo"
+msgstr "Abrir pedidos"
 
 #: work/templates/work/order_plan.html:125
-#, fuzzy
-#| msgid "Due date"
 msgid "Due Date:"
-msgstr "Fecha de vencimiento"
+msgstr "Fecha entrega"
 
 #: work/templates/work/order_plan.html:128
-#, fuzzy
-#| msgid "provider"
 msgid "Provider:"
-msgstr "proveedor"
+msgstr "Proveedor"
 
 #: work/templates/work/order_plan.html:131
-#, fuzzy
-#| msgid "Receive"
 msgid "Receiver:"
-msgstr "Cobrar"
+msgstr "Recipiente"
 
 #: work/templates/work/order_plan.html:253
 msgid "Item"
-msgstr ""
+msgstr "Item"
 
 #: work/templates/work/process_logging.html:169
-#, fuzzy
-#| msgid "Process"
 msgid "Process:"
 msgstr "Proceso"
 
 #: work/templates/work/process_logging.html:204
-#, fuzzy
-#| msgid "Active Orders"
 msgid "View Order"
-msgstr "Pedidos activos"
+msgstr "Ver pedido"
 
 #: work/templates/work/profile.html:81
 msgid "Profile for "
-msgstr ""
+msgstr "Perfil para"
 
 #: work/templates/work/profile.html:109
 msgid "Personal Information"
-msgstr ""
+msgstr "Informacion personal"
 
 #: work/templates/work/profile.html:157
 msgid "More about me"
-msgstr ""
+msgstr "Mas sobre mi"
 
 #: work/templates/work/profile.html:175
 msgid "Telephone"
-msgstr ""
+msgstr "Telefono"
 
 #: work/templates/work/profile.html:195
 msgid "FairCoin account"
-msgstr ""
+msgstr "Cuenta Faircoin"
 
 #: work/templates/work/profile.html:197
 msgid "Manage Account"
-msgstr ""
+msgstr "Gestionar cuenta"
 
 #: work/templates/work/profile.html:233
 msgid "Registered Skills"
-msgstr ""
+msgstr "Habilidades registradas"
 
 #: work/templates/work/profile.html:245
 msgid "Thanks for the suggestion!"
-msgstr ""
+msgstr "Gracias por la sugerencia"
 
 #: work/templates/work/profile.html:253
 msgid "You previously suggested"
-msgstr ""
+msgstr "Sugeriste previamente"
 
 #: work/templates/work/profile.html:264
 msgid "Picture"
-msgstr ""
+msgstr "Imagen"
 
 #: work/templates/work/profile.html:266 work/templates/work/profile.html:283
 msgid "Upload"
-msgstr ""
+msgstr "Subir"
 
 #: work/templates/work/profile.html:274
 msgid "Upload Picture for "
-msgstr ""
+msgstr "Subir imagen para"
 
 #: work/templates/work/project_history.html:8
-#, fuzzy
-#| msgid "Project Contributions for "
 msgid "Project History for "
-msgstr "Contribuciones de Proyecto para"
+msgstr "Historial del proyecto para"
 
 #: work/templates/work/project_history.html:47
-#, fuzzy
-#| msgid "Work Notes History"
 msgid "Work History"
-msgstr "Historia de Notas de Trabajo"
+msgstr "Historial de trabajo"
 
 #: work/templates/work/project_history.html:54
-#, fuzzy
-#| msgid "Show contributions from "
 msgid "Show events from "
-msgstr "Mostrar contribuciones de"
+msgstr "Mostrar eventos desde"
 
 #: work/templates/work/project_resources.html:174
-#, fuzzy
-#| msgid "Inventory"
 msgid "Inventory:"
 msgstr "Inventario"
 
 #: work/templates/work/project_resources.html:182
-#, fuzzy
-#| msgid "Resource"
 msgid "New Resource"
-msgstr "Recurso"
+msgstr "Nuevo recurso"
 
 #: work/templates/work/project_work.html:196
-#, fuzzy
-#| msgid "for project"
 msgid "Your projects tasks"
-msgstr "para proyecto"
+msgstr "Tus tareas de proyectos"
 
 #: work/templates/work/project_work.html:209
 msgid "Show work scheduled during "
-msgstr ""
+msgstr "Mostrar trabajos programados durante"
 
 #: work/templates/work/project_work.html:240
 msgid "Process Task List:"
-msgstr ""
+msgstr "Procesar la Lista de Tareas:"
 
 #: work/templates/work/project_work.html:294
-#, fuzzy
-#| msgid "Notes"
 msgid "Notes:"
-msgstr "Notas"
+msgstr "Notas:"
 
 #: work/templates/work/project_work.html:342
 msgid "No processes scheduled for this date range and project selection."
 msgstr ""
+"No hay procesos programados para este rango de fechas y seleccion de "
+"proyecto"
 
 #: work/templates/work/project_work.html:351
 msgid "Simple Task List:"
-msgstr ""
+msgstr "Lista de tareas simples"
 
 #: work/templates/work/register_skills.html:7
 #: work/templates/work/register_skills.html:46
 msgid "Register Skills for "
-msgstr ""
+msgstr "Registrar habilidades para"
 
 #: work/templates/work/take_new_tasks.html:180
 msgid "Take new tasks for "
-msgstr ""
+msgstr "Coger nuevas tareas"
 
 #: work/templates/work/take_new_tasks.html:193
 msgid "My tasks"
-msgstr ""
+msgstr "Mis tareas"
 
 #: work/templates/work/take_new_tasks.html:444
-#, fuzzy
-#| msgid "Unassigned tasks using my skills"
 msgid "Unassigned process tasks using my skills"
-msgstr "Tareas no asignadas usando mis habilidades"
+msgstr "Tareas de processo no asiganadas usando mis habilidades"
 
 #: work/templates/work/take_new_tasks.html:516
-#, fuzzy
-#| msgid "Unassigned tasks using my skills"
 msgid "Unassigned simple tasks using my skills"
-msgstr "Tareas no asignadas usando mis habilidades"
+msgstr "Tareas simples no asignadas usando mis habilidades"
 
 #: work/templates/work/work_timer.html:140
 msgid "Save and Go Back"
-msgstr ""
+msgstr "Guarda y vuelve"
 
 #: work/templates/work/your_projects.html:105
 msgid "Projects coordinated by you:"
-msgstr ""
+msgstr "Proyectos coordinados por ti"
 
 #: work/templates/work/your_projects.html:182
 msgid "Projects where you participate:"
-msgstr ""
+msgstr "Proyectos en los que participas"
 
 #: work/templates/work/your_projects.html:190
 msgid "Membership feedback"
-msgstr ""
+msgstr "Opinar sobre la membresía"
 
 #: work/templates/work/your_projects.html:190
 #: work/templates/work/your_projects.html:204
 msgid "Freedom Coop's active member"
-msgstr ""
+msgstr "Miembro activo de Freedom coop"
 
 #: work/templates/work/your_projects.html:241
 msgid "Projects you can join:"
-msgstr ""
+msgstr "Proyectos a los que te puedes unir"
 
 #: work/templates/work/your_projects.html:256
 msgid "Joining Process Feedback"
-msgstr ""
+msgstr "Opinar sobre el proceso de alta"
 
 #: work/templates/work_home.html:24
 msgid "Freedom COOP"
-msgstr ""
+msgstr "Freedom COOP"
 
 #: work/templates/work_home.html:25
 msgid "Welcome to the Online Collaborative Platform"
-msgstr ""
+msgstr "Bienvenido a la Plataforma Abierta Colaborativa"
 
 #: work/templates/work_home.html:27
 msgid "To start using the OCP:"
-msgstr ""
+msgstr "Para empezar a usar la PAC"
 
 #: work/templates/work_home.html:29
 msgid "First, you need an account on the system."
-msgstr ""
+msgstr "Primero,necesita una cuenta en el sistema"
 
 #: work/templates/work_home.html:29
 msgid "Request Membership here"
-msgstr ""
+msgstr "Solicita membresia aqui"
 
 #: work/templates/work_home.html:30
 msgid ""
 "You should go to the My Profile page and update your information and "
 "register your skills."
 msgstr ""
+"Ve a Mi Perfil y actualiza tu información, y registra tus habilidades."
 
 #: work/templates/work_home.html:31
 msgid "You can also add yourself to the Map page."
-msgstr ""
+msgstr "También puedes añadirte al Mapa."
 
 #: work/templates/work_home.html:32
 msgid ""
@@ -11533,20 +11264,22 @@ msgid ""
 "Logging or the Process Logging page, depending on the type of work or "
 "project you are involved with."
 msgstr ""
+"Cuando estés, puedes registrar tu trabajo en el Registro de Procesos, o en "
+"el de No Procesos, según el tipo de trabajo que sea."
 
 #: work/templates/work_home.html:35
 msgid "You can also find help on each page, in the upper right corner."
 msgstr ""
+"También encontrarás ayuda en cada página, en la esquina superior derecha."
 
 #: work/views.py:1854 work/views.py:1882
-#, fuzzy
-#| msgid "Usernames can only contain letters, numbers and underscores."
 msgid ""
-"Enter a valid username. This value may contain only letters, numbers and @/./"
-"+/-/_ characters."
+"Enter a valid username. This value may contain only letters, numbers and "
+"@/./+/-/_ characters."
 msgstr ""
-"Los nombres de usuario sólo pueden contener letras, números y subrayados."
+"Mete un nombre de usuario válido. Sólo puede contener letras, números y los "
+"caracteres @ . + - _"
 
 #: work/views.py:3079
 msgid "If you don't find a type that suits, choose a subcategory and click:"
-msgstr ""
+msgstr "Si no encuentras un tipo que encaje, elige una subcategoría y pulsa:"

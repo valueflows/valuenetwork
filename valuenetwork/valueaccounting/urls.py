@@ -551,7 +551,7 @@ urlpatterns += [
     url(r"^validate-resource-type-name/$", valuenetwork.valueaccounting.views.validate_resource_type_name, name="validate_resource_type_name"),
 ]
 
-if settings.USE_FAIRCOIN:
+if 'faircoin' in settings.INSTALLED_APPS:
     urlpatterns += [
         url(r"^request-faircoin-address/(?P<agent_id>\d+)/$", valuenetwork.valueaccounting.views.request_faircoin_address,
             name="request_faircoin_address"),

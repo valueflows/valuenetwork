@@ -16,7 +16,7 @@ import json as simplejson
 from django.db.models.functions import Lower
 from django.conf import settings
 
-from valuenetwork.valueaccounting import faircoin_utils
+from faircoin import utils as faircoin_utils
 from easy_thumbnails.fields import ThumbnailerImageField
 
 """Models based on REA
@@ -563,7 +563,7 @@ class EconomicAgent(models.Model):
             return None
 
     def request_faircoin_address(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         address = self.faircoin_address()
         if not address:
@@ -580,7 +580,7 @@ class EconomicAgent(models.Model):
         return address
 
     def create_faircoin_resource(self, address):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         role_types = AgentResourceRoleType.objects.filter(is_owner=True)
         owner_role_type = None
@@ -615,7 +615,7 @@ class EconomicAgent(models.Model):
             return None
 
     def faircoin_address(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         fcr = self.faircoin_resource()
         if fcr:
@@ -4460,7 +4460,7 @@ class EconomicResource(models.Model):
         return False
 
     def digital_currency_history(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         history = []
         address = self.digital_currency_address
@@ -4469,7 +4469,7 @@ class EconomicResource(models.Model):
         return history
 
     def digital_currency_balance(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         bal = 0
         address = self.digital_currency_address
@@ -4488,7 +4488,7 @@ class EconomicResource(models.Model):
         return bal
 
     def digital_currency_balance_unconfirmed(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return "Not accessible now"
         bal = 0
         unconfirmed = 0
@@ -4517,8 +4517,19 @@ class EconomicResource(models.Model):
             bal = self.newbalance
         return bal
 
+    def balance_in_tx_state_new(self):
+        newtxs = self.events.filter(digital_currency_tx_state="new")
+        newadd = 0
+        for ev in newtxs:
+            if Decimal(ev.quantity):
+                if ev.from_agent == self.owner(): # sended fairs
+                    newadd -= Decimal(ev.quantity)
+                else: # new received fairs
+                    newadd += Decimal(ev.quantity)
+        return newadd
+
     def is_wallet_address(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         address = self.digital_currency_address
         if address:
@@ -4535,7 +4546,7 @@ class EconomicResource(models.Model):
             return False
 
     def spending_limit(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return 0
         limit = 0
         address = self.digital_currency_address
@@ -9263,7 +9274,7 @@ class Commitment(models.Model):
                 if self.fulfillment_events.filter(resource=resource):
                     answer.append(resource)
         return answer
-        
+
     def onhand_for_citation(self):
         answer = []
         rt = self.resource_type
@@ -10018,7 +10029,7 @@ class ValueEquation(models.Model):
             va = None
             #todo faircoin distribution
             to_agent = dist_event.to_agent
-            if money_resource.is_digital_currency_resource() and settings.USE_FAIRCOIN:
+            if money_resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
                 #if testing:
                     # TODO faircoin distribution: shd put this into models
                     # faircoins are the only digital currency we handle now
@@ -10150,7 +10161,7 @@ class ValueEquation(models.Model):
             dist_event.event_date = distribution.distribution_date
             #todo faircoin distribution
             #digital_currency_resources for to_agents were created earlier in this method
-            if dist_event.resource.is_digital_currency_resource() and settings.USE_FAIRCOIN:
+            if dist_event.resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
                 address_origin = self.context_agent.faircoin_address()
                 address_end = dist_event.resource.digital_currency_address
                 # what about network_fee?
@@ -10700,7 +10711,7 @@ class EconomicEvent(models.Model):
         return nexts
 
     def transaction_state(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         state = self.digital_currency_tx_state
         new_state = None
@@ -10720,7 +10731,7 @@ class EconomicEvent(models.Model):
         return state
 
     def to_faircoin_address(self):
-        if not settings.USE_FAIRCOIN:
+        if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         if self.resource.is_digital_currency_resource():
             event_reference = self.event_reference

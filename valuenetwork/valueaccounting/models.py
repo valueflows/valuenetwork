@@ -6839,6 +6839,11 @@ class Process(models.Model):
             event_type__relationship='work',
         )
 
+    def non_work_input_requirements(self):
+        return self.commitments.exclude(
+            event_type__relationship='work').exclude(
+            event_type__relationship='out')
+
     def create_changeable_requirements(self):
         return self.commitments.filter(
         event_type__name="Create Changeable")
@@ -6867,6 +6872,11 @@ class Process(models.Model):
     def work_events(self):
         return self.events.filter(
             event_type__relationship='work')
+
+    def non_work_input_events(self):
+        return self.events.exclude(
+            event_type__relationship='work').exclude(
+            event_type__relationship='out')
 
     def unplanned_work_events(self):
         return self.work_events().filter(commitment__isnull=True)

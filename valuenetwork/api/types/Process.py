@@ -21,24 +21,44 @@ class Process(DjangoObjectType):
 
     inputs = graphene.List(lambda: types.EconomicEvent)
 
+    work_inputs = graphene.List(lambda: types.EconomicEvent)
+
+    non_work_inputs = graphene.List(lambda: types.EconomicEvent)
+
     outputs = graphene.List(lambda: types.EconomicEvent)
 
     committed_inputs = graphene.List(lambda: types.Commitment)
+
+    committed_work_inputs = graphene.List(lambda: types.Commitment)
+
+    committed_non_work_inputs = graphene.List(lambda: types.Commitment)
 
     committed_outputs = graphene.List(lambda: types.Commitment)
 
     next_processes = graphene.List(lambda: types.Process)
 
     previous_processes = graphene.List(lambda: types.Process)
-    
+
     def resolve_inputs(self, args, context, info):
         return self.incoming_events()
+
+    def resolve_work_inputs(self, args, context, info):
+        return self.work_events()
+
+    def resolve_non_work_inputs(self, args, context, info):
+        return self.non_work_input_events()
 
     def resolve_outputs(self, args, context, info):
         return self.outputs()
 
     def resolve_committed_inputs(self, args, context, info):
         return self.incoming_commitments()
+
+    def resolve_committed_work_inputs(self, args, context, info):
+        return self.work_requirements()
+
+    def resolve_committed_non_work_inputs(self, args, context, info):
+        return self.non_work_input_requirements()
 
     def resolve_committed_outputs(self, args, context, info):
         return self.outgoing_commitments()

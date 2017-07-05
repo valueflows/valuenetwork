@@ -564,7 +564,6 @@ fragment coreEventFields on EconomicEvent {
       name
     }
   }
-  note
   affectedResource {
     id
     resourceTaxonomyItem {
@@ -613,10 +612,22 @@ query ($token: String) {
       inputs {
         ...coreEventFields
       }
+      workInputs {
+        ...coreEventFields
+      }
+      nonWorkInputs {
+        ...coreEventFields
+      }
       outputs {
         ...coreEventFields
       }
       committedInputs {
+        ...coreCommitmentFields
+      }
+      committedWorkInputs {
+        ...coreCommitmentFields
+      }
+      committedNonWorkInputs {
         ...coreCommitmentFields
       }
       committedOutputs {

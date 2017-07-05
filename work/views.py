@@ -839,22 +839,23 @@ def members_agent(request, agent_id):
                         res.id = None
                         res.pk = None
                         resarr = res.identifier.split(ag.has_associate.nick)
-                        res.identifier = ag.has_associate.nick+resarr[1]+agent.name #.identifier.split(ag.has_associate.nick)
-                        res.quantity = 1
-                        res.price_per_unit = 0
-                        res.save()
-                        rol = AgentResourceRoleType.objects.filter(is_owner=True)[0]
-                        arr = AgentResourceRole(
-                            agent=agent,
-                            resource=res,
-                            role=rol,
-                            owner_percentage=100
-                        )
-                        arr.save()
-                        #import pdb; pdb.set_trace()
-                        auto_resource += _("To participate in")+" <b>"+ag.has_associate.name+"</b> "
-                        auto_resource += _("you need a")+" \"<b>"+rt.name+"</b>\"... "
-                        auto_resource += _("It has been created for you automatically!")+"<br />"
+                        if len(resarr) > 1:
+                            res.identifier = ag.has_associate.nick+resarr[1]+agent.name #.identifier.split(ag.has_associate.nick)
+                            res.quantity = 1
+                            res.price_per_unit = 0
+                            res.save()
+                            rol = AgentResourceRoleType.objects.filter(is_owner=True)[0]
+                            arr = AgentResourceRole(
+                                agent=agent,
+                                resource=res,
+                                role=rol,
+                                owner_percentage=100
+                            )
+                            arr.save()
+                            #import pdb; pdb.set_trace()
+                            auto_resource += _("To participate in")+" <b>"+ag.has_associate.name+"</b> "
+                            auto_resource += _("you need a")+" \"<b>"+rt.name+"</b>\"... "
+                            auto_resource += _("It has been created for you automatically!")+"<br />"
 
 
     return render(request, "work/members_agent.html", {

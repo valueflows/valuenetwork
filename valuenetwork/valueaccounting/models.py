@@ -6507,7 +6507,11 @@ class Process(models.Model):
     @property #ValueFlows
     def is_finished(self):
         return self.finished
-    
+
+    @property #ValueFlows
+    def is_started(self):
+        return self.started
+
     @property #ValueFlows
     def note(self):
         return self.notes

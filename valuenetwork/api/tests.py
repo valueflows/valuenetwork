@@ -647,6 +647,8 @@ query ($token: String) {
   viewer(token: $token) {
     process(id: 52) {
       name
+      isStarted
+      isFinished
       workingAgents {
         name
         image

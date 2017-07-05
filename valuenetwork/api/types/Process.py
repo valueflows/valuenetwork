@@ -12,6 +12,7 @@ from valuenetwork.api.models import formatAgent
 class Process(DjangoObjectType):
     planned_start = graphene.String(source='planned_start')
     planned_duration = graphene.String(source='planned_duration')
+    is_started = graphene.Boolean(source='is_started')
     is_finished = graphene.Boolean(source='is_finished')
     note = graphene.String(source='note')
 

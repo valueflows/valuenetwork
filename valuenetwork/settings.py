@@ -210,7 +210,8 @@ INSTALLED_APPS = [
     'valuenetwork.api.types.apps.ApiTypesAppConfig',
     #'valuenetwork.api.schemas',
     #'valuenetwork.api.types',
-    
+
+    'faircoin',
 
     # general
     'general',
@@ -306,8 +307,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 BROADCAST_FAIRCOINS_LOCK_WAIT_TIMEOUT = None
-# Set this to False in local_settings.py if don't use faircoin.
-USE_FAIRCOIN = True
+
 #id of the group to send payments to
 SEND_MEMBERSHIP_PAYMENT_TO = "FC MembershipRequest"
 

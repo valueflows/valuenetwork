@@ -839,7 +839,7 @@ def members_agent(request, agent_id):
                         res.id = None
                         res.pk = None
                         resarr = res.identifier.split(ag.has_associate.nick)
-                        if len(resarr) > 1:
+                        if len(resarr) > 1 and not ag.has_associate.nick == 'Freedom Coop':
                             res.identifier = ag.has_associate.nick+resarr[1]+agent.name #.identifier.split(ag.has_associate.nick)
                             res.quantity = 1
                             res.price_per_unit = 0

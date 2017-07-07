@@ -18,7 +18,7 @@ class Query(AgentBase, graphene.AbstractType):
 
     # define input query params
 
-    my_organizations = graphene.List(Organization)
+    #my_organizations = graphene.List(Organization)
 
     organization = graphene.Field(Organization,
                                   id=graphene.Int())
@@ -29,9 +29,9 @@ class Query(AgentBase, graphene.AbstractType):
     # (this gives the projects, collectives, groups that the user agent is any
     # kind of member of)
 
-    def resolve_my_organizations(self, args, context, info):
-        my_agent = self._load_own_agent() # provided by AgentBase
-        return formatAgentList(my_agent.is_member_of())
+    #def resolve_my_organizations(self, args, context, info):
+    #    my_agent = self._load_own_agent() # provided by AgentBase
+    #    return formatAgentList(my_agent.is_member_of())
 
     # load any organisation
 

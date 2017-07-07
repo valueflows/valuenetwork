@@ -171,43 +171,6 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    myOrganizations {
-      id
-      name
-      image
-      note
-      type
-    }
-  }
-}
-
-fragment coreAgentFields on Agent {
-  id
-  name
-  image
-  note
-  type
-}
-query ($token: String) {
-  viewer(token: $token) {
-    myAgent {
-      ...coreAgentFields
-      memberOfOrganizations {
-        id
-        name
-        members {
-          name
-          memberOfOrganizations {
-            name
-          }
-        }
-      }
-    }
-  }
-}
-
-query($token: String) {
-  viewer(token: $token) {
     allAgentRelationshipRoles {
       id
       label

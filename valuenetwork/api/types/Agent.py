@@ -33,7 +33,7 @@ class Agent(graphene.Interface):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
 
-    member_of_organizations = graphene.List(lambda: Organization)
+    #member_of_organizations = graphene.List(lambda: Organization)
 
     owned_economic_resources = graphene.List(lambda: types.EconomicResource,
                                              category=types.EconomicResourceCategory())
@@ -55,11 +55,11 @@ class Agent(graphene.Interface):
 
     # Resolvers
 
-    def resolve_member_of_organizations(self, args, context, info):
-        agent = _load_identified_agent(self)
-        if agent:
-            return formatAgentList(agent.is_member_of())
-        return None
+    #def resolve_member_of_organizations(self, args, context, info):
+    #    agent = _load_identified_agent(self)
+    #    if agent:
+    #        return formatAgentList(agent.is_member_of())
+    #    return None
 
     def resolve_owned_economic_resources(self, args, context, info):
         type = args.get('category', types.EconomicResourceCategory.NONE)
@@ -154,13 +154,13 @@ class Person(DjangoObjectType):
 
 class Organization(DjangoObjectType):
 
-    members = graphene.List(lambda: Agent)
+    #members = graphene.List(lambda: Agent)
 
-    def resolve_members(self, args, context, info):
-        org = _load_identified_agent(self)
-        if org:
-            return formatAgentList(org.members())
-        return None
+    #def resolve_members(self, args, context, info):
+    #    org = _load_identified_agent(self)
+    #    if org:
+    #        return formatAgentList(org.members())
+    #    return None
 
 
     # Django model binding

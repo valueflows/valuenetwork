@@ -1,6 +1,7 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load thumbnail %}
 
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -101,9 +102,25 @@
     <div class="base-form">
       <h2>
         {% trans "Request to join:" %}
-      </h2>
+      </h2><br>
       <h1>
-        {% if project.agent.url %}<a href="{{ project.agent.url }}" target="_blank">{{ project.agent.name }}</a>{% else %} {{ project.agent.name }} {% endif %}
+        {% if project.agent.url %}<a href="{{ project.agent.url }}" target="_blank">
+          {% if project.agent.photo %}
+              <img src="{% thumbnail project.agent.photo 400x400 %}" title="{{ project.agent.name }}" />
+          {% elif project.agent.photo_url %}
+              <img src="{{ project.agent.photo_url }}" width="400" />
+          {% else %}
+              {{ project.agent.name }}
+          {% endif %}
+        </a>{% else %}
+          {% if project.agent.photo %}
+              <img src="{% thumbnail project.agent.photo 400x400 %}" title="{{ project.agent.name }}" />
+          {% elif project.agent.photo_url %}
+              <img src="{{ project.agent.photo_url }}" width="400" />
+          {% else %}
+              {{ project.agent.name }}
+          {% endif %}
+        {% endif %}
       </h1>
       <p>&nbsp;</p>
       <!-- <p>

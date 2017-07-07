@@ -67,7 +67,7 @@ body {
                 <img src="{% thumbnail project.agent.photo 500x500 %}" title="{{ project.agent.name }}">
             {% endif %}
         </h4>
-        <h1>{% if not project.agent.photo_url or project.agent.photo %}{{ project.agent.name }}{% endif %}</h1>
+        {% if not project.agent.photo_url and not project.agent.photo %}<h1>{{ project.agent.name }}</h1>{% endif %}
         <br />
     <table class="landing" border="0" align="center" style="text-align:center">
       <tr>

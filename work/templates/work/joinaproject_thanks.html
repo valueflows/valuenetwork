@@ -31,7 +31,7 @@
             <br />
             <a href="{{ agent.url }}">
               {% if project.agent.photo %}
-                <img src="{% thumbnail project.agent.photo photo_size %}" title="{{ project.agent.name }}" />
+                <img src="{% thumbnail project.agent.photo 400x400 %}" title="{{ project.agent.name }}" />
               {% elif project.agent.photo_url %}
                 <img src="{{ project.agent.photo_url }}" width="400" />
               {% endif %}

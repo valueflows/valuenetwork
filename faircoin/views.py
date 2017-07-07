@@ -10,7 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 
-from valuenetwork.valueaccounting.models import EconomicResource, EconomicResourceType, Help
+from valuenetwork.valueaccounting.models import EconomicResource, EconomicEvent,\
+    EconomicResourceType, Help
 from valuenetwork.valueaccounting.forms import EconomicResourceForm
 from valuenetwork.valueaccounting.service import ExchangeService
 from faircoin import utils as faircoin_utils

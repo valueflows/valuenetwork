@@ -22,6 +22,5 @@ class AgentRelationshipRole(DjangoObjectType):
         model = AgentAssociationType
         only_fields = ('id', 'label', 'inverse_label')
 
-
     def resolve_category(self, args, *rargs):
         return self.category

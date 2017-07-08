@@ -7,7 +7,8 @@
 #
 
 import graphene
-from valuenetwork.valueaccounting.models import EconomicAgent
+from graphene_django.types import DjangoObjectType
+from valuenetwork.valueaccounting.models import EconomicAgent, AgentType
 from work.models import Project
 from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Organization
@@ -21,11 +22,19 @@ class JoiningStyle(graphene.Enum):
     MODERATED = "moderated"
     AUTOJOIN = "autojoin"
 
+
 class Visibility(graphene.Enum):
     NONE = None
     PRIVATE = "private"
     FCMEMBERS = "only FC members"
     PUBLIC = "public"
+
+
+class OrganizationType(DjangoObjectType):
+
+    class Meta:
+        model = AgentType
+        only_fields = ('id', 'name')
 
 
 class Query(AgentBase, graphene.AbstractType):
@@ -73,3 +82,10 @@ class Query(AgentBase, graphene.AbstractType):
         for org in orgs:
             org_agents.append(formatAgent(org.agent))
         return org_agents
+
+    #types of organization
+
+    organization_types = graphene.List(OrganizationType)
+
+    def resolve_organization_types(self, args, context, info):
+        return AgentType.objects.exclude(party_type="individual")

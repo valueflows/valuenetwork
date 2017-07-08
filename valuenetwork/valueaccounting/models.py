@@ -582,44 +582,17 @@ class EconomicAgent(models.Model):
     def create_faircoin_resource(self, address):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
-        role_types = AgentResourceRoleType.objects.filter(is_owner=True)
-        owner_role_type = None
-        if role_types:
-            owner_role_type = role_types[0]
-        resource_types = EconomicResourceType.objects.filter(
-            behavior="dig_acct")
-        if resource_types.count() == 0:
-            raise ValidationError("Cannot create digital currency resource for " + self.nick + " because no digital currency account ResourceTypes.")
-            return None
-        if resource_types.count() > 1:
-            raise ValidationError("Cannot create digital currency resource for " + self.nick + ", more than one digital currency account ResourceTypes.")
-            return None
-        resource_type = resource_types[0]
-        if owner_role_type:
-            # resource type has unit
-            va = EconomicResource(
-                resource_type=resource_type,
-                identifier="Faircoin Ocp Account for " + self.nick,
-                digital_currency_address=address,
-            )
-            va.save()
-            arr = AgentResourceRole(
-                agent=self,
-                role=owner_role_type,
-                resource=va,
-            )
-            arr.save()
-            return va
-        else:
-            raise ValidationError("Cannot create digital currency resource for " + self.nick + " because no owner AgentResourceRoleTypes.")
-            return None
+        from valuenetwork.valueaccounting.service import ExchangeService
+        service = ExchangeService.get()
+        resource = service.create_faircoin_resource(self, address)
+        return resource
 
     def faircoin_address(self):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         fcr = self.faircoin_resource()
         if fcr:
-            return fcr.digital_currency_address
+            return fcr.faircoin_address.address
         else:
             return None
 
@@ -627,7 +600,7 @@ class EconomicAgent(models.Model):
         candidates = self.agent_resource_roles.filter(
             role__is_owner=True,
             resource__resource_type__behavior="dig_acct",
-            resource__digital_currency_address__isnull=False)
+            resource__faircoin_address__address__isnull=False)
         if candidates:
             return candidates[0].resource
         else:
@@ -4447,13 +4420,13 @@ class EconomicResource(models.Model):
                 id_str,
             ])
     def is_digital_currency_resource(self):
-        if self.digital_currency_address:
+        if self.faircoin_address.address:
             return True
         else:
             return False
 
     def address_is_activated(self):
-        address = self.digital_currency_address
+        address = self.faircoin_address.address
         if address:
             if address != "address_requested":
                 return True
@@ -4463,7 +4436,7 @@ class EconomicResource(models.Model):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         history = []
-        address = self.digital_currency_address
+        address = self.faircoin_address.address
         if address:
             history = faircoin_utils.get_address_history(address)
         return history
@@ -4472,7 +4445,7 @@ class EconomicResource(models.Model):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         bal = 0
-        address = self.digital_currency_address
+        address = self.faircoin_address.address
         if address:
           if not hasattr(self, 'balance'):
             try:
@@ -4492,7 +4465,7 @@ class EconomicResource(models.Model):
             return "Not accessible now"
         bal = 0
         unconfirmed = 0
-        address = self.digital_currency_address
+        address = self.faircoin_address.address
         if address:
           if not hasattr(self, 'newbalance'):
             try:
@@ -4531,7 +4504,7 @@ class EconomicResource(models.Model):
     def is_wallet_address(self):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
-        address = self.digital_currency_address
+        address = self.faircoin_address.address
         if address:
           if self.is_address_requested():
             return True
@@ -4539,7 +4512,7 @@ class EconomicResource(models.Model):
               return faircoin_utils.is_mine(address)
 
     def is_address_requested(self):
-        address = self.digital_currency_address
+        address = self.faircoin_address.address
         if address == "address_requested":
             return True
         else:
@@ -4549,7 +4522,7 @@ class EconomicResource(models.Model):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return 0
         limit = 0
-        address = self.digital_currency_address
+        address = self.faircoin_address.address
         if address and self.is_wallet_address():
             balance = self.digital_currency_balance()
             self.balance = balance
@@ -10163,7 +10136,7 @@ class ValueEquation(models.Model):
             #digital_currency_resources for to_agents were created earlier in this method
             if dist_event.resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
                 address_origin = self.context_agent.faircoin_address()
-                address_end = dist_event.resource.digital_currency_address
+                address_end = dist_event.resource.faircoin_address.address
                 # what about network_fee?
                 #handle when tx is broadcast
                 quantity = dist_event.quantity
@@ -10173,10 +10146,16 @@ class ValueEquation(models.Model):
                     state = "pending"
                     if broadcasted:
                         state = "broadcast"
-                    dist_event.digital_currency_tx_hash = tx_hash
-                dist_event.digital_currency_tx_state = state
-                dist_event.event_reference=address_end
             dist_event.save()
+            if dist_event.resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
+                from faircoin.models import FaircoinTransaction
+                dist_event_tx = FaircoinTransaction(
+                    event=dist_event,
+                    tx_hash=tx_hash,
+                    tx_state=state,
+                    to_address=address_end,
+                )
+                dist_event_tx.save()
             to_resource = dist_event.resource
             to_resource.quantity += dist_event.quantity
             to_resource.save()
@@ -10716,7 +10695,7 @@ class EconomicEvent(models.Model):
         state = self.digital_currency_tx_state
         new_state = None
         if state == "external" or state == "pending" or state == "broadcast":
-            tx = self.digital_currency_tx_hash
+            tx = self.faircoin_transaction.tx_hash
             if tx:
                 confirmations, timestamp = faircoin_utils.get_confirmations(tx)
                 if confirmations > 0:
@@ -10737,7 +10716,7 @@ class EconomicEvent(models.Model):
             event_reference = self.event_reference
             if event_reference:
                 answer = event_reference
-                to_resources = EconomicResource.objects.filter(digital_currency_address=event_reference)
+                to_resources = EconomicResource.objects.filter(faircoin_address__address=event_reference)
                 if to_resources:
                     answer = to_resources[0].identifier
         return answer

@@ -31,14 +31,14 @@
         <legend>
             {% trans "Event History for Resource" %} {{ resource }}&nbsp;&nbsp;
             {% if agent %}
-                {% if not resource.digital_currency_address %}
+                {% if not resource.faircoin_address.address %}
                     <a href="#adjustmentForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Adjust Quantity" %}</a>&nbsp;&nbsp;
                 {% endif %}
             {% endif %}
         </legend>
         
         <p>
-            {% if resource.digital_currency_address %}
+            {% if resource.faircoin_address.address %}
                 {% trans "Current Balance" %}: {{ resource.digital_currency_balance }} {{ resource.unit_of_quantity }}
             {% else %}
                 {% trans "Current Quantity" %}: {{ resource.quantity }} {{ resource.unit_of_quantity }}
@@ -46,7 +46,7 @@
         </p>
         
         {% if agent %}
-            {% if not resource.digital_currency_address %}
+            {% if not resource.faircoin_address.address %}
                 <div class="modal hide fade" id="adjustmentForm" tabindex="-1" role="dialog" aria-labelledby=adjustment-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -84,7 +84,7 @@
                 <th>{% trans "URL" %}</th>
                 <th>{% trans "Description" %}</th>
                 <th>{% trans "Process" %}</th>
-                {% if resource.digital_currency_address %}
+                {% if resource.faircoin_address.address %}
                     <th>{% trans "To Address" %}</th>
                     <th>{% trans "Tx State" %}</th>
                     <th>{% trans "Chain" %}</th>
@@ -111,12 +111,12 @@
                                 <a href="{{ event.process.get_absolute_url }}" target="_blank">{{ event.process.name }}</a>
                             {% endif %}
                         </td>
-                        {% if resource.digital_currency_address %}
+                        {% if resource.faircoin_address.address %}
                             <td>{{ event.to_faircoin_address }}</td>
                             <td>{{ event.transaction_state }}</td>
                             <td>
-                            {% if event.digital_currency_tx_hash %}
-                                <a href="https://chain.fair-coin.org/tx/{{ event.digital_currency_tx_hash }}" target="_blank">{% trans "On Chain" %}</a>
+                            {% if event.faircoin_transaction.tx_hash %}
+                                <a href="https://chain.fair-coin.org/tx/{{ event.faircoin_transaction.tx_hash }}" target="_blank">{% trans "On Chain" %}</a>
                             {% endif %}
                         </td>
                         {% endif %}

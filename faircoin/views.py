@@ -54,13 +54,13 @@ def manage_faircoin_account(request, resource_id):
 
     wallet = faircoin_utils.is_connected()
     if wallet:
-        is_wallet_address = faircoin_utils.is_mine(resource.digital_currency_address)
+        is_wallet_address = faircoin_utils.is_mine(resource.faircoin_address.address)
         if not is_wallet_address:
             if resource.is_address_requested(): is_wallet_address = True
         if is_wallet_address:
             send_coins_form = SendFairCoinsForm(agent=resource.owner())
             try:
-                balances = faircoin_utils.get_address_balance(resource.digital_currency_address)
+                balances = faircoin_utils.get_address_balance(resource.faircoin_address.address)
                 confirmed_balance = Decimal(balances[0]) / FAIRCOIN_DIVISOR
                 unconfirmed_balance =  Decimal(balances[0] + balances[1]) / FAIRCOIN_DIVISOR
                 unconfirmed_balance += resource.balance_in_tx_state_new()
@@ -142,7 +142,7 @@ def transfer_faircoins(request, resource_id):
             address_end = data["to_address"]
             quantity = data["quantity"]
             notes = data["description"]
-            address_origin = resource.digital_currency_address
+            address_origin = resource.faircoin_address.address
             network_fee = faircoin_utils.network_fee()
             if address_origin and address_end and network_fee:
                 exchange_service = ExchangeService.get()
@@ -172,7 +172,7 @@ def faircoin_history(request, resource_id):
             exchange_service = ExchangeService.get()
             exchange_service.include_blockchain_tx_as_event(resource.owner(), resource)
             try:
-                balances = faircoin_utils.get_address_balance(resource.digital_currency_address)
+                balances = faircoin_utils.get_address_balance(resource.faircoin_address.address)
                 confirmed_balance = Decimal(balances[0]) / FAIRCOIN_DIVISOR
                 unconfirmed_balance =  Decimal(balances[0] + balances[1]) / FAIRCOIN_DIVISOR
                 unconfirmed_balance += resource.balance_in_tx_state_new()

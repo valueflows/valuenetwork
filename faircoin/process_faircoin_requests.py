@@ -79,7 +79,7 @@ def create_address_for_agent(agent):
             logger.critical("an exception occurred in creating a FairCoin address: {0}".format(e))
 
         if (address is not None) and (address != 'ERROR'):
-            used = EconomicResource.objects.filter(digital_currency_address=address)
+            used = EconomicResource.objects.filter(faircoin_address__address=address)
             if used.count():
                 msg = " ".join(["address already existent! (count[0]=", str(used[0]), ") when creating new address for", agent.name])
                 logger.critical(msg)
@@ -94,7 +94,7 @@ def create_address_for_resource(resource):
     agent = resource.owner()
     address = create_address_for_agent(agent)
     if address:
-        resource.digital_currency_address = address
+        resource.faircoin_address.address = address
         resource.save()
         return True
     else:
@@ -105,7 +105,7 @@ def create_address_for_resource(resource):
 def create_requested_addresses():
     try:
         requests = EconomicResource.objects.filter(
-            digital_currency_address="address_requested")
+            faircoin_address__address="address_requested")
 
         msg = " ".join(["new FairCoin address requests count:", str(requests.count())])
         logger.debug(msg)
@@ -150,15 +150,15 @@ def broadcast_tx():
             for event in events:
                 if event.resource:
                     if event.event_type.name=="Give":
-                        address_origin = event.resource.digital_currency_address
+                        address_origin = event.resource.faircoin_address.address
                         address_end = event.event_reference
                     elif event.event_type.name=="Distribution":
                         address_origin = event.from_agent.faircoin_address()
-                        address_end = event.resource.digital_currency_address
+                        address_end = event.resource.faircoin_address.address
                     amount = float(event.quantity) * 1.e6 # In satoshis
                     if amount < 1001:
                         event.digital_currency_tx_state = "broadcast"
-                        event.digital_currency_tx_hash = "Null"
+                        event.faircoin_transaction.tx_hash = "Null"
                         event.save()
                         continue
 
@@ -176,14 +176,14 @@ def broadcast_tx():
                     elif tx_hash:
                         successful_events += 1
                         event.digital_currency_tx_state = "broadcast"
-                        event.digital_currency_tx_hash = tx_hash
+                        event.faircoin_transaction.tx_hash = tx_hash
                         event.save()
                         transfer = event.transfer
                         if transfer:
                             revent = transfer.receive_event()
                             if revent:
                                 revent.digital_currency_tx_state = "broadcast"
-                                revent.digital_currency_tx_hash = tx_hash
+                                revent.faircoin_transaction.tx_hash = tx_hash
                                 revent.save()
                         msg = " ".join([ "Broadcasted tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
                         logger.info(msg)

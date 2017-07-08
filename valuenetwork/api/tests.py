@@ -1,4 +1,8 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
+from valuenetwork.valueaccounting.models import *
+from valuenetwork.api.models import *
+from .schema import schema
 
 
 class AgentSchemaTest(TestCase):
@@ -11,21 +15,71 @@ class AgentSchemaTest(TestCase):
         django.setup()
 
     def setUp(self):
-        from django.contrib.auth.models import User
-        from valuenetwork.valueaccounting.models import EconomicAgent, AgentAssociation, AgentType
+        at_person = AgentType.objects.get(name="Individual")
+        at_org = AgentType.objects.get(name="Organization")
+        aat_member = AgentAssociationType.objects.get(identifier="member")
+        aat_supplier = AgentAssociationType.objects.get(identifier="supplier")
         test_user, _ = User.objects.get_or_create(username='testUser11222')
         test_user.set_password('123456')
         test_user.save()
-        test_agent, _ = EconomicAgent.objects.get_or_create(nick='testUser11222', agent_type_id=1)
+        test_agent, _ = EconomicAgent.objects.get_or_create(nick='testUser11222', agent_type=at_person)
         test_agent.name = 'testUser11222'
         if test_user not in test_agent.users.all():
             from valuenetwork.valueaccounting.models import AgentUser
             agent_user, _ = AgentUser.objects.get_or_create(agent=test_agent, user=test_user)
             test_agent.users.add(agent_user)
         test_agent.save()
+        org1 = EconomicAgent(
+            name="org1",
+            nick="org1",
+            agent_type=at_org,
+            )
+        org1.save()
+        org2 = EconomicAgent(
+            name="org2",
+            nick="org2",
+            agent_type=at_org,
+            )
+        org2.save()
+        another_person = EconomicAgent(
+            name="not user",
+            nick="not user",
+            agent_type=at_person,
+            )
+        another_person.save()
+        supplier = EconomicAgent(
+            name="supp1",
+            nick="supp1",
+            agent_type=at_org,
+            )
+        supplier.save()
+        test_agent_org1 = AgentAssociation(
+            is_associate=test_agent,
+            has_associate=org1,
+            association_type=aat_member,
+            )
+        test_agent_org1.save()
+        another_person_org1 = AgentAssociation(
+            is_associate=another_person,
+            has_associate=org1,
+            association_type=aat_member,
+            )
+        another_person_org1.save()
+        test_agent_org2 = AgentAssociation(
+            is_associate=test_agent,
+            has_associate=org2,
+            association_type=aat_member,
+            )
+        test_agent_org2.save()
+        supplier_org1 = AgentAssociation(
+            is_associate=supplier,
+            has_associate=org1,
+            association_type=aat_supplier,
+            )
+        supplier_org1.save()
+        
 
     def test_basic_me_query(self):
-        from .schema import schema
 
         result = schema.execute('''
         mutation {
@@ -49,7 +103,6 @@ class AgentSchemaTest(TestCase):
         self.assertEqual('testUser11222', result.data['viewer']['myAgent']['name'])
 
     def test_change_password(self):
-        from .schema import schema
 
         result = schema.execute('''
                 mutation {
@@ -60,7 +113,6 @@ class AgentSchemaTest(TestCase):
                 ''')
         call_result = result.data['createToken']
         token = call_result['token']
-        from django.contrib.auth.models import User
         user = User.objects.get_by_natural_key('testUser11222')
         user.set_password('654321')
         user.save()
@@ -77,6 +129,292 @@ class AgentSchemaTest(TestCase):
         self.assertEqual(None, result.data['viewer'])
         self.assertTrue(len(result.errors) == 1)
         self.assertEqual('Invalid password', str(result.errors[0]))
+
+    def test_single_agent(self):
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''')
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
+
+        query = '''
+                query {
+                  viewer(token: "''' + token + '''") {
+                    agent(id:''' + str(test_agent.id) + ''') {
+                      name
+                    }
+                  }
+                }
+                '''
+        result = schema.execute(query)
+        self.assertEqual('testUser11222', result.data['viewer']['agent']['name'])
+        self.assertTrue(len(result) == 1)
+
+    def test_all_agents(self):
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''')
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
+
+        query = '''
+                query {
+                  viewer(token: "''' + token + '''") {
+                    allAgents {
+                      name
+                      type
+                      agentRelationships {
+                        id
+                        subject {
+                          name
+                          type
+                        }
+                        relationship {
+                          label
+                          category
+                        }
+                        object {
+                          name
+                          type
+                        }
+                      }
+                    }
+                  }
+                }
+                '''
+        result = schema.execute(query)
+        self.assertTrue(len(result) == 4)
+
+'''
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:39) {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allAgents {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    person(id:6) {
+      id
+      name
+      image
+      note
+      type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allPeople {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    organization(id:26) {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allOrganizations {
+      id
+      name
+      image
+      note
+      type
+      __typename
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    fcOrganizations (visibility:"public", joiningStyle:"moderated") {
+      id
+      name
+      image
+      type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allAgentRelationshipRoles {
+      id
+      label
+      inverseLabel
+      category
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agentRelationship(id:20) {
+      subject {
+        name
+        type
+      }
+      relationship {
+        label
+        category
+      }
+      object {
+        name
+        type
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allAgentRelationships {
+      id
+      subject {
+        name
+        type
+      }
+      relationship {
+        label
+        category
+      }
+      object {
+        name
+        type
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationships {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationships(category: MEMBER) {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationships(roleId: 2) {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRoles {
+        label
+        category
+      }
+    }
+  }
+}    
+'''
+    
 
 '''
 # test queries, full coverage

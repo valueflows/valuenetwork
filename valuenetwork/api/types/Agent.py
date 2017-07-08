@@ -154,17 +154,6 @@ class Person(DjangoObjectType):
 
 class Organization(DjangoObjectType):
 
-    #members = graphene.List(lambda: Agent)
-
-    #def resolve_members(self, args, context, info):
-    #    org = _load_identified_agent(self)
-    #    if org:
-    #        return formatAgentList(org.members())
-    #    return None
-
-
-    # Django model binding
-
     class Meta:
         interfaces = (Agent, )
         model = OrganizationModel #EconomicAgent

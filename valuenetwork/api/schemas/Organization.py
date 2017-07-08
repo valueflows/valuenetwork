@@ -7,31 +7,39 @@
 #
 
 import graphene
-
 from valuenetwork.valueaccounting.models import EconomicAgent
-
+from work.models import Project
 from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Organization
 from valuenetwork.api.models import formatAgent, formatAgentList
+
+
+# Visibility and Joining Style are from the OCP work app, and at this point include hard-codings for Freedom Coop
+
+class JoiningStyle(graphene.Enum):
+    NONE = None
+    MODERATED = "moderated"
+    AUTOJOIN = "autojoin"
+
+class Visibility(graphene.Enum):
+    NONE = None
+    PRIVATE = "private"
+    FCMEMBERS = "only FC members"
+    PUBLIC = "public"
+
 
 class Query(AgentBase, graphene.AbstractType):
 
     # define input query params
 
-    #my_organizations = graphene.List(Organization)
-
     organization = graphene.Field(Organization,
                                   id=graphene.Int())
 
     all_organizations = graphene.List(Organization)
-
-    # load context agents that 'me' is related to with 'member' or 'manager' behavior
-    # (this gives the projects, collectives, groups that the user agent is any
-    # kind of member of)
-
-    #def resolve_my_organizations(self, args, context, info):
-    #    my_agent = self._load_own_agent() # provided by AgentBase
-    #    return formatAgentList(my_agent.is_member_of())
+    
+    fc_organizations = graphene.List(Organization,
+                                     joining_style=graphene.String(),
+                                     visibility=graphene.String())
 
     # load any organisation
 
@@ -50,3 +58,18 @@ class Query(AgentBase, graphene.AbstractType):
 
     def resolve_all_organizations(self, args, context, info):
         return formatAgentList(EconomicAgent.objects.exclude(agent_type__party_type="individual"))
+
+    # organizations with Freedom Coop filtering options
+
+    def resolve_fc_organizations(self, args, context, info):
+        joining_style = args.get("joining_style")
+        visibility = args.get("visibility")
+        orgs = Project.objects.all()
+        if visibility:
+            orgs = orgs.filter(visibility=visibility)
+        if joining_style:
+            orgs = orgs.filter(joining_style=joining_style)
+        org_agents = []
+        for org in orgs:
+            org_agents.append(formatAgent(org.agent))
+        return org_agents

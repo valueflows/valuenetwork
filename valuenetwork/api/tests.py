@@ -285,6 +285,14 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
+    organizationTypes {
+      name
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
     allAgentRelationshipRoles {
       id
       label

@@ -129,7 +129,7 @@ def broadcast_tx():
 
     try:
         events = EconomicEvent.objects.filter(
-            faircoin_address__tx_state="new").order_by('pk')
+            faircoin_transaction__tx_state="new").order_by('pk')
         events = events.filter(
             Q(event_type__name='Give')|Q(event_type__name='Distribution'))
         msg = " ".join(["new FairCoin event count:", str(events.count())])

@@ -182,12 +182,18 @@ class ExchangeService(object):
             to_agent=to_agent,
             resource_type=resource.resource_type,
             resource=resource,
-            digital_currency_tx_state=state,
             quantity=qty,
             transfer=transfer,
             event_reference=recipient,
         )
         event.save()
+        fairtx = FaircoinTransaction(
+            event=event,
+            tx_state=state,
+            to_address=recipient,
+        )
+        fairtx.save()
+
         if to_resource:
             # network_fee is subtracted from quantity
             # so quantity is correct for the giving event
@@ -201,12 +207,18 @@ class ExchangeService(object):
                 to_agent=to_agent,
                 resource_type=to_resource.resource_type,
                 resource=to_resource,
-                digital_currency_tx_state=state,
                 quantity=quantity,
                 transfer=transfer,
                 event_reference=recipient,
             )
             event.save()
+            fairtx = FaircoinTransaction(
+                event=event,
+                tx_state=state,
+                to_address=recipient,
+            )
+            fairtx.save()
+
         return exchange
 
     def include_blockchain_tx_as_event(self, agent, resource):

@@ -4632,7 +4632,7 @@ class EconomicResource(models.Model):
                 balance = faircoin_utils.get_address_balance(address)
                 balance1 = balance[0]
                 unconfirmed = balance[1]+balance[2] # the response is triple with unmature and unconfirmed (negative)
-                newtxs = self.events.filter(digital_currency_tx_state="new")
+                newtxs = self.events.filter(faircoin_transaction__tx_state="new")
                 newadd = 0
                 for ev in newtxs:
                   if Decimal(ev.quantity):
@@ -4651,7 +4651,7 @@ class EconomicResource(models.Model):
         return bal
 
     def balance_in_tx_state_new(self):
-        newtxs = self.events.filter(digital_currency_tx_state="new")
+        newtxs = self.events.filter(faircoin_transaction__tx_state="new")
         newadd = 0
         for ev in newtxs:
             if Decimal(ev.quantity):
@@ -11051,7 +11051,7 @@ class EconomicEvent(models.Model):
     def transaction_state(self):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
-        state = self.digital_currency_tx_state
+        state = self.faircoin_transaction.tx_state
         new_state = None
         if state == "external" or state == "pending" or state == "broadcast":
             tx = self.faircoin_transaction.tx_hash
@@ -11064,8 +11064,9 @@ class EconomicEvent(models.Model):
                     new_state = "confirmed"
         if new_state:
             state = new_state
-            self.digital_currency_tx_state = new_state
-            self.save()
+            fairtx = self.faircoin_transaction
+            fairtx.tx_state = new_state
+            fairtx.save()
         return state
 
     def to_faircoin_address(self):

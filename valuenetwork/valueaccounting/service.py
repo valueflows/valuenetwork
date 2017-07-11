@@ -1,9 +1,12 @@
 import datetime
 from decimal import *
+
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from valuenetwork.valueaccounting.models import (
     EconomicResource,
+    EconomicResourceType,
     EventType,
     Transfer,
     TransferType,
@@ -11,9 +14,12 @@ from valuenetwork.valueaccounting.models import (
     ExchangeType,
     Exchange,
     EconomicEvent,
+    AgentResourceRole,
+    AgentResourceRoleType,
 )
 
 from faircoin import utils as faircoin_utils
+from faircoin.models import FaircoinAddress, FaircoinTransaction
 
 class ExchangeService(object):
     @classmethod
@@ -123,7 +129,7 @@ class ExchangeService(object):
     def send_faircoins(self, from_agent, recipient, qty, resource, notes=None):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
-        to_resources = EconomicResource.objects.filter(digital_currency_address=recipient)
+        to_resources = EconomicResource.objects.filter(faircoin_address__address=recipient)
         to_resource = None
         to_agent = None
         if to_resources:
@@ -206,7 +212,7 @@ class ExchangeService(object):
     def include_blockchain_tx_as_event(self, agent, resource):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return []
-        faircoin_address = str(resource.digital_currency_address)
+        faircoin_address = str(resource.faircoin_address.address)
         tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
         if not tx_in_blockchain: # Something wrong in daemon or network.
             return []
@@ -214,7 +220,7 @@ class ExchangeService(object):
         event_list = resource.events.all()
         tx_in_ocp = []
         for event in event_list:
-            tx_in_ocp.append(str(event.digital_currency_tx_hash))
+            tx_in_ocp.append(str(event.faircoin_transaction.tx_hash))
 
         tx_included = []
         for tx in tx_in_blockchain:
@@ -254,13 +260,56 @@ class ExchangeService(object):
                         to_agent=agent,
                         resource_type=resource.resource_type,
                         resource=resource,
-                        digital_currency_tx_hash=str(tx[0]),
-                        digital_currency_tx_state=state,
                         quantity=qty,
                         transfer=transfer,
                         event_reference=faircoin_address
                     )
                     event.save()
-
+                    fairtx = FaircoinTransaction(
+                        event=event,
+                        tx_hash=str(tx[0]),
+                        tx_state=state,
+                        to_address=faircoin_address,
+                    )
+                    fairtx.save()
                     tx_included.append(str(tx[0]))
         return tx_included
+
+    def create_faircoin_resource(self, agent, address):
+        if 'faircoin' not in settings.INSTALLED_APPS:
+            return None
+        role_types = AgentResourceRoleType.objects.filter(is_owner=True)
+        owner_role_type = None
+        if role_types:
+            owner_role_type = role_types[0]
+        resource_types = EconomicResourceType.objects.filter(
+            behavior="dig_acct")
+        if resource_types.count() == 0:
+            raise ValidationError("Cannot create digital currency resource for " + agent.nick + " because no digital currency account ResourceTypes.")
+            return None
+        if resource_types.count() > 1:
+            raise ValidationError("Cannot create digital currency resource for " + agent.nick + ", more than one digital currency account ResourceTypes.")
+            return None
+        resource_type = resource_types[0]
+        if owner_role_type:
+            # resource type has unit
+            va = EconomicResource(
+                resource_type=resource_type,
+                identifier="Faircoin Ocp Account for " + agent.nick,
+            )
+            va.save()
+            fairaddress = FaircoinAddress(
+                resource=va,
+                address=address,
+            )
+            fairaddress.save()
+            arr = AgentResourceRole(
+                agent=agent,
+                role=owner_role_type,
+                resource=va,
+            )
+            arr.save()
+            return va
+        else:
+            raise ValidationError("Cannot create digital currency resource for " + agent.nick + " because no owner AgentResourceRoleTypes.")
+            return None

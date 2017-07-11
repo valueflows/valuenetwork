@@ -20,13 +20,13 @@ class Command(BaseCommand):
             fcr = agent.faircoin_resource()
             if fcr is None:
                 continue
-            if fcr.digital_currency_address:
+            if fcr.faircoin_address.address:
                 found += 1
-                if is_address_in_wallet(fcr.digital_currency_address) == False:
+                if is_address_in_wallet(fcr.faircoin_address.address) == False:
                     reassigned += 1
                     new_address = create_address_for_agent(agent)
                     if new_address:
-                        fcr.digital_currency_address = new_address
+                        fcr.faircoin_address.address = new_address
                         fcr.save()
 
         print "Finished %d wallet reassignments of %d wallets & %d total agents" % (reassigned, found, total)

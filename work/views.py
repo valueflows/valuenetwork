@@ -326,8 +326,8 @@ def share_payment(request, agent_id):
         pay_to_agent = EconomicAgent.objects.get(nick=pay_to_id)
         pay_to_account = pay_to_agent.faircoin_resource()
         quantity = Decimal(share_price)
-        address_origin = agent_account.digital_currency_address
-        address_end = pay_to_account.digital_currency_address
+        address_origin = agent_account.faircoin_address.address
+        address_end = pay_to_account.faircoin_address.address
         xt = ExchangeType.objects.membership_share_exchange_type()
         tts = xt.transfer_types.all()
         tt_share = tts.get(name__contains="Share")

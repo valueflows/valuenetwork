@@ -206,10 +206,10 @@
 	                    <td>{{ resource.current_location }}</td>
                     </tr>
                 {% endif %}
-                {% if resource.digital_currency_address %}
+                {% if resource.faircoin_address.address %}
                     <tr>
                         <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
-                        <td>{{ resource.digital_currency_address }}</td>
+                        <td>{{ resource.faircoin_address.address }}</td>
                     </tr>
                 {% endif %}
                 {% if resource.notes %}

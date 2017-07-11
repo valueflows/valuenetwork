@@ -254,7 +254,7 @@ class AgentRoleInline(admin.TabularInline):
     fields = ('role', 'agent')
 
 class EconomicResourceAdmin(admin.ModelAdmin):
-    list_display = ('id', 'identifier', 'resource_type', 'quantity', 'unit_of_quantity', 'quality', 'notes', 'digital_currency_address')
+    list_display = ('id', 'identifier', 'resource_type', 'quantity', 'unit_of_quantity', 'quality', 'notes')
     list_filter = ['resource_type', 'author']
     search_fields = ['identifier', 'resource_type__name']
     date_hierarchy = 'created_date'

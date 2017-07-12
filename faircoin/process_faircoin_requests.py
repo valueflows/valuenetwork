@@ -94,8 +94,9 @@ def create_address_for_resource(resource):
     agent = resource.owner()
     address = create_address_for_agent(agent)
     if address:
-        resource.faircoin_address.address = address
-        resource.save()
+        fairaddress = resource.faircoin_address
+        fairaddress.address = address
+        fairaddress.save()
         return True
     else:
         msg = " ".join(["Failed to get a FairCoin address for", agent.name])

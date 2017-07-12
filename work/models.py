@@ -313,7 +313,7 @@ class SkillSuggestion(models.Model):
 from nine.versions import DJANGO_LTE_1_5
 from fobi.contrib.plugins.form_handlers.db_store.models import SavedFormDataEntry
 import simplejson as json
-
+import hashlib
 
 USER_TYPE_CHOICES = (
     #('participant', _('project participant (no membership)')),
@@ -519,6 +519,28 @@ class JoinRequest(models.Model):
             if obj and obj['html']:
                 return obj['html']
         return False
+
+    def payment_salt(self):
+        payopt = self.payment_option()
+        obj = None
+        if settings.PAYMENT_GATEWAYS and payopt:
+            gates = settings.PAYMENT_GATEWAYS
+            if self.project.fobi_slug and gates[self.project.fobi_slug]:
+                try:
+                    obj = gates[self.project.fobi_slug][payopt['key']]
+                except:
+                    pass
+            if obj and obj['salt']:
+                return obj['salt']
+        return False
+
+    def payment_token(self):
+        salt = self.payment_salt()
+        email = self.email_address
+        amount = self.pending_shares()
+        strin = salt+str(amount)+email
+        token_obj = hashlib.sha1(strin)
+        return token_obj.hexdigest()
 
 
 class NewFeature(models.Model):

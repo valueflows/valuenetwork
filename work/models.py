@@ -470,6 +470,31 @@ class JoinRequest(models.Model):
 
         return False #'??'
 
+    def total_shares(self):
+        account_type = None
+        balance = 0
+        if self.project.joining_style == "moderated" and self.fobi_data:
+            rts = list(set([arr.resource.resource_type for arr in self.project.agent.resource_relationships()]))
+            for rt in rts:
+                if rt.ocp_artwork_type:
+                    for key in self.fobi_items_keys():
+                        if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
+                            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+                            entry = self.entries[0]
+                            self.data = json.loads(entry.saved_data)
+                            val = self.data.get(key)
+                            account_type = rt
+
+        if self.agent:
+            user_rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
+            for rt in user_rts:
+                if rt == account_type: #.ocp_artwork_type:
+                    rss = list(set([arr.resource for arr in self.agent.resource_relationships()]))
+                    for rs in rss:
+                        if rs.resource_type == rt:
+                            balance = rs.price_per_unit # TODO: update the price_per_unit with wallet balance
+        return balance
+
     def payment_option(self):
         answer = {}
         if self.project.joining_style == "moderated" and self.fobi_data:

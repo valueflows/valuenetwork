@@ -175,6 +175,13 @@ th
                 </td>
               </tr>
             {% endif %}
+            {% if req.total_shares %}
+              <tr><th>{% trans "Total owned Shares" %}:</th>
+                  <td>
+                      {{ req.total_shares }}
+                  </td>
+              </tr>
+            {% endif %}
             <!-- <tr>
                 <th>{% trans "Languages" %}:</th>
                 <td>{{ req.native_language }}</td>

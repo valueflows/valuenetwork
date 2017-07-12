@@ -151,7 +151,7 @@ def broadcast_tx():
                 if event.resource:
                     if event.event_type.name=="Give":
                         address_origin = event.resource.faircoin_address.address
-                        address_end = event.faircoin_address.to_address
+                        address_end = event.faircoin_transaction.to_address
                     elif event.event_type.name=="Distribution":
                         address_origin = event.from_agent.faircoin_address()
                         address_end = event.resource.faircoin_address.address

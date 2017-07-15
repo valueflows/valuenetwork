@@ -918,7 +918,7 @@ def assign_skills(request, agent_id):
             old_skill_rts.append(art.resource_type)
 
         add_skill_form = AddUserSkillForm(agent=agent, data=request.POST)
-        if add_skill_form.is_valid():
+        if add_skill_form.is_valid() and request.POST.get('skill_type'):
             skill_type = Ocp_Skill_Type.objects.get(id=int(request.POST.get('skill_type')))
             if not skill_type.resource_type:
                 #pass # TODO create it?

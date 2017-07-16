@@ -30,8 +30,8 @@ from valuenetwork.valueaccounting.forms import *
 from valuenetwork.valueaccounting.service import ExchangeService
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
-#from valuenetwork.valueaccounting.views import get_agent, get_help, get_site_name, resource_role_agent_formset, uncommit, commitment_finished, commit_to_task
 from faircoin import utils as faircoin_utils
+from faircoin.models import FaircoinTransaction
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
@@ -376,13 +376,18 @@ def share_payment(request, agent_id):
             to_agent=to_agent,
             resource_type=resource.resource_type,
             resource=resource,
-            digital_currency_tx_state = state,
             quantity = quantity,
             transfer=transfer_fee,
             event_reference=address_end,
             created_by=request.user,
             )
         event.save()
+        fairtx = FaircoinTransaction(
+            event = event,
+            tx_state = state,
+            to_address = address_end,
+        )
+        fairtx.save()
 
         quantity = quantity - Decimal(float(network_fee) / 1.e6)
 
@@ -393,13 +398,18 @@ def share_payment(request, agent_id):
             to_agent=to_agent,
             resource_type=to_resource.resource_type,
             resource=to_resource,
-            digital_currency_tx_state = state,
             quantity = quantity,
             transfer=transfer_fee,
             event_reference=address_end,
             created_by=request.user,
             )
         event.save()
+        fairtx = FaircoinTransaction(
+            event = event,
+            tx_state = state,
+            to_address = address_end,
+        )
+        fairtx.save()
 
         quantity = Decimal(number_of_shares)
         resource = EconomicResource(

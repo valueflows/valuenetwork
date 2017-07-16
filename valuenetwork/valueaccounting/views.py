@@ -1258,7 +1258,7 @@ def send_faircoins(request, resource_id):
             data = send_coins_form.cleaned_data
             address_end = data["to_address"]
             quantity = data["quantity"]
-            address_origin = resource.digital_currency_address
+            address_origin = resource.faircoin_address.address
             if address_origin and address_end:
                 from_agent = resource.owner()
                 exchange_service = ExchangeService.get()

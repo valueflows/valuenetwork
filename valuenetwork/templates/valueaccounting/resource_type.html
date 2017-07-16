@@ -225,7 +225,7 @@ container li {
 	        <ul>
 	            {% for r in resource_type.all_resources %}
 	                <li>
-                        <a href="{% url "resource" resource_id=r.id %}">{{ r }} {% trans "quantity" %} {{ r.quantity }} {{ r.unit_of_quantity }} </a> {% if r.digital_currency_address %} &nbsp; ( {{ r.digital_currency_address }} ) {% endif %}
+                        <a href="{% url "resource" resource_id=r.id %}">{{ r }} {% trans "quantity" %} {{ r.quantity }} {{ r.unit_of_quantity }} </a> {% if r.faircoin_address.address %} &nbsp; ( {{ r.faircoin_address.address }} ) {% endif %}
 	                </li>
 	            {% endfor %}
 	        </ul>

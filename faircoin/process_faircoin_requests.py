@@ -79,7 +79,7 @@ def create_address_for_agent(agent):
             logger.critical("an exception occurred in creating a FairCoin address: {0}".format(e))
 
         if (address is not None) and (address != 'ERROR'):
-            used = EconomicResource.objects.filter(digital_currency_address=address)
+            used = EconomicResource.objects.filter(faircoin_address__address=address)
             if used.count():
                 msg = " ".join(["address already existent! (count[0]=", str(used[0]), ") when creating new address for", agent.name])
                 logger.critical(msg)
@@ -94,8 +94,9 @@ def create_address_for_resource(resource):
     agent = resource.owner()
     address = create_address_for_agent(agent)
     if address:
-        resource.digital_currency_address = address
-        resource.save()
+        fairaddress = resource.faircoin_address
+        fairaddress.address = address
+        fairaddress.save()
         return True
     else:
         msg = " ".join(["Failed to get a FairCoin address for", agent.name])
@@ -105,7 +106,7 @@ def create_address_for_resource(resource):
 def create_requested_addresses():
     try:
         requests = EconomicResource.objects.filter(
-            digital_currency_address="address_requested")
+            faircoin_address__address="address_requested")
 
         msg = " ".join(["new FairCoin address requests count:", str(requests.count())])
         logger.debug(msg)
@@ -129,7 +130,7 @@ def broadcast_tx():
 
     try:
         events = EconomicEvent.objects.filter(
-            digital_currency_tx_state="new").order_by('pk')
+            faircoin_transaction__tx_state="new").order_by('pk')
         events = events.filter(
             Q(event_type__name='Give')|Q(event_type__name='Distribution'))
         msg = " ".join(["new FairCoin event count:", str(events.count())])
@@ -150,16 +151,17 @@ def broadcast_tx():
             for event in events:
                 if event.resource:
                     if event.event_type.name=="Give":
-                        address_origin = event.resource.digital_currency_address
-                        address_end = event.event_reference
+                        address_origin = event.resource.faircoin_address.address
+                        address_end = event.faircoin_transaction.to_address
                     elif event.event_type.name=="Distribution":
                         address_origin = event.from_agent.faircoin_address()
-                        address_end = event.resource.digital_currency_address
+                        address_end = event.resource.faircoin_address.address
+                    fairtx = event.faircoin_transaction
                     amount = float(event.quantity) * 1.e6 # In satoshis
                     if amount < 1001:
-                        event.digital_currency_tx_state = "broadcast"
-                        event.digital_currency_tx_hash = "Null"
-                        event.save()
+                        fairtx.tx_state = "broadcast"
+                        fairtx.tx_hash = "Null"
+                        fairtx.save()
                         continue
 
                     logger.info("About to build transaction. Amount: %d" %(int(amount)))
@@ -175,32 +177,23 @@ def broadcast_tx():
                         failed_events += 1
                     elif tx_hash:
                         successful_events += 1
-                        event.digital_currency_tx_state = "broadcast"
-                        event.digital_currency_tx_hash = tx_hash
-                        event.save()
+                        fairtx.tx_state = "broadcast"
+                        fairtx.tx_hash = tx_hash
+                        fairtx.save()
                         transfer = event.transfer
                         if transfer:
                             revent = transfer.receive_event()
                             if revent:
-                                revent.digital_currency_tx_state = "broadcast"
-                                revent.digital_currency_tx_hash = tx_hash
-                                revent.save()
+                                refairtx = revent.faircoin_transaction
+                                refairtx.tx_state = "broadcast"
+                                refairtx.tx_hash = tx_hash
+                                refairtx.save()
                         msg = " ".join([ "Broadcasted tx", tx_hash, "amount", str(amount), "from", address_origin, "to", address_end ])
                         logger.info(msg)
     except Exception:
         _, e, _ = sys.exc_info()
         logger.critical("an exception occurred in processing events: {0}".format(e))
-        """
-        logger.warning("releasing lock because of error...")
-        lock.release()
-        logger.debug("released.")
-        """
         return "failed to process events"
-    """
-    logger.debug("releasing lock normally...")
-    lock.release()
-    logger.debug("released.")
-    """
 
     if events:
         msg = " ".join(["Broadcast", str(successful_events), "new faircoin tx."])

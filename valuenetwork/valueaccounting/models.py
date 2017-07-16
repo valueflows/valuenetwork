@@ -4580,16 +4580,17 @@ class EconomicResource(models.Model):
                 id_str,
             ])
     def is_digital_currency_resource(self):
-        if self.faircoin_address.address:
+        if hasattr(self, 'faircoin_address') and self.faircoin_address.address:
             return True
         else:
             return False
 
     def address_is_activated(self):
-        address = self.faircoin_address.address
-        if address:
-            if address != "address_requested":
-                return True
+        if hasattr(self, 'faircoin_address'):
+            address = self.faircoin_address.address
+            if address:
+                if address != "address_requested":
+                    return True
         return False
 
     def digital_currency_history(self):

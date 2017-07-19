@@ -74,7 +74,7 @@
 
       <div class="subnav">
         <a class="indent" href="{% url "faircoin_history" resource_id=resource.id %}">{% trans "Account History" %}</a>
-        <a class="indent" href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Blockchain" %}</a>
+        <a class="indent" href="https://chain.fair-coin.org/address/{{ resource.faircoin_address.address }}" target="_blank" >{% trans "Blockchain" %}</a>
       </div>
 		</legend>
 
@@ -178,17 +178,17 @@
 	                        <td>{{ resource.current_location }}</td>
                         </tr>
                     {% endif %}
-                    {% if resource.digital_currency_address %}
+                    {% if resource.faircoin_address.address %}
                         <tr>
                             <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
                             <td>{% if wallet %}
                                     {% if is_wallet_address == False %}
-                                        <span class="error">{{ resource.digital_currency_address }} not in this wallet!!</span>
+                                        <span class="error">{{ resource.faircoin_address.address }} not in this wallet!!</span>
                                     {% else %}
-                                        {{ resource.digital_currency_address }}
+                                        {{ resource.faircoin_address.address }}
                                     {% endif %}
                                 {% else %}
-                                    {{ resource.digital_currency_address }} &nbsp; <span class="error">{% trans "No wallet?" %}</span>
+                                    {{ resource.faircoin_address.address }} &nbsp; <span class="error">{% trans "No wallet?" %}</span>
                                 {% endif %}
                             </td>
                         </tr>

@@ -60,7 +60,7 @@
 
             <a href="{% url "event_history" resource_id=resource.id %}">{% trans "Event history" %}</a>&nbsp;&nbsp;
 
-            <a href="https://chain.fair-coin.org/address/{{ resource.digital_currency_address }}" target="_blank" >{% trans "Follow Chain" %}</a>
+            <a href="https://chain.fair-coin.org/address/{{ resource.faircoin_address.address }}" target="_blank" >{% trans "Follow Chain" %}</a>
 		</legend>
 		
         {% if is_owner or request.user.is_superuser %}
@@ -136,10 +136,10 @@
 	                        <td>{{ resource.current_location }}</td>
                         </tr>
                     {% endif %}
-                    {% if resource.digital_currency_address %}
+                    {% if resource.faircoin_address.address %}
                         <tr>
                             <th style="text-align: right;">{% trans "FairCoin Address" %}</th>
-                            <td>{{ resource.digital_currency_address }}</td>
+                            <td>{{ resource.faircoin_address.address }}</td>
                         </tr>
                     {% endif %}
                     {% if resource.notes %}

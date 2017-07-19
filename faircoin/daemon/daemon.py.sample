@@ -30,10 +30,10 @@ import sqlite3
 import urllib
 import logging
 
-import electrum_fair
-from electrum_fair import util
-from electrum_fair.util import NotEnoughFunds
-electrum_fair.set_verbosity(True)
+import electrumfair
+from electrumfair import util
+from electrumfair.util import NotEnoughFunds
+electrumfair.set_verbosity(True)
 
 import ConfigParser
 config = ConfigParser.ConfigParser()
@@ -168,8 +168,7 @@ def new_fair_address(entity_id, entity = 'generic'):
     We can label like "user: 213" or "user: pachamama" or "order: 67".
     """
     while network.is_connected():
-        new_address = wallet.create_new_address()
-        wallet.add_address(new_address)
+        new_address = wallet.create_new_address(False)
         wallet.synchronizer.subscribe_to_addresses([new_address])
         wallet.up_to_date = False
         check_label = wallet.get_label(new_address)
@@ -224,33 +223,24 @@ if __name__ == '__main__':
     logging.debug("Starting electrum...")
     out_queue = Queue.Queue()
     # start network
-    c = electrum_fair.SimpleConfig({'wallet_path':wallet_path})
-    daemon_socket = electrum_fair.daemon.get_daemon(c, True)
-    network = electrum_fair.NetworkProxy(daemon_socket, config)
+    c = electrumfair.SimpleConfig()
+    network = electrumfair.Network(c)
     network.start()
-    n = 0
-    # wait until connected
-    while (network.is_connecting() and (n < 100)):
-        time.sleep(0.5)
-        n = n + 1
 
+    # wait until connected
+    while network.is_connecting():
+        time.sleep(0.1)
     if not network.is_connected():
-        logging.error("Can not init Electrum Network. Exiting.")
+        print_msg("daemon is not connected")
         sys.exit(1)
 
-    # create wallet
-    storage = electrum_fair.WalletStorage(wallet_path)
+    storage = electrumfair.WalletStorage(wallet_path)
     if not storage.file_exists:
         logging.error("The wallet cannot be found in path " + wallet_path + ". Exiting.")
         sys.exit(1)
-    else:
-        wallet = electrum_fair.wallet.Wallet(storage)
-
-    wallet.synchronize = lambda: None # prevent address creation by the wallet
-    #wallet.change_gap_limit(100)
-    wallet.start_threads(network)
-    #network.register_callback('updated', on_wallet_update)
-    cmd_wallet = electrum_fair.commands.Commands(c, wallet, network)
+    storage.put('wallet_type', 'standard')
+    wallet = electrumfair.Wallet(storage)
+    cmd_wallet = electrumfair.commands.Commands(c, wallet, network)
 
     # server thread
     from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer

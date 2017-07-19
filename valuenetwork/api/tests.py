@@ -917,6 +917,12 @@ query ($token: String) {
   viewer(token: $token) {
     process(id: 6) {
       name
+      processEconomicEvents {
+        ...coreEventFields
+      }
+      processCommitments {
+        ...coreCommitmentFields
+      }
       inputs {
         ...coreEventFields
       }

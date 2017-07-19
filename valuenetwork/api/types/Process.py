@@ -21,6 +21,10 @@ class Process(DjangoObjectType):
         only_fields = ('id', 'name')
 
 
+    process_economic_events = graphene.List(lambda: types.EconomicEvent)
+
+    process_commitments = graphene.List(lambda: types.Commitment)
+
     inputs = graphene.List(lambda: types.EconomicEvent)
 
     work_inputs = graphene.List(lambda: types.EconomicEvent)
@@ -47,6 +51,11 @@ class Process(DjangoObjectType):
 
     #previous_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
+    def resolve_process_economic_events(self, args, context, info):
+        return self.events.all()
+
+    def resolve_process_commitments(self, args, context, info):
+        return self.commitments.all()
 
     def resolve_inputs(self, args, context, info):
         return self.incoming_events()

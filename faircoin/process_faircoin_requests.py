@@ -157,7 +157,7 @@ def broadcast_tx():
                         address_origin = event.from_agent.faircoin_address()
                         address_end = event.resource.faircoin_address.address
                     fairtx = event.faircoin_transaction
-                    amount = float(event.quantity) * 1.e6 # In satoshis
+                    amount = float(event.quantity) * 1.e8 # In satoshis
                     if amount < 1001:
                         fairtx.tx_state = "broadcast"
                         fairtx.tx_hash = "Null"

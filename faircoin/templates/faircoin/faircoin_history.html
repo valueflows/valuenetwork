@@ -85,7 +85,7 @@
                         <td>{{ event.event_type }}</td>
                         <td>{{ event.from_agent }}</td>
                         <!-- <td>{{ event.context_agent }}</td> -->
-                        {% if event.event_type = "Give" and event.transaction_state == "new" %}
+                        {% if event.event_type == "Give" and event.transaction_state == "new" %}
                             <td style="text-align: right;" >{{ event.quantity_formatted }} (+fee)</td>
                         {% else %}
                             <td style="text-align: right;" >{{ event.quantity_formatted }}</td>

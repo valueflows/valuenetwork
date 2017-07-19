@@ -137,7 +137,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
         return False
     fee = tx.get_fee()
     wallet.sign_transaction(tx, password)
-    rec_tx_state, rec_tx_out = wallet.sendtx(tx)
+    rec_tx_state, rec_tx_out = network.broadcast(tx,60)
     if rec_tx_state:
         logging.info("SUCCESS. The transaction %s has been broadcasted." %rec_tx_out)
         return rec_tx_out, fee
@@ -193,7 +193,6 @@ if __name__ == '__main__':
     if not storage.file_exists:
         logging.error("The wallet cannot be found in path " + wallet_path + ". Exiting.")
         sys.exit(1)
-    storage.put('wallet_type', 'standard')
     wallet = electrumfair.Wallet(storage)
     cmd_wallet = electrumfair.commands.Commands(c, wallet, network)
 
@@ -220,7 +219,3 @@ if __name__ == '__main__':
             server.handle_request()
         except socket.timeout:
             continue
-
-    network.stop_daemon()
-    if network.is_connected():
-        time.sleep(1)

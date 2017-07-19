@@ -15,4 +15,4 @@ use_change = False
 [network]
 server = electrum.faircoin.world:51812:s
 proxy = None
-fee = 10000
+fee = 1000000

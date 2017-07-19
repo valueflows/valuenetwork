@@ -9,6 +9,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
+from django.db.models import Q
 from valuenetwork.valueaccounting.models import EconomicAgent
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship
@@ -19,7 +20,6 @@ import datetime
 
 def _load_identified_agent(self):
     return EconomicAgent.objects.get(pk=self.id)
-
 
 # Economic agent base type
 
@@ -80,26 +80,31 @@ class Agent(graphene.Interface):
                 return agent_processes
         return None
 
-    # returns events where an agent is a provider, receiver, or scope agent
+    # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events
     def resolve_agent_economic_events(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
             days = args.get('latest_number_of_days', 0)
             if days > 0:
-                return agent.involved_in_events().filter(event_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
+                events = agent.involved_in_events().filter(event_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
             else:
-                return agent.involved_in_events()
+                events = agent.involved_in_events()
+            events = events.exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            return events
         return None
 
-    # returns commitments where an agent is a provider, receiver, or scope agent
+    # returns commitments where an agent is a provider, receiver, or scope agent, excluding exchange related events
     def resolve_agent_commitments(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
             days = args.get('latest_number_of_days', 0)
             if days > 0:
-                return agent.involved_in_commitments().filter(commitment_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
+                commits = agent.involved_in_commitments().filter(
+                    commitment_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
             else:
-                return agent.involved_in_commitments()
+                commits = agent.involved_in_commitments()
+            commits = commits.exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            return commits
         return None
 
     # returns relationships where an agent is a subject or object, optionally filtered by role category

@@ -421,10 +421,6 @@ query ($token: String) {
     }
   }
 }
-'''
-
-'''
-# test queries, full coverage
 
 query($token: String) {
   viewer(token: $token) {

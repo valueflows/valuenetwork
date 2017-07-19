@@ -45,9 +45,8 @@ my_port = config.getint('main','port')
 
 wallet_path = config.get('electrum','wallet_path')
 
-seed = config.get('electrum','seed')
 password = config.get('electrum', 'password')
-net_fee = config.getint('network','fee')
+fee_rate = config.getint('network','fee')
 
 num = 0
 
@@ -56,7 +55,7 @@ stopping = False
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(message)s')
 
 def fee():
-    return net_fee
+    return fee_rate
 
 def do_stop(password):
     global stopping
@@ -124,9 +123,8 @@ def make_transaction_from_address(address_origin, address_end, amount):
         wallet.up_to_date = False
     inputs = [address_origin]
     coins = wallet.get_spendable_coins(domain = inputs)
-    #logging.debug("Coins : %s" %coins)
-    amount_total = int(amount) - int(net_fee) #In Satoshis
-    amount_total = int(amount_total)
+    # The fee is calculated in make_unsigned_transaction from fee_rate and size.
+    amount_total = int(amount)
 
     if amount_total > 0:
         output = [('address', address_end, int(amount_total))]
@@ -134,16 +132,17 @@ def make_transaction_from_address(address_origin, address_end, amount):
         logging.error("Amount negative: %d" %(amount_total) )
         return False
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, fixed_fee=int(net_fee), change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))
         return False
+    fee = tx.get_fee()
     wallet.sign_transaction(tx, password)
     rec_tx_state, rec_tx_out = wallet.sendtx(tx)
     if rec_tx_state:
-         logging.info("SUCCESS. The transaction %s has been broadcasted." %rec_tx_out)
-         return rec_tx_out
+        logging.info("SUCCESS. The transaction %s has been broadcasted." %rec_tx_out)
+        return rec_tx_out, fee
     else:
          logging.error("Sending %s fairs to the address %s" %(amount_total, address_end ) )
          return False
@@ -242,8 +241,8 @@ if __name__ == '__main__':
     # create wallet
     storage = electrum_fair.WalletStorage(wallet_path)
     if not storage.file_exists:
-        logging.debug("creating wallet file")
-        wallet = electrum_fair.wallet.Wallet.from_seed(seed, password, storage)
+        logging.error("The wallet cannot be found in path " + wallet_path + ". Exiting.")
+        sys.exit(1)
     else:
         wallet = electrum_fair.wallet.Wallet(storage)
 

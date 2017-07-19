@@ -195,10 +195,10 @@ class ExchangeService(object):
         fairtx.save()
 
         if to_resource:
-            # network_fee is subtracted from quantity
-            # so quantity is correct for the giving event
-            # but receiving event will get quantity - network_fee
-            quantity = qty - Decimal(float(network_fee) / 1.e6)
+            # The events are saved without fee.
+            # When the wallet constructs the transactions and knows how large is,
+            # it calculates the fee and it will add the fee to the et_give event.
+            # quantity = qty - Decimal(float(network_fee) / 1.e6)
             et_receive = EventType.objects.get(name="Receive")
             event = EconomicEvent(
                 event_type=et_receive,
@@ -207,7 +207,7 @@ class ExchangeService(object):
                 to_agent=to_agent,
                 resource_type=to_resource.resource_type,
                 resource=to_resource,
-                quantity=quantity,
+                quantity=qty,
                 transfer=transfer,
                 event_reference=recipient,
             )

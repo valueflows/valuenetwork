@@ -116,7 +116,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
     # Fix old address generated, can be removed on new database
     wallet.add_address(address_origin)
     callback = lambda response: logging.debug(util.json_encode(response.get('result')))
-    network.send([('blockchain.address.subscribe',[address])], callback)
+    network.send([('blockchain.address.subscribe',[address_origin])], callback)
     inputs = [address_origin]
     coins = wallet.get_spendable_coins(domain = inputs)
     # The fee is calculated in make_unsigned_transaction from fee_rate and size.
@@ -128,7 +128,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
         logging.error("Amount negative: %d" %(amount_total) )
         return False
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, c, change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))

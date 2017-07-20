@@ -17,7 +17,7 @@ from valuenetwork.valueaccounting.service import ExchangeService
 from faircoin import utils as faircoin_utils
 from faircoin.forms import SendFairCoinsForm
 
-FAIRCOIN_DIVISOR = Decimal("1000000.00")
+FAIRCOIN_DIVISOR = Decimal("100000000.00")
 
 def get_agent(request):
     agent = None

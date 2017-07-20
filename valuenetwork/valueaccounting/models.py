@@ -1406,12 +1406,22 @@ class EconomicAgent(models.Model):
 
     def owned_currency_resources(self):
         arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(
-            resource__resource_type__behavior="other").exclude(resource__quantity=0)
+            resource__resource_type__behavior="other").exclude(
+            resource__resource_type__behavior="used").exclude(
+            resource__resource_type__behavior="cited").exclude(
+            resource__resource_type__behavior="consumed").exclude(
+            resource__resource_type__behavior="produced").exclude(
+            resource__quantity=0)
         return [arr.resource for arr in arrs]
 
     def owned_inventory_resources(self):
         arrs = self.agent_resource_roles.filter(role__is_owner=True).filter(
-            resource__resource_type__behavior="other").exclude(resource__quantity=0)
+            Q(resource__resource_type__behavior="other")|
+            Q(resource__resource_type__behavior="used")|
+            Q(resource__resource_type__behavior="cited")|
+            Q(resource__resource_type__behavior="consumed")|
+            Q(resource__resource_type__behavior="produced")).exclude(
+            resource__quantity=0)
         return [arr.resource for arr in arrs]
 
     def create_virtual_account(self, resource_type):
@@ -2075,6 +2085,10 @@ BEHAVIOR_CHOICES = (
     ('dig_curr', _('Digital Currency')),
     ('dig_acct', _('Digital Currency Address')),
     ('dig_wallet', _('Digital Currency Wallet')),
+    ('consumed', _('Produced/Changed + Consumed')),
+    ('used', _('Produced/Changed + Used')),
+    ('cited', _('Produced/Changed + Cited')),
+    ('produced', _('Produced only')),
     ('other', _('Other')),
 )
 
@@ -2161,14 +2175,16 @@ class EconomicResourceType(models.Model):
 
     @property #ValueFlows
     def category(self):
-        if self.behavior == "other":
+        if (self.behavior == "other"
+            or self.behavior == "consumed"
+            or self.behavior == "used" 
+            or self.behavior == "produced" 
+            or self.behavior == "cited"):
             return "INVENTORY"
         elif self.behavior == "work":
             return "WORK"
-        elif self.behavior != "other" and self.behavior != "work":
-            return "CURRENCY"
         else:
-            return "NONE"
+            return "CURRENCY"
 
     def label(self):
         return self.__unicode__()
@@ -4546,12 +4562,16 @@ class EconomicResource(models.Model):
 
     @property #ValueFlows
     def category(self):
-        if self.resource_type.behavior == "other":
+        if (self.resource_type.behavior == "other" 
+        or self.resource_type.behavior == "consumed"
+        or self.resource_type.behavior == "used" 
+        or self.resource_type.behavior == "produced" 
+        or self.resource_type.behavior == "cited"):
             return "INVENTORY"
-        elif self.resource_type.behavior != "other" and self.resource_type.behavior != "work":
-            return "CURRENCY"
+        if self.resource_type.behavior == "work":
+            return "WORK"
         else:
-            return "NONE"
+            return "CURRENCY"
 
     def label(self):
         return self.identifier or str(self.id)

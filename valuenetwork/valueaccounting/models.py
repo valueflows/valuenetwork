@@ -30,7 +30,7 @@ http://global.ihs.com/doc_detail.cfm?item_s_key=00495115&item_key_date=920616
 
 """
 
-FAIRCOIN_DIVISOR = Decimal("1000000.00")
+FAIRCOIN_DIVISOR = Decimal("100000000.00")
 
 def unique_slugify(instance, value, slug_field_name='slug', queryset=None,
                    slug_separator='-'):

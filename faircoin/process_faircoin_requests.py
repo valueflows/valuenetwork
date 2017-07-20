@@ -13,7 +13,7 @@ import faircoin.utils as efn
 from valuenetwork.valueaccounting.models import EconomicAgent, EconomicEvent, EconomicResource
 from valuenetwork.valueaccounting.lockfile import FileLock, AlreadyLocked, LockTimeout, LockFailed
 
-#FAIRCOIN_DIVISOR = int(1000000)
+#FAIRCOIN_DIVISOR = int(100000000)
 
 def acquire_lock():
     lock = FileLock("broadcast-faircoins")

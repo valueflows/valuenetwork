@@ -198,7 +198,7 @@ class ExchangeService(object):
             # The events are saved without fee.
             # When the wallet constructs the transactions and knows how large is,
             # it calculates the fee and it will add the fee to the et_give event.
-            # quantity = qty - Decimal(float(network_fee) / 1.e6)
+            # quantity = qty - Decimal(float(network_fee) / 1.e8)
             et_receive = EventType.objects.get(name="Receive")
             event = EconomicEvent(
                 event_type=et_receive,
@@ -224,68 +224,74 @@ class ExchangeService(object):
     def include_blockchain_tx_as_event(self, agent, resource):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return []
-        faircoin_address = str(resource.faircoin_address.address)
-        tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
-        if not tx_in_blockchain: # Something wrong in daemon or network.
-            return []
 
-        event_list = resource.events.all()
-        tx_in_ocp = []
-        for event in event_list:
-            tx_in_ocp.append(str(event.faircoin_transaction.tx_hash))
+        # This function should be adapted to faircoin2 as the new bockchain
+        # begins on 18/7/2017 and there's no more old transaction history
 
-        tx_included = []
-        for tx in tx_in_blockchain:
-            if str(tx[0]) not in tx_in_ocp:
-                amount, time = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
-                confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
-                if amount and confirmations:
-                    qty=Decimal(amount)/Decimal(1000000)
-                    date = datetime.date.fromtimestamp(time)
-                    tt = ExchangeService.faircoin_incoming_transfer_type()
-                    xt = tt.exchange_type
-                    exchange = Exchange(
-                        exchange_type=xt,
-                        use_case=xt.use_case,
-                        name="Receive Faircoins",
-                        start_date=date,
-                    )
-                    exchange.save()
-                    transfer = Transfer(
-                        transfer_type=tt,
-                        exchange=exchange,
-                        transfer_date=date,
-                        name="Receive Faircoins",
-                    )
-                    transfer.save()
+        return []
 
-                    et_receive = EventType.objects.get(name="Receive")
-                    state = "external"
-                    if confirmations > 0:
-                        state = "broadcast"
-                    if confirmations > 2:
-                        state = "confirmed"
-
-                    event = EconomicEvent(
-                        event_type=et_receive,
-                        event_date=date,
-                        to_agent=agent,
-                        resource_type=resource.resource_type,
-                        resource=resource,
-                        quantity=qty,
-                        transfer=transfer,
-                        event_reference=faircoin_address
-                    )
-                    event.save()
-                    fairtx = FaircoinTransaction(
-                        event=event,
-                        tx_hash=str(tx[0]),
-                        tx_state=state,
-                        to_address=faircoin_address,
-                    )
-                    fairtx.save()
-                    tx_included.append(str(tx[0]))
-        return tx_included
+        # faircoin_address = str(resource.faircoin_address.address)
+        # tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
+        # if not tx_in_blockchain: # Something wrong in daemon or network.
+        #     return []
+        #
+        # event_list = resource.events.all()
+        # tx_in_ocp = []
+        # for event in event_list:
+        #     tx_in_ocp.append(str(event.faircoin_transaction.tx_hash))
+        #
+        # tx_included = []
+        # for tx in tx_in_blockchain:
+        #     if str(tx[0]) not in tx_in_ocp:
+        #         amount, time = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
+        #         confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
+        #         if amount and confirmations:
+        #             qty=Decimal(amount)/Decimal(100000000)
+        #             date = datetime.date.fromtimestamp(time)
+        #             tt = ExchangeService.faircoin_incoming_transfer_type()
+        #             xt = tt.exchange_type
+        #             exchange = Exchange(
+        #                 exchange_type=xt,
+        #                 use_case=xt.use_case,
+        #                 name="Receive Faircoins",
+        #                 start_date=date,
+        #             )
+        #             exchange.save()
+        #             transfer = Transfer(
+        #                 transfer_type=tt,
+        #                 exchange=exchange,
+        #                 transfer_date=date,
+        #                 name="Receive Faircoins",
+        #             )
+        #             transfer.save()
+        #
+        #             et_receive = EventType.objects.get(name="Receive")
+        #             state = "external"
+        #             if confirmations > 0:
+        #                 state = "broadcast"
+        #             if confirmations > 2:
+        #                 state = "confirmed"
+        #
+        #             event = EconomicEvent(
+        #                 event_type=et_receive,
+        #                 event_date=date,
+        #                 to_agent=agent,
+        #                 resource_type=resource.resource_type,
+        #                 resource=resource,
+        #                 quantity=qty,
+        #                 transfer=transfer,
+        #                 event_reference=faircoin_address
+        #             )
+        #             event.save()
+        #             fairtx = FaircoinTransaction(
+        #                 event=event,
+        #                 tx_hash=str(tx[0]),
+        #                 tx_state=state,
+        #                 to_address=faircoin_address,
+        #             )
+        #             fairtx.save()
+        #             tx_included.append(str(tx[0]))
+        # return tx_included
 
     def create_faircoin_resource(self, agent, address):
         if 'faircoin' not in settings.INSTALLED_APPS:

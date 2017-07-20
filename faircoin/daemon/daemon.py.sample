@@ -83,8 +83,8 @@ def new_fair_address(entity_id, entity = 'generic'):
     """
     while network.is_connected():
         new_address = wallet.create_new_address(False)
-        wallet.synchronizer.subscribe_to_addresses([new_address])
-        wallet.up_to_date = False
+        callback = lambda response: logging.debug(util.json_encode(response.get('result')))
+        network.send([('blockchain.address.subscribe',[address])], callback)
         check_label = wallet.get_label(new_address)
         check_history = cmd_wallet.getaddresshistory(new_address)
         # It checks if address is labeled or has history yet, a gap limit protection.
@@ -115,10 +115,9 @@ def make_transaction_from_address(address_origin, address_end, amount):
         logging.error("The address %s does not belong to this wallet" %address_origin)
         return False
     # Fix old address generated, can be removed on new database
-    else:
-        wallet.add_address(address_origin)
-        wallet.synchronizer.subscribe_to_addresses([address_origin])
-        wallet.up_to_date = False
+    wallet.add_address(address_origin)
+    callback = lambda response: logging.debug(util.json_encode(response.get('result')))
+    network.send([('blockchain.address.subscribe',[address])], callback)
     inputs = [address_origin]
     coins = wallet.get_spendable_coins(domain = inputs)
     # The fee is calculated in make_unsigned_transaction from fee_rate and size.
@@ -194,6 +193,7 @@ if __name__ == '__main__':
         logging.error("The wallet cannot be found in path " + wallet_path + ". Exiting.")
         sys.exit(1)
     wallet = electrumfair.Wallet(storage)
+    wallet.start_threads(network)
     cmd_wallet = electrumfair.commands.Commands(c, wallet, network)
 
     # server thread
@@ -206,7 +206,6 @@ if __name__ == '__main__':
     server.register_function(get_confirmations,'get_confirmations')
     server.register_function(get_transaction,'get_transaction')
     server.register_function(new_fair_address,'new_fair_address')
-    server.register_function(address_history_info,'address_history_info')
     server.register_function(make_transaction_from_address,'make_transaction_from_address')
     server.register_function(is_mine,'is_mine')
     server.register_function(is_valid,'is_valid')

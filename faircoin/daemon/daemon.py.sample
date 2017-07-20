@@ -12,6 +12,7 @@ import logging
 import electrumfair
 from electrumfair import util
 from electrumfair.util import NotEnoughFunds
+from electrumfair.bitcoin import TYPE_ADDRESS
 electrumfair.set_verbosity(True)
 
 import ConfigParser
@@ -31,12 +32,11 @@ stopping = False
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(message)s')
 
 def fee():
+    # TODO: ask for fee rate to the server with network.send([('blockchain.estimatefee)])
     return fee_rate
 
 def do_stop(password):
     global stopping
-    #if password != my_password:
-    #    return "wrong password"
     stopping = True
     logging.debug("Stopping")
     return "ok"
@@ -56,7 +56,6 @@ def send_command(cmd, params):
         logging.error("Can not send the command")
         return 1
 
-    #logging.debug("sending : %s" %json.dumps(out, indent=4))
     return 0
 
 # Return True if this daemon is running.
@@ -84,12 +83,12 @@ def new_fair_address(entity_id, entity = 'generic'):
     while network.is_connected():
         new_address = wallet.create_new_address(False)
         callback = lambda response: logging.debug(util.json_encode(response.get('result')))
-        network.send([('blockchain.address.subscribe',[address])], callback)
+        network.send([('blockchain.address.subscribe',[new_address])], callback)
         check_label = wallet.get_label(new_address)
-        check_history = cmd_wallet.getaddresshistory(new_address)
+        check_history = wallet.get_address_history(new_address)
         # It checks if address is labeled or has history yet, a gap limit protection.
         # This can be removed when we have good control of gap limit.
-        if not check_label[0] and not check_history:
+        if not check_label and not check_history:
             wallet.set_label(new_address, entity + ': ' + str(entity_id))
             return new_address
     return False
@@ -117,19 +116,19 @@ def make_transaction_from_address(address_origin, address_end, amount):
     # Fix old address generated, can be removed on new database
     wallet.add_address(address_origin)
     callback = lambda response: logging.debug(util.json_encode(response.get('result')))
-    network.send([('blockchain.address.subscribe',[address])], callback)
+    network.send([('blockchain.address.subscribe',[address_origin])], callback)
     inputs = [address_origin]
     coins = wallet.get_spendable_coins(domain = inputs)
     # The fee is calculated in make_unsigned_transaction from fee_rate and size.
     amount_total = int(amount)
 
     if amount_total > 0:
-        output = [('address', address_end, int(amount_total))]
+        output = [(TYPE_ADDRESS, address_origin, address_end, int(amount_total))]
     else:
         logging.error("Amount negative: %d" %(amount_total) )
         return False
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, c, change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))
@@ -147,12 +146,17 @@ def make_transaction_from_address(address_origin, address_end, amount):
 def get_confirmations(tx):
     """Return the number of confirmations of a monitored transaction
     and the timestamp of the last confirmation (or None if not confirmed)."""
-    return wallet.get_confirmations(tx)
+    height, conf, timestamp = wallet.get_tx_height(tx)
+    return conf, timestamp
 
 def get_transaction(tx_hash):
-    raw_transaction = cmd_wallet.gettransaction(tx_hash)
-    transaction = raw_transaction.deserialize()
-    return transaction
+    serialized_tx = network.synchronous_get(('blockchain.transaction.get', [tx_hash]))
+    transaction = electrumfair.Transaction(serialized_tx)
+    raw_tx = transaction.deserialize()
+    tx_hash, status, label, can_broadcast, can_bump, amount, fee, height, conf,\
+        timestamp, exp_n = wallet.get_tx_info(transaction)
+    raw_tx['time'] = timestamp
+    return raw_tx
 
 def import_key(privkey, entity_id, entity = 'generic'):
     try:
@@ -210,6 +214,7 @@ if __name__ == '__main__':
     server.register_function(is_mine,'is_mine')
     server.register_function(is_valid,'is_valid')
     server.register_function(get_address_balance,'get_address_balance')
+    server.register_function(get_address_history,'get_address_history')
     server.register_function(import_key,'import_key')
     server.socket.settimeout(1)
 

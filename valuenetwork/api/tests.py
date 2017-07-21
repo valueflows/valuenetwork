@@ -692,6 +692,23 @@ query($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    resourceTaxonomyItem(id: 31) {
+      name
+      taxonomyItemResources {
+        trackingIdentifier
+        currentQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
 query($token: String) {
   viewer(token: $token) {
     economicResource(id: 26) {
@@ -862,6 +879,16 @@ query($token: String) {
         isFinished
         note
       }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    resourceTaxonomyItemsByProcessCategory(category: "consumed") {
+      name
+      category
+      processCategory
     }
   }
 }

@@ -17,6 +17,9 @@ class Query(graphene.AbstractType):
 
     all_resource_taxonomy_items = graphene.List(ResourceTaxonomyItem)
 
+    resource_taxonomy_items_by_process_category = graphene.List(ResourceTaxonomyItem,
+                                                               category=graphene.String())
+
     # load single item
 
     def resolve_resource_taxonomy_item(self, args, *rargs):
@@ -31,3 +34,7 @@ class Query(graphene.AbstractType):
 
     def resolve_all_resource_taxonomy_items(self, args, context, info):
         return EconomicResourceType.objects.all()
+
+    def resolve_resource_taxonomy_items_by_process_category(self, args, context, info):
+        cat = args.get('category')
+        return EconomicResourceType.objects.filter(behavior=cat)

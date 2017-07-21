@@ -16,15 +16,27 @@ class EconomicResourceCategory(graphene.Enum):
     INVENTORY = "inventory"
     WORK = "work"
 
+class EconomicResourceProcessCategory(graphene.Enum):
+    NONE = None
+    CONSUMED = "consumed"
+    USED = "used"
+    CITED = "cited"
+    PRODUCED = "produced"
 
 class ResourceTaxonomyItem(DjangoObjectType):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
     category = graphene.String(source='category')
+    process_category = graphene.String(source='behavior')
 
     class Meta:
         model = EconomicResourceType
         only_fields = ('id', 'name')
+
+    taxonomy_item_resources = graphene.List(lambda: EconomicResource)
+
+    def resolve_taxonomy_item_resources(self, args, context, info):
+        return self.resources.all()
 
 
 class EconomicResource(DjangoObjectType):

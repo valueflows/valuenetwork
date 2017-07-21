@@ -25,7 +25,7 @@ my_port = config.getint('main','port')
 
 wallet_path = config.get('electrum','wallet_path')
 password = config.get('electrum', 'password')
-fee = config.getint('network','fee')
+default_fee = config.getint('network','fee')
 
 stopping = False
 
@@ -34,7 +34,7 @@ logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(mess
 def fee():
     # TODO: test to ask for current fee rate instead of conf value with:
     # return wallet.relayfee()
-    return fee
+    return default_fee
 
 def do_stop(password):
     global stopping
@@ -116,8 +116,8 @@ def make_transaction_from_address(address_origin, address_end, amount):
         return False
     # Fix old address generated, can be removed on new database
     wallet.add_address(address_origin)
-    callback = lambda response: logging.debug(util.json_encode(response.get('result')))
-    network.send([('blockchain.address.subscribe',[address_origin])], callback)
+    #callback = lambda response: logging.debug(util.json_encode(response.get('result')))
+    #network.send([('blockchain.address.subscribe',[address_origin])], callback)
     inputs = [address_origin]
     coins = wallet.get_spendable_coins(domain = inputs)
     amount_total = int(amount)
@@ -130,7 +130,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
 
     config = electrumfair.SimpleConfig()
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, config, fixed_fee=fee, change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, config, fixed_fee=default_fee, change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))
@@ -139,7 +139,7 @@ def make_transaction_from_address(address_origin, address_end, amount):
     rec_tx_state, rec_tx_out = network.broadcast(tx,60)
     if rec_tx_state:
         logging.info("SUCCESS. The transaction %s has been broadcasted." %rec_tx_out)
-        return rec_tx_out, fee
+        return rec_tx_out, default_fee
     else:
          logging.error("Sending %s fairs to the address %s" %(amount_total, address_end ) )
          return False

@@ -5,16 +5,17 @@ from valuenetwork.api.models import *
 from .schema import schema
 
 
-class AgentSchemaTest(TestCase):
+class APITest(TestCase):
     @classmethod
     def setUpClass(cls):
         import os
         os.environ['DJANGO_SETTINGS_MODULE'] = 'valuenetwork.settings'
-        super(AgentSchemaTest, cls).setUpClass()
+        super(APITest, cls).setUpClass()
         import django
         django.setup()
 
     def setUp(self):
+        # agent data
         at_person = AgentType.objects.get(name="Individual")
         at_org = AgentType.objects.get(name="Organization")
         aat_member = AgentAssociationType.objects.get(identifier="member")
@@ -77,7 +78,59 @@ class AgentSchemaTest(TestCase):
             association_type=aat_supplier,
             )
         supplier_org1.save()
-        
+
+        # resource data
+        unit_each = Unit(
+            unit_type = "quantity",
+            abbrev = "EA",
+            name = "Each",
+            )
+        unit_each.save()
+        unit_hours = Unit(
+            unit_type = "time",
+            abbrev = "HR",
+            name = "Hours",
+            )
+        unit_hours.save()
+        rti1 = EconomicResourceType(
+            name='component1',
+            unit=unit_each,
+            behavior="consumed",
+            inventory_rule="yes",
+            )
+        rti1.save()
+        rti3 = EconomicResourceType(
+            name='product1',
+            unit=unit_each,
+            behavior="produced",
+            inventory_rule="yes",
+            )
+        rti3.save()
+        rti2 = EconomicResourceType(
+            name='work1',
+            unit=unit_hours,
+            behavior="work",
+            inventory_rule="never",
+            )
+        rti2.save()
+        res1 = EconomicResource(
+            resource_type=rti1,
+            identifier="a-component",
+            quantity=5,
+            )
+        res1.save()
+        res2 = EconomicResource(
+            resource_type=rti1,
+            identifier="another-component",
+            quantity=100,
+            )
+        res2.save()
+        res3 = EconomicResource(
+            resource_type=rti1,
+            identifier="a-product",
+            quantity=10,
+            )
+        res3.save()
 
     def test_basic_me_query(self):
 
@@ -154,7 +207,7 @@ class AgentSchemaTest(TestCase):
         result = schema.execute(query)
         self.assertEqual('testUser11222', result.data['viewer']['agent']['name'])
 
-    def test_all_agents(self):
+    def test_agents_and_relationships(self):
         result = schema.execute('''
                 mutation {
                   createToken(username: "testUser11222", password: "123456") {
@@ -172,7 +225,8 @@ class AgentSchemaTest(TestCase):
                     allAgents {
                       name
                       type
-                      agentRelationships {
+                      __typename
+                      members: agentRelationships(category: MEMBER) {
                         id
                         subject {
                           name
@@ -187,20 +241,109 @@ class AgentSchemaTest(TestCase):
                           type
                         }
                       }
+                      tps: agentRelationships(category: TRADINGPARTNER) {
+                        id
+                        subject {
+                          name
+                          type
+                        }
+                        relationship {
+                          label
+                          category
+                        }
+                        object {
+                          name
+                          type
+                        }
+                      }
+                      agentRoles {
+                          label
+                          category
+                      }
                     }
                   }
                 }
                 '''
-        #import pdb; pdb.set_trace()
         result = schema.execute(query)
         allAgents = result.data['viewer']['allAgents']
         self.assertEqual(len(allAgents), 5)
         org1 = allAgents[1]
         self.assertEqual(org1['name'], 'org1')
-        agentRelationships = org1['agentRelationships']
-        supplier = agentRelationships[1]
+        agentRelationships = org1['tps']
+        supplier = agentRelationships[0]
         self.assertEqual(supplier['subject']['name'], 'supp1')
-        
+        self.assertEqual(org1['__typename'], 'Organization')
+        self.assertEqual(org1['type'], 'Organization')
+        person = allAgents[0]
+        self.assertEqual(person['__typename'], 'Person')
+        roles = person['agentRoles']
+        role = roles[0]
+        self.assertEqual(role['label'], 'is member of')
+
+    def test_resources_and_resource_types(self):
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''')
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
+
+        query = '''
+                query {
+                  viewer(token: "''' + token + '''") {
+                    resourceTaxonomyItemsByProcessCategory(category: CONSUMED) {
+                      name
+                      category
+                      processCategory
+                      taxonomyItemResources {
+                        trackingIdentifier
+                        currentQuantity {
+                          numericValue
+                          unit {
+                            name
+                          }
+                        }
+                        resourceTaxonomyItem {
+                          name
+                        }
+                        image
+                        category
+                        note
+                      }
+                    }
+                    resourceTaxonomyItemsByAction(action: PRODUCE) {
+                      name
+                      category
+                      processCategory
+                      taxonomyItemResources {
+                        trackingIdentifier
+                      }
+                    }
+                  }
+                }
+                '''
+        result = schema.execute(query)
+        resourceTaxonomyItemsByProcessCategory = result.data['viewer']['resourceTaxonomyItemsByProcessCategory']
+        resourceTaxonomyItemsByAction = result.data['viewer']['resourceTaxonomyItemsByAction']
+        #import pdb; pdb.set_trace()
+        self.assertEqual(len(resourceTaxonomyItemsByProcessCategory), 1)
+        rti1 = resourceTaxonomyItemsByProcessCategory[0]
+        self.assertEqual(rti1['name'], 'component1')
+        consumed_resources = rti1['taxonomyItemResources']
+        self.assertEqual(len(consumed_resources), 3)
+        conres1 = consumed_resources[0]
+        self.assertEqual(conres1['trackingIdentifier'], 'a-component')
+        prod_resources = resourceTaxonomyItemsByAction[0]['taxonomyItemResources']
+        prodres1 = prod_resources[1]
+        self.assertEqual(prodres1['trackingIdentifier'], 'a-product')
+
+
+
+######################### SAMPLE QUERIES #####################
 
 '''
 query($token: String) {
@@ -709,6 +852,26 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    resourceTaxonomyItemsByProcessCategory(category: CONSUMED) {
+      name
+      category
+      processCategory
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    resourceTaxonomyItemsByAction(action: PRODUCE) {
+      name
+      category
+      processCategory
+    }
+  }
+}
+
 query($token: String) {
   viewer(token: $token) {
     economicResource(id: 26) {
@@ -879,26 +1042,6 @@ query($token: String) {
         isFinished
         note
       }
-    }
-  }
-}
-
-query ($token: String) {
-  viewer(token: $token) {
-    resourceTaxonomyItemsByProcessCategory(category: CONSUMED) {
-      name
-      category
-      processCategory
-    }
-  }
-}
-
-query ($token: String) {
-  viewer(token: $token) {
-    resourceTaxonomyItemsByAction(action: PRODUCE) {
-      name
-      category
-      processCategory
     }
   }
 }

@@ -154,46 +154,53 @@ class AgentSchemaTest(TestCase):
         result = schema.execute(query)
         self.assertEqual('testUser11222', result.data['viewer']['agent']['name'])
 
-    #def test_all_agents(self):
-    #    result = schema.execute('''
-    #            mutation {
-    #              createToken(username: "testUser11222", password: "123456") {
-    #                token
-    #              }
-    #            }
-    #            ''')
-    #    call_result = result.data['createToken']
-    #    token = call_result['token']
-    #    test_agent = EconomicAgent.objects.get(name="testUser11222")
+    def test_all_agents(self):
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''')
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
 
-    #    query = '''
-    #            query {
-    #              viewer(token: "''' + token + '''") {
-    #                allAgents {
-    #                  name
-    #                  type
-    #                  agentRelationships {
-    #                    id
-    #                    subject {
-    #                      name
-    #                      type
-    #                    }
-    #                    relationship {
-    #                      label
-    #                      category
-    #                    }
-    #                    object {
-    #                      name
-    #                      type
-    #                    }
-    #                  }
-    #                }
-    #              }
-    #            }
-    #            '''
-    #    import pdb; pdb.set_trace()
-    #    result = schema.execute(query)
-    #    self.assertNotIn('error', result)
+        query = '''
+                query {
+                  viewer(token: "''' + token + '''") {
+                    allAgents {
+                      name
+                      type
+                      agentRelationships {
+                        id
+                        subject {
+                          name
+                          type
+                        }
+                        relationship {
+                          label
+                          category
+                        }
+                        object {
+                          name
+                          type
+                        }
+                      }
+                    }
+                  }
+                }
+                '''
+        #import pdb; pdb.set_trace()
+        result = schema.execute(query)
+        allAgents = result.data['viewer']['allAgents']
+        self.assertEqual(len(allAgents), 5)
+        org1 = allAgents[1]
+        self.assertEqual(org1['name'], 'org1')
+        agentRelationships = org1['agentRelationships']
+        supplier = agentRelationships[1]
+        self.assertEqual(supplier['subject']['name'], 'supp1')
+        
 
 '''
 query($token: String) {

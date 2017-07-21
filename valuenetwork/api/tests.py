@@ -890,7 +890,17 @@ query($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
-    resourceTaxonomyItemsByProcessCategory(category: "consumed") {
+    resourceTaxonomyItemsByProcessCategory(category: CONSUMED) {
+      name
+      category
+      processCategory
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    resourceTaxonomyItemsByAction(action: PRODUCE) {
       name
       category
       processCategory

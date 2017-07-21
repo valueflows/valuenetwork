@@ -25,7 +25,7 @@ my_port = config.getint('main','port')
 
 wallet_path = config.get('electrum','wallet_path')
 password = config.get('electrum', 'password')
-fee_rate = config.getint('network','fee')
+fee = config.getint('network','fee')
 
 stopping = False
 
@@ -34,7 +34,7 @@ logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(mess
 def fee():
     # TODO: test to ask for current fee rate instead of conf value with:
     # return wallet.relayfee()
-    return fee_rate
+    return fee
 
 def do_stop(password):
     global stopping
@@ -120,7 +120,6 @@ def make_transaction_from_address(address_origin, address_end, amount):
     network.send([('blockchain.address.subscribe',[address_origin])], callback)
     inputs = [address_origin]
     coins = wallet.get_spendable_coins(domain = inputs)
-    # The fee is calculated in make_unsigned_transaction from fee_rate and size.
     amount_total = int(amount)
 
     if amount_total > 0:
@@ -131,18 +130,11 @@ def make_transaction_from_address(address_origin, address_end, amount):
 
     config = electrumfair.SimpleConfig()
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, config, change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, config, fixed_fee=fee, change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))
         return False
-    fixed_fee = wallet.relayfee() * tx.estimated_size() / 1000
-    if tx.get_fee() < fixed_fee:
-        try:
-            tx = wallet.make_unsigned_transaction(coins, output, config, fixed_fee=fixed_fee, change_addr=address_origin)
-        except NotEnoughFunds:
-            logging.error("Not enough funds when adding the network fee. Fee : %s " %fixed_fee)
-            return False
     wallet.sign_transaction(tx, password)
     rec_tx_state, rec_tx_out = network.broadcast(tx,60)
     if rec_tx_state:

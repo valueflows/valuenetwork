@@ -32,7 +32,8 @@ stopping = False
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)s %(message)s')
 
 def fee():
-    # TODO: ask for fee rate to the server with network.send([('blockchain.estimatefee)])
+    # TODO: test to ask for current fee rate instead of conf value with:
+    # return wallet.relayfee()
     return fee_rate
 
 def do_stop(password):
@@ -123,17 +124,25 @@ def make_transaction_from_address(address_origin, address_end, amount):
     amount_total = int(amount)
 
     if amount_total > 0:
-        output = [(TYPE_ADDRESS, address_origin, address_end, int(amount_total))]
+        output = [(TYPE_ADDRESS, address_end, int(amount_total))]
     else:
         logging.error("Amount negative: %d" %(amount_total) )
         return False
+
+    config = electrumfair.SimpleConfig()
     try:
-        tx = wallet.make_unsigned_transaction(coins, output, c, change_addr=address_origin)
+        tx = wallet.make_unsigned_transaction(coins, output, config, change_addr=address_origin)
     except NotEnoughFunds:
         logging.error("Not enough funds confirmed to make the transaction. Requested Amount : %s " %amount_total)
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))
         return False
-    fee = tx.get_fee()
+    fixed_fee = wallet.relayfee() * tx.estimated_size() / 1000
+    if tx.get_fee() < fixed_fee:
+        try:
+            tx = wallet.make_unsigned_transaction(coins, output, config, fixed_fee=fixed_fee, change_addr=address_origin)
+        except NotEnoughFunds:
+            logging.error("Not enough funds when adding the network fee. Fee : %s " %fixed_fee)
+            return False
     wallet.sign_transaction(tx, password)
     rec_tx_state, rec_tx_out = network.broadcast(tx,60)
     if rec_tx_state:

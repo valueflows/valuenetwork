@@ -4,6 +4,11 @@ from valuenetwork.valueaccounting.models import *
 from valuenetwork.api.models import *
 from .schema import schema
 
+import logging
+logger = logging.getLogger("graphql.execution.executor").addHandler(logging.NullHandler())
+# Note: if you want to see the executor error messages,
+# comment out the line above and uncomment the one below:
+#logging.basicConfig()
 
 class AgentSchemaTest(TestCase):
     @classmethod

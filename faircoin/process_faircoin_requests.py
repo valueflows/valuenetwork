@@ -179,7 +179,7 @@ def broadcast_tx():
                         successful_events += 1
                         if event.event_type.name=="Give":
                             qty = event.quantity
-                            qty += Decimal(fee) / Decimal("1.e6")
+                            qty += Decimal(fee) / Decimal("1.e8")
                             event.quantity = qty
                             event.save()
                         fairtx.tx_state = "broadcast"

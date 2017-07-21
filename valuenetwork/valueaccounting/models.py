@@ -2088,7 +2088,7 @@ BEHAVIOR_CHOICES = (
     ('consumed', _('Produced/Changed + Consumed')),
     ('used', _('Produced/Changed + Used')),
     ('cited', _('Produced/Changed + Cited')),
-    ('produced', _('Produced only')),
+    ('produced', _('Produced/Changed only')),
     ('other', _('Other')),
 )
 

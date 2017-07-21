@@ -16,11 +16,18 @@ class EconomicResourceCategory(graphene.Enum):
     INVENTORY = "inventory"
     WORK = "work"
 
+class EconomicResourceProcessCategory(graphene.Enum):
+    NONE = None
+    CONSUMED = "consumed"
+    USED = "used"
+    CITED = "cited"
+    PRODUCED = "produced"
 
 class ResourceTaxonomyItem(DjangoObjectType):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
     category = graphene.String(source='category')
+    process_category = graphene.String(source='process_category')
 
     class Meta:
         model = EconomicResourceType

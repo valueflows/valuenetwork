@@ -859,6 +859,16 @@ query($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    resourceTaxonomyItemsByProcessCategory(category: "produced") {
+      name
+      category
+      processCategory
+    }
+  }
+}
+
 fragment coreEventFields on EconomicEvent {
   action
   start

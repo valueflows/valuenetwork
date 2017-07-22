@@ -225,73 +225,90 @@ class ExchangeService(object):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return []
 
-        # This function should be adapted to faircoin2 as the new bockchain
-        # begins on 18/7/2017 and there's no more old transaction history
+        redistribution_date = datetime.date(2017, 7, 18)
+        redistribution_txs = (
+            "009e53988153fbd13f458b0881734ff385f749d020e3ee7360e1ca9ed8ff0490",
+            "12bc2f2f699dc75d1cbe0dd17597cd12649bb7698e179c752f22b70a0a3c98d4",
+            "218c72570d992dc33456c148c1e26641a4b985e83054a5cae227ba71ee979ea3",
+            "231c406153b1e5e75d47aade9dda5a2b806067f577d7d5b8e9574f19bb988d75",
+            "39a808302aed7ff4cd68d8d2deb775502ae99c5eb207c65a9712a7125d5329c8",
+            "634f11e66604bf38eafec4b0d7aeebf630073cfcb83c74a58fdd5e0772e88305",
+            "6abd3941e457d3e68f42f7619eadc19767ad0724009f1f98caffde2403656d8f",
+            "7229c6eaca9b2bd55edd10410fd3b223a4b700d53591ddb97690762f52526fdd",
+            "7484be3956691dae231d8c4dafb62104dbf805e541b1cc1c572a06b65d9a3f18"
+            "7927a0fbf3b6533f282815f49154dae94acde9e347e7a53f84b4e54d276b9792",
+            "b31489979bfd28faa2fadcec559a9e5d10413048a5ad80bc7d3c46901a1ff362",
+            "b46352e1b87783fbf9ed771d722c08035cfc1c7c4e1509d4654ae195c700af91",
+            "d26e3759806a8ae53ae81a643786d2ad34705f8d792330d9bf8bdd306658a982",
+        )
 
-        return []
+        faircoin_address = str(resource.faircoin_address.address)
+        tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
+        if not tx_in_blockchain: # Something wrong in daemon or network.
+            return []
 
-        # faircoin_address = str(resource.faircoin_address.address)
-        # tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
-        # if not tx_in_blockchain: # Something wrong in daemon or network.
-        #     return []
-        #
-        # event_list = resource.events.all()
-        # tx_in_ocp = []
-        # for event in event_list:
-        #     tx_in_ocp.append(str(event.faircoin_transaction.tx_hash))
-        #
-        # tx_included = []
-        # for tx in tx_in_blockchain:
-        #     if str(tx[0]) not in tx_in_ocp:
-        #         amount, time = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
-        #         confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
-        #         if amount and confirmations:
-        #             qty=Decimal(amount)/Decimal(100000000)
-        #             date = datetime.date.fromtimestamp(time)
-        #             tt = ExchangeService.faircoin_incoming_transfer_type()
-        #             xt = tt.exchange_type
-        #             exchange = Exchange(
-        #                 exchange_type=xt,
-        #                 use_case=xt.use_case,
-        #                 name="Receive Faircoins",
-        #                 start_date=date,
-        #             )
-        #             exchange.save()
-        #             transfer = Transfer(
-        #                 transfer_type=tt,
-        #                 exchange=exchange,
-        #                 transfer_date=date,
-        #                 name="Receive Faircoins",
-        #             )
-        #             transfer.save()
-        #
-        #             et_receive = EventType.objects.get(name="Receive")
-        #             state = "external"
-        #             if confirmations > 0:
-        #                 state = "broadcast"
-        #             if confirmations > 2:
-        #                 state = "confirmed"
-        #
-        #             event = EconomicEvent(
-        #                 event_type=et_receive,
-        #                 event_date=date,
-        #                 to_agent=agent,
-        #                 resource_type=resource.resource_type,
-        #                 resource=resource,
-        #                 quantity=qty,
-        #                 transfer=transfer,
-        #                 event_reference=faircoin_address
-        #             )
-        #             event.save()
-        #             fairtx = FaircoinTransaction(
-        #                 event=event,
-        #                 tx_hash=str(tx[0]),
-        #                 tx_state=state,
-        #                 to_address=faircoin_address,
-        #             )
-        #             fairtx.save()
-        #             tx_included.append(str(tx[0]))
-        # return tx_included
+        event_list = EconomicEvent.objects.filter(
+            resource=resource,
+            event_date__gt=redistribution_date,
+            faircoin_transaction__tx_hash__isnull=False
+        )
+
+        tx_in_ocp = []
+        for event in event_list:
+            tx_in_ocp.append(str(event.faircoin_transaction.tx_hash))
+
+        tx_included = []
+        for tx in tx_in_blockchain:
+            if str(tx[0]) not in tx_in_ocp and str(tx[0]) not in redistribution_txs:
+                amount, time = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
+                confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
+                if amount and confirmations:
+                    qty=Decimal(amount)/Decimal(100000000)
+                    date = datetime.date.fromtimestamp(time)
+                    tt = ExchangeService.faircoin_incoming_transfer_type()
+                    xt = tt.exchange_type
+                    exchange = Exchange(
+                        exchange_type=xt,
+                        use_case=xt.use_case,
+                        name="Receive Faircoins",
+                        start_date=date,
+                    )
+                    exchange.save()
+                    transfer = Transfer(
+                        transfer_type=tt,
+                        exchange=exchange,
+                        transfer_date=date,
+                        name="Receive Faircoins",
+                    )
+                    transfer.save()
+
+                    et_receive = EventType.objects.get(name="Receive")
+                    state = "external"
+                    if confirmations > 0:
+                        state = "broadcast"
+                    if confirmations > 2:
+                        state = "confirmed"
+
+                    event = EconomicEvent(
+                        event_type=et_receive,
+                        event_date=date,
+                        to_agent=agent,
+                        resource_type=resource.resource_type,
+                        resource=resource,
+                        quantity=qty,
+                        transfer=transfer,
+                        event_reference=faircoin_address
+                    )
+                    event.save()
+                    fairtx = FaircoinTransaction(
+                        event=event,
+                        tx_hash=str(tx[0]),
+                        tx_state=state,
+                        to_address=faircoin_address,
+                    )
+                    fairtx.save()
+                    tx_included.append(str(tx[0]))
+        return tx_included
 
     def create_faircoin_resource(self, agent, address):
         if 'faircoin' not in settings.INSTALLED_APPS:

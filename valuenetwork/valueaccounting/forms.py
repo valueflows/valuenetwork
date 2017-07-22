@@ -67,7 +67,7 @@ class SendFairCoinsForm(forms.Form):
         queryset=EconomicAgent.objects.filter(
             agent_resource_roles__role__is_owner=True,
             agent_resource_roles__resource__resource_type__behavior="dig_acct",
-            agent_resource_roles__resource__digital_currency_address__isnull=False),
+            agent_resource_roles__resource__faircoin_address__address__isnull=False),
         widget=forms.Select(
             attrs={'class': 'chzn-select'}),
         label=_("If you send to an OCP agent, choose it here to get the address:"),
@@ -86,7 +86,7 @@ class SendFairCoinsForm(forms.Form):
                 id__in=ag_ids,
                 agent_resource_roles__role__is_owner=True,
                 agent_resource_roles__resource__resource_type__behavior="dig_acct",
-                agent_resource_roles__resource__digital_currency_address__isnull=False)
+                agent_resource_roles__resource__faircoin_address__address__isnull=False)
 
     def clean(self):
         data = super(SendFairCoinsForm, self).clean()
@@ -4084,4 +4084,3 @@ class ProcessMultiSelectForm(forms.Form):
                 l.append(Process.objects.get(pk=pk))
             dict["processes"] = l
         return dict
-

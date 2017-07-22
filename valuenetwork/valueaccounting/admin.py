@@ -254,7 +254,7 @@ class AgentRoleInline(admin.TabularInline):
     fields = ('role', 'agent')
 
 class EconomicResourceAdmin(admin.ModelAdmin):
-    list_display = ('id', 'identifier', 'resource_type', 'quantity', 'unit_of_quantity', 'quality', 'notes', 'digital_currency_address')
+    list_display = ('id', 'identifier', 'resource_type', 'quantity', 'unit_of_quantity', 'quality', 'notes')
     list_filter = ['resource_type', 'author']
     search_fields = ['identifier', 'resource_type__name']
     date_hierarchy = 'created_date'
@@ -313,9 +313,9 @@ class ClaimEvent2Inline(admin.TabularInline):
 
 class EconomicEventAdmin(admin.ModelAdmin):
     date_hierarchy = 'event_date'
-    list_display = ('event_type', 'event_date', 'from_agent', 'to_agent', 'digital_currency_tx_state', 'context_agent',
+    list_display = ('event_type', 'event_date', 'from_agent', 'to_agent', 'context_agent',
         'process', 'exchange', 'resource_type', 'quantity', 'unit_of_quantity', 'description',)
-    list_filter = ['event_type', 'digital_currency_tx_state', 'context_agent', 'resource_type', 'from_agent',]
+    list_filter = ['event_type', 'context_agent', 'resource_type', 'from_agent',]
     search_fields = ['description', 'process__name', 'event_type__name', 'from_agent__name', 'to_agent__name',
         'resource_type__name',]
     list_editable = ['event_date', 'context_agent']

@@ -1100,7 +1100,10 @@ def joinaproject_request(request, form_slug = False):
     cleaned_data = False
     form = False
     if form_slug:
-        project = Project.objects.get(fobi_slug=form_slug)
+        try:
+            project = Project.objects.get(fobi_slug=form_slug.strip())
+        except:
+            project = False
 
         try:
             user_agent = request.user.agent.agent
@@ -1109,7 +1112,7 @@ def joinaproject_request(request, form_slug = False):
         except:
             user_agent = False
 
-        if project.visibility != "public" and not user_agent:
+        if not project or project.visibility != "public": # or not user_agent:
             return HttpResponseRedirect('/%s/' % ('home'))
 
         fobi_slug = project.fobi_slug

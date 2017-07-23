@@ -6,15 +6,13 @@ port = 8069
 
 [electrum]
 # This data is for electrum-fair wallet.
-wallet_path = /home/ocp/.electrum-fair/wallets/ocp_wallet
-seed = XXX
-password = XXX 
+wallet_path = /home/ocp/.electrumfair/wallets/ocp_wallet
+password = XXX
 gap_limit = 5
 use_change = False
 
 
 [network]
-server = chain.fair-coin.org:51002:s
+server = electrum.faircoin.world:51812:s
 proxy = None
-fee = 1000
-
+fee = 1000000

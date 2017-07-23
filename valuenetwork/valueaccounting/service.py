@@ -195,10 +195,10 @@ class ExchangeService(object):
         fairtx.save()
 
         if to_resource:
-            # network_fee is subtracted from quantity
-            # so quantity is correct for the giving event
-            # but receiving event will get quantity - network_fee
-            quantity = qty - Decimal(float(network_fee) / 1.e6)
+            # The events are saved without fee.
+            # When the wallet constructs the transactions and knows how large is,
+            # it calculates the fee and it will add the fee to the et_give event.
+            # quantity = qty - Decimal(float(network_fee) / 1.e8)
             et_receive = EventType.objects.get(name="Receive")
             event = EconomicEvent(
                 event_type=et_receive,
@@ -207,7 +207,7 @@ class ExchangeService(object):
                 to_agent=to_agent,
                 resource_type=to_resource.resource_type,
                 resource=to_resource,
-                quantity=quantity,
+                quantity=qty,
                 transfer=transfer,
                 event_reference=recipient,
             )
@@ -224,23 +224,46 @@ class ExchangeService(object):
     def include_blockchain_tx_as_event(self, agent, resource):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return []
+
+        redistribution_date = datetime.date(2017, 7, 18)
+        redistribution_txs = (
+            "009e53988153fbd13f458b0881734ff385f749d020e3ee7360e1ca9ed8ff0490",
+            "12bc2f2f699dc75d1cbe0dd17597cd12649bb7698e179c752f22b70a0a3c98d4",
+            "218c72570d992dc33456c148c1e26641a4b985e83054a5cae227ba71ee979ea3",
+            "231c406153b1e5e75d47aade9dda5a2b806067f577d7d5b8e9574f19bb988d75",
+            "39a808302aed7ff4cd68d8d2deb775502ae99c5eb207c65a9712a7125d5329c8",
+            "634f11e66604bf38eafec4b0d7aeebf630073cfcb83c74a58fdd5e0772e88305",
+            "6abd3941e457d3e68f42f7619eadc19767ad0724009f1f98caffde2403656d8f",
+            "7229c6eaca9b2bd55edd10410fd3b223a4b700d53591ddb97690762f52526fdd",
+            "7484be3956691dae231d8c4dafb62104dbf805e541b1cc1c572a06b65d9a3f18"
+            "7927a0fbf3b6533f282815f49154dae94acde9e347e7a53f84b4e54d276b9792",
+            "b31489979bfd28faa2fadcec559a9e5d10413048a5ad80bc7d3c46901a1ff362",
+            "b46352e1b87783fbf9ed771d722c08035cfc1c7c4e1509d4654ae195c700af91",
+            "d26e3759806a8ae53ae81a643786d2ad34705f8d792330d9bf8bdd306658a982",
+        )
+
         faircoin_address = str(resource.faircoin_address.address)
         tx_in_blockchain = faircoin_utils.get_address_history(faircoin_address)
         if not tx_in_blockchain: # Something wrong in daemon or network.
             return []
 
-        event_list = resource.events.all()
+        event_list = EconomicEvent.objects.filter(
+            resource=resource,
+            event_date__gt=redistribution_date,
+            faircoin_transaction__tx_hash__isnull=False
+        )
+
         tx_in_ocp = []
         for event in event_list:
             tx_in_ocp.append(str(event.faircoin_transaction.tx_hash))
 
         tx_included = []
         for tx in tx_in_blockchain:
-            if str(tx[0]) not in tx_in_ocp:
+            if str(tx[0]) not in tx_in_ocp and str(tx[0]) not in redistribution_txs:
                 amount, time = faircoin_utils.get_transaction_info(str(tx[0]), faircoin_address)
                 confirmations, timestamp = faircoin_utils.get_confirmations(str(tx[0]))
                 if amount and confirmations:
-                    qty=Decimal(amount)/Decimal(1000000)
+                    qty=Decimal(amount)/Decimal(100000000)
                     date = datetime.date.fromtimestamp(time)
                     tt = ExchangeService.faircoin_incoming_transfer_type()
                     xt = tt.exchange_type

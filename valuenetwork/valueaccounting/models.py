@@ -6685,13 +6685,12 @@ class Process(models.Model):
                                         answer.append(pc.process)
         for ie in self.incoming_events():
             #todo: check stage of ie.resource != self.process_type
-            if not ie.commitment:
-                if ie.resource:
-                    for evt in ie.resource.producing_events():
-                        if evt.process:
-                            if evt.process != self:
-                                if evt.process not in answer:
-                                    answer.append(evt.process)
+            if ie.resource:
+                for evt in ie.resource.producing_events():
+                    if evt.process:
+                        if evt.process != self:
+                            if evt.process not in answer:
+                                answer.append(evt.process)
         return answer
 
     def previous_processes_for_order(self, order):
@@ -6767,15 +6766,14 @@ class Process(models.Model):
                                             if cc.process not in answer:
                                                 answer.append(cc.process)
         for oe in self.production_events():
-            if not oe.commitment:
-                rt = oe.resource_type
-                if oe.cycle_id() not in input_ids:
-                    if oe.resource:
-                        for evt in oe.resource.all_usage_events():
-                            if evt.process:
-                                if evt.process != self:
-                                    if evt.process not in answer:
-                                        answer.append(evt.process)
+            rt = oe.resource_type
+            if oe.cycle_id() not in input_ids:
+                if oe.resource:
+                    for evt in oe.resource.all_usage_events():
+                        if evt.process:
+                            if evt.process != self:
+                                if evt.process not in answer:
+                                    answer.append(evt.process)
         return answer
 
     def next_processes_for_order(self, order):

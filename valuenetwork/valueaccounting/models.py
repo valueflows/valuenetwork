@@ -959,11 +959,16 @@ class EconomicAgent(models.Model):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
         # bumbum get also parents of parents contexts
         grand_parents = []
+        mates = []
         for agn in agents:
-          grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+            grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+            if self.is_individual():
+                mates.extend([ag.is_associate for ag in agn.has_associates.all()])
         agents.extend(grand_parents)
         if childs:
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
+        if self.is_individual():
+            agents.extend(mates)
         if self.is_context and not self in agents:
           agents.extend([self])
         return list(set(agents))

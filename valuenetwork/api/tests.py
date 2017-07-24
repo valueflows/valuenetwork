@@ -591,6 +591,10 @@ class APITest(TestCase):
                           name
                         }
                     }
+                    affectedTaxonomyItem {
+                        name
+                        category
+                    }
                     affectedResource {
                         id
                         resourceTaxonomyItem {

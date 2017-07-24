@@ -29,6 +29,7 @@ class EconomicEvent(DjangoObjectType):
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
+    affected_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
     affected_resource = graphene.Field(lambda: types.EconomicResource)
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
@@ -51,6 +52,9 @@ class EconomicEvent(DjangoObjectType):
 
     def resolve_scope(self, args, *rargs):
         return formatAgent(self.scope)
+
+    def resolve_affected_taxonomy_item(self, args, *rargs):
+        return self.affected_taxonomy_item
 
     def resolve_affected_resource(self, args, *rargs):
         return self.affected_resource

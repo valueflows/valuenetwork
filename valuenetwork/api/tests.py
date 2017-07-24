@@ -1703,6 +1703,10 @@ query ($token: String) {
         }
       }
       note
+      affectedTaxonomyItem {
+        name
+        category
+      }
       affectedResource {
         id
         resourceTaxonomyItem {
@@ -1728,7 +1732,6 @@ query ($token: String) {
         name
       }
       fulfills {
-        commitmentDate
         committedQuantity {
           numericValue
         }

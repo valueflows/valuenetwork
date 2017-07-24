@@ -4546,7 +4546,7 @@ class EconomicResource(models.Model):
     def tracking_identifier(self):
         return self.identifier
 
-    @property #ValueFlows
+    @property #ValueFlows  TODO is this still valid???
     def resource_type_name(self):
         return self.resource_type.name
 
@@ -10883,6 +10883,10 @@ class EconomicEvent(models.Model):
     @property #ValueFlows
     def affected_resource(self):
         return self.resource
+
+    @property #ValueFlows
+    def affected_taxonomy_item(self):
+        return self.resource_type
 
     #@property #ValueFlows TODO not in VF now
     #def work_category(self):

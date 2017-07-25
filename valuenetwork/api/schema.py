@@ -1,9 +1,6 @@
 #
 # Graphene master schema for Valuenetwork datatypes
 #
-# @author:  pospi <pospi@spadgos.com>
-# @since:   2017-03-20
-#
 
 import graphene
 import jwt
@@ -20,6 +17,7 @@ import valuenetwork.api.schemas.Organization
 import valuenetwork.api.schemas.Person
 import valuenetwork.api.schemas.EconomicResource
 import valuenetwork.api.schemas.Process
+import valuenetwork.api.schemas.Exchange
 import valuenetwork.api.schemas.EconomicEvent
 import valuenetwork.api.schemas.QuantityValue
 import valuenetwork.api.schemas.Unit
@@ -36,6 +34,7 @@ class ViewerQuery(
     valuenetwork.api.schemas.Person.Query,
     valuenetwork.api.schemas.EconomicResource.Query,
     valuenetwork.api.schemas.Process.Query,
+    valuenetwork.api.schemas.Exchange.Query,
     valuenetwork.api.schemas.EconomicEvent.Query,
     valuenetwork.api.schemas.QuantityValue.Query,
     valuenetwork.api.schemas.Unit.Query,

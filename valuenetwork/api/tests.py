@@ -1510,7 +1510,13 @@ query ($token: String) {
       processEconomicEvents {
         ...coreEventFields
       }
+      processEconomicEvents(action: PRODUCE) {
+        ...coreEventFields
+      }
       processCommitments {
+        ...coreCommitmentFields
+      }
+      processCommitments(action: WORK) {
         ...coreCommitmentFields
       }
       inputs {

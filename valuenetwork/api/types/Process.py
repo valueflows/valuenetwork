@@ -22,9 +22,11 @@ class Process(DjangoObjectType):
         only_fields = ('id', 'name')
 
 
-    process_economic_events = graphene.List(lambda: types.EconomicEvent)
+    process_economic_events = graphene.List(lambda: types.EconomicEvent,
+                                            action=Action())
 
-    process_commitments = graphene.List(lambda: types.Commitment)
+    process_commitments = graphene.List(lambda: types.Commitment,
+                                        action=Action())
 
     inputs = graphene.List(lambda: types.EconomicEvent)
 
@@ -35,7 +37,7 @@ class Process(DjangoObjectType):
     outputs = graphene.List(lambda: types.EconomicEvent)
 
     unplanned_economic_events = graphene.List(lambda: types.EconomicEvent,
-                                     action=Action())
+                                              action=Action())
 
     committed_inputs = graphene.List(lambda: types.Commitment)
 
@@ -56,10 +58,44 @@ class Process(DjangoObjectType):
     #previous_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
     def resolve_process_economic_events(self, args, context, info):
-        return self.events.all()
+        action = args.get('action')
+        events = self.events.all()
+        if action: 
+            if action == Action.WORK:
+                return events.filter(event_type__name="Time Contribution")
+            if action == Action.USE:
+                return events.filter(event_type__name="Resource use")
+            if action == Action.CONSUME:
+                return events.filter(event_type__name="Resource Consumption")
+            if action == Action.CITE:
+                return events.filter(event_type__name="Citation")
+            if action == Action.PRODUCE:
+                return events.filter(event_type__name="Resource Production")
+            if action == Action.ACCEPT:
+                return events.filter(event_type__name="To Be Changed")
+            if action == Action.IMPROVE:
+                return events.filter(event_type__name="Change")
+        return events
 
     def resolve_process_commitments(self, args, context, info):
-        return self.commitments.all()
+        action = args.get('action')
+        commitments = self.commitments.all()
+        if action: 
+            if action == Action.WORK:
+                return commitments.filter(event_type__name="Time Contribution")
+            if action == Action.USE:
+                return commitments.filter(event_type__name="Resource use")
+            if action == Action.CONSUME:
+                return commitments.filter(event_type__name="Resource Consumption")
+            if action == Action.CITE:
+                return commitments.filter(event_type__name="Citation")
+            if action == Action.PRODUCE:
+                return commitments.filter(event_type__name="Resource Production")
+            if action == Action.ACCEPT:
+                return commitments.filter(event_type__name="To Be Changed")
+            if action == Action.IMPROVE:
+                return commitments.filter(event_type__name="Change")
+        return commitments
 
     def resolve_inputs(self, args, context, info):
         return self.incoming_events()
@@ -99,7 +135,6 @@ class Process(DjangoObjectType):
         return formatted_agents
 
     def resolve_unplanned_economic_events(self, args, context, info):
-        #import pdb; pdb.set_trace()
         action = args.get('action')
         unplanned_events = self.uncommitted_events()
         if action: 

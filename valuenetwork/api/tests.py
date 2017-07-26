@@ -305,6 +305,19 @@ class APITest(TestCase):
             commitment=proc1_c4,
             )
         proc1_e5.save()
+        proc1_e6 = EconomicEvent(
+            event_type=et_produce,
+            event_date=datetime.date.today() + datetime.timedelta(days=3),
+            from_agent=org1,
+            resource_type=rti1,
+            resource=res2,
+            process=proc1,
+            context_agent=org1,
+            quantity=Decimal(2),
+            unit_of_quantity=unit_each,
+            commitment=None,
+            )
+        proc1_e6.save()
         proc2_e1 = EconomicEvent(
             event_type=et_produce,
             event_date=datetime.date.today() - datetime.timedelta(days=5),
@@ -640,6 +653,9 @@ class APITest(TestCase):
                   viewer(token: "''' + token + '''") {
                     process(id: 1) {
                         name
+                        unplannedEconomicEvents(action: PRODUCE) {
+                            ...coreEventFields
+                        }
                         processEconomicEvents {
                             ...coreEventFields
                         }
@@ -688,6 +704,7 @@ class APITest(TestCase):
         result = schema.execute(query)
         process = result.data['viewer']['process']
         self.assertEqual(process['name'], 'proc1')
+        unplannedEconomicEvents = process['unplannedEconomicEvents']
         processEconomicEvents = process['processEconomicEvents']
         processCommitments = process['processCommitments']
         inputs = process['inputs']
@@ -701,13 +718,13 @@ class APITest(TestCase):
         nextProcesses = process['nextProcesses']
         previousProcesses = process['previousProcesses']
         workingAgents = process['workingAgents']
-        #import pdb; pdb.set_trace()
-        self.assertEqual(len(processEconomicEvents), 5)
+        self.assertEqual(len(unplannedEconomicEvents), 1)
+        self.assertEqual(len(processEconomicEvents), 6)
         self.assertEqual(len(processCommitments), 4)
         self.assertEqual(len(inputs), 4)
         self.assertEqual(len(workInputs), 3)
         self.assertEqual(len(nonWorkInputs), 1)
-        self.assertEqual(len(outputs), 1)
+        self.assertEqual(len(outputs), 2)
         self.assertEqual(len(committedInputs), 3)
         self.assertEqual(len(committedWorkInputs), 2)
         self.assertEqual(len(committedNonWorkInputs), 1)
@@ -1487,6 +1504,9 @@ query ($token: String) {
   viewer(token: $token) {
     process(id: 6) {
       name
+      unplannedEconomicEvents(action: WORK) {
+        ...coreEventFields
+      }
       processEconomicEvents {
         ...coreEventFields
       }

@@ -6599,6 +6599,9 @@ class Process(models.Model):
     def production_quantity(self):
         return sum(pe.quantity for pe in self.production_events())
 
+    def uncommitted_events(self):
+        return self.events.filter(commitment=None)
+
     def uncommitted_production_events(self):
         return self.events.filter(
             event_type__relationship='out',

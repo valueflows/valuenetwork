@@ -5,6 +5,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
+from valuenetwork.api.types.EconomicEvent import Action
 from valuenetwork.valueaccounting.models import Process as ProcessProxy
 from valuenetwork.api.models import formatAgent
 
@@ -32,6 +33,9 @@ class Process(DjangoObjectType):
     non_work_inputs = graphene.List(lambda: types.EconomicEvent)
 
     outputs = graphene.List(lambda: types.EconomicEvent)
+
+    unplanned_economic_events = graphene.List(lambda: types.EconomicEvent,
+                                     action=Action())
 
     committed_inputs = graphene.List(lambda: types.Commitment)
 
@@ -93,6 +97,27 @@ class Process(DjangoObjectType):
         for agent in agents:
             formatted_agents.append(formatAgent(agent))
         return formatted_agents
+
+    def resolve_unplanned_economic_events(self, args, context, info):
+        #import pdb; pdb.set_trace()
+        action = args.get('action')
+        unplanned_events = self.uncommitted_events()
+        if action: 
+            if action == Action.WORK:
+                return unplanned_events.filter(event_type__name="Time Contribution")
+            if action == Action.USE:
+                return unplanned_events.filter(event_type__name="Resource use")
+            if action == Action.CONSUME:
+                return unplanned_events.filter(event_type__name="Resource Consumption")
+            if action == Action.CITE:
+                return unplanned_events.filter(event_type__name="Citation")
+            if action == Action.PRODUCE:
+                return unplanned_events.filter(event_type__name="Resource Production")
+            if action == Action.ACCEPT:
+                return unplanned_events.filter(event_type__name="To Be Changed")
+            if action == Action.IMPROVE:
+                return unplanned_events.filter(event_type__name="Change")
+        return unplanned_events
 
     #def resolve_next_resource_taxonomy_items(self, args, context, info):
     #    return self.output_resource_types()

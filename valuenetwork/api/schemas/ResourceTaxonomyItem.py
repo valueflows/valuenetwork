@@ -56,6 +56,6 @@ class Query(graphene.AbstractType):
             return EconomicResourceType.objects.filter(behavior="cited")
         if action == Action.PRODUCE:
             return EconomicResourceType.objects.filter(Q(behavior="produced")|Q(behavior="used")|Q(behavior="cited")|Q(behavior="consumed"))
-        if action == Action.CHANGE:
+        if action == Action.IMPROVE or action == Action.ACCEPT:
             return EconomicResourceType.objects.filter(Q(behavior="produced")|Q(behavior="used")|Q(behavior="cited")|Q(behavior="consumed"))
         return None

@@ -20,7 +20,8 @@ class Action(graphene.Enum):
     USE = "use"
     CITE = "cite"
     PRODUCE = "produce"
-    CHANGE = "change"
+    IMPROVE = "improve"
+    ACCEPT = "accept"
 
 
 class EconomicEvent(DjangoObjectType):

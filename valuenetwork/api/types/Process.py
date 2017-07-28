@@ -57,6 +57,9 @@ class Process(DjangoObjectType):
 
     #previous_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
+    resource_taxonomy_items_by_action = graphene.List(lambda: types.ResourceTaxonomyItem)
+
+
     def resolve_process_economic_events(self, args, context, info):
         action = args.get('action')
         events = self.events.all()
@@ -158,4 +161,11 @@ class Process(DjangoObjectType):
     #    return self.output_resource_types()
 
     #def resolve_previous_resource_taxonomy_items(self, args, context, info):
-    #    return self.previous_processes()
+    #    return self.
+
+    def resolve_resource_taxonomy_items_by_action(self, args, context, info): #TODO not completed
+        action = args.get('action')
+        if action:
+            event_type = convert_action_to_event_type(action)
+            return self.get_rts_by_action(event_type)
+        return None

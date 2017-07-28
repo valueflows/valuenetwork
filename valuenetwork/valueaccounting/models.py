@@ -6508,6 +6508,20 @@ class Process(models.Model):
     def note(self):
         return self.notes
 
+    def get_rts_by_action(self, event_type):
+        try:
+            from work.models import Project
+            proj = Project.objects.get(agent=self.context_agent)
+            if proj:
+                rt_selection = proj.resource_type_selection
+            else:
+                rt_selection = "all"
+        except:
+            rt_selection = "all"
+        #items = 
+        #if rt_selection == "project":
+        return rt_selection #temp
+
     def is_deletable(self):
         if self.events.all():
             return False

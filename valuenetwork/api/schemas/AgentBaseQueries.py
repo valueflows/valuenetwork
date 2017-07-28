@@ -8,10 +8,10 @@
 # @since:   2017-06-17
 #
 
-from valuenetwork.valueaccounting.models import AgentUser
+#from valuenetwork.valueaccounting.models import AgentUser
 
-class AgentBase:
+#class AgentBase:
 
-    def _load_own_agent(self):
-        agentUser = AgentUser.objects.filter(user=self.user).first()
-        return agentUser.agent
+#    def _load_own_agent(self):
+#        agentUser = AgentUser.objects.filter(user=self.user).first()
+#        return agentUser.agent

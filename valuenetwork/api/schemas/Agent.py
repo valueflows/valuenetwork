@@ -7,16 +7,12 @@
 #
 
 from django.core.exceptions import PermissionDenied
-
 import graphene
-
-from valuenetwork.valueaccounting.models import EconomicAgent
+from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
 from valuenetwork.api.models import formatAgent, formatAgentList
-
-from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Agent
 
-class Query(AgentBase, graphene.AbstractType):
+class Query(graphene.AbstractType):
 
     # define input query params
 
@@ -30,7 +26,8 @@ class Query(AgentBase, graphene.AbstractType):
     # load single agents
 
     def resolve_my_agent(self, args, *rargs):
-        agent = self._load_own_agent()
+        agentUser = AgentUser.objects.filter(user=self.user).first()
+        agent = agentUser.agent
         if agent:
             return formatAgent(agent)
         raise PermissionDenied("Cannot find requested agent")

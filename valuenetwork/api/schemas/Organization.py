@@ -10,7 +10,6 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from valuenetwork.valueaccounting.models import EconomicAgent, AgentType
 from work.models import Project
-from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Organization
 from valuenetwork.api.models import formatAgent, formatAgentList
 
@@ -37,7 +36,7 @@ class OrganizationType(DjangoObjectType):
         only_fields = ('id', 'name')
 
 
-class Query(AgentBase, graphene.AbstractType):
+class Query(graphene.AbstractType):
 
     # define input query params
 

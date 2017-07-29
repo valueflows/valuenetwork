@@ -552,6 +552,7 @@ class APITest(TestCase):
                         resourceTaxonomyItem {
                           name
                           category
+                          processCategory
                         }
                         trackingIdentifier
                         currentQuantity {
@@ -577,6 +578,7 @@ class APITest(TestCase):
         processes = result.data['viewer']['agent']['agentProcesses']
         self.assertEqual(agent['name'], 'org1')
         self.assertEqual(ownedEconomicResources[0]['resourceTaxonomyItem']['name'], 'product1')
+        self.assertEqual(ownedEconomicResources[0]['resourceTaxonomyItem']['processCategory'], 'produced')
         self.assertEqual(len(ownedEconomicResources), 2)
         self.assertEqual(ownedEconomicResources[0]['currentQuantity']['unit']['name'], 'Each')
         self.assertEqual(len(processes), 1)
@@ -604,12 +606,7 @@ class APITest(TestCase):
                           name
                         }
                     }
-                    affectedTaxonomyItem {
-                        name
-                        category
-                    }
                     affectedResource {
-                        id
                         resourceTaxonomyItem {
                           name
                           category
@@ -1234,6 +1231,7 @@ query($token: String) {
       name
       image
       category
+      processCategory
       note
     }
   }
@@ -1460,7 +1458,6 @@ fragment coreEventFields on EconomicEvent {
     }
   }
   affectedResource {
-    id
     resourceTaxonomyItem {
       name
       category
@@ -1582,7 +1579,6 @@ query ($token: String) {
       }
       note
       affectedResource {
-        id
         resourceTaxonomyItem {
           name
           category
@@ -1624,7 +1620,6 @@ query ($token: String) {
           }
         }
         affectedResource {
-          id
           resourceTaxonomyItem {
             name
             category
@@ -1693,7 +1688,6 @@ query ($token: String) {
       }
       note
       affectedResource {
-        id
         resourceTaxonomyItem {
           name
           category
@@ -1738,7 +1732,6 @@ query ($token: String) {
         category
       }
       affectedResource {
-        id
         resourceTaxonomyItem {
           name
           category

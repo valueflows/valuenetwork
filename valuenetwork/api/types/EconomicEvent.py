@@ -9,7 +9,7 @@ from graphene_django.types import DjangoObjectType
 
 import valuenetwork.api.types as types
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
+from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, EconomicResource as EconomicResourceProxy
 from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy
 
 
@@ -20,8 +20,11 @@ class Action(graphene.Enum):
     USE = "use"
     CITE = "cite"
     PRODUCE = "produce"
-    IMPROVE = "improve"
     ACCEPT = "accept"
+    IMPROVE = "improve"
+
+    def _convert_action_to_event_type(self): #TODO not completed
+        return self
 
 
 class EconomicEvent(DjangoObjectType):
@@ -30,11 +33,10 @@ class EconomicEvent(DjangoObjectType):
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
-    affected_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
+    #affected_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
     affected_resource = graphene.Field(lambda: types.EconomicResource)
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
-    #work_category = graphene.String(source='work_category')
     fulfills = graphene.Field(lambda: types.Commitment)
     note = graphene.String(source='note')
 
@@ -54,11 +56,14 @@ class EconomicEvent(DjangoObjectType):
     def resolve_scope(self, args, *rargs):
         return formatAgent(self.scope)
 
-    def resolve_affected_taxonomy_item(self, args, *rargs):
-        return self.affected_taxonomy_item
+    #def resolve_affected_taxonomy_item(self, args, *rargs):
+    #    return self.affected_taxonomy_item
 
     def resolve_affected_resource(self, args, *rargs):
-        return self.affected_resource
+        res = self.affected_resource
+        if res == None:
+            res = EconomicResourceProxy(resource_type=self.affected_taxonomy_item)
+        return res
 
     def resolve_affected_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)

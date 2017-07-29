@@ -27,7 +27,7 @@ class ResourceTaxonomyItem(DjangoObjectType):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
     category = graphene.String(source='category')
-    process_category = graphene.String(source='behavior')
+    process_category = graphene.String(source='process_category')
 
     class Meta:
         model = EconomicResourceType

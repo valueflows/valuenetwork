@@ -166,6 +166,6 @@ class Process(DjangoObjectType):
     def resolve_resource_taxonomy_items_by_action(self, args, context, info): #TODO not completed
         action = args.get('action')
         if action:
-            event_type = convert_action_to_event_type(action)
+            event_type = action._convert_action_to_event_type()
             return self.get_rts_by_action(event_type)
         return None

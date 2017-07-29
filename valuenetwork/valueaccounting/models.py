@@ -2173,7 +2173,7 @@ class EconomicResourceType(models.Model):
     def note(self):
         return self.description
 
-    @property #ValueFlows
+    @property
     def category(self):
         if (self.behavior == "other"
             or self.behavior == "consumed"
@@ -2185,6 +2185,16 @@ class EconomicResourceType(models.Model):
             return "WORK"
         else:
             return "CURRENCY"
+
+    @property
+    def process_category(self):
+        if (self.behavior ==  "consumed"
+            or self.behavior == "used" 
+            or self.behavior == "produced" 
+            or self.behavior == "cited"):
+            return self.behavior
+        else:
+            return None
 
     def label(self):
         return self.__unicode__()

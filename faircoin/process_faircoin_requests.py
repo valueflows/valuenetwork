@@ -13,7 +13,7 @@ import faircoin.utils as efn
 from valuenetwork.valueaccounting.models import EconomicAgent, EconomicEvent, EconomicResource
 from valuenetwork.valueaccounting.lockfile import FileLock, AlreadyLocked, LockTimeout, LockFailed
 
-#FAIRCOIN_DIVISOR = int(1000000)
+#FAIRCOIN_DIVISOR = int(100000000)
 
 def acquire_lock():
     lock = FileLock("broadcast-faircoins")
@@ -157,7 +157,7 @@ def broadcast_tx():
                         address_origin = event.from_agent.faircoin_address()
                         address_end = event.resource.faircoin_address.address
                     fairtx = event.faircoin_transaction
-                    amount = float(event.quantity) * 1.e6 # In satoshis
+                    amount = float(event.quantity) * 1.e8 # In satoshis
                     if amount < 1001:
                         fairtx.tx_state = "broadcast"
                         fairtx.tx_hash = "Null"
@@ -167,7 +167,7 @@ def broadcast_tx():
                     logger.info("About to build transaction. Amount: %d" %(int(amount)))
                     tx_hash = None
                     try:
-                        tx_hash = efn.make_transaction_from_address(address_origin, address_end, int(amount))
+                        tx_hash, fee = efn.make_transaction_from_address(address_origin, address_end, int(amount))
                     except Exception:
                         _, e, _ = sys.exc_info()
                         logger.critical("an exception occurred in make_transaction_from_address: {0}".format(e))
@@ -177,6 +177,11 @@ def broadcast_tx():
                         failed_events += 1
                     elif tx_hash:
                         successful_events += 1
+                        if event.event_type.name=="Give":
+                            qty = event.quantity
+                            qty += Decimal(fee) / Decimal("1.e8")
+                            event.quantity = qty
+                            event.save()
                         fairtx.tx_state = "broadcast"
                         fairtx.tx_hash = tx_hash
                         fairtx.save()

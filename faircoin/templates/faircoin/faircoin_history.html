@@ -85,7 +85,11 @@
                         <td>{{ event.event_type }}</td>
                         <td>{{ event.from_agent }}</td>
                         <!-- <td>{{ event.context_agent }}</td> -->
-                        <td style="text-align: right;" >{{ event.quantity_formatted }}</td>
+                        {% if event.event_type == "Give" and event.transaction_state == "new" %}
+                            <td style="text-align: right;" >{{ event.quantity_formatted }} (+fee)</td>
+                        {% else %}
+                            <td style="text-align: right;" >{{ event.quantity_formatted }}</td>
+                        {% endif %}
                         <td>
                             {% if event.url %}
                                 <a href="{{ event.url }}" target="_blank">{% trans "Open" %}</a>
@@ -104,7 +108,11 @@
                             <td>{{ event.transaction_state }}</td>
                             <td>
                             {% if event.faircoin_transaction.tx_hash %}
-                                <a href="https://chain.fair-coin.org/tx/{{ event.faircoin_transaction.tx_hash }}" target="_blank">{% trans "On Chain" %}</a>
+                                {% if event.faircoin_transaction.is_old_blockchain %}
+                                    <a href="https://chain.fair-coin.org/tx/{{ event.faircoin_transaction.tx_hash }}" target="_blank">{% trans "On Chain" %}</a>
+                                {% else %}
+                                    <a href="https://chain.fair.to/transaction?transaction={{ event.faircoin_transaction.tx_hash }}" target="_blank">{% trans "On Chain" %}</a>
+                                {% endif %}
                             {% endif %}
                         </td>
                         {% endif %}

@@ -3,7 +3,6 @@
 #
 
 import graphene
-#import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy
 from valuenetwork.api.types.Commitment import Commitment
 
@@ -29,7 +28,3 @@ class Query(graphene.AbstractType):
 
     def resolve_all_commitments(self, args, context, info):
         return CommitmentProxy.objects.all()
-
-
-    
-

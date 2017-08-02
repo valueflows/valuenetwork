@@ -743,6 +743,22 @@ class APITest(TestCase):
         self.assertEqual(previousProcesses[0]['name'], 'proc2')
         self.assertEqual(nextProcesses[0]['name'], 'proc3')
 
+    def test_create_process(self):
+        result = schema.execute('''
+                mutation { 
+                  createProcess(name: "Make something cool", plannedStart: "2017-07-07", 
+                    plannedDuration: 7, scopeId: 2, createdById: 1) {
+                    process {
+                        name
+                        scope {
+                            name
+                        }
+                    }
+                  }
+                }
+                ''')
+        self.assertEqual(result.data['createProcess']['process']['name'], "Make something cool")
+        self.assertEqual(result.data['createProcess']['process']['scope']['name'], "org1")
 
 ######################### SAMPLE QUERIES #####################
 
@@ -1395,6 +1411,9 @@ query($token: String) {
     process(id:3) {
       id
       name
+      scope {
+        name
+      }
       plannedStart
       plannedDuration
       isFinished
@@ -1408,6 +1427,9 @@ query($token: String) {
     allProcesses {
       id
       name
+      scope {
+        name
+      }
       plannedStart
       plannedDuration
       isFinished
@@ -1860,6 +1882,17 @@ query ($token: String) {
           name
         }
       }
+    }
+  }
+}
+
+######################### SAMPLE MUTATIONS ###########################
+
+mutation {
+  createProcess(name: "Make something cool 2", plannedStart: "2017-07-07", 
+    plannedDuration: 7, scopeId: 26, createdById: 6) {
+    process {
+      name
     }
   }
 }

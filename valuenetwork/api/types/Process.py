@@ -11,6 +11,7 @@ from valuenetwork.api.models import formatAgent
 
 
 class Process(DjangoObjectType):
+    scope = graphene.Field(lambda: types.Agent)
     planned_start = graphene.String(source='planned_start')
     planned_duration = graphene.String(source='planned_duration')
     is_started = graphene.Boolean(source='is_started')
@@ -59,6 +60,9 @@ class Process(DjangoObjectType):
 
     resource_taxonomy_items_by_action = graphene.List(lambda: types.ResourceTaxonomyItem)
 
+
+    def resolve_scope(self, args, *rargs):
+        return formatAgent(self.scope)
 
     def resolve_process_economic_events(self, args, context, info):
         action = args.get('action')

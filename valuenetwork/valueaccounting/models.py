@@ -6518,6 +6518,10 @@ class Process(models.Model):
     def note(self):
         return self.notes
 
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
     def get_rts_by_action(self, event_type):
         try:
             from work.models import Project

@@ -37,24 +37,3 @@ class Query(graphene.AbstractType):
         people = EconomicAgent.objects.filter(agent_type__party_type="individual")
         return formatAgentList(people)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

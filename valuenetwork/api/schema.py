@@ -67,6 +67,8 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     create_token = valuenetwork.api.schemas.Auth.CreateToken.Field()
     create_process = valuenetwork.api.schemas.Process.CreateProcess.Field()
+    update_process = valuenetwork.api.schemas.Process.UpdateProcess.Field()
+    delete_process = valuenetwork.api.schemas.Process.DeleteProcess.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

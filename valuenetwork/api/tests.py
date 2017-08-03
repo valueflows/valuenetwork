@@ -743,7 +743,7 @@ class APITest(TestCase):
         self.assertEqual(previousProcesses[0]['name'], 'proc2')
         self.assertEqual(nextProcesses[0]['name'], 'proc3')
 
-    def test_create_process(self):
+    def test_create_update_delete_process(self):
         result = schema.execute('''
                 mutation { 
                   createProcess(name: "Make something cool", plannedStart: "2017-07-07", 
@@ -753,12 +753,59 @@ class APITest(TestCase):
                         scope {
                             name
                         }
+                        isFinished
+                        plannedStart
+                        plannedDuration
                     }
                   }
                 }
                 ''')
+
         self.assertEqual(result.data['createProcess']['process']['name'], "Make something cool")
         self.assertEqual(result.data['createProcess']['process']['scope']['name'], "org1")
+        self.assertEqual(result.data['createProcess']['process']['isFinished'], False)
+        self.assertEqual(result.data['createProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
+
+        result2 = schema.execute('''
+                    mutation {
+                        updateProcess(id: 4, plannedDuration: 10, changedById: 1, isFinished: true) {
+                            process {
+                                name
+                                scope {
+                                    name
+                                }
+                                isFinished
+                                plannedStart
+                                plannedDuration
+                            }
+                        }
+                    }
+                    ''')
+
+        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
+        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
+        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
+        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+
+        result3 = schema.execute('''
+                    mutation {
+                        deleteProcess(id: 4) {
+                            process {
+                                name
+                            }
+                        }
+                    }
+                    ''')
+
+        proc = None
+        try:
+            proc = Process.objects.get(pk=4)
+        except:
+            pass
+        self.assertEqual(proc, None)
+
 
 ######################### SAMPLE QUERIES #####################
 
@@ -1891,6 +1938,25 @@ query ($token: String) {
 mutation {
   createProcess(name: "Make something cool 2", plannedStart: "2017-07-07", 
     plannedDuration: 7, scopeId: 26, createdById: 6) {
+    process {
+      name
+    }
+  }
+}
+
+mutation {
+  updateProcess(id: 59
+    plannedDuration: 10, changedById: 6, isFinished: true) {
+    process {
+      name
+      isFinished
+      plannedDuration
+    }
+  }
+}
+
+mutation {
+  deleteProcess(id: 57) {
     process {
       name
     }

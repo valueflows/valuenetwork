@@ -13,7 +13,7 @@ import datetime
 from valuenetwork.valueaccounting.models import Process as ProcessProxy, EconomicAgent
 from valuenetwork.api.types.Process import Process
 from django.contrib.auth.models import User
-from .Auth import AuthedInputMeta, AuthedInputBase
+from .Auth import AuthedInputMeta, AuthedMutation
 
 
 class Query(graphene.AbstractType):
@@ -41,7 +41,7 @@ class Query(graphene.AbstractType):
         return ProcessProxy.objects.all()
 
 
-class CreateProcess(AuthedInputBase, graphene.Mutation):
+class CreateProcess(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         name = graphene.String(required=True)
         planned_start = graphene.String(required=True)
@@ -53,8 +53,6 @@ class CreateProcess(AuthedInputBase, graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, args, context, info):
-        authedUser = cls.authUser(args.get('token'))
-
         name = args.get('name')
         planned_start = args.get('planned_start')
         planned_duration = args.get('planned_duration')
@@ -72,7 +70,7 @@ class CreateProcess(AuthedInputBase, graphene.Mutation):
             end_date=end_date,
             notes=note,
             context_agent=scope,
-            created_by=authedUser,
+            created_by=context.user,
         )
         process.save()
 

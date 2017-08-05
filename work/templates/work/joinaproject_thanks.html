@@ -48,9 +48,20 @@
                 {% trans "You've choosed to pay your" %} <b>{{ jn_req.pending_shares }}</b> {% trans "Shares via" %} <span style="font-weight:bold;">{{ jn_req.payment_option.val }}</span>
             </p>
             {% if jn_req.payment_url %}
-                <p style="text-align:center"><br />
+                <form action="{{ jn_req.payment_url }}" method="POST" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_id" id="order_id" value="{{ jn_req.pk }}" />
+                    <input type="hidden" name="amount" id="amount" value="{{ jn_req.pending_shares }}" />
+                    <input type="hidden" name="email" id="email" value="{{ jn_req.email_address }}" />
+                    <input type="hidden" name="first_name" id="first_name" value="{{ jn_req.name }}" />
+                    <input type="hidden" name="last_name" id="last_name" value="{{ jn_req.surname }}" />
+                    <input type="hidden" name="lang" id="lang" value="en" />
+                    <input type="hidden" name="token" id="token" value="{{ jn_req.payment_token }}" />
+                    <input type="submit" value="{% if jn_req.payment_html %}{{ jn_req.payment_html }}{% else %}{% trans "Pay your Shares" %}{% endif %}" class="btn btn-primary" />
+                </form>
+                <!-- <p style="text-align:center"><br />
                     <a href="{% url 'payment_url' paymode=jn_req.payment_option.key join_request_id=jn_req.id %}" target="ocp_pay" class="btn btn-primary">{% if jn_req.payment_html %}{{ jn_req.payment_html }}{% else %}{% trans "Pay your Shares now" %}{% endif %}</a><br />
-                </p>
+                </p> -->
             {% elif jn_req.payment_html %}
                 <p style="text-align:center">{{ jn_req.payment_html|safe }}</p>
             {% endif %}

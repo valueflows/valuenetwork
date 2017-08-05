@@ -313,7 +313,7 @@ class SkillSuggestion(models.Model):
 from nine.versions import DJANGO_LTE_1_5
 from fobi.contrib.plugins.form_handlers.db_store.models import SavedFormDataEntry
 import simplejson as json
-import hashlib
+
 
 USER_TYPE_CHOICES = (
     #('participant', _('project participant (no membership)')),
@@ -545,7 +545,7 @@ class JoinRequest(models.Model):
                 return obj['html']
         return False
 
-    def payment_salt(self):
+    def payment_secret(self):
         payopt = self.payment_option()
         obj = None
         if settings.PAYMENT_GATEWAYS and payopt:
@@ -555,17 +555,70 @@ class JoinRequest(models.Model):
                     obj = gates[self.project.fobi_slug][payopt['key']]
                 except:
                     pass
-            if obj and obj['salt']:
-                return obj['salt']
+            if obj and obj['secret']:
+                return obj['secret']
+        return False
+
+    def payment_tokenorder(self):
+        payopt = self.payment_option()
+        obj = None
+        if settings.PAYMENT_GATEWAYS and payopt:
+            gates = settings.PAYMENT_GATEWAYS
+            if self.project.fobi_slug and gates[self.project.fobi_slug]:
+                try:
+                    obj = gates[self.project.fobi_slug][payopt['key']]
+                except:
+                    pass
+            if obj and obj['tokenorder']:
+                return obj['tokenorder']
+        return False
+
+    def payment_algorithm(self):
+        payopt = self.payment_option()
+        obj = None
+        if settings.PAYMENT_GATEWAYS and payopt:
+            gates = settings.PAYMENT_GATEWAYS
+            if self.project.fobi_slug and gates[self.project.fobi_slug]:
+                try:
+                    obj = gates[self.project.fobi_slug][payopt['key']]
+                except:
+                    pass
+            if obj and obj['algorithm']:
+                return obj['algorithm']
         return False
 
     def payment_token(self):
-        salt = self.payment_salt()
+        secret = self.payment_secret()
         email = self.email_address
         amount = self.pending_shares()
-        strin = salt+str(amount)+email
-        token_obj = hashlib.sha1(strin)
-        return token_obj.hexdigest()
+
+        order = self.payment_tokenorder()
+        algor = self.payment_algorithm()
+        orderr = order.split('+')
+        strin = ''
+        token_obj = False
+        if len(orderr) > 2:
+            for fld in orderr:
+                if fld == 'secret':
+                    strin += secret
+                elif fld == 'email':
+                    strin += email
+                elif fld == 'amount':
+                    strin += str(amount)
+
+            if algor == 'bcrypt':
+
+                from passlib.hash import bcrypt
+
+                token_obj = bcrypt.hash(strin)
+            else:
+                raise ValidationError("Token hashing algorithm not implemented or not understood: "+algor)
+        else:
+            raise ValidationError("Token fields order below 3: "+str(len(orderr))+"  "+('+'.join(orderr)))
+
+        return token_obj #.hexdigest()
+
+
 
 
 class NewFeature(models.Model):

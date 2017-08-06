@@ -1935,6 +1935,8 @@ query ($token: String) {
 
 ######################### SAMPLE MUTATIONS ###########################
 
+#these don't work, just here as holding points right now
+
 mutation {
   createProcess(name: "Make something cool 2", plannedStart: "2017-07-07", 
     plannedDuration: 7, scopeId: 26, createdById: 6) {
@@ -1945,7 +1947,7 @@ mutation {
 }
 
 mutation {
-  updateProcess(id: 59
+  updateProcess(id: 59, 
     plannedDuration: 10, changedById: 6, isFinished: true) {
     process {
       name
@@ -1962,5 +1964,30 @@ mutation {
     }
   }
 }
+
+
+mutation($token:String!, $name: String!, $plannedStart: String!, $plannedDuration: Int!, $scopeId: Int!, $note: String) {
+  createProcess(token: $token, name: $name, plannedStart: $plannedStart, plannedDuration: $plannedDuration, scopeId: $scopeId, note: $note) {
+    process {
+      id
+      name
+      plannedStart
+    }
+  }
+}
+{"token": "...yours here...", "scopeId": 115, "name": "HELO", "plannedStart": "2017-08-05", "plannedDuration": 1}
+
+
+mutation ($token: String!) {
+  createProcess(token: $token, name: "Make some fudge", plannedStart: "2017-10-01", 
+    plannedDuration: 9, scopeId: 39, note: "testing") {
+    process {
+      id
+      name
+      plannedStart
+    }
+  }
+}
+
 
 '''

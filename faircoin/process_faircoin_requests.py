@@ -61,7 +61,7 @@ def create_address_from_file(entity_id, entity):
     #     + str(entity) + ": " + str(entity_id) + " (address: " + address + ")")
     # return address
     logger.info("Address " + address_in_file + " succesfully imported from file for "
-        + str(entity) + ": " + str(entity_id)
+        + str(entity) + ": " + str(entity_id))
     return address_in_file
 
 def create_address_for_agent(agent):

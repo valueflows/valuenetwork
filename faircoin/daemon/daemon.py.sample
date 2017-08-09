@@ -136,12 +136,13 @@ def make_transaction_from_address(address_origin, address_end, amount):
         logging.error("Confirmed : %s -- Unconfirmed: %s -- Unmature : %s " %wallet.get_addr_balance(address_origin))
         return False
     wallet.sign_transaction(tx, password)
-    rec_tx_state, rec_tx_out = network.broadcast(tx,60)
+    rec_tx_state, rec_tx_out = network.broadcast(tx, 30)
     if rec_tx_state:
         logging.info("SUCCESS. The transaction %s has been broadcasted." %rec_tx_out)
         return rec_tx_out, default_fee
     else:
          logging.error("Sending %s fairs to the address %s" %(amount_total, address_end ) )
+         logging.error("%s" %rec_tx_out)
          return False
 
 def get_confirmations(tx):
@@ -168,8 +169,12 @@ def import_key(privkey, entity_id, entity = 'generic'):
         wallet.set_label(address, entity + ': ' + str(entity_id))
     except:
         pass
-
+    wallet.synchronize()
     return 'ok', address
+
+def add_address(add):
+    wallet.import_address(add)
+    return 'ok'
 
 if __name__ == '__main__':
 
@@ -217,6 +222,7 @@ if __name__ == '__main__':
     server.register_function(get_address_balance,'get_address_balance')
     server.register_function(get_address_history,'get_address_history')
     server.register_function(import_key,'import_key')
+    server.register_function(add_address,'add_address')
     server.socket.settimeout(1)
 
     while not stopping:

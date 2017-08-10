@@ -8286,6 +8286,50 @@ class Transfer(models.Model):
             self.transfer_date.strftime('%Y-%m-%d'),
             ])
 
+    @property #ValueFlows
+    def exchange_agreement(self, args, *rargs):
+        return self.exchange
+
+    @property #ValueFlows
+    def scope(self, args, *rargs):
+        return self.context_agent
+
+    @property #ValueFlows
+    def provider(self, args, *rargs):
+        return self.from_agent()
+
+    @property #ValueFlows
+    def receiver(self, args, *rargs):
+        return self.to_agent()
+
+    @property #ValueFlows
+    def resource_taxonomy_item(self, args, *rargs):
+        return self.resource_type()
+
+    @property #ValueFlows
+    def give_resource(self, args, *rargs):
+        events = self.events.all()
+        give_resource = None
+        et_give = EventType.objects.get(name="Give")
+        if events:
+            for ev in events:
+                if ev.event_type == et_give:
+                    give_resource = ev.resource
+        return give_resource
+
+
+    @property #ValueFlows
+    def take_resource(self, args, *rargs):
+        events = self.events.all()
+        take_resource = None
+        et_receive = EventType.objects.get(name="Receive")
+        if events:
+            for ev in events:
+                if ev.event_type == et_receive:
+                    take_resource = ev.resource
+        return take_resource
+
+
     def commit_text(self):
         text = None
         give = None

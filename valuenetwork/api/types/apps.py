@@ -29,6 +29,10 @@ class ApiTypesAppConfig(AppConfig):
         types.EconomicEvent = EconomicEvent
         from valuenetwork.api.types.Commitment import Commitment
         types.Commitment = Commitment
+        from valuenetwork.api.types.Exchange import ExchangeAgreement
+        types.ExchangeAgreement = ExchangeAgreement
+        from valuenetwork.api.types.Exchange import Transfer
+        types.Transfer = Transfer
         super(ApiTypesAppConfig, self).ready()
 
         

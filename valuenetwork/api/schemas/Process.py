@@ -51,7 +51,6 @@ class CreateProcess(AuthedMutation):
 
     @classmethod
     def mutate(cls, root, args, context, info):
-        import pdb; pdb.set_trace()
         name = args.get('name')
         planned_start = args.get('planned_start')
         planned_duration = args.get('planned_duration')

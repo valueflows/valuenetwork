@@ -1845,4 +1845,116 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    exchangeAgreement(id: 94) {
+      plannedStart
+      scope {
+        name
+      }
+      note
+      transfers {
+        name
+        provider {
+          name
+        }
+        receiver {
+          name
+        }
+        transferQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      involvedAgents {
+        name
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    transfer(id: 160) {
+      name
+      plannedStart
+      scope {
+        name
+      }
+      note
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      transferQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      transferEconomicEvents {
+        action
+      }
+      transferCommitments {
+        action
+      }
+      involvedAgents {
+        name
+      }
+    }
+  }
+}
+query ($token: String) {
+  viewer(token: $token) {
+    transfer(id: 76) {
+      name
+      plannedStart
+      scope {
+        name
+      }
+      note
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      resourceTaxonomyItem {
+        name
+      }
+      giveResource {
+        trackingIdentifier
+      }
+      takeResource {
+        trackingIdentifier
+      }
+      transferQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      transferEconomicEvents {
+        action
+      }
+      giveEconomicEvent {
+        action
+      }
+      takeEconomicEvent {
+        action
+      }
+      transferCommitments {
+        action
+      }
+      involvedAgents {
+        name
+      }
+    }
+  }
+}
+
 '''

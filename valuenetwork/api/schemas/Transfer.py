@@ -11,7 +11,7 @@ class Query(graphene.AbstractType):
 
     # define input query params
 
-    transfer = graphene.Field(Tramsfer,
+    transfer = graphene.Field(Transfer,
                               id=graphene.Int())
 
     all_transfers = graphene.List(Transfer)
@@ -21,7 +21,7 @@ class Query(graphene.AbstractType):
     def resolve_transfer(self, args, *rargs):
         id = args.get('id')
         if id is not None:
-            transfer = Transfer.objects.get(pk=id)
+            transfer = TransferProxy.objects.get(pk=id)
             if transfer:
                 return transfer
         return None
@@ -29,4 +29,4 @@ class Query(graphene.AbstractType):
     # load all items
 
     def resolve_all_transfers(self, args, context, info):
-        return Transfer.objects.all()
+        return TransferProxy.objects.all()

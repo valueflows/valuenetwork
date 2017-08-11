@@ -19,28 +19,18 @@ class ExchangeAgreement(DjangoObjectType):
         model = Exchange
         only_fields = ('id', 'name')
 
-    exchange_transfers = graphene.List(lambda: types.Transfer)
-
-    exchange_economic_events = graphene.List(lambda: types.EconomicEvent)
-
-    exchange_commitments = graphene.List(lambda: types.Commitment)
+    transfers = graphene.List(lambda: types.Transfer)
 
     involved_agents = graphene.List(lambda: types.Agent)
 
     def resolve_scope(self, args, *rargs):
         return formatAgent(self.scope)
 
-    def resolve_exchange_transfers(self, args, context, info):
+    def resolve_transfers(self, args, context, info):
         return self.transfers.all()
 
-    def resolve_exchange_economic_events(self, args, context, info):
-        return self.events.all()
-
-    def resolve_exchange_commitments(self, args, context, info):
-        return self.commitments.all()
-
     def resolve_involved_agents(self, args, context, info):
-        agents = self.all_working_agents()
+        agents = self.related_agents()
         formatted_agents = []
         for agent in agents:
             formatted_agents.append(formatAgent(agent))
@@ -57,13 +47,14 @@ class Transfer(DjangoObjectType):
         model = TransferProxy
         only_fields = ('id', 'name')
 
-    #this group of fields come from the give and/or take events that make up the transfer
+    #this group of fields come from the give and/or take commitments and events that make up the transfer
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     resource_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
     give_resource = graphene.Field(lambda: types.EconomicResource)
     take_resource = graphene.Field(lambda: types.EconomicResource)
     transfer_quantity = graphene.Field(QuantityValue)
+    ###
 
     transfer_economic_events = graphene.List(lambda: types.EconomicEvent)
 
@@ -112,7 +103,7 @@ class Transfer(DjangoObjectType):
         return self.commitments.all()
 
     def resolve_involved_agents(self, args, context, info):
-        agents = self.all_working_agents()
+        agents = self.related_agents()
         formatted_agents = []
         for agent in agents:
             formatted_agents.append(formatAgent(agent))

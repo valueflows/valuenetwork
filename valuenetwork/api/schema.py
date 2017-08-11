@@ -18,6 +18,7 @@ import valuenetwork.api.schemas.Person
 import valuenetwork.api.schemas.EconomicResource
 import valuenetwork.api.schemas.Process
 import valuenetwork.api.schemas.Exchange
+import valuenetwork.api.schemas.Transfer
 import valuenetwork.api.schemas.EconomicEvent
 import valuenetwork.api.schemas.QuantityValue
 import valuenetwork.api.schemas.Unit
@@ -35,6 +36,7 @@ class ViewerQuery(
     valuenetwork.api.schemas.EconomicResource.Query,
     valuenetwork.api.schemas.Process.Query,
     valuenetwork.api.schemas.Exchange.Query,
+    valuenetwork.api.schemas.Transfer.Query,
     valuenetwork.api.schemas.EconomicEvent.Query,
     valuenetwork.api.schemas.QuantityValue.Query,
     valuenetwork.api.schemas.Unit.Query,

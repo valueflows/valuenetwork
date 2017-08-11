@@ -7684,6 +7684,18 @@ class Exchange(models.Model):
         unique_slugify(self, slug)
         super(Exchange, self).save(*args, **kwargs)
 
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.start_date.isoformat()
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
     def class_label(self):
         return "Exchange"
 
@@ -8188,23 +8200,15 @@ class Exchange(models.Model):
                 #print "local_total:", local_total
 
     def related_agents(self):
-        evts = self.events.all()
-        coms = self.commitments.all()
+        xfers = self.transfers.all()
         agents = []
-        for ev in evts:
-          if not ev.to_agent in agents:
-            agents.append(ev.to_agent)
-          if not ev.from_agent in agents:
-            agents.append(ev.from_agent)
-          if not ev.created_by.agent.agent in agents:
-            agents.append(ev.created_by.agent.agent)
-        for cm in coms:
-          if not cm.to_agent in agents:
-            agents.append(cm.to_agent)
-          if not cm.from_agent in agents:
-            agents.append(cm.from_agent)
-          if not cm.created_by.agent.agent in agents:
-            agents.append(cm.created_by.agent.agent)
+        for xfer in xfers:
+            if xfer.to_agent() not in agents:
+                agents.append(xfer.to_agent())
+            if not xfer.from_agent() in agents:
+                agents.append(xfer.from_agent())
+            if not xfer.scope in agents:
+                agents.append(xfer.scope)
         return agents
 
 class Transfer(models.Model):
@@ -8287,27 +8291,35 @@ class Transfer(models.Model):
             ])
 
     @property #ValueFlows
-    def exchange_agreement(self, args, *rargs):
+    def exchange_agreement(self):
         return self.exchange
 
     @property #ValueFlows
-    def scope(self, args, *rargs):
+    def planned_start(self):
+        return self.transfer_date
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
+    @property #ValueFlows
+    def scope(self):
         return self.context_agent
 
     @property #ValueFlows
-    def provider(self, args, *rargs):
+    def provider(self):
         return self.from_agent()
 
     @property #ValueFlows
-    def receiver(self, args, *rargs):
+    def receiver(self):
         return self.to_agent()
 
     @property #ValueFlows
-    def resource_taxonomy_item(self, args, *rargs):
+    def resource_taxonomy_item(self):
         return self.resource_type()
 
     @property #ValueFlows
-    def give_resource(self, args, *rargs):
+    def give_resource(self):
         events = self.events.all()
         give_resource = None
         et_give = EventType.objects.get(name="Give")
@@ -8319,7 +8331,7 @@ class Transfer(models.Model):
 
 
     @property #ValueFlows
-    def take_resource(self, args, *rargs):
+    def take_resource(self):
         events = self.events.all()
         take_resource = None
         et_receive = EventType.objects.get(name="Receive")
@@ -8329,6 +8341,17 @@ class Transfer(models.Model):
                     take_resource = ev.resource
         return take_resource
 
+    def related_agents(self):
+        agents = []
+        if self.from_agent():
+            agents.append(self.from_agent())
+        if self.to_agent():
+            if self.to_agent() not in agents:
+                agents.append(self.to_agent())
+        if self.context_agent:
+            if self.context_agent not in agents:
+                agents.append(self.context_agent)
+        return agents
 
     def commit_text(self):
         text = None

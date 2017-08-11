@@ -733,6 +733,8 @@ class APITest(TestCase):
 ######################### SAMPLE QUERIES #####################
 
 '''
+# agent data
+
 query($token: String) {
   viewer(token: $token) {
     agent(id:39) {
@@ -1178,6 +1180,8 @@ query ($token: String) {
   }
 }
 
+# unit data
+
 query($token: String) {
   viewer(token: $token) {
     unit(id:8) {
@@ -1197,6 +1201,8 @@ query($token: String) {
     }
   }
 }
+
+# resource data
 
 query($token: String) {
   viewer(token: $token) {
@@ -1375,6 +1381,52 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    economicResource(id: 20) {
+      id
+      resourceTaxonomyItem {
+        name
+        category
+      }
+      trackingIdentifier
+      currentQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      transfers {
+        id
+        transferDate
+        provider {
+          name
+        }
+        receiver {
+          name
+        }
+        resourceTaxonomyItem {
+          name
+        }
+        giveResource {
+          trackingIdentifier
+        }
+        takeResource {
+          trackingIdentifier
+        }
+        transferQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+# process data
+
 query($token: String) {
   viewer(token: $token) {
     process(id:3) {
@@ -1541,6 +1593,8 @@ query ($token: String) {
     }
   }
 }
+
+# event data
 
 query ($token: String) {
   viewer(token: $token) {
@@ -1744,6 +1798,8 @@ query ($token: String) {
   }
 }
 
+# commitment data
+
 query ($token: String) {
   viewer(token: $token) {
     allCommitments {
@@ -1845,6 +1901,7 @@ query ($token: String) {
   }
 }
 
+# exchange data
 query ($token: String) {
   viewer(token: $token) {
     exchangeAgreement(id: 94) {

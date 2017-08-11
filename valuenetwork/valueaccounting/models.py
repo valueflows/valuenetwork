@@ -4571,6 +4571,14 @@ class EconomicResource(models.Model):
         else:
             return "CURRENCY"
 
+    def transfers(self):
+        events = self.events.all().filter(Q(event_type__name="Give")|Q(event_type__name="Receive"))
+        transfers = []
+        for event in events:
+            if event.transfer not in transfers:
+                transfers.append(event.transfer)
+        return transfers
+
     def label(self):
         return self.identifier or str(self.id)
 
@@ -8296,7 +8304,14 @@ class Transfer(models.Model):
 
     @property #ValueFlows
     def planned_start(self):
-        return self.transfer_date
+        return self.transfer_date.isoformat()
+
+    @property #ValueFlows
+    def actual_date(self):
+        events = self.events.all()
+        if events:
+            return events[0].event_date.isoformat()
+        return None
 
     @property #ValueFlows
     def note(self):

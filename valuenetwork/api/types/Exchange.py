@@ -54,6 +54,7 @@ class Transfer(DjangoObjectType):
     give_resource = graphene.Field(lambda: types.EconomicResource)
     take_resource = graphene.Field(lambda: types.EconomicResource)
     transfer_quantity = graphene.Field(QuantityValue)
+    transfer_date = graphene.String(source='actual_date')
     ###
 
     transfer_economic_events = graphene.List(lambda: types.EconomicEvent)

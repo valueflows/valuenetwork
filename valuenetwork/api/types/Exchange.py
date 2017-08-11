@@ -47,7 +47,7 @@ class Transfer(DjangoObjectType):
         model = TransferProxy
         only_fields = ('id', 'name')
 
-    #this group of fields come from the give and/or take commitments and events that make up the transfer
+    #this group of fields come from the give and/or take events that make up the transfer
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     resource_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
@@ -63,6 +63,10 @@ class Transfer(DjangoObjectType):
     take_economic_event = graphene.Field(lambda: types.EconomicEvent)
 
     transfer_commitments = graphene.List(lambda: types.Commitment)
+
+    give_commitment = graphene.Field(lambda: types.Commitment)
+
+    take_commitment = graphene.Field(lambda: types.Commitment)
 
     involved_agents = graphene.List(lambda: types.Agent)
 
@@ -88,7 +92,7 @@ class Transfer(DjangoObjectType):
         return self.take_resource
 
     def resolve_transfer_quantity(self, args, *rargs):
-        return QuantityValueProxy(numeric_value=self.quantity(), unit=self.unit_of_quantity())
+        return QuantityValueProxy(numeric_value=self.actual_quantity(), unit=self.unit)
 
     def resolve_transfer_economic_events(self, args, context, info):
         return self.events.all()
@@ -98,6 +102,12 @@ class Transfer(DjangoObjectType):
 
     def resolve_take_economic_event(self, args, *rargs):
         return self.receive_event()
+
+    def resolve_give_commitment(self, args, *rargs):
+        return self.give_commitment()
+
+    def resolve_take_commitment(self, args, *rargs):
+        return self.receive_commitment()
 
     def resolve_transfer_commitments(self, args, context, info):
         return self.commitments.all()

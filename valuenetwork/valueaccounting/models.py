@@ -8308,15 +8308,25 @@ class Transfer(models.Model):
 
     @property #ValueFlows
     def provider(self):
-        return self.from_agent()
+        events = self.events.all()
+        if events:
+            return events[0].from_agent
+        return None
 
     @property #ValueFlows
     def receiver(self):
-        return self.to_agent()
+        events = self.events.all()
+        if events:
+            return events[0].to_agent
+        return None
 
     @property #ValueFlows
     def resource_taxonomy_item(self):
-        return self.resource_type()
+        events = self.events.all()
+        if events:
+            event = events[0]
+            return event.resource_type
+        return None
 
     @property #ValueFlows
     def give_resource(self):
@@ -8329,7 +8339,6 @@ class Transfer(models.Model):
                     give_resource = ev.resource
         return give_resource
 
-
     @property #ValueFlows
     def take_resource(self):
         events = self.events.all()
@@ -8340,6 +8349,13 @@ class Transfer(models.Model):
                 if ev.event_type == et_receive:
                     take_resource = ev.resource
         return take_resource
+
+    @property #ValueFlows
+    def unit(self):
+        events = self.events.all()
+        if events:
+            return events[0].unit_of_quantity
+        return None
 
     def related_agents(self):
         agents = []
@@ -8551,6 +8567,18 @@ class Transfer(models.Model):
         try:
             return self.events.get(event_type__name="Receive")
         except EconomicEvent.DoesNotExist:
+            return None
+
+    def give_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Give")
+        except Commitment.DoesNotExist:
+            return None
+
+    def receive_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Receive")
+        except Commitment.DoesNotExist:
             return None
 
     def quantity(self):

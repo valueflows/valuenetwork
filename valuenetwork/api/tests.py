@@ -1902,6 +1902,12 @@ query ($token: String) {
       transferCommitments {
         action
       }
+      giveCommitment {
+        action
+      }
+      takeCommitment {
+        action
+      }
       involvedAgents {
         name
       }

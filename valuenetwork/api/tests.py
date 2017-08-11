@@ -1790,7 +1790,13 @@ query ($token: String) {
         name
       }
       fulfills {
-        committedQuantity {
+        commitment {
+          action
+          committedQuantity {
+            numericValue
+          }
+        }
+        fulfilledQuantity {
           numericValue
         }
       }

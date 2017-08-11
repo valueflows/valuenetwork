@@ -10,7 +10,8 @@ from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy
-from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy
+from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy 
+from valuenetwork.api.models import Fulfillment as FulfillmentProxy
 
 
 class Action(graphene.Enum):
@@ -34,12 +35,14 @@ class EconomicEvent(DjangoObjectType):
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
     #work_category = graphene.String(source='work_category')
-    fulfills = graphene.Field(lambda: types.Commitment)
+    #fulfills = graphene.Field(lambda: types.Commitment)
     note = graphene.String(source='note')
 
     class Meta:
         model = EconomicEventProxy
         only_fields = ('id')
+
+    fulfills = graphene.List(lambda: types.Fulfillment)
 
     def resolve_process(self, args, *rargs):
         return self.process
@@ -62,5 +65,22 @@ class EconomicEvent(DjangoObjectType):
     def resolve_affected_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
 
-    def resolve_fulfills(self, args, *rargs):
-        return self.fulfills
+    def resolve_fulfills(self, args, context, info):
+        commitment = self.commitment
+        if commitment:
+            fulfillment = Fulfillment(
+                economic_event=self,
+                commitment=commitment,
+                fulfilled_quantity=QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity),
+                )
+            ff_list = []
+            ff_list.append(fulfillment)
+            return ff_list
+        return []
+
+
+class Fulfillment(DjangoObjectType):
+
+    class Meta:
+        model = FulfillmentProxy
+        only_fields = ('id', 'economic_event', 'commitment', 'fulfilled_quantity', 'note')

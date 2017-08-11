@@ -11004,9 +11004,9 @@ class EconomicEvent(models.Model):
     #        return self.resource_type
     #    return None
 
-    @property #ValueFlows
-    def fulfills(self):
-        return self.commitment
+    #@property #ValueFlows
+    #def fulfills(self):
+    #    return self.commitment
 
     def undistributed_description(self):
         if self.unit_of_quantity:

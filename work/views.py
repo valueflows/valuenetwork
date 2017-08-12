@@ -693,6 +693,7 @@ def members_agent(request, agent_id):
     else:
         change_form = ProjectCreateForm(instance=agent) #AgentCreateForm(instance=agent)
 
+    """ not used yet...
     nav_form = InternalExchangeNavForm(data=request.POST or None)
     if agent:
         if request.method == "POST":
@@ -701,6 +702,7 @@ def members_agent(request, agent_id):
                 ext = data["exchange_type"]
             return HttpResponseRedirect('/%s/%s/%s/%s/'
                 % ('work/exchange', ext.id, 0, agent.id))
+    """
 
     context_ids = [c.id for c in agent.related_all_agents()]
     context_ids.append(agent.id)
@@ -874,7 +876,7 @@ def members_agent(request, agent_id):
         "photo_size": (128, 128),
         "change_form": change_form,
         "user_form": user_form,
-        "nav_form": nav_form,
+        #"nav_form": nav_form,
         "assn_form": assn_form,
         "upload_form": upload_form,
         "user_agent": user_agent,
@@ -1593,7 +1595,91 @@ def project_total_shares(request, project_slug=None):
         "total_holders": project.share_holders(),
     })
 
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
+def project_update_payment_status(request, project_slug=None):
+    project = False
+    if project_slug:
+        project = get_object_or_404(Project, fobi_slug=project_slug.strip('/'))
+    if project and request.POST:
+        req_id = request.POST["order_id"]
+        price = request.POST["price"]
+        status = request.POST["status"]
+        email = request.POST["email"]
+        lang = request.POST["lang"]
+        token = request.POST["token"]
+
+        #print(project)
+        #return HttpResponse(project.agent.name)
+        req = None
+        try:
+            req = get_object_or_404(JoinRequest, id=req_id*1)
+        except:
+            raise ValidationError("Can't find a join request with id: "+str(req_id))
+            return HttpResponse('error')
+
+        if req:
+            #return HttpResponse(str(req))
+            account_type = req.payment_account_type()
+            balance = 0
+            amount = req.payment_amount()
+
+            if not token == req.payment_token():
+                raise ValidationError("The token is not valid! "+str(token))
+                return HttpResponse('error')
+
+            if not project == req.project:
+                raise ValidationError("The project is not the request project! "+str(project)+" != "+str(req.project))
+                return HttpResponse('error')
+
+            if not str(amount) == str(price):
+                raise ValidationError("The payment amount and the request amount are not equal! price:"+str(price)+" amount:"+str(amount))
+                return HttpResponse('error')
+
+            if not email == req.email_address:
+                raise ValidationError("The payment email and the request email are not equal! email:"+str(email)+" reqemail:"+str(req.email_address))
+                return HttpResponse('error')
+
+            if not account_type:
+                raise ValidationError("The payment is not related any account type!")
+                return HttpResponse('error')
+
+            if status:
+                if not req.exchange:
+                    ex = req.create_exchange()
+                    raise ValidationError("The exchange has been created? "+str(ex))
+                    #return HttpResponse('error')
+                # TODO update the exchange transfer status
+
+
+                if status == 'complete' or status == 'published':
+                    if req.agent and amount:
+                        user_rts = list(set([arr.resource.resource_type for arr in req.agent.resource_relationships()]))
+                        for rt in user_rts:
+                            if rt == account_type: # match the account type to update the value
+                                rss = list(set([arr.resource for arr in req.agent.resource_relationships()]))
+                                for rs in rss:
+                                    if rs.resource_type == rt:
+                                        rs.price_per_unit += amount # update the price_per_unit with payment amount
+                                        #rs.save()
+                    else:
+                        raise ValidationError("The request has no agent yet! ")
+                        return HttpResponse('no agent')
+                else:
+                    raise ValidationError("The status is not implemented: "+status)
+                    return HttpResponse('error')
+            else:
+                raise ValidationError("The notification has no status! "+status)
+                return HttpResponse('error')
+
+        else:
+            raise ValidationError("Can't find a false join request: "+str(req))
+            return HttpResponse('error')
+
+    else:
+        raise ValidationError("Can't find a project or request:POST: "+str(request.POST))
+        return HttpResponse('error')
 
 
 @login_required
@@ -1711,9 +1797,12 @@ def undecline_request(request, join_request_id):
 @login_required
 def delete_request(request, join_request_id):
     mbr_req = get_object_or_404(JoinRequest, pk=join_request_id)
-    mbr_req.delete()
+    if mbr_req.fobi_data:
+        fd = get_object_or_404(SavedFormDataEntry, id=mbr_req.fobi_data.id)
+        fd.delete()
     if mbr_req.agent:
       pass # delete user and agent?
+    mbr_req.delete()
 
     return HttpResponseRedirect('/%s/%s/%s/'
         % ('work/agent', mbr_req.project.agent.id, 'join-requests'))

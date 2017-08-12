@@ -321,6 +321,11 @@ USER_TYPE_CHOICES = (
     ('collective', _('collective')),
 )
 
+PAYMENT_STATUS_CHOICES = (
+    ('pending', _('pending')),
+    ('complete', _('complete')),
+)
+
 class JoinRequest(models.Model):
     # common fields for all projects
     project = models.ForeignKey(Project,
@@ -357,6 +362,15 @@ class JoinRequest(models.Model):
     state = models.CharField(_('state'),
         max_length=12, choices=REQUEST_STATE_CHOICES,
         default='new', editable=False)
+
+    exchange = models.OneToOneField(Exchange,
+        verbose_name=_('exchange'), related_name='join_request',
+        blank=True, null=True,
+        help_text=_("this join request is linked to this Ocp Exchange"))
+
+    """payment_status = models.CharField(_('payment status'),
+        max_length=12, choices=PAYMENT_STATUS_CHOICES,
+        editable=False, null=True, blank=True)"""
 
     def fobi_slug(self):
       if self.project.fobi_slug:
@@ -421,37 +435,11 @@ class JoinRequest(models.Model):
 
     def pending_shares(self):
         answer = ''
-        account_type = None
+        account_type = self.payment_account_type()
         balance = 0
-        amount = 0
-        if self.project.joining_style == "moderated" and self.fobi_data:
-            rts = list(set([arr.resource.resource_type for arr in self.project.agent.resource_relationships()]))
-            for rt in rts:
-                if rt.ocp_artwork_type:
-                    for key in self.fobi_items_keys():
-                        if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
-                            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
-                            entry = self.entries[0]
-                            self.data = json.loads(entry.saved_data)
-                            val = self.data.get(key)
-                            account_type = rt
-                            for elem in self.fobi_data.form_entry.formelemententry_set.all():
-                                data = json.loads(elem.plugin_data)
-                                choi = data.get('choices')
-                                if choi:
-                                    opts = choi.split('\r\n')
-                                    for op in opts:
-                                      opa = op.split(',')
-                                      #import pdb; pdb.set_trace()
-                                      if type(val) is str and opa[1].encode('utf-8').strip() == val.encode('utf-8').strip():
-                                        amount = int(opa[0])
-                                        break
-                                elif type(val) is int and val:
-                                    amount = val
-                                    break
+        amount = self.payment_amount()
 
-
-        if self.agent:
+        if self.agent and account_type:
             user_rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
             for rt in user_rts:
                 if rt == account_type: #.ocp_artwork_type:
@@ -463,6 +451,9 @@ class JoinRequest(models.Model):
         if amount:
             answer = amount - balance
             if answer > 0:
+                #if self.payment_url and self.payment_secret and not self.payment_status:
+                    #self.payment_status = 'pending'
+                    #self.save()
                 return int(answer)
             else:
                 #import pdb; pdb.set_trace()
@@ -471,21 +462,10 @@ class JoinRequest(models.Model):
         return False #'??'
 
     def total_shares(self):
-        account_type = None
+        account_type = self.payment_account_type() #None
         balance = 0
-        if self.project.joining_style == "moderated" and self.fobi_data:
-            rts = list(set([arr.resource.resource_type for arr in self.project.agent.resource_relationships()]))
-            for rt in rts:
-                if rt.ocp_artwork_type:
-                    for key in self.fobi_items_keys():
-                        if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
-                            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
-                            entry = self.entries[0]
-                            self.data = json.loads(entry.saved_data)
-                            val = self.data.get(key)
-                            account_type = rt
 
-        if self.agent:
+        if self.agent and account_type:
             user_rts = list(set([arr.resource.resource_type for arr in self.agent.resource_relationships()]))
             for rt in user_rts:
                 if rt == account_type: #.ocp_artwork_type:
@@ -544,6 +524,46 @@ class JoinRequest(models.Model):
             if obj and obj['html']:
                 return obj['html']
         return False
+
+    def payment_amount(self):
+        amount = 0
+        if self.project.joining_style == "moderated" and self.fobi_data:
+            rts = list(set([arr.resource.resource_type for arr in self.project.agent.resource_relationships()]))
+            for rt in rts:
+                if rt.ocp_artwork_type:
+                    for key in self.fobi_items_keys():
+                        if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
+                            self.entries = SavedFormDataEntry.objects.filter(pk=self.fobi_data.pk).select_related('form_entry')
+                            entry = self.entries[0]
+                            self.data = json.loads(entry.saved_data)
+                            val = self.data.get(key)
+                            for elem in self.fobi_data.form_entry.formelemententry_set.all():
+                                data = json.loads(elem.plugin_data)
+                                choi = data.get('choices')
+                                if choi:
+                                    opts = choi.split('\r\n')
+                                    for op in opts:
+                                      opa = op.split(',')
+                                      #import pdb; pdb.set_trace()
+                                      if type(val) is str and opa[1].encode('utf-8').strip() == val.encode('utf-8').strip():
+                                        amount = int(opa[0])
+                                        break
+                                elif type(val) is int and val:
+                                    amount = val
+                                    break
+        return amount
+
+    def payment_account_type(self):
+        account_type = None
+        if self.project.joining_style == "moderated" and self.fobi_data:
+            rts = list(set([arr.resource.resource_type for arr in self.project.agent.resource_relationships()]))
+            for rt in rts:
+                if rt.ocp_artwork_type:
+                    for key in self.fobi_items_keys():
+                        if key == rt.ocp_artwork_type.clas: # fieldname is the artwork type clas, project has shares of this type
+                            account_type = rt
+        return account_type
+
 
     def payment_secret(self):
         payopt = self.payment_option()
@@ -617,6 +637,48 @@ class JoinRequest(models.Model):
             raise ValidationError("Token fields order below 3: "+str(len(orderr))+"  "+('+'.join(orderr)))
 
         return token_obj #.hexdigest()
+
+    def exchange_type(self):
+        et = None
+        if self.exchange:
+            return self.exchange.exchange_type
+
+        rt = self.payment_account_type()
+        if rt and rt.ocp_artwork_type:
+            recordts = Ocp_Record_Type.objects.filter(ocpRecordType_ocp_artwork_type=rt.ocp_artwork_type, exchange_type__isnull=False)
+            if len(recordts) > 1:
+                raise ValidationError("More than one Ocp_Record_type related this account type (Ocp_Artwork_Type): "+str(rt.ocp_artwork_type))
+
+            et = recordts[0].exchange_type
+
+        return et
+
+
+    def create_exchange(self):
+        ex = None
+        et = self.exchange_type()
+        pro = self.project.agent
+        dt = self.request_date
+        ag = self.agent
+
+        if et and pro and dt:
+            ex, created = Exchange.objects.get_or_create(
+                exchange_type=et,
+                context_agent=pro,
+                start_date=dt,
+                use_case=et.use_case,
+
+            )
+            if ex:
+                self.exchange = ex
+                self.save()
+
+            if ag:
+                pass # TODO assign agent to a commitment in this exchange
+            else:
+                pass # TODO autocreate agent and user with random pass and request data?
+
+        return ex
 
 
 

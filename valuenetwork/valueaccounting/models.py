@@ -4361,8 +4361,6 @@ class EconomicResource(models.Model):
     current_location = models.ForeignKey(Location,
         verbose_name=_('current location'), related_name='resources_at_location',
         blank=True, null=True)
-    digital_currency_address = models.CharField(_("digital currency address"), max_length=96,
-        blank=True, null=True, editable=False)
     value_per_unit = models.DecimalField(_('value per unit'), max_digits=8, decimal_places=2,
         default=Decimal("0.00"))
     value_per_unit_of_use = models.DecimalField(_('value per unit of use'), max_digits=8, decimal_places=2,
@@ -10484,11 +10482,6 @@ class EconomicEvent(models.Model):
         verbose_name=_('accounting reference'), related_name="events",
         help_text=_('optional reference to an accounting grouping'))
     event_reference = models.CharField(_('reference'), max_length=128, blank=True, null=True)
-    digital_currency_tx_hash = models.CharField(_("digital currency transaction hash"), max_length=96,
-        blank=True, null=True, editable=False)
-    digital_currency_tx_state = models.CharField(_('digital currency transaction state'),
-        max_length=12, choices=TX_STATE_CHOICES,
-        blank=True, null=True)
     created_by = models.ForeignKey(User, verbose_name=_('created by'),
         related_name='events_created', blank=True, null=True, editable=False)
     changed_by = models.ForeignKey(User, verbose_name=_('changed by'),

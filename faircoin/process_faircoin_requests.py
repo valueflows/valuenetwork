@@ -33,7 +33,8 @@ def acquire_lock():
 def create_address_from_file(entity_id, entity):
     filename = settings.NEW_FAIRCOIN_ADDRESSES_FILE
     address = None
-    logger.info("About import privkey for " + str(entity) + ": " + str(entity_id))
+    # logger.info("About import privkey for " + str(entity) + ": " + str(entity_id))
+    logger.info("About creating new address from file for " + str(entity) + ": " + str(entity_id))
     with open(filename, 'r') as fin:
         try:
             data = fin.read().splitlines(True)
@@ -41,24 +42,27 @@ def create_address_from_file(entity_id, entity):
         except:
             logger.critical("Error reading new faircoin addresses file.")
             return None
-    try:
-        status, address = efn.import_key(privkey, entity_id, entity)
-    except:
-        logger.critical("Error importing key: " + address)
-        return None
-    if status == 'ERROR':
-        logger.critical("Error importing key: " + address)
-        return None
-    if address != address_in_file:
-        logger.warning("Address returned on importing key is different from the file one.")
+    # try:
+    #     status, address = efn.import_key(privkey, entity_id, entity)
+    # except:
+    #     logger.critical("Error importing key: " + address)
+    #     return None
+    # if status == 'ERROR':
+    #     logger.critical("Error importing key: " + address)
+    #     return None
+    # if address != address_in_file:
+    #     logger.warning("Address returned on importing key is different from the file one.")
     with open(filename, 'w') as fout:
         try:
            fout.writelines(data[1:])
         except:
            logger.critical("Error writting new faircoin addresses file.")
-    logger.info("Private key succesfully imported to wallet for "
-        + str(entity) + ": " + str(entity_id) + " (address: " + address + ")")
-    return address
+    # logger.info("Private key succesfully imported to wallet for "
+    #     + str(entity) + ": " + str(entity_id) + " (address: " + address + ")")
+    # return address
+    logger.info("Address " + address_in_file + " succesfully imported from file for "
+        + str(entity) + ": " + str(entity_id))
+    return address_in_file
 
 def create_address_for_agent(agent):
     address = None

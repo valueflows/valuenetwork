@@ -72,6 +72,7 @@ class Transfer(DjangoObjectType):
     involved_agents = graphene.List(lambda: types.Agent)
 
     def resolve_exchange_agreement(self, args, *rargs):
+        #VF does not have an exchange unless it is created ahead of time for reciprocal commitments 
         return self.exchange_agreement
 
     def resolve_scope(self, args, *rargs):

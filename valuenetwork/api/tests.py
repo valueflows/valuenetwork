@@ -1915,6 +1915,9 @@ query ($token: String) {
       scope {
         name
       }
+      exchangeAgreement {
+        name
+      }
       note
       transfers {
         name
@@ -1944,6 +1947,9 @@ query ($token: String) {
       name
       plannedStart
       scope {
+        name
+      }
+      exchangeAgreement {
         name
       }
       note
@@ -1977,6 +1983,7 @@ query ($token: String) {
     }
   }
 }
+
 query ($token: String) {
   viewer(token: $token) {
     transfer(id: 76) {
@@ -2021,6 +2028,17 @@ query ($token: String) {
       }
       involvedAgents {
         name
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    transfer(id: 82) {
+      name
+      exchangeAgreement {
+        plannedStart
       }
     }
   }

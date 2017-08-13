@@ -8300,7 +8300,11 @@ class Transfer(models.Model):
 
     @property #ValueFlows
     def exchange_agreement(self):
-        return self.exchange
+        #VF does not have an exchange unless it is created ahead of time for reciprocal commitments 
+        exch = self.exchange
+        if exch.has_reciprocal():
+            return exch
+        return None
 
     @property #ValueFlows
     def planned_start(self):

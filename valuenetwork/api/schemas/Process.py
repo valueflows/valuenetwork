@@ -5,6 +5,8 @@
 # @since:   2017-06-22
 #
 
+#from django.core.exceptions import PermissionDenied
+
 from six import with_metaclass
 import graphene
 import datetime
@@ -51,7 +53,6 @@ class CreateProcess(AuthedMutation):
 
     @classmethod
     def mutate(cls, root, args, context, info):
-        import pdb; pdb.set_trace()
         name = args.get('name')
         planned_start = args.get('planned_start')
         planned_duration = args.get('planned_duration')
@@ -76,8 +77,8 @@ class CreateProcess(AuthedMutation):
         return CreateProcess(process=process)
 
 
-class UpdateProcess(AuthedMutation):
-    class Input(with_metaclass(AuthedInputMeta)):
+class UpdateProcess(graphene.Mutation):
+    class Input:
         id = graphene.Int(required=True)
         name = graphene.String(required=False)
         planned_start = graphene.String(required=False)
@@ -85,6 +86,7 @@ class UpdateProcess(AuthedMutation):
         scope_id = graphene.Int(required=False)
         note = graphene.String(required=False)
         is_finished = graphene.Boolean(required=False)
+        changed_by_id = graphene.Int(required=True)
 
     process = graphene.Field(lambda: Process)
 
@@ -97,6 +99,7 @@ class UpdateProcess(AuthedMutation):
         note = args.get('note')
         scope_id = args.get('scope_id')
         is_finished = args.get('is_finished')
+        changed_by_id = args.get('changed_by_id')
 
         process = ProcessProxy.objects.get(pk=id)
         if process:
@@ -115,14 +118,15 @@ class UpdateProcess(AuthedMutation):
                 process.context_agent=scope
             if is_finished:
                 process.finished=is_finished
-            process.changed_by=context.user
+            changed_by = User.objects.get(pk=changed_by_id)
+            process.changed_by=changed_by
             process.save()
 
         return UpdateProcess(process=process)
 
 
-class DeleteProcess(AuthedMutation):
-    class Input(with_metaclass(AuthedInputMeta)):
+class DeleteProcess(graphene.Mutation):
+    class Input:
         id = graphene.Int(required=True)
 
     process = graphene.Field(lambda: Process)

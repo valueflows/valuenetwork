@@ -12,6 +12,7 @@ from valuenetwork.valueaccounting.models import Process as ProcessProxy, Economi
 from valuenetwork.api.types.Process import Process
 from django.contrib.auth.models import User
 from .Auth import AuthedInputMeta, AuthedMutation
+from django.core.exceptions import PermissionDenied
 
 
 class Query(graphene.AbstractType):
@@ -51,6 +52,7 @@ class CreateProcess(AuthedMutation):
 
     @classmethod
     def mutate(cls, root, args, context, info):
+        #import pdb; pdb.set_trace()
         name = args.get('name')
         planned_start = args.get('planned_start')
         planned_duration = args.get('planned_duration')
@@ -131,6 +133,9 @@ class DeleteProcess(AuthedMutation):
         id = args.get('id')
         process = ProcessProxy.objects.get(pk=id)
         if process:
-            process.delete()
+            if process.is_deletable():
+                process.delete()
+            else:
+                raise PermissionDenied("Process has events so cannot be deleted.")
 
         return DeleteProcess(process=process)

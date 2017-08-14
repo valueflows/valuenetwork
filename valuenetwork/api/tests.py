@@ -745,9 +745,20 @@ class APITest(TestCase):
 
     def test_create_update_delete_process(self):
         result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''')
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
+
+        result = schema.execute('''
                 mutation { 
-                  createProcess(name: "Make something cool", plannedStart: "2017-07-07", 
-                    plannedDuration: 7, scopeId: 2, createdById: 1) {
+                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", 
+                    plannedDuration: 7, scopeId: 2) {
                     process {
                         name
                         scope {
@@ -760,51 +771,51 @@ class APITest(TestCase):
                   }
                 }
                 ''')
-
+        #import pdb; pdb.set_trace()
         self.assertEqual(result.data['createProcess']['process']['name'], "Make something cool")
         self.assertEqual(result.data['createProcess']['process']['scope']['name'], "org1")
         self.assertEqual(result.data['createProcess']['process']['isFinished'], False)
         self.assertEqual(result.data['createProcess']['process']['plannedStart'], "2017-07-07")
         self.assertEqual(result.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
 
-        #result2 = schema.execute('''
-        #            mutation {
-        #                updateProcess(id: 4, plannedDuration: 10, changedById: 1, isFinished: true) {
-        #                    process {
-        #                        name
-        #                        scope {
-        #                            name
-        #                        }
-        #                        isFinished
-        #                        plannedStart
-        #                        plannedDuration
-        #                    }
-        #                }
-        #            }
-        #            ''')
+        result2 = schema.execute('''
+                    mutation {
+                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
+                            process {
+                                name
+                                scope {
+                                    name
+                                }
+                                isFinished
+                                plannedStart
+                                plannedDuration
+                            }
+                        }
+                    }
+                    ''')
 
-        #self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
-        #self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
-        #self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
-        #self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
-        #self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
+        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
+        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
+        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
 
-        #result3 = schema.execute('''
-        #            mutation {
-        #                deleteProcess(id: 4) {
-        #                    process {
-        #                        name
-        #                    }
-        #                }
-        #            }
-        #            ''')
+        result3 = schema.execute('''
+                    mutation {
+                        deleteProcess(token: "''' + token + '''", id: 4) {
+                            process {
+                                name
+                            }
+                        }
+                    }
+                    ''')
 
-        #proc = None
-        #try:
-        #    proc = Process.objects.get(pk=4)
-        #except:
-        #    pass
-        #self.assertEqual(proc, None)
+        proc = None
+        try:
+            proc = Process.objects.get(pk=4)
+        except:
+            pass
+        self.assertEqual(proc, None)
 
 
 ######################### SAMPLE QUERIES #####################
@@ -1935,49 +1946,6 @@ query ($token: String) {
 
 ######################### SAMPLE MUTATIONS ###########################
 
-#these don't work, just here as holding points right now
-
-mutation {
-  createProcess(name: "Make something cool 2", plannedStart: "2017-07-07", 
-    plannedDuration: 7, scopeId: 26, createdById: 6) {
-    process {
-      name
-    }
-  }
-}
-
-mutation {
-  updateProcess(id: 59, 
-    plannedDuration: 10, changedById: 6, isFinished: true) {
-    process {
-      name
-      isFinished
-      plannedDuration
-    }
-  }
-}
-
-mutation {
-  deleteProcess(id: 57) {
-    process {
-      name
-    }
-  }
-}
-
-
-mutation($token:String!, $name: String!, $plannedStart: String!, $plannedDuration: Int!, $scopeId: Int!, $note: String) {
-  createProcess(token: $token, name: $name, plannedStart: $plannedStart, plannedDuration: $plannedDuration, scopeId: $scopeId, note: $note) {
-    process {
-      id
-      name
-      plannedStart
-    }
-  }
-}
-{"token": "...yours here...", "scopeId": 115, "name": "HELO", "plannedStart": "2017-08-05", "plannedDuration": 1}
-
-
 mutation ($token: String!) {
   createProcess(token: $token, name: "Make some fudge", plannedStart: "2017-10-01", 
     plannedDuration: 9, scopeId: 39, note: "testing") {
@@ -1988,6 +1956,26 @@ mutation ($token: String!) {
     }
   }
 }
+
+mutation ($token: String!) {
+  updateProcess(token: $token, id: 50, 
+    plannedDuration: 10, isFinished: true) {
+    process {
+      name
+      isFinished
+      plannedDuration
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteProcess(token: $token, id: 38) {
+    process {
+      name
+    }
+  }
+}
+
 
 
 '''

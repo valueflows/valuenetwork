@@ -52,17 +52,20 @@ class _AuthedMutationMeta(MutationMeta):
         if not is_base_type(bases, _AuthedMutationMeta):
             return type.__new__(cls, name, bases, attrs)
 
-        cls.__orig_mutate = attrs['mutate'] # store original mutate method on the class
-        del attrs['mutate'] # prevent it getting injected by MutationMeta as we want the overridden one in this class to be used
+        # store a ref to the original mutate method (not the classmethod wrapper!)
+        orig_mutate = getattr(attrs['mutate'], '__func__')
+
+        # define wrapper logic for this class
+        def new_mutate(cls, root, args, context, info):
+            # authenticate automagically before running mutation, throw exception on bad credentials
+            context.user = _authUser(args.get('token'))
+            # now run the original mutation, exposing the user in the context object
+            return orig_mutate(cls, root, args, context, info)
+
+        # override base mutate classmethod
+        attrs['mutate'] = classmethod(new_mutate)
 
         return MutationMeta.__new__(cls, name, bases, attrs)
-
-    @classmethod
-    def mutate(cls, root, args, context, info):
-        # authenticate automagically before running mutation, throw exception on bad credentials
-        context.user = _authUser(args.get('token'))
-        # now run the original mutation, exposing the user in the context object
-        return cls.__orig_mutate(root, args, context, info)
 
 class AuthedMutation(with_metaclass(_AuthedMutationMeta, graphene.ObjectType)):
     pass

@@ -22,7 +22,7 @@ class Commitment(DjangoObjectType):
     committed_resource = graphene.Field(lambda: types.EconomicResource)
     committed_quantity = graphene.Field(QuantityValue)
     committed_on = graphene.String(source='committed_on')
-    commitment_start = graphene.String(source='commitment_start')
+    planned_start = graphene.String(source='planned_start')
     due = graphene.String(source='due')
     is_finished = graphene.Boolean(source='is_finished')
     note = graphene.String(source='note')

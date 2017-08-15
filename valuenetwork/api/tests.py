@@ -755,7 +755,7 @@ class APITest(TestCase):
         token = call_result['token']
         test_agent = EconomicAgent.objects.get(name="testUser11222")
 
-        result = schema.execute('''
+        result1 = schema.execute('''
                 mutation { 
                   createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", 
                     plannedDuration: 7, scopeId: 2) {
@@ -772,11 +772,11 @@ class APITest(TestCase):
                 }
                 ''')
         #import pdb; pdb.set_trace()
-        self.assertEqual(result.data['createProcess']['process']['name'], "Make something cool")
-        self.assertEqual(result.data['createProcess']['process']['scope']['name'], "org1")
-        self.assertEqual(result.data['createProcess']['process']['isFinished'], False)
-        self.assertEqual(result.data['createProcess']['process']['plannedStart'], "2017-07-07")
-        self.assertEqual(result.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
+        self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
+        self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
+        self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
+        self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
 
         result2 = schema.execute('''
                     mutation {
@@ -1976,6 +1976,93 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  createCommitment(token: $token, action: "use", plannedStart: "2017-10-01", due: "2017-10-10",
+    scopeId: 39, note: "testing", committedTaxonomyItemId: 17, committedResourceId: 11, 
+    committedNumericValue: "3.5", committedUnitId: 2, processId: 62,
+    providerId: 79, receiverId: 39) {
+    commitment {
+      id
+      action
+      plannedStart
+      due
+      process {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      committedTaxonomyItem {
+        name
+      }
+      committedResource {
+        trackingIdentifier
+      }
+      committedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      committedOn
+      isFinished
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateCommitment(token: $token, plannedStart: "2017-10-03", due: "2017-10-12",
+    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 362) {
+    commitment {
+      id
+      action
+      plannedStart
+      due
+      process {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      committedTaxonomyItem {
+        name
+      }
+      committedResource {
+        trackingIdentifier
+      }
+      committedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      committedOn
+      isFinished
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteCommitment(token: $token, id: 11) {
+    commitment {
+      action
+    }
+  }
+}
 
 
 '''

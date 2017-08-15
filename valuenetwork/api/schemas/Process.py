@@ -5,11 +5,11 @@
 # @since:   2017-06-22
 #
 
-from six import with_metaclass
 import graphene
 import datetime
 from valuenetwork.valueaccounting.models import Process as ProcessProxy, EconomicAgent
 from valuenetwork.api.types.Process import Process
+from six import with_metaclass
 from django.contrib.auth.models import User
 from .Auth import AuthedInputMeta, AuthedMutation
 from django.core.exceptions import PermissionDenied

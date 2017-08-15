@@ -23,9 +23,6 @@ class Action(graphene.Enum):
     ACCEPT = "accept"
     IMPROVE = "improve"
 
-    def _convert_action_to_event_type(self): #TODO not completed
-        return self
-
 
 class EconomicEvent(DjangoObjectType):
     action = graphene.String(source='action')

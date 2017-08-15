@@ -1873,6 +1873,29 @@ class EventTypeManager(models.Manager):
     def cash_event_types(self):
         return EventType.objects.filter(relationship="cash")
 
+    #ValueFlows
+    def convert_action_to_event_type(self, action):
+        if action == "work":
+            return EventType.objects.get(name="Time Contribution")
+        elif action == "consume":
+            return EventType.objects.get(name="Resource Consumption")
+        elif action == "produce":
+            return EventType.objects.get(name="Resource Production")
+        elif action == "use":
+            return EventType.objects.get(name="Resource use")
+        elif action == "cite":
+            return EventType.objects.get(name="Citation")
+        elif action == "accept":
+            return EventType.objects.get(name="To Be Changed")
+        elif action == "improve":
+            return EventType.objects.get(name="Change")
+        elif action == "give":
+            return EventType.objects.get(name="Give")
+        elif action == "take":
+            return EventType.objects.get(name="Receive")
+        else:
+            return "NONE"
+
 
 class EventType(models.Model):
     name = models.CharField(_('name'), max_length=128)
@@ -1943,6 +1966,29 @@ class EventType(models.Model):
                 related_to=related_to, resource_effect=resource_effect, unit_type=unit_type).save()
             if verbosity > 1:
                 print "Created %s EventType" % name
+
+    @property #ValueFlows
+    def action(self):
+        if self.name == "Time Contribution" or self.name == "Todo":
+            return "work"
+        elif self.name == "Resource Consumption":
+            return "consume"
+        elif self.name == "Resource Production" or self.name == "Create Changeable":
+            return "produce"
+        elif self.name == "Resource use":
+            return "use"
+        elif self.name == "Citation":
+            return "cite"
+        elif self.name == "Change":
+            return "improve"
+        elif self.name == "To Be Changed":
+            return "accept"
+        elif self.name == "Give":
+            return "give"
+        elif self.name == "Receive":
+            return "take"
+        else:
+            return self.label
 
     def default_event_value_equation(self):
         #todo exchange redesign fallout
@@ -9062,26 +9108,7 @@ class Commitment(models.Model):
 
     @property #ValueFlows
     def action(self):
-        if self.event_type.name == "Time Contribution" or self.event_type.name == "Todo":
-            return "work"
-        elif self.event_type.name == "Resource Consumption":
-            return "consume"
-        elif self.event_type.name == "Resource Production" or self.event_type.name == "Create Changeable":
-            return "produce"
-        elif self.event_type.name == "Resource use":
-            return "use"
-        elif self.event_type.name == "Citation":
-            return "cite"
-        elif self.event_type.name == "Change":
-            return "improve"
-        elif self.event_type.name == "To Be Changed":
-            return "accept"
-        elif self.event_type.name == "Give":
-            return "give"
-        elif self.event_type.name == "Receive":
-            return "receive"
-        else:
-            return self.event_type.label
+        return self.event_type.action
 
     @property #ValueFlows
     def numeric_value(self):
@@ -9092,7 +9119,7 @@ class Commitment(models.Model):
         return self.unit_of_quantity
 
     @property #ValueFlows
-    def commitment_start(self):
+    def planned_start(self):
         return self.start_date.isoformat()
 
     @property #ValueFlows
@@ -10848,27 +10875,8 @@ class EconomicEvent(models.Model):
 
     @property #ValueFlows
     def action(self):
-        if self.event_type.name == "Time Contribution" or self.event_type.name == "Todo":
-            return "work"
-        elif self.event_type.name == "Resource Consumption":
-            return "consume"
-        elif self.event_type.name == "Resource Production" or self.event_type.name == "Create Changeable":
-            return "produce"
-        elif self.event_type.name == "Resource use":
-            return "use"
-        elif self.event_type.name == "Citation":
-            return "cite"
-        elif self.event_type.name == "Change":
-            return "improve"
-        elif self.event_type.name == "To Be Changed":
-            return "accept"
-        elif self.event_type.name == "Give":
-            return "give"
-        elif self.event_type.name == "Receive":
-            return "receive"
-        else:
-            return self.event_type.label
-    
+        return self.event_type.action
+
     @property #ValueFlows
     def numeric_value(self):
         return self.quantity

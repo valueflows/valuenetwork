@@ -69,6 +69,9 @@ class Mutation(graphene.ObjectType):
     create_process = valuenetwork.api.schemas.Process.CreateProcess.Field()
     update_process = valuenetwork.api.schemas.Process.UpdateProcess.Field()
     delete_process = valuenetwork.api.schemas.Process.DeleteProcess.Field()
+    create_commitment = valuenetwork.api.schemas.Commitment.CreateCommitment.Field()
+    update_commitment = valuenetwork.api.schemas.Commitment.UpdateCommitment.Field()
+    delete_commitment = valuenetwork.api.schemas.Commitment.DeleteCommitment.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

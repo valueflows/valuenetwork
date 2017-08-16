@@ -2037,6 +2037,9 @@ query ($token: String) {
       involvedAgents {
         name
       }
+    }
+  }
+}
 
 query ($token: String) {
   viewer(token: $token) {
@@ -2057,7 +2060,11 @@ query ($token: String) {
         name
       }
       transferQuantity {
-
+        numericValue
+        unit {
+          name
+        }
+      }
       transferEconomicEvents {
         action
       }
@@ -2073,7 +2080,9 @@ query ($token: String) {
       involvedAgents {
         name
       }
-
+    }
+  }
+}
 
 query ($token: String) {
   viewer(token: $token) {
@@ -2084,6 +2093,12 @@ query ($token: String) {
         name
       }
       note
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
       resourceTaxonomyItem {
         name
       }
@@ -2094,7 +2109,11 @@ query ($token: String) {
         trackingIdentifier
       }
       transferQuantity {
-
+        numericValue
+        unit {
+          name
+        }
+      }
       transferEconomicEvents {
         action
       }
@@ -2110,6 +2129,9 @@ query ($token: String) {
       involvedAgents {
         name
       }
+    }
+  }
+}
 
 query ($token: String) {
   viewer(token: $token) {
@@ -2118,6 +2140,10 @@ query ($token: String) {
       exchangeAgreement {
         plannedStart
       }
+    }
+  }
+}
+
 
 ######################### SAMPLE MUTATIONS ###########################
 

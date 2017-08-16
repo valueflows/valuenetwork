@@ -4627,6 +4627,14 @@ class EconomicResource(models.Model):
         else:
             return "CURRENCY"
 
+    def transfers(self):
+        events = self.events.all().filter(Q(event_type__name="Give")|Q(event_type__name="Receive"))
+        transfers = []
+        for event in events:
+            if event.transfer not in transfers:
+                transfers.append(event.transfer)
+        return transfers
+
     def label(self):
         return self.identifier or str(self.id)
 
@@ -7761,6 +7769,18 @@ class Exchange(models.Model):
         unique_slugify(self, slug)
         super(Exchange, self).save(*args, **kwargs)
 
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.start_date.isoformat()
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
     def class_label(self):
         return "Exchange"
 
@@ -8265,23 +8285,15 @@ class Exchange(models.Model):
                 #print "local_total:", local_total
 
     def related_agents(self):
-        evts = self.events.all()
-        coms = self.commitments.all()
+        xfers = self.transfers.all()
         agents = []
-        for ev in evts:
-          if not ev.to_agent in agents:
-            agents.append(ev.to_agent)
-          if not ev.from_agent in agents:
-            agents.append(ev.from_agent)
-          if not ev.created_by.agent.agent in agents:
-            agents.append(ev.created_by.agent.agent)
-        for cm in coms:
-          if not cm.to_agent in agents:
-            agents.append(cm.to_agent)
-          if not cm.from_agent in agents:
-            agents.append(cm.from_agent)
-          if not cm.created_by.agent.agent in agents:
-            agents.append(cm.created_by.agent.agent)
+        for xfer in xfers:
+            if xfer.to_agent() not in agents:
+                agents.append(xfer.to_agent())
+            if not xfer.from_agent() in agents:
+                agents.append(xfer.from_agent())
+            if not xfer.scope in agents:
+                agents.append(xfer.scope)
         return agents
 
 class Transfer(models.Model):
@@ -8362,6 +8374,96 @@ class Transfer(models.Model):
             "on",
             self.transfer_date.strftime('%Y-%m-%d'),
             ])
+
+    @property #ValueFlows
+    def exchange_agreement(self):
+        #VF does not have an exchange unless it is created ahead of time for reciprocal commitments 
+        exch = self.exchange
+        if exch.has_reciprocal():
+            return exch
+        return None
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.transfer_date.isoformat()
+
+    @property #ValueFlows
+    def actual_date(self):
+        events = self.events.all()
+        if events:
+            return events[0].event_date.isoformat()
+        return None
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def provider(self):
+        events = self.events.all()
+        if events:
+            return events[0].from_agent
+        return None
+
+    @property #ValueFlows
+    def receiver(self):
+        events = self.events.all()
+        if events:
+            return events[0].to_agent
+        return None
+
+    @property #ValueFlows
+    def resource_taxonomy_item(self):
+        events = self.events.all()
+        if events:
+            event = events[0]
+            return event.resource_type
+        return None
+
+    @property #ValueFlows
+    def give_resource(self):
+        events = self.events.all()
+        give_resource = None
+        et_give = EventType.objects.get(name="Give")
+        if events:
+            for ev in events:
+                if ev.event_type == et_give:
+                    give_resource = ev.resource
+        return give_resource
+
+    @property #ValueFlows
+    def take_resource(self):
+        events = self.events.all()
+        take_resource = None
+        et_receive = EventType.objects.get(name="Receive")
+        if events:
+            for ev in events:
+                if ev.event_type == et_receive:
+                    take_resource = ev.resource
+        return take_resource
+
+    @property #ValueFlows
+    def unit(self):
+        events = self.events.all()
+        if events:
+            return events[0].unit_of_quantity
+        return None
+
+    def related_agents(self):
+        agents = []
+        if self.from_agent():
+            agents.append(self.from_agent())
+        if self.to_agent():
+            if self.to_agent() not in agents:
+                agents.append(self.to_agent())
+        if self.context_agent:
+            if self.context_agent not in agents:
+                agents.append(self.context_agent)
+        return agents
 
     def commit_text(self):
         text = None
@@ -8561,6 +8663,18 @@ class Transfer(models.Model):
         try:
             return self.events.get(event_type__name="Receive")
         except EconomicEvent.DoesNotExist:
+            return None
+
+    def give_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Give")
+        except Commitment.DoesNotExist:
+            return None
+
+    def receive_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Receive")
+        except Commitment.DoesNotExist:
             return None
 
     def quantity(self):
@@ -10933,9 +11047,9 @@ class EconomicEvent(models.Model):
     #        return self.resource_type
     #    return None
 
-    @property #ValueFlows
-    def fulfills(self):
-        return self.commitment
+    #@property #ValueFlows
+    #def fulfills(self):
+    #    return self.commitment
 
     def undistributed_description(self):
         if self.unit_of_quantity:

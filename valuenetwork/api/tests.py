@@ -821,6 +821,8 @@ class APITest(TestCase):
 ######################### SAMPLE QUERIES #####################
 
 '''
+# agent data
+
 query($token: String) {
   viewer(token: $token) {
     agent(id:39) {
@@ -1266,6 +1268,8 @@ query ($token: String) {
   }
 }
 
+# unit data
+
 query($token: String) {
   viewer(token: $token) {
     unit(id:8) {
@@ -1285,6 +1289,8 @@ query($token: String) {
     }
   }
 }
+
+# resource data
 
 query($token: String) {
   viewer(token: $token) {
@@ -1463,6 +1469,52 @@ query ($token: String) {
     }
   }
 }
+
+query ($token: String) {
+  viewer(token: $token) {
+    economicResource(id: 20) {
+      id
+      resourceTaxonomyItem {
+        name
+        category
+      }
+      trackingIdentifier
+      currentQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      transfers {
+        id
+        transferDate
+        provider {
+          name
+        }
+        receiver {
+          name
+        }
+        resourceTaxonomyItem {
+          name
+        }
+        giveResource {
+          trackingIdentifier
+        }
+        takeResource {
+          trackingIdentifier
+        }
+        transferQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+# process data
 
 query($token: String) {
   viewer(token: $token) {
@@ -1644,6 +1696,8 @@ query ($token: String) {
     }
   }
 }
+
+# event data
 
 query ($token: String) {
   viewer(token: $token) {
@@ -1835,13 +1889,21 @@ query ($token: String) {
         name
       }
       fulfills {
-        committedQuantity {
+        commitment {
+          action
+          committedQuantity {
+            numericValue
+          }
+        }
+        fulfilledQuantity {
           numericValue
         }
       }
     }
   }
 }
+
+# commitment data
 
 query ($token: String) {
   viewer(token: $token) {
@@ -1943,6 +2005,119 @@ query ($token: String) {
     }
   }
 }
+
+# exchange data
+
+query ($token: String) {
+  viewer(token: $token) {
+    exchangeAgreement(id: 94) {
+      plannedStart
+      scope {
+        name
+      }
+      exchangeAgreement {
+        name
+      }
+      note
+      transfers {
+        name
+        provider {
+          name
+        }
+        receiver {
+          name
+        }
+        transferQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      involvedAgents {
+        name
+      }
+
+query ($token: String) {
+  viewer(token: $token) {
+    transfer(id: 160) {
+      name
+      plannedStart
+      scope {
+        name
+      }
+      exchangeAgreement {
+        name
+      }
+      note
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      transferQuantity {
+
+      transferEconomicEvents {
+        action
+      }
+      transferCommitments {
+        action
+      }
+      giveCommitment {
+        action
+      }
+      takeCommitment {
+        action
+      }
+      involvedAgents {
+        name
+      }
+
+
+query ($token: String) {
+  viewer(token: $token) {
+    transfer(id: 76) {
+      name
+      plannedStart
+      scope {
+        name
+      }
+      note
+      resourceTaxonomyItem {
+        name
+      }
+      giveResource {
+        trackingIdentifier
+      }
+      takeResource {
+        trackingIdentifier
+      }
+      transferQuantity {
+
+      transferEconomicEvents {
+        action
+      }
+      giveEconomicEvent {
+        action
+      }
+      takeEconomicEvent {
+        action
+      }
+      transferCommitments {
+        action
+      }
+      involvedAgents {
+        name
+      }
+
+query ($token: String) {
+  viewer(token: $token) {
+    transfer(id: 82) {
+      name
+      exchangeAgreement {
+        plannedStart
+      }
 
 ######################### SAMPLE MUTATIONS ###########################
 
@@ -2063,6 +2238,5 @@ mutation ($token: String!) {
     }
   }
 }
-
 
 '''

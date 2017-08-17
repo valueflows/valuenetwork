@@ -9,7 +9,7 @@ from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy
-from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy
+from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy, Fulfillment as FulfillmentProxy
 
 
 class Commitment(DjangoObjectType):
@@ -31,7 +31,7 @@ class Commitment(DjangoObjectType):
         model = CommitmentProxy
         only_fields = ('id')
 
-    fulfilled_by = graphene.List(lambda: types.EconomicEvent)
+    fulfilled_by = graphene.List(lambda: types.Fulfillment)
 
     def resolve_process(self, args, *rargs):
         return self.process
@@ -55,4 +55,13 @@ class Commitment(DjangoObjectType):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
 
     def resolve_fulfilled_by(self, args, context, info):
-        return self.fulfilled_by.all()
+        events = self.fulfillment_events.all()
+        fulfillments = []
+        for event in events:
+            fulfill = FulfillmentProxy(
+                economic_event=event,
+                commitment=self,
+                fulfilled_quantity=QuantityValueProxy(numeric_value=event.quantity, unit=event.unit_of_quantity),
+                )
+            fulfillments.append(fulfill)
+        return fulfillments

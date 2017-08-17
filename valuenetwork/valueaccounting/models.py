@@ -9272,10 +9272,6 @@ class Commitment(models.Model):
     def committed_taxonomy_item(self):
         return self.resource_type
 
-    @property #ValueFlows
-    def fulfilled_by(self):
-        return self.fulfillment_events.all()
-
     def shorter_label(self):
         quantity_string = str(self.quantity)
         resource_name = ""

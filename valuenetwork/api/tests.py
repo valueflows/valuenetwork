@@ -1861,10 +1861,6 @@ query ($token: String) {
         }
       }
       note
-      affectedTaxonomyItem {
-        name
-        category
-      }
       affectedResource {
         resourceTaxonomyItem {
           name
@@ -1891,12 +1887,12 @@ query ($token: String) {
       fulfills {
         commitment {
           action
-          committedQuantity {
-            numericValue
-          }
         }
         fulfilledQuantity {
           numericValue
+          unit {
+            name
+          }
         }
       }
     }
@@ -1996,10 +1992,18 @@ query ($token: String) {
         name
       }
       fulfilledBy {
-        action
-        start
-        provider {
-          name
+        economicEvent {
+          action
+          start
+          provider {
+            name
+          }
+        }
+        fulfilledQuantity {
+          numericValue
+          unit {
+            name
+          }
         }
       }
     }

@@ -624,7 +624,7 @@ class APITest(TestCase):
                 }
                 fragment coreCommitmentFields on Commitment {
                     action
-                    commitmentStart
+                    plannedStart
                     committedOn
                     due
                     committedQuantity {
@@ -1607,7 +1607,7 @@ fragment coreEventFields on EconomicEvent {
 }
 fragment coreCommitmentFields on Commitment {
   action
-  commitmentStart
+  plannedStart
   committedOn
   due
   committedQuantity {
@@ -1777,7 +1777,7 @@ query ($token: String) {
       agentCommitments(latestNumberOfDays: 30) {
         id
         action
-        commitmentStart
+        plannedStart
         committedOn
         due
         committedQuantity {
@@ -1910,7 +1910,7 @@ query ($token: String) {
     allCommitments {
       id
       action
-      commitmentStart
+      plannedStart
       committedOn
       due
       committedQuantity {
@@ -1957,7 +1957,7 @@ query ($token: String) {
     commitment(id: 325) {
       id
       action
-      commitmentStart
+      plannedStart
       committedOn
       due
       committedQuantity {

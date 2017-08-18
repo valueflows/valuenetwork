@@ -756,9 +756,8 @@ class APITest(TestCase):
         test_agent = EconomicAgent.objects.get(name="testUser11222")
 
         result1 = schema.execute('''
-                mutation { 
-                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", 
-                    plannedDuration: 7, scopeId: 2) {
+                mutation {
+                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2) {
                     process {
                         name
                         scope {

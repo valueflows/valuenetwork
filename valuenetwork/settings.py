@@ -94,7 +94,10 @@ LOGIN_EXEMPT_URLS = [
     r'^robots.txt$',
 ]
 
-PROJECTS_LOGIN = {}
+
+# projects login settings
+PROJECTS_LOGIN = {} # Fill the object in local_settings.py with custom login data by project
+
 
 MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware',
@@ -228,6 +231,10 @@ MAP_ZOOM = 11
 
 # multicurrency settings
 MULTICURRENCY = {} #Fill the dict in local_settings.py with private data.
+
+# payment gateways settings
+PAYMENT_GATEWAYS = {} # Fill the object in local_settings.py with custom gateways data by project
+
 
 PINAX_NOTIFICATIONS_QUEUE_ALL = True
 

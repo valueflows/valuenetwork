@@ -27,12 +27,14 @@ class Action(graphene.Enum):
 
 class EconomicEvent(DjangoObjectType):
     action = graphene.String(source='action')
-    process = graphene.Field(lambda: types.Process)
+    #process = graphene.Field(lambda: types.Process)
+    input_of = graphene.Field(lambda: types.Process)
+    output_of = graphene.Field(lambda: types.Process)
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
     #affected_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
-    affected_resource = graphene.Field(lambda: types.EconomicResource)
+    affects = graphene.Field(lambda: types.EconomicResource)
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
     #work_category = graphene.String(source='work_category')
@@ -45,9 +47,15 @@ class EconomicEvent(DjangoObjectType):
 
     fulfills = graphene.List(lambda: types.Fulfillment)
 
-    def resolve_process(self, args, *rargs):
-        return self.process
+    #def resolve_process(self, args, *rargs):
+    #    return self.process
 
+    def resolve_input_of(self, args, *rargs):
+        return self.input_of
+
+    def resolve_output_of(self, args, *rargs):
+        return self.output_of
+  
     def resolve_provider(self, args, *rargs):
         return formatAgent(self.provider)
 
@@ -60,8 +68,8 @@ class EconomicEvent(DjangoObjectType):
     #def resolve_affected_taxonomy_item(self, args, *rargs):
     #    return self.affected_taxonomy_item
 
-    def resolve_affected_resource(self, args, *rargs):
-        res = self.affected_resource
+    def resolve_affects(self, args, *rargs):
+        res = self.affects
         if res == None:
             res = EconomicResourceProxy(resource_type=self.affected_taxonomy_item)
         return res
@@ -73,8 +81,8 @@ class EconomicEvent(DjangoObjectType):
         commitment = self.commitment
         if commitment:
             fulfillment = Fulfillment(
-                economic_event=self,
-                commitment=commitment,
+                fulfilled_by=self,
+                fulfills=commitment,
                 fulfilled_quantity=QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity),
                 )
             ff_list = []
@@ -87,4 +95,4 @@ class Fulfillment(DjangoObjectType):
 
     class Meta:
         model = FulfillmentProxy
-        only_fields = ('id', 'economic_event', 'commitment', 'fulfilled_quantity', 'note')
+        only_fields = ('id', 'fulfilled_by', 'fulfills', 'fulfilled_quantity', 'note')

@@ -9265,12 +9265,24 @@ class Commitment(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def committed_resource(self):
+    def involves(self):
         return self.resource
 
     @property #ValueFlows
     def committed_taxonomy_item(self):
         return self.resource_type
+
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def shorter_label(self):
         quantity_string = str(self.quantity)
@@ -11030,7 +11042,7 @@ class EconomicEvent(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def affected_resource(self):
+    def affects(self):
         return self.resource
 
     @property #ValueFlows
@@ -11043,9 +11055,17 @@ class EconomicEvent(models.Model):
     #        return self.resource_type
     #    return None
 
-    #@property #ValueFlows
-    #def fulfills(self):
-    #    return self.commitment
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def undistributed_description(self):
         if self.unit_of_quantity:

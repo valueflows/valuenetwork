@@ -15,6 +15,7 @@ class EconomicResourceCategory(graphene.Enum):
     CURRENCY = "currency"
     INVENTORY = "inventory"
     WORK = "work"
+    #SERVICE = "service" TODO: work this in, might need a new event type in VF
 
 class EconomicResourceProcessCategory(graphene.Enum):
     NONE = None

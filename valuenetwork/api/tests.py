@@ -606,7 +606,7 @@ class APITest(TestCase):
                           name
                         }
                     }
-                    affectedResource {
+                    affects {
                         resourceTaxonomyItem {
                           name
                           category
@@ -732,7 +732,7 @@ class APITest(TestCase):
         self.assertEqual(workingAgents[0]['__typename'], "Person")
         self.assertEqual(inputs[0]['action'], "work")
         self.assertEqual(inputs[1]['affectedQuantity']['numericValue'], 1.5)
-        self.assertEqual(inputs[2]['affectedResource']['resourceTaxonomyItem']['name'], "component1")
+        self.assertEqual(inputs[2]['affects']['resourceTaxonomyItem']['name'], "component1")
         self.assertEqual(inputs[3]['provider']['name'], "testUser11222")
         self.assertEqual(outputs[0]['action'], "produce")
         self.assertEqual(committedInputs[0]['action'], "work")
@@ -1726,7 +1726,11 @@ query ($token: String) {
         id
         name
       }
-      process {
+      inputOf {
+        id
+        name
+      }
+      outputOf {
         id
         name
       }
@@ -1767,10 +1771,6 @@ query ($token: String) {
           id
           name
         }
-        process {
-          id
-          name
-        }
         note
       }
       agentCommitments(latestNumberOfDays: 30) {
@@ -1794,10 +1794,6 @@ query ($token: String) {
           name
         }
         receiver {
-          id
-          name
-        }
-        process {
           id
           name
         }
@@ -1835,10 +1831,6 @@ query ($token: String) {
         id
         name
       }
-      process {
-        id
-        name
-      }
       scope {
         id
         name
@@ -1860,7 +1852,7 @@ query ($token: String) {
         }
       }
       note
-      affectedResource {
+      affects {
         resourceTaxonomyItem {
           name
           category
@@ -1875,8 +1867,10 @@ query ($token: String) {
         id
         name
       }
-      process {
-        id
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       scope {
@@ -1884,8 +1878,14 @@ query ($token: String) {
         name
       }
       fulfills {
-        commitment {
-          action
+        fulfills {
+          id
+          committedQuantity {
+            numericValue
+            unit {
+              name
+            }
+          }
         }
         fulfilledQuantity {
           numericValue
@@ -1897,6 +1897,7 @@ query ($token: String) {
     }
   }
 }
+
 
 # commitment data
 
@@ -1919,7 +1920,7 @@ query ($token: String) {
         name
         category
       }
-      committedResource {
+      involves {
         id
         resourceTaxonomyItem {
           name
@@ -1935,7 +1936,11 @@ query ($token: String) {
         id
         name
       }
-      process {
+      inputOf {
+        id
+        name
+      }
+      outputOf {
         id
         name
       }
@@ -1966,7 +1971,7 @@ query ($token: String) {
         name
         category
       }
-      committedResource {
+      involves {
         id
         resourceTaxonomyItem {
           name
@@ -1982,7 +1987,11 @@ query ($token: String) {
         id
         name
       }
-      process {
+      inputOf {
+        id
+        name
+      }
+      outputOf {
         id
         name
       }
@@ -1991,7 +2000,7 @@ query ($token: String) {
         name
       }
       fulfilledBy {
-        economicEvent {
+        fulfilledBy {
           action
           start
           provider {
@@ -2008,7 +2017,6 @@ query ($token: String) {
     }
   }
 }
-
 # exchange data
 
 query ($token: String) {

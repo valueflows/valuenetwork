@@ -654,7 +654,7 @@ class JoinRequest(models.Model):
         return et
 
 
-    def create_exchange(self):
+    def create_exchange(self, status=None):
         ex = None
         et = self.exchange_type()
         pro = self.project.agent
@@ -672,6 +672,8 @@ class JoinRequest(models.Model):
             if ex:
                 self.exchange = ex
                 self.save()
+
+            # TODO create transfers or commitments?
 
             if ag:
                 pass # TODO assign agent to a commitment in this exchange

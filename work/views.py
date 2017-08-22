@@ -1647,9 +1647,26 @@ def project_update_payment_status(request, project_slug=None):
 
             if status:
                 if not req.exchange:
-                    ex = req.create_exchange()
-                    raise ValidationError("The exchange has been created? "+str(ex))
+                    ex = req.create_exchange(status)
+                    #raise ValidationError("The exchange has been created? "+str(ex))
                     #return HttpResponse('error')
+                else:
+                    ex = req.exchange
+
+                xt = ex.exchange_type
+                tts = xt.transfer_types.all()
+                if not tts:
+                    raise ValidationError("This exchange type has not transfer types: "+str(xt))
+                elif len(tts) < 2:
+                    raise ValidationError("This exchange type has less than 2 transfer types: "+str(xt))
+
+                tt_share = tts.get(name__contains="Share")
+                tt_pay = tts.get(name__contains="Payment")
+                # TODO create transfers and events or commitments?
+
+                et_give = EventType.objects.get(name="Give")
+                et_receive = EventType.objects.get(name="Receive")
+
                 # TODO update the exchange transfer status
 
 

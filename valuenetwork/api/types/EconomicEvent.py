@@ -73,8 +73,8 @@ class EconomicEvent(DjangoObjectType):
         commitment = self.commitment
         if commitment:
             fulfillment = Fulfillment(
-                economic_event=self,
-                commitment=commitment,
+                fulfilled_by=self,
+                fulfills=commitment,
                 fulfilled_quantity=QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity),
                 )
             ff_list = []
@@ -87,4 +87,5 @@ class Fulfillment(DjangoObjectType):
 
     class Meta:
         model = FulfillmentProxy
-        only_fields = ('id', 'economic_event', 'commitment', 'fulfilled_quantity', 'note')
+        only_fields = ('id', 'fulfilled_by', 'fulfills', 'fulfilled_quantity', 'note')
+

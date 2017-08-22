@@ -12,8 +12,7 @@ from graphene_django.types import DjangoObjectType
 from django.db.models import Q
 from valuenetwork.valueaccounting.models import EconomicAgent
 import valuenetwork.api.types as types
-from valuenetwork.api.types.AgentRelationship import AgentRelationship
-from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipCategory, AgentRelationshipRole
+from valuenetwork.api.types.AgentRelationship import AgentRelationship, AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
 import datetime
 

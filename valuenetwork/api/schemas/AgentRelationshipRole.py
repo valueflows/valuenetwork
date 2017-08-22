@@ -6,7 +6,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from valuenetwork.valueaccounting.models import AgentAssociationType
-from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipRole
+from valuenetwork.api.types.AgentRelationship import AgentRelationshipRole
 
 
 class Query(graphene.AbstractType):

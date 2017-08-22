@@ -7,14 +7,11 @@
 #
 
 import graphene
-
 from valuenetwork.valueaccounting.models import EconomicAgent
-
-from AgentBaseQueries import AgentBase
 from valuenetwork.api.types.Agent import Person
 from valuenetwork.api.models import formatAgent, formatAgentList
 
-class Query(AgentBase, graphene.AbstractType):
+class Query(graphene.AbstractType):
 
     # define input query params
 
@@ -39,25 +36,4 @@ class Query(AgentBase, graphene.AbstractType):
     def resolve_all_people(self, args, context, info):
         people = EconomicAgent.objects.filter(agent_type__party_type="individual")
         return formatAgentList(people)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

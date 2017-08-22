@@ -5,7 +5,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-#import valuenetwork.api.types as types
+import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType
 from valuenetwork.api.models import QuantityValue as QuantityValueProxy
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
@@ -27,7 +27,7 @@ class ResourceTaxonomyItem(DjangoObjectType):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
     category = graphene.String(source='category')
-    process_category = graphene.String(source='behavior')
+    process_category = graphene.String(source='process_category')
 
     class Meta:
         model = EconomicResourceType
@@ -51,8 +51,14 @@ class EconomicResource(DjangoObjectType):
         model = EconomicResourceProxy
         only_fields = ('id')
 
+    transfers = graphene.List(lambda: types.Transfer)
+
     def resolve_current_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)
 
     def resolve_resource_taxonomy_item(self, args, *rargs):
         return self.resource_type
+
+    def resolve_transfers(self, args, context, info):
+        return self.transfers()
+

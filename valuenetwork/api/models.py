@@ -1,6 +1,6 @@
 from django.db import models
 
-from valuenetwork.valueaccounting.models import Unit
+from valuenetwork.valueaccounting.models import Unit, EconomicEvent, Commitment
 from decimal import *
 
 # Helpers for dealing with Agent polymorphism
@@ -28,7 +28,7 @@ def formatAgentList(agent_list):
         mixed_list.append(formatAgent(agent))
     return mixed_list
 
-# Django model extensions for exposing OO type layer in Graphene (core doesn't really use inheritance)
+# Django model extensions for exposing OO type layer in Graphene, where the core doesn't directly support ValueFlows
 
 class QuantityValue(models.Model):
     numeric_value = models.DecimalField(max_digits=8, decimal_places=2,
@@ -59,6 +59,19 @@ class Person(models.Model):
     image = models.CharField(max_length=255, blank=True)
     is_context = models.BooleanField(default=False)
     type = models.CharField(max_length=255, default="Person")
+
+    class Meta:
+        managed = False
+
+
+class Fulfillment(models.Model):
+    economic_event = models.ForeignKey(EconomicEvent,
+        related_name="fulfillments")
+    commitment = models.ForeignKey(Commitment,
+        related_name="fulfillments") 
+    fulfilled_quantity = models.ForeignKey(QuantityValue,
+        related_name="fulfillments")
+    note = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -5,9 +5,29 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
-from valuenetwork.valueaccounting.models import AgentAssociation
+from valuenetwork.valueaccounting.models import AgentAssociation, AgentAssociationType
 from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipRole
 from valuenetwork.api.models import formatAgent, Person, Organization
+
+
+class AgentRelationshipCategory(graphene.Enum):
+    NONE = None
+    MEMBER = "member"
+    PART = "part"
+    PEER = "peer"
+    TRADINGPARTNER = "trading partner"
+    LEGALPARTNER = "legal partner"
+
+
+class AgentRelationshipRole(DjangoObjectType):
+    category = graphene.Field(lambda: AgentRelationshipCategory)
+
+    class Meta:
+        model = AgentAssociationType
+        only_fields = ('id', 'label', 'inverse_label')
+
+    def resolve_category(self, args, *rargs):
+        return self.category
 
 
 class AgentRelationship(DjangoObjectType):

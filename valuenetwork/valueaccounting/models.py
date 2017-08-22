@@ -1873,6 +1873,29 @@ class EventTypeManager(models.Manager):
     def cash_event_types(self):
         return EventType.objects.filter(relationship="cash")
 
+    #ValueFlows
+    def convert_action_to_event_type(self, action):
+        if action == "work":
+            return EventType.objects.get(name="Time Contribution")
+        elif action == "consume":
+            return EventType.objects.get(name="Resource Consumption")
+        elif action == "produce":
+            return EventType.objects.get(name="Resource Production")
+        elif action == "use":
+            return EventType.objects.get(name="Resource use")
+        elif action == "cite":
+            return EventType.objects.get(name="Citation")
+        elif action == "accept":
+            return EventType.objects.get(name="To Be Changed")
+        elif action == "improve":
+            return EventType.objects.get(name="Change")
+        elif action == "give":
+            return EventType.objects.get(name="Give")
+        elif action == "take":
+            return EventType.objects.get(name="Receive")
+        else:
+            return "NONE"
+
 
 class EventType(models.Model):
     name = models.CharField(_('name'), max_length=128)
@@ -1943,6 +1966,29 @@ class EventType(models.Model):
                 related_to=related_to, resource_effect=resource_effect, unit_type=unit_type).save()
             if verbosity > 1:
                 print "Created %s EventType" % name
+
+    @property #ValueFlows
+    def action(self):
+        if self.name == "Time Contribution" or self.name == "Todo":
+            return "work"
+        elif self.name == "Resource Consumption":
+            return "consume"
+        elif self.name == "Resource Production" or self.name == "Create Changeable":
+            return "produce"
+        elif self.name == "Resource use":
+            return "use"
+        elif self.name == "Citation":
+            return "cite"
+        elif self.name == "Change":
+            return "improve"
+        elif self.name == "To Be Changed":
+            return "accept"
+        elif self.name == "Give":
+            return "give"
+        elif self.name == "Receive":
+            return "take"
+        else:
+            return self.label
 
     def default_event_value_equation(self):
         #todo exchange redesign fallout
@@ -2173,7 +2219,7 @@ class EconomicResourceType(models.Model):
     def note(self):
         return self.description
 
-    @property #ValueFlows
+    @property
     def category(self):
         if (self.behavior == "other"
             or self.behavior == "consumed"
@@ -2185,6 +2231,16 @@ class EconomicResourceType(models.Model):
             return "WORK"
         else:
             return "CURRENCY"
+
+    @property
+    def process_category(self):
+        if (self.behavior ==  "consumed"
+            or self.behavior == "used" 
+            or self.behavior == "produced" 
+            or self.behavior == "cited"):
+            return self.behavior
+        else:
+            return None
 
     def label(self):
         return self.__unicode__()
@@ -4571,6 +4627,14 @@ class EconomicResource(models.Model):
         else:
             return "CURRENCY"
 
+    def transfers(self):
+        events = self.events.all().filter(Q(event_type__name="Give")|Q(event_type__name="Receive"))
+        transfers = []
+        for event in events:
+            if event.transfer not in transfers:
+                transfers.append(event.transfer)
+        return transfers
+
     def label(self):
         return self.identifier or str(self.id)
 
@@ -6508,6 +6572,24 @@ class Process(models.Model):
     def note(self):
         return self.notes
 
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    def get_rts_by_action(self, event_type):
+        try:
+            from work.models import Project
+            proj = Project.objects.get(agent=self.context_agent)
+            if proj:
+                rt_selection = proj.resource_type_selection
+            else:
+                rt_selection = "all"
+        except:
+            rt_selection = "all"
+        #items = 
+        #if rt_selection == "project":
+        return rt_selection #temp
+
     def is_deletable(self):
         if self.events.all():
             return False
@@ -7687,6 +7769,18 @@ class Exchange(models.Model):
         unique_slugify(self, slug)
         super(Exchange, self).save(*args, **kwargs)
 
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.start_date.isoformat()
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
     def class_label(self):
         return "Exchange"
 
@@ -8191,23 +8285,15 @@ class Exchange(models.Model):
                 #print "local_total:", local_total
 
     def related_agents(self):
-        evts = self.events.all()
-        coms = self.commitments.all()
+        xfers = self.transfers.all()
         agents = []
-        for ev in evts:
-          if not ev.to_agent in agents:
-            agents.append(ev.to_agent)
-          if not ev.from_agent in agents:
-            agents.append(ev.from_agent)
-          if not ev.created_by.agent.agent in agents:
-            agents.append(ev.created_by.agent.agent)
-        for cm in coms:
-          if not cm.to_agent in agents:
-            agents.append(cm.to_agent)
-          if not cm.from_agent in agents:
-            agents.append(cm.from_agent)
-          if not cm.created_by.agent.agent in agents:
-            agents.append(cm.created_by.agent.agent)
+        for xfer in xfers:
+            if xfer.to_agent() not in agents:
+                agents.append(xfer.to_agent())
+            if not xfer.from_agent() in agents:
+                agents.append(xfer.from_agent())
+            if not xfer.scope in agents:
+                agents.append(xfer.scope)
         return agents
 
 class Transfer(models.Model):
@@ -8288,6 +8374,96 @@ class Transfer(models.Model):
             "on",
             self.transfer_date.strftime('%Y-%m-%d'),
             ])
+
+    @property #ValueFlows
+    def exchange_agreement(self):
+        #VF does not have an exchange unless it is created ahead of time for reciprocal commitments 
+        exch = self.exchange
+        if exch.has_reciprocal():
+            return exch
+        return None
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.transfer_date.isoformat()
+
+    @property #ValueFlows
+    def actual_date(self):
+        events = self.events.all()
+        if events:
+            return events[0].event_date.isoformat()
+        return None
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def provider(self):
+        events = self.events.all()
+        if events:
+            return events[0].from_agent
+        return None
+
+    @property #ValueFlows
+    def receiver(self):
+        events = self.events.all()
+        if events:
+            return events[0].to_agent
+        return None
+
+    @property #ValueFlows
+    def resource_taxonomy_item(self):
+        events = self.events.all()
+        if events:
+            event = events[0]
+            return event.resource_type
+        return None
+
+    @property #ValueFlows
+    def give_resource(self):
+        events = self.events.all()
+        give_resource = None
+        et_give = EventType.objects.get(name="Give")
+        if events:
+            for ev in events:
+                if ev.event_type == et_give:
+                    give_resource = ev.resource
+        return give_resource
+
+    @property #ValueFlows
+    def take_resource(self):
+        events = self.events.all()
+        take_resource = None
+        et_receive = EventType.objects.get(name="Receive")
+        if events:
+            for ev in events:
+                if ev.event_type == et_receive:
+                    take_resource = ev.resource
+        return take_resource
+
+    @property #ValueFlows
+    def unit(self):
+        events = self.events.all()
+        if events:
+            return events[0].unit_of_quantity
+        return None
+
+    def related_agents(self):
+        agents = []
+        if self.from_agent():
+            agents.append(self.from_agent())
+        if self.to_agent():
+            if self.to_agent() not in agents:
+                agents.append(self.to_agent())
+        if self.context_agent:
+            if self.context_agent not in agents:
+                agents.append(self.context_agent)
+        return agents
 
     def commit_text(self):
         text = None
@@ -8487,6 +8663,18 @@ class Transfer(models.Model):
         try:
             return self.events.get(event_type__name="Receive")
         except EconomicEvent.DoesNotExist:
+            return None
+
+    def give_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Give")
+        except Commitment.DoesNotExist:
+            return None
+
+    def receive_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Receive")
+        except Commitment.DoesNotExist:
             return None
 
     def quantity(self):
@@ -9034,26 +9222,7 @@ class Commitment(models.Model):
 
     @property #ValueFlows
     def action(self):
-        if self.event_type.name == "Time Contribution" or self.event_type.name == "Todo":
-            return "work"
-        elif self.event_type.name == "Resource Consumption":
-            return "consume"
-        elif self.event_type.name == "Resource Production" or self.event_type.name == "Create Changeable":
-            return "produce"
-        elif self.event_type.name == "Resource use":
-            return "use"
-        elif self.event_type.name == "Citation":
-            return "cite"
-        elif self.event_type.name == "Change":
-            return "improve"
-        elif self.event_type.name == "To Be Changed":
-            return "accept"
-        elif self.event_type.name == "Give":
-            return "give"
-        elif self.event_type.name == "Receive":
-            return "receive"
-        else:
-            return self.event_type.label
+        return self.event_type.action
 
     @property #ValueFlows
     def numeric_value(self):
@@ -9064,7 +9233,7 @@ class Commitment(models.Model):
         return self.unit_of_quantity
 
     @property #ValueFlows
-    def commitment_start(self):
+    def planned_start(self):
         return self.start_date.isoformat()
 
     @property #ValueFlows
@@ -9102,10 +9271,6 @@ class Commitment(models.Model):
     @property #ValueFlows
     def committed_taxonomy_item(self):
         return self.resource_type
-
-    @property #ValueFlows
-    def fulfilled_by(self):
-        return self.fulfillment_events.all()
 
     def shorter_label(self):
         quantity_string = str(self.quantity)
@@ -10820,27 +10985,8 @@ class EconomicEvent(models.Model):
 
     @property #ValueFlows
     def action(self):
-        if self.event_type.name == "Time Contribution" or self.event_type.name == "Todo":
-            return "work"
-        elif self.event_type.name == "Resource Consumption":
-            return "consume"
-        elif self.event_type.name == "Resource Production" or self.event_type.name == "Create Changeable":
-            return "produce"
-        elif self.event_type.name == "Resource use":
-            return "use"
-        elif self.event_type.name == "Citation":
-            return "cite"
-        elif self.event_type.name == "Change":
-            return "improve"
-        elif self.event_type.name == "To Be Changed":
-            return "accept"
-        elif self.event_type.name == "Give":
-            return "give"
-        elif self.event_type.name == "Receive":
-            return "receive"
-        else:
-            return self.event_type.label
-    
+        return self.event_type.action
+
     @property #ValueFlows
     def numeric_value(self):
         return self.quantity
@@ -10897,9 +11043,9 @@ class EconomicEvent(models.Model):
     #        return self.resource_type
     #    return None
 
-    @property #ValueFlows
-    def fulfills(self):
-        return self.commitment
+    #@property #ValueFlows
+    #def fulfills(self):
+    #    return self.commitment
 
     def undistributed_description(self):
         if self.unit_of_quantity:

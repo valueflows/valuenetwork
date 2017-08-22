@@ -1,9 +1,6 @@
 #
 # Graphene schema for exposing EconomicResource model
 #
-# @package: OCP
-# @since:   2017-06-03
-#
 
 import graphene
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy

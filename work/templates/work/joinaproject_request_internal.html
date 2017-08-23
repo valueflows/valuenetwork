@@ -27,7 +27,7 @@
      <div>
 
         <legend>
-            {% trans "Request to join:" %} {{ project.agent.name }}
+            {% trans "Request to join:" %} <a href="{% url 'members_agent' agent_id=project.agent.id %}">{{ project.agent.name }}</a>
 
             {% if user.agent.agent.is_active_freedom_coop_member or user.is_staff %}
 
@@ -36,7 +36,7 @@
 
             <div class="subnav">
 
-              <a class="indent" href="{% url 'members_agent' agent_id=project.agent.id %}">{% trans "View Project" %}</a>
+              <!-- <a class="indent" href="{% url 'members_agent' agent_id=project.agent.id %}">{% trans "View Project" %}</a> -->
               <a class="indent" href="{% url "your_projects" %}">{% trans "Your Projects" %}</a>
               <a class="indent" href="{% url "project_work" %}">{% trans "Projects Tasks" %}</a>
 
@@ -53,7 +53,14 @@
             <p>
               {% trans "You already are an active participant of this project!" %}
             </p>
-          {% else %}
+            {% if not reqs %}
+              <p>
+                  {% trans "However, you didn't fill the project form yet. You can do so now if you wish." %}
+              </p>
+              <br />
+            {% endif %}
+          {% endif %}
+          {% if not reqs %}
             <form id="joinForm" class="validateMe" action="." method="POST" >
               {% csrf_token %}
               {{ join_form|as_bootstrap }}

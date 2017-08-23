@@ -1079,6 +1079,14 @@ def project_login(request, form_slug = False):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
+                agent = user.agent.agent
+                req = JoinRequest.objects.filter(project=project, agent=agent)
+                if len(req) > 1:
+                    pass # TODO raise error, create notice or repair the multiple join requests of this agent with this project
+                elif len(req) == 0:
+                    # redirect to the internal joinaproject form
+                    return HttpResponseRedirect(reverse('project_joinform', args=(project.agent.id,)))
+                #return HttpResponse(str(agent.nick))
                 # Redirect to a success page.
                 return HttpResponseRedirect(reverse('my_dashboard'))
             else:
@@ -1159,7 +1167,22 @@ def joinaproject_request(request, form_slug = False):
             type_of_user = data["type_of_user"]
             name = data["name"]
             surname = data["surname"]
-            #description = data["description"]
+
+            """
+            email = data["email_address"]
+            requser = data["requested_username"]
+            existuser = None
+            existemail = None
+            exist_user = EconomicAgent.objects.filter(nick=requser) #User.objects.filter(username=requser)
+            exist_email = EconomicAgent.objects.filter(email=email)
+            if len(exist_user) > 0:
+                existuser = exist_user[0]
+            if len(exist_email) > 0:
+                existemail = exist_email[0]
+            login_form = None
+            if existuser or existemail:
+                login_form = WorkLoginUsernameForm(initial={'username': requser}) # data=request.POST or None,
+            """
 
             jn_req = join_form.save(commit=False)
             jn_req.project = project
@@ -1311,6 +1334,9 @@ def joinaproject_request(request, form_slug = False):
             return render(request, "work/joinaproject_thanks.html", {
                 "project": project,
                 "jn_req": jn_req,
+                #"existuser": existuser,
+                #"existemail": existemail,
+                #"login_form": login_form
                 #"fobi_form": fobi_form,
                 #"field_map": field_name_to_label_map,
                 #"post": escapejs(json.dumps(request.POST)),
@@ -1337,6 +1363,9 @@ def joinaproject_request_internal(request, agent_id = False):
     form_slug = project.fobi_slug
     if form_slug and form_slug == 'freedom-coop':
         return redirect('membership_request')
+    usr_agent = request.user.agent.agent
+    reqs = JoinRequest.objects.filter(project=project, agent=usr_agent)
+
     join_form = JoinRequestInternalForm(data=request.POST or None)
     fobi_form = False
     cleaned_data = False
@@ -1464,7 +1493,8 @@ def joinaproject_request_internal(request, agent_id = False):
             # add relation candidate
             if jn_req.agent:
                 ass_type = get_object_or_404(AgentAssociationType, identifier="participant")
-                if ass_type:
+                ass = AgentAssociation.objects.filter(is_associate=jn_req.agent, has_associate=jn_req.project.agent)
+                if ass_type and not ass:
                   fc_aa = AgentAssociation(
                     is_associate=jn_req.agent,
                     has_associate=jn_req.project.agent,
@@ -1523,8 +1553,7 @@ def joinaproject_request_internal(request, agent_id = False):
                         }
                     )
 
-            return HttpResponseRedirect('/%s/'
-                % ('work/your-projects'))
+            return HttpResponseRedirect(reverse('members_agent', args=(proj_agent.id,))) #'/%s/' % ('work/your-projects'))
 
 
     kwargs = {'initial': {'fobi_initial_data':form_slug} }
@@ -1536,6 +1565,7 @@ def joinaproject_request_internal(request, agent_id = False):
         "fobi_form": fobi_form,
         "project": project,
         "post": escapejs(json.dumps(request.POST)),
+        "reqs": reqs,
     })
 
 

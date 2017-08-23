@@ -209,7 +209,7 @@
 
             {% if not node.name == 'Freedom Coop' and not agent in node.managers and agent in node.members %}
             <li><b><a href="../agent/{{ node.id }}">{{ node.name }}</a></b>
-              &nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>
+              {% if 'exchanges' in node.project.services %}&nbsp;- &nbsp;<a href="{% url "exchanges_all" agent_id=node.id %}">{% trans "Exchanges" %}</a>{% endif %}
               {% if node.description %}
                 <span class="showhide" id="sh-{{ node.id }}" >(Show)</span>
                 <div class="description list" id="list-{{ node.id }}">{{ node.description|urlize|linebreaks }}</div>

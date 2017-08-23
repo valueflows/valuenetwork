@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from valuenetwork.valueaccounting.models import *
 from work.models import *
 from valuenetwork.valueaccounting.forms import *
+from account.forms import LoginForm
 from general.models import Unit_Type
 
 from django.shortcuts import get_object_or_404
@@ -204,6 +205,7 @@ class AssociationForm(forms.Form):
 
 
 
+
 #     J O I N   R E Q U E S T S
 
 
@@ -212,6 +214,7 @@ class JoinRequestForm(forms.ModelForm):
     captcha = CaptchaField(help_text=_("Is a math operation: Please put the result (don't copy the symbols)"))
 
     project = None
+    exchange = None
     '''forms.ModelChoiceField(
         queryset=Project.objects.filter(joining_style='moderated', visibility='public'),
         empty_label=None,
@@ -220,11 +223,23 @@ class JoinRequestForm(forms.ModelForm):
 
     class Meta:
         model = JoinRequest
-        exclude = ('agent', 'project', 'fobi_data',)
+        exclude = ('agent', 'project', 'fobi_data', 'exchange')
 
     def clean(self):
         data = super(JoinRequestForm, self).clean()
-        type_of_user = data["type_of_user"]
+        username = data["requested_username"]
+        email = data["email_address"]
+        nome = data["name"]
+        exist_name = EconomicAgent.objects.filter(name=nome)
+        exist_user = EconomicAgent.objects.filter(nick=username)
+        exist_email = EconomicAgent.objects.filter(email=email)
+        if len(exist_name) > 0:
+            self.add_error('name', _("The name is already used by user: ")+str(exist_name[0].nick))
+        if len(exist_user) > 0:
+            self.add_error('requested_username', _("The username already exists. Please login before filling this form or choose another username."))
+        if len(exist_email) > 0:
+            self.add_error('email_address', _("The email is already in the system for username: ")+str(exist_email[0].nick))
+        #type_of_user = data["type_of_user"]
         #number_of_shares = data["number_of_shares"]
         #if type_of_user == "collective":
             #if int(number_of_shares) < 2:
@@ -242,6 +257,7 @@ class JoinRequestInternalForm(forms.ModelForm):
     captcha = None #CaptchaField()
 
     project = None
+    exchange = None
     '''forms.ModelChoiceField(
         queryset=Project.objects.filter(joining_style='moderated', visibility='public'),
         empty_label=None,
@@ -250,7 +266,7 @@ class JoinRequestInternalForm(forms.ModelForm):
 
     class Meta:
         model = JoinRequest
-        exclude = ('agent', 'project', 'fobi_data', 'type_of_user', 'name', 'surname', 'requested_username', 'email_address', 'phone_number', 'address',)
+        exclude = ('agent', 'project', 'exchange', 'fobi_data', 'type_of_user', 'name', 'surname', 'requested_username', 'email_address', 'phone_number', 'address',)
 
     def clean(self):
         data = super(JoinRequestInternalForm, self).clean()

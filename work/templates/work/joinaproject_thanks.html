@@ -25,6 +25,27 @@
 <div class="container">
     {% include "_messages.html" %}
     <p>&nbsp;</p>
+    {% if existuser or existemail %}
+        <!-- {% if existuser and not existemail %}
+            <h2>
+                {% trans "The username is already in the system." %}
+            </h2>
+            <p style="text-align:center; font-size:120%; ">
+                {% blocktrans %} If you are <b>{{ existuser }}</b>, put your existent password to connect this request to your account.
+                {% endblocktrans %}
+            </p>
+            {% if login_form %}
+                {% csrf_token %}
+                {{ login_form }}
+                <button type="submit" class="btn btn-primary">{% trans "Log in" %}</button>
+            {% endif %}
+        {% elif existuser and existemail %}
+            user: {{ existuser }} email: {{ existemail }}
+        {% elif existemail and not existuser %}
+            email: {{ existemail }}
+        {% endif %} -->
+
+    {% else %}
     <h2>
         {% trans "Thank you for your request to join" %}<br />
         {% if project.agent.photo or project.agent.photo_url %}
@@ -67,7 +88,7 @@
             {% endif %}
         {% endif %}
     </div>
-
+    {% endif %}
 </div>
 </body>
 </html>

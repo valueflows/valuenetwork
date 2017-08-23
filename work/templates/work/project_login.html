@@ -47,7 +47,7 @@ body {
   <body style="background-image: {% if project.background_url %}url({% static project.background_url %}){% else %}url({% static 'img/photo-OCP-1600x900_green.jpg' %}){% endif %}; text-align:center; background-attachment:fixed;">
         <p>&nbsp;</p>
 
-    <!-- <form action="{% url 'set_language' %}" method="post" id="lang-switch">{% csrf_token %}
+    <form action="{% url 'set_language' %}" method="post" id="lang-switch">{% csrf_token %}
       <input name="next" type="hidden" value="{{ redirect_to }}" />
       <select name="language" onchange="this.form.submit()">
           {% get_current_language as LANGUAGE_CODE %}
@@ -59,7 +59,7 @@ body {
               </option>
           {% endfor %}
       </select>
-    </form> -->
+    </form>
 
         <h4>{% if project.agent.photo_url %}
                 <img src="{{ project.agent.photo_url }}" title="{{ project.agent.name }}">
@@ -95,7 +95,7 @@ body {
         </td>
         <td width="50%" class="login-block">
           <h3>{% trans "Log in to the OCP" %}</h3>
-	  <p>{% trans "If you already did it, and have user and password, login here." %}</p>
+	  <p>{% trans "If you already have an account in OCP, please login here." %}</p>
           <div class="log">
             <form method="POST" action="{% url "project_login" form_slug=form_slug %}" autocapitalize="off" class="form-horizontal"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
                 {% csrf_token %}

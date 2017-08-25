@@ -9,7 +9,8 @@ from django.utils.dateparse import parse_datetime
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 from multicurrency.models import MulticurrencyAuth
-from multicurrency.forms import MulticurrencyAuthForm, MulticurrencyAuthDeleteForm
+from multicurrency.forms import MulticurrencyAuthForm, MulticurrencyAuthDeleteForm, \
+    MulticurrencyAuthCreateForm
 from multicurrency.utils import ChipChapAuthConnection, ChipChapAuthError
 
 def get_agents(request, agent_id):
@@ -70,10 +71,12 @@ def auth(request, agent_id):
             return redirect('multicurrency_auth', agent_id=agent_id)
 
     else:
+        create_form = None
         try:
             oauths = MulticurrencyAuth.objects.filter(agent=agent)
         except MulticurrencyAuth.DoesNotExist:
             oauths = None
+            create_form = MulticurrencyAuthCreateForm()
 
         form = MulticurrencyAuthForm()
         delete_form = MulticurrencyAuthDeleteForm()
@@ -82,6 +85,7 @@ def auth(request, agent_id):
             'user_agent': user_agent,
             'oauths': oauths,
             'oauth_form': form,
+            'create_form': create_form,
             'delete_form': delete_form,
             })
 
@@ -112,6 +116,34 @@ def deleteauth(request, agent_id, oauth_id):
                 'Your ChipChap user has been succesfully logged out.')
     return redirect('multicurrency_auth', agent_id=agent_id)
 
+@login_required
+def createauth(request, agent_id):
+    access_permission, user_agent, agent = get_agents(request, agent_id)
+    if not access_permission:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = MulticurrencyAuthCreateForm(request.POST)
+        if form.is_valid():
+            connection = ChipChapAuthConnection.get()
+            try:
+                response = connection.new_chipchap_user(
+                    username = agent.nick,
+                    email = agent.email,
+                    #company_name = ,
+                    #password = ,
+                    #repassword = ,
+                )
+            except ChipChapAuthError:
+                messages.error(request, 'Something was wrong creating new chip-chap user.')
+                return redirect('multicurrency_auth', agent_id=agent_id)
+            # TODO: save new auth with response data (no password yet)
+            messages.success(request,
+                'Your ChipChap user ' + agent.nick + ' has been succesfully created.'
+                + 'Check your email for confirming it and to get the password.'
+                + 'Come back here with your credentials, and authenticate your user.')
+
+    return redirect('multicurrency_auth', agent_id=agent_id)
 
 @login_required
 def history(request, agent_id, oauth_id):

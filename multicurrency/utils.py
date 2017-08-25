@@ -21,6 +21,7 @@ class ChipChapAuthConnection(object):
             self.client_secret = cdata['client_secret']
             self.access_key = cdata['access_key']
             self.access_secret = cdata['access_secret']
+            self.url_new_user = cdata['url_new_user']
             self.url_client = cdata['url_client']
             self.url_history = cdata['url_history']
             self.url_balance = cdata['url_balance']
@@ -60,6 +61,27 @@ class ChipChapAuthConnection(object):
             '", version="2", signature="' + signature +
             '"'}
         return headers
+
+    def new_chipchap_user(cls, username, email, company_name, password, repassword):
+        if not self.able_to_connect:
+            raise ChipChapAuthError('Connection Error', 'No data to connect')
+
+        headers = ChipChapAuthConnection.chipchap_x_signature(self.access_key, self.access_secret)
+        data = {
+            'username': username,
+            'email': email,
+            'company_name': company_name,
+            'password': password,
+            'repassword': repassword,
+        }
+        response = requests.post(self.url_new_user, headers=headers, data=data)
+        if int(response.status_code) == 200:
+            self.logger.info("New chipchap user request for " + username + " has been succesfully processed.")
+            return response.json()
+        else:
+            self.logger.critical("New chipchap user request for " + username + " has returned "
+                + str(response.status_code) + " status code. Error: " + response.text)
+            raise ChipChapAuthError('Error ' + str(response.status_code), response.text)
 
     def new_client(self, username, password):
         if not self.able_to_connect:

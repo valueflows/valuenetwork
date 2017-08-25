@@ -8,3 +8,6 @@ class MulticurrencyAuthForm(forms.Form):
 
 class MulticurrencyAuthDeleteForm(forms.Form):
     hidden_delete = forms.CharField(widget=forms.HiddenInput(), initial='delete')
+
+class MulticurrencyAuthCreateForm(forms.Form):
+    hidden_create = forms.CharField(widget=forms.HiddenInput(), initial='create')

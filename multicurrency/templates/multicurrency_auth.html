@@ -42,25 +42,42 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="3"><p>{% trans "You don't have any authenticated user." %}<br />
-            {% trans "Use the form below to add an access." %}<br />
-            {% trans "If you don't have any access to ChipChap's panel, create it by clicking" %} <a href="https://commerce.chip-chap.com/login/bankofthecommons" target="_blank" ><b>HERE</b></a> <br />{% trans "...and come back to add your access below." %}
+          <tr><td colspan="3"><p>{% trans "You don't have any ChipChap authenticated user in ocp yet." %}<br />
+            {% trans "If you already have any access to ChipChap's panel, use the form below to authenticate." %}<br />
+            {% trans "If you don't have any access to ChipChap's panel, create one by clicking this button:" %}
+            <form id="createForm" class="createMe" action="{% url 'multicurrency_createauth' agent_id=agent.id %}" method="POST" >
+                {% csrf_token %}
+                {{ create_form|as_bootstrap }}
+                <input type="submit" onclick="confirm_create();" name="submit" value="{% trans 'Create ChipChap access' %}" class="btn btn-primary" />
+            </form>
           </td></tr>
         {% endfor %}
       </table>
     </div>
     <br /><br />
     <div class="span6 miniform" style="margin-left:0">
-      <h3>{% trans "Authenticate another user in ChipChap" %}:</h3>
+      <h3>{% trans "Authenticate an existing user in ChipChap" %}:</h3>
       <form id="oauthForm" class="validateMe" action="." method="POST" >
           {% csrf_token %}
           {{ oauth_form|as_bootstrap }}
           <input type="submit" name="submit" value="{% trans 'Submit' %}" class="btn btn-primary" />
       </form>
       <p><small class="muted">
-        {% trans "By submitting your ChipChap user/password you give permission to this site to access to your ChipChap wallet." %}<br />
-        {% trans "Your password won't be stored, it's just necessary to check your identity in ChipChap." %}
+        {% trans "By submitting your ChipChap user/password you give permission to this site to access (read-only) to your wallet." %}<br />
+        {% trans "Your password won't be stored, it's just necessary to check your identity in ChipChap system." %}
       </small></p>
     </div>
   </div>
+  <script type="text/javascript">
+      function confirm_create() {
+         if (confirm('Do you really want to create a new user in ChipChap panel?\n\n'
+             + "\t• username: {{ agent.nick }}\n"
+             + "\t• email: {{ agent.email }}\n\n"
+             + "(Your password will be sent by email when created.)")) {
+             createForm.submit();
+         } else {
+             return false;
+         }
+      }
+  </script>
 {% endblock %}

@@ -62,14 +62,23 @@
         {% endif %}
     </h2>
     <div class="row-fluid">
-        <p style="text-align:center">{% trans "A project coordinator will send you an email soon with your OCP login credentials." %}</p>
+        {% if not jn_req.payment_url %}<p style="text-align:center">{% trans "A project coordinator will send you an email soon with your OCP login credentials." %}</p>{% endif %}
         <p> &nbsp; </p>
         {% if project.payment_options and jn_req.pending_shares %}
             <p style="text-align:center; font-size:120%; ">
                 {% trans "You've choosed to pay your" %} <b>{{ jn_req.pending_shares }}</b> {% trans "Shares via" %} <span style="font-weight:bold;">{{ jn_req.payment_option.val }}</span>
             </p>
             {% if jn_req.payment_url %}
-                <form action="{{ jn_req.payment_url }}" method="POST" style="display:inline">
+                <p style="text-align:center; font-size:120%; ">
+                    {% trans "To pay the shares directly by credit card is required to login first in OCP." %}
+                </p>
+                <p style="text-align:center; font-size:120%;">
+                    {% trans "You've received an email with an initial random password to proceed (change it afterwards)." %}
+                </p>
+                <p style="text-align:center;">
+                    <b><a href="{% url 'project_login' form_slug=project.fobi_slug %}" class="btn btn-primary" >{% trans "Login to" %} {{ project.agent.name }}</a></b>
+                </p>
+                <!-- <form action="{{ jn_req.payment_url }}" method="POST" style="display:inline">
                     {% csrf_token %}
                     <input type="hidden" name="order_id" id="order_id" value="{{ jn_req.pk }}" />
                     <input type="hidden" name="amount" id="amount" value="{{ jn_req.pending_shares }}" />
@@ -79,7 +88,7 @@
                     <input type="hidden" name="lang" id="lang" value="en" />
                     <input type="hidden" name="token" id="token" value="{{ jn_req.payment_token }}" />
                     <input type="submit" value="{% if jn_req.payment_html %}{{ jn_req.payment_html }}{% else %}{% trans "Pay your Shares" %}{% endif %}" class="btn btn-primary" />
-                </form>
+                </form> -->
                 <!-- <p style="text-align:center"><br />
                     <a href="{% url 'payment_url' paymode=jn_req.payment_option.key join_request_id=jn_req.id %}" target="ocp_pay" class="btn btn-primary">{% if jn_req.payment_html %}{{ jn_req.payment_html }}{% else %}{% trans "Pay your Shares now" %}{% endif %}</a><br />
                 </p> -->

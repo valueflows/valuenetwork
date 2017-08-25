@@ -1283,10 +1283,20 @@ def joinaproject_request(request, form_slug = False):
             #    fc_aa.save()
 
             event_type = EventType.objects.get(relationship="todo")
-            description = "Create an Agent and User for the Join Request from "
-            description += name
             join_url = get_url_starter(request) + "/work/agent/" + str(jn_req.project.agent.id) +"/join-requests/"
             context_agent = jn_req.project.agent #EconomicAgent.objects.get(name__icontains="Membership Request")
+
+            if jn_req.payment_url(): # its a credit card payment, create the user and the agent
+
+                password = jn_req.create_useragent_randompass(request or None)
+                description = "Created automatically an Agent and User for the Join Request from "
+                description += name+' '
+                description += "with random password: "+password
+
+            else:
+                description = "Create an Agent and User for the Join Request from "
+                description += name
+
             resource_types = EconomicResourceType.objects.filter(behavior="work")
             rts = resource_types.filter(
                 Q(name__icontains="Admin")|

@@ -1,6 +1,7 @@
 from django.db import models, connection
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -10,6 +11,29 @@ from valuenetwork.valueaccounting.models import *
 from fobi.models import FormEntry
 
 from mptt.fields import TreeForeignKey
+
+if "pinax.notifications" in settings.INSTALLED_APPS:
+    from pinax.notifications import models as notification
+else:
+    notification = None
+
+
+def get_site_name(request=None):
+    if request:
+        domain = request.get_host()
+        try:
+            obj = settings.PROJECTS_LOGIN
+            for pro in obj:
+                if obj[pro]['domains']:
+                    if domain in obj[pro]['domains']:
+                        proj = get_object_or_404(Project, fobi_slug=pro)
+                        if proj:
+                            return proj.agent.name
+        except:
+            pass
+    return Site.objects.get_current().name
+
+
 
 MEMBERSHIP_TYPE_CHOICES = (
     #('participant', _('project participant (no membership)')),
@@ -313,6 +337,8 @@ class SkillSuggestion(models.Model):
 from nine.versions import DJANGO_LTE_1_5
 from fobi.contrib.plugins.form_handlers.db_store.models import SavedFormDataEntry
 import simplejson as json
+import random
+import hashlib
 
 
 USER_TYPE_CHOICES = (
@@ -682,6 +708,100 @@ class JoinRequest(models.Model):
 
         return ex
 
+    def create_useragent_randompass(self, request=None, hash_func=hashlib.sha256):
+        from work.forms import ProjectAgentCreateForm # if imported generally it breaks other imports, requires a deep imports rebuild TODO
+        randpass = hash_func(str(random.SystemRandom().getrandbits(32))).hexdigest()
+
+        at = None
+        password = None
+        if self.type_of_user == 'individual':
+            at = get_object_or_404(AgentType, party_type='individual', is_context=False)
+        elif self.type_of_user == 'collective':
+            at = get_object_or_404(AgentType, party_type='team', is_context=True)
+        else:
+            raise ValidationError("The 'type_of_user' field is not understood for this request: "+str(self))
+
+        reqdata = {'name':self.name,
+                   'email':self.email_address,
+                   'nick':self.requested_username,
+                   'password':randpass,
+                   'agent_type':at.id,
+        }
+
+        form = ProjectAgentCreateForm(data=reqdata) #prefix=jn_req.form_prefix())
+        if form.is_valid():
+            data = form.cleaned_data
+            agent = form.save(commit=False)
+            try:
+                if request.user.agent.agent:
+                    agent.created_by=request.user
+            except:
+                pass
+            if not agent.is_individual():
+                agent.is_context=True
+            agent.save()
+            self.agent = agent
+            self.save()
+            project = self.project
+            # add relation candidate
+            ass_type = get_object_or_404(AgentAssociationType, identifier="participant")
+            ass = AgentAssociation.objects.filter(is_associate=self.agent, has_associate=self.project.agent)
+            if ass_type and not ass:
+                aa = AgentAssociation(
+                    is_associate=agent,
+                    has_associate=project.agent,
+                    association_type=ass_type,
+                    state="potential",
+                    )
+                aa.save()
+            password = data["password"]
+            if password:
+                username = data["nick"]
+                email = data["email"]
+                if username:
+                    user = User(
+                        username=username,
+                        email=email,
+                        )
+                    user.set_password(password)
+                    user.save()
+                    au = AgentUser(
+                        agent = agent,
+                        user = user)
+                    au.save()
+                    #agent.request_faircoin_address()
+
+                    name = data["name"]
+                    if notification:
+                        managers = project.agent.managers()
+                        users = [agent.user().user,]
+                        for manager in managers:
+                            if manager.user():
+                                users.append(manager.user().user)
+                        #users = User.objects.filter(is_staff=True)
+                        if users:
+                            #allusers = chain(users, agent)
+                            #users = list(users)
+                            #users.append(agent.user)
+                            site_name = get_site_name(request)
+                            notification.send(
+                                users,
+                                "work_new_account",
+                                {"name": name,
+                                "username": username,
+                                "password": password,
+                                "site_name": site_name,
+                                "context_agent": project.agent,
+                                "request_host": request.get_host(),
+                                }
+                            )
+                else:
+                    raise ValidationError("There's a problem with the username: "+str(username))
+            else:
+                raise ValidationError("There's some problem with the random password: "+str(password))
+        else:
+            raise ValidationError("The form to autocreate user+agent from the join request is not valid. "+str(form.errors))
+        return password
 
 
 

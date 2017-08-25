@@ -208,6 +208,8 @@
                     {% trans "This agent is not yet a regular ocp's 'project', only is pending to be defined the visibility and the joining style." %}
                   </div>
                   {% endif %}
+                {% elif user.is_staff or user_agent == agent or user_agent in agent.managers %}
+                    <a href="#agentChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
                 {% endif %}
                 {% if not agent.faircoin_address and not agent.multicurrencyauth_set.count %}
                   {% if agent.need_faircoins %}
@@ -261,7 +263,8 @@
                 </form>
             {% endif %}
 
-            {% if user_agent and user_agent in agent.managers or user.is_staff %}
+            {% if user.is_staff or user_agent == agent or user_agent in agent.managers %}
+
                 <div class="modal hide fade" id="agentChangeForm" tabindex="-1" role="dialog" aria-labelledby="agent-change-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

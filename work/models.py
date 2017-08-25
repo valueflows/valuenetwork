@@ -267,6 +267,15 @@ class Project(models.Model):
                 pass
         return css
 
+    def custom_js(self):
+        js = False
+        if settings.PROJECTS_LOGIN and self.fobi_slug:
+            try:
+                js = settings.PROJECTS_LOGIN[self.fobi_slug]['js']
+            except:
+                pass
+        return js
+
     def custom_html(self):
         html = False
         if settings.PROJECTS_LOGIN and self.fobi_slug:
@@ -710,7 +719,7 @@ class JoinRequest(models.Model):
 
     def create_useragent_randompass(self, request=None, hash_func=hashlib.sha256):
         from work.forms import ProjectAgentCreateForm # if imported generally it breaks other imports, requires a deep imports rebuild TODO
-        randpass = hash_func(str(random.SystemRandom().getrandbits(32))).hexdigest()
+        randpass = hash_func(str(random.SystemRandom().getrandbits(64))).hexdigest()[:20]
 
         at = None
         password = None

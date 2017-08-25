@@ -1086,6 +1086,10 @@ def project_login(request, form_slug = False):
                 elif len(req) == 0:
                     # redirect to the internal joinaproject form
                     return HttpResponseRedirect(reverse('project_joinform', args=(project.agent.id,)))
+
+                elif len(req) == 1 and req[0].pending_shares() and req[0].payment_url():
+                    return HttpResponseRedirect(reverse('project_feedback', args=(project.agent.id, req[0].pk)))
+
                 #return HttpResponse(str(agent.nick))
                 # Redirect to a success page.
                 return HttpResponseRedirect(reverse('my_dashboard'))
@@ -1289,7 +1293,7 @@ def joinaproject_request(request, form_slug = False):
             if jn_req.payment_url(): # its a credit card payment, create the user and the agent
 
                 password = jn_req.create_useragent_randompass(request or None)
-                description = "Created automatically an Agent and User for the Join Request from "
+                description = "Check the automatically created Agent and User for the Join Request of "
                 description += name+' '
                 description += "with random password: "+password
 

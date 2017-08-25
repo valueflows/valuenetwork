@@ -10,6 +10,16 @@
   {% block head_title %}{% trans "Request to join a project" %}{% endblock %}
 
   {% block extra_head %}
+  <script src="{% static "pinax/js/jquery.js" %}"></script>
+  <script type="text/javascript">
+      {% if not reqs %}
+          var Ocp_is_context = {% if user.agent.agent.is_context %}true{% else %}false{% endif %};
+      {% endif %}
+
+      {% if project.custom_js %}
+        {{ project.custom_js|safe }}
+      {% endif %}
+  </script>
 
   <!--<link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" /> -->
 

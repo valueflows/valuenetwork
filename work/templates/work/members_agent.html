@@ -529,8 +529,14 @@
                         {% endif %}
                         {% if agent.project.custom_css %}
                           <tr>
-                            <th>{% trans "Custom Login Css:" %}</th>
+                            <th>{% trans "Custom CSS:" %}</th>
                             <td>{{ agent.project.custom_css }}</td>
+                          </tr>
+                        {% endif %}
+                        {% if agent.project.custom_js %}
+                          <tr>
+                            <th>{% trans "Custom JS:" %}</th>
+                            <td>{{ agent.project.custom_js }}</td>
                           </tr>
                         {% endif %}
                       {% endif %}

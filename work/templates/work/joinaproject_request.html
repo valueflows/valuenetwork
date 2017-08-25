@@ -38,6 +38,10 @@
     <script src="{% static "pinax/js/jquery.js" %}"></script>
     <script type="text/javascript">
 
+      {% if project.custom_js %}
+        {{ project.custom_js|safe }}
+      {% endif %}
+
       var decodeEntities = (function() {
         // this prevents any overhead from creating the object each time
         var element = document.createElement('div');

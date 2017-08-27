@@ -1958,7 +1958,15 @@ def connect_agent_to_join_request(request, agent_id, join_request_id):
             aa.save()
             return HttpResponseRedirect('/%s/%s/%s/'
                 % ('work/agent', project.agent.id, 'join-requests'))
-    raise ValidationError('Not allowed to connect agent to join request')
+        elif not mbr_req.agent == agent:
+            raise ValidationError("The join-request ("+str(mbr_req)+") is already linked to another agent: "+str(mbr_req.agent))
+        else:
+            raise ValidationError("The join-request ("+str(mbr_req)+") is already linked to this agent. Why redo? "+str(mbr_req.agent))
+      else:
+          raise ValidationError("Not enough permissions to connect agent to join-request!")
+    else:
+        raise ValidationError('Project with a non moderated joining style! Project:'+str(project)+' joinstyle:'+project.joining_style+' req.agent:'+str(mbr_req.agent))
+
     """project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
     if request.method == "POST":
         agent_form = JoinAgentSelectionForm(data=request.POST)

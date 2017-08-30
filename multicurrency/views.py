@@ -6,12 +6,14 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.contrib import messages
 from django.utils.dateparse import parse_datetime
+from django.utils.translation import ugettext_lazy as _
 
 from valuenetwork.valueaccounting.models import EconomicAgent
 from multicurrency.models import MulticurrencyAuth
-from multicurrency.forms import MulticurrencyAuthForm, MulticurrencyAuthDeleteForm, \
-    MulticurrencyAuthCreateForm
+from multicurrency.forms import MulticurrencyAuthForm, \
+    MulticurrencyAuthDeleteForm, MulticurrencyAuthCreateForm
 from multicurrency.utils import ChipChapAuthConnection, ChipChapAuthError
+
 
 def get_agents(request, agent_id):
 
@@ -47,27 +49,25 @@ def auth(request, agent_id):
             name = form.cleaned_data['name']
             password = form.cleaned_data['password']
             connection = ChipChapAuthConnection.get()
-
             try:
                 response = connection.new_client(name, password)
-            except ChipChapAuthError as e:
-                messages.error(request, 'Authentication failed.')
+            except ChipChapAuthError:
+                messages.error(request, _('Authentication failed.'))
                 return redirect('multicurrency_auth', agent_id=agent_id)
-
             try:
                 MulticurrencyAuth.objects.create(
-                    agent = agent,
-                    auth_user = name,
-                    access_key = response['access_key'],
-                    access_secret = response['access_secret'],
-                    created_by = request.user,
+                    agent=agent,
+                    auth_user=name,
+                    access_key=response['access_key'],
+                    access_secret=response['access_secret'],
+                    created_by=request.user,
                 )
             except:
-                messages.error(request,
-                    'Something was wrong saving your data.')
-
-            messages.success(request,
-                'Your ChipChap user has been succesfully authenticated.')
+                messages.error(
+                    request, _('Something was wrong saving your data.'))
+            messages.success(
+                request,
+                _('Your ChipChap user has been succesfully authenticated.'))
             return redirect('multicurrency_auth', agent_id=agent_id)
 
     else:
@@ -90,6 +90,7 @@ def auth(request, agent_id):
             'create_form': create_form,
             'delete_form': delete_form,
             })
+
 
 @login_required
 def deleteauth(request, agent_id, oauth_id):
@@ -114,9 +115,11 @@ def deleteauth(request, agent_id, oauth_id):
         form = MulticurrencyAuthDeleteForm(request.POST)
         if form.is_valid():
             oauth.delete()
-            messages.success(request,
-                'Your ChipChap user has been succesfully logged out.')
+            messages.success(
+                request,
+                _('Your ChipChap user has been succesfully logged out.'))
     return redirect('multicurrency_auth', agent_id=agent_id)
+
 
 @login_required
 def createauth(request, agent_id):
@@ -137,15 +140,21 @@ def createauth(request, agent_id):
                     repassword=form.cleaned_data['password'],
                 )
             except ChipChapAuthError:
-                messages.error(request, 'Something was wrong creating new chip-chap user.')
+                messages.error(
+                    request,
+                    _('Something was wrong creating new chip-chap user.'))
                 return redirect('multicurrency_auth', agent_id=agent_id)
             # TODO: save new auth with response data (no password yet)
-            messages.success(request,
-                'Your ChipChap user ' + agent.nick + ' has been succesfully created.'
-                + 'Check your email in order of confirming it in ChipChap system.'
-                + 'Come back here with your credentials, and authenticate your user.')
+            messages.success(
+                request,
+                _('Your ChipChap user ') + agent.nick
+                + _(' has been succesfully created.')
+                + _('Check your email in order of confirming it.')
+                + _('Come back here with your credentials,'
+                    ' and authenticate your user in the bottom form.'))
 
     return redirect('multicurrency_auth', agent_id=agent_id)
+
 
 @login_required
 def history(request, agent_id, oauth_id):
@@ -183,8 +192,8 @@ def history(request, agent_id, oauth_id):
             offset=offset,
         )
     except ChipChapAuthError:
-        messages.error(request,
-            'Something was wrong connecting to chip-chap.')
+        messages.error(
+            request, _('Something was wrong connecting to chip-chap.'))
         return redirect('multicurrency_auth', agent_id=agent_id)
 
     if tx_list['status'] == 'ok' and balance['status'] == 'ok':
@@ -256,6 +265,7 @@ def history(request, agent_id, oauth_id):
             'paginator': paginator,
         })
     else:
-        messages.error(request,
-            'Something was wrong connecting to chip-chap.')
+        messages.error(
+            request,
+            _('Something was wrong connecting to chip-chap.'))
         return redirect('multicurrency_auth', agent_id=agent_id)

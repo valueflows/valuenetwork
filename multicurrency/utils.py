@@ -62,7 +62,7 @@ class ChipChapAuthConnection(object):
             '"'}
         return headers
 
-    def new_chipchap_user(cls, username, email, company_name, password, repassword):
+    def new_chipchap_user(self, username, email, company_name, password, repassword):
         if not self.able_to_connect:
             raise ChipChapAuthError('Connection Error', 'No data to connect')
 
@@ -75,6 +75,7 @@ class ChipChapAuthConnection(object):
             'repassword': repassword,
         }
         response = requests.post(self.url_new_user, headers=headers, data=data)
+        #import pdb; pdb.set_trace()
         if int(response.status_code) == 200:
             self.logger.info("New chipchap user request for " + username + " has been succesfully processed.")
             return response.json()

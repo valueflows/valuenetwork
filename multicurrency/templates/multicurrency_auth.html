@@ -44,12 +44,33 @@
         {% empty %}
           <tr><td colspan="3"><p>{% trans "You don't have any ChipChap authenticated user in ocp yet." %}<br />
             {% trans "If you already have any access to ChipChap's panel, use the form below to authenticate." %}<br />
-            {% trans "If you don't have any access to ChipChap's panel, create one by clicking this button:" %}
-            <form id="createForm" class="createMe" action="{% url 'multicurrency_createauth' agent_id=agent.id %}" method="POST" >
-                {% csrf_token %}
-                {{ create_form|as_bootstrap }}
-                <input type="submit" onclick="confirm_create();" name="submit" value="{% trans 'Create ChipChap access' %}" class="btn btn-primary" />
-            </form>
+            {% trans "If you don't have any access to ChipChap's panel, create one by clicking this button:" %}<br /><br />
+
+            <a href="#create-chipchap-user" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Create new ChipChap user" %}</a>
+
+            <div class="modal hide fade" id="create-chipchap-user" tabindex="-1" role="dialog" aria-labelledby="agent-label" aria-hidden="true">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="agent-label">{% trans "Create New ChipChap User" %}</h3>
+                </div>
+                <div class="modal-body">
+                    <form id="createForm" class="createMe" action="{% url 'multicurrency_createauth' agent_id=agent.id %}" method="POST" onsubmit="return validateRepassword()">
+                        {% csrf_token %}
+                        {{ create_form|as_bootstrap }}
+                        <div id="div_id_repassword" class="control-group ">
+                          <label class="control-label required-field" for="id_repassword">{% trans "Confirm password" %}</label>
+                          <div class="controls">
+                            <input id="id_repassword" name="repassword" required="" maxlength="32" type="password">
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                            <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Create ChipChap User" %}' />
+                        </div>
+                    </form>
+                </div>
+            </div>
+
           </td></tr>
         {% endfor %}
       </table>
@@ -69,15 +90,16 @@
     </div>
   </div>
   <script type="text/javascript">
-      function confirm_create() {
-         if (confirm('Do you really want to create a new user in ChipChap panel?\n\n'
-             + "\t• username: {{ agent.nick }}\n"
-             + "\t• email: {{ agent.email }}\n\n"
-             + "(Your password will be sent by email when created.)")) {
-             createForm.submit();
-         } else {
-             return false;
-         }
+      function validateRepassword() {
+        var pass1 = document.getElementById("id_password").value;
+        var pass2 = document.getElementById("id_repassword").value;
+        var ok = true;
+        if (pass1 != pass2) {
+          alert("Passwords Do not match");
+          document.getElementById("id_repassword").style.borderColor = "#E34234";
+          ok = false;
+        }
+        return ok;
       }
   </script>
 {% endblock %}

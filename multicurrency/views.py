@@ -71,15 +71,17 @@ def auth(request, agent_id):
             return redirect('multicurrency_auth', agent_id=agent_id)
 
     else:
-        create_form = None
         try:
             oauths = MulticurrencyAuth.objects.filter(agent=agent)
         except MulticurrencyAuth.DoesNotExist:
             oauths = None
-            create_form = MulticurrencyAuthCreateForm()
 
         form = MulticurrencyAuthForm()
         delete_form = MulticurrencyAuthDeleteForm()
+        create_form = MulticurrencyAuthCreateForm(initial={
+            'username': agent.nick,
+            'email': agent.email,
+            })
         return render(request, 'multicurrency_auth.html', {
             'agent': agent,
             'user_agent': user_agent,
@@ -128,11 +130,11 @@ def createauth(request, agent_id):
             connection = ChipChapAuthConnection.get()
             try:
                 response = connection.new_chipchap_user(
-                    username = agent.nick,
-                    email = agent.email,
-                    #company_name = ,
-                    #password = ,
-                    #repassword = ,
+                    username=agent.nick,
+                    email=agent.email,
+                    company_name=agent.nick,
+                    password=form.cleaned_data['password'],
+                    repassword=form.cleaned_data['password'],
                 )
             except ChipChapAuthError:
                 messages.error(request, 'Something was wrong creating new chip-chap user.')
@@ -140,7 +142,7 @@ def createauth(request, agent_id):
             # TODO: save new auth with response data (no password yet)
             messages.success(request,
                 'Your ChipChap user ' + agent.nick + ' has been succesfully created.'
-                + 'Check your email for confirming it and to get the password.'
+                + 'Check your email in order of confirming it in ChipChap system.'
                 + 'Come back here with your credentials, and authenticate your user.')
 
     return redirect('multicurrency_auth', agent_id=agent_id)

@@ -22,5 +22,8 @@ django-simple-captcha
 django-mptt
 django-fobi==0.12.2
 pytz
+graphene-django>=1.0
+PyJWT
+six
 selenium
 mock

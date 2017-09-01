@@ -516,6 +516,27 @@ class EconomicAgent(models.Model):
         return ('agent', (),
         { 'agent_id': str(self.id),})
 
+    @property #ValueFlows
+    def image(self):
+        if self.photo_url:
+            return self.photo_url
+        elif self.photo:
+            from valuenetwork.valueaccounting.utils import get_url_starter
+            return get_url_starter() + self.photo.url
+        else:
+            return ""
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def type(self):
+        tp = self.agent_type.name
+        if tp == "Individual":
+            tp = "Person"
+        return tp
+
     def membership_request(self):
         reqs = self.membership_requests.all()
         if reqs:
@@ -769,6 +790,12 @@ class EconomicAgent(models.Model):
 
     def contributions(self):
         return self.given_events.filter(is_contribution=True)
+    
+    def involved_in_events(self):
+        return EconomicEvent.objects.filter(Q(from_agent=self)|Q(to_agent=self)|Q(context_agent=self))
+    
+    def involved_in_commitments(self):
+        return Commitment.objects.filter(Q(from_agent=self)|Q(to_agent=self)|Q(context_agent=self))
 
     def user(self):
         users = self.users.filter(user__is_active=True)
@@ -1268,6 +1295,15 @@ class EconomicAgent(models.Model):
     def individual_members(self):
         return self.members().filter(agent_type__party_type="individual")
 
+    def is_member_of(self):
+        assocs = self.is_associate_of.filter(
+            Q(association_type__association_behavior="member") | Q(association_type__association_behavior="manager")
+            ).filter(state="active")
+        agents = []
+        for assoc in assocs:
+            agents.append(assoc.has_associate)
+        return agents
+
     #  bum2
     def managers(self): #returns a list or None
         agent_ids = self.has_associates.filter(association_type__association_behavior="manager").filter(state="active").values_list('is_associate')
@@ -1363,6 +1399,30 @@ class EconomicAgent(models.Model):
             role__is_owner=True,
             resource__resource_type__behavior="account")
         return [var.resource for var in vars]
+
+    def owned_resources(self):
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(resource__quantity=0)
+        return [arr.resource for arr in arrs]
+
+    def owned_currency_resources(self):
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(
+            resource__resource_type__behavior="other").exclude(
+            resource__resource_type__behavior="used").exclude(
+            resource__resource_type__behavior="cited").exclude(
+            resource__resource_type__behavior="consumed").exclude(
+            resource__resource_type__behavior="produced").exclude(
+            resource__quantity=0)
+        return [arr.resource for arr in arrs]
+
+    def owned_inventory_resources(self):
+        arrs = self.agent_resource_roles.filter(role__is_owner=True).filter(
+            Q(resource__resource_type__behavior="other")|
+            Q(resource__resource_type__behavior="used")|
+            Q(resource__resource_type__behavior="cited")|
+            Q(resource__resource_type__behavior="consumed")|
+            Q(resource__resource_type__behavior="produced")).exclude(
+            resource__quantity=0)
+        return [arr.resource for arr in arrs]
 
     def create_virtual_account(self, resource_type):
         role_types = AgentResourceRoleType.objects.filter(is_owner=True)
@@ -1467,6 +1527,18 @@ class EconomicAgent(models.Model):
     def all_associations(self):
         return AgentAssociation.objects.filter(
             Q(has_associate=self ) | Q(is_associate=self))
+
+    def all_active_associations(self):
+        return AgentAssociation.objects.filter(
+            Q(has_associate=self ) | Q(is_associate=self)).filter(state="active")
+
+    def active_association_types(self):
+        assocs = self.all_active_associations()
+        roles = []
+        for assoc in assocs:
+            if assoc.association_type not in roles:
+                roles.append(assoc.association_type)
+        return roles
 
     def is_context_agent(self):
         return self.is_context
@@ -1652,6 +1724,24 @@ class AgentAssociationType(models.Model):
             if verbosity > 1:
                 print "Created %s AgentAssociationType" % name
 
+    @property #ValueFlows
+    def category(self):
+        if self.association_behavior == "member" or self.association_behavior == "manager":
+            return "member"
+        elif self.association_behavior == "child":
+            return "part"
+        elif self.association_behavior == "supplier" or self.association_behavior == "customer":
+            return "trading partner"
+        elif self.association_behavior == "child":
+            return "part"
+        elif self.association_behavior == "custodian":
+            return "legal partner"
+        elif self.association_behavior == "peer":
+            return "peer"
+        else:
+            return "none"
+
+
 from django.db.models.signals import post_migrate
 
 #def create_agent_types(app, **kwargs):
@@ -1712,6 +1802,19 @@ class AgentAssociation(models.Model):
             state,
             ])
 
+    @property #ValueFlows
+    def subject(self):
+        return self.is_associate
+
+    @property #ValueFlows
+    def object(self):
+        return self.has_associate
+
+    @property #ValueFlows
+    def relationship(self):
+        return self.association_type
+
+
 #todo exchange redesign fallout
 #many of these are obsolete
 DIRECTION_CHOICES = (
@@ -1769,6 +1872,29 @@ class EventTypeManager(models.Manager):
     #obsolete event type
     def cash_event_types(self):
         return EventType.objects.filter(relationship="cash")
+
+    #ValueFlows
+    def convert_action_to_event_type(self, action):
+        if action == "work":
+            return EventType.objects.get(name="Time Contribution")
+        elif action == "consume":
+            return EventType.objects.get(name="Resource Consumption")
+        elif action == "produce":
+            return EventType.objects.get(name="Resource Production")
+        elif action == "use":
+            return EventType.objects.get(name="Resource use")
+        elif action == "cite":
+            return EventType.objects.get(name="Citation")
+        elif action == "accept":
+            return EventType.objects.get(name="To Be Changed")
+        elif action == "improve":
+            return EventType.objects.get(name="Change")
+        elif action == "give":
+            return EventType.objects.get(name="Give")
+        elif action == "take":
+            return EventType.objects.get(name="Receive")
+        else:
+            return "NONE"
 
 
 class EventType(models.Model):
@@ -1840,6 +1966,29 @@ class EventType(models.Model):
                 related_to=related_to, resource_effect=resource_effect, unit_type=unit_type).save()
             if verbosity > 1:
                 print "Created %s EventType" % name
+
+    @property #ValueFlows
+    def action(self):
+        if self.name == "Time Contribution" or self.name == "Todo":
+            return "work"
+        elif self.name == "Resource Consumption":
+            return "consume"
+        elif self.name == "Resource Production" or self.name == "Create Changeable":
+            return "produce"
+        elif self.name == "Resource use":
+            return "use"
+        elif self.name == "Citation":
+            return "cite"
+        elif self.name == "Change":
+            return "improve"
+        elif self.name == "To Be Changed":
+            return "accept"
+        elif self.name == "Give":
+            return "give"
+        elif self.name == "Receive":
+            return "take"
+        else:
+            return self.label
 
     def default_event_value_equation(self):
         #todo exchange redesign fallout
@@ -1982,6 +2131,10 @@ BEHAVIOR_CHOICES = (
     ('dig_curr', _('Digital Currency')),
     ('dig_acct', _('Digital Currency Address')),
     ('dig_wallet', _('Digital Currency Wallet')),
+    ('consumed', _('Produced/Changed + Consumed')),
+    ('used', _('Produced/Changed + Used')),
+    ('cited', _('Produced/Changed + Cited')),
+    ('produced', _('Produced/Changed only')),
     ('other', _('Other')),
 )
 
@@ -2051,6 +2204,43 @@ class EconomicResourceType(models.Model):
     def get_absolute_url(self):
         return ('resource_type', (),
             { 'resource_type_id': str(self.id),})
+
+    @property #ValueFlows
+    def image(self):
+        if self.photo_url:
+            return self.photo_url
+        elif self.photo:
+            from valuenetwork.valueaccounting.utils import get_url_starter
+            return get_url_starter() + self.photo.url
+        else:
+            return ""
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property
+    def category(self):
+        if (self.behavior == "other"
+            or self.behavior == "consumed"
+            or self.behavior == "used" 
+            or self.behavior == "produced" 
+            or self.behavior == "cited"):
+            return "INVENTORY"
+        elif self.behavior == "work":
+            return "WORK"
+        else:
+            return "CURRENCY"
+
+    @property
+    def process_category(self):
+        if (self.behavior ==  "consumed"
+            or self.behavior == "used" 
+            or self.behavior == "produced" 
+            or self.behavior == "cited"):
+            return self.behavior
+        else:
+            return None
 
     def label(self):
         return self.__unicode__()
@@ -4323,6 +4513,9 @@ class EconomicResourceManager(models.Manager):
 
     def onhand(self):
         return EconomicResource.objects.filter(quantity__gt=0)
+    
+    def all_economic_resources(self):
+        return EconomicResource.objects.all()
 
 class EconomicResource(models.Model):
     resource_type = models.ForeignKey(EconomicResourceType,
@@ -4390,6 +4583,57 @@ class EconomicResource(models.Model):
     def get_absolute_url(self):
         return ('resource', (),
             { 'resource_id': str(self.id),})
+
+    @property #ValueFlows
+    def image(self):
+        if self.photo_url:
+            return self.photo_url
+        elif self.photo:
+            from valuenetwork.valueaccounting.utils import get_url_starter
+            return get_url_starter() + self.photo.url
+        else:
+            return ""
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
+    @property #ValueFlows
+    def tracking_identifier(self):
+        return self.identifier
+
+    @property #ValueFlows  TODO is this still valid???
+    def resource_type_name(self):
+        return self.resource_type.name
+
+    @property #ValueFlows
+    def numeric_value(self):
+        return self.quantity
+
+    @property #ValueFlows
+    def unit(self):
+        return self.resource_type.unit
+
+    @property #ValueFlows
+    def category(self):
+        if (self.resource_type.behavior == "other" 
+        or self.resource_type.behavior == "consumed"
+        or self.resource_type.behavior == "used" 
+        or self.resource_type.behavior == "produced" 
+        or self.resource_type.behavior == "cited"):
+            return "INVENTORY"
+        if self.resource_type.behavior == "work":
+            return "WORK"
+        else:
+            return "CURRENCY"
+
+    def transfers(self):
+        events = self.events.all().filter(Q(event_type__name="Give")|Q(event_type__name="Receive"))
+        transfers = []
+        for event in events:
+            if event.transfer not in transfers:
+                transfers.append(event.transfer)
+        return transfers
 
     def label(self):
         return self.identifier or str(self.id)
@@ -6300,6 +6544,52 @@ class Process(models.Model):
                     event.to_agent = self.context_agent
                 event.save()
 
+    @property #ValueFlows
+    def planned_start(self):
+        return self.start_date
+
+    @property #ValueFlows
+    def planned_duration(self):
+        return self.end_date - self.start_date
+    
+    #@property #ValueFlows
+    #def numeric_duration(self):
+    #    return self.end_date - self.start_date #TODO get in tune with VF, get VF resolved
+    
+    #@property #ValueFlows
+    #def temporal_unit(self):
+    #    return "Days" #TODO get in tune with VF, get VF resolved
+    
+    @property #ValueFlows
+    def is_finished(self):
+        return self.finished
+
+    @property #ValueFlows
+    def is_started(self):
+        return self.started
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    def get_rts_by_action(self, event_type):
+        try:
+            from work.models import Project
+            proj = Project.objects.get(agent=self.context_agent)
+            if proj:
+                rt_selection = proj.resource_type_selection
+            else:
+                rt_selection = "all"
+        except:
+            rt_selection = "all"
+        #items = 
+        #if rt_selection == "project":
+        return rt_selection #temp
+
     def is_deletable(self):
         if self.events.all():
             return False
@@ -6391,6 +6681,9 @@ class Process(models.Model):
     def production_quantity(self):
         return sum(pe.quantity for pe in self.production_events())
 
+    def uncommitted_events(self):
+        return self.events.filter(commitment=None)
+
     def uncommitted_production_events(self):
         return self.events.filter(
             event_type__relationship='out',
@@ -6477,13 +6770,12 @@ class Process(models.Model):
                                         answer.append(pc.process)
         for ie in self.incoming_events():
             #todo: check stage of ie.resource != self.process_type
-            if not ie.commitment:
-                if ie.resource:
-                    for evt in ie.resource.producing_events():
-                        if evt.process:
-                            if evt.process != self:
-                                if evt.process not in answer:
-                                    answer.append(evt.process)
+            if ie.resource:
+                for evt in ie.resource.producing_events():
+                    if evt.process:
+                        if evt.process != self:
+                            if evt.process not in answer:
+                                answer.append(evt.process)
         return answer
 
     def previous_processes_for_order(self, order):
@@ -6559,15 +6851,14 @@ class Process(models.Model):
                                             if cc.process not in answer:
                                                 answer.append(cc.process)
         for oe in self.production_events():
-            if not oe.commitment:
-                rt = oe.resource_type
-                if oe.cycle_id() not in input_ids:
-                    if oe.resource:
-                        for evt in oe.resource.all_usage_events():
-                            if evt.process:
-                                if evt.process != self:
-                                    if evt.process not in answer:
-                                        answer.append(evt.process)
+            rt = oe.resource_type
+            if oe.cycle_id() not in input_ids:
+                if oe.resource:
+                    for evt in oe.resource.all_usage_events():
+                        if evt.process:
+                            if evt.process != self:
+                                if evt.process not in answer:
+                                    answer.append(evt.process)
         return answer
 
     def next_processes_for_order(self, order):
@@ -6627,6 +6918,11 @@ class Process(models.Model):
             event_type__relationship='work',
         )
 
+    def non_work_input_requirements(self):
+        return self.commitments.exclude(
+            event_type__relationship='work').exclude(
+            event_type__relationship='out')
+
     def create_changeable_requirements(self):
         return self.commitments.filter(
         event_type__name="Create Changeable")
@@ -6652,9 +6948,21 @@ class Process(models.Model):
         reqs = self.work_requirements()
         return [req.from_agent for req in reqs if req.from_agent]
 
+    def all_working_agents(self): #from both commitments and events
+        agents = self.working_agents()
+        work_events = self.work_events()
+        for event in work_events:
+            agents.append(event.from_agent)
+        return set(list(agents))
+
     def work_events(self):
         return self.events.filter(
             event_type__relationship='work')
+
+    def non_work_input_events(self):
+        return self.events.exclude(
+            event_type__relationship='work').exclude(
+            event_type__relationship='out')
 
     def unplanned_work_events(self):
         return self.work_events().filter(commitment__isnull=True)
@@ -7461,6 +7769,18 @@ class Exchange(models.Model):
         unique_slugify(self, slug)
         super(Exchange, self).save(*args, **kwargs)
 
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.start_date.isoformat()
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
     def class_label(self):
         return "Exchange"
 
@@ -7965,23 +8285,15 @@ class Exchange(models.Model):
                 #print "local_total:", local_total
 
     def related_agents(self):
-        evts = self.events.all()
-        coms = self.commitments.all()
+        xfers = self.transfers.all()
         agents = []
-        for ev in evts:
-          if not ev.to_agent in agents:
-            agents.append(ev.to_agent)
-          if not ev.from_agent in agents:
-            agents.append(ev.from_agent)
-          if not ev.created_by.agent.agent in agents:
-            agents.append(ev.created_by.agent.agent)
-        for cm in coms:
-          if not cm.to_agent in agents:
-            agents.append(cm.to_agent)
-          if not cm.from_agent in agents:
-            agents.append(cm.from_agent)
-          if not cm.created_by.agent.agent in agents:
-            agents.append(cm.created_by.agent.agent)
+        for xfer in xfers:
+            if xfer.to_agent() not in agents:
+                agents.append(xfer.to_agent())
+            if not xfer.from_agent() in agents:
+                agents.append(xfer.from_agent())
+            if not xfer.scope in agents:
+                agents.append(xfer.scope)
         return agents
 
 class Transfer(models.Model):
@@ -8062,6 +8374,96 @@ class Transfer(models.Model):
             "on",
             self.transfer_date.strftime('%Y-%m-%d'),
             ])
+
+    @property #ValueFlows
+    def exchange_agreement(self):
+        #VF does not have an exchange unless it is created ahead of time for reciprocal commitments 
+        exch = self.exchange
+        if exch.has_reciprocal():
+            return exch
+        return None
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.transfer_date.isoformat()
+
+    @property #ValueFlows
+    def actual_date(self):
+        events = self.events.all()
+        if events:
+            return events[0].event_date.isoformat()
+        return None
+
+    @property #ValueFlows
+    def note(self):
+        return self.notes
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def provider(self):
+        events = self.events.all()
+        if events:
+            return events[0].from_agent
+        return None
+
+    @property #ValueFlows
+    def receiver(self):
+        events = self.events.all()
+        if events:
+            return events[0].to_agent
+        return None
+
+    @property #ValueFlows
+    def resource_taxonomy_item(self):
+        events = self.events.all()
+        if events:
+            event = events[0]
+            return event.resource_type
+        return None
+
+    @property #ValueFlows
+    def give_resource(self):
+        events = self.events.all()
+        give_resource = None
+        et_give = EventType.objects.get(name="Give")
+        if events:
+            for ev in events:
+                if ev.event_type == et_give:
+                    give_resource = ev.resource
+        return give_resource
+
+    @property #ValueFlows
+    def take_resource(self):
+        events = self.events.all()
+        take_resource = None
+        et_receive = EventType.objects.get(name="Receive")
+        if events:
+            for ev in events:
+                if ev.event_type == et_receive:
+                    take_resource = ev.resource
+        return take_resource
+
+    @property #ValueFlows
+    def unit(self):
+        events = self.events.all()
+        if events:
+            return events[0].unit_of_quantity
+        return None
+
+    def related_agents(self):
+        agents = []
+        if self.from_agent():
+            agents.append(self.from_agent())
+        if self.to_agent():
+            if self.to_agent() not in agents:
+                agents.append(self.to_agent())
+        if self.context_agent:
+            if self.context_agent not in agents:
+                agents.append(self.context_agent)
+        return agents
 
     def commit_text(self):
         text = None
@@ -8261,6 +8663,18 @@ class Transfer(models.Model):
         try:
             return self.events.get(event_type__name="Receive")
         except EconomicEvent.DoesNotExist:
+            return None
+
+    def give_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Give")
+        except Commitment.DoesNotExist:
+            return None
+
+    def receive_commitment(self):
+        try:
+            return self.commitments.get(event_type__name="Receive")
+        except Commitment.DoesNotExist:
             return None
 
     def quantity(self):
@@ -8805,6 +9219,58 @@ class Commitment(models.Model):
                 resource_name,
                 self.due_date.strftime('%Y-%m-%d'),
         ])
+
+    @property #ValueFlows
+    def action(self):
+        return self.event_type.action
+
+    @property #ValueFlows
+    def numeric_value(self):
+        return self.quantity
+
+    @property #ValueFlows
+    def unit(self):
+        return self.unit_of_quantity
+
+    @property #ValueFlows
+    def planned_start(self):
+        return self.start_date.isoformat()
+
+    @property #ValueFlows
+    def committed_on(self):
+        return self.commitment_date.isoformat()
+
+    @property #ValueFlows
+    def due(self):
+        return self.due_date.isoformat()
+
+    @property #ValueFlows
+    def is_finished(self):
+        return self.finished
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def provider(self):
+        return self.from_agent
+
+    @property #ValueFlows
+    def receiver(self):
+        return self.to_agent
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def committed_resource(self):
+        return self.resource
+
+    @property #ValueFlows
+    def committed_taxonomy_item(self):
+        return self.resource_type
 
     def shorter_label(self):
         quantity_string = str(self.quantity)
@@ -10516,6 +10982,70 @@ class EconomicEvent(models.Model):
             quantity_string,
             resource_string,
         ])
+
+    @property #ValueFlows
+    def action(self):
+        return self.event_type.action
+
+    @property #ValueFlows
+    def numeric_value(self):
+        return self.quantity
+
+    @property #ValueFlows
+    def unit(self):
+        return self.unit_of_quantity
+
+    @property #ValueFlows
+    def start(self):
+        return self.event_date.isoformat()
+
+    #@property #ValueFlows
+    #def numeric_duration(self):
+    #    if self.event_type.name == "Resource use" or self.event_type.name == "Time Contribution":
+    #        return self.quantity
+    #    else:
+    #        return None
+
+    #@property #ValueFlows
+    #def temporal_unit(self):
+    #    if self.event_type.name == "Resource use" or self.event_type.name == "Time Contribution":
+    #        return self.unit_of_quantity
+    #    else:
+    #        return None
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def provider(self):
+        return self.from_agent
+
+    @property #ValueFlows
+    def receiver(self):
+        return self.to_agent
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
+
+    @property #ValueFlows
+    def affected_resource(self):
+        return self.resource
+
+    @property #ValueFlows
+    def affected_taxonomy_item(self):
+        return self.resource_type
+
+    #@property #ValueFlows TODO not in VF now
+    #def work_category(self):
+    #    if self.resource_type.behavior == "work":
+    #        return self.resource_type
+    #    return None
+
+    #@property #ValueFlows
+    #def fulfills(self):
+    #    return self.commitment
 
     def undistributed_description(self):
         if self.unit_of_quantity:

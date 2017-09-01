@@ -4989,6 +4989,7 @@ def process_logging(request, process_id):
                         work_resource_types = work_resource_types.filter(context_agent=None)
                 except:
                     work_resource_types = work_resource_types.filter(context_agent=None)
+                work_unit = None
                 if work_resource_types:
                     work_unit = work_resource_types[0].unit
                     #work_init = {"unit_of_quantity": work_unit,}

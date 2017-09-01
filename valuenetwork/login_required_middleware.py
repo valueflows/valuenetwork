@@ -24,6 +24,10 @@ class LoginRequiredMiddleware:
             work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
             'django.core.context_processors.auth'."
 
+        if "api/graph" in request.path_info:
+            # Ignore graph API URls, they manage their own auth internally
+            return
+
         if request.user.is_authenticated():
             if not request.user.is_staff:
                 if "accounting" in request.path_info or "api" in request.path_info:

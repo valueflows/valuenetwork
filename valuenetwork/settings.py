@@ -148,6 +148,7 @@ INSTALLED_APPS = [
     'corsheaders',
     #'django_filters',
     'rest_framework',
+    'graphene_django',
     'captcha',
 
     # `django-fobi` core
@@ -203,10 +204,16 @@ INSTALLED_APPS = [
     'valuenetwork.valueaccounting.apps.ValueAccountingAppConfig',
     'valuenetwork.equipment',
     'valuenetwork.board',
-    'valuenetwork.api',
     'account',
     'work.apps.WorkAppConfig',
     'multicurrency',
+    'valuenetwork.api',
+    #'valuenetwork.api.apps.ApiAppConfig',
+    #'valuenetwork.api.schemas.apps.ApiSchemasAppConfig',
+    'valuenetwork.api.types.apps.ApiTypesAppConfig',
+    #'valuenetwork.api.schemas',
+    #'valuenetwork.api.types',
+
     'faircoin',
 
     # general
@@ -274,6 +281,12 @@ LOGGING = {
             "propagate": True,
         },
     }
+}
+
+GRAPHENE = {
+    'MIDDLEWARE': [
+        'graphene_django.debug.DjangoDebugMiddleware',
+    ]
 }
 
 #LOGGING_CONFIG = None

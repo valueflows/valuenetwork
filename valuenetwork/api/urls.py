@@ -1,10 +1,12 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
 from django.conf.urls import url, include
+from django.views.decorators.csrf import csrf_exempt
 
+from graphene_django.views import GraphQLView
 from rest_framework import routers
 
-from valuenetwork.api import views
+from valuenetwork.api import schema, views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
@@ -25,6 +27,7 @@ router.register(r'agentuser', views.AgentUserViewSet, 'agentuser')
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'^graph', csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema.schema))),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r"^agent-jsonld/$", views.agent_jsonld, name="agent_jsonld"),
     url(r"^agent-lod/(?P<agent_id>\d+)/$", views.agent_lod, name="agent_lod"),
@@ -33,5 +36,4 @@ urlpatterns = [
     url(r"^agent-relationship-lod/(?P<agent_assoc_id>\d+)/$", views.agent_relationship_lod, name="agent_relationship_lod"),
     url(r"^agent-relationship-inv-lod/(?P<agent_assoc_id>\d+)/$", views.agent_relationship_inv_lod, name="agent_relationship_inv_lod"),
     url(r"^agent-jsonld-query/$", views.agent_jsonld_query, name="agent_jsonld_query"),
-    
 ]

@@ -907,7 +907,7 @@ class Ocp_Record_Type(Record_Type):
         answer = None
         if transfer_type:
           if transfer_type.inherit_types:
-            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocpRecordType_ocp_artwork_type.lft, rght__lte=self.ocpRecordType_ocp_artwork_type.rght, tree_id=self.ocpRecordType_ocp_artwork_type.tree_id).order_by('lft')
+            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocpRecordType_ocp_artwork_type.lft, rght__lte=self.ocpRecordType_ocp_artwork_type.rght, tree_id=self.ocpRecordType_ocp_artwork_type.tree_id).order_by('tree_id','lft')
           else:
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
             Mtyp = False
@@ -939,7 +939,7 @@ class Ocp_Record_Type(Record_Type):
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type" or facet.clas == "Currency_Type":
                     if Rids:
-                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids).order_by('lft') #.order_by('tree_id','lft')
+                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids).order_by('tree_id','lft') #.order_by('tree_id','lft')
                         #if Nids: # and Ntyp:
                         #    Mtys = Artwork_Type.objects.filter(id__in=Nids+Mids) #+[Ntyp.id, Mtyp.id])
                         answer = Rtys
@@ -948,7 +948,7 @@ class Ocp_Record_Type(Record_Type):
 
                 elif facet.clas == "Skill_Type":
                     if Sids:
-                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids).order_by('lft')
+                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids).order_by('tree_id','lft')
                         #if Mids: # and Mtyp:
                         #    Ntys = Artwork_Type.objects.filter(id__in=Mids+Nids) #+[Ntyp.id, Mtyp.id])
                         answer = Stys

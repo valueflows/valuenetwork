@@ -133,25 +133,42 @@ def createauth(request, agent_id):
             connection = ChipChapAuthConnection.get()
             try:
                 response = connection.new_chipchap_user(
-                    username=agent.nick,
-                    email=agent.email,
-                    company_name=agent.nick,
+                    username=form.cleaned_data['username'],
+                    email=form.cleaned_data['email'],
+                    company_name=form.cleaned_data['username'],
                     password=form.cleaned_data['password'],
                     repassword=form.cleaned_data['password'],
                 )
-            except ChipChapAuthError:
+            except ChipChapAuthError as e:
                 messages.error(
                     request,
-                    _('Something was wrong creating new chip-chap user.'))
+                    _('Something was wrong creating new chip-chap user.')
+                    + ' (' + str(e) + ')')
                 return redirect('multicurrency_auth', agent_id=agent_id)
-            # TODO: save new auth with response data (no password yet)
-            messages.success(
-                request,
-                _('Your ChipChap user ') + agent.nick
-                + _(' has been succesfully created.')
-                + _('Check your email in order of confirming it.')
-                + _('Come back here with your credentials,'
-                    ' and authenticate your user in the bottom form.'))
+            try:
+                response2 = connection.new_client(
+                    form.cleaned_data['username'],
+                    form.cleaned_data['password'])
+            except ChipChapAuthError:
+                messages.success(
+                    request,
+                    _('Your ChipChap user has been succesfully created. Check '
+                      'your email and follow the link to confirm your email in'
+                      ' ChipChap system. Come back here with your credentials,'
+                      ' and authenticate your new user in the bottom form.'))
+                # messages.error(request, _('Authentication failed.'))
+                return redirect('multicurrency_auth', agent_id=agent_id)
+            try:
+                MulticurrencyAuth.objects.create(
+                    agent=agent,
+                    auth_user=form.cleaned_data['username'],
+                    access_key=response2['access_key'],
+                    access_secret=response2['access_secret'],
+                    created_by=request.user,
+                )
+            except:
+                messages.error(
+                    request, _('Something was wrong saving your data.'))
 
     return redirect('multicurrency_auth', agent_id=agent_id)
 

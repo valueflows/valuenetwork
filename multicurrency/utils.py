@@ -85,17 +85,19 @@ class ChipChapAuthConnection(object):
             'repassword': repassword,
         }
         response = requests.post(self.url_new_user, headers=headers, data=data)
-        if int(response.status_code) == 200:
+        if int(response.status_code) == 201:
             self.logger.info("New chipchap user request for " + username
                              + " has been succesfully processed.")
             return response.json()
         else:
+            msg = response.json()
             self.logger.critical(
                 "New chipchap user request for " + username + " has returned "
                 + str(response.status_code) + " status code. Error: "
                 + response.text)
             raise ChipChapAuthError(
-                'Error ' + str(response.status_code), response.text)
+                'Error ' + str(response.status_code)
+                + ': ' + msg['message'], response.text)
 
     def new_client(self, username, password):
         if not self.able_to_connect:

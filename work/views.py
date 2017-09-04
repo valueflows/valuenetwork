@@ -1111,8 +1111,7 @@ def joinaproject_request(request, form_slug = False):
     cleaned_data = False
     form = False
     if form_slug:
-        project = Project.objects.get(fobi_slug=form_slug)
-
+        project = get_object_or_404(Project, fobi_slug=form_slug)
         try:
             user_agent = request.user.agent.agent
             if user_agent and request.user.is_authenticated: # and user_agent.is_active_freedom_coop_member or request.user.is_staff:
@@ -1692,7 +1691,12 @@ def decline_request(request, join_request_id):
     if mbr_req.agent and mbr_req.project:
         # modify relation to active
         ass_type = AgentAssociationType.objects.get(identifier="participant")
-        ass, created = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
+        aass = AgentAssociation.objects.filter(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
+        if len(aass) > 1:
+            ass = aass[0]
+            aass[1].delete()
+        else:
+            ass, created = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
         ass.state = "potential"
         ass.save()
     return HttpResponseRedirect('/%s/%s/%s/'

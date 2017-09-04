@@ -817,6 +817,7 @@ def members_agent(request, agent_id):
     #artwork = get_object_or_404(Artwork_Type, clas="Material")
     add_skill_form = AddUserSkillForm(agent=agent, data=request.POST or None)
     Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
+    Stype_tree = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
 
     upload_form = UploadAgentForm(instance=agent)
 
@@ -891,7 +892,7 @@ def members_agent(request, agent_id):
         "form_entries": entries,
         "fobi_name": fobi_name,
         "add_skill_form": add_skill_form,
-        "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft'),
+        "Stype_tree": Stype_tree,
         "Stype_form": Stype_form,
         "auto_resource": auto_resource,
         "related_rts": related_rts,

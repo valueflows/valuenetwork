@@ -153,7 +153,7 @@ class ProjectCreateForm(AgentCreateForm):
     fobi_slug = forms.CharField(
         required = False,
         label = "Custom project url slug",
-        help_text = _("Used to reach your custom join form, but after the custom fields has been defined by you and configured by OCP Admins."),
+        help_text = _("Used to reach your custom join form, but after the custom fields has been defined by you and configured by OCP Admins. Only works if the project has a 'moderated' joining style."),
         )
 
     def __init__(self, *args, **kwargs):

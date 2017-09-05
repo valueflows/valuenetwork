@@ -58,7 +58,7 @@ class Process(DjangoObjectType):
 
     #previous_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
-    resource_taxonomy_items_by_action = graphene.List(lambda: types.ResourceTaxonomyItem)
+    resource_classifications_by_action = graphene.List(lambda: types.ResourceClassification)
 
 
     def resolve_scope(self, args, *rargs):
@@ -167,7 +167,7 @@ class Process(DjangoObjectType):
     #def resolve_previous_resource_taxonomy_items(self, args, context, info):
     #    return self.
 
-    def resolve_resource_taxonomy_items_by_action(self, args, context, info): #TODO not completed
+    def resolve_resource_classifications_by_action(self, args, context, info): #TODO not completed
         action = args.get('action')
         if action:
             event_type = action._convert_action_to_event_type()

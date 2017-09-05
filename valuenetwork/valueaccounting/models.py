@@ -8417,7 +8417,7 @@ class Transfer(models.Model):
         return None
 
     @property #ValueFlows
-    def resource_taxonomy_item(self):
+    def resource_classifiedAs(self):
         events = self.events.all()
         if events:
             event = events[0]
@@ -9269,7 +9269,7 @@ class Commitment(models.Model):
         return self.resource
 
     @property #ValueFlows
-    def committed_taxonomy_item(self):
+    def resource_classified_as(self):
         return self.resource_type
 
     @property #ValueFlows
@@ -11046,7 +11046,7 @@ class EconomicEvent(models.Model):
         return self.resource
 
     @property #ValueFlows
-    def affected_taxonomy_item(self):
+    def affected_resource_classified_as(self):
         return self.resource_type
 
     #@property #ValueFlows TODO not in VF now

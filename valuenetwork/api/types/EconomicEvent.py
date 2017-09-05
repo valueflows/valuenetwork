@@ -71,7 +71,7 @@ class EconomicEvent(DjangoObjectType):
     def resolve_affects(self, args, *rargs):
         res = self.affects
         if res == None:
-            res = EconomicResourceProxy(resource_type=self.affected_taxonomy_item)
+            res = EconomicResourceProxy(resource_type=self.affected_resource_classified_as)
         return res
 
     def resolve_affected_quantity(self, args, *rargs):

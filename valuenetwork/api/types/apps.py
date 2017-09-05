@@ -16,11 +16,11 @@ class ApiTypesAppConfig(AppConfig):
         from .models import CommentMixin
         comments.CommentMixin = CommentsMixin
         """
-        
-        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory, ResourceTaxonomyItem
+
+        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory, ResourceClassification
         types.EconomicResource = EconomicResource
         types.EconomicResourceCategory = EconomicResourceCategory
-        types.ResourceTaxonomyItem = ResourceTaxonomyItem
+        types.ResourceClassification = ResourceClassification
         from valuenetwork.api.types.Agent import Agent
         types.Agent = Agent
         from valuenetwork.api.types.Process import Process

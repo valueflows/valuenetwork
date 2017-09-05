@@ -20,7 +20,7 @@ class Commitment(DjangoObjectType):
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
-    committed_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
+    resource_classified_as = graphene.Field(lambda: types.ResourceClassification)
     involves = graphene.Field(lambda: types.EconomicResource)
     committed_quantity = graphene.Field(QuantityValue)
     committed_on = graphene.String(source='committed_on')
@@ -56,8 +56,8 @@ class Commitment(DjangoObjectType):
     def resolve_involves(self, args, *rargs):
         return self.involves
 
-    def resolve_committed_taxonomy_item(self, args, *rargs):
-        return self.committed_taxonomy_item
+    def resolve_resource_classified_as(self, args, *rargs):
+        return self.resource_classified_as
 
     def resolve_committed_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)

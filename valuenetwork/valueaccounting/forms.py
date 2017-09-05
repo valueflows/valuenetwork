@@ -2458,7 +2458,7 @@ class EventTypeFilterForm(forms.Form):
 
     def __init__(self, event_types, *args, **kwargs):
         super(EventTypeFilterForm, self).__init__(*args, **kwargs)
-        self.fields["event_types"].choices = [('', '----------')] + [(et.id, et.name) for et in event_types]
+        self.fields["event_types"].choices = [(et.id, et.name) for et in event_types] # [('', '----------')] +
         self.fields["paid_filter"].choices = [("U", "Show Unpaid Only"), ("A", "Show All")]
 
 

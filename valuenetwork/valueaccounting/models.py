@@ -984,7 +984,7 @@ class EconomicAgent(models.Model):
 
     def related_all_agents(self, childs=True):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
-        # bumbum get also parents of parents contexts
+        # get also parents of parents contexts
         grand_parents = []
         for agn in agents:
           grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
@@ -993,6 +993,13 @@ class EconomicAgent(models.Model):
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
         if self.is_context and not self in agents:
           agents.extend([self])
+        grandgrand_parents = [] # get grandparents of parents. TODO: recursive parents until root
+        for agn in grand_parents:
+          grandgrand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+        agents.extend(grandgrand_parents)
+        ocp = EconomicAgent.objects.root_ocp_agent()
+        if not ocp in agents:
+            agents.extend([ocp])
         return list(set(agents))
 
     def related_context_queryset(self):

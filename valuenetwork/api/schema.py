@@ -73,6 +73,9 @@ class Mutation(graphene.ObjectType):
     create_commitment = valuenetwork.api.schemas.Commitment.CreateCommitment.Field()
     update_commitment = valuenetwork.api.schemas.Commitment.UpdateCommitment.Field()
     delete_commitment = valuenetwork.api.schemas.Commitment.DeleteCommitment.Field()
+    create_economic_event = valuenetwork.api.schemas.EconomicEvent.CreateEconomicEvent.Field()
+    update_economic_event = valuenetwork.api.schemas.EconomicEvent.UpdateEconomicEvent.Field()
+    delete_economic_event = valuenetwork.api.schemas.EconomicEvent.DeleteEconomicEvent.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

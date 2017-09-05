@@ -484,11 +484,11 @@ class APITest(TestCase):
         query = '''
                 query {
                   viewer(token: "''' + token + '''") {
-                    resourceTaxonomyItemsByProcessCategory(category: CONSUMED) {
+                    resourceClassificationsByProcessCategory(category: CONSUMED) {
                       name
                       category
                       processCategory
-                      taxonomyItemResources {
+                      classificationResources {
                         trackingIdentifier
                         currentQuantity {
                           numericValue
@@ -496,7 +496,7 @@ class APITest(TestCase):
                             name
                           }
                         }
-                        resourceTaxonomyItem {
+                        resourceClassifiedAs {
                           name
                         }
                         image
@@ -504,11 +504,11 @@ class APITest(TestCase):
                         note
                       }
                     }
-                    resourceTaxonomyItemsByAction(action: PRODUCE) {
+                    resourceClassificationsByAction(action: PRODUCE) {
                       name
                       category
                       processCategory
-                      taxonomyItemResources {
+                      classificationResources {
                         trackingIdentifier
                       }
                     }
@@ -517,16 +517,16 @@ class APITest(TestCase):
                 '''
         result = schema.execute(query)
         #import pdb; pdb.set_trace()
-        resourceTaxonomyItemsByProcessCategory = result.data['viewer']['resourceTaxonomyItemsByProcessCategory']
-        resourceTaxonomyItemsByAction = result.data['viewer']['resourceTaxonomyItemsByAction']
-        self.assertEqual(len(resourceTaxonomyItemsByProcessCategory), 1)
-        rti1 = resourceTaxonomyItemsByProcessCategory[0]
+        resourceClassificationsByProcessCategory = result.data['viewer']['resourceClassificationsByProcessCategory']
+        resourceClassificationsByAction = result.data['viewer']['resourceClassificationsByAction']
+        self.assertEqual(len(resourceClassificationsByProcessCategory), 1)
+        rti1 = resourceClassificationsByProcessCategory[0]
         self.assertEqual(rti1['name'], 'component1')
-        consumed_resources = rti1['taxonomyItemResources']
+        consumed_resources = rti1['classificationResources']
         self.assertEqual(len(consumed_resources), 2)
         conres1 = consumed_resources[0]
         self.assertEqual(conres1['trackingIdentifier'], 'a-component')
-        prod_resources = resourceTaxonomyItemsByAction[1]['taxonomyItemResources']
+        prod_resources = resourceClassificationsByAction[1]['classificationResources']
         prodres1 = prod_resources[0]
         self.assertEqual(prodres1['trackingIdentifier'], 'a-product')
 
@@ -549,7 +549,7 @@ class APITest(TestCase):
                       name
                       ownedEconomicResources(category: INVENTORY) {
                         id
-                        resourceTaxonomyItem {
+                        resourceClassifiedAs {
                           name
                           category
                           processCategory
@@ -577,8 +577,8 @@ class APITest(TestCase):
         ownedEconomicResources = result.data['viewer']['agent']['ownedEconomicResources']
         processes = result.data['viewer']['agent']['agentProcesses']
         self.assertEqual(agent['name'], 'org1')
-        self.assertEqual(ownedEconomicResources[0]['resourceTaxonomyItem']['name'], 'product1')
-        self.assertEqual(ownedEconomicResources[0]['resourceTaxonomyItem']['processCategory'], 'produced')
+        self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['name'], 'product1')
+        self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['processCategory'], 'produced')
         self.assertEqual(len(ownedEconomicResources), 2)
         self.assertEqual(ownedEconomicResources[0]['currentQuantity']['unit']['name'], 'Each')
         self.assertEqual(len(processes), 1)
@@ -606,8 +606,8 @@ class APITest(TestCase):
                           name
                         }
                     }
-                    affectedResource {
-                        resourceTaxonomyItem {
+                    affects {
+                        resourceClassifiedAs {
                           name
                           category
                         }
@@ -633,7 +633,7 @@ class APITest(TestCase):
                           name
                         }
                     }
-                    committedTaxonomyItem {
+                    resourceClassifiedAs {
                         name
                         category
                     }
@@ -643,6 +643,9 @@ class APITest(TestCase):
                     }
                     receiver {
                         id
+                        name
+                    }
+                    involvedAgents {
                         name
                     }
                 }
@@ -732,12 +735,12 @@ class APITest(TestCase):
         self.assertEqual(workingAgents[0]['__typename'], "Person")
         self.assertEqual(inputs[0]['action'], "work")
         self.assertEqual(inputs[1]['affectedQuantity']['numericValue'], 1.5)
-        self.assertEqual(inputs[2]['affectedResource']['resourceTaxonomyItem']['name'], "component1")
+        self.assertEqual(inputs[2]['affects']['resourceClassifiedAs']['name'], "component1")
         self.assertEqual(inputs[3]['provider']['name'], "testUser11222")
         self.assertEqual(outputs[0]['action'], "produce")
         self.assertEqual(committedInputs[0]['action'], "work")
         self.assertEqual(committedInputs[1]['committedQuantity']['numericValue'], 2.5)
-        self.assertEqual(committedInputs[2]['committedTaxonomyItem']['name'], "component1")
+        self.assertEqual(committedInputs[2]['resourceClassifiedAs']['name'], "component1")
         self.assertEqual(committedInputs[1]['provider']['name'], "not user")
         self.assertEqual(committedOutputs[0]['action'], "produce")
         self.assertEqual(previousProcesses[0]['name'], 'proc2')
@@ -1293,7 +1296,7 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    resourceTaxonomyItem(id:38) {
+    resourceClassification(id:38) {
       id
       name
       image
@@ -1305,7 +1308,7 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    allResourceTaxonomyItems {
+    allResourceClassifications {
       id
       name
       image
@@ -1318,9 +1321,9 @@ query($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
-    resourceTaxonomyItem(id: 31) {
+    resourceClassification(id: 31) {
       name
-      taxonomyItemResources {
+      classificationResources {
         trackingIdentifier
         currentQuantity {
           numericValue
@@ -1335,7 +1338,7 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
-    resourceTaxonomyItemsByProcessCategory(category: CONSUMED) {
+    resourceClassificationsByProcessCategory(category: CONSUMED) {
       name
       category
       processCategory
@@ -1345,7 +1348,7 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
-    resourceTaxonomyItemsByAction(action: PRODUCE) {
+    resourceClassificationsByAction(action: PRODUCE) {
       name
       category
       processCategory
@@ -1357,7 +1360,7 @@ query($token: String) {
   viewer(token: $token) {
     economicResource(id: 26) {
       id
-      resourceTaxonomyItem {
+      resourceClassification {
         name
         category
       }
@@ -1379,7 +1382,7 @@ query ($token: String) {
   viewer(token: $token) {
     allEconomicResources {
       id
-      resourceTaxonomyItem {
+      resourceClassification {
         name
         category
       }
@@ -1402,7 +1405,7 @@ query ($token: String) {
       name
       ownedEconomicResources {
         id
-        resourceTaxonomyItem {
+        resourceClassification {
           name
           category
         }
@@ -1427,7 +1430,7 @@ query ($token: String) {
       name
       ownedEconomicResources(category: CURRENCY) {
         id
-        resourceTaxonomyItem {
+        resourceClassification {
           name
           category
         }
@@ -1451,7 +1454,7 @@ query ($token: String) {
       name
       ownedEconomicResources(category: INVENTORY) {
         id
-        resourceTaxonomyItem {
+        resourceClassification {
           name
           category
         }
@@ -1473,7 +1476,7 @@ query ($token: String) {
   viewer(token: $token) {
     economicResource(id: 20) {
       id
-      resourceTaxonomyItem {
+      resourceClassification {
         name
         category
       }
@@ -1493,7 +1496,7 @@ query ($token: String) {
         receiver {
           name
         }
-        resourceTaxonomyItem {
+        resourceClassification {
           name
         }
         giveResource {
@@ -1589,7 +1592,7 @@ fragment coreEventFields on EconomicEvent {
     }
   }
   affectedResource {
-    resourceTaxonomyItem {
+    resourceClassification {
       name
       category
     }
@@ -1615,7 +1618,7 @@ fragment coreCommitmentFields on Commitment {
       name
     }
   }
-  committedTaxonomyItem {
+  committedClassification {
     name
     category
   }
@@ -1712,7 +1715,7 @@ query ($token: String) {
       }
       note
       affectedResource {
-        resourceTaxonomyItem {
+        resourceClassification {
           name
           category
         }
@@ -1726,7 +1729,11 @@ query ($token: String) {
         id
         name
       }
-      process {
+      inputOf {
+        id
+        name
+      }
+      outputOf {
         id
         name
       }
@@ -1753,7 +1760,7 @@ query ($token: String) {
           }
         }
         affectedResource {
-          resourceTaxonomyItem {
+          resourceClassification {
             name
             category
           }
@@ -1764,10 +1771,6 @@ query ($token: String) {
           name
         }
         receiver {
-          id
-          name
-        }
-        process {
           id
           name
         }
@@ -1785,7 +1788,7 @@ query ($token: String) {
             name
           }
         }
-        committedTaxonomyItem {
+        committedClassification {
           name
           category
         }
@@ -1794,10 +1797,6 @@ query ($token: String) {
           name
         }
         receiver {
-          id
-          name
-        }
-        process {
           id
           name
         }
@@ -1821,7 +1820,7 @@ query ($token: String) {
       }
       note
       affectedResource {
-        resourceTaxonomyItem {
+        resourceClassification {
           name
           category
         }
@@ -1832,10 +1831,6 @@ query ($token: String) {
         name
       }
       receiver {
-        id
-        name
-      }
-      process {
         id
         name
       }
@@ -1860,8 +1855,8 @@ query ($token: String) {
         }
       }
       note
-      affectedResource {
-        resourceTaxonomyItem {
+      affects {
+        resourceClassification {
           name
           category
         }
@@ -1875,8 +1870,10 @@ query ($token: String) {
         id
         name
       }
-      process {
-        id
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       scope {
@@ -1884,8 +1881,14 @@ query ($token: String) {
         name
       }
       fulfills {
-        commitment {
-          action
+        fulfills {
+          id
+          committedQuantity {
+            numericValue
+            unit {
+              name
+            }
+          }
         }
         fulfilledQuantity {
           numericValue
@@ -1897,6 +1900,7 @@ query ($token: String) {
     }
   }
 }
+
 
 # commitment data
 
@@ -1915,13 +1919,13 @@ query ($token: String) {
         }
       }
       note
-      committedTaxonomyItem {
+      committedClassification {
         name
         category
       }
-      committedResource {
+      involves {
         id
-        resourceTaxonomyItem {
+        resourceClassification {
           name
           category
         }
@@ -1935,7 +1939,11 @@ query ($token: String) {
         id
         name
       }
-      process {
+      inputOf {
+        id
+        name
+      }
+      outputOf {
         id
         name
       }
@@ -1962,13 +1970,13 @@ query ($token: String) {
         }
       }
       note
-      committedTaxonomyItem {
+      committedClassification {
         name
         category
       }
-      committedResource {
+      involves {
         id
-        resourceTaxonomyItem {
+        resourceClassification {
           name
           category
         }
@@ -1982,7 +1990,11 @@ query ($token: String) {
         id
         name
       }
-      process {
+      inputOf {
+        id
+        name
+      }
+      outputOf {
         id
         name
       }
@@ -1991,7 +2003,7 @@ query ($token: String) {
         name
       }
       fulfilledBy {
-        economicEvent {
+        fulfilledBy {
           action
           start
           provider {
@@ -2004,6 +2016,9 @@ query ($token: String) {
             name
           }
         }
+      }
+      involvedAgents {
+        name
       }
     }
   }
@@ -2102,7 +2117,7 @@ query ($token: String) {
       receiver {
         name
       }
-      resourceTaxonomyItem {
+      resourceClassification {
         name
       }
       giveResource {
@@ -2182,7 +2197,7 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   createCommitment(token: $token, action: "use", plannedStart: "2017-10-01", due: "2017-10-10",
-    scopeId: 39, note: "testing", committedTaxonomyItemId: 17, committedResourceId: 11, 
+    scopeId: 39, note: "testing", committedResourceClassificationId: 17, committedResourceId: 11, 
     committedNumericValue: "3.5", committedUnitId: 2, processId: 62,
     providerId: 79, receiverId: 39) {
     commitment {
@@ -2202,7 +2217,7 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedTaxonomyItem {
+      committedClassification {
         name
       }
       committedResource {
@@ -2241,7 +2256,7 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedTaxonomyItem {
+      committedClassification {
         name
       }
       committedResource {

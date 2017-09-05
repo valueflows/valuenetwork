@@ -989,7 +989,7 @@ class EconomicAgent(models.Model):
 
     def related_all_agents(self, childs=True):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
-        # bumbum get also parents of parents contexts
+        # get also parents of parents contexts
         grand_parents = []
         for agn in agents:
           grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
@@ -998,6 +998,13 @@ class EconomicAgent(models.Model):
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
         if self.is_context and not self in agents:
           agents.extend([self])
+        grandgrand_parents = [] # get grandparents of parents. TODO: recursive parents until root
+        for agn in grand_parents:
+          grandgrand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+        agents.extend(grandgrand_parents)
+        ocp = EconomicAgent.objects.root_ocp_agent()
+        if not ocp in agents:
+            agents.extend([ocp])
         return list(set(agents))
 
     def related_context_queryset(self):
@@ -8422,7 +8429,7 @@ class Transfer(models.Model):
         return None
 
     @property #ValueFlows
-    def resource_taxonomy_item(self):
+    def resource_classifiedAs(self):
         events = self.events.all()
         if events:
             event = events[0]
@@ -9270,12 +9277,24 @@ class Commitment(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def committed_resource(self):
+    def involves(self):
         return self.resource
 
     @property #ValueFlows
-    def committed_taxonomy_item(self):
+    def resource_classified_as(self):
         return self.resource_type
+
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def shorter_label(self):
         quantity_string = str(self.quantity)
@@ -11035,11 +11054,11 @@ class EconomicEvent(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def affected_resource(self):
+    def affects(self):
         return self.resource
 
     @property #ValueFlows
-    def affected_taxonomy_item(self):
+    def affected_resource_classified_as(self):
         return self.resource_type
 
     #@property #ValueFlows TODO not in VF now
@@ -11048,9 +11067,17 @@ class EconomicEvent(models.Model):
     #        return self.resource_type
     #    return None
 
-    #@property #ValueFlows
-    #def fulfills(self):
-    #    return self.commitment
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def undistributed_description(self):
         if self.unit_of_quantity:

@@ -44,7 +44,7 @@ class CreateCommitment(AuthedMutation):
         provider_id = graphene.Int(required=False)
         receiver_id = graphene.Int(required=False)
         scope_id = graphene.Int(required=False)
-        committed_taxonomy_item_id = graphene.Int(required=True)
+        committed_resource_classification_id = graphene.Int(required=True)
         committed_resource_id = graphene.Int(required=False)
         committed_numeric_value = graphene.String(required=True)
         committed_unit_id = graphene.Int(required=True)
@@ -61,7 +61,7 @@ class CreateCommitment(AuthedMutation):
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
-        committed_taxonomy_item_id = args.get('committed_taxonomy_item_id')
+        committed_resource_classification_id = args.get('committed_resource_classification_id')
         committed_resource_id = args.get('committed_resource_id')
         committed_numeric_value = args.get('committed_numeric_value')
         committed_unit_id = args.get('committed_unit_id')
@@ -91,10 +91,10 @@ class CreateCommitment(AuthedMutation):
             process = Process.objects.get(pk=process_id)
         else:
             process = None
-        if committed_taxonomy_item_id:
-            committed_taxonomy_item = EconomicResourceType.objects.get(pk=committed_taxonomy_item_id)
+        if committed_resource_classification_id:
+            resource_classified_as = EconomicResourceType.objects.get(pk=committed_resource_classification_id)
         else:
-            committed_taxonomy_item = None
+            resource_classified_as = None
         if committed_resource_id:
             committed_resource = EconomicResource.objects.get(pk=committed_resource_id)
         else:
@@ -106,7 +106,7 @@ class CreateCommitment(AuthedMutation):
             process = process,
             from_agent = provider,
             to_agent = receiver,
-            resource_type = committed_taxonomy_item,
+            resource_type = resource_classified_as,
             resource = committed_resource,
             quantity = Decimal(committed_numeric_value),
             unit_of_quantity = committed_unit,
@@ -129,7 +129,7 @@ class UpdateCommitment(AuthedMutation):
         provider_id = graphene.Int(required=False)
         receiver_id = graphene.Int(required=False)
         scope_id = graphene.Int(required=False)
-        committed_taxonomy_item_id = graphene.Int(required=False)
+        committed_resource_classification_id = graphene.Int(required=False)
         committed_resource_id = graphene.Int(required=False)
         committed_numeric_value = graphene.String(required=False)
         committed_unit_id = graphene.Int(required=False)
@@ -149,7 +149,7 @@ class UpdateCommitment(AuthedMutation):
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
-        committed_taxonomy_item_id = args.get('committed_taxonomy_item_id')
+        committed_resource_classification_id = args.get('committed_resource_classification_id')
         committed_resource_id = args.get('committed_resource_id')
         committed_numeric_value = args.get('committed_numeric_value')
         committed_unit_id = args.get('committed_unit_id')
@@ -177,8 +177,8 @@ class UpdateCommitment(AuthedMutation):
                 commitment.to_agent = EconomicAgent.objects.get(pk=receiver_id)
             if process_id:
                 commitment.process = Process.objects.get(pk=process_id)
-            if committed_taxonomy_item_id:
-                commitment.resource_type = EconomicResourceType.objects.get(pk=committed_taxonomy_item_id)
+            if committed_resource_classification_id:
+                commitment.resource_type = EconomicResourceType.objects.get(pk=committed_resource_classification_id)
             if committed_resource_id:
                 commitment.resource = EconomicResource.objects.get(pk=committed_resource_id)
             if committed_numeric_value:

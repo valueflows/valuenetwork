@@ -2472,7 +2472,7 @@ class ProjectSelectionForm(forms.Form):
 
 #used in view work, fixed to select context_agents
 class ProjectSelectionFormOptional(forms.Form):
-    context_agent = forms.ChoiceField()
+    context_agent = forms.ChoiceField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(ProjectSelectionFormOptional, self).__init__(*args, **kwargs)

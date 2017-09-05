@@ -136,7 +136,6 @@ INSTALLED_APPS = [
     #'debug_toolbar',
     'django_extensions',
     'easy_thumbnails',
-    #'report_builder',
     'pinax.notifications',
     'corsheaders',
     #'django_filters',
@@ -149,13 +148,7 @@ INSTALLED_APPS = [
     'valuenetwork.board',
     'valuenetwork.api',
     'account',
-    #'work.apps.WorkAppConfig',
-    #'multicurrency',
-    #'faircoin',
 
-    # general
-    'general',
-    'mptt', # This provide Tree management in a 'nested set' style
 ]
 
 REST_FRAMEWORK = {

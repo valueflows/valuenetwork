@@ -51,11 +51,11 @@ class ValueEquationModelChoiceField(forms.ModelChoiceField):
             label = ": ".join([obj.name , "Test Only"])
         return label
 
+""" not used in LearnDeep
 from work.models import REQUEST_STATE_CHOICES
 
 class RequestStateForm(forms.Form):
     state = forms.ChoiceField(choices=REQUEST_STATE_CHOICES, widget=forms.RadioSelect(attrs={'class': 'tog'}))
-
 
 class SendFairCoinsForm(forms.Form):
     quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'faircoins input-small',}),min_value=Decimal('1.0'))
@@ -97,7 +97,7 @@ class SendFairCoinsForm(forms.Form):
            touser = data["to_user"]
            if touser and touser.faircoin_address():
                data["to_address"] = touser.faircoin_address()
-
+"""
 
 class AgentForm(forms.Form):
     nick = forms.CharField(label="ID", widget=forms.TextInput(attrs={'class': 'required-field',}))
@@ -158,12 +158,12 @@ class AgentSelectionForm(forms.Form):
         label="Select an existing Agent",
         required=False)
 
-
+""" not used in LearnDeep
 class MembershipAgentSelectionForm(forms.Form):
     created_agent = AgentModelChoiceField(
         queryset=EconomicAgent.objects.without_membership_request(),
         required=False)
-
+"""
 
 class ContextAgentSelectionForm(forms.Form):
     selected_agent = AgentModelChoiceField(

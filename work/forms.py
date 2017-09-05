@@ -94,7 +94,7 @@ class AddUserSkillForm(forms.Form):
             context_ids = [c.id for c in agent.related_all_agents()]
             if not agent.id in context_ids:
                 context_ids.append(agent.id)
-            self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
 
 
 
@@ -393,11 +393,11 @@ class ExchangeNavForm(forms.Form):
                         hidden_etids.append(det.id)
 
 
-                    self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(id__in=hidden_etids) ) #Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+                    self.fields["exchange_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(id__in=hidden_etids) ).order_by('tree_id','lft') #Q(exchange_type__isnull=False), Q(exchange_type__context_agent__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
 
 
-                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ) #| Q(resource_type__context_agent__isnull=True) )
-                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ) #| Q(resource_type__context_agent__isnull=True) )
+                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft') #| Q(resource_type__context_agent__isnull=True) )
+                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft') #| Q(resource_type__context_agent__isnull=True) )
 
                 exchanges = Exchange.objects.filter(context_agent=agent)
                 ex_types = [ex.exchange_type.id for ex in exchanges]
@@ -484,10 +484,10 @@ class ContextExchangeTypeForm(forms.Form):  # used only for editing
                     context_ids.append(agent.id)
                 if gen_et:
                     #self.fields["parent_exchange_type"].label = 'Contexts: '+str(agent.related_all_agents())
-                    self.fields["parent_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) )
+                    self.fields["parent_type"].queryset = Ocp_Record_Type.objects.filter(lft__gt=gen_et.lft, rght__lt=gen_et.rght, tree_id=gen_et.tree_id).exclude( Q(exchange_type__isnull=False), ~Q(exchange_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
 
-                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
-                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) )
+                    self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) ).order_by('tree_id','lft')
+                    self.fields["skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) | Q(resource_type__context_agent__isnull=True) ).order_by('tree_id','lft')
 
                     self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
                     #self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
@@ -588,7 +588,7 @@ class NewResourceTypeForm(forms.Form):
         super(NewResourceTypeForm, self).__init__(*args, **kwargs)
         self.fields["substitutable"].initial = settings.SUBSTITUTABLE_DEFAULT
         self.fields["parent"].queryset = possible_parent_resource_types()
-        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
+        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.all().exclude(clas='faircoin').order_by('tree_id','lft') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
         if agent:
             context_ids = [c.id for c in agent.related_all_agents()]
             if not agent.id in context_ids:
@@ -596,8 +596,8 @@ class NewResourceTypeForm(forms.Form):
             self.fields["context_agent"].queryset = agent.related_all_contexts_queryset(agent)
             self.fields["context_agent"].initial = self.fields["context_agent"].queryset.last()
 
-            self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
-            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["resource_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
+            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
 
     def clean(self):
         data = super(NewResourceTypeForm, self).clean()
@@ -696,7 +696,7 @@ class NewSkillTypeForm(forms.Form):
     def __init__(self, agent=None, *args, **kwargs):
         super(NewSkillTypeForm, self).__init__(*args, **kwargs)
         time = get_object_or_404(Ocp_Unit_Type, clas='time_currency')
-        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.filter(lft__gt=time.lft, rght__lt=time.rght, tree_id=time.tree_id) #all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
+        self.fields["unit_type"].queryset = Ocp_Unit_Type.objects.filter(lft__gt=time.lft, rght__lt=time.rght, tree_id=time.tree_id).order_by('tree_id','lft') #all().exclude(clas='faircoin') #(Q(clas__contains='currency') | Q(parent__clas__contains='currency'))
         if agent:
             context_ids = [c.id for c in agent.related_all_agents()]
             if not agent.id in context_ids:
@@ -709,8 +709,8 @@ class NewSkillTypeForm(forms.Form):
             self.fields["context_agent"].queryset = contexts
             self.fields["context_agent"].initial = initial #self.fields["context_agent"].queryset.last()
 
-            self.fields["parent_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
-            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["parent_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
+            self.fields["related_type"].queryset = Ocp_Artwork_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
 
     def clean(self):
         data = super(NewSkillTypeForm, self).clean()
@@ -808,7 +808,7 @@ class WorkEventContextAgentForm(forms.ModelForm):
             context_ids = [c.id for c in context_agent.related_all_agents()]
             if not context_agent.id in context_ids:
                 context_ids.append(context_agent.id)
-            self.fields["ocp_skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) )
+            self.fields["ocp_skill_type"].queryset = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
         if kwargs.items():
             for name, value in kwargs.items():
               if name == 'instance':

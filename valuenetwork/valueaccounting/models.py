@@ -30,6 +30,7 @@ http://global.ihs.com/doc_detail.cfm?item_s_key=00495115&item_key_date=920616
 
 """
 
+
 FAIRCOIN_DIVISOR = Decimal("100000000.00")
 
 def unique_slugify(instance, value, slug_field_name='slug', queryset=None,
@@ -431,6 +432,8 @@ class AgentManager(models.Manager):
         return EconomicAgent.objects.all()
 
     def freedom_coop(self):
+        if 'faircoin' not in settings.INSTALLED_APPS:
+            return None
         try:
             fc = EconomicAgent.objects.get(name="Freedom Coop")
         except EconomicAgent.DoesNotExist:
@@ -618,6 +621,8 @@ class EconomicAgent(models.Model):
             return None
 
     def faircoin_resource(self):
+        if 'faircoin' not in settings.INSTALLED_APPS:
+            return None
         candidates = self.agent_resource_roles.filter(
             role__is_owner=True,
             resource__resource_type__behavior="dig_acct",

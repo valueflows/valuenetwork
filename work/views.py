@@ -27,11 +27,11 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
-from valuenetwork.valueaccounting.service import ExchangeService
+#from valuenetwork.valueaccounting.service import ExchangeService
 from work.forms import *
 from valuenetwork.valueaccounting.views import *
 from faircoin import utils as faircoin_utils
-from faircoin.models import FaircoinTransaction
+#from faircoin.models import FaircoinTransaction
 
 from fobi.models import FormEntry
 from general.models import Artwork_Type, Unit_Type
@@ -308,7 +308,7 @@ def register_skills(request):
 #    M E M B E R S H I P
 
 
-
+""" not used in LearnDeep
 @login_required
 def share_payment(request, agent_id):
     agent = get_object_or_404(EconomicAgent, id=agent_id)
@@ -559,7 +559,7 @@ def membership_discussion(request, membership_request_id):
     })
 
 
-
+"""
 
 #    P R O J E C T S
 
@@ -891,7 +891,7 @@ def members_agent(request, agent_id):
         "form_entries": entries,
         "fobi_name": fobi_name,
         "add_skill_form": add_skill_form,
-        "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
+        "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft'),
         "Stype_form": Stype_form,
         "auto_resource": auto_resource,
         "related_rts": related_rts,

@@ -6,7 +6,6 @@ import graphene
 from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import AgentAssociation, AgentAssociationType
-from valuenetwork.api.types.AgentRelationshipRole import AgentRelationshipRole
 from valuenetwork.api.models import formatAgent, Person, Organization
 
 

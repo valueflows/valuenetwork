@@ -148,6 +148,13 @@ INSTALLED_APPS = [
     'valuenetwork.equipment',
     'valuenetwork.board',
     'account',
+    'valuenetwork.api',
+    #'valuenetwork.api.apps.ApiAppConfig',
+    #'valuenetwork.api.schemas.apps.ApiSchemasAppConfig',
+    'valuenetwork.api.types.apps.ApiTypesAppConfig',
+    #'valuenetwork.api.schemas',
+    #'valuenetwork.api.types',
+
 
 ]
 

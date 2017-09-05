@@ -9,7 +9,6 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from valuenetwork.valueaccounting.models import EconomicAgent, AgentType
-from work.models import Project
 from valuenetwork.api.types.Agent import Organization
 from valuenetwork.api.models import formatAgent, formatAgentList
 
@@ -44,10 +43,6 @@ class Query(graphene.AbstractType):
                                   id=graphene.Int())
 
     all_organizations = graphene.List(Organization)
-    
-    fc_organizations = graphene.List(Organization,
-                                     joining_style=graphene.String(),
-                                     visibility=graphene.String())
 
     # load any organisation
 
@@ -66,21 +61,6 @@ class Query(graphene.AbstractType):
 
     def resolve_all_organizations(self, args, context, info):
         return formatAgentList(EconomicAgent.objects.exclude(agent_type__party_type="individual"))
-
-    # organizations with Freedom Coop filtering options
-
-    def resolve_fc_organizations(self, args, context, info):
-        joining_style = args.get("joining_style")
-        visibility = args.get("visibility")
-        orgs = Project.objects.all()
-        if visibility:
-            orgs = orgs.filter(visibility=visibility)
-        if joining_style:
-            orgs = orgs.filter(joining_style=joining_style)
-        org_agents = []
-        for org in orgs:
-            org_agents.append(formatAgent(org.agent))
-        return org_agents
 
     #types of organization
 

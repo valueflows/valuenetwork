@@ -26,11 +26,11 @@ from django_comments.models import Comment, CommentFlag
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
-from valuenetwork.valueaccounting.service import ExchangeService
+#from valuenetwork.valueaccounting.service import ExchangeService
 from valuenetwork.valueaccounting.utils import *
-from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
-from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
-from work.utils import *
+#from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
+#from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
+#from work.utils import *
 
 if "pinax.notifications" in settings.INSTALLED_APPS:
     from pinax.notifications import models as notification
@@ -1247,7 +1247,8 @@ def event_history(request, resource_id):
         "unit": unit,
         "events": events,
     })
-
+    
+""" not used in LearnDeep
 @login_required
 def send_faircoins(request, resource_id):
     if request.method == "POST":
@@ -1284,6 +1285,7 @@ def validate_faircoin_address(request):
         answer = "Invalid FairCoin address"
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
+"""
 
 def all_contributions(request):
     event_list = EconomicEvent.objects.filter(is_contribution=True)

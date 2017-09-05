@@ -30,8 +30,8 @@ urlpatterns = [
     url(r'^update-skills/(?P<agent_id>\d+)/$', work.views.update_skills, name="update_skills"),
     url(r"^add-worker-to-location/(?P<location_id>\d+)/(?P<agent_id>\d+)/$", work.views.add_worker_to_location, name="add_worker_to_location"),
     url(r"^add-location-to-worker/(?P<agent_id>\d+)/$", work.views.add_location_to_worker, name="add_location_to_worker"),
-    url(r'^membership-discussion/(?P<membership_request_id>\d+)/$', work.views.membership_discussion,
-        name="membership_discussion"),
+    #url(r'^membership-discussion/(?P<membership_request_id>\d+)/$', work.views.membership_discussion,
+    #    name="membership_discussion"),
 
     url(r"^work-add-todo/$", work.views.work_add_todo, name="work_add_todo"),
     url(r"^work-todo-done/(?P<todo_id>\d+)/$", work.views.work_todo_done, name="work_todo_done"),
@@ -55,7 +55,7 @@ urlpatterns = [
     url(r'^new_skill_type/(?P<agent_id>\d+)/$', work.views.new_skill_type, name="new_skill_type"),
     url(r'^my-tasks/$', work.views.my_tasks, name="my_tasks"),
     url(r'^take-new-tasks/$', work.views.take_new_tasks, name="take_new_tasks"),
-    url(r'^home/$', work.views.my_dashboard, name="home"),
+    url(r'^home/$', work.views.my_dashboard, name="work_home"),
     url(r"^create-your-project/$", work.views.create_your_project, name="create_your_project"),
     url(r"^change-your-project/(?P<agent_id>\d+)/$", work.views.change_your_project, name="change_your_project"),
     url(r'^project-feedback/(?P<agent_id>\d+)/(?P<join_request_id>\d+)/$', work.views.project_feedback,
@@ -87,7 +87,7 @@ urlpatterns = [
 
     url(r'^payment-url/(?P<paymode>.+)/(?P<join_request_id>\d+)/$', work.views.payment_url, name="payment_url"),
 
-    url(r'^share-payment/(?P<agent_id>\d+)/$', work.views.share_payment, name="share_payment"),
+    #url(r'^share-payment/(?P<agent_id>\d+)/$', work.views.share_payment, name="share_payment"),
     url(r"^validate-nick/$", work.views.validate_nick, name="validate_nick"),
     url(r"^validate-username/$", work.views.validate_username, name="validate_username"),
     url(r'^new-features/$', work.views.new_features, name='new_features'),

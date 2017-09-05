@@ -205,9 +205,9 @@ INSTALLED_APPS = [
     'valuenetwork.board',
     'valuenetwork.api',
     'account',
-    'work.apps.WorkAppConfig',
-    'multicurrency',
-    'faircoin',
+    #'work.apps.WorkAppConfig',
+    #'multicurrency',
+    #'faircoin',
 
     # general
     'general',
@@ -288,9 +288,9 @@ ACCOUNT_USE_OPENID = False
 ACCOUNT_REQUIRED_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = False
 ACCOUNT_EMAIL_AUTHENTICATION = False
-ACCOUNT_LOGIN_REDIRECT_URL = "/work/home/" #"/accounting/start/"
-WORKER_LOGIN_REDIRECT_URL = "/work/home/"
-WORKER_LOGOUT_REDIRECT_URL = "/work/work-home/"
+ACCOUNT_LOGIN_REDIRECT_URL = "home"
+WORKER_LOGIN_REDIRECT_URL = "home"
+WORKER_LOGOUT_REDIRECT_URL = "home" 
 ACCOUNT_LOGOUT_REDIRECT_URL = "home"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 2
 LOGIN_URL = '/account/login/'

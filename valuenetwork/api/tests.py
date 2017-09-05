@@ -645,6 +645,9 @@ class APITest(TestCase):
                         id
                         name
                     }
+                    involvedAgents {
+                        name
+                    }
                 }
                 query {
                   viewer(token: "''' + token + '''") {
@@ -2014,9 +2017,13 @@ query ($token: String) {
           }
         }
       }
+      involvedAgents {
+        name
+      }
     }
   }
 }
+
 # exchange data
 
 query ($token: String) {

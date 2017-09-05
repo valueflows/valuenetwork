@@ -35,6 +35,8 @@ class Commitment(DjangoObjectType):
 
     fulfilled_by = graphene.List(lambda: types.Fulfillment)
 
+    involved_agents = graphene.List(lambda: types.Agent)
+
     #def resolve_process(self, args, *rargs):
     #    return self.process
 
@@ -73,3 +75,13 @@ class Commitment(DjangoObjectType):
                 )
             fulfillments.append(fulfill)
         return fulfillments
+
+    def resolve_involved_agents(self, args, context, info):
+        involved = []
+        if self.provider:
+            involved.append(formatAgent(self.provider))
+        events = self.fulfillment_events.all()
+        for event in events:
+            if event.provider:
+                involved.append(formatAgent(event.provider))
+        return list(set(involved))

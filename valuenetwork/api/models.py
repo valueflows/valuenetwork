@@ -65,9 +65,9 @@ class Person(models.Model):
 
 
 class Fulfillment(models.Model):
-    economic_event = models.ForeignKey(EconomicEvent,
+    fulfilled_by = models.ForeignKey(EconomicEvent,
         related_name="fulfillments")
-    commitment = models.ForeignKey(Commitment,
+    fulfills = models.ForeignKey(Commitment,
         related_name="fulfillments") 
     fulfilled_quantity = models.ForeignKey(QuantityValue,
         related_name="fulfillments")

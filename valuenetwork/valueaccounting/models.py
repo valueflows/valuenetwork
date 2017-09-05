@@ -8424,7 +8424,7 @@ class Transfer(models.Model):
         return None
 
     @property #ValueFlows
-    def resource_taxonomy_item(self):
+    def resource_classifiedAs(self):
         events = self.events.all()
         if events:
             event = events[0]
@@ -9272,12 +9272,24 @@ class Commitment(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def committed_resource(self):
+    def involves(self):
         return self.resource
 
     @property #ValueFlows
-    def committed_taxonomy_item(self):
+    def resource_classified_as(self):
         return self.resource_type
+
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def shorter_label(self):
         quantity_string = str(self.quantity)
@@ -11037,11 +11049,11 @@ class EconomicEvent(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def affected_resource(self):
+    def affects(self):
         return self.resource
 
     @property #ValueFlows
-    def affected_taxonomy_item(self):
+    def affected_resource_classified_as(self):
         return self.resource_type
 
     #@property #ValueFlows TODO not in VF now
@@ -11050,9 +11062,17 @@ class EconomicEvent(models.Model):
     #        return self.resource_type
     #    return None
 
-    #@property #ValueFlows
-    #def fulfills(self):
-    #    return self.commitment
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def undistributed_description(self):
         if self.unit_of_quantity:

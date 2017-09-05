@@ -29,24 +29,24 @@ class Process(DjangoObjectType):
     process_commitments = graphene.List(lambda: types.Commitment,
                                         action=Action())
 
-    inputs = graphene.List(lambda: types.EconomicEvent)
+    inputs = graphene.List(lambda: types.EconomicEvent) #VF
 
     work_inputs = graphene.List(lambda: types.EconomicEvent)
 
     non_work_inputs = graphene.List(lambda: types.EconomicEvent)
 
-    outputs = graphene.List(lambda: types.EconomicEvent)
+    outputs = graphene.List(lambda: types.EconomicEvent) #VF
 
     unplanned_economic_events = graphene.List(lambda: types.EconomicEvent,
                                               action=Action())
 
-    committed_inputs = graphene.List(lambda: types.Commitment)
+    committed_inputs = graphene.List(lambda: types.Commitment) #VF
 
     committed_work_inputs = graphene.List(lambda: types.Commitment)
 
     committed_non_work_inputs = graphene.List(lambda: types.Commitment)
 
-    committed_outputs = graphene.List(lambda: types.Commitment)
+    committed_outputs = graphene.List(lambda: types.Commitment) #VF
 
     next_processes = graphene.List(lambda: types.Process)
 
@@ -58,7 +58,7 @@ class Process(DjangoObjectType):
 
     #previous_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
-    resource_taxonomy_items_by_action = graphene.List(lambda: types.ResourceTaxonomyItem)
+    resource_classifications_by_action = graphene.List(lambda: types.ResourceClassification)
 
 
     def resolve_scope(self, args, *rargs):
@@ -167,7 +167,7 @@ class Process(DjangoObjectType):
     #def resolve_previous_resource_taxonomy_items(self, args, context, info):
     #    return self.
 
-    def resolve_resource_taxonomy_items_by_action(self, args, context, info): #TODO not completed
+    def resolve_resource_classifications_by_action(self, args, context, info): #TODO not completed
         action = args.get('action')
         if action:
             event_type = action._convert_action_to_event_type()

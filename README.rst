@@ -1,6 +1,16 @@
 Learn Deep NRP
 ============================
 
+Status
+---------
+
+An older more stable version of this codebase has been deployed for Learn Deep.  Some work will continue to go on there, as needed by the Learn Deep organization.  You can see it here: http://nrp.webfactional.com/.
+
+This version (latest Django version, graphql api in progress) will be used for the backend of the new version for Learn Deep. This version will get the new work being added to the older version when it is complete.  That will be before the end of the class sprint 0.
+
+History and connections
+----------------------------
+
 This was forked from Freedom Coop's OCP, which was forked from Mikorizal's NRP.
 
 We mean Accounting in a large sense.  We are developing something analogous to an ERP system for value networks.

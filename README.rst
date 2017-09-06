@@ -22,4 +22,3 @@ See `docs <https://github.com/FreedomCoop/valuenetwork/tree/master/docs>`_ for d
 
 The graphql API is being developed in conjunction with the React UI in the rea-app repository here.  It uses the `ValueFlows <https://valueflo.ws>`_ vocabulary.
 
-The valueaccounting app could be split out and used in other Django projects.

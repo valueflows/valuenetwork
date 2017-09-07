@@ -1063,7 +1063,7 @@ class EconomicAgent(models.Model):
     def need_projects(self):
         resp = True
         ags = self.related_contexts()
-        if len(ags) < 2:
+        if ags and len(ags) < 2: # only one project
             if ags[0].project and ags[0].project.services():
                 if not 'projects' in ags[0].project.services():
                     resp = False

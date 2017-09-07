@@ -3698,7 +3698,6 @@ ORDER_TYPE_CHOICES = (
     ('customer', _('Customer order')),
     ('rand', _('Work order')),
     ('holder', _('Placeholder order')),
-    ('plan', _('Workflow plan')),
 )
 
 
@@ -3727,9 +3726,6 @@ class OrderManager(models.Manager):
             if not order.has_open_processes():
                 closed_orders.append(order)
         return closed_orders
-
-    def plans(self):
-        return Order.objects.filter(order_type="plan")
 
 #todo: Order is used for both of the above types.
 #maybe shd be renamed?
@@ -3827,6 +3823,7 @@ class Order(models.Model):
         return self.description
 
     def all_working_agents(self):
+        procs = self.all_processes()
         
 
     def exchange(self):
@@ -3974,7 +3971,7 @@ class Order(models.Model):
         return ct
 
     def all_processes(self):
-        # this method includes only processes for this order, and not "plan" processes #TODO add plan processes
+        # this method includes only processes for this order
         deliverables = self.commitments.filter(event_type__relationship="out")
         if deliverables:
             processes = [d.process for d in deliverables if d.process]
@@ -6494,8 +6491,6 @@ class Process(models.Model):
     end_date = models.DateField(_('end date'), blank=True, null=True)
     started = models.DateField(_('started'), blank=True, null=True)
     finished = models.BooleanField(_('finished'), default=False)
-    plan = models.ForeignKey(Order, blank=True, null=True,
-        verbose_name=_('plan'), related_name='processes')
     notes = models.TextField(_('notes'), blank=True)
     created_by = models.ForeignKey(User, verbose_name=_('created by'),
         related_name='processes_created', blank=True, null=True, editable=False)

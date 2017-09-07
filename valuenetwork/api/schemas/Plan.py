@@ -17,7 +17,7 @@ class Query(graphene.AbstractType):
     # define input query params
 
     plan = graphene.Field(Plan,
-                            id=graphene.Int())
+                          id=graphene.Int())
 
     all_plans = graphene.List(Plan)
 
@@ -34,7 +34,7 @@ class Query(graphene.AbstractType):
     # load all items
 
     def resolve_all_plans(self, args, context, info):
-        return Order.objects.plans()
+        return Order.objects.rand()
 
 
 class CreatePlan(AuthedMutation): #TODO

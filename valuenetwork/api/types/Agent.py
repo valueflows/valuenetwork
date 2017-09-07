@@ -38,6 +38,9 @@ class Agent(graphene.Interface):
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
 
+    agent_plans = graphene.List(lambda: types.Plan,
+                                is_finished=graphene.Boolean())
+
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                           latest_number_of_days=graphene.Int())
 
@@ -77,6 +80,22 @@ class Agent(graphene.Interface):
                     return agent_processes.filter(finished=True)
             else:
                 return agent_processes
+        return None
+
+    # if an organization, this returns plans from that context
+    # if a person, this returns plans the person has worked on
+    def resolve_agent_plans(self, args, context, info):
+        agent = _load_identified_agent(self)
+        if agent:
+            agent_plans = agent.all_plans()
+            finished = args.get('is_finished', None)
+            if finished != None:
+                if not finished:
+                    return agent_plans.filter(finished=False)
+                else:
+                    return agent_plans.filter(finished=True)
+            else:
+                return agent_plans
         return None
 
     # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events

@@ -27,6 +27,7 @@ class Commitment(DjangoObjectType):
     planned_start = graphene.String(source='planned_start')
     due = graphene.String(source='due')
     is_finished = graphene.Boolean(source='is_finished')
+    plan = graphene.Field(lambda: types.Plan)
     note = graphene.String(source='note')
 
     class Meta:

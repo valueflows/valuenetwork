@@ -65,6 +65,9 @@ class Commitment(DjangoObjectType):
     def resolve_committed_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
 
+    def resolve_plan(self, args, *rargs):
+        return self.independent_demand
+
     def resolve_fulfilled_by(self, args, context, info):
         events = self.fulfillment_events.all()
         fulfillments = []

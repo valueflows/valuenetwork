@@ -14,8 +14,6 @@ from django.core.exceptions import PermissionDenied
 
 class Query(graphene.AbstractType):
 
-    # define input query params
-
     plan = graphene.Field(Plan,
                           id=graphene.Int())
 
@@ -34,7 +32,7 @@ class Query(graphene.AbstractType):
     # load all items
 
     def resolve_all_plans(self, args, context, info):
-        return Order.objects.rand()
+        return Order.objects.rand_orders()
 
 
 class CreatePlan(AuthedMutation): #TODO
@@ -45,7 +43,7 @@ class CreatePlan(AuthedMutation): #TODO
         scope_id = graphene.Int(required=True)
         note = graphene.String(required=False)
 
-    process = graphene.Field(lambda: Process)
+    plan = graphene.Field(lambda: Plan)
 
     @classmethod
     def mutate(cls, root, args, context, info):
@@ -71,7 +69,7 @@ class CreatePlan(AuthedMutation): #TODO
         )
         process.save()
 
-        return CreateProcess(process=process)
+        return CreatePlan(plan=plan)
 
 
 class UpdatePlan(AuthedMutation): #TODO
@@ -84,7 +82,7 @@ class UpdatePlan(AuthedMutation): #TODO
         note = graphene.String(required=False)
         is_finished = graphene.Boolean(required=False)
 
-    process = graphene.Field(lambda: Process)
+    plan = graphene.Field(lambda: Plan)
 
     @classmethod
     def mutate(cls, root, args, context, info):
@@ -116,14 +114,14 @@ class UpdatePlan(AuthedMutation): #TODO
             process.changed_by=context.user
             process.save()
 
-        return UpdateProcess(process=process)
+        return UpdatePlan(plan=plan)
 
 
 class DeletePlan(AuthedMutation): #TODO
     class Input(with_metaclass(AuthedInputMeta)):
         id = graphene.Int(required=True)
 
-    process = graphene.Field(lambda: Process)
+    plan = graphene.Field(lambda: Plan)
 
     @classmethod
     def mutate(cls, root, args, context, info):
@@ -135,4 +133,4 @@ class DeletePlan(AuthedMutation): #TODO
             else:
                 raise PermissionDenied("Process has events so cannot be deleted.")
 
-        return DeleteProcess(process=process)
+        return DeletePlan(plan=plan)

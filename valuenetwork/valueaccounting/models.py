@@ -3700,7 +3700,6 @@ ORDER_TYPE_CHOICES = (
     ('holder', _('Placeholder order')),
 )
 
-
 class OrderManager(models.Manager):
 
     def customer_orders(self):
@@ -3824,7 +3823,13 @@ class Order(models.Model):
 
     def all_working_agents(self):
         procs = self.all_processes()
-        
+        agents = []
+        for proc in procs:
+            workers = proc.all_working_agents()
+            for worker in workers:
+                if worker not in agents:
+                    agents.append(worker)
+        return agents
 
     def exchange(self):
         exs = Exchange.objects.filter(order=self)

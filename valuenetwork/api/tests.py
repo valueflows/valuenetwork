@@ -166,7 +166,8 @@ class APITest(TestCase):
             )
         a1r1.save()
 
-        # process-commitment-event data
+        # order-process-commitment-event data
+
         proc1 = Process(
             name="proc1",
             start_date=datetime.date.today(),
@@ -191,6 +192,14 @@ class APITest(TestCase):
             context_agent=org2,
             )
         proc3.save()
+        order1 = Order(
+            name="order1",
+            due_date=proc3.end_date,
+            order_date=proc1.start_date,
+            provider=org1,
+            order_type="rand",
+            )
+        order1.save()
         et_cite = EventType.objects.get(name="Citation")
         et_produce = EventType.objects.get(name="Resource Production")
         et_todo = EventType.objects.get(name="Todo")
@@ -208,6 +217,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=3,
             unit_of_quantity=unit_hours,
+            independent_demand=order1,
             )
         proc1_c1.save()
         proc1_c2 = Commitment(
@@ -219,6 +229,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=2.5,
             unit_of_quantity=unit_hours,
+            independent_demand=order1,
             )
         proc1_c2.save()
         proc1_c3 = Commitment(
@@ -230,6 +241,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=3,
             unit_of_quantity=unit_each,
+            independent_demand=order1,
             )
         proc1_c3.save()
         proc1_c4 = Commitment(
@@ -241,6 +253,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=1,
             unit_of_quantity=unit_each,
+            independent_demand=order1,
             )
         proc1_c4.save()
         proc1_e1 = EconomicEvent(
@@ -584,7 +597,7 @@ class APITest(TestCase):
         self.assertEqual(len(processes), 1)
         self.assertEqual(processes[0]['name'], 'proc1')
 
-    def test_processes_commitments_events(self):
+    def test_orders_processes_commitments_events(self):
         result = schema.execute('''
                 mutation {
                   createToken(username: "testUser11222", password: "123456") {
@@ -646,6 +659,9 @@ class APITest(TestCase):
                         name
                     }
                     involvedAgents {
+                        name
+                    }
+                    plan {
                         name
                     }
                 }
@@ -740,84 +756,86 @@ class APITest(TestCase):
         self.assertEqual(outputs[0]['action'], "produce")
         self.assertEqual(committedInputs[0]['action'], "work")
         self.assertEqual(committedInputs[1]['committedQuantity']['numericValue'], 2.5)
+        self.assertEqual(committedInputs[1]['plan']['name'], 'order1')
         self.assertEqual(committedInputs[2]['resourceClassifiedAs']['name'], "component1")
         self.assertEqual(committedInputs[1]['provider']['name'], "not user")
         self.assertEqual(committedOutputs[0]['action'], "produce")
         self.assertEqual(previousProcesses[0]['name'], 'proc2')
         self.assertEqual(nextProcesses[0]['name'], 'proc3')
 
-    def test_create_update_delete_process(self):
-        result = schema.execute('''
-                mutation {
-                  createToken(username: "testUser11222", password: "123456") {
-                    token
-                  }
-                }
-                ''')
-        call_result = result.data['createToken']
-        token = call_result['token']
-        test_agent = EconomicAgent.objects.get(name="testUser11222")
 
-        result1 = schema.execute('''
-                mutation {
-                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2) {
-                    process {
-                        name
-                        scope {
-                            name
-                        }
-                        isFinished
-                        plannedStart
-                        plannedDuration
-                    }
-                  }
-                }
-                ''')
-        #import pdb; pdb.set_trace()
-        self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
-        self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
-        self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
-        self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
-        self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
+#    def test_create_update_delete_process(self):
+#        result = schema.execute('''
+#                mutation {
+#                  createToken(username: "testUser11222", password: "123456") {
+#                    token
+#                  }
+#                }
+#                ''')
+#        call_result = result.data['createToken']
+#        token = call_result['token']
+#        test_agent = EconomicAgent.objects.get(name="testUser11222")
 
-        result2 = schema.execute('''
-                    mutation {
-                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
-                            process {
-                                name
-                                scope {
-                                    name
-                                }
-                                isFinished
-                                plannedStart
-                                plannedDuration
-                            }
-                        }
-                    }
-                    ''')
+#        result1 = schema.execute('''
+#                mutation {
+#                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2) {
+#                    process {
+#                        name
+#                        scope {
+#                            name
+#                        }
+#                        isFinished
+#                        plannedStart
+#                        plannedDuration
+#                    }
+#                  }
+#                }
+#                ''')
+#        #import pdb; pdb.set_trace()
+#        self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
+#        self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
+#        self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
+#        self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
+#        self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
 
-        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
-        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
-        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
-        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
-        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+#        result2 = schema.execute('''
+#                    mutation {
+#                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
+#                            process {
+#                                name
+#                                scope {
+#                                    name
+#                                }
+#                                isFinished
+#                                plannedStart
+#                                plannedDuration
+#                            }
+#                        }
+#                    }
+#                    ''')
 
-        result3 = schema.execute('''
-                    mutation {
-                        deleteProcess(token: "''' + token + '''", id: 4) {
-                            process {
-                                name
-                            }
-                        }
-                    }
-                    ''')
+#        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
+#        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
+#        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
+#        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
+#        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
 
-        proc = None
-        try:
-            proc = Process.objects.get(pk=4)
-        except:
-            pass
-        self.assertEqual(proc, None)
+#        result3 = schema.execute('''
+#                    mutation {
+#                        deleteProcess(token: "''' + token + '''", id: 4) {
+#                            process {
+#                                name
+#                            }
+#                        }
+#                    }
+#                    ''')
+
+#        proc = None
+#        try:
+#            proc = Process.objects.get(pk=4)
+#        except:
+#            pass
+#        self.assertEqual(proc, None)
 
 
 ######################### SAMPLE QUERIES #####################
@@ -1699,6 +1717,38 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    plan(id: 50) {
+      name
+      scope {
+        name
+      }
+      planned
+      due
+      note
+      planProcesses {
+        name
+      }
+      workingAgents {
+        name
+        __typename
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allPlans {
+      name
+      planProcesses {
+        name
+      }
+    }
+  }
+}
+
 # event data
 
 query ($token: String) {
@@ -1856,7 +1906,7 @@ query ($token: String) {
       }
       note
       affects {
-        resourceClassification {
+        resourceClassifedAs {
           name
           category
         }
@@ -1919,13 +1969,13 @@ query ($token: String) {
         }
       }
       note
-      committedClassification {
+      resourceClassifedAs {
         name
         category
       }
       involves {
         id
-        resourceClassification {
+        resourceClassifedAs {
           name
           category
         }
@@ -1970,13 +2020,13 @@ query ($token: String) {
         }
       }
       note
-      committedClassification {
+      resourceClassifiedAs {
         name
         category
       }
       involves {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -2000,6 +2050,9 @@ query ($token: String) {
       }
       scope {
         id
+        name
+      }
+      plan {
         name
       }
       fulfilledBy {
@@ -2117,7 +2170,7 @@ query ($token: String) {
       receiver {
         name
       }
-      resourceClassification {
+      resourceClassifiedAs {
         name
       }
       giveResource {
@@ -2217,7 +2270,7 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedClassification {
+      resourceClassifiedAs {
         name
       }
       committedResource {
@@ -2256,7 +2309,7 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedClassification {
+      resourceClassifiedAs {
         name
       }
       committedResource {

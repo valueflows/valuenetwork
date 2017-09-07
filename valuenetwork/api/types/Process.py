@@ -16,7 +16,6 @@ class Process(DjangoObjectType):
     planned_duration = graphene.String(source='planned_duration')
     is_started = graphene.Boolean(source='is_started')
     is_finished = graphene.Boolean(source='is_finished')
-    plan = graphene.Field(lambda: types.Plan)
     note = graphene.String(source='note')
 
     class Meta:

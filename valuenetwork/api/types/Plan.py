@@ -7,7 +7,7 @@ from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.EconomicEvent import Action
 from valuenetwork.valueaccounting.models import Order
-from valuenetwork.api.models import formatAgent
+from valuenetwork.api.models import formatAgent, formatAgentList
 
 
 class Plan(DjangoObjectType):
@@ -30,7 +30,7 @@ class Plan(DjangoObjectType):
         return formatAgent(self.provider)
 
     def resolve_plan_processes(self, args, context, info):
-        return self.processes.all()
+        return self.all_processes()
 
     def resolve_working_agents(self, args, context, info):
         return formatAgentList(self.all_working_agents())

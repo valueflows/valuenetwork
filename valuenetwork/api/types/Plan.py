@@ -11,7 +11,6 @@ from valuenetwork.api.models import formatAgent, formatAgentList
 
 
 class Plan(DjangoObjectType):
-    scope = graphene.Field(lambda: types.Agent)
     planned = graphene.String(source='planned')
     due = graphene.String(source='due')
     note = graphene.String(source='note')
@@ -21,13 +20,15 @@ class Plan(DjangoObjectType):
         only_fields = ('id', 'name')
 
 
+    scope = graphene.List(lambda: types.Agent)
+
     plan_processes = graphene.List(lambda: types.Process)
 
     working_agents = graphene.List(lambda: types.Agent)
 
 
     def resolve_scope(self, args, *rargs):
-        return formatAgent(self.provider)
+        return formatAgentList(self.plan_context_agents())
 
     def resolve_plan_processes(self, args, context, info):
         return self.all_processes()

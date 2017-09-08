@@ -4067,6 +4067,11 @@ class Order(models.Model):
         items = self.order_items()
         return [item.context_agent for item in items]
 
+    #derives context agents from processes rather than order items for people who don't record outputs
+    def plan_context_agents(self):
+        processes = self.all_processes()
+        return list(set([proc.context_agent for proc in processes]))
+
     def sale(self):
         sale = None
         if self.order_type == "customer":

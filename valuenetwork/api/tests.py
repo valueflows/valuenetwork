@@ -681,19 +681,7 @@ class APITest(TestCase):
                         unplannedEconomicEvents(action: PRODUCE) {
                             ...coreEventFields
                         }
-                        processEconomicEvents {
-                            ...coreEventFields
-                        }
-                        processCommitments {
-                            ...coreCommitmentFields
-                        }
                         inputs {
-                            ...coreEventFields
-                        }
-                        workInputs {
-                            ...coreEventFields
-                        }
-                        nonWorkInputs {
                             ...coreEventFields
                         }
                         outputs {
@@ -702,13 +690,7 @@ class APITest(TestCase):
                         committedInputs {
                             ...coreCommitmentFields
                         }
-                        committedWorkInputs {
-                            ...coreCommitmentFields
-                        }
-                        committedNonWorkInputs {
-                            ...coreCommitmentFields
-                        }
-                        committedOutputs {
+                        committedOutputs (action: PRODUCE) {
                             ...coreCommitmentFields
                         }
                         nextProcesses {
@@ -730,29 +712,17 @@ class APITest(TestCase):
         process = result.data['viewer']['process']
         self.assertEqual(process['name'], 'proc1')
         unplannedEconomicEvents = process['unplannedEconomicEvents']
-        processEconomicEvents = process['processEconomicEvents']
-        processCommitments = process['processCommitments']
         inputs = process['inputs']
-        workInputs = process['workInputs']
-        nonWorkInputs = process['nonWorkInputs']
         outputs = process['outputs']
         committedInputs = process['committedInputs']
-        committedWorkInputs = process['committedWorkInputs']
-        committedNonWorkInputs = process['committedNonWorkInputs']
         committedOutputs = process['committedOutputs']
         nextProcesses = process['nextProcesses']
         previousProcesses = process['previousProcesses']
         workingAgents = process['workingAgents']
         self.assertEqual(len(unplannedEconomicEvents), 1)
-        self.assertEqual(len(processEconomicEvents), 6)
-        self.assertEqual(len(processCommitments), 4)
         self.assertEqual(len(inputs), 4)
-        self.assertEqual(len(workInputs), 3)
-        self.assertEqual(len(nonWorkInputs), 1)
         self.assertEqual(len(outputs), 2)
         self.assertEqual(len(committedInputs), 3)
-        self.assertEqual(len(committedWorkInputs), 2)
-        self.assertEqual(len(committedNonWorkInputs), 1)
         self.assertEqual(len(committedOutputs), 1)
         self.assertEqual(len(nextProcesses), 1)
         self.assertEqual(len(previousProcesses), 1)
@@ -766,7 +736,7 @@ class APITest(TestCase):
         self.assertEqual(committedInputs[0]['action'], "work")
         self.assertEqual(committedInputs[1]['committedQuantity']['numericValue'], 2.5)
         self.assertEqual(committedInputs[1]['plan']['name'], 'order1')
-        self.assertEqual(committedInputs[1]['plan']['scope']['name'], 'org1')
+        self.assertEqual(committedInputs[1]['plan']['scope'][0]['name'], 'org1')
         self.assertEqual(committedInputs[2]['resourceClassifiedAs']['name'], "component1")
         self.assertEqual(committedInputs[1]['provider']['name'], "not user")
         self.assertEqual(committedOutputs[0]['action'], "produce")

@@ -663,6 +663,9 @@ class APITest(TestCase):
                     }
                     plan {
                         name
+                        plannedOn
+                        due
+                        note
                         scope {
                             name
                         }
@@ -1684,7 +1687,7 @@ query ($token: String) {
       scope {
         name
       }
-      planned
+      plannedOn
       due
       note
       planProcesses {

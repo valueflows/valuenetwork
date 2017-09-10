@@ -11,7 +11,7 @@ from valuenetwork.api.models import formatAgent, formatAgentList
 
 
 class Plan(DjangoObjectType):
-    planned = graphene.String(source='planned')
+    planned_on = graphene.String(source='planned')
     due = graphene.String(source='due')
     note = graphene.String(source='note')
 

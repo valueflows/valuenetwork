@@ -1670,7 +1670,7 @@ query ($token: String) {
       unplannedEconomicEvents(action: WORK) {
         ...coreEventFields
       }
-      inputs {
+      inputs (action: WORK) {
         ...coreEventFields
       }
       outputs {
@@ -1679,7 +1679,7 @@ query ($token: String) {
       committedInputs {
         ...coreCommitmentFields
       }
-      committedOutputs {
+      committedOutputs (action: PRODUCE) {
         ...coreCommitmentFields
       }
       nextProcesses {

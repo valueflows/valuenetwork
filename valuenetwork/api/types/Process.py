@@ -6,7 +6,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.EconomicEvent import Action
-from valuenetwork.valueaccounting.models import Process as ProcessProxy
+from valuenetwork.valueaccounting.models import Process as ProcessProxy, EventType
 from valuenetwork.api.models import formatAgent
 
 
@@ -114,7 +114,12 @@ class Process(DjangoObjectType):
     #    return commitments
 
     def resolve_inputs(self, args, context, info):
-        return self.incoming_events()
+        action = args.get('action')
+        events = self.incoming_events()
+        if action:
+            event_type = EventType.objects.convert_action_to_event_type(action)
+            events = events.filter(event_type=event_type)
+        return events
 
     #def resolve_work_inputs(self, args, context, info):
     #    return self.work_events()
@@ -123,10 +128,20 @@ class Process(DjangoObjectType):
     #    return self.non_work_input_events()
 
     def resolve_outputs(self, args, context, info):
-        return self.outputs()
+        action = args.get('action')
+        events = self.outputs()
+        if action:
+            event_type = EventType.objects.convert_action_to_event_type(action)
+            events = events.filter(event_type=event_type)
+        return events
 
     def resolve_committed_inputs(self, args, context, info):
-        return self.incoming_commitments()
+        action = args.get('action')
+        commits = self.incoming_commitments()
+        if action:
+            event_type = EventType.objects.convert_action_to_event_type(action)
+            commits = commits.filter(event_type=event_type)
+        return commits
 
     #def resolve_committed_work_inputs(self, args, context, info):
     #    return self.work_requirements()
@@ -135,7 +150,12 @@ class Process(DjangoObjectType):
     #    return self.non_work_input_requirements()
 
     def resolve_committed_outputs(self, args, context, info):
-        return self.outgoing_commitments()
+        action = args.get('action')
+        commits = self.outgoing_commitments()
+        if action:
+            event_type = EventType.objects.convert_action_to_event_type(action)
+            commits = commits.filter(event_type=event_type)
+        return commits
 
     def resolve_next_processes(self, args, context, info):
         return self.next_processes()
@@ -153,9 +173,9 @@ class Process(DjangoObjectType):
     def resolve_unplanned_economic_events(self, args, context, info):
         action = args.get('action')
         unplanned_events = self.uncommitted_events()
-        #if action:
-        #    event_type = self.convert_action_to_event_type(action)
-        #    unplanned_events = unplanned_events.filter(event_type=event_type)
+        if action:
+            event_type = EventType.objects.convert_action_to_event_type(action)
+            unplanned_events = unplanned_events.filter(event_type=event_type)
         return unplanned_events
 
     #def resolve_next_resource_taxonomy_items(self, args, context, info):

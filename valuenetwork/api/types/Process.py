@@ -23,95 +23,104 @@ class Process(DjangoObjectType):
         only_fields = ('id', 'name')
 
 
-    process_economic_events = graphene.List(lambda: types.EconomicEvent,
-                                            action=Action())
+    #process_economic_events = graphene.List(lambda: types.EconomicEvent,
+    #                                        action=Action())
 
-    process_commitments = graphene.List(lambda: types.Commitment,
-                                        action=Action())
+    #process_commitments = graphene.List(lambda: types.Commitment,
+    #                                    action=Action())
 
-    inputs = graphene.List(lambda: types.EconomicEvent) #VF
+    inputs = graphene.List(lambda: types.EconomicEvent,
+                                        action=Action()) #VF
 
-    work_inputs = graphene.List(lambda: types.EconomicEvent)
+    #work_inputs = graphene.List(lambda: types.EconomicEvent)
 
-    non_work_inputs = graphene.List(lambda: types.EconomicEvent)
+    #non_work_inputs = graphene.List(lambda: types.EconomicEvent)
 
-    outputs = graphene.List(lambda: types.EconomicEvent) #VF
+    outputs = graphene.List(lambda: types.EconomicEvent,
+                            action=Action()) #VF
 
     unplanned_economic_events = graphene.List(lambda: types.EconomicEvent,
                                               action=Action())
 
-    committed_inputs = graphene.List(lambda: types.Commitment) #VF
+    committed_inputs = graphene.List(lambda: types.Commitment,
+                                     action=Action()) #VF
 
-    committed_work_inputs = graphene.List(lambda: types.Commitment)
+    #committed_work_inputs = graphene.List(lambda: types.Commitment)
 
-    committed_non_work_inputs = graphene.List(lambda: types.Commitment)
+    #committed_non_work_inputs = graphene.List(lambda: types.Commitment)
 
-    committed_outputs = graphene.List(lambda: types.Commitment) #VF
+    committed_outputs = graphene.List(lambda: types.Commitment,
+                                      action=Action()) #VF
 
     next_processes = graphene.List(lambda: types.Process)
 
     previous_processes = graphene.List(lambda: types.Process)
 
     working_agents = graphene.List(lambda: types.Agent)
+    
+    process_plan = graphene.Field(lambda: types.Plan)
 
     #next_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
     #previous_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
-    resource_classifications_by_action = graphene.List(lambda: types.ResourceClassification)
+    #resource_classifications_by_action = graphene.List(lambda: types.ResourceClassification)
 
 
     def resolve_scope(self, args, *rargs):
         return formatAgent(self.scope)
 
-    def resolve_process_economic_events(self, args, context, info):
-        action = args.get('action')
-        events = self.events.all()
-        if action: 
-            if action == Action.WORK:
-                return events.filter(event_type__name="Time Contribution")
-            if action == Action.USE:
-                return events.filter(event_type__name="Resource use")
-            if action == Action.CONSUME:
-                return events.filter(event_type__name="Resource Consumption")
-            if action == Action.CITE:
-                return events.filter(event_type__name="Citation")
-            if action == Action.PRODUCE:
-                return events.filter(event_type__name="Resource Production")
-            if action == Action.ACCEPT:
-                return events.filter(event_type__name="To Be Changed")
-            if action == Action.IMPROVE:
-                return events.filter(event_type__name="Change")
-        return events
+    def resolve_process_plan(self, args, *rargs):
+        return self.independent_demand()
 
-    def resolve_process_commitments(self, args, context, info):
-        action = args.get('action')
-        commitments = self.commitments.all()
-        if action: 
-            if action == Action.WORK:
-                return commitments.filter(event_type__name="Time Contribution")
-            if action == Action.USE:
-                return commitments.filter(event_type__name="Resource use")
-            if action == Action.CONSUME:
-                return commitments.filter(event_type__name="Resource Consumption")
-            if action == Action.CITE:
-                return commitments.filter(event_type__name="Citation")
-            if action == Action.PRODUCE:
-                return commitments.filter(event_type__name="Resource Production")
-            if action == Action.ACCEPT:
-                return commitments.filter(event_type__name="To Be Changed")
-            if action == Action.IMPROVE:
-                return commitments.filter(event_type__name="Change")
-        return commitments
+    #def resolve_process_economic_events(self, args, context, info):
+    #    action = args.get('action')
+    #    events = self.events.all()
+    #    if action: 
+    #        if action == Action.WORK:
+    #            return events.filter(event_type__name="Time Contribution")
+    #        if action == Action.USE:
+    #            return events.filter(event_type__name="Resource use")
+    #        if action == Action.CONSUME:
+    #            return events.filter(event_type__name="Resource Consumption")
+    #        if action == Action.CITE:
+    #            return events.filter(event_type__name="Citation")
+    #        if action == Action.PRODUCE:
+    #            return events.filter(event_type__name="Resource Production")
+    #        if action == Action.ACCEPT:
+    #            return events.filter(event_type__name="To Be Changed")
+    #        if action == Action.IMPROVE:
+    #            return events.filter(event_type__name="Change")
+    #    return events
+
+    #def resolve_process_commitments(self, args, context, info):
+    #    action = args.get('action')
+    #    commitments = self.commitments.all()
+    #    if action: 
+    #        if action == Action.WORK:
+    #            return commitments.filter(event_type__name="Time Contribution")
+    #        if action == Action.USE:
+    #            return commitments.filter(event_type__name="Resource use")
+    #        if action == Action.CONSUME:
+    #            return commitments.filter(event_type__name="Resource Consumption")
+    #        if action == Action.CITE:
+    #            return commitments.filter(event_type__name="Citation")
+    #        if action == Action.PRODUCE:
+    #            return commitments.filter(event_type__name="Resource Production")
+    #        if action == Action.ACCEPT:
+    #            return commitments.filter(event_type__name="To Be Changed")
+    #        if action == Action.IMPROVE:
+    #            return commitments.filter(event_type__name="Change")
+    #    return commitments
 
     def resolve_inputs(self, args, context, info):
         return self.incoming_events()
 
-    def resolve_work_inputs(self, args, context, info):
-        return self.work_events()
+    #def resolve_work_inputs(self, args, context, info):
+    #    return self.work_events()
 
-    def resolve_non_work_inputs(self, args, context, info):
-        return self.non_work_input_events()
+    #def resolve_non_work_inputs(self, args, context, info):
+    #    return self.non_work_input_events()
 
     def resolve_outputs(self, args, context, info):
         return self.outputs()
@@ -119,11 +128,11 @@ class Process(DjangoObjectType):
     def resolve_committed_inputs(self, args, context, info):
         return self.incoming_commitments()
 
-    def resolve_committed_work_inputs(self, args, context, info):
-        return self.work_requirements()
+    #def resolve_committed_work_inputs(self, args, context, info):
+    #    return self.work_requirements()
 
-    def resolve_committed_non_work_inputs(self, args, context, info):
-        return self.non_work_input_requirements()
+    #def resolve_committed_non_work_inputs(self, args, context, info):
+    #    return self.non_work_input_requirements()
 
     def resolve_committed_outputs(self, args, context, info):
         return self.outgoing_commitments()
@@ -144,21 +153,9 @@ class Process(DjangoObjectType):
     def resolve_unplanned_economic_events(self, args, context, info):
         action = args.get('action')
         unplanned_events = self.uncommitted_events()
-        if action: 
-            if action == Action.WORK:
-                return unplanned_events.filter(event_type__name="Time Contribution")
-            if action == Action.USE:
-                return unplanned_events.filter(event_type__name="Resource use")
-            if action == Action.CONSUME:
-                return unplanned_events.filter(event_type__name="Resource Consumption")
-            if action == Action.CITE:
-                return unplanned_events.filter(event_type__name="Citation")
-            if action == Action.PRODUCE:
-                return unplanned_events.filter(event_type__name="Resource Production")
-            if action == Action.ACCEPT:
-                return unplanned_events.filter(event_type__name="To Be Changed")
-            if action == Action.IMPROVE:
-                return unplanned_events.filter(event_type__name="Change")
+        #if action:
+        #    event_type = self.convert_action_to_event_type(action)
+        #    unplanned_events = unplanned_events.filter(event_type=event_type)
         return unplanned_events
 
     #def resolve_next_resource_taxonomy_items(self, args, context, info):
@@ -167,9 +164,9 @@ class Process(DjangoObjectType):
     #def resolve_previous_resource_taxonomy_items(self, args, context, info):
     #    return self.
 
-    def resolve_resource_classifications_by_action(self, args, context, info): #TODO not completed
-        action = args.get('action')
-        if action:
-            event_type = action._convert_action_to_event_type()
-            return self.get_rts_by_action(event_type)
-        return None
+    #def resolve_resource_classifications_by_action(self, args, context, info): #TODO not completed
+    #    action = args.get('action')
+    #    if action:
+    #        event_type = action._convert_action_to_event_type()
+    #        return self.get_rts_by_action(event_type)
+    #    return None

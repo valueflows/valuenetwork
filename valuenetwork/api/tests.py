@@ -663,6 +663,15 @@ class APITest(TestCase):
                     }
                     plan {
                         name
+                        scope {
+                            name
+                        }
+                        workingAgents {
+                            name
+                        }
+                        planProcesses {
+                            name
+                        }
                     }
                 }
                 query {
@@ -757,6 +766,7 @@ class APITest(TestCase):
         self.assertEqual(committedInputs[0]['action'], "work")
         self.assertEqual(committedInputs[1]['committedQuantity']['numericValue'], 2.5)
         self.assertEqual(committedInputs[1]['plan']['name'], 'order1')
+        self.assertEqual(committedInputs[1]['plan']['scope']['name'], 'org1')
         self.assertEqual(committedInputs[2]['resourceClassifiedAs']['name'], "component1")
         self.assertEqual(committedInputs[1]['provider']['name'], "not user")
         self.assertEqual(committedOutputs[0]['action'], "produce")
@@ -1538,11 +1548,15 @@ query ($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    process(id:3) {
+    process(id:51) {
       id
       name
       scope {
         name
+      }
+      processPlan {
+        name
+        due
       }
       plannedStart
       plannedDuration
@@ -1609,8 +1623,8 @@ fragment coreEventFields on EconomicEvent {
       name
     }
   }
-  affectedResource {
-    resourceClassification {
+  affects {
+    resourceClassifiedAs {
       name
       category
     }
@@ -1636,7 +1650,7 @@ fragment coreCommitmentFields on Commitment {
       name
     }
   }
-  committedClassification {
+  resourceClassifiedAs {
     name
     category
   }
@@ -1656,37 +1670,13 @@ query ($token: String) {
       unplannedEconomicEvents(action: WORK) {
         ...coreEventFields
       }
-      processEconomicEvents {
-        ...coreEventFields
-      }
-      processEconomicEvents(action: PRODUCE) {
-        ...coreEventFields
-      }
-      processCommitments {
-        ...coreCommitmentFields
-      }
-      processCommitments(action: WORK) {
-        ...coreCommitmentFields
-      }
       inputs {
-        ...coreEventFields
-      }
-      workInputs {
-        ...coreEventFields
-      }
-      nonWorkInputs {
         ...coreEventFields
       }
       outputs {
         ...coreEventFields
       }
       committedInputs {
-        ...coreCommitmentFields
-      }
-      committedWorkInputs {
-        ...coreCommitmentFields
-      }
-      committedNonWorkInputs {
         ...coreCommitmentFields
       }
       committedOutputs {

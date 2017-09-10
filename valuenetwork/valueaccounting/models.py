@@ -856,14 +856,13 @@ class EconomicAgent(models.Model):
         else:
             return self.context_processes()
 
-    #this works only when order is on the process, not when mediated through commitments
     def all_plans(self):
         procs = self.all_processes()
         plans = []
         for proc in procs:
-            if proc.plan:
-                if proc.plan not in plans:
-                    plans.append(proc.plan)
+            if proc.independent_demand():
+                if proc.independent_demand() not in plans:
+                    plans.append(proc.independent_demand())
         return plans
 
     def resources_created(self):

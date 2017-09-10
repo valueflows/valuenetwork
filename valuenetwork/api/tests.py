@@ -581,6 +581,11 @@ class APITest(TestCase):
                         name
                         isFinished
                       }
+                      agentPlans {
+                        name
+                        due
+                        note
+                      }
                     }
                   }
                 }
@@ -589,6 +594,7 @@ class APITest(TestCase):
         agent = result.data['viewer']['agent']
         ownedEconomicResources = result.data['viewer']['agent']['ownedEconomicResources']
         processes = result.data['viewer']['agent']['agentProcesses']
+        plans = result.data['viewer']['agent']['agentPlans']
         self.assertEqual(agent['name'], 'org1')
         self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['name'], 'product1')
         self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['processCategory'], 'produced')
@@ -596,6 +602,8 @@ class APITest(TestCase):
         self.assertEqual(ownedEconomicResources[0]['currentQuantity']['unit']['name'], 'Each')
         self.assertEqual(len(processes), 1)
         self.assertEqual(processes[0]['name'], 'proc1')
+        self.assertEqual(len(plans), 1)
+        self.assertEqual(plans[0]['name'], 'order1')
 
     def test_orders_processes_commitments_events(self):
         result = schema.execute('''
@@ -1565,6 +1573,20 @@ query($token: String) {
         plannedStart
         plannedDuration
         isFinished
+        note
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:26) {
+      name
+      agentPlans {
+        id
+        name
+        due
         note
       }
     }

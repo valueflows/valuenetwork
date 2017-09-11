@@ -689,6 +689,9 @@ class APITest(TestCase):
                   viewer(token: "''' + token + '''") {
                     process(id: 1) {
                         name
+                        processClassifiedAs {
+                            name
+                        }
                         unplannedEconomicEvents(action: PRODUCE) {
                             ...coreEventFields
                         }
@@ -1555,9 +1558,40 @@ query($token: String) {
       scope {
         name
       }
+      processClassifiedAs {
+        name
+      }
       plannedStart
       plannedDuration
       isFinished
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    processClassification (id: 3) {
+      id
+      name
+      scope {
+        name
+      }
+      estimatedDuration
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allProcessClassifications {
+      id
+      name
+      scope {
+        name
+      }
+      estimatedDuration
       note
     }
   }

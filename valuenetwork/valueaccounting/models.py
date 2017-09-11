@@ -3810,11 +3810,11 @@ class Order(models.Model):
 
     @property #ValueFlows
     def planned(self):
-        return self.order_date
+        return self.order_date.isoformat()
 
     @property #ValueFlows
     def due(self):
-        return self.due_date
+        return self.due_date.isoformat()
 
     @property #ValueFlows
     def note(self):
@@ -4134,6 +4134,14 @@ class ProcessType(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(ProcessType, self).save(*args, **kwargs)
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
 
     def timeline_title(self):
         return " ".join([self.name, "Process to be planned"])

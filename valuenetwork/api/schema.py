@@ -22,7 +22,8 @@ import valuenetwork.api.schemas.Transfer
 import valuenetwork.api.schemas.EconomicEvent
 import valuenetwork.api.schemas.QuantityValue
 import valuenetwork.api.schemas.Unit
-import valuenetwork.api.schemas.ResourceTaxonomyItem
+import valuenetwork.api.schemas.ResourceClassification
+import valuenetwork.api.schemas.ProcessClassification
 import valuenetwork.api.schemas.Commitment
 import valuenetwork.api.schemas.Plan
 from valuenetwork.api.schemas.helpers import hash_password
@@ -41,7 +42,8 @@ class ViewerQuery(
     valuenetwork.api.schemas.EconomicEvent.Query,
     valuenetwork.api.schemas.QuantityValue.Query,
     valuenetwork.api.schemas.Unit.Query,
-    valuenetwork.api.schemas.ResourceTaxonomyItem.Query,
+    valuenetwork.api.schemas.ResourceClassification.Query,
+    valuenetwork.api.schemas.ProcessClassification.Query,
     valuenetwork.api.schemas.Commitment.Query,
     valuenetwork.api.schemas.Plan.Query,
     graphene.ObjectType

@@ -168,12 +168,19 @@ class APITest(TestCase):
 
         # order-process-commitment-event data
 
+        pt1 = ProcessType(
+            name="pt1",
+            context_agent=org1,
+            estimated_duration=300,
+            )
+        pt1.save()
         proc1 = Process(
             name="proc1",
             start_date=datetime.date.today(),
             end_date=datetime.date.today() + datetime.timedelta(days=5),
             finished=False,
             context_agent=org1,
+            process_type=pt1,
             )
         proc1.save()
         proc2 = Process(
@@ -691,6 +698,10 @@ class APITest(TestCase):
                         name
                         processClassifiedAs {
                             name
+                            scope {
+                                name
+                            }
+                            estimatedDuration
                         }
                         unplannedEconomicEvents(action: PRODUCE) {
                             ...coreEventFields
@@ -756,6 +767,7 @@ class APITest(TestCase):
         self.assertEqual(committedOutputs[0]['action'], "produce")
         self.assertEqual(previousProcesses[0]['name'], 'proc2')
         self.assertEqual(nextProcesses[0]['name'], 'proc3')
+        self.assertEqual(process['processClassifiedAs']['name'], 'pt1')
 
 
 #    def test_create_update_delete_process(self):

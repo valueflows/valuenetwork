@@ -26,10 +26,13 @@ class Plan(DjangoObjectType):
 
     working_agents = graphene.List(lambda: types.Agent)
 
-    #input_resources = graphene.List(lambda: types.EconomicResource)
+    planned_input_resources = graphene.List(lambda: types.EconomicResource)
 
-    #output_resources = graphene.List(lambda: types.EconomicResource)
+    planned_output_resources = graphene.List(lambda: types.EconomicResource)
 
+    input_resources = graphene.List(lambda: types.EconomicResource)
+
+    output_resources = graphene.List(lambda: types.EconomicResource)
 
     def resolve_scope(self, args, *rargs):
         return formatAgentList(self.plan_context_agents())
@@ -40,11 +43,14 @@ class Plan(DjangoObjectType):
     def resolve_working_agents(self, args, context, info):
         return formatAgentList(self.all_working_agents())
 
-    #def resolve_input_resources(self, args, context, info):
-    #    input_commits = self.input_commitments()
-    #    input_uncommitted_events = self.input_uncommitted_events()
-    #    # figure out if resource needed by internal process is from another internal process or from outside the plan
-    #    return None #self.
+    def resolve_committed_input_resources(self, args, context, info):
+        return self.committed_input_resources()
 
-    #def resolve_output_resources(self, args, context, info):
-    #    return None #self.
+    def resolve_committed_output_resources(self, args, context, info):
+        return self.committed_output_resources()
+
+    def resolve_input_resources(self, args, context, info):
+        return self.input_resources()
+
+    def resolve_output_resources(self, args, context, info):
+        return self.output_resources()

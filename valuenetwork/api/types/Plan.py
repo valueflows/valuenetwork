@@ -26,13 +26,13 @@ class Plan(DjangoObjectType):
 
     working_agents = graphene.List(lambda: types.Agent)
 
-    planned_input_resources = graphene.List(lambda: types.EconomicResource)
+    planned_non_work_inputs = graphene.List(lambda: types.Commitment)
 
-    planned_output_resources = graphene.List(lambda: types.EconomicResource)
+    planned_outputs = graphene.List(lambda: types.Commitment)
 
-    input_resources = graphene.List(lambda: types.EconomicResource)
+    non_work_inputs = graphene.List(lambda: types.EconomicEvent)
 
-    output_resources = graphene.List(lambda: types.EconomicResource)
+    outputs = graphene.List(lambda: types.EconomicEvent)
 
     def resolve_scope(self, args, *rargs):
         return formatAgentList(self.plan_context_agents())
@@ -43,14 +43,14 @@ class Plan(DjangoObjectType):
     def resolve_working_agents(self, args, context, info):
         return formatAgentList(self.all_working_agents())
 
-    def resolve_committed_input_resources(self, args, context, info):
-        return self.committed_input_resources()
+    def resolve_planned_non_work_inputs(self, args, context, info):
+        return self.non_work_incoming_commitments()
 
-    def resolve_committed_output_resources(self, args, context, info):
-        return self.committed_output_resources()
+    def resolve_planned_outputs(self, args, context, info):
+        return self.all_outgoing_commitments()
 
-    def resolve_input_resources(self, args, context, info):
-        return self.input_resources()
+    def resolve_non_work_inputs(self, args, context, info):
+        return self.non_work_incoming_events()
 
-    def resolve_output_resources(self, args, context, info):
-        return self.output_resources()
+    def resolve_outputs(self, args, context, info):
+        return self.all_outgoing_events()

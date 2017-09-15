@@ -1780,6 +1780,69 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    allPlans {
+      id
+      name
+      plannedNonWorkInputs {
+        action
+        resourceClassifiedAs {
+          name
+        }
+        committedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      plannedOutputs {
+        action
+        resourceClassifiedAs {
+          name
+        }
+        committedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      nonWorkInputs {
+        action
+        affects {
+          trackingIdentifier
+          resourceClassifiedAs {
+            name
+          }
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      outputs {
+        action
+        affects {
+          trackingIdentifier
+          resourceClassifiedAs {
+            name
+          }
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
 # event data
 
 query ($token: String) {

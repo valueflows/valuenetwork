@@ -4013,8 +4013,8 @@ class Order(models.Model):
         # this cd be return order.dependent_commitments.all()
         return Commitment.objects.filter(independent_demand=self)
 
-    def all_incoming_commitments(self):
-        cts = [ct for ct in self.all_dependent_commitments().exclude(event_type__relationship="out")]
+    def non_work_incoming_commitments(self):
+        cts = [ct for ct in self.all_dependent_commitments().exclude(event_type__relationship="out").exclude(event_type__relationship="work")]
         answer = []
         for ct in cts:
             matches = None
@@ -4043,8 +4043,8 @@ class Order(models.Model):
                     answer.append(ct)
         return answer
 
-    def all_incoming_events(self):
-        evts = [evt for evt in self.all_events() if evt.event_type.relationship!="out"]
+    def non_work_incoming_events(self):
+        evts = [evt for evt in self.all_events() if evt.event_type.relationship!="out" and evt.event_type.relationship != "work"]
         answer = []
         for evt in evts:
             matches = None

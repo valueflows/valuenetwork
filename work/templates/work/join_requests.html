@@ -109,6 +109,14 @@
                                         {% csrf_token %}
                                         <input type="submit" class="btn btn-mini btn-primary" name="submit" value='{% trans "Undecline" %}' />
                                     </form>
+                                    <form
+                                        class="action-form"
+                                        id="delete-form{{ req.id }}"
+                                        action="{% url "delete_request" join_request_id=req.id %}"
+                                        method="POST" >
+                                        {% csrf_token %}
+                                        <input type="submit" class="btn btn-mini btn-danger" name="submit" value='{% trans "Delete" %}' />
+                                    </form>
                                 {% elif state == "accepted" %}
                                     <form
                                         class="action-form"

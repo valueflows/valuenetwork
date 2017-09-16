@@ -856,6 +856,15 @@ class EconomicAgent(models.Model):
         else:
             return self.context_processes()
 
+    def all_plans(self):
+        procs = self.all_processes()
+        plans = []
+        for proc in procs:
+            if proc.independent_demand():
+                if proc.independent_demand() not in plans:
+                    plans.append(proc.independent_demand())
+        return plans
+
     def resources_created(self):
         creations = []
         for p in self.all_processes():
@@ -984,7 +993,7 @@ class EconomicAgent(models.Model):
 
     def related_all_agents(self, childs=True):
         agents = [ag.has_associate for ag in self.is_associate_of.all()]
-        # bumbum get also parents of parents contexts
+        # get also parents of parents contexts
         grand_parents = []
         for agn in agents:
           grand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
@@ -993,6 +1002,13 @@ class EconomicAgent(models.Model):
           agents.extend([ag.is_associate for ag in self.has_associates.all()])
         if self.is_context and not self in agents:
           agents.extend([self])
+        grandgrand_parents = [] # get grandparents of parents. TODO: recursive parents until root
+        for agn in grand_parents:
+          grandgrand_parents.extend([ag.has_associate for ag in agn.is_associate_of.all()])
+        agents.extend(grandgrand_parents)
+        ocp = EconomicAgent.objects.root_ocp_agent()
+        if not ocp in agents:
+            agents.extend([ocp])
         return list(set(agents))
 
     def related_context_queryset(self):
@@ -1083,7 +1099,7 @@ class EconomicAgent(models.Model):
     def need_projects(self):
         resp = True
         ags = self.related_contexts()
-        if len(ags) < 2:
+        if ags and len(ags) < 2: # only one project
             if ags[0].project and ags[0].project.services():
                 if not 'projects' in ags[0].project.services():
                     resp = False
@@ -3683,7 +3699,6 @@ ORDER_TYPE_CHOICES = (
     ('holder', _('Placeholder order')),
 )
 
-
 class OrderManager(models.Manager):
 
     def customer_orders(self):
@@ -3792,6 +3807,28 @@ class Order(models.Model):
     def get_absolute_url(self):
         return ('order_schedule', (),
             { 'order_id': str(self.id),})
+
+    @property #ValueFlows
+    def planned(self):
+        return self.order_date.isoformat()
+
+    @property #ValueFlows
+    def due(self):
+        return self.due_date.isoformat()
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    def all_working_agents(self):
+        procs = self.all_processes()
+        agents = []
+        for proc in procs:
+            workers = proc.all_working_agents()
+            for worker in workers:
+                if worker not in agents:
+                    agents.append(worker)
+        return agents
 
     def exchange(self):
         exs = Exchange.objects.filter(order=self)
@@ -3976,6 +4013,66 @@ class Order(models.Model):
         # this cd be return order.dependent_commitments.all()
         return Commitment.objects.filter(independent_demand=self)
 
+    def non_work_incoming_commitments(self):
+        cts = [ct for ct in self.all_dependent_commitments().exclude(event_type__relationship="out").exclude(event_type__relationship="work")]
+        answer = []
+        for ct in cts:
+            matches = None
+            if ct.process:
+                pps = ct.process.previous_processes()
+                for pp in pps:
+                    matches = [oc for oc in pp.outgoing_commitments() if oc.resource_type == ct.resource_type]
+                    if matches:
+                        break
+                if not matches:
+                    answer.append(ct)
+        return answer
+
+    def all_outgoing_commitments(self):
+        cts = [ct for ct in self.all_dependent_commitments().filter(event_type__relationship="out")]
+        answer = []
+        for ct in cts:
+            matches = None
+            if ct.process:
+                nps = ct.process.next_processes()
+                for np in nps:
+                    matches = [ic for ic in np.incoming_commitments() if ic.resource_type == ct.resource_type]
+                    if matches:
+                        break
+                if not matches:
+                    answer.append(ct)
+        return answer
+
+    def non_work_incoming_events(self):
+        evts = [evt for evt in self.all_events() if evt.event_type.relationship!="out" and evt.event_type.relationship != "work"]
+        answer = []
+        for evt in evts:
+            matches = None
+            if evt.process:
+                pps = evt.process.previous_processes()
+                for pp in pps:
+                    matches = [oevt for oevt in pp.production_events() if oevt.resource_type == evt.resource_type]
+                    if matches:
+                        break
+                if not matches:
+                    answer.append(evt)
+        return answer
+
+    def all_outgoing_events(self):
+        evts = [evt for evt in self.all_events() if evt.event_type.relationship=="out"]
+        answer = []
+        for evt in evts:
+            matches = None
+            if evt.process:
+                nps = evt.process.next_processes()
+                for np in nps:
+                    matches = [ievt for ievt in np.incoming_events() if ievt.resource_type == evt.resource_type]
+                    if matches:
+                        break
+                if not matches:
+                    answer.append(evt)
+        return answer
+
     def has_open_processes(self):
         answer = False
         processes = self.unordered_processes()
@@ -4028,6 +4125,11 @@ class Order(models.Model):
     def context_agents(self):
         items = self.order_items()
         return [item.context_agent for item in items]
+
+    #derives context agents from processes rather than order items for people who don't record outputs
+    def plan_context_agents(self):
+        processes = self.all_processes()
+        return list(set([proc.context_agent for proc in processes]))
 
     def sale(self):
         sale = None
@@ -4092,6 +4194,14 @@ class ProcessType(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(ProcessType, self).save(*args, **kwargs)
+
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def scope(self):
+        return self.context_agent
 
     def timeline_title(self):
         return " ".join([self.name, "Process to be planned"])
@@ -8417,7 +8527,7 @@ class Transfer(models.Model):
         return None
 
     @property #ValueFlows
-    def resource_taxonomy_item(self):
+    def resource_classifiedAs(self):
         events = self.events.all()
         if events:
             event = events[0]
@@ -9265,12 +9375,24 @@ class Commitment(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def committed_resource(self):
+    def involves(self):
         return self.resource
 
     @property #ValueFlows
-    def committed_taxonomy_item(self):
+    def resource_classified_as(self):
         return self.resource_type
+
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def shorter_label(self):
         quantity_string = str(self.quantity)
@@ -11030,11 +11152,11 @@ class EconomicEvent(models.Model):
         return self.context_agent
 
     @property #ValueFlows
-    def affected_resource(self):
+    def affects(self):
         return self.resource
 
     @property #ValueFlows
-    def affected_taxonomy_item(self):
+    def affected_resource_classified_as(self):
         return self.resource_type
 
     #@property #ValueFlows TODO not in VF now
@@ -11043,9 +11165,17 @@ class EconomicEvent(models.Model):
     #        return self.resource_type
     #    return None
 
-    #@property #ValueFlows
-    #def fulfills(self):
-    #    return self.commitment
+    @property #ValueFlows
+    def input_of(self):
+        if not self.event_type.relationship == "out":
+            return self.process
+        return None
+
+    @property #ValueFlows
+    def output_of(self):
+        if self.event_type.relationship == "out":
+            return self.process
+        return None
 
     def undistributed_description(self):
         if self.unit_of_quantity:

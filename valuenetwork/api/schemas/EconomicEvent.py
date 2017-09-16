@@ -101,7 +101,7 @@ class CreateEconomicEvent(AuthedMutation):
             process = process,
             from_agent = provider,
             to_agent = receiver,
-            resource_type = committed_taxonomy_item,
+            #resource_type = committed_taxonomy_item,
             resource = committed_resource,
             quantity = Decimal(committed_numeric_value),
             unit_of_quantity = committed_unit,

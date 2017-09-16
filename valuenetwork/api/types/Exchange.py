@@ -50,7 +50,7 @@ class Transfer(DjangoObjectType):
     #this group of fields come from the give and/or take events that make up the transfer
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
-    resource_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
+    resource_classified_as = graphene.Field(lambda: types.ResourceClassification)
     give_resource = graphene.Field(lambda: types.EconomicResource)
     take_resource = graphene.Field(lambda: types.EconomicResource)
     transfer_quantity = graphene.Field(QuantityValue)
@@ -84,8 +84,8 @@ class Transfer(DjangoObjectType):
     def resolve_receiver(self, args, *rargs):
         return formatAgent(self.receiver)
 
-    def resolve_resource_taxonomy_item(self, args, *rargs):
-        return self.resource_taxonomy_item
+    def resolve_resource_classified_as(self, args, *rargs):
+        return self.resource_classified_as
 
     def resolve_give_resource(self, args, *rargs):
         return self.give_resource

@@ -817,6 +817,7 @@ def members_agent(request, agent_id):
     #artwork = get_object_or_404(Artwork_Type, clas="Material")
     add_skill_form = AddUserSkillForm(agent=agent, data=request.POST or None)
     Stype_form = NewSkillTypeForm(agent=agent, data=request.POST or None)
+    Stype_tree = Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ).order_by('tree_id','lft')
 
     upload_form = UploadAgentForm(instance=agent)
 
@@ -891,7 +892,7 @@ def members_agent(request, agent_id):
         "form_entries": entries,
         "fobi_name": fobi_name,
         "add_skill_form": add_skill_form,
-        "Stype_tree": Ocp_Skill_Type.objects.all().exclude( Q(resource_type__isnull=False), Q(resource_type__context_agent__isnull=False), ~Q(resource_type__context_agent__id__in=context_ids) ),
+        "Stype_tree": Stype_tree,
         "Stype_form": Stype_form,
         "auto_resource": auto_resource,
         "related_rts": related_rts,
@@ -1110,8 +1111,7 @@ def joinaproject_request(request, form_slug = False):
     cleaned_data = False
     form = False
     if form_slug:
-        project = Project.objects.get(fobi_slug=form_slug)
-
+        project = get_object_or_404(Project, fobi_slug=form_slug)
         try:
             user_agent = request.user.agent.agent
             if user_agent and request.user.is_authenticated: # and user_agent.is_active_freedom_coop_member or request.user.is_staff:
@@ -1691,7 +1691,12 @@ def decline_request(request, join_request_id):
     if mbr_req.agent and mbr_req.project:
         # modify relation to active
         ass_type = AgentAssociationType.objects.get(identifier="participant")
-        ass, created = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
+        aass = AgentAssociation.objects.filter(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
+        if len(aass) > 1:
+            ass = aass[0]
+            aass[1].delete()
+        else:
+            ass, created = AgentAssociation.objects.get_or_create(is_associate=mbr_req.agent, has_associate=mbr_req.project.agent, association_type=ass_type)
         ass.state = "potential"
         ass.save()
     return HttpResponseRedirect('/%s/%s/%s/'
@@ -1958,7 +1963,15 @@ def connect_agent_to_join_request(request, agent_id, join_request_id):
             aa.save()
             return HttpResponseRedirect('/%s/%s/%s/'
                 % ('work/agent', project.agent.id, 'join-requests'))
-    raise ValidationError('Not allowed to connect agent to join request')
+        elif not mbr_req.agent == agent:
+            raise ValidationError("The join-request ("+str(mbr_req)+") is already linked to another agent: "+str(mbr_req.agent))
+        else:
+            raise ValidationError("The join-request ("+str(mbr_req)+") is already linked to this agent. Why redo? "+str(mbr_req.agent))
+      else:
+          raise ValidationError("Not enough permissions to connect agent to join-request!")
+    else:
+        raise ValidationError('Project with a non moderated joining style! Project:'+str(project)+' joinstyle:'+project.joining_style+' req.agent:'+str(mbr_req.agent))
+
     """project_agent = get_object_or_404(EconomicAgent, pk=agent_id)
     if request.method == "POST":
         agent_form = JoinAgentSelectionForm(data=request.POST)

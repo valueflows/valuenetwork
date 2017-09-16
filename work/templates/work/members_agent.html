@@ -869,6 +869,7 @@
                                     <a href="{% url 'project_feedback' agent_id=agent.id join_request_id=req.id %}">
                                         <b>{% trans "Feedback" %}</b>
                                     </a>
+                                    {% if not req.fobi_data %} &nbsp;<b class="error">ERROR!</b> {% endif %}
                                 {% endif %}
                               {% endif %}
                             {% endfor %}

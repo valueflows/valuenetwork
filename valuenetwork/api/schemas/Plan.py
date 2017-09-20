@@ -105,9 +105,10 @@ class DeletePlan(AuthedMutation):
         id = args.get('id')
         plan = Order.objects.get(pk=id)
         if plan:
-            #if plan.is_deletable(): #TODO no method like this on Order, I think it just sets the process fk's null - but this doesn't seem like the best for this situation, where you need a plan to get to a process....
-            plan.delete()
-            #else:
-            #    raise PermissionDenied("Process has events so cannot be deleted.")
+            procs = plan.unordered_processes()
+            if len(procs) == 0: #TODO is this the right requirement? >> no, there is a bunch of code in the view!
+                plan.delete()
+            else:
+                raise PermissionDenied("Plan has processes so cannot be deleted.")
 
         return DeletePlan(plan=plan)

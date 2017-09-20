@@ -2352,7 +2352,10 @@ mutation ($token: String!) {
       action
       plannedStart
       due
-      process {
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       provider {
@@ -2367,7 +2370,7 @@ mutation ($token: String!) {
       resourceClassifiedAs {
         name
       }
-      committedResource {
+      involves {
         trackingIdentifier
       }
       committedQuantity {
@@ -2385,13 +2388,16 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   updateCommitment(token: $token, plannedStart: "2017-10-03", due: "2017-10-12",
-    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 362) {
+    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 363) {
     commitment {
       id
       action
       plannedStart
       due
-      process {
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       provider {
@@ -2406,7 +2412,7 @@ mutation ($token: String!) {
       resourceClassifiedAs {
         name
       }
-      committedResource {
+      involves {
         trackingIdentifier
       }
       committedQuantity {

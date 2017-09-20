@@ -35,52 +35,41 @@ class Query(graphene.AbstractType):
         return Order.objects.rand_orders()
 
 
-class CreatePlan(AuthedMutation): #TODO
+class CreatePlan(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         name = graphene.String(required=True)
-        planned_start = graphene.String(required=True)
-        planned_duration = graphene.Int(required=True)
-        scope_id = graphene.Int(required=True)
+        due = graphene.String(required=True)
         note = graphene.String(required=False)
 
     plan = graphene.Field(lambda: Plan)
 
     @classmethod
     def mutate(cls, root, args, context, info):
-        #import pdb; pdb.set_trace()
         name = args.get('name')
-        planned_start = args.get('planned_start')
-        planned_duration = args.get('planned_duration')
+        due = args.get('due')
         note = args.get('note')
-        scope_id = args.get('scope_id')
 
         if not note:
             note = ""
-        start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
-        end_date = start_date + datetime.timedelta(days=planned_duration)
-        scope = EconomicAgent.objects.get(pk=scope_id)
-        process = ProcessProxy(
+        due = datetime.datetime.strptime(due, '%Y-%m-%d').date()
+        plan = Order(
+            order_type="rand",
             name=name,
-            start_date=start_date,
-            end_date=end_date,
-            notes=note,
-            context_agent=scope,
+            due_date=due,
+            description=note,
             created_by=context.user,
         )
-        process.save()
+        plan.save()
 
         return CreatePlan(plan=plan)
 
 
-class UpdatePlan(AuthedMutation): #TODO
+class UpdatePlan(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         id = graphene.Int(required=True)
         name = graphene.String(required=False)
-        planned_start = graphene.String(required=False)
-        planned_duration = graphene.Int(required=False)
-        scope_id = graphene.Int(required=False)
+        due = graphene.String(required=False)
         note = graphene.String(required=False)
-        is_finished = graphene.Boolean(required=False)
 
     plan = graphene.Field(lambda: Plan)
 
@@ -88,36 +77,24 @@ class UpdatePlan(AuthedMutation): #TODO
     def mutate(cls, root, args, context, info):
         id = args.get('id')
         name = args.get('name')
-        planned_start = args.get('planned_start')
-        planned_duration = args.get('planned_duration')
+        due = args.get('due')
         note = args.get('note')
-        scope_id = args.get('scope_id')
-        is_finished = args.get('is_finished')
 
-        process = ProcessProxy.objects.get(pk=id)
-        if process:
+        plan = Order.objects.get(pk=id)
+        if plan:
             if name:
-                process.name = name
+                plan.name = name
             if note:
-                process.notes=note
-            if planned_start:
-                start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
-                process.start_date=start_date
-            if planned_duration:
-                end_date = process.start_date + datetime.timedelta(days=planned_duration)
-                process.end_date=end_date
-            if scope_id:
-                scope = EconomicAgent.objects.get(pk=scope_id)
-                process.context_agent=scope
-            if is_finished:
-                process.finished=is_finished
-            process.changed_by=context.user
-            process.save()
+                plan.description=note
+            if due:
+                due_date = datetime.datetime.strptime(due, '%Y-%m-%d').date()
+                plan.due_date=due_date
+            plan.save()
 
         return UpdatePlan(plan=plan)
 
 
-class DeletePlan(AuthedMutation): #TODO
+class DeletePlan(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         id = graphene.Int(required=True)
 
@@ -126,11 +103,11 @@ class DeletePlan(AuthedMutation): #TODO
     @classmethod
     def mutate(cls, root, args, context, info):
         id = args.get('id')
-        process = ProcessProxy.objects.get(pk=id)
-        if process:
-            if process.is_deletable():
-                process.delete()
-            else:
-                raise PermissionDenied("Process has events so cannot be deleted.")
+        plan = Order.objects.get(pk=id)
+        if plan:
+            #if plan.is_deletable(): #TODO no method like this on Order, I think it just sets the process fk's null - but this doesn't seem like the best for this situation, where you need a plan to get to a process....
+            plan.delete()
+            #else:
+            #    raise PermissionDenied("Process has events so cannot be deleted.")
 
         return DeletePlan(plan=plan)

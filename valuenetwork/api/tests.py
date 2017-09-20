@@ -2430,4 +2430,34 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  createPlan(token: $token, name: "Fudge!", due: "2017-10-15", note: "testing") {
+    plan {
+      id
+      name
+      due
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updatePlan(token: $token, id:53, name: "Fudge!", due: "2017-10-16", note: "testing more") {
+    plan {
+      id
+      name
+      due
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deletePlan(token: $token, id: 53) {
+    plan {
+      name
+    }
+  }
+}
+
 '''

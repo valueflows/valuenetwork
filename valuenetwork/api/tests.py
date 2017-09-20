@@ -2466,4 +2466,89 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "use", start: "2017-10-01", scopeId: 39, note: "testing", affectedResourceClassificationId: 17, affectedResourceId: 11, affectedNumericValue: "3.5", affectedUnitId: 2, processId: 62, providerId: 79, receiverId: 39) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateEconomicEvent(token: $token, id: 346, start: "2017-10-02", scopeId: 39, note: "testing more", affectedResourceClassificationId: 17, affectedResourceId: 11, affectedNumericValue: "4.5", affectedUnitId: 2, processId: 62, providerId: 79, receiverId: 39) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteEconomicEvent(token: $token, id: 346) {
+    economicEvent {
+      action
+      start
+    }
+  }
+}
+
 '''

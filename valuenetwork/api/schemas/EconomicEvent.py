@@ -5,7 +5,7 @@
 import graphene
 import datetime
 from decimal import Decimal
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment
+from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment, EventType, EconomicAgent, Process, EconomicResourceType, EconomicResource as EconomicResourceProxy, Unit
 from valuenetwork.api.types.EconomicEvent import EconomicEvent, Action
 from valuenetwork.api.models import Fulfillment
 from six import with_metaclass
@@ -45,6 +45,7 @@ class CreateEconomicEvent(AuthedMutation):
         receiver_id = graphene.Int(required=False)
         scope_id = graphene.Int(required=False)
         affected_resource_id = graphene.Int(required=False)
+        affected_resource_classification_id = graphene.Int(required=True)
         affected_numeric_value = graphene.String(required=True)
         affected_unit_id = graphene.Int(required=True)
         start = graphene.String(required=False)
@@ -60,7 +61,8 @@ class CreateEconomicEvent(AuthedMutation):
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
         affected_resource_id = args.get('affected_resource_id')
-        committed_numeric_value = args.get('committed_numeric_value')
+        affected_resource_classification_id = args.get('affected_resource_classification_id')
+        affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
         start = args.get('start')
         note = args.get('note')
@@ -69,7 +71,7 @@ class CreateEconomicEvent(AuthedMutation):
         if not note:
             note = ""
         if start:
-            start = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
+            start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
         if scope_id:
             scope = EconomicAgent.objects.get(pk=scope_id)
         else:
@@ -86,12 +88,12 @@ class CreateEconomicEvent(AuthedMutation):
             process = Process.objects.get(pk=process_id)
         else:
             process = None
-       #if committed_taxonomy_item_id:
-       #     committed_taxonomy_item = EconomicResourceType.objects.get(pk=committed_taxonomy_item_id)
-       # else:
-       #     committed_taxonomy_item = None
+        if affected_resource_classification_id:
+            affected_resource_classification = EconomicResourceType.objects.get(pk=affected_resource_classification_id)
+        else:
+            affected_resource_classification = None
         if affected_resource_id:
-            affected_resource = EconomicResource.objects.get(pk=affected_resource_id)
+            affected_resource = EconomicResourceProxy.objects.get(pk=affected_resource_id)
         else:
             affected_resource = None
         affected_unit = Unit.objects.get(pk=affected_unit_id)
@@ -101,11 +103,11 @@ class CreateEconomicEvent(AuthedMutation):
             process = process,
             from_agent = provider,
             to_agent = receiver,
-            #resource_type = committed_taxonomy_item,
-            resource = committed_resource,
-            quantity = Decimal(committed_numeric_value),
-            unit_of_quantity = committed_unit,
-            start_date = planned_start,
+            resource_type = affected_resource_classification,
+            resource = affected_resource,
+            quantity = Decimal(affected_numeric_value),
+            unit_of_quantity = affected_unit,
+            event_date = start,
             description=note,
             context_agent=scope,
             created_by=context.user,
@@ -123,10 +125,10 @@ class UpdateEconomicEvent(AuthedMutation):
         provider_id = graphene.Int(required=False)
         receiver_id = graphene.Int(required=False)
         scope_id = graphene.Int(required=False)
-        #affected_taxonomy_item_id = graphene.Int(required=True)
+        affected_resource_classification_id = graphene.Int(required=False)
         affected_resource_id = graphene.Int(required=False)
-        affected_numeric_value = graphene.String(required=True)
-        affected_unit_id = graphene.Int(required=True)
+        affected_numeric_value = graphene.String(required=False)
+        affected_unit_id = graphene.Int(required=False)
         start = graphene.String(required=False)
         note = graphene.String(required=False)
 
@@ -140,9 +142,9 @@ class UpdateEconomicEvent(AuthedMutation):
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
-        #affected_taxonomy_item_id = args.get('committed_taxonomy_item_id')
+        affected_resource_classification_id = args.get('affected_resource_classification_id')
         affected_resource_id = args.get('affected_resource_id')
-        committed_numeric_value = args.get('committed_numeric_value')
+        affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
         start = args.get('start')
         note = args.get('note')
@@ -153,8 +155,8 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.event_type = EventType.objects.convert_action_to_event_type(action)
             if note:
                 economic_event.description = note
-            if planned_start:
-                economic_event.start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
+            if start:
+                economic_event.event_date = datetime.datetime.strptime(start, '%Y-%m-%d').date()
             if scope_id:
                 economic_event.context_agent = EconomicAgent.objects.get(pk=scope_id)
             if provider_id:
@@ -163,10 +165,10 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.to_agent = EconomicAgent.objects.get(pk=receiver_id)
             if process_id:
                 economic_event.process = Process.objects.get(pk=process_id)
-            #if committed_taxonomy_item_id:
-            #    economic_event.resource_type = EconomicResourceType.objects.get(pk=committed_taxonomy_item_id)
+            if affected_resource_classification_id:
+                economic_event.resource_type = EconomicResourceType.objects.get(pk=affected_resource_classification_id)
             if affected_resource_id:
-                economic_event.resource = EconomicResource.objects.get(pk=affected_resource_id)
+                economic_event.resource = EconomicResourceProxy.objects.get(pk=affected_resource_id)
             if affected_numeric_value:
                 economic_event.quantity = Decimal(affected_numeric_value)
             if affected_unit_id:

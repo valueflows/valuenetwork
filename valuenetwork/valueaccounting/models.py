@@ -11475,6 +11475,20 @@ class EconomicEvent(models.Model):
                     pass
         super(EconomicEvent, self).delete(*args, **kwargs)
 
+    def update_resource(self, delta):
+        # This should work for new or changed events,
+        # but not for deletes.
+        # delta is for event changes
+        resource = self.resource
+        if resource:
+            quantity = delta or self.quantity
+            if self.consumes_resources():
+                resource.quantity -= quantity
+                resource.save()
+            if self.creates_resources():
+                resource.quantity += event.quantity
+                resource.save()
+
     def due_date(self):
         if self.commitment:
             return self.commitment.due_date

@@ -73,6 +73,7 @@ class CreateProcess(AuthedMutation):
             created_by=context.user,
         )
         process.save()
+        #TODO: add logic for inserting process into workflow plan
 
         return CreateProcess(process=process)
 
@@ -117,7 +118,7 @@ class UpdateProcess(AuthedMutation):
             if is_finished:
                 process.finished=is_finished
             process.changed_by=context.user
-            process.save()
+            process.save_api()
 
         return UpdateProcess(process=process)
 
@@ -135,7 +136,8 @@ class DeleteProcess(AuthedMutation):
         if process:
             if process.is_deletable():
                 process.delete()
+                #TODO: add logic for adjusting other processes if workflow plan
             else:
-                raise PermissionDenied("Process has events so cannot be deleted.")
+                raise PermissionDenied("Process has economic events so cannot be deleted.")
 
         return DeleteProcess(process=process)

@@ -105,10 +105,6 @@ class DeletePlan(AuthedMutation):
         id = args.get('id')
         plan = Order.objects.get(pk=id)
         if plan:
-            procs = plan.unordered_processes()
-            if len(procs) == 0: #TODO is this the right requirement? >> no, there is a bunch of code in the view!
-                plan.delete()
-            else:
-                raise PermissionDenied("Plan has processes so cannot be deleted.")
+            plan.delete_api()
 
         return DeletePlan(plan=plan)

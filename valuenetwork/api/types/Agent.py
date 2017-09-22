@@ -53,6 +53,10 @@ class Agent(graphene.Interface):
 
     agent_roles = graphene.List(AgentRelationshipRole)
 
+    agent_recipes = graphene.List(lambda: types.ResourceClassification)
+
+    #agent_recipe_bundles = graphene.List(ResourceClassification)
+
     # Resolvers
 
     def resolve_owned_economic_resources(self, args, context, info):
@@ -153,6 +157,20 @@ class Agent(graphene.Interface):
         if agent:
             return agent.active_association_types()
         return None
+
+    # returns resource classifications that have a recipe, for this and parent agents
+    def resolve_agent_recipes(self, args, context, info):
+        agent = _load_identified_agent(self)
+        if agent:
+            return agent.recipes()
+        return None
+
+    # returns resource classifications that have a recipe, for this and parent agents
+    #def resolve_agent_recipe_bundles(self, args, context, info):
+    #    agent = _load_identified_agent(self)
+    #    if agent:
+    #        return agent.get_resource_type_lists()
+    #    return None
 
 
 # ValueFlows type for a Person (singular) Agent.

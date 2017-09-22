@@ -11299,6 +11299,10 @@ class EconomicEvent(models.Model):
     def update_resource(self, delta):
         # This should work for new or changed events,
         # but not for deletes.
+        # It also only works for adding to existing resources.
+        # If the resource has not been created yet,
+        # and assigned to the event,
+        # this method will not create it.
         # delta is for event changes
         resource = self.resource
         if resource:

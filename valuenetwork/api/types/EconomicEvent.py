@@ -37,8 +37,7 @@ class EconomicEvent(DjangoObjectType):
     affects = graphene.Field(lambda: types.EconomicResource)
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
-    #work_category = graphene.String(source='work_category')
-    #fulfills = graphene.Field(lambda: types.Commitment)
+    url = graphene.String(source='url')
     note = graphene.String(source='note')
 
     class Meta:
@@ -77,6 +76,7 @@ class EconomicEvent(DjangoObjectType):
     def resolve_affected_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
 
+    # This is valid only for process related events, may need to re-look at when doing exchanges
     def resolve_fulfills(self, args, context, info):
         commitment = self.commitment
         if commitment:

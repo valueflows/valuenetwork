@@ -11444,6 +11444,14 @@ class EconomicEvent(models.Model):
         #    if self.resource.resource_type.is_virtual_account():
                 #call the faircoin method here, pass the event info needed
 
+    def save_api(self):
+        self.save()
+        process = self.process
+        if process:
+            if not process.start_date:
+                process.start_date = self.event_date
+                process.save()
+        
 
     def delete(self, *args, **kwargs):
         if self.is_contribution:

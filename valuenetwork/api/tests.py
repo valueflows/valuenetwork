@@ -1858,6 +1858,7 @@ query ($token: String) {
         }
       }
       note
+      url
       affectedResource {
         resourceClassification {
           name

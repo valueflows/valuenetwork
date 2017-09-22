@@ -49,6 +49,8 @@ class CreateEconomicEvent(AuthedMutation):
         affected_numeric_value = graphene.String(required=True)
         affected_unit_id = graphene.Int(required=True)
         start = graphene.String(required=False)
+        fulfills_commitment_id = graphene.Int(required=False)
+        url = graphene.String(required=False)
         note = graphene.String(required=False)
 
     economic_event = graphene.Field(lambda: EconomicEvent)
@@ -65,6 +67,8 @@ class CreateEconomicEvent(AuthedMutation):
         affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
         start = args.get('start')
+        fulfills_commitment_id = args.get('commitment_id') #TODO see if this needs fixing for multiples when doing exchanges
+        url = args.get('url')
         note = args.get('note')
 
         event_type = EventType.objects.convert_action_to_event_type(action)
@@ -72,8 +76,16 @@ class CreateEconomicEvent(AuthedMutation):
             note = ""
         if start:
             start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
+        else:
+            start = datetime.date.today()
+        if fulfills_commitment_id:
+            commitment = Commitment.objects.get(pk=commitment_id)
+        else:
+            commitment = None
         if scope_id:
             scope = EconomicAgent.objects.get(pk=scope_id)
+        elif commitment:
+            scope = commitment.context_agent
         else:
             scope = None
         if provider_id:
@@ -110,6 +122,8 @@ class CreateEconomicEvent(AuthedMutation):
             event_date = start,
             description=note,
             context_agent=scope,
+            url=url,
+            commitment=commitment,
             created_by=context.user,
         )
         economic_event.save()
@@ -130,6 +144,7 @@ class UpdateEconomicEvent(AuthedMutation):
         affected_numeric_value = graphene.String(required=False)
         affected_unit_id = graphene.Int(required=False)
         start = graphene.String(required=False)
+        fulfills_commitment_id = graphene.Int(required=False)
         note = graphene.String(required=False)
 
     economic_event = graphene.Field(lambda: EconomicEvent)
@@ -147,6 +162,7 @@ class UpdateEconomicEvent(AuthedMutation):
         affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
         start = args.get('start')
+        fulfills_commitment_id = args.get('commitment_id') #TODO see if this needs fixing for multiples when doing exchanges
         note = args.get('note')
 
         economic_event = EconomicEventProxy.objects.get(pk=id)
@@ -173,6 +189,8 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.quantity = Decimal(affected_numeric_value)
             if affected_unit_id:
                 economic_event.unit_of_quantity = Unit.objects.get(pk=affected_unit_id)
+            if fulfills_commitment_id:
+                economic_event.commitment = Commitment.objects.get(pk=fulfills_commitment_id)
 
             economic_event.save()
 

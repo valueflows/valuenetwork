@@ -133,6 +133,8 @@ class CreateEconomicEvent(AuthedMutation):
             affected_unit = Unit.objects.get(pk=commitment.unit_of_quantity__id)
         else:
             raise ValidationError("Must provide a unit in either economic event or its commitment")
+        if not url:
+            url = ""
 
         economic_event = EconomicEventProxy(
             event_type = event_type,

@@ -11449,6 +11449,8 @@ class EconomicEvent(models.Model):
         process = self.process
         if process:
             process.set_started(self.event_date, user)
+        if self.resource:
+            self.update_resource(delta=self.quantity)
         
 
     def delete(self, *args, **kwargs):

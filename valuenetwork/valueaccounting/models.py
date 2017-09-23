@@ -11296,23 +11296,56 @@ class EconomicEvent(models.Model):
                     pass
         super(EconomicEvent, self).delete(*args, **kwargs)
 
-    def update_resource(self, delta):
+    def update_resource(self, delta=None):
         # This should work for new or changed events,
         # but not for deletes.
-        # It also only works for adding to existing resources.
+        # It also *only works for adding to existing resources*.
         # If the resource has not been created yet,
         # and assigned to the event,
         # this method will not create it.
-        # delta is for event changes
+        # delta is for event changes.
+        #import pdb; pdb.set_trace()
         resource = self.resource
         if resource:
             quantity = delta or self.quantity
             if self.consumes_resources():
                 resource.quantity -= quantity
-                resource.save()
+                #resource.save()
             if self.creates_resources():
-                resource.quantity += event.quantity
-                resource.save()
+                resource.quantity += quantity
+                #resource.save()
+
+    def delete_resource_effects(self):
+        # This might work for deleted events,
+        #import pdb; pdb.set_trace()
+        resource = self.resource
+        if resource:
+            quantity = self.quantity
+            if self.consumes_resources():
+                resource.quantity += quantity
+                #resource.save()
+            if self.creates_resources():
+                resource.quantity -= quantity
+                #resource.save()
+            if self.changes_stage():
+                process = self.process
+                if process:
+                    #this needs a lot of testing
+                    tbcs = process.to_be_changed_requirements.filter(
+                        resource_type=resource.resource_type)
+                    if tbcs:
+                        tbc = tbcs[0]
+                        tbc_evts = tbc.fulfilling_events.filter(
+                            resource=resource)
+                        if tbc_evts:
+                            tbc_evt = tbc_evts[0]
+                            resource.quantity = tbc_evt.quantity
+                            tbc_evt.delete()
+                        resource.stage = tbc.stage
+                        resource.save()
+                    else:
+                        resource.revert_to_previous_stage()
+                
 
     def due_date(self):
         if self.commitment:

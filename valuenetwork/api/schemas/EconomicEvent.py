@@ -69,12 +69,12 @@ class CreateEconomicEvent(AuthedMutation):
         affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
         start = args.get('start')
-        fulfills_commitment_id = args.get('commitment_id') #TODO see if this needs fixing for multiples when doing exchanges
+        fulfills_commitment_id = args.get('fulfills_commitment_id') #TODO see if this needs fixing for multiples when doing exchanges
         url = args.get('url')
         note = args.get('note')
 
         if fulfills_commitment_id:
-            commitment = Commitment.objects.get(pk=commitment_id)
+            commitment = Commitment.objects.get(pk=fulfills_commitment_id)
         else:
             commitment = None
         if action:
@@ -152,7 +152,7 @@ class CreateEconomicEvent(AuthedMutation):
             commitment=commitment,
             created_by=context.user,
         )
-        economic_event.save_api(user=context.user)
+        economic_event.save_api(user=context.user, delta=None)
 
         return CreateEconomicEvent(economic_event=economic_event)
 
@@ -191,11 +191,12 @@ class UpdateEconomicEvent(AuthedMutation):
         affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
         start = args.get('start')
-        fulfills_commitment_id = args.get('commitment_id') #TODO see if this needs fixing for multiples when doing exchanges
+        fulfills_commitment_id = args.get('fulfills_commitment_id') #TODO see if this needs fixing for multiples when doing exchanges
         url = args.get('url')
         note = args.get('note')
 
         economic_event = EconomicEventProxy.objects.get(pk=id)
+        old_quantity = economic_event.quantity
         if economic_event:
             if action:
                 economic_event.event_type = EventType.objects.convert_action_to_event_type(action)
@@ -224,8 +225,9 @@ class UpdateEconomicEvent(AuthedMutation):
             if fulfills_commitment_id:
                 economic_event.commitment = Commitment.objects.get(pk=fulfills_commitment_id)
             economic_event.changed_by = context.user
+            delta = economic_event.quantity - old_quantity
 
-            economic_event.save_api(user=context.user)
+            economic_event.save_api(user=context.user, delta=delta)
 
         return UpdateEconomicEvent(economic_event=economic_event)
 

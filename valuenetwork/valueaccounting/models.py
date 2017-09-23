@@ -11444,14 +11444,13 @@ class EconomicEvent(models.Model):
         #    if self.resource.resource_type.is_virtual_account():
                 #call the faircoin method here, pass the event info needed
 
-    def save_api(self, user):
+    def save_api(self, user, delta): #additional logic from views
         self.save()
         process = self.process
         if process:
             process.set_started(self.event_date, user)
-        if self.resource:
-            self.update_resource(delta=self.quantity)
-        
+        if self.resource and delta != 0:
+            self.update_resource(delta=delta)
 
     def delete(self, *args, **kwargs):
         if self.is_contribution:
@@ -11475,37 +11474,41 @@ class EconomicEvent(models.Model):
                     pass
         super(EconomicEvent, self).delete(*args, **kwargs)
 
+    def delete_api(self): #additional logic from views
+        self.delete()
+        self.delete_resource_effects()
+
     def update_resource(self, delta=None):
-        # This should work for new or changed events,
+        # This should work for new or changed events (changed quantity only),
         # but not for deletes.
         # It also *only works for adding to existing resources*.
         # If the resource has not been created yet,
         # and assigned to the event,
         # this method will not create it.
-        # delta is for event changes.
+        # delta is for event changes, quantity only.
         #import pdb; pdb.set_trace()
         resource = self.resource
         if resource:
             quantity = delta or self.quantity
             if self.consumes_resources():
                 resource.quantity -= quantity
-                #resource.save()
+                resource.save()
             if self.creates_resources():
                 resource.quantity += quantity
-                #resource.save()
+                resource.save()
 
     def delete_resource_effects(self):
-        # This might work for deleted events,
+        # This might work for deleted events
         #import pdb; pdb.set_trace()
         resource = self.resource
         if resource:
             quantity = self.quantity
             if self.consumes_resources():
                 resource.quantity += quantity
-                #resource.save()
+                resource.save()
             if self.creates_resources():
                 resource.quantity -= quantity
-                #resource.save()
+                resource.save()
             if self.changes_stage():
                 process = self.process
                 if process:

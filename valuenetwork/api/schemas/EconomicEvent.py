@@ -11,7 +11,7 @@ from valuenetwork.api.models import Fulfillment
 from six import with_metaclass
 from django.contrib.auth.models import User
 from .Auth import AuthedInputMeta, AuthedMutation
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 
 
 class Query(graphene.AbstractType):
@@ -39,15 +39,16 @@ class Query(graphene.AbstractType):
 
 class CreateEconomicEvent(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
-        action = graphene.String(required=True)
-        process_id = graphene.Int(required=False)
+        action = graphene.String(required=False) #but then must have a commitment
+        input_of_id = graphene.Int(required=False)
+        output_of_id = graphene.Int(required=False)
         provider_id = graphene.Int(required=False)
         receiver_id = graphene.Int(required=False)
-        scope_id = graphene.Int(required=False)
-        affected_resource_id = graphene.Int(required=False)
-        affected_resource_classification_id = graphene.Int(required=True)
+        scope_id = graphene.Int(required=False) #but then must have a commitment
+        affects_id = graphene.Int(required=False)
+        affected_resource_classification_id = graphene.Int(required=False) #but then must have a commitment
         affected_numeric_value = graphene.String(required=True)
-        affected_unit_id = graphene.Int(required=True)
+        affected_unit_id = graphene.Int(required=False) #but then must have a commitment
         start = graphene.String(required=False)
         fulfills_commitment_id = graphene.Int(required=False)
         url = graphene.String(required=False)
@@ -58,11 +59,12 @@ class CreateEconomicEvent(AuthedMutation):
     @classmethod
     def mutate(cls, root, args, context, info):
         action = args.get('action')
-        process_id = args.get('process_id')
+        input_of_id = args.get('input_of_id')
+        output_of_id = args.get('output_of_id')
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
-        affected_resource_id = args.get('affected_resource_id')
+        affects_id = args.get('affects_id')
         affected_resource_classification_id = args.get('affected_resource_classification_id')
         affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
@@ -71,44 +73,66 @@ class CreateEconomicEvent(AuthedMutation):
         url = args.get('url')
         note = args.get('note')
 
-        event_type = EventType.objects.convert_action_to_event_type(action)
+        if fulfills_commitment_id:
+            commitment = Commitment.objects.get(pk=commitment_id)
+        else:
+            commitment = None
+        if action:
+            event_type = EventType.objects.convert_action_to_event_type(action)
+        elif commitment:
+            event_type = commitment.event_type
+        else:
+            raise ValidationError("Must provide an action in either economic event or its commitment")
         if not note:
             note = ""
         if start:
             start = datetime.datetime.strptime(start, '%Y-%m-%d').date()
         else:
             start = datetime.date.today()
-        if fulfills_commitment_id:
-            commitment = Commitment.objects.get(pk=commitment_id)
-        else:
-            commitment = None
         if scope_id:
             scope = EconomicAgent.objects.get(pk=scope_id)
         elif commitment:
             scope = commitment.context_agent
         else:
-            scope = None
+            raise ValidationError("Must provide a scope in either economic event or its commitment")
         if provider_id:
             provider = EconomicAgent.objects.get(pk=provider_id)
+        elif commitment:
+            provider = commitment.from_agent
         else:
             provider = None
         if receiver_id:
             receiver = EconomicAgent.objects.get(pk=receiver_id)
+        elif commitment:
+            receiver = commitment.to_agent
         else:
             receiver = None
-        if process_id:
-            process = Process.objects.get(pk=process_id)
+        if input_of_id:
+            process = Process.objects.get(pk=input_of_id)
+        elif output_of_id:
+            process = Process.objects.get(pk=output_of_id)
+        elif commitment:
+            process = commitment.process
         else:
             process = None
+        if affects_id:
+            affects = EconomicResourceProxy.objects.get(pk=affects_id)
+        else:
+            affects = None
         if affected_resource_classification_id:
             affected_resource_classification = EconomicResourceType.objects.get(pk=affected_resource_classification_id)
+        elif affects:
+            affected_resource_classification = EconomicResourceType.objects.get(pk=affects.resource_type__id)
+        elif commitment:
+            affected_resource_classification = EconomicResourceType.objects.get(pk=commitment.resource_type__id)
         else:
-            affected_resource_classification = None
-        if affected_resource_id:
-            affected_resource = EconomicResourceProxy.objects.get(pk=affected_resource_id)
+            raise ValidationError("Must provide a resource classification in either economic event or its commitment")
+        if affected_unit_id:
+            affected_unit = Unit.objects.get(pk=affected_unit_id)
+        elif commitment:
+            affected_unit = Unit.objects.get(pk=commitment.unit_of_quantity__id)
         else:
-            affected_resource = None
-        affected_unit = Unit.objects.get(pk=affected_unit_id)
+            raise ValidationError("Must provide a unit in either economic event or its commitment")
 
         economic_event = EconomicEventProxy(
             event_type = event_type,
@@ -116,7 +140,7 @@ class CreateEconomicEvent(AuthedMutation):
             from_agent = provider,
             to_agent = receiver,
             resource_type = affected_resource_classification,
-            resource = affected_resource,
+            resource = affects,
             quantity = Decimal(affected_numeric_value),
             unit_of_quantity = affected_unit,
             event_date = start,
@@ -126,7 +150,7 @@ class CreateEconomicEvent(AuthedMutation):
             commitment=commitment,
             created_by=context.user,
         )
-        economic_event.save()
+        economic_event.save_api(user=context.user)
 
         return CreateEconomicEvent(economic_event=economic_event)
 
@@ -135,16 +159,18 @@ class UpdateEconomicEvent(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         id = graphene.Int(required=True)
         action = graphene.String(required=False)
-        process_id = graphene.Int(required=False)
+        input_of_id = graphene.Int(required=False)
+        output_of_id = graphene.Int(required=False)
         provider_id = graphene.Int(required=False)
         receiver_id = graphene.Int(required=False)
         scope_id = graphene.Int(required=False)
         affected_resource_classification_id = graphene.Int(required=False)
-        affected_resource_id = graphene.Int(required=False)
+        affects_id = graphene.Int(required=False)
         affected_numeric_value = graphene.String(required=False)
         affected_unit_id = graphene.Int(required=False)
         start = graphene.String(required=False)
         fulfills_commitment_id = graphene.Int(required=False)
+        url = graphene.String(required=False)
         note = graphene.String(required=False)
 
     economic_event = graphene.Field(lambda: EconomicEvent)
@@ -153,16 +179,18 @@ class UpdateEconomicEvent(AuthedMutation):
     def mutate(cls, root, args, context, info):
         id = args.get('id')
         action = args.get('action')
-        process_id = args.get('process_id')
+        input_of_id = args.get('input_of_id')
+        output_of_id = args.get('output_of_id')
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
         affected_resource_classification_id = args.get('affected_resource_classification_id')
-        affected_resource_id = args.get('affected_resource_id')
+        affects_id = args.get('affects_id')
         affected_numeric_value = args.get('affected_numeric_value')
         affected_unit_id = args.get('affected_unit_id')
         start = args.get('start')
         fulfills_commitment_id = args.get('commitment_id') #TODO see if this needs fixing for multiples when doing exchanges
+        url = args.get('url')
         note = args.get('note')
 
         economic_event = EconomicEventProxy.objects.get(pk=id)
@@ -179,20 +207,23 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.from_agent = EconomicAgent.objects.get(pk=provider_id)
             if receiver_id:
                 economic_event.to_agent = EconomicAgent.objects.get(pk=receiver_id)
-            if process_id:
-                economic_event.process = Process.objects.get(pk=process_id)
+            if input_of_id:
+                economic_event.process = Process.objects.get(pk=input_of_id)
+            elif output_of_id:
+                economic_event.process = Process.objects.get(pk=output_of_id)
             if affected_resource_classification_id:
                 economic_event.resource_type = EconomicResourceType.objects.get(pk=affected_resource_classification_id)
-            if affected_resource_id:
-                economic_event.resource = EconomicResourceProxy.objects.get(pk=affected_resource_id)
+            if affects_id:
+                economic_event.resource = EconomicResourceProxy.objects.get(pk=affects_id)
             if affected_numeric_value:
                 economic_event.quantity = Decimal(affected_numeric_value)
             if affected_unit_id:
                 economic_event.unit_of_quantity = Unit.objects.get(pk=affected_unit_id)
             if fulfills_commitment_id:
                 economic_event.commitment = Commitment.objects.get(pk=fulfills_commitment_id)
+            economic_event.changed_by = context.user
 
-            economic_event.save()
+            economic_event.save_api(user=context.user)
 
         return UpdateEconomicEvent(economic_event=economic_event)
 
@@ -208,6 +239,6 @@ class DeleteEconomicEvent(AuthedMutation):
         id = args.get('id')
         economic_event = EconomicEventProxy.objects.get(pk=id)
         if economic_event:
-            economic_event.delete()
+            economic_event.delete_api()
 
         return DeleteEconomicEvent(economic_event=economic_event)

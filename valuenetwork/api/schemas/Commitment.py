@@ -52,6 +52,7 @@ class CreateCommitment(AuthedMutation):
         planned_start = graphene.String(required=False)
         due = graphene.String(required=True)
         note = graphene.String(required=False)
+        #plan = graphene.Field(lambda: types.Plan)
 
     commitment = graphene.Field(lambda: Commitment)
 

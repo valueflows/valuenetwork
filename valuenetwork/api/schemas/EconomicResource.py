@@ -3,8 +3,12 @@
 #
 
 import graphene
-from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy
+from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType
 from valuenetwork.api.types.EconomicResource import EconomicResource
+from six import with_metaclass
+from django.contrib.auth.models import User
+from .Auth import AuthedInputMeta, AuthedMutation
+from django.core.exceptions import PermissionDenied
 
 
 class Query(graphene.AbstractType):
@@ -32,105 +36,95 @@ class Query(graphene.AbstractType):
         #for resource in resources:
             #resource.current_quantity = self._current_quantity(quantity=resource.quantity, unit=resource.unit)
         return resources
+
 '''
 class CreateEconomicResource(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
-        name = graphene.String(required=True)
-        planned_start = graphene.String(required=True)
-        planned_duration = graphene.Int(required=True)
-        scope_id = graphene.Int(required=True)
+        resource_classified_as_id = graphene.Int(required=True)
+        tracking_identifier = graphene.String(required=False)
+        image = graphene.String(required=False)
         note = graphene.String(required=False)
+        #current_location #TODO
+        #current_quantity is not creatable or updatable directly, it always is derived from economic events
 
     economic_resource = graphene.Field(lambda: EconomicResource)
 
     @classmethod
     def mutate(cls, root, args, context, info):
-        #import pdb; pdb.set_trace()
-        name = args.get('name')
-        planned_start = args.get('planned_start')
-        planned_duration = args.get('planned_duration')
+        resource_classified_as_id = args.get('resource_classified_as_id')
+        tracking_identifier = args.get('tracking_identifier')
+        image = args.get('image')
         note = args.get('note')
-        scope_id = args.get('scope_id')
 
         if not note:
             note = ""
-        start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
-        end_date = start_date + datetime.timedelta(days=planned_duration)
-        scope = EconomicAgent.objects.get(pk=scope_id)
-        process = ProcessProxy(
-            name=name,
-            start_date=start_date,
-            end_date=end_date,
+        if not image:
+            image = ""
+        if not tracking_identifier:
+            tracking_identifier = ""
+        resource_classified_as = EconomicResourceType.objects.get(pk=resource_classified_as_id)
+        economic_resource = EconomicResourceProxy(
+            resource_type=resource_classified_as,
+            photo_url=image,
+            identifier=tracking_identifier,
             notes=note,
-            context_agent=scope,
             created_by=context.user,
+            #location
         )
         economic_resource.save()
 
-        return CreateProcess(economic_resource=economic_resource)
-
-
-class UpdateProcess(AuthedMutation):
-    class Input(with_metaclass(AuthedInputMeta)):
-        id = graphene.Int(required=True)
-        name = graphene.String(required=False)
-        planned_start = graphene.String(required=False)
-        planned_duration = graphene.Int(required=False)
-        scope_id = graphene.Int(required=False)
-        note = graphene.String(required=False)
-        is_finished = graphene.Boolean(required=False)
-
-    process = graphene.Field(lambda: Process)
-
-    @classmethod
-    def mutate(cls, root, args, context, info):
-        id = args.get('id')
-        name = args.get('name')
-        planned_start = args.get('planned_start')
-        planned_duration = args.get('planned_duration')
-        note = args.get('note')
-        scope_id = args.get('scope_id')
-        is_finished = args.get('is_finished')
-
-        process = ProcessProxy.objects.get(pk=id)
-        if process:
-            if name:
-                process.name = name
-            if note:
-                process.notes=note
-            if planned_start:
-                start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
-                process.start_date=start_date
-            if planned_duration:
-                end_date = process.start_date + datetime.timedelta(days=planned_duration)
-                process.end_date=end_date
-            if scope_id:
-                scope = EconomicAgent.objects.get(pk=scope_id)
-                process.context_agent=scope
-            if is_finished:
-                process.finished=is_finished
-            process.changed_by=context.user
-            process.save_api()
-
-        return UpdateProcess(process=process)
-
-
-class DeleteProcess(AuthedMutation):
-    class Input(with_metaclass(AuthedInputMeta)):
-        id = graphene.Int(required=True)
-
-    process = graphene.Field(lambda: Process)
-
-    @classmethod
-    def mutate(cls, root, args, context, info):
-        id = args.get('id')
-        process = ProcessProxy.objects.get(pk=id)
-        if process:
-            if process.is_deletable():
-                process.delete()
-                #TODO: add logic for adjusting other processes if workflow plan
-            else:
-                raise PermissionDenied("Process has economic events so cannot be deleted.")
-
-        return DeleteProcess(process=process)
+        return CreateEconomicResource(economic_resource=economic_resource)
 '''
+
+class UpdateEconomicResource(AuthedMutation):
+    class Input(with_metaclass(AuthedInputMeta)):
+        id = graphene.Int(required=True)
+        resource_classified_as_id = graphene.Int(required=False)
+        tracking_identifier = graphene.String(required=False)
+        image = graphene.String(required=False)
+        note = graphene.String(required=False)
+        #current_location #TODO
+
+    economic_resource = graphene.Field(lambda: EconomicResource)
+
+    @classmethod
+    def mutate(cls, root, args, context, info):
+        id = args.get('id')
+        resource_classified_as_id = args.get('resource_classified_as_id')
+        tracking_identifier = args.get('tracking_identifier')
+        image = args.get('image')
+        note = args.get('note')
+
+        economic_resource = EconomicResourceProxy.objects.get(pk=id)
+        if economic_resource:
+            if tracking_identifier:
+                economic_resource.identifier = tracking_identifier
+            if note:
+                economic_resource.notes=note
+            if image:
+                economic_resource.photo_url=image
+            if resource_classified_as_id:
+                economic_resource.resource_type=EconomicResourceType.objects.get(pk=resource_classified_as_id)
+            economic_resource.changed_by=context.user
+            economic_resource.save()
+
+        return UpdateEconomicResource(economic_resource=economic_resource)
+
+
+class DeleteEconomicResource(AuthedMutation):
+    class Input(with_metaclass(AuthedInputMeta)):
+        id = graphene.Int(required=True)
+
+    economic_resource = graphene.Field(lambda: EconomicResource)
+
+    @classmethod
+    def mutate(cls, root, args, context, info):
+        id = args.get('id')
+        economic_resource = EconomicResourceProxy.objects.get(pk=id)
+        if economic_resource:
+            if economic_resource.is_deletable():
+                economic_resource.delete()
+            else:
+                raise PermissionDenied("Economic resource has related events or quantity > 0 and cannot be deleted.")
+
+        return DeleteEconomicResource(economic_resource=economic_resource)

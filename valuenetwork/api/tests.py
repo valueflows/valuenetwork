@@ -2477,7 +2477,7 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   createEconomicEvent(token: $token, action: "use", start: "2017-10-01", scopeId: 39, 
-    note: "testing", affectedResourceClassificationId: 17, affectsId: 11, affectedNumericValue: "3.5", 
+    note: "testing", affectedResourceClassifiedAsId: 17, affectsId: 11, affectedNumericValue: "3.5", 
     affectedUnitId: 2, inputOfId: 62, providerId: 79, receiverId: 39, url: "hi.com") {
     economicEvent {
       id
@@ -2517,8 +2517,51 @@ mutation ($token: String!) {
 }
 
 mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "produce", start: "2017-10-01", scopeId: 39, 
+    note: "testing new resource", affectedResourceClassifiedAsId: 37, affectedNumericValue: "30", 
+    affectedUnitId: 4, outputOfId: 67, providerId: 39, receiverId: 39, createResource: "true",
+    resourceNote: "new one", resourceImage: "rrr.com/image", resourceTrackingIdentifier: "432234") {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+        note
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+    }
+  }
+}
+
+mutation ($token: String!) {
   updateEconomicEvent(token: $token, id: 350, start: "2017-10-02", scopeId: 39, 
-    note: "testing more", affectedResourceClassificationId: 17, affectsId: 11, 
+    note: "testing more", affectedResourceClassifiedAsId: 17, affectsId: 11, 
     affectedNumericValue: "4.5", affectedUnitId: 2, inputOfId: 62, providerId: 79, receiverId: 39) {
     economicEvent {
       id
@@ -2561,6 +2604,35 @@ mutation ($token: String!) {
     economicEvent {
       action
       start
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateEconomicResource(token: $token, id: 128, trackingIdentifier: "xxxccc333", 
+    note: "testing more", resourceClassifiedAsId: 37, image: "xxx.com") {
+    economicResource {
+      id
+      trackingIdentifier
+      resourceClassifiedAs {
+        name
+      }
+      currentQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      image
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteEconomicResource(token: $token, id: 34) {
+    economicResource {
+      trackingIdentifier
     }
   }
 }

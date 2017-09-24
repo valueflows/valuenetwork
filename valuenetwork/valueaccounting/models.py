@@ -11445,6 +11445,7 @@ class EconomicEvent(models.Model):
                 #call the faircoin method here, pass the event info needed
 
     def save_api(self, user, delta): #additional logic from views
+        #import pdb; pdb.set_trace()
         self.save()
         process = self.process
         if process:

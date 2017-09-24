@@ -5,7 +5,7 @@
 import graphene
 import datetime
 from decimal import Decimal
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment, EventType, EconomicAgent, Process, EconomicResourceType, EconomicResource as EconomicResourceProxy, Unit
+from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment, EventType, EconomicAgent, Process, EconomicResourceType, EconomicResource as EconomicResourceProxy, Unit, AgentUser
 from valuenetwork.api.types.EconomicEvent import EconomicEvent, Action
 from valuenetwork.api.models import Fulfillment
 from six import with_metaclass
@@ -106,16 +106,19 @@ class CreateEconomicEvent(AuthedMutation):
             raise ValidationError("Must provide a scope in either economic event or its commitment")
         if provider_id:
             provider = EconomicAgent.objects.get(pk=provider_id)
+        elif action == "work":
+            user_agent = AgentUser.objects.get(user=context.user)
+            provider = user_agent.agent
         elif commitment:
             provider = commitment.from_agent
         else:
-            provider = None
+            provider = scope
         if receiver_id:
             receiver = EconomicAgent.objects.get(pk=receiver_id)
         elif commitment:
             receiver = commitment.to_agent
         else:
-            receiver = None
+            receiver = scope
         if input_of_id:
             process = Process.objects.get(pk=input_of_id)
         elif output_of_id:

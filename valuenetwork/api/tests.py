@@ -2520,7 +2520,7 @@ mutation ($token: String!) {
 mutation ($token: String!) {
   createEconomicEvent(token: $token, action: "produce", start: "2017-10-01", scopeId: 39, 
     note: "testing new resource", affectedResourceClassifiedAsId: 37, affectedNumericValue: "30", 
-    affectedUnitId: 4, outputOfId: 67, providerId: 39, receiverId: 39, createResource: "true",
+    affectedUnitId: 4, outputOfId: 67, providerId: 39, receiverId: 39, createResource: true,
     resourceNote: "new one", resourceImage: "rrr.com/image", resourceTrackingIdentifier: "432234") {
     economicEvent {
       id
@@ -2556,6 +2556,49 @@ mutation ($token: String!) {
       }
       note
       url
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "work", start: "2017-10-01", scopeId: 39, 
+    note: "testing no provider", affectedNumericValue: "5", affectedResourceClassifiedAsId: 61,
+    inputOfId: 65, affectedUnitId: 2, requestDistribution: true) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+        note
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+      requestDistribution
     }
   }
 }

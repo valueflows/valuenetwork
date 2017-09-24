@@ -38,6 +38,7 @@ class EconomicEvent(DjangoObjectType):
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
     url = graphene.String(source='url')
+    request_distribution = graphene.Boolean(source='is_contribution')
     note = graphene.String(source='note')
 
     class Meta:

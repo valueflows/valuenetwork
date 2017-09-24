@@ -153,7 +153,7 @@ class CreateEconomicEvent(AuthedMutation):
             request_distribution = False
 
         if not affects:
-            if create_resource == "true":
+            if create_resource:
                 if not resource_note:
                     resource_note = ""
                 if not resource_image:

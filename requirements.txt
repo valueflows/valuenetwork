@@ -11,6 +11,7 @@ django-webtest
 pinax-notifications
 toposort
 django-cors-headers
+easy_thumbnails
 rdflib
 rdflib-jsonld
 djangorestframework
@@ -26,3 +27,5 @@ PyJWT
 six
 selenium
 mock
+requests
+

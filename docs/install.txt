@@ -43,13 +43,13 @@ setuptools version 18.5 or above.)
 sudo apt-get install git
 
 5. create a virtualenv (assuming you installed virtualenvwrapper):
-mkvirtualenv vn --system-site-packages 
-workon vn
-    (Or if you already have a vn, give it a different name.)
+mkvirtualenv LearnDeep --system-site-packages 
+workon LearnDeep
+    (Or if you already have a LearnDeep, give it a different name.)
 cdvirtualenv
 
 6. clone the valuenetwork repo inside the vn virtualenv.
-git clone https://github.com/FreedomCoop/valuenetwork.git
+git clone https://github.com/LearnDeepMilwaukee/valuenetwork.git
  
 7. cd valuenetwork
 

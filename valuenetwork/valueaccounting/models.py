@@ -4897,6 +4897,22 @@ class EconomicResource(models.Model):
         else:
             return "CURRENCY"
 
+    def save_api(self, process=None, event_type=None, commitment=None):
+        self.save()
+        #logic derived from views
+        new_resource = False
+        if self.pk:
+            new_resource = True
+        if new_resource and process and event_type:
+            if event_type.relationship == "out":
+                if not self.resource_type.substitutable:
+                    if commitment:
+                        self.independent_demand = commitment.independent_demand
+                        self.order_item = commitment.order_item
+                    else:
+                        self.independent_demand = process.independent_demand()
+                    self.save()
+
     def transfers(self):
         events = self.events.all().filter(Q(event_type__name="Give")|Q(event_type__name="Receive"))
         transfers = []

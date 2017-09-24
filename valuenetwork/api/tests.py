@@ -2516,6 +2516,7 @@ mutation ($token: String!) {
   }
 }
 
+#creates a resource also
 mutation ($token: String!) {
   createEconomicEvent(token: $token, action: "produce", start: "2017-10-01", scopeId: 39, 
     note: "testing new resource", affectedResourceClassifiedAsId: 37, affectedNumericValue: "30", 

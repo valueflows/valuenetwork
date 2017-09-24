@@ -124,12 +124,16 @@ class CreateEconomicEvent(AuthedMutation):
             process = commitment.process
         else:
             process = None
+        if affects_id:
+            affects = EconomicResourceProxy.objects.get(pk=affects_id)
+        else:
+            affects = None
         if affected_resource_classified_as_id:
             affected_resource_classification = EconomicResourceType.objects.get(pk=affected_resource_classified_as_id)
         elif affects:
-            affected_resource_classification = EconomicResourceType.objects.get(pk=affects.resource_type__id)
+            affected_resource_classification = EconomicResourceType.objects.get(pk=affects.resource_type.id)
         elif commitment:
-            affected_resource_classification = EconomicResourceType.objects.get(pk=commitment.resource_type__id)
+            affected_resource_classification = EconomicResourceType.objects.get(pk=commitment.resource_type.id)
         else:
             raise ValidationError("Must provide a resource classification in either economic event or its commitment")
         if affected_unit_id:
@@ -141,27 +145,24 @@ class CreateEconomicEvent(AuthedMutation):
         if not url:
             url = ""
 
-        if affects_id:
-            affects = EconomicResourceProxy.objects.get(pk=affects_id)
-        elif create_resource == "true":
-            if not resource_note:
-                resource_note = ""
-            if not resource_image:
-                resource_image = ""
-            if not resource_tracking_identifier:
-                resource_tracking_identifier = ""
-            affects = EconomicResourceProxy(
-                resource_type=affected_resource_classification,
-                quantity=Decimal(affected_numeric_value),
-                photo_url=resource_image,
-                identifier=resource_tracking_identifier,
-                notes=resource_note,
-                created_by=context.user,
-                #location
-            )
-            affects.save()
-        else:
-            affects = None
+        if not affects:
+            if create_resource == "true":
+                if not resource_note:
+                    resource_note = ""
+                if not resource_image:
+                    resource_image = ""
+                if not resource_tracking_identifier:
+                    resource_tracking_identifier = ""
+                affects = EconomicResourceProxy(
+                    resource_type=affected_resource_classification,
+                    quantity=Decimal(affected_numeric_value),
+                    photo_url=resource_image,
+                    identifier=resource_tracking_identifier,
+                    notes=resource_note,
+                    created_by=context.user,
+                    #location
+                )
+                affects.save_api(process=process, event_type=event_type, commitment=commitment)
 
         economic_event = EconomicEventProxy(
             event_type = event_type,

@@ -541,11 +541,7 @@ class EconomicAgent(models.Model):
         return tp
 
     def membership_request(self):
-        reqs = self.membership_requests.all()
-        if reqs:
-            return reqs[0]
-        else:
-            return None
+        return None
 
     def membership_request_id(self):
         req = self.membership_request()

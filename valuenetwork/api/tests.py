@@ -166,13 +166,21 @@ class APITest(TestCase):
             )
         a1r1.save()
 
-        # process-commitment-event data
+        # order-process-commitment-event data
+
+        pt1 = ProcessType(
+            name="pt1",
+            context_agent=org1,
+            estimated_duration=300,
+            )
+        pt1.save()
         proc1 = Process(
             name="proc1",
             start_date=datetime.date.today(),
             end_date=datetime.date.today() + datetime.timedelta(days=5),
             finished=False,
             context_agent=org1,
+            process_type=pt1,
             )
         proc1.save()
         proc2 = Process(
@@ -191,6 +199,14 @@ class APITest(TestCase):
             context_agent=org2,
             )
         proc3.save()
+        order1 = Order(
+            name="order1",
+            due_date=proc3.end_date,
+            order_date=proc1.start_date,
+            provider=org1,
+            order_type="rand",
+            )
+        order1.save()
         et_cite = EventType.objects.get(name="Citation")
         et_produce = EventType.objects.get(name="Resource Production")
         et_todo = EventType.objects.get(name="Todo")
@@ -208,6 +224,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=3,
             unit_of_quantity=unit_hours,
+            independent_demand=order1,
             )
         proc1_c1.save()
         proc1_c2 = Commitment(
@@ -219,6 +236,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=2.5,
             unit_of_quantity=unit_hours,
+            independent_demand=order1,
             )
         proc1_c2.save()
         proc1_c3 = Commitment(
@@ -230,6 +248,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=3,
             unit_of_quantity=unit_each,
+            independent_demand=order1,
             )
         proc1_c3.save()
         proc1_c4 = Commitment(
@@ -241,6 +260,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=1,
             unit_of_quantity=unit_each,
+            independent_demand=order1,
             )
         proc1_c4.save()
         proc1_e1 = EconomicEvent(
@@ -568,6 +588,11 @@ class APITest(TestCase):
                         name
                         isFinished
                       }
+                      agentPlans {
+                        name
+                        due
+                        note
+                      }
                     }
                   }
                 }
@@ -576,6 +601,7 @@ class APITest(TestCase):
         agent = result.data['viewer']['agent']
         ownedEconomicResources = result.data['viewer']['agent']['ownedEconomicResources']
         processes = result.data['viewer']['agent']['agentProcesses']
+        plans = result.data['viewer']['agent']['agentPlans']
         self.assertEqual(agent['name'], 'org1')
         self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['name'], 'product1')
         self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['processCategory'], 'produced')
@@ -583,8 +609,10 @@ class APITest(TestCase):
         self.assertEqual(ownedEconomicResources[0]['currentQuantity']['unit']['name'], 'Each')
         self.assertEqual(len(processes), 1)
         self.assertEqual(processes[0]['name'], 'proc1')
+        self.assertEqual(len(plans), 1)
+        self.assertEqual(plans[0]['name'], 'order1')
 
-    def test_processes_commitments_events(self):
+    def test_orders_processes_commitments_events(self):
         result = schema.execute('''
                 mutation {
                   createToken(username: "testUser11222", password: "123456") {
@@ -648,27 +676,37 @@ class APITest(TestCase):
                     involvedAgents {
                         name
                     }
+                    plan {
+                        name
+                        plannedOn
+                        due
+                        note
+                        scope {
+                            name
+                        }
+                        workingAgents {
+                            name
+                        }
+                        planProcesses {
+                            name
+                        }
+                    }
                 }
                 query {
                   viewer(token: "''' + token + '''") {
                     process(id: 1) {
                         name
+                        processClassifiedAs {
+                            name
+                            scope {
+                                name
+                            }
+                            estimatedDuration
+                        }
                         unplannedEconomicEvents(action: PRODUCE) {
                             ...coreEventFields
                         }
-                        processEconomicEvents {
-                            ...coreEventFields
-                        }
-                        processCommitments {
-                            ...coreCommitmentFields
-                        }
                         inputs {
-                            ...coreEventFields
-                        }
-                        workInputs {
-                            ...coreEventFields
-                        }
-                        nonWorkInputs {
                             ...coreEventFields
                         }
                         outputs {
@@ -677,13 +715,7 @@ class APITest(TestCase):
                         committedInputs {
                             ...coreCommitmentFields
                         }
-                        committedWorkInputs {
-                            ...coreCommitmentFields
-                        }
-                        committedNonWorkInputs {
-                            ...coreCommitmentFields
-                        }
-                        committedOutputs {
+                        committedOutputs (action: PRODUCE) {
                             ...coreCommitmentFields
                         }
                         nextProcesses {
@@ -705,29 +737,17 @@ class APITest(TestCase):
         process = result.data['viewer']['process']
         self.assertEqual(process['name'], 'proc1')
         unplannedEconomicEvents = process['unplannedEconomicEvents']
-        processEconomicEvents = process['processEconomicEvents']
-        processCommitments = process['processCommitments']
         inputs = process['inputs']
-        workInputs = process['workInputs']
-        nonWorkInputs = process['nonWorkInputs']
         outputs = process['outputs']
         committedInputs = process['committedInputs']
-        committedWorkInputs = process['committedWorkInputs']
-        committedNonWorkInputs = process['committedNonWorkInputs']
         committedOutputs = process['committedOutputs']
         nextProcesses = process['nextProcesses']
         previousProcesses = process['previousProcesses']
         workingAgents = process['workingAgents']
         self.assertEqual(len(unplannedEconomicEvents), 1)
-        self.assertEqual(len(processEconomicEvents), 6)
-        self.assertEqual(len(processCommitments), 4)
         self.assertEqual(len(inputs), 4)
-        self.assertEqual(len(workInputs), 3)
-        self.assertEqual(len(nonWorkInputs), 1)
         self.assertEqual(len(outputs), 2)
         self.assertEqual(len(committedInputs), 3)
-        self.assertEqual(len(committedWorkInputs), 2)
-        self.assertEqual(len(committedNonWorkInputs), 1)
         self.assertEqual(len(committedOutputs), 1)
         self.assertEqual(len(nextProcesses), 1)
         self.assertEqual(len(previousProcesses), 1)
@@ -740,84 +760,88 @@ class APITest(TestCase):
         self.assertEqual(outputs[0]['action'], "produce")
         self.assertEqual(committedInputs[0]['action'], "work")
         self.assertEqual(committedInputs[1]['committedQuantity']['numericValue'], 2.5)
+        self.assertEqual(committedInputs[1]['plan']['name'], 'order1')
+        self.assertEqual(committedInputs[1]['plan']['scope'][0]['name'], 'org1')
         self.assertEqual(committedInputs[2]['resourceClassifiedAs']['name'], "component1")
         self.assertEqual(committedInputs[1]['provider']['name'], "not user")
         self.assertEqual(committedOutputs[0]['action'], "produce")
         self.assertEqual(previousProcesses[0]['name'], 'proc2')
         self.assertEqual(nextProcesses[0]['name'], 'proc3')
+        self.assertEqual(process['processClassifiedAs']['name'], 'pt1')
 
-    def test_create_update_delete_process(self):
-        result = schema.execute('''
-                mutation {
-                  createToken(username: "testUser11222", password: "123456") {
-                    token
-                  }
-                }
-                ''')
-        call_result = result.data['createToken']
-        token = call_result['token']
-        test_agent = EconomicAgent.objects.get(name="testUser11222")
 
-        result1 = schema.execute('''
-                mutation {
-                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2) {
-                    process {
-                        name
-                        scope {
-                            name
-                        }
-                        isFinished
-                        plannedStart
-                        plannedDuration
-                    }
-                  }
-                }
-                ''')
-        #import pdb; pdb.set_trace()
-        self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
-        self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
-        self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
-        self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
-        self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
+#    def test_create_update_delete_process(self):
+#        result = schema.execute('''
+#                mutation {
+#                  createToken(username: "testUser11222", password: "123456") {
+#                    token
+#                  }
+#                }
+#                ''')
+#        call_result = result.data['createToken']
+#        token = call_result['token']
+#        test_agent = EconomicAgent.objects.get(name="testUser11222")
 
-        result2 = schema.execute('''
-                    mutation {
-                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
-                            process {
-                                name
-                                scope {
-                                    name
-                                }
-                                isFinished
-                                plannedStart
-                                plannedDuration
-                            }
-                        }
-                    }
-                    ''')
+#        result1 = schema.execute('''
+#                mutation {
+#                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2) {
+#                    process {
+#                        name
+#                        scope {
+#                            name
+#                        }
+#                        isFinished
+#                        plannedStart
+#                        plannedDuration
+#                    }
+#                  }
+#                }
+#                ''')
+#        #import pdb; pdb.set_trace()
+#        self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
+#        self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
+#        self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
+#        self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
+#        self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
 
-        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
-        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
-        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
-        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
-        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+#        result2 = schema.execute('''
+#                    mutation {
+#                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
+#                            process {
+#                                name
+#                                scope {
+#                                    name
+#                                }
+#                                isFinished
+#                                plannedStart
+#                                plannedDuration
+#                            }
+#                        }
+#                    }
+#                    ''')
 
-        result3 = schema.execute('''
-                    mutation {
-                        deleteProcess(token: "''' + token + '''", id: 4) {
-                            process {
-                                name
-                            }
-                        }
-                    }
-                    ''')
+#        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
+#        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
+#        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
+#        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
+#        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
 
-        proc = None
-        try:
-            proc = Process.objects.get(pk=4)
-        except:
-            pass
-        self.assertEqual(proc, None)
+#        result3 = schema.execute('''
+#                    mutation {
+#                        deleteProcess(token: "''' + token + '''", id: 4) {
+#                            process {
+#                                name
+#                            }
+#                        }
+#                    }
+#                    ''')
+
+#        proc = None
+#        try:
+#            proc = Process.objects.get(pk=4)
+#        except:
+#            pass
+#        self.assertEqual(proc, None)
 
 
 ######################### SAMPLE QUERIES #####################
@@ -1520,11 +1544,15 @@ query ($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    process(id:3) {
+    process(id:51) {
       id
       name
       scope {
         name
+      }
+      processPlan {
+        name
+        due
       }
       plannedStart
       plannedDuration
@@ -1542,9 +1570,40 @@ query($token: String) {
       scope {
         name
       }
+      processClassifiedAs {
+        name
+      }
       plannedStart
       plannedDuration
       isFinished
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    processClassification (id: 3) {
+      id
+      name
+      scope {
+        name
+      }
+      estimatedDuration
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allProcessClassifications {
+      id
+      name
+      scope {
+        name
+      }
+      estimatedDuration
       note
     }
   }
@@ -1560,6 +1619,20 @@ query($token: String) {
         plannedStart
         plannedDuration
         isFinished
+        note
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:26) {
+      name
+      agentPlans {
+        id
+        name
+        due
         note
       }
     }
@@ -1591,8 +1664,8 @@ fragment coreEventFields on EconomicEvent {
       name
     }
   }
-  affectedResource {
-    resourceClassification {
+  affects {
+    resourceClassifiedAs {
       name
       category
     }
@@ -1618,7 +1691,7 @@ fragment coreCommitmentFields on Commitment {
       name
     }
   }
-  committedClassification {
+  resourceClassifiedAs {
     name
     category
   }
@@ -1638,25 +1711,7 @@ query ($token: String) {
       unplannedEconomicEvents(action: WORK) {
         ...coreEventFields
       }
-      processEconomicEvents {
-        ...coreEventFields
-      }
-      processEconomicEvents(action: PRODUCE) {
-        ...coreEventFields
-      }
-      processCommitments {
-        ...coreCommitmentFields
-      }
-      processCommitments(action: WORK) {
-        ...coreCommitmentFields
-      }
-      inputs {
-        ...coreEventFields
-      }
-      workInputs {
-        ...coreEventFields
-      }
-      nonWorkInputs {
+      inputs (action: WORK) {
         ...coreEventFields
       }
       outputs {
@@ -1665,13 +1720,7 @@ query ($token: String) {
       committedInputs {
         ...coreCommitmentFields
       }
-      committedWorkInputs {
-        ...coreCommitmentFields
-      }
-      committedNonWorkInputs {
-        ...coreCommitmentFields
-      }
-      committedOutputs {
+      committedOutputs (action: PRODUCE) {
         ...coreCommitmentFields
       }
       nextProcesses {
@@ -1699,6 +1748,101 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    plan(id: 50) {
+      name
+      scope {
+        name
+      }
+      plannedOn
+      due
+      note
+      planProcesses {
+        name
+      }
+      workingAgents {
+        name
+        __typename
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allPlans {
+      name
+      planProcesses {
+        name
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allPlans {
+      id
+      name
+      plannedNonWorkInputs {
+        action
+        resourceClassifiedAs {
+          name
+        }
+        committedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      plannedOutputs {
+        action
+        resourceClassifiedAs {
+          name
+        }
+        committedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      nonWorkInputs {
+        action
+        affects {
+          trackingIdentifier
+          resourceClassifiedAs {
+            name
+          }
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      outputs {
+        action
+        affects {
+          trackingIdentifier
+          resourceClassifiedAs {
+            name
+          }
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
 # event data
 
 query ($token: String) {
@@ -1714,8 +1858,9 @@ query ($token: String) {
         }
       }
       note
-      affectedResource {
-        resourceClassification {
+      url
+      affects {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1741,6 +1886,14 @@ query ($token: String) {
         id
         name
       }
+      fulfills {
+        fulfilledQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
     }
   }
 }
@@ -1759,8 +1912,8 @@ query ($token: String) {
             name
           }
         }
-        affectedResource {
-          resourceClassification {
+        affects {
+          resourceClassifiedAs {
             name
             category
           }
@@ -1788,7 +1941,7 @@ query ($token: String) {
             name
           }
         }
-        committedClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1819,8 +1972,8 @@ query ($token: String) {
         }
       }
       note
-      affectedResource {
-        resourceClassification {
+      affects {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1856,7 +2009,7 @@ query ($token: String) {
       }
       note
       affects {
-        resourceClassification {
+        resourceClassifedAs {
           name
           category
         }
@@ -1919,13 +2072,13 @@ query ($token: String) {
         }
       }
       note
-      committedClassification {
+      resourceClassifedAs {
         name
         category
       }
       involves {
         id
-        resourceClassification {
+        resourceClassifedAs {
           name
           category
         }
@@ -1970,13 +2123,13 @@ query ($token: String) {
         }
       }
       note
-      committedClassification {
+      resourceClassifiedAs {
         name
         category
       }
       involves {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -2000,6 +2153,9 @@ query ($token: String) {
       }
       scope {
         id
+        name
+      }
+      plan {
         name
       }
       fulfilledBy {
@@ -2117,7 +2273,7 @@ query ($token: String) {
       receiver {
         name
       }
-      resourceClassification {
+      resourceClassifiedAs {
         name
       }
       giveResource {
@@ -2197,15 +2353,18 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   createCommitment(token: $token, action: "use", plannedStart: "2017-10-01", due: "2017-10-10",
-    scopeId: 39, note: "testing", committedResourceClassificationId: 17, committedResourceId: 11, 
-    committedNumericValue: "3.5", committedUnitId: 2, processId: 62,
+    scopeId: 39, note: "testing", committedResourceClassificationId: 17, involvesId: 11, 
+    committedNumericValue: "3.5", committedUnitId: 2, inputOfId: 62,
     providerId: 79, receiverId: 39) {
     commitment {
       id
       action
       plannedStart
       due
-      process {
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       provider {
@@ -2217,10 +2376,10 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedClassification {
+      resourceClassifiedAs {
         name
       }
-      committedResource {
+      involves {
         trackingIdentifier
       }
       committedQuantity {
@@ -2238,13 +2397,16 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   updateCommitment(token: $token, plannedStart: "2017-10-03", due: "2017-10-12",
-    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 362) {
+    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 363) {
     commitment {
       id
       action
       plannedStart
       due
-      process {
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       provider {
@@ -2256,10 +2418,10 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedClassification {
+      resourceClassifiedAs {
         name
       }
-      committedResource {
+      involves {
         trackingIdentifier
       }
       committedQuantity {
@@ -2279,6 +2441,242 @@ mutation ($token: String!) {
   deleteCommitment(token: $token, id: 11) {
     commitment {
       action
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createPlan(token: $token, name: "Fudge!", due: "2017-10-15", note: "testing") {
+    plan {
+      id
+      name
+      due
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updatePlan(token: $token, id:53, name: "Fudge!", due: "2017-10-16", note: "testing more") {
+    plan {
+      id
+      name
+      due
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deletePlan(token: $token, id: 53) {
+    plan {
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "use", start: "2017-10-01", scopeId: 39, 
+    note: "testing", affectedResourceClassifiedAsId: 17, affectsId: 11, affectedNumericValue: "3.5", 
+    affectedUnitId: 2, inputOfId: 62, providerId: 79, receiverId: 39, url: "hi.com") {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+    }
+  }
+}
+
+#creates a resource also
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "produce", start: "2017-10-01", scopeId: 39, 
+    note: "testing new resource", affectedResourceClassifiedAsId: 37, affectedNumericValue: "30", 
+    affectedUnitId: 4, outputOfId: 67, providerId: 39, receiverId: 39, createResource: true,
+    resourceNote: "new one", resourceImage: "rrr.com/image", resourceTrackingIdentifier: "432234") {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+        note
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "work", start: "2017-10-01", scopeId: 39, 
+    note: "testing no provider", affectedNumericValue: "5", affectedResourceClassifiedAsId: 61,
+    inputOfId: 65, affectedUnitId: 2, requestDistribution: true) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+        note
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+      requestDistribution
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateEconomicEvent(token: $token, id: 350, start: "2017-10-02", scopeId: 39, 
+    note: "testing more", affectedResourceClassifiedAsId: 17, affectsId: 11, 
+    affectedNumericValue: "4.5", affectedUnitId: 2, inputOfId: 62, providerId: 79, receiverId: 39) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteEconomicEvent(token: $token, id: 350) {
+    economicEvent {
+      action
+      start
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateEconomicResource(token: $token, id: 128, trackingIdentifier: "xxxccc333", 
+    note: "testing more", resourceClassifiedAsId: 37, image: "xxx.com") {
+    economicResource {
+      id
+      trackingIdentifier
+      resourceClassifiedAs {
+        name
+      }
+      currentQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      image
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteEconomicResource(token: $token, id: 34) {
+    economicResource {
+      trackingIdentifier
     }
   }
 }

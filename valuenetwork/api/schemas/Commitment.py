@@ -40,7 +40,8 @@ class Query(graphene.AbstractType):
 class CreateCommitment(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         action = graphene.String(required=True)
-        process_id = graphene.Int(required=False)
+        input_of_id = graphene.Int(required=False)
+        output_of_id = graphene.Int(required=False)
         provider_id = graphene.Int(required=False)
         receiver_id = graphene.Int(required=False)
         scope_id = graphene.Int(required=False)
@@ -51,18 +52,20 @@ class CreateCommitment(AuthedMutation):
         planned_start = graphene.String(required=False)
         due = graphene.String(required=True)
         note = graphene.String(required=False)
+        #plan = graphene.Field(lambda: types.Plan)
 
     commitment = graphene.Field(lambda: Commitment)
 
     @classmethod
     def mutate(cls, root, args, context, info):
         action = args.get('action')
-        process_id = args.get('process_id')
+        input_of_id = args.get('input_of_id')
+        output_of_id = args.get('output_of_id')
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
         committed_resource_classification_id = args.get('committed_resource_classification_id')
-        committed_resource_id = args.get('committed_resource_id')
+        involves_id = args.get('involves_id')
         committed_numeric_value = args.get('committed_numeric_value')
         committed_unit_id = args.get('committed_unit_id')
         planned_start = args.get('planned_start')
@@ -87,16 +90,18 @@ class CreateCommitment(AuthedMutation):
             receiver = EconomicAgent.objects.get(pk=receiver_id)
         else:
             receiver = None
-        if process_id:
-            process = Process.objects.get(pk=process_id)
+        if input_of_id:
+            process = Process.objects.get(pk=input_of_id)
+        elif output_of_id:
+            process = Process.objects.get(pk=output_of_id)
         else:
             process = None
         if committed_resource_classification_id:
             resource_classified_as = EconomicResourceType.objects.get(pk=committed_resource_classification_id)
         else:
             resource_classified_as = None
-        if committed_resource_id:
-            committed_resource = EconomicResource.objects.get(pk=committed_resource_id)
+        if involves_id:
+            committed_resource = EconomicResource.objects.get(pk=involves_id)
         else:
             committed_resource = None
         committed_unit = Unit.objects.get(pk=committed_unit_id)
@@ -125,12 +130,13 @@ class UpdateCommitment(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         id = graphene.Int(required=True)
         action = graphene.String(required=False)
-        process_id = graphene.Int(required=False)
+        input_of_id = graphene.Int(required=False)
+        output_of_id = graphene.Int(required=False)
         provider_id = graphene.Int(required=False)
         receiver_id = graphene.Int(required=False)
         scope_id = graphene.Int(required=False)
         committed_resource_classification_id = graphene.Int(required=False)
-        committed_resource_id = graphene.Int(required=False)
+        involves_id = graphene.Int(required=False)
         committed_numeric_value = graphene.String(required=False)
         committed_unit_id = graphene.Int(required=False)
         committed_on = graphene.String(required=False)
@@ -145,12 +151,13 @@ class UpdateCommitment(AuthedMutation):
     def mutate(cls, root, args, context, info):
         id = args.get('id')
         action = args.get('action')
-        process_id = args.get('process_id')
+        input_of_id = args.get('input_of_id')
+        output_of_id = args.get('output_of_id')
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
         committed_resource_classification_id = args.get('committed_resource_classification_id')
-        committed_resource_id = args.get('committed_resource_id')
+        committed_resource_id = args.get('involves_id')
         committed_numeric_value = args.get('committed_numeric_value')
         committed_unit_id = args.get('committed_unit_id')
         committed_on = args.get('committed_on')
@@ -175,12 +182,14 @@ class UpdateCommitment(AuthedMutation):
                 commitment.from_agent = EconomicAgent.objects.get(pk=provider_id)
             if receiver_id:
                 commitment.to_agent = EconomicAgent.objects.get(pk=receiver_id)
-            if process_id:
-                commitment.process = Process.objects.get(pk=process_id)
+            if input_of_id:
+                commitment.process = Process.objects.get(pk=input_of_id)
+            elif output_of_id:
+                commitment.process = Process.objects.get(pk=output_of_id)
             if committed_resource_classification_id:
                 commitment.resource_type = EconomicResourceType.objects.get(pk=committed_resource_classification_id)
-            if committed_resource_id:
-                commitment.resource = EconomicResource.objects.get(pk=committed_resource_id)
+            if involves_id:
+                commitment.resource = EconomicResource.objects.get(pk=involves_id)
             if committed_numeric_value:
                 commitment.quantity = Decimal(committed_numeric_value)
             if committed_unit_id:

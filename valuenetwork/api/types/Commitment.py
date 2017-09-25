@@ -27,6 +27,7 @@ class Commitment(DjangoObjectType):
     planned_start = graphene.String(source='planned_start')
     due = graphene.String(source='due')
     is_finished = graphene.Boolean(source='is_finished')
+    plan = graphene.Field(lambda: types.Plan)
     note = graphene.String(source='note')
 
     class Meta:
@@ -63,6 +64,9 @@ class Commitment(DjangoObjectType):
 
     def resolve_committed_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit_of_quantity)
+
+    def resolve_plan(self, args, *rargs):
+        return self.independent_demand
 
     def resolve_fulfilled_by(self, args, context, info):
         events = self.fulfillment_events.all()

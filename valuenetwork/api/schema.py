@@ -22,8 +22,10 @@ import valuenetwork.api.schemas.Transfer
 import valuenetwork.api.schemas.EconomicEvent
 import valuenetwork.api.schemas.QuantityValue
 import valuenetwork.api.schemas.Unit
-import valuenetwork.api.schemas.ResourceTaxonomyItem
+import valuenetwork.api.schemas.ResourceClassification
+import valuenetwork.api.schemas.ProcessClassification
 import valuenetwork.api.schemas.Commitment
+import valuenetwork.api.schemas.Plan
 from valuenetwork.api.schemas.helpers import hash_password
 
 
@@ -40,8 +42,10 @@ class ViewerQuery(
     valuenetwork.api.schemas.EconomicEvent.Query,
     valuenetwork.api.schemas.QuantityValue.Query,
     valuenetwork.api.schemas.Unit.Query,
-    valuenetwork.api.schemas.ResourceTaxonomyItem.Query,
+    valuenetwork.api.schemas.ResourceClassification.Query,
+    valuenetwork.api.schemas.ProcessClassification.Query,
     valuenetwork.api.schemas.Commitment.Query,
+    valuenetwork.api.schemas.Plan.Query,
     graphene.ObjectType
 ):
     def __init__(self, *args, **kwargs):
@@ -76,6 +80,11 @@ class Mutation(graphene.ObjectType):
     create_economic_event = valuenetwork.api.schemas.EconomicEvent.CreateEconomicEvent.Field()
     update_economic_event = valuenetwork.api.schemas.EconomicEvent.UpdateEconomicEvent.Field()
     delete_economic_event = valuenetwork.api.schemas.EconomicEvent.DeleteEconomicEvent.Field()
+    create_plan = valuenetwork.api.schemas.Plan.CreatePlan.Field()
+    update_plan = valuenetwork.api.schemas.Plan.UpdatePlan.Field()
+    delete_plan = valuenetwork.api.schemas.Plan.DeletePlan.Field()
+    update_economic_resource = valuenetwork.api.schemas.EconomicResource.UpdateEconomicResource.Field()
+    delete_economic_resource = valuenetwork.api.schemas.EconomicResource.DeleteEconomicResource.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

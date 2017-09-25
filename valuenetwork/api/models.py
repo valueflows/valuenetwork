@@ -66,11 +66,14 @@ class Person(models.Model):
 
 class Fulfillment(models.Model):
     fulfilled_by = models.ForeignKey(EconomicEvent,
-        related_name="fulfillments")
+        related_name="fulfillments",
+        on_delete=models.DO_NOTHING)
     fulfills = models.ForeignKey(Commitment,
-        related_name="fulfillments") 
+        related_name="fulfillments",
+        on_delete=models.DO_NOTHING) 
     fulfilled_quantity = models.ForeignKey(QuantityValue,
-        related_name="fulfillments")
+        related_name="fulfillments",
+        on_delete=models.DO_NOTHING)
     note = models.TextField(blank=True, null=True)
 
     class Meta:

@@ -11460,14 +11460,15 @@ class EconomicEvent(models.Model):
         #    if self.resource.resource_type.is_virtual_account():
                 #call the faircoin method here, pass the event info needed
 
-    def save_api(self, user, delta): #additional logic from views
-        #import pdb; pdb.set_trace()
+    def save_api(self, user, old_quantity=None, old_resource=None, create_resource=False): #additional logic from views
+        if create_resource:
+            self.resource.save_api(process=self.process, event_type=self.event_type, commitment=self.commitment)
         self.save()
         process = self.process
         if process:
             process.set_started(self.event_date, user)
-        if self.resource and delta != 0:
-            self.update_resource(delta=delta)
+        if self.resource and not create_resource:
+            self.update_resource(old_quantity=old_quantity, old_resource=old_resource)
 
     def delete(self, *args, **kwargs):
         if self.is_contribution:
@@ -11495,7 +11496,7 @@ class EconomicEvent(models.Model):
         self.delete()
         self.delete_resource_effects()
 
-    def update_resource(self, delta=None):
+    def update_resource(self, old_quantity=None, old_resource=None):
         # This should work for new or changed events (changed quantity only),
         # but not for deletes.
         # It also *only works for adding to existing resources*.
@@ -11503,16 +11504,60 @@ class EconomicEvent(models.Model):
         # and assigned to the event,
         # this method will not create it.
         # delta is for event changes, quantity only.
+
         #import pdb; pdb.set_trace()
+        #has_new_resource = False
+        #if old_quantity:
+        #    delta = self.quantity - old_quantity
+        #else:
+        #    delta = 0
+        #if old_resource:
+        #    if self.resource == old_resource:
+        #        old_resource = None
+        #    else:
+        #        has_new_resource = True
+                
         resource = self.resource
         if resource:
-            quantity = delta or self.quantity
+            #quantity = delta or self.quantity
             if self.consumes_resources():
-                resource.quantity -= quantity
+                if old_resource:
+                    if resource != old_resource:
+                        old_resource.quantity = old_resource.quantity + old_quantity
+                        old_resource.save()
+                        resource.quantity = resource.quantity - self.quantity
+                    else:
+                        changed_qty = self.quantity - old_quantity
+                        if changed_qty != 0:
+                            resource.quantity = resource.quantity - changed_qty
+                else:
+                    resource.quantity = resource.quantity - self.quantity
                 resource.save()
+                #resource.quantity -= quantity
+                #resource.save()
             if self.creates_resources():
-                resource.quantity += quantity
-                resource.save()
+                if old_resource:
+                    if resource != old_resource:
+                        old_resource.quantity = old_resource.quantity - old_quantity
+                        old_resource.save()
+                        resource.quantity = resource.quantity + self.quantity
+                    else:
+                        changed_qty = self.quantity - old_quantity
+                        if changed_qty != 0:
+                            resource.quantity = resource.quantity + changed_qty
+                else:
+                    resource.quantity = resource.quantity + self.quantity
+                resource.save()                
+                #resource.quantity += quantity
+                #resource.save()
+        else:
+            if old_resource:
+                if self.consumes_resources():
+                    old_resource.quantity = old_resource.quantity + old_qty
+                    old_resource.save()
+                if self.creates_resources():
+                    old_resource.quantity = old_resource.quantity - old_qty
+                    old_resource.save()
 
     def delete_resource_effects(self):
         # This might work for deleted events

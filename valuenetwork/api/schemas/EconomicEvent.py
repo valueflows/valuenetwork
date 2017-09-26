@@ -169,7 +169,7 @@ class CreateEconomicEvent(AuthedMutation):
                     created_by=context.user,
                     #location
                 )
-                affects.save_api(process=process, event_type=event_type, commitment=commitment)
+                #affects.save_api(process=process, event_type=event_type, commitment=commitment)
 
         economic_event = EconomicEventProxy(
             event_type = event_type,
@@ -188,7 +188,7 @@ class CreateEconomicEvent(AuthedMutation):
             is_contribution=request_distribution,
             created_by=context.user,
         )
-        economic_event.save_api(user=context.user, delta=None)
+        economic_event.save_api(user=context.user, create_resource=create_resource)
 
         return CreateEconomicEvent(economic_event=economic_event)
 
@@ -234,8 +234,9 @@ class UpdateEconomicEvent(AuthedMutation):
         note = args.get('note')
 
         economic_event = EconomicEventProxy.objects.get(pk=id)
-        old_quantity = economic_event.quantity
         if economic_event:
+            old_resource = economic_event.resource
+            old_quantity = economic_event.quantity
             if action:
                 economic_event.event_type = EventType.objects.convert_action_to_event_type(action)
             if note:
@@ -267,9 +268,8 @@ class UpdateEconomicEvent(AuthedMutation):
             if fulfills_commitment_id:
                 economic_event.commitment = Commitment.objects.get(pk=fulfills_commitment_id)
             economic_event.changed_by = context.user
-            delta = economic_event.quantity - old_quantity
 
-            economic_event.save_api(user=context.user, delta=delta)
+            economic_event.save_api(user=context.user, old_quantity=old_quantity, old_resource=old_resource)
 
         return UpdateEconomicEvent(economic_event=economic_event)
 

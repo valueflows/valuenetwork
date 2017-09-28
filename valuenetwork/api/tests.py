@@ -2072,13 +2072,13 @@ query ($token: String) {
         }
       }
       note
-      resourceClassifedAs {
+      resourceClassifiedAs {
         name
         category
       }
       involves {
         id
-        resourceClassifedAs {
+        resourceClassifiedAs {
           name
           category
         }
@@ -2104,10 +2104,21 @@ query ($token: String) {
         id
         name
       }
+      plan {
+        id
+        name
+      }
+      isPlanDeliverable
+      forPlanDeliverable {
+        id
+        action
+        outputOf {
+          name
+        }
+      }
     }
   }
 }
-
 query ($token: String) {
   viewer(token: $token) {
     commitment(id: 325) {

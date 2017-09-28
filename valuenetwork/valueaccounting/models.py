@@ -9581,6 +9581,13 @@ class Commitment(models.Model):
             return self.process
         return None
 
+    @property #ValueFlows
+    def is_plan_deliverable(self):
+        if self.order:
+            return True
+        else:
+            return False
+
     def shorter_label(self):
         quantity_string = str(self.quantity)
         resource_name = ""

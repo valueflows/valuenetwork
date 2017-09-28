@@ -28,6 +28,8 @@ class Commitment(DjangoObjectType):
     due = graphene.String(source='due')
     is_finished = graphene.Boolean(source='is_finished')
     plan = graphene.Field(lambda: types.Plan)
+    is_plan_deliverable = graphene.Boolean(source='is_plan_deliverable')
+    for_plan_deliverable = graphene.Field(lambda: Commitment)
     note = graphene.String(source='note')
 
     class Meta:
@@ -67,6 +69,9 @@ class Commitment(DjangoObjectType):
 
     def resolve_plan(self, args, *rargs):
         return self.independent_demand
+
+    def resolve_for_plan_deliverable(self, args, *rargs):
+        return self.order_item
 
     def resolve_fulfilled_by(self, args, context, info):
         events = self.fulfillment_events.all()

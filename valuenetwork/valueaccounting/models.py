@@ -9634,7 +9634,7 @@ class Commitment(models.Model):
             rt = old_ct.resource_type
             demand = old_ct.independent_demand
             new_qty = self.quantity
-            self.handle_commitment_changes(old_ct, rt, new_qty, demand, demand)
+            #self.handle_commitment_changes(old_ct, rt, new_qty, demand, demand)
         self.save()
 
     #duplicated from views to support the api

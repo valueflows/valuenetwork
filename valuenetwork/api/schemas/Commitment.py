@@ -68,7 +68,7 @@ class CreateCommitment(AuthedMutation):
         provider_id = args.get('provider_id')
         receiver_id = args.get('receiver_id')
         scope_id = args.get('scope_id')
-        committed_resource_classified_as_id = args.get('committed_resource_classification_id')
+        committed_resource_classified_as_id = args.get('committed_resource_classified_as_id')
         involves_id = args.get('involves_id')
         committed_numeric_value = args.get('committed_numeric_value')
         committed_unit_id = args.get('committed_unit_id')

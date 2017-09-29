@@ -9615,6 +9615,69 @@ class Commitment(models.Model):
         #notify_here?
         super(Commitment, self).save(*args, **kwargs)
 
+    def save_api(self):
+        if not self.order_item:
+            if self.process:
+                self.order_item = self.process.order_item()
+                if not self.order_item:
+                    raise ValidationError("Cannot find deliverable in this process chain, please include in the input parameters.")
+        if self.pk:
+            old_ct = Commitment.objects.get(pk=self.pk)
+            rt = old_ct.resource_type
+            demand = old_ct.independent_demand
+            new_qty = self.quantity
+            self.handle_commitment_changes(old_ct, rt, new_qty, demand, demand)
+        self.save()
+
+    #duplicated from views to support the api
+    def handle_commitment_changes(old_ct, new_rt, new_qty, old_demand, new_demand):
+        propagators = []
+        explode = True
+        if old_ct.event_type.relationship == "out":
+            dependants = old_ct.process.incoming_commitments()
+            propagators.append(old_ct)
+            if new_qty != old_ct.quantity:
+                explode = False
+        else:
+            dependants = old_ct.associated_producing_commitments()
+        old_rt = old_ct.resource_type
+        order_item = old_ct.order_item
+
+        if not propagators:
+            for dep in dependants:
+                if order_item:
+                    if dep.order_item == order_item:
+                        propagators.append(dep)
+                        explode = False
+                else:
+                    if dep.due_date == old_ct.process.start_date:
+                        if dep.quantity == old_ct.quantity:
+                            propagators.append(dep)
+                            explode = False
+        if new_rt != old_rt:
+            for ex_ct in old_ct.associated_producing_commitments():
+                if ex_ct.order_item == order_item:
+                    ex_ct.delete_dependants()
+            old_ct.delete()
+            explode = True
+        elif new_qty != old_ct.quantity:
+            delta = new_qty - old_ct.quantity
+            for pc in propagators:
+                if new_demand != old_demand:
+                    propagate_changes(pc, delta, old_demand, new_demand, [])
+                else:
+                    propagate_qty_change(pc, delta, [])
+        else:
+            if new_demand != old_demand:
+                #this is because we are just changing the order
+                delta = Decimal("0")
+                for pc in propagators:
+                    propagate_changes(pc, delta, old_demand, new_demand, [])
+                explode = False
+
+        return explode
+
+
     def label(self):
         return self.event_type.get_relationship_display()
 

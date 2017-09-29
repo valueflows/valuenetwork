@@ -2119,6 +2119,7 @@ query ($token: String) {
     }
   }
 }
+
 query ($token: String) {
   viewer(token: $token) {
     commitment(id: 325) {

@@ -8996,6 +8996,7 @@ def change_expense_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#this has been duplicated in models in class Commitment, to support the api
 def handle_commitment_changes(old_ct, new_rt, new_qty, old_demand, new_demand):
     propagators = []
     explode = True

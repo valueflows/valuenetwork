@@ -56,7 +56,7 @@ class CreateCommitment(AuthedMutation):
         note = graphene.String(required=False)
         plan_id = graphene.Int(required=False)
         is_plan_deliverable = graphene.Boolean(required=False)
-        for_plan_deliverable_id = graphene.Int(required=False)
+        #for_plan_deliverable_id = graphene.Int(required=False)
 
     commitment = graphene.Field(lambda: Commitment)
 
@@ -77,7 +77,7 @@ class CreateCommitment(AuthedMutation):
         note = args.get('note')
         plan_id = args.get('plan_id')
         is_plan_deliverable = args.get('is_plan_deliverable')
-        for_plan_deliverable_id = args.get('for_plan_deliverable_id')
+        #for_plan_deliverable_id = args.get('for_plan_deliverable_id')
 
         if output_of_id or input_of_id:
             if not plan_id:
@@ -123,10 +123,10 @@ class CreateCommitment(AuthedMutation):
             deliverable_for = plan
         else:
             deliverable_for = None
-        if for_plan_deliverable_id:
-            order_item = CommitmentProxy.objects.get(pk=for_plan_deliverable_id)
-        else:
-            order_item = None
+        #if for_plan_deliverable_id:
+        #    order_item = CommitmentProxy.objects.get(pk=for_plan_deliverable_id)
+        #else:
+        #    order_item = None
 
         commitment = CommitmentProxy(
             event_type = event_type,
@@ -143,7 +143,7 @@ class CreateCommitment(AuthedMutation):
             context_agent=scope,
             order=deliverable_for,
             independent_demand=plan,
-            order_item=order_item,
+            order_item=None, #order_item,
             created_by=context.user,
         )
         commitment.save_api()

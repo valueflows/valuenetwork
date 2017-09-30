@@ -9583,13 +9583,13 @@ class Commitment(models.Model):
             if self.process:
                 self.order_item = self.process.order_item()
                 if not self.order_item:
-                    raise ValidationError("Cannot find deliverable in this process chain, please include in the input parameters.")
+                    raise ValidationError("Cannot find deliverable in this process chain, cannot save.")
         if self.pk:
             self.handle_commitment_changes()
         self.save()
 
     #duplicated/modified from views to support the api
-    def handle_commitment_changes(self, old_ct):
+    def handle_commitment_changes(self):
         old_ct = Commitment.objects.get(pk=self.pk)
         new_rt = self.resource_type
         old_demand = old_ct.independent_demand
@@ -9641,6 +9641,7 @@ class Commitment(models.Model):
 
         return explode
 
+    #duplicated/modified from views to support the api
     def propagate_qty_change(self, commitment, delta, visited):
         process = commitment.process
         if commitment not in visited:
@@ -9671,6 +9672,7 @@ class Commitment(models.Model):
         commitment.quantity += delta
         commitment.save()
 
+    #duplicated/modified from views to support the api
     def propagate_changes(self, commitment, delta, old_demand, new_demand, visited):
         process = commitment.process
         order_item = commitment.order_item

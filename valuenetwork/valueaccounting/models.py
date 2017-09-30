@@ -9585,15 +9585,16 @@ class Commitment(models.Model):
                 if not self.order_item:
                     raise ValidationError("Cannot find deliverable in this process chain, please include in the input parameters.")
         if self.pk:
-            old_ct = Commitment.objects.get(pk=self.pk)
-            rt = old_ct.resource_type
-            demand = old_ct.independent_demand
-            new_qty = self.quantity
-            #self.handle_commitment_changes(old_ct, rt, new_qty, demand, demand)
+            self.handle_commitment_changes()
         self.save()
 
-    #duplicated from views to support the api
-    def handle_commitment_changes(old_ct, new_rt, new_qty, old_demand, new_demand):
+    #duplicated/modified from views to support the api
+    def handle_commitment_changes(self, old_ct):
+        old_ct = Commitment.objects.get(pk=self.pk)
+        new_rt = self.resource_type
+        old_demand = old_ct.independent_demand
+        new_demand = self.independent_demand
+        new_qty = self.quantity
         propagators = []
         explode = True
         if old_ct.event_type.relationship == "out":
@@ -9640,6 +9641,54 @@ class Commitment(models.Model):
 
         return explode
 
+    def propagate_qty_change(self, commitment, delta, visited):
+        process = commitment.process
+        if commitment not in visited:
+            visited.append(commitment)
+            for ic in process.incoming_commitments():
+                if ic.event_type.relationship != "cite":
+                    input_ctype = ic.commitment_type()
+                    output_ctype = commitment.commitment_type()
+                    ratio = input_ctype.quantity / output_ctype.quantity
+                    new_delta = (delta * ratio).quantize(Decimal('.01'), rounding=ROUND_UP)
+
+                    ic.quantity += new_delta
+                    ic.save()
+                    rt = ic.resource_type
+                    pcs = ic.associated_producing_commitments()
+                    if pcs:
+                        oh_qty = 0
+                        if rt.substitutable:
+                            if ic.event_type.resource_effect == "-":
+                                oh_qty = rt.onhand_qty_for_commitment(ic)
+                        if oh_qty:
+                            delta_delta = ic.quantity - oh_qty
+                            new_delta = delta_delta
+                    order_item = ic.order_item
+                    for pc in pcs:
+                        if pc.order_item == order_item:
+                            propagate_qty_change(pc, new_delta, visited)
+        commitment.quantity += delta
+        commitment.save()
+
+    def propagate_changes(self, commitment, delta, old_demand, new_demand, visited):
+        process = commitment.process
+        order_item = commitment.order_item
+        if process not in visited:
+            visited.append(process)
+            for ic in process.incoming_commitments():
+                ratio = ic.quantity / commitment.quantity
+                new_delta = (delta * ratio).quantize(Decimal('.01'), rounding=ROUND_UP)
+                ic.quantity += new_delta
+                ic.order_item = order_item
+                ic.save()
+                rt = ic.resource_type
+                for pc in ic.associated_producing_commitments():
+                    if pc.order_item == order_item:
+                        propagate_changes(pc, new_delta, old_demand, new_demand, visited)
+        commitment.quantity += delta
+        commitment.independent_demand = new_demand
+        commitment.save()
 
     def label(self):
         return self.event_type.get_relationship_display()

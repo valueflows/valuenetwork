@@ -222,7 +222,7 @@ class UpdateCommitment(AuthedMutation):
             if is_finished:
                 commitment.finished = is_finished
 
-            commitment.save()
+            commitment.save_api()
 
         return UpdateCommitment(commitment=commitment)
 

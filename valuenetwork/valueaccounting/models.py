@@ -2718,45 +2718,43 @@ class EconomicResourceType(models.Model):
             due_date=start_date,
             created_by=user)
         order.save()
-        #the rest has been moved to Order:
-        order.generate_staged_work_order_from_resource_details(resource=resource)
-        #processes = []
-        #new_start_date = start_date
-        #for pt in pts:
-        #    p = pt.create_process(new_start_date, user, inheritance)
-        #   new_start_date = p.end_date
-        #    processes.append(p)
-        #if processes:
-        #    last_process = processes[-1]
-        #    octs = last_process.outgoing_commitments()
-        #    order_item = None
-        #    for ct in octs:
-        #        order_qty = ct.quantity
-        #        ct.order = order
-        #        if not order_name:
-        #            order_name = " ".join([order_name, ct.resource_type.name])
-        #            order.name = order_name
-        #        ct.save()
-        #    assert octs.count() == 1, 'generate_staged_work_order_from_resource assumes one and only one output'
-        #    order_item = octs[0]
-        #    order.due_date = last_process.end_date
-        #    order.save()
-        #    #pr changed
-        #    if not resource.resource_type.substitutable:
-        #        resource.independent_demand = order
-        #        resource.order_item = order_item
-        #        resource.save()
-        ##Todo: apply selected_context_agent here
-        #for process in processes:
-        #    for commitment in process.commitments.all():
-        #        commitment.independent_demand = order
-        #        commitment.order_item = order_item
-        #        if commitment.resource_type == self:
-        #            commitment.quantity = resource.quantity
-        #        elif commitment.is_work():
-        #            if commitment.quantity == order_qty and commitment.unit_of_quantity == self.unit:
-        #                commitment.quantity = resource.quantity
-        #        commitment.save()
+        processes = []
+        new_start_date = start_date
+        for pt in pts:
+            p = pt.create_process(new_start_date, user, inheritance)
+            new_start_date = p.end_date
+            processes.append(p)
+        if processes:
+            last_process = processes[-1]
+            octs = last_process.outgoing_commitments()
+            order_item = None
+            for ct in octs:
+                order_qty = ct.quantity
+                ct.order = order
+                if not order_name:
+                    order_name = " ".join([order_name, ct.resource_type.name])
+                    order.name = order_name
+                ct.save()
+            assert octs.count() == 1, 'generate_staged_work_order_from_resource assumes one and only one output'
+            order_item = octs[0]
+            order.due_date = last_process.end_date
+            order.save()
+            #pr changed
+            if not resource.resource_type.substitutable:
+                resource.independent_demand = order
+                resource.order_item = order_item
+                resource.save()
+        #Todo: apply selected_context_agent here
+        for process in processes:
+            for commitment in process.commitments.all():
+                commitment.independent_demand = order
+                commitment.order_item = order_item
+                if commitment.resource_type == self:
+                    commitment.quantity = resource.quantity
+                elif commitment.is_work():
+                    if commitment.quantity == order_qty and commitment.unit_of_quantity == self.unit:
+                        commitment.quantity = resource.quantity
+                commitment.save()
 
         return order
 
@@ -3873,120 +3871,77 @@ class Order(models.Model):
         else:
             raise ValidationError("Cannot delete a plan with economic events recorded.")
 
+    #TODO this is a start at something, check if it is still useful
     #assumes the order itself is already saved (adapted from view plan_from_recipe)
-    def create_order_details_from_recipe_api(self, resource_type_id=None, rt_list_id=None, resource_id=None): 
-        resource_types = []
-        resource_type_lists = []
-        selected_context_agent = self.provider
-        forward_schedule = False
-        resource_driven = False
-        today = datetime.date.today()
+    #def create_order_details_from_recipe_api(self, resource_type_id=None, rt_list_id=None, resource_id=None): 
+    #    resource_types = []
+    #    resource_type_lists = []
+    #    selected_context_agent = self.provider
+    #    forward_schedule = False
+    #    resource_driven = False
+    #    today = datetime.date.today()
 
-        if rt_list_id:
-            rt_list = ResourceTypeList.objects.get(id=rt_list_id)
-            if rt_list.recipe_class() == "workflow":
-                forward_schedule = True
-            rts_to_produce = [elem.resource_type for elem in rt_list.list_elements.all()]
-            item_number = 1
-        elif resource_type_id:
-            produced_rt = EconomicResourceType.objects.get(id=resource_type_id)
-            rts_to_produce = [produced_rt,]
-            if produced_rt.recipe_is_staged():
-                forward_schedule = True
-                if produced_rt.recipe_needs_starting_resource():
-                    resource_driven = True
-        elif resource_id:
-            resource = EconomicResource.objects.get(id=resource_id)
-            if resource.resource_type not in rts:
-                rts.append(resource.resource_type)
-        else:
-            raise ValidationError("A resource classification or a resource classification bundle or a resource is required.")
+    #    if rt_list_id:
+    #        rt_list = ResourceTypeList.objects.get(id=rt_list_id)
+    #        if rt_list.recipe_class() == "workflow":
+    #            forward_schedule = True
+    #        rts_to_produce = [elem.resource_type for elem in rt_list.list_elements.all()]
+    #        item_number = 1
+    #    elif resource_type_id:
+    #        produced_rt = EconomicResourceType.objects.get(id=resource_type_id)
+    #        rts_to_produce = [produced_rt,]
+    #        if produced_rt.recipe_is_staged():
+    #            forward_schedule = True
+    #            if produced_rt.recipe_needs_starting_resource():
+    #                resource_driven = True
+    #    elif resource_id:
+    #        resource = EconomicResource.objects.get(id=resource_id)
+    #        if resource.resource_type not in rts:
+    #            rts.append(resource.resource_type)
+    #    else:
+    #        raise ValidationError("A resource classification or a resource classification bundle or a resource is required.")
 
-        #???
-        #if forward_schedule:
-        #    if start_or_due == "start":
-        #        start_date = due_date
-        #    else:
-        #        forward_schedule = False
+    #    #???
+    #    #if forward_schedule:
+    #    #    if start_or_due == "start":
+    #    #        start_date = due_date
+    #    #    else:
+    #    #        forward_schedule = False
 
-        for produced_rt in rts_to_produce:
-            if forward_schedule:
-                if resource_driven:
-                    #demand = produced_rt.generate_staged_work_order_from_resource(resource, order_name, start_date, self.created_by)
-                    produced_rt.generate_staged_work_order_from_resource(resource, order_name, start_date, self.created_by)
-                else:
-                    if len(rts_to_produce) == 1:
-                        demand = produced_rt.generate_staged_work_order(order_name, start_date, self.created_by)
-                    else:
-                        if item_number == 1:
-                            item_number += 1
-                            demand = produced_rt.generate_staged_work_order(order_name, start_date, self.created_by)
-                        else:
-                            demand = produced_rt.generate_staged_order_item(self, start_date, self.created_by)
-            else:
-                ptrt, inheritance = produced_rt.main_producing_process_type_relationship()
-                et = ptrt.event_type
-                if et:
-                    commitment = self.add_commitment(
-                        resource_type=produced_rt,
-                        #Todo: apply selected_context_agent here? Only if inheritance?
-                        context_agent=ptrt.process_type.context_agent,
-                        quantity=ptrt.quantity,
-                        event_type=et,
-                        unit=produced_rt.unit,
-                        description=ptrt.description or "",
-                        stage=ptrt.stage,
-                        state=ptrt.state,
-                        )
-                    commitment.created_by=self.created_by
-                    commitment.save()
+    #    for produced_rt in rts_to_produce:
+    #        if forward_schedule:
+    #            if resource_driven:
+    #                #demand = produced_rt.generate_staged_work_order_from_resource(resource, order_name, start_date, self.created_by)
+    #                produced_rt.generate_staged_work_order_from_resource(resource, order_name, start_date, self.created_by)
+    #            else:
+    #                if len(rts_to_produce) == 1:
+    #                    demand = produced_rt.generate_staged_work_order(order_name, start_date, self.created_by)
+    #                else:
+    #                    if item_number == 1:
+    #                        item_number += 1
+    #                        demand = produced_rt.generate_staged_work_order(order_name, start_date, self.created_by)
+    #                    else:
+    #                        demand = produced_rt.generate_staged_order_item(self, start_date, self.created_by)
+    #        else:
+    #            ptrt, inheritance = produced_rt.main_producing_process_type_relationship()
+    #            et = ptrt.event_type
+    #            if et:
+    #                commitment = self.add_commitment(
+    #                    resource_type=produced_rt,
+    #                    #Todo: apply selected_context_agent here? Only if inheritance?
+    #                    context_agent=ptrt.process_type.context_agent,
+    #                    quantity=ptrt.quantity,
+    #                    event_type=et,
+    #                    unit=produced_rt.unit,
+    #                    description=ptrt.description or "",
+    #                    stage=ptrt.stage,
+    #                    state=ptrt.state,
+    #                    )
+    #                commitment.created_by=self.created_by
+    #                commitment.save()
 
-                    #Todo: apply selected_context_agent here? #???
-                    process = commitment.generate_producing_process(self.created_by, [], inheritance=inheritance, explode=True)
-
-    def generate_staged_work_order_from_resource_details(self, resource):
-        processes = []
-        new_start_date = start_date
-        for pt in pts:
-            p = pt.create_process(new_start_date, user, inheritance)
-            new_start_date = p.end_date
-            processes.append(p)
-        if processes:
-            last_process = processes[-1]
-            octs = last_process.outgoing_commitments()
-            order_item = None
-            for ct in octs:
-                order_qty = ct.quantity
-                ct.order = order
-                if not order_name:
-                    order_name = " ".join([order_name, ct.resource_type.name])
-                    order.name = order_name
-                ct.save()
-            assert octs.count() == 1, 'generate_staged_work_order_from_resource assumes one and only one output'
-            order_item = octs[0]
-            order.due_date = last_process.end_date
-            order.save()
-            #pr changed
-            if not resource.resource_type.substitutable:
-                resource.independent_demand = order
-                resource.order_item = order_item
-                resource.save()
-        #Todo: apply selected_context_agent here
-        for process in processes:
-            for commitment in process.commitments.all():
-                commitment.independent_demand = order
-                commitment.order_item = order_item
-                if commitment.resource_type == self:
-                    commitment.quantity = resource.quantity
-                elif commitment.is_work():
-                    if commitment.quantity == order_qty and commitment.unit_of_quantity == self.unit:
-                        commitment.quantity = resource.quantity
-                commitment.save()
-
-
-
-
-
+    #                #Todo: apply selected_context_agent here? #???
+    #                process = commitment.generate_producing_process(self.created_by, [], inheritance=inheritance, explode=True)
 
     def all_working_agents(self):
         procs = self.all_processes()

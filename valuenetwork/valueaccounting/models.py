@@ -9589,7 +9589,7 @@ class Commitment(models.Model):
         self.save()
 
     #duplicated/modified from views to support the api
-    def handle_commitment_changes(self, old_ct):
+    def handle_commitment_changes(self):
         old_ct = Commitment.objects.get(pk=self.pk)
         new_rt = self.resource_type
         old_demand = old_ct.independent_demand
@@ -9628,15 +9628,15 @@ class Commitment(models.Model):
             delta = new_qty - old_ct.quantity
             for pc in propagators:
                 if new_demand != old_demand:
-                    propagate_changes(pc, delta, old_demand, new_demand, [])
+                    self.propagate_changes(pc, delta, old_demand, new_demand, [])
                 else:
-                    propagate_qty_change(pc, delta, [])
+                    self.propagate_qty_change(pc, delta, [])
         else:
             if new_demand != old_demand:
                 #this is because we are just changing the order
                 delta = Decimal("0")
                 for pc in propagators:
-                    propagate_changes(pc, delta, old_demand, new_demand, [])
+                    self.propagate_changes(pc, delta, old_demand, new_demand, [])
                 explode = False
 
         return explode
@@ -9667,7 +9667,7 @@ class Commitment(models.Model):
                     order_item = ic.order_item
                     for pc in pcs:
                         if pc.order_item == order_item:
-                            propagate_qty_change(pc, new_delta, visited)
+                            self.propagate_qty_change(pc, new_delta, visited)
         commitment.quantity += delta
         commitment.save()
 
@@ -9685,7 +9685,7 @@ class Commitment(models.Model):
                 rt = ic.resource_type
                 for pc in ic.associated_producing_commitments():
                     if pc.order_item == order_item:
-                        propagate_changes(pc, new_delta, old_demand, new_demand, visited)
+                        self.propagate_changes(pc, new_delta, old_demand, new_demand, visited)
         commitment.quantity += delta
         commitment.independent_demand = new_demand
         commitment.save()

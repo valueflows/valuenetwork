@@ -282,3 +282,77 @@ class ExplosionTest(TestCase):
         self.assertEqual(len(child_outputs), 0)
         self.assertTrue(explode)
 
+    def test_api_commitment_change_propagation(self):
+        """Propagate changes to dependants
+            using the methods called by
+            the graphql api
+
+        """
+
+        cts = self.order.order_items()
+        commitment = cts[0]
+
+        # set up the process flow to be changed
+        visited = []
+        process = commitment.generate_producing_process(self.user, visited, explode=True)
+        child_input = process.incoming_commitments()[0]
+        self.assertEqual(child_input.quantity, Decimal("8"))
+        child_output=child_input.associated_producing_commitments()[0]
+        self.assertEqual(child_output.quantity, Decimal("5"))
+        child_process=child_output.process
+        grandchild_input = child_process.incoming_commitments()[0]
+        self.assertEqual(grandchild_input.quantity, Decimal("15"))
+
+        #change input quantity
+        new_rt = child_input.resource_type
+        new_qty = Decimal("10")
+        child_input.quantity = new_qty
+        explode = child_input.handle_commitment_changes()
+        #child_input.quantity = new_qty
+        child_input.save()
+        child_output=child_input.associated_producing_commitments()[0]
+        child_process=child_output.process
+        grandchild_input = child_process.incoming_commitments()[0]
+        self.assertEqual(child_output.quantity, Decimal("7"))
+        self.assertEqual(grandchild_input.quantity, Decimal("21"))
+        self.assertFalse(explode)
+        new_qty = Decimal("8")
+        child_input.quantity = new_qty
+        explode = child_input.handle_commitment_changes()
+        #child_input.quantity = new_qty
+        child_input.save()
+        child_output=child_input.associated_producing_commitments()[0]
+        child_process=child_output.process
+        grandchild_input = child_process.incoming_commitments()[0]
+        self.assertEqual(child_output.quantity, Decimal("5"))
+        child_process=child_output.process
+        grandchild_input = child_process.incoming_commitments()[0]
+        self.assertEqual(grandchild_input.quantity, Decimal("15"))
+
+        # change output quantity
+        new_rt = commitment.resource_type
+        new_qty = Decimal("8")
+        commitment.quantity = new_qty
+        explode = commitment.handle_commitment_changes()
+        #child_input.quantity = new_qty
+        child_input.save()
+        child_output=child_input.associated_producing_commitments()[0]
+        child_process=child_output.process
+        grandchild_input = child_process.incoming_commitments()[0]
+        self.assertEqual(child_output.quantity, Decimal("18"))
+        self.assertEqual(grandchild_input.quantity, Decimal("54"))
+        self.assertFalse(explode)
+
+        #change input resource type
+        new_rt = EconomicResourceType(
+            name="changed resource type",
+        )
+        new_rt.save()
+        child_input.resource_type = new_rt
+        explode = child_input.handle_commitment_changes()
+        #child_input.resource_type = new_rt
+        child_input.save()
+        child_outputs=child_input.associated_producing_commitments()
+        self.assertEqual(len(child_outputs), 0)
+        self.assertTrue(explode)
+        

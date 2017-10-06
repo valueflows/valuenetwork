@@ -169,7 +169,6 @@ class CreateEconomicEvent(AuthedMutation):
                     created_by=context.user,
                     #location
                 )
-                #affects.save_api(process=process, event_type=event_type, commitment=commitment)
 
         economic_event = EconomicEventProxy(
             event_type = event_type,
@@ -188,7 +187,13 @@ class CreateEconomicEvent(AuthedMutation):
             is_contribution=request_distribution,
             created_by=context.user,
         )
-        economic_event.save_api(user=context.user, create_resource=create_resource)
+
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        is_authorized = user_agent.is_authorized(object_to_mutate=economic_event)
+        if is_authorized:
+            economic_event.save_api(user=context.user, create_resource=create_resource)
+        else:
+            raise PermissionDenied('User not authorized to perform this action.')
 
         return CreateEconomicEvent(economic_event=economic_event)
 
@@ -269,7 +274,13 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.commitment = Commitment.objects.get(pk=fulfills_commitment_id)
             economic_event.changed_by = context.user
 
-            economic_event.save_api(user=context.user, old_quantity=old_quantity, old_resource=old_resource)
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=economic_event)
+            if is_authorized:
+                economic_event.save_api(user=context.user, old_quantity=old_quantity, old_resource=old_resource)
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
+            
 
         return UpdateEconomicEvent(economic_event=economic_event)
 
@@ -285,6 +296,11 @@ class DeleteEconomicEvent(AuthedMutation):
         id = args.get('id')
         economic_event = EconomicEventProxy.objects.get(pk=id)
         if economic_event:
-            economic_event.delete_api()
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=economic_event)
+            if is_authorized:
+                economic_event.delete_api()
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
 
         return DeleteEconomicEvent(economic_event=economic_event)

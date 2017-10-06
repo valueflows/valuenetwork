@@ -4,7 +4,7 @@
 
 import graphene
 import datetime
-from valuenetwork.valueaccounting.models import Order, EconomicAgent
+from valuenetwork.valueaccounting.models import Order, EconomicAgent, AgentUser
 from valuenetwork.api.types.Plan import Plan
 from six import with_metaclass
 from django.contrib.auth.models import User
@@ -59,7 +59,13 @@ class CreatePlan(AuthedMutation):
             description=note,
             created_by=context.user,
         )
-        plan.save()
+
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        is_authorized = user_agent.is_authorized(object_to_mutate=plan)
+        if is_authorized:
+            plan.save()
+        else:
+            raise PermissionDenied('User not authorized to perform this action.')
 
         return CreatePlan(plan=plan)
 
@@ -89,7 +95,13 @@ class UpdatePlan(AuthedMutation):
             if due:
                 due_date = datetime.datetime.strptime(due, '%Y-%m-%d').date()
                 plan.due_date=due_date
-            plan.save()
+
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=plan)
+            if is_authorized:
+                plan.save()
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
 
         return UpdatePlan(plan=plan)
 
@@ -105,6 +117,11 @@ class DeletePlan(AuthedMutation):
         id = args.get('id')
         plan = Order.objects.get(pk=id)
         if plan:
-            plan.delete_api()
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=plan)
+            if is_authorized:
+                plan.delete_api()
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
 
         return DeletePlan(plan=plan)

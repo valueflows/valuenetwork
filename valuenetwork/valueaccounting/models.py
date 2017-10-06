@@ -537,6 +537,26 @@ class EconomicAgent(models.Model):
             tp = "Person"
         return tp
 
+    # basic authorization in one place for use by the api(s) initially
+    def is_authorized(self, object_to_mutate):
+        user = self.my_user()
+        if not user:
+            return False
+        if self.is_superuser():
+            return True
+        if object_to_mutate.context_agent not in self.is_member_of():
+            return False
+        if object_to_mutate.pk: #update or delete
+            if type(object_to_mutate) is EconomicEvent or type(object_to_mutate) is Commitment:
+                if object_to_mutate.created_by == user:
+                    return True
+                else:
+                    return False
+            else:
+                return True
+        else: #create
+            return True
+
     def recipes(self):
         resource_types = []
         candidate_resource_types = self.get_resource_types_with_recipe()
@@ -551,7 +571,6 @@ class EconomicAgent(models.Model):
             else:
                     resource_types.append(rt)
         return resource_types
-
 
     def membership_request(self):
         reqs = self.membership_requests.all()

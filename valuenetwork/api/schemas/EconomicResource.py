@@ -3,7 +3,7 @@
 #
 
 import graphene
-from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType
+from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType, AgentUser
 from valuenetwork.api.types.EconomicResource import EconomicResource
 from six import with_metaclass
 from django.contrib.auth.models import User
@@ -106,7 +106,13 @@ class UpdateEconomicResource(AuthedMutation):
             if resource_classified_as_id:
                 economic_resource.resource_type=EconomicResourceType.objects.get(pk=resource_classified_as_id)
             economic_resource.changed_by=context.user
-            economic_resource.save()
+
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=economic_resource)
+            if is_authorized:
+                economic_resource.save()
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
 
         return UpdateEconomicResource(economic_resource=economic_resource)
 
@@ -123,7 +129,11 @@ class DeleteEconomicResource(AuthedMutation):
         economic_resource = EconomicResourceProxy.objects.get(pk=id)
         if economic_resource:
             if economic_resource.is_deletable():
-                economic_resource.delete()
+                is_authorized = user_agent.is_authorized(object_to_mutate=economic_resource)
+                if is_authorized:
+                    economic_resource.delete()
+                else:
+                    raise PermissionDenied('User not authorized to perform this action.')
             else:
                 raise PermissionDenied("Economic resource has related events or quantity > 0 and cannot be deleted.")
 

@@ -5,7 +5,7 @@
 import graphene
 import datetime
 from decimal import Decimal
-from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy, EconomicAgent, EconomicResourceType, EconomicResource, Unit, EventType, Process, Order
+from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy, EconomicAgent, EconomicResourceType, EconomicResource, Unit, EventType, Process, Order, AgentUser
 from valuenetwork.api.types.Commitment import Commitment
 from valuenetwork.api.types.EconomicEvent import Action
 from six import with_metaclass
@@ -146,7 +146,13 @@ class CreateCommitment(AuthedMutation):
             order_item=None, #order_item,
             created_by=context.user,
         )
-        commitment.save_api()
+
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        is_authorized = user_agent.is_authorized(object_to_mutate=commitment)
+        if is_authorized:
+            commitment.save_api()
+        else:
+            raise PermissionDenied('User not authorized to perform this action.')
 
         return CreateCommitment(commitment=commitment)
 
@@ -222,7 +228,12 @@ class UpdateCommitment(AuthedMutation):
             if is_finished:
                 commitment.finished = is_finished
 
-            commitment.save_api()
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=commitment)
+            if is_authorized:
+                commitment.save_api()
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
 
         return UpdateCommitment(commitment=commitment)
 
@@ -239,7 +250,12 @@ class DeleteCommitment(AuthedMutation):
         commitment = CommitmentProxy.objects.get(pk=id)
         if commitment:
             if commitment.is_deletable():
-                commitment.delete()
+                user_agent = AgentUser.objects.get(user=context.user).agent
+                is_authorized = user_agent.is_authorized(object_to_mutate=commitment)
+                if is_authorized:
+                    commitment.delete()
+                else:
+                    raise PermissionDenied('User not authorized to perform this action.')
             else:
                 raise PermissionDenied("Commitment has fulfilling events so cannot be deleted.")
 

@@ -2365,8 +2365,8 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   createCommitment(token: $token, action: "use", plannedStart: "2017-10-01", due: "2017-10-10",
-    scopeId: 39, note: "testing", committedResourceClassificationId: 17, involvesId: 11, 
-    committedNumericValue: "3.5", committedUnitId: 2, inputOfId: 62,
+    scopeId: 39, note: "testing", committedResourceClassifiedAsId: 17, involvesId: 11, 
+    committedNumericValue: "3.5", committedUnitId: 2, inputOfId: 6, planId: 52,
     providerId: 79, receiverId: 39) {
     commitment {
       id

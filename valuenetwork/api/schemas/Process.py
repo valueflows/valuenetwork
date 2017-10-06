@@ -7,7 +7,7 @@
 
 import graphene
 import datetime
-from valuenetwork.valueaccounting.models import Process as ProcessProxy, EconomicAgent
+from valuenetwork.valueaccounting.models import Process as ProcessProxy, EconomicAgent, AgentUser
 from valuenetwork.api.types.Process import Process
 from six import with_metaclass
 from django.contrib.auth.models import User
@@ -72,7 +72,14 @@ class CreateProcess(AuthedMutation):
             context_agent=scope,
             created_by=context.user,
         )
-        process.save()
+
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        is_authorized = user_agent.is_authorized(object_to_mutate=process)
+        if is_authorized:
+            process.save()  
+        else:
+            raise PermissionDenied('User not authorized to perform this action.')
+        
         #TODO: add logic for inserting process into workflow plan
 
         return CreateProcess(process=process)
@@ -118,7 +125,14 @@ class UpdateProcess(AuthedMutation):
             if is_finished:
                 process.finished=is_finished
             process.changed_by=context.user
-            process.save_api()
+
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=process)
+            if is_authorized:
+                process.save_api()  
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
+
 
         return UpdateProcess(process=process)
 
@@ -135,7 +149,12 @@ class DeleteProcess(AuthedMutation):
         process = ProcessProxy.objects.get(pk=id)
         if process:
             if process.is_deletable():
-                process.delete()
+                user_agent = AgentUser.objects.get(user=context.user).agent
+                is_authorized = user_agent.is_authorized(object_to_mutate=process)
+                if is_authorized:
+                    process.delete() 
+                else:
+                    raise PermissionDenied('User not authorized to perform this action.')                
                 #TODO: add logic for adjusting other processes if workflow plan
             else:
                 raise PermissionDenied("Process has economic events so cannot be deleted.")

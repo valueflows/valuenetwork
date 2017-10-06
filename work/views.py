@@ -5009,17 +5009,18 @@ def process_logging(request, process_id):
                     }
                     unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", context_agent=context_agent, initial=work_init)
                     unplanned_work_form.fields["resource_type"].queryset = work_resource_types
+                    if logger:
+                        work_init = {
+                            "from_agent": agent,
+                            "unit_of_quantity": work_unit,
+                            "is_contribution": True,
+                            "due_date": process.end_date,
+                        }
+                        add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=work_init)
+                        add_work_form.fields["resource_type"].queryset = work_resource_types
                 else:
                     unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", pattern=pattern, context_agent=context_agent, initial=work_init)
-                if logger:
-                    work_init = {
-                        "from_agent": agent,
-                        "unit_of_quantity": work_unit,
-                        "is_contribution": True,
-                        "due_date": process.end_date,
-                    }
-                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=work_init)
-                    add_work_form.fields["resource_type"].queryset = work_resource_types
+
 
         if "cite" in slots:
             cite_unit = None

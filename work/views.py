@@ -4781,13 +4781,15 @@ def json_get_context_resource_types(request, context_id, pattern_id=None):
             rts = pattern.work_resource_types()
     else:
         rts = EconomicResourceType.objects.filter(behavior="work")
-    try:
-        if context_agent.project.resource_type_selection == "project":
-            rts = rts.filter(context_agent=context_agent)
-        else:
-            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
-    except:
-        rts = rts.filter(context_agent=None)
+    # this code is disabled everywhere in these views
+    # because of https://github.com/FreedomCoop/valuenetwork/issues/374
+    #try:
+    #    if context_agent.project.resource_type_selection == "project":
+    #        rts = rts.filter(context_agent=context_agent)
+    #    else:
+    #        rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
+    #except:
+    #    rts = rts.filter(context_agent=None)
     json = serializers.serialize("json", rts, fields=('name'))
     return HttpResponse(json, content_type='application/json')
 
@@ -4960,13 +4962,14 @@ def process_logging(request, process_id):
         change_et = EventType.objects.get(name="Change")
         if "out" in slots:
             output_resource_types = pattern.output_resource_types()
-            try:
-                if context_agent.project.resource_type_selection == "project":
-                    output_resource_types = output_resource_types.filter(context_agent=context_agent)
-                else:
-                    output_resource_types = output_resource_types.filter(context_agent=None)
-            except:
-                output_resource_types = output_resource_types.filter(context_agent=None)
+            # see https://github.com/FreedomCoop/valuenetwork/issues/374
+            #try:
+            #    if context_agent.project.resource_type_selection == "project":
+            #        output_resource_types = output_resource_types.filter(context_agent=context_agent)
+            #    else:
+            #        output_resource_types = output_resource_types.filter(context_agent=None)
+            #except:
+            #    output_resource_types = output_resource_types.filter(context_agent=None)
             unplanned_output_form = UnplannedOutputForm(prefix='unplannedoutput')
             unplanned_output_form.fields["resource_type"].queryset = output_resource_types
             if logger:
@@ -4987,13 +4990,15 @@ def process_logging(request, process_id):
                     "is_contribution": True,
                 }
                 work_resource_types = pattern.work_resource_types()
-                try:
-                    if context_agent.project.resource_type_selection == "project":
-                        work_resource_types = work_resource_types.filter(context_agent=context_agent)
-                    else:
-                        work_resource_types = work_resource_types.filter(context_agent=None)
-                except:
-                    work_resource_types = work_resource_types.filter(context_agent=None)
+                # see https://github.com/FreedomCoop/valuenetwork/issues/374
+                #try:
+                #    if context_agent.project.resource_type_selection == "project":
+                #        work_resource_types = work_resource_types.filter(context_agent=context_agent)
+                #    else:
+                #        work_resource_types = work_resource_types.filter(context_agent=None)
+                #except:
+                #    work_resource_types = work_resource_types.filter(context_agent=None)
+                work_unit = None
                 if work_resource_types:
                     work_unit = work_resource_types[0].unit
                     #work_init = {"unit_of_quantity": work_unit,}
@@ -5021,37 +5026,40 @@ def process_logging(request, process_id):
             if context_agent.unit_of_claim_value:
                 cite_unit = context_agent.unit_of_claim_value
             citable_resource_types = pattern.citables_with_resources()
-            try:
-                if context_agent.project.resource_type_selection == "project":
-                    citable_resource_types = citable_resource_types.filter(context_agent=context_agent)
-                else:
-                    citable_resource_types = citable_resource_types.filter(context_agent=None)
-            except:
-                citable_resource_types = citable_resource_types.filter(context_agent=None)
+            # see https://github.com/FreedomCoop/valuenetwork/issues/374
+            #try:
+            #    if context_agent.project.resource_type_selection == "project":
+            #        citable_resource_types = citable_resource_types.filter(context_agent=context_agent)
+            #    else:
+            #        citable_resource_types = citable_resource_types.filter(context_agent=None)
+            #except:
+            #    citable_resource_types = citable_resource_types.filter(context_agent=None)
             unplanned_cite_form = UnplannedCiteEventForm(prefix='unplannedcite', pattern=None, cite_unit=cite_unit)
             unplanned_cite_form.fields["resource_type"].queryset = citable_resource_types
             if logger:
                 add_citation_form = ProcessCitationForm(prefix='citation', pattern=None)
                 cite_resource_types = pattern.citable_resource_types()
-                try:
-                    if context_agent.project.resource_type_selection == "project":
-                        cite_resource_types = cite_resource_types.filter(context_agent=context_agent)
-                    else:
-                        cite_resource_types = cite_resource_types.filter(context_agent=None)
-                except:
-                    cite_resource_types = cite_resource_types.filter(context_agent=None)
+                # see https://github.com/FreedomCoop/valuenetwork/issues/374
+                #try:
+                #    if context_agent.project.resource_type_selection == "project":
+                #        cite_resource_types = cite_resource_types.filter(context_agent=context_agent)
+                #    else:
+                #        cite_resource_types = cite_resource_types.filter(context_agent=None)
+                #except:
+                #    cite_resource_types = cite_resource_types.filter(context_agent=None)
                 add_citation_form.fields["resource_type"].queryset = cite_resource_types
 
         if "consume" in slots:
             unplanned_consumption_form = UnplannedInputEventForm(prefix='unplannedconsumption', pattern=None)
             consumable_resource_types = pattern.consumables_with_resources()
-            try:
-                if context_agent.project.resource_type_selection == "project":
-                    consumable_resource_types = consumable_resource_types.filter(context_agent=context_agent)
-                else:
-                    consumable_resource_types = consumable_resource_types.filter(context_agent=None)
-            except:
-                consumable_resource_types = consumable_resource_types.filter(context_agent=None)
+            # see https://github.com/FreedomCoop/valuenetwork/issues/374
+            #try:
+            #    if context_agent.project.resource_type_selection == "project":
+            #        consumable_resource_types = consumable_resource_types.filter(context_agent=context_agent)
+            #    else:
+            #        consumable_resource_types = consumable_resource_types.filter(context_agent=None)
+            #except:
+            #    consumable_resource_types = consumable_resource_types.filter(context_agent=None)
             unplanned_consumption_form.fields["resource_type"].queryset = consumable_resource_types
             if logger:
                 add_consumable_form = ProcessConsumableForm(prefix='consumable', pattern=None)
@@ -5060,13 +5068,14 @@ def process_logging(request, process_id):
         if "use" in slots:
             unplanned_use_form = UnplannedInputEventForm(prefix='unplannedusable', pattern=None)
             usable_resource_types = pattern.usables_with_resources()
-            try:
-                if context_agent.project.resource_type_selection == "project":
-                    usable_resource_types = usable_resource_types.filter(context_agent=context_agent)
-                else:
-                    usable_resource_types = usable_resource_types.filter(context_agent=None)
-            except:
-                usable_resource_types = usable_resource_types.filter(context_agent=None)
+            # see https://github.com/FreedomCoop/valuenetwork/issues/374
+            #try:
+            #    if context_agent.project.resource_type_selection == "project":
+            #        usable_resource_types = usable_resource_types.filter(context_agent=context_agent)
+            #    else:
+            #        usable_resource_types = usable_resource_types.filter(context_agent=None)
+            #except:
+            #    usable_resource_types = usable_resource_types.filter(context_agent=None)
             unplanned_use_form.fields["resource_type"].queryset = usable_resource_types
             if logger:
                 add_usable_form = ProcessUsableForm(prefix='usable', pattern=None)
@@ -5293,10 +5302,11 @@ def non_process_logging(request):
     ctx_qs = member.related_context_queryset()
     if ctx_qs:
         context_agent = ctx_qs[0]
-        if context_agent.project.resource_type_selection == "project":
-            rts = rts.filter(context_agent=context_agent)
-        else:
-            rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
+        # see https://github.com/FreedomCoop/valuenetwork/issues/374
+        #if context_agent.project.resource_type_selection == "project":
+        #    rts = rts.filter(context_agent=context_agent)
+        #else:
+        #    rts = rts.filter(Q(context_agent=context_agent)|Q(context_agent=None))
 
     TimeFormSet = modelformset_factory(
         EconomicEvent,
@@ -6607,13 +6617,14 @@ def plan_work(request, rand=0):
                 slots = selected_pattern.event_types()
                 for slot in slots:
                     rts = selected_pattern.get_resource_types(slot)
-                    try:
-                        if selected_context_agent.project.resource_type_selection == "project":
-                            rts = rts.filter(context_agent=selected_context_agent)
-                        else:
-                            rts = rts.filter(context_agent=None)
-                    except:
-                        rts = rts.filter(context_agent=None)
+                    # see https://github.com/FreedomCoop/valuenetwork/issues/374
+                    #try:
+                    #    if selected_context_agent.project.resource_type_selection == "project":
+                    #        rts = rts.filter(context_agent=selected_context_agent)
+                    #    else:
+                    #        rts = rts.filter(context_agent=None)
+                    #except:
+                    #    rts = rts.filter(context_agent=None)
                     slot.resource_types = rts
             process_form = DateAndNameForm(initial=init)
             #demand_form = OrderSelectionFilteredForm(provider=selected_context_agent)

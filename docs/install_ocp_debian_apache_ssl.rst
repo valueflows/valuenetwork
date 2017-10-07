@@ -1,4 +1,4 @@
-This is a howto for installing NRO in a debian/ubuntu system.
+This is a howto for installing NRP in a debian/ubuntu system.
 
 - Install dependencies in the system: ::
 

@@ -37,6 +37,8 @@ class ApiTypesAppConfig(AppConfig):
         types.ExchangeAgreement = ExchangeAgreement
         from valuenetwork.api.types.Exchange import Transfer
         types.Transfer = Transfer
+        from valuenetwork.api.types.Place import Place
+        types.Place = Place
         super(ApiTypesAppConfig, self).ready()
 
         

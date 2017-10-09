@@ -302,6 +302,14 @@ class Location(models.Model):
     def __unicode__(self):
         return self.name
 
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
+    @property #ValueFlows
+    def mappable_address(self):
+        return self.address
+
     def resources(self):
         return self.resources_at_location.all()
 

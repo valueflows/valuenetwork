@@ -2330,6 +2330,48 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    place(id: 4) {
+      id
+      name
+      mappableAddress
+      latitude
+      longitude
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allPlaces {
+      id
+      name
+      mappableAddress
+      latitude
+      longitude
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    place(id: 5) {
+      placeAgents {
+        name
+      }
+      placeResources {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+    }
+  }
+}
+
 
 ######################### SAMPLE MUTATIONS ###########################
 

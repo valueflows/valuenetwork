@@ -26,6 +26,7 @@ import valuenetwork.api.schemas.ResourceClassification
 import valuenetwork.api.schemas.ProcessClassification
 import valuenetwork.api.schemas.Commitment
 import valuenetwork.api.schemas.Plan
+import valuenetwork.api.schemas.Place
 from valuenetwork.api.schemas.helpers import hash_password
 
 
@@ -46,6 +47,7 @@ class ViewerQuery(
     valuenetwork.api.schemas.ProcessClassification.Query,
     valuenetwork.api.schemas.Commitment.Query,
     valuenetwork.api.schemas.Plan.Query,
+    valuenetwork.api.schemas.Place.Query,
     graphene.ObjectType
 ):
     def __init__(self, *args, **kwargs):

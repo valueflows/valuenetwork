@@ -867,6 +867,10 @@ query($token: String) {
       id
       name
       image
+      primaryLocation {
+        name
+        address
+      }
       note
       type
       __typename
@@ -1384,7 +1388,7 @@ query($token: String) {
   viewer(token: $token) {
     economicResource(id: 26) {
       id
-      resourceClassification {
+      resourceClassiedAs {
         name
         category
       }
@@ -1406,7 +1410,7 @@ query ($token: String) {
   viewer(token: $token) {
     allEconomicResources {
       id
-      resourceClassification {
+      resourceClassifiedAs {
         name
         category
       }
@@ -1416,6 +1420,10 @@ query ($token: String) {
         unit {
           name
         }
+      }
+      currentLocation {
+        name
+        address
       }
       image
       note
@@ -1429,7 +1437,7 @@ query ($token: String) {
       name
       ownedEconomicResources {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1454,7 +1462,7 @@ query ($token: String) {
       name
       ownedEconomicResources(category: CURRENCY) {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1478,7 +1486,7 @@ query ($token: String) {
       name
       ownedEconomicResources(category: INVENTORY) {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1500,7 +1508,7 @@ query ($token: String) {
   viewer(token: $token) {
     economicResource(id: 20) {
       id
-      resourceClassification {
+      resourceClassifiedAs {
         name
         category
       }
@@ -1520,7 +1528,7 @@ query ($token: String) {
         receiver {
           name
         }
-        resourceClassification {
+        resourceClassifiedAs {
           name
         }
         giveResource {

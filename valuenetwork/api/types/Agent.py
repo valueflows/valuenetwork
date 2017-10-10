@@ -31,6 +31,7 @@ class Agent(graphene.Interface):
     type = graphene.String(source='type')
     image = graphene.String(source='image')
     note = graphene.String(source='note')
+    primary_location = graphene.Field(lambda: types.Place)
 
     owned_economic_resources = graphene.List(lambda: types.EconomicResource,
                                              category=types.EconomicResourceCategory())
@@ -57,8 +58,21 @@ class Agent(graphene.Interface):
 
     #agent_recipe_bundles = graphene.List(ResourceClassification)
 
-    # Resolvers
 
+    def resolve_primary_location(self, args, *rargs):
+        return self.primary_location
+
+    def resolve_owned_economic_resources(self, args, context, info):
+        type = args.get('category', types.EconomicResourceCategory.NONE)
+        org = _load_identified_agent(self)
+        if org:
+            if type == types.EconomicResourceCategory.CURRENCY:
+                return org.owned_currency_resources()
+            elif type == types.EconomicResourceCategory.INVENTORY:
+                return org.owned_inventory_resources()
+            return org.owned_resources()
+        return None
+    
     def resolve_owned_economic_resources(self, args, context, info):
         type = args.get('category', types.EconomicResourceCategory.NONE)
         org = _load_identified_agent(self)
@@ -180,7 +194,7 @@ class Person(DjangoObjectType):
     class Meta:
         interfaces = (Agent, )
         model = PersonModel #EconomicAgent
-        only_fields = ('id', 'name', 'image')
+        only_fields = ('id', 'name', 'image', 'primary_location')
 
 
 # Organization - an Agent which is not a Person, and can be further classified from there
@@ -190,7 +204,7 @@ class Organization(DjangoObjectType):
     class Meta:
         interfaces = (Agent, )
         model = OrganizationModel #EconomicAgent
-        only_fields = ('id', 'name', 'image', 'note')
+        only_fields = ('id', 'name', 'image', 'note', 'primary_location')
 
 
 

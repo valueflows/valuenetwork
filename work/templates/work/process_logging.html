@@ -458,7 +458,7 @@ hr {
 		    <div class="log-section infobox">
 		        <h3 style="margin-bottom: 4px;" >
 		            {% trans "Work" %}
-		            {% if logger %}
+		            {% if logger and add_work_form %}
 			            <a href="#addWorkModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Add a new work requirement, people with those skills will be notified">
 		                    {% if worker %}
                                 {% trans "Invite a collaborator" %}

@@ -2335,7 +2335,7 @@ query ($token: String) {
     place(id: 4) {
       id
       name
-      mappableAddress
+      address
       latitude
       longitude
       note
@@ -2348,7 +2348,7 @@ query ($token: String) {
     allPlaces {
       id
       name
-      mappableAddress
+      address
       latitude
       longitude
       note

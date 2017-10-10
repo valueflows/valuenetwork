@@ -11,13 +11,10 @@ from valuenetwork.api.models import formatAgentList
 
 class Place(DjangoObjectType):
     note = graphene.String(source='note')
-    mappable_address = graphene.String(source='mappable_address')
-    latitude = graphene.Float(source='latitude')
-    longitude = graphene.Float(source='longitude')
 
     class Meta:
         model = Location
-        only_fields = ('id', 'name')
+        only_fields = ('id', 'name', 'address', 'latitude', 'longitude')
 
     place_resources = graphene.List(lambda: types.EconomicResource)
 

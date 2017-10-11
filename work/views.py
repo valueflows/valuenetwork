@@ -1013,7 +1013,7 @@ def change_your_project(request, agent_id):
         else:
           pro_form = ProjectCreateForm(instance=project, data=request.POST or None)
 
-        agn_form = AgentCreateForm(instance=agent, data=request.POST or None)
+        agn_form = WorkAgentCreateForm(instance=agent, data=request.POST or None)
         if pro_form.is_valid() and agn_form.is_valid():
             project = pro_form.save()
             data = agn_form.cleaned_data

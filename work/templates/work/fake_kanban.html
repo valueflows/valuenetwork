@@ -92,6 +92,10 @@ h3 {
     color: green;
 }
 
+.other-project {
+    color: firebrick;
+}
+
 </style>
 {% endblock %}
 
@@ -150,6 +154,9 @@ h3 {
                                 {% for proc in plan.all_processes %}
                                     <li>
                                         <a href="{% url 'process_logging' process_id=proc.id %}" title="Process" >{{ proc.name }}</a>
+                                        {% if proc.context_agent != project %}
+                                            <span class="other-project">In {{ proc.context_agent }}</span>
+                                        {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -179,6 +186,9 @@ h3 {
                                             <span class="green">doing</span>
                                         {% elif proc.finished %}<b>done</b>
                                         {% endif%}
+                                        {% if proc.context_agent != project %}
+                                            <span class="other-project">In {{ proc.context_agent }}</span>
+                                        {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -204,6 +214,9 @@ h3 {
                                 {% for proc in plan.all_processes %}
                                     <li>
                                         <a href="{% url 'process_logging' process_id=proc.id %}" title="Process" >{{ proc.name }}</a>
+                                        {% if proc.context_agent != project %}
+                                            <span class="other-project">In {{ proc.context_agent }}</span>
+                                        {% endif %}
                                     </li>
                                 {% endfor %}
                             </ul>

@@ -140,7 +140,7 @@ h3 {
             {% for plan in project.planned_orders %}
                     <div class="card">
                         <div class="card-hdr">
-                            <a href="{{ plan.get_absolute_url }}">
+                            <a href="{% url 'order_plan' order_id=plan.id %}">
                             {{ plan.kanban_label }}
                             </a>
                         </div>
@@ -149,7 +149,7 @@ h3 {
                             <ul>
                                 {% for proc in plan.all_processes %}
                                     <li>
-                                        <a href="{{ proc.get_absolute_url }}" title="Process" >{{ proc.name }}</a>
+                                        <a href="{% url 'process_logging' process_id=proc.id %}" title="Process" >{{ proc.name }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -165,7 +165,7 @@ h3 {
             {% for plan in project.doing_orders %}
                     <div class="card">
                         <div class="card-hdr">
-                            <a href="{{ plan.get_absolute_url }}">
+                            <a href="{% url 'order_plan' order_id=plan.id %}">
                             {{ plan.kanban_label }}
                             </a>
                         </div>
@@ -174,7 +174,7 @@ h3 {
                             <ul>
                                 {% for proc in plan.all_processes %}
                                     <li>
-                                        <a href="{{ proc.get_absolute_url }}" title="Process" >{{ proc.name }}</a>
+                                        <a href="{% url 'process_logging' process_id=proc.id %}" title="Process" >{{ proc.name }}</a>
                                         {% if proc.started %}
                                             <span class="green">doing</span>
                                         {% elif proc.finished %}<b>done</b>
@@ -194,7 +194,7 @@ h3 {
             {% for plan in project.finished_orders %}
                     <div class="card">
                         <div class="card-hdr">
-                            <a href="{{ plan.get_absolute_url }}">
+                            <a href="{% url 'order_plan' order_id=plan.id %}">
                             {{ plan.kanban_label }}
                             </a>
                         </div>
@@ -203,7 +203,7 @@ h3 {
                             <ul>
                                 {% for proc in plan.all_processes %}
                                     <li>
-                                        <a href="{{ proc.get_absolute_url }}" title="Process" >{{ proc.name }}</a>
+                                        <a href="{% url 'process_logging' process_id=proc.id %}" title="Process" >{{ proc.name }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>

@@ -459,7 +459,7 @@
                           {% if agent.project.joining_style == 'moderated' %}
                             {% if agent.project.fobi_slug %}
                           - <b><a href="/work/agent/{{ agent.id }}/join-requests/">{% trans "Manage Requests" %}</a></b>
-                          - <b><a href="/joinaproject/{{ agent.project.fobi_slug }}" target="_blank">{% trans "View Form" %}</a></b>
+                            - <b><a href="/joinaproject/{{ agent.project.fobi_slug }}" target="_blank">{% if agent.project.fobi_form %}{% trans "View Form" %}{% else %}<span class="error">{% trans "Error" %}</span>{% endif %}</a></b>
                             {% endif %}
                           {% endif %}</td>
                       </tr>
@@ -476,6 +476,9 @@
                           <th>{% trans "Custom Form:" %}</th>
                           <td>{% if agent.project.fobi_slug %}
                                 {{ agent.project.fobi_slug }} {% if user_agent.is_staff %} / <a href="/fobi/view/{{ agent.project.fobi_slug }}/" target="_blank">{% trans "View Custom Form Fields" %}</a>{% endif %}
+                                {% if not agent.project.fobi_form %}
+                                  <span class="error">? {% trans "Error: form not found." %}</span> <em>{% trans "The custom form can be pending to setup by admins. Make sure you already listed which custom fields are needed (using the feedback page) so admins can proceed." %}</em>
+                                {% endif %}
                               {% else %}
                                 <span class="error">{% trans "None" %}</span> <em>{% trans "(custom form fields pending to setup, list your desired fields and ask an admin using the feedback page)" %}</em>
                               {% endif %}

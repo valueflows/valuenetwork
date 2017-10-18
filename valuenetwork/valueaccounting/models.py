@@ -10959,6 +10959,7 @@ class ValueEquation(models.Model):
             fa = money_resource.owner()
         else:
             fa = self.context_agent
+        distributed = sum(de.quantity for de in distribution_events)
         disbursement_event = EconomicEvent(
             event_type=et,
             event_date=distribution.distribution_date,
@@ -10966,9 +10967,11 @@ class ValueEquation(models.Model):
             to_agent=self.context_agent,
             context_agent=self.context_agent,
             distribution=distribution,
-            quantity=amount_to_distribute,
+            #quantity=amount_to_distribute,
+            quantity=distributed,
             unit_of_quantity=money_resource.resource_type.unit,
-            value=amount_to_distribute,
+            #value=amount_to_distribute,
+            value=distributed,
             unit_of_value=money_resource.resource_type.unit,
             is_contribution=False,
             resource_type=money_resource.resource_type,
@@ -10977,7 +10980,8 @@ class ValueEquation(models.Model):
         #todo faircoin distribution
         disbursement_event.save()
         if not money_resource.is_digital_currency_resource():
-            money_resource.quantity -= amount_to_distribute
+            #money_resource.quantity -= amount_to_distribute
+            money_resource.quantity -= distributed
             money_resource.save()
         if events_to_distribute:
             if len(events_to_distribute) == 1:
@@ -10986,7 +10990,8 @@ class ValueEquation(models.Model):
                     distribution_date=distribution.distribution_date,
                     income_event=cr,
                     distribution_ref=distribution,
-                    quantity=amount_to_distribute,
+                    #quantity=amount_to_distribute,
+                    quantity=distributed,
                     unit_of_quantity=cr.unit_of_quantity,
                 )
                 crd.save()
@@ -11013,6 +11018,7 @@ class ValueEquation(models.Model):
         for dist_event in distribution_events:
             dist_event.distribution = distribution
             dist_event.event_date = distribution.distribution_date
+            dist_event.save()
             #todo faircoin distribution
             #digital_currency_resources for to_agents were created earlier in this method
             if dist_event.resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
@@ -11027,16 +11033,15 @@ class ValueEquation(models.Model):
                     state = "pending"
                     if broadcasted:
                         state = "broadcast"
-            dist_event.save()
-            if dist_event.resource.is_digital_currency_resource() and 'faircoin' in settings.INSTALLED_APPS:
-                from faircoin.models import FaircoinTransaction
-                dist_event_tx = FaircoinTransaction(
-                    event=dist_event,
-                    tx_hash=tx_hash,
-                    tx_state=state,
-                    to_address=address_end,
-                )
-                dist_event_tx.save()
+                else:
+                    from faircoin.models import FaircoinTransaction
+                    dist_event_tx = FaircoinTransaction(
+                        event=dist_event,
+                        #tx_hash=tx_hash,
+                        tx_state=state,
+                        to_address=address_end,
+                    )
+                    dist_event_tx.save()
             to_resource = dist_event.resource
             to_resource.quantity += dist_event.quantity
             to_resource.save()
@@ -11116,6 +11121,10 @@ class ValueEquation(models.Model):
         #clean up rounding errors
         distributed = sum(de.quantity for de in distribution_events)
         delta = atd - distributed
+        if delta:
+            if self.percentage_behavior == "remaining":
+                if abs(delta) > .05:
+                    delta = 0
         if delta and distribution_events:
             max_dist = distribution_events[0]
             for de in distribution_events:

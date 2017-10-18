@@ -6891,6 +6891,37 @@ def project_history_csv(request):
 
     return response
 
+def fake_kanban(request, agent_id):
+    project = get_object_or_404(EconomicAgent, pk=agent_id)
+    agent = get_agent(request)
+    
+    """
+    event_list = project.contribution_events()
+    event_list = project.all_events()
+    agent_ids = {event.from_agent.id for event in event_list if event.from_agent}
+    agents = EconomicAgent.objects.filter(id__in=agent_ids)
+    filter_form = ProjectContributionsFilterForm(agents=agents, data=request.POST or None)
+    if request.method == "POST":
+        if filter_form.is_valid():
+            data = filter_form.cleaned_data
+            #event_type = data["event_type"]
+            from_agents = data["from_agents"]
+            start = data["start_date"]
+            end = data["end_date"]
+            if from_agents:
+                event_list = event_list.filter(from_agent__in=from_agents)
+            if start:
+                event_list = event_list.filter(event_date__gte=start)
+            if end:
+                event_list = event_list.filter(event_date__lte=end)
+    event_ids = ",".join([str(event.id) for event in event_list])
+    """
+    
+    return render(request, "work/fake_kanban.html", {
+        "project": project,
+        "agent": agent,
+
+    })
 
 @login_required
 def order_delete_confirmation_work(request, order_id):

@@ -751,6 +751,15 @@ class EconomicAgent(models.Model):
         ps = self.processes.all()
         oset = {p.independent_demand() for p in ps if p.independent_demand()}
         return list(oset)
+        
+    def planned_orders(self):
+        return [o for o in self.orders() if o.kanban_state() == "planned"]
+        
+    def doing_orders(self):
+        return [o for o in self.orders() if o.kanban_state() == "doing"]
+        
+    def finished_orders(self):
+        return [o for o in self.orders() if o.kanban_state() == "done"]
 
     def active_orders(self):
         return [o for o in self.orders() if o.has_open_processes()]
@@ -3612,6 +3621,26 @@ class Order(models.Model):
             due_label,
             self.due_date.strftime('%Y-%m-%d'),
             ])
+            
+    def kanban_label(self):
+        name = self.name
+        if not name:
+            process= self.naming_process()
+            if process:
+                name = process.name
+            else:
+                name = str(self.id)
+                
+        return "".join(
+            [name, 
+            ", due: ",
+            self.due_date.strftime('%Y-%m-%d'),
+            ])
+            
+    def number_of_processes(self):
+        procs = self.unordered_processes()
+        return len(list(procs))
+        
 
     @models.permalink
     def get_absolute_url(self):
@@ -3626,7 +3655,14 @@ class Order(models.Model):
 
     def node_id(self):
         return "-".join(["Order", str(self.id)])
-
+        
+    def kanban_state(self):
+        if not self.has_open_processes():
+            return "done"
+        if self.has_started_processes():
+            return "doing"
+        return "planned"
+        
     def timeline_title(self):
         return self.__unicode__()
 
@@ -3647,6 +3683,16 @@ class Order(models.Model):
 
     def work_requirements(self):
         return []
+        
+    def naming_process(self):
+        procs = self.all_processes()
+        if len(procs) == 1:
+            return procs.pop()
+        else:
+            procs = self.unordered_processes()
+            if procs.count() == 1:
+                return procs[0]
+        return None
 
     def process(self): #todo: should this be on order_item?
         answer = None
@@ -3806,6 +3852,15 @@ class Order(models.Model):
         processes = self.unordered_processes()
         for process in processes:
             if process.finished == False:
+                answer = True
+                break
+        return answer
+        
+    def has_started_processes(self):
+        answer = False
+        processes = self.unordered_processes()
+        for process in processes:
+            if process.started:
                 answer = True
                 break
         return answer

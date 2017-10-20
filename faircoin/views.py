@@ -155,9 +155,12 @@ def transfer_faircoins(request, resource_id):
                 )
                 return HttpResponseRedirect('/%s/%s/'
                     % ('faircoin/faircoin-history', resource.id))
-
-        return HttpResponseRedirect('/%s/%s/'
-                % ('faircoin/manage-faircoin-account', resource.id))
+        else:
+            raise ValidationError(send_coins_form.errors)
+    else:
+        raise Http404
+    return HttpResponseRedirect('/%s/%s/'
+        % ('faircoin/manage-faircoin-account', resource.id))
 
 
 @login_required

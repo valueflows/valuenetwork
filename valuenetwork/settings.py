@@ -190,7 +190,7 @@ FOBI_DEBUG = DEBUG
 #    'easy_thumbnails': 'easy_thumbnails.south_migrations',
 #}
 
-INTERNAL_IPS = ('127.0.0.1',)
+INTERNAL_IPS = ('155.92.15.29',)
 
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,

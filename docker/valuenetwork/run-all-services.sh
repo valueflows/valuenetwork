@@ -12,5 +12,5 @@ else
 fi
 
 # Run the webserver
-./manage.py runserver 0.0.0.0:8000
+./manage.py runserver 155.92.15.29:8000
 # ./manage.py test

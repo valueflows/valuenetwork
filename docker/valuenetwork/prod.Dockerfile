@@ -19,4 +19,4 @@ RUN ./docker/valuenetwork/run-db-migrations.sh
 
 EXPOSE 8000
 
-CMD ["./manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["./manage.py", "runserver", "155.92.15.29:8000"]

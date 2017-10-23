@@ -36,6 +36,8 @@ class Process(DjangoObjectType):
         model = ProcessProxy
         only_fields = ('id', 'name')
 
+    is_deletable = graphene.Boolean()
+
     inputs = graphene.List(lambda: types.EconomicEvent,
                                         action=Action()) #VF
 
@@ -127,6 +129,9 @@ class Process(DjangoObjectType):
             event_type = EventType.objects.convert_action_to_event_type(action)
             unplanned_events = unplanned_events.filter(event_type=event_type)
         return unplanned_events
+
+    def resolve_is_deletable(self, args, *rargs):
+        return self.is_deletable()
 
     #def resolve_next_resource_taxonomy_items(self, args, context, info):
     #    return self.output_resource_types()

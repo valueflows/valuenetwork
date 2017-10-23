@@ -40,6 +40,8 @@ class Commitment(DjangoObjectType):
 
     involved_agents = graphene.List(lambda: types.Agent)
 
+    is_deletable = graphene.Boolean()
+
     #def resolve_process(self, args, *rargs):
     #    return self.process
 
@@ -94,3 +96,6 @@ class Commitment(DjangoObjectType):
             if event.provider:
                 involved.append(formatAgent(event.provider))
         return list(set(involved))
+
+    def resolve_is_deletable(self, args, *rargs):
+        return self.is_deletable()

@@ -1585,6 +1585,7 @@ query($token: String) {
       plannedDuration
       isFinished
       note
+      isDeletable
     }
   }
 }
@@ -2124,6 +2125,7 @@ query ($token: String) {
           name
         }
       }
+      isDeletable
     }
   }
 }

@@ -57,7 +57,7 @@ class Agent(graphene.Interface):
     agent_recipes = graphene.List(lambda: types.ResourceClassification)
 
     #agent_recipe_bundles = graphene.List(ResourceClassification)
-    
+
     faircoin_address = graphene.String()
 
 
@@ -174,7 +174,6 @@ class Agent(graphene.Interface):
             return agent.active_association_types()
         return None
 
-    # returns resource classifications that have a recipe, for this and parent agents
     def resolve_agent_recipes(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
@@ -211,6 +210,3 @@ class Organization(DjangoObjectType):
         interfaces = (Agent, )
         model = OrganizationModel #EconomicAgent
         only_fields = ('id', 'name', 'image', 'note', 'primary_location')
-
-
-

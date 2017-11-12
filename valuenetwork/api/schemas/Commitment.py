@@ -16,14 +16,10 @@ from django.core.exceptions import PermissionDenied, ValidationError
 
 class Query(graphene.AbstractType):
 
-    # define input query params
-
     commitment = graphene.Field(Commitment,
                                 id=graphene.Int())
 
     all_commitments = graphene.List(Commitment)
-
-    # resolvers
 
     def resolve_commitment(self, args, *rargs):
         id = args.get('id')

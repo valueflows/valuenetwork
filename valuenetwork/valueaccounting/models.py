@@ -542,23 +542,32 @@ class EconomicAgent(models.Model):
         return tp
 
     # basic authorization in one place for use by the api(s) initially
-    def is_authorized(self, object_to_mutate):
+    def is_authorized(self, object_to_mutate=None, context_agent_id=None):
         user = self.my_user()
         if not user:
             return False
         if self.is_superuser():
             return True
-        if object_to_mutate.context_agent not in self.is_member_of():
+        if context_agent_id:
+            context_agent = EconomicAgent.objects.get(pk=context_agent_id)
+        elif object_to_mutate:
+            context_agent = object_to_mutate.context_agent
+        else:
             return False
-        if object_to_mutate.pk: #update or delete
-            if type(object_to_mutate) is EconomicEvent or type(object_to_mutate) is Commitment:
-                if object_to_mutate.created_by == user:
-                    return True
+        if context_agent not in self.is_member_of():
+            return False
+        if object_to_mutate: 
+            if object_to_mutate.pk: #update or delete
+                if type(object_to_mutate) is EconomicEvent:
+                    if object_to_mutate.created_by == user:
+                        return True
+                    else:
+                        return False
                 else:
-                    return False
-            else:
+                    return True
+            else: #create
                 return True
-        else: #create
+        else: #create check ahead
             return True
 
     def recipes(self):

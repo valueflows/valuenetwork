@@ -1,6 +1,6 @@
 from django.db import models
 
-from valuenetwork.valueaccounting.models import Unit, EconomicEvent, Commitment, Location
+from valuenetwork.valueaccounting.models import Unit, EconomicEvent, Commitment, Location, EconomicAgent
 from decimal import *
 
 # Helpers for dealing with Agent polymorphism

@@ -42,6 +42,10 @@ class Commitment(DjangoObjectType):
 
     is_deletable = graphene.Boolean()
 
+    user_is_authorized_to_update = graphene.Boolean()
+
+    user_is_authorized_to_delete = graphene.Boolean()
+
     #def resolve_process(self, args, *rargs):
     #    return self.process
 
@@ -99,3 +103,7 @@ class Commitment(DjangoObjectType):
 
     def resolve_is_deletable(self, args, *rargs):
         return self.is_deletable()
+
+    def resolve_user_is_authorized_to_update(self, args, context, *rargs):
+        import pdb; pdb.set_trace()
+        return True

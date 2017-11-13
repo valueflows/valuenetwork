@@ -29,4 +29,5 @@ six
 selenium
 mock
 requests
+graphql-core==1.1
 

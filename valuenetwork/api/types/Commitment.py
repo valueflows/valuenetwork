@@ -105,5 +105,5 @@ class Commitment(DjangoObjectType):
         return self.is_deletable()
 
     def resolve_user_is_authorized_to_update(self, args, context, *rargs):
-        import pdb; pdb.set_trace()
-        return True
+        #import pdb; pdb.set_trace()
+        return None

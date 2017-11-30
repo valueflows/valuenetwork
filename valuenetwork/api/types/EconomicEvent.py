@@ -6,10 +6,10 @@
 
 import graphene
 from graphene_django.types import DjangoObjectType
-
 import valuenetwork.api.types as types
+from valuenetwork.api.schemas.Auth import _authUser
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, EconomicResource as EconomicResourceProxy
+from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, EconomicResource as EconomicResourceProxy, AgentUser
 from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy
 from valuenetwork.api.models import Fulfillment as FulfillmentProxy
 
@@ -46,6 +46,10 @@ class EconomicEvent(DjangoObjectType):
         only_fields = ('id')
 
     fulfills = graphene.List(lambda: types.Fulfillment)
+
+    user_is_authorized_to_update = graphene.Boolean()
+
+    user_is_authorized_to_delete = graphene.Boolean()
 
     #def resolve_process(self, args, *rargs):
     #    return self.process
@@ -90,6 +94,18 @@ class EconomicEvent(DjangoObjectType):
             ff_list.append(fulfillment)
             return ff_list
         return []
+
+    def resolve_user_is_authorized_to_update(self, args, context, *rargs):
+        token = rargs[0].variable_values['token']
+        context.user = _authUser(token)
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        return user_agent.is_authorized(object_to_mutate=self)
+
+    def resolve_user_is_authorized_to_delete(self, args, context, *rargs):
+        token = rargs[0].variable_values['token']
+        context.user = _authUser(token)
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        return user_agent.is_authorized(object_to_mutate=self)
 
 
 class Fulfillment(DjangoObjectType):

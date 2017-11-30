@@ -15,7 +15,7 @@ from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 from valuenetwork.api.schemas.Auth import _authUser
-from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy
+from valuenetwork.valueaccounting.models import Commitment as CommitmentProxy, AgentUser
 from valuenetwork.api.models import formatAgent, Person, Organization, QuantityValue as QuantityValueProxy, Fulfillment as FulfillmentProxy
 
 
@@ -114,6 +114,11 @@ class Commitment(DjangoObjectType):
     def resolve_user_is_authorized_to_update(self, args, context, *rargs):
         token = rargs[0].variable_values['token']
         context.user = _authUser(token)
-        user = context.user
-        
-        return True
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        return user_agent.is_authorized(object_to_mutate=self)
+
+    def resolve_user_is_authorized_to_delete(self, args, context, *rargs):
+        token = rargs[0].variable_values['token']
+        context.user = _authUser(token)
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        return user_agent.is_authorized(object_to_mutate=self)

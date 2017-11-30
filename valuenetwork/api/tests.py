@@ -1573,6 +1573,8 @@ query($token: String) {
       plannedDuration
       isFinished
       note
+      userIsAuthorizedToUpdate
+      userIsAuthorizedToDelete
     }
   }
 }
@@ -2007,6 +2009,8 @@ query ($token: String) {
         id
         name
       }
+      userIsAuthorizedToUpdate
+      userIsAuthorizedToDelete
     }
   }
 }

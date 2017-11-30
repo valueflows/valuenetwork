@@ -5,8 +5,9 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 import valuenetwork.api.types as types
+from valuenetwork.api.schemas.Auth import _authUser
 from valuenetwork.api.types.EconomicEvent import Action
-from valuenetwork.valueaccounting.models import Process as ProcessProxy, EventType, ProcessType
+from valuenetwork.valueaccounting.models import Process as ProcessProxy, EventType, ProcessType, AgentUser
 from valuenetwork.api.models import formatAgent
 
 
@@ -58,8 +59,12 @@ class Process(DjangoObjectType):
     previous_processes = graphene.List(lambda: types.Process)
 
     working_agents = graphene.List(lambda: types.Agent)
-    
+
     process_plan = graphene.Field(lambda: types.Plan)
+
+    user_is_authorized_to_update = graphene.Boolean()
+
+    user_is_authorized_to_delete = graphene.Boolean()
 
     #next_resource_taxonomy_items = graphene.List(lambda: types.ResourceTaxonomyItem)
 
@@ -132,6 +137,18 @@ class Process(DjangoObjectType):
 
     def resolve_is_deletable(self, args, *rargs):
         return self.is_deletable()
+
+    def resolve_user_is_authorized_to_update(self, args, context, *rargs):
+        token = rargs[0].variable_values['token']
+        context.user = _authUser(token)
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        return user_agent.is_authorized(object_to_mutate=self)
+
+    def resolve_user_is_authorized_to_delete(self, args, context, *rargs):
+        token = rargs[0].variable_values['token']
+        context.user = _authUser(token)
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        return user_agent.is_authorized(object_to_mutate=self)
 
     #def resolve_next_resource_taxonomy_items(self, args, context, info):
     #    return self.output_resource_types()

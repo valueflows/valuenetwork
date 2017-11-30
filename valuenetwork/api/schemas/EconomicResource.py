@@ -94,7 +94,6 @@ class UpdateEconomicResource(AuthedMutation):
         tracking_identifier = args.get('tracking_identifier')
         image = args.get('image')
         note = args.get('note')
-
         economic_resource = EconomicResourceProxy.objects.get(pk=id)
         if economic_resource:
             if tracking_identifier:

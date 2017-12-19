@@ -5,7 +5,7 @@
 import graphene
 import datetime
 from decimal import Decimal
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment, EventType, EconomicAgent, Process, EconomicResourceType, EconomicResource as EconomicResourceProxy, Unit, AgentUser
+from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment, EventType, EconomicAgent, Process, EconomicResourceType, EconomicResource as EconomicResourceProxy, Unit, AgentUser, Location
 from valuenetwork.api.types.EconomicEvent import EconomicEvent, Action
 from valuenetwork.api.models import Fulfillment
 from six import with_metaclass
@@ -58,7 +58,7 @@ class CreateEconomicEvent(AuthedMutation):
         resource_tracking_identifier = graphene.String(required=False)
         resource_image = graphene.String(required=False)
         resource_note = graphene.String(required=False)
-        #resource_current_location #TODO
+        resource_current_location_id = graphene.Int(required=False)
 
     economic_event = graphene.Field(lambda: EconomicEvent)
 
@@ -82,6 +82,7 @@ class CreateEconomicEvent(AuthedMutation):
         create_resource = args.get('create_resource')
         resource_tracking_identifier = args.get('resource_tracking_identifier')
         resource_image = args.get('resource_image')
+        resource_current_location_id = args.get('resource_current_location_id')
         resource_note = args.get('resource_note')
 
         if fulfills_commitment_id:
@@ -151,7 +152,9 @@ class CreateEconomicEvent(AuthedMutation):
             url = ""
         if not request_distribution:
             request_distribution = False
-
+        if resource_current_location_id:
+            current_location = Location.objects.get(pk=resource_current_location_id)
+        #import pdb; pdb.set_trace()
         if not affects:
             if create_resource:
                 if not resource_note:
@@ -165,6 +168,7 @@ class CreateEconomicEvent(AuthedMutation):
                     quantity=Decimal(affected_numeric_value),
                     photo_url=resource_image,
                     identifier=resource_tracking_identifier,
+                    current_location=current_location,
                     notes=resource_note,
                     created_by=context.user,
                     #location

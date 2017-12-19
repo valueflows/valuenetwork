@@ -3,7 +3,7 @@
 #
 
 import graphene
-from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType, AgentUser
+from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType, AgentUser, Location
 from valuenetwork.api.types.EconomicResource import EconomicResource
 from six import with_metaclass
 from django.contrib.auth.models import User
@@ -83,7 +83,7 @@ class UpdateEconomicResource(AuthedMutation):
         tracking_identifier = graphene.String(required=False)
         image = graphene.String(required=False)
         note = graphene.String(required=False)
-        #current_location #TODO
+        current_location_id = graphene.Int(required=False)
 
     economic_resource = graphene.Field(lambda: EconomicResource)
 
@@ -93,6 +93,7 @@ class UpdateEconomicResource(AuthedMutation):
         resource_classified_as_id = args.get('resource_classified_as_id')
         tracking_identifier = args.get('tracking_identifier')
         image = args.get('image')
+        current_location_id = args.get('current_location_id')
         note = args.get('note')
         economic_resource = EconomicResourceProxy.objects.get(pk=id)
         if economic_resource:
@@ -104,6 +105,8 @@ class UpdateEconomicResource(AuthedMutation):
                 economic_resource.photo_url=image
             if resource_classified_as_id:
                 economic_resource.resource_type=EconomicResourceType.objects.get(pk=resource_classified_as_id)
+            if current_location_id:
+                economic_resource.current_location=Location.objects.get(pk=current_location_id)
             economic_resource.changed_by=context.user
 
             user_agent = AgentUser.objects.get(user=context.user).agent

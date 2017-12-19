@@ -23,17 +23,17 @@ class Action(graphene.Enum):
     PRODUCE = "produce"
     ACCEPT = "accept"
     IMPROVE = "improve"
+    GIVE = "give"
+    TAKE = "take"
 
 
 class EconomicEvent(DjangoObjectType):
     action = graphene.String(source='action')
-    #process = graphene.Field(lambda: types.Process)
     input_of = graphene.Field(lambda: types.Process)
     output_of = graphene.Field(lambda: types.Process)
     provider = graphene.Field(lambda: types.Agent)
     receiver = graphene.Field(lambda: types.Agent)
     scope = graphene.Field(lambda: types.Agent)
-    #affected_taxonomy_item = graphene.Field(lambda: types.ResourceTaxonomyItem)
     affects = graphene.Field(lambda: types.EconomicResource)
     affected_quantity = graphene.Field(QuantityValue)
     start = graphene.String(source='start')
@@ -51,15 +51,12 @@ class EconomicEvent(DjangoObjectType):
 
     user_is_authorized_to_delete = graphene.Boolean()
 
-    #def resolve_process(self, args, *rargs):
-    #    return self.process
-
     def resolve_input_of(self, args, *rargs):
         return self.input_of
 
     def resolve_output_of(self, args, *rargs):
         return self.output_of
-  
+
     def resolve_provider(self, args, *rargs):
         return formatAgent(self.provider)
 

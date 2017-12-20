@@ -44,7 +44,7 @@ class Query(graphene.AbstractType):
                                   id=graphene.Int())
 
     all_organizations = graphene.List(Organization)
-    
+
     fc_organizations = graphene.List(Organization,
                                      joining_style=graphene.String(),
                                      visibility=graphene.String())

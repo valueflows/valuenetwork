@@ -48,6 +48,7 @@ class EconomicResource(DjangoObjectType):
     note = graphene.String(source='note')
     category = graphene.String(source='category')
     current_location = graphene.Field(lambda: types.Place)
+    created_date = graphene.String(source='created_date')
 
     class Meta:
         model = EconomicResourceProxy

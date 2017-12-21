@@ -1053,6 +1053,37 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    agent(id: 7) {
+      name
+      agentRelationships(category: MEMBER) {
+        id
+        subject {
+          name
+          type
+          ownedEconomicResources (resourceClassificationId: 28) {
+            createdDate
+            resourceClassifiedAs {
+              name
+            }
+            currentQuantity {
+              numericValue
+              unit {
+                name
+              }
+            }
+          }
+        }
+        relationship {
+          label
+          category
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     agent(id: 39) {
       name
       agentRelationships(roleId: 2) {

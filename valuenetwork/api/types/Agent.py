@@ -10,7 +10,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from django.db.models import Q
-from valuenetwork.valueaccounting.models import EconomicAgent
+from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship, AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
@@ -34,7 +34,8 @@ class Agent(graphene.Interface):
     primary_location = graphene.Field(lambda: types.Place)
 
     owned_economic_resources = graphene.List(lambda: types.EconomicResource,
-                                             category=types.EconomicResourceCategory())
+                                             category=types.EconomicResourceCategory(),
+                                             resourceClassificationId=graphene.Int())
 
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
@@ -66,25 +67,24 @@ class Agent(graphene.Interface):
 
     def resolve_owned_economic_resources(self, args, context, info):
         type = args.get('category', types.EconomicResourceCategory.NONE)
+        resource_class_id = args.get('resourceClassificationId', None)
         org = _load_identified_agent(self)
+        resources = None
         if org:
             if type == types.EconomicResourceCategory.CURRENCY:
-                return org.owned_currency_resources()
+                resources = org.owned_currency_resources()
             elif type == types.EconomicResourceCategory.INVENTORY:
-                return org.owned_inventory_resources()
-            return org.owned_resources()
-        return None
-    
-    def resolve_owned_economic_resources(self, args, context, info):
-        type = args.get('category', types.EconomicResourceCategory.NONE)
-        org = _load_identified_agent(self)
-        if org:
-            if type == types.EconomicResourceCategory.CURRENCY:
-                return org.owned_currency_resources()
-            elif type == types.EconomicResourceCategory.INVENTORY:
-                return org.owned_inventory_resources()
-            return org.owned_resources()
-        return None
+                resources = org.owned_inventory_resources()
+            else:
+                resources = org.owned_resources()
+            if resource_class_id:
+                rc = EconomicResourceType.objects.get(pk=resource_class_id)
+                resources_temp = []
+                for res in resources:
+                    if res.resource_type == rc:
+                        resources_temp.append(res)
+                resources = resources_temp
+        return resources
 
     # if an organization, this returns processes done in that context
     # if a person, this returns proceses the person has worked on

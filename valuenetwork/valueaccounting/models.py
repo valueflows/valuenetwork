@@ -920,6 +920,7 @@ class EconomicAgent(models.Model):
             if proc.independent_demand():
                 if proc.independent_demand() not in plans:
                     plans.append(proc.independent_demand())
+        plans.sort(lambda x, y: cmp(x.due_date, y.due_date))
         return plans
 
     def resources_created(self):

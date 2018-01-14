@@ -107,15 +107,14 @@ class Agent(graphene.Interface):
     def resolve_agent_plans(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
-            agent_plans = agent.all_plans()
             finished = args.get('is_finished', None)
             if finished != None:
                 if not finished:
-                    return agent_plans.filter(finished=False)
+                    return agent.unfinished_plans()
                 else:
-                    return agent_plans.filter(finished=True)
+                    return agent.finished_plans()
             else:
-                return agent_plans
+                return agent.all_plans()
         return None
 
     # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events

@@ -6390,6 +6390,13 @@ class EconomicResource(models.Model):
     def all_contacts(self):
         return self.agent_resource_roles.filter(is_contact=True)
 
+    def all_contact_agents(self):
+        arrs = self.all_contacts()
+        answer = []
+        for arr in arrs:
+            answer.append(arr.agent)
+        return answer
+
     def all_related_agents(self):
         arrs = self.agent_resource_roles.all()
         agent_ids = []

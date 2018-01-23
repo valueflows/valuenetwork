@@ -7,7 +7,7 @@ from graphene_django.types import DjangoObjectType
 
 import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType
-from valuenetwork.api.models import QuantityValue as QuantityValueProxy
+from valuenetwork.api.models import QuantityValue as QuantityValueProxy, formatAgentList
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 
 class EconomicResourceCategory(graphene.Enum):
@@ -56,6 +56,8 @@ class EconomicResource(DjangoObjectType):
 
     transfers = graphene.List(lambda: types.Transfer)
 
+    resource_contacts = graphene.List(lambda: types.Agent)
+
     def resolve_current_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)
 
@@ -68,3 +70,5 @@ class EconomicResource(DjangoObjectType):
     def resolve_transfers(self, args, context, info):
         return self.transfers()
 
+    def resolve_resource_contacts(self, args, context, info):
+        return formatAgentList(self.all_contact_agents())

@@ -1148,6 +1148,7 @@ query($token: String) {
       name
       image
       note
+      email
       type
       __typename
     }

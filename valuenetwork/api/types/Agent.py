@@ -198,7 +198,7 @@ class Person(DjangoObjectType):
     class Meta:
         interfaces = (Agent, )
         model = PersonModel #EconomicAgent
-        only_fields = ('id', 'name', 'image', 'primary_location')
+        only_fields = ('id', 'name', 'image', 'note', 'primary_location')
 
 
 # Organization - an Agent which is not a Person, and can be further classified from there

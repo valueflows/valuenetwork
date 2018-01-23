@@ -2839,4 +2839,19 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  updatePerson(token: $token, id: 74, note: "test", name: "test agent", primaryLocationId: 24,
+  image: "https://testocp.freedomcoop.eu/site_media/media/photos/what_is_it.JPG") {
+    person {
+      id
+      name
+      note
+      image
+      primaryLocation {
+        name
+      }
+    }
+  }
+}
+
 '''

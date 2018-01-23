@@ -13,7 +13,8 @@ def formatAgent(agent):
                 name = agent.name,
                 note = agent.description,
                 primary_location = agent.primary_location,
-                image = agent.image)
+                image = agent.image,
+                email = agent.email)
         else:
             return Organization(
                 id=agent.id,
@@ -22,7 +23,8 @@ def formatAgent(agent):
                 image = agent.image,
                 is_context = agent.is_context,
                 primary_location = agent.primary_location,
-                type = agent.agent_type)
+                type = agent.agent_type,
+                email = agent.email)
 
 def formatAgentList(agent_list):
     mixed_list = []
@@ -53,6 +55,7 @@ class Organization(models.Model):
         related_name='orgs_at_location',
         blank=True, null=True,
         on_delete=models.DO_NOTHING)
+    email = models.EmailField(max_length=96, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -69,6 +72,7 @@ class Person(models.Model):
         related_name='people_at_location',
         blank=True, null=True,
         on_delete=models.DO_NOTHING)
+    email = models.EmailField(max_length=96, blank=True, null=True)
 
     class Meta:
         managed = False

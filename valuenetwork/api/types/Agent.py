@@ -32,6 +32,7 @@ class Agent(graphene.Interface):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
     primary_location = graphene.Field(lambda: types.Place)
+    email = graphene.String(source='email')
 
     owned_economic_resources = graphene.List(lambda: types.EconomicResource,
                                              category=types.EconomicResourceCategory(),
@@ -198,7 +199,7 @@ class Person(DjangoObjectType):
     class Meta:
         interfaces = (Agent, )
         model = PersonModel #EconomicAgent
-        only_fields = ('id', 'name', 'image', 'note', 'primary_location')
+        only_fields = ('id', 'name', 'image', 'note', 'primary_location', 'email')
 
 
 # Organization - an Agent which is not a Person, and can be further classified from there
@@ -208,4 +209,4 @@ class Organization(DjangoObjectType):
     class Meta:
         interfaces = (Agent, )
         model = OrganizationModel #EconomicAgent
-        only_fields = ('id', 'name', 'image', 'note', 'primary_location')
+        only_fields = ('id', 'name', 'image', 'note', 'primary_location', 'email')

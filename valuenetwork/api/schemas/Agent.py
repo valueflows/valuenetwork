@@ -131,6 +131,7 @@ class UpdatePerson(AuthedMutation):
         name = graphene.String(required=False)
         image = graphene.String(required=False)
         primary_location_id = graphene.Int(required=False)
+        email = graphene.String(required=False)
         note = graphene.String(required=False)
 
     person = graphene.Field(lambda: Person)
@@ -142,6 +143,7 @@ class UpdatePerson(AuthedMutation):
         image = args.get('image')
         note = args.get('note')
         primary_location_id = args.get('primary_location_id')
+        email = args.get('email')
 
         agent = EconomicAgent.objects.get(pk=id)
         if agent:
@@ -153,6 +155,8 @@ class UpdatePerson(AuthedMutation):
                 agent.name = name
             if primary_location_id:
                 agent.primary_location = Location.objects.get(pk=primary_location_id)
+            if email:
+                agent.email = email
 
             user_agent = AgentUser.objects.get(user=context.user).agent
             is_authorized = user_agent.is_authorized(object_to_mutate=agent)

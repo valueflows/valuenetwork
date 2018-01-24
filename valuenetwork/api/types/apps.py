@@ -11,16 +11,18 @@ class ApiTypesAppConfig(AppConfig):
         'Adding from .models import CommentMixin imports CommentMixin so that you can use it
         inside the ready() method. It does not magically add it to the comment module so that
         you can access it as comments.CommentMixin
-        
+
         You could assign it to the comments module in the ready() method.'
         from .models import CommentMixin
         comments.CommentMixin = CommentsMixin
         """
 
-        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory, ResourceClassification
+        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory, ResourceClassification, Facet, FacetValue
         types.EconomicResource = EconomicResource
         types.EconomicResourceCategory = EconomicResourceCategory
         types.ResourceClassification = ResourceClassification
+        types.Facet = Facet
+        types.FacetFalue = FacetValue
         from valuenetwork.api.types.Agent import Agent
         types.Agent = Agent
         from valuenetwork.api.types.Process import Process
@@ -40,5 +42,3 @@ class ApiTypesAppConfig(AppConfig):
         from valuenetwork.api.types.Place import Place
         types.Place = Place
         super(ApiTypesAppConfig, self).ready()
-
-        

@@ -4,8 +4,8 @@
 
 import graphene
 
-from valuenetwork.valueaccounting.models import EconomicResourceType
-from valuenetwork.api.types.EconomicResource import ResourceClassification, EconomicResourceProcessCategory
+from valuenetwork.valueaccounting.models import EconomicResourceType, Facet as FacetProxy, FacetValue as FacetValueProxy
+from valuenetwork.api.types.EconomicResource import ResourceClassification, EconomicResourceProcessCategory, Facet, FacetValue
 from valuenetwork.api.types.EconomicEvent import Action
 from django.db.models import Q
 
@@ -25,7 +25,11 @@ class Query(graphene.AbstractType):
     resource_classifications_by_action = graphene.List(ResourceClassification,
                                                       action=Action())
 
-    # load single item
+    facet = graphene.Field(Facet,
+                           id=graphene.Int())
+ 
+    all_facets = graphene.List(Facet)
+
 
     def resolve_resource_classification(self, args, *rargs):
         id = args.get('id')
@@ -34,8 +38,6 @@ class Query(graphene.AbstractType):
             if rt:
                 return rt
         return None
-
-    # load all items
 
     def resolve_all_resource_classifications(self, args, context, info):
         return EconomicResourceType.objects.all()
@@ -59,3 +61,14 @@ class Query(graphene.AbstractType):
         if action == Action.IMPROVE or action == Action.ACCEPT:
             return EconomicResourceType.objects.filter(Q(behavior="produced")|Q(behavior="used")|Q(behavior="cited")|Q(behavior="consumed"))
         return None
+
+    def resolve_facet(self, args, *rargs):
+        id = args.get('id')
+        if id:
+            facet = FacetProxy.objects.get(pk=id)
+            if facet:
+                return facet
+        return None
+
+    def resolve_all_facets(self, args, context, info):
+        return FacetProxy.objects.all()

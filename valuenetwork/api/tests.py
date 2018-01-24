@@ -1382,6 +1382,9 @@ query($token: String) {
       category
       processCategory
       note
+      classificationFacetValues {
+        name
+      }
     }
   }
 }
@@ -1419,6 +1422,20 @@ query ($token: String) {
       name
       category
       processCategory
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allFacets {
+      id
+      name
+      description
+      facetValues {
+        value
+        description
+      }
     }
   }
 }
@@ -1466,6 +1483,9 @@ query ($token: String) {
       }
       image
       note
+      resourceContacts {
+        name
+      }
     }
   }
 }

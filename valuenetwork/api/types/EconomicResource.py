@@ -64,7 +64,7 @@ class ResourceClassification(DjangoObjectType):
         return self.resources.all()
 
     def resolve_classification_facet_values(self, args, context, info):
-        return self.facets.all()
+        return self.facets.all() #TODO in process, not working yet
 
 class EconomicResource(DjangoObjectType):
     resource_classified_as = graphene.Field(ResourceClassification)

@@ -126,8 +126,11 @@ class Project(models.Model):
 
     def fobi_form(self):
         if self.fobi_slug:
-            entry = FormEntry.objects.get(slug=self.fobi_slug)
-            return entry
+            try:
+                entry = FormEntry.objects.get(slug=self.fobi_slug)
+                return entry
+            except:
+                pass
         return False
 
     def rts_with_clas(self, clas=None):
@@ -146,8 +149,9 @@ class Project(models.Model):
         shr_ts = []
         if self.is_moderated() and self.fobi_slug:
             form = self.fobi_form()
-            fields = form.formelemententry_set.all()
-            for fi in fields:
+            if form:
+              fields = form.formelemententry_set.all()
+              for fi in fields:
                 data = json.loads(fi.plugin_data)
                 name = data.get('name')
                 for rt in self.rts_with_clas():
@@ -198,8 +202,9 @@ class Project(models.Model):
         pay_opts = []
         if self.is_moderated() and self.fobi_slug:
             form = self.fobi_form()
-            fields = form.formelemententry_set.all()
-            for fi in fields:
+            if form:
+              fields = form.formelemententry_set.all()
+              for fi in fields:
                 data = json.loads(fi.plugin_data)
                 name = data.get('name')
                 if name == "payment_mode": # name of the fobi field
@@ -222,7 +227,7 @@ class Project(models.Model):
                                     if gate['html']:
                                         ok += ' <ul><li>'+str(gate['html'])+'</li></ul>'
                             pay_opts.append(val+' &nbsp;'+ok)
-            return pay_opts
+              return pay_opts
         return False
 
     def background_url(self):
@@ -907,7 +912,7 @@ class Ocp_Record_Type(Record_Type):
         answer = None
         if transfer_type:
           if transfer_type.inherit_types:
-            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocpRecordType_ocp_artwork_type.lft, rght__lte=self.ocpRecordType_ocp_artwork_type.rght, tree_id=self.ocpRecordType_ocp_artwork_type.tree_id).order_by('lft')
+            answer = Ocp_Artwork_Type.objects.filter(lft__gte=self.ocpRecordType_ocp_artwork_type.lft, rght__lte=self.ocpRecordType_ocp_artwork_type.rght, tree_id=self.ocpRecordType_ocp_artwork_type.tree_id).order_by('tree_id','lft')
           else:
             facetvalues = [ttfv.facet_value.value for ttfv in transfer_type.facet_values.all()]
             Mtyp = False
@@ -939,7 +944,7 @@ class Ocp_Record_Type(Record_Type):
             for facet in transfer_type.facets():
                 if facet.clas == "Material_Type" or facet.clas == "Nonmaterial_Type" or facet.clas == "Currency_Type":
                     if Rids:
-                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids)#.order_by('tree_id','lft')
+                        Rtys = Ocp_Artwork_Type.objects.filter(id__in=Rids).order_by('tree_id','lft') #.order_by('tree_id','lft')
                         #if Nids: # and Ntyp:
                         #    Mtys = Artwork_Type.objects.filter(id__in=Nids+Mids) #+[Ntyp.id, Mtyp.id])
                         answer = Rtys
@@ -948,7 +953,7 @@ class Ocp_Record_Type(Record_Type):
 
                 elif facet.clas == "Skill_Type":
                     if Sids:
-                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids)
+                        Stys = Ocp_Skill_Type.objects.filter(id__in=Sids).order_by('tree_id','lft')
                         #if Mids: # and Mtyp:
                         #    Ntys = Artwork_Type.objects.filter(id__in=Mids+Nids) #+[Ntyp.id, Mtyp.id])
                         answer = Stys

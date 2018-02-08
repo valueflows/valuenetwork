@@ -126,7 +126,7 @@ class ExchangeService(object):
         return tt
 
 
-    def send_faircoins(self, from_agent, recipient, qty, resource, notes=None):
+    def send_faircoins(self, from_agent, recipient, qty, resource, notes=''):
         if 'faircoin' not in settings.INSTALLED_APPS:
             return None
         to_resources = EconomicResource.objects.filter(faircoin_address__address=recipient)
@@ -153,6 +153,7 @@ class ExchangeService(object):
                 exchange=exchange,
                 transfer_date=date,
                 name="Transfer Faircoins",
+                notes=notes,
             )
             transfer.save()
         else:
@@ -171,6 +172,7 @@ class ExchangeService(object):
                 exchange=exchange,
                 transfer_date=date,
                 name="Send Faircoins",
+                notes=notes,
             )
             transfer.save()
 
@@ -185,6 +187,7 @@ class ExchangeService(object):
             quantity=qty,
             transfer=transfer,
             event_reference=recipient,
+            description=notes,
         )
         event.save()
         fairtx = FaircoinTransaction(
@@ -210,6 +213,7 @@ class ExchangeService(object):
                 quantity=qty,
                 transfer=transfer,
                 event_reference=recipient,
+                description=notes,
             )
             event.save()
             fairtx = FaircoinTransaction(

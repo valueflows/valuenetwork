@@ -15,6 +15,7 @@ class EconomicResourceCategory(graphene.Enum):
     CURRENCY = "currency"
     INVENTORY = "inventory"
     WORK = "work"
+    #SERVICE = "service" TODO: work this in, might need a new event type in VF
 
 class EconomicResourceProcessCategory(graphene.Enum):
     NONE = None
@@ -23,7 +24,7 @@ class EconomicResourceProcessCategory(graphene.Enum):
     CITED = "cited"
     PRODUCED = "produced"
 
-class ResourceTaxonomyItem(DjangoObjectType):
+class ResourceClassification(DjangoObjectType):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
     category = graphene.String(source='category')
@@ -33,19 +34,21 @@ class ResourceTaxonomyItem(DjangoObjectType):
         model = EconomicResourceType
         only_fields = ('id', 'name')
 
-    taxonomy_item_resources = graphene.List(lambda: EconomicResource)
+    classification_resources = graphene.List(lambda: EconomicResource)
 
-    def resolve_taxonomy_item_resources(self, args, context, info):
+    def resolve_classification_resources(self, args, context, info):
         return self.resources.all()
 
 
 class EconomicResource(DjangoObjectType):
-    resource_taxonomy_item = graphene.Field(ResourceTaxonomyItem)
+    resource_classified_as = graphene.Field(ResourceClassification)
     tracking_identifier = graphene.String(source='tracking_identifier')
     image = graphene.String(source='image')
     current_quantity = graphene.Field(QuantityValue)
     note = graphene.String(source='note')
     category = graphene.String(source='category')
+    current_location = graphene.Field(lambda: types.Place)
+    created_date = graphene.String(source='created_date')
 
     class Meta:
         model = EconomicResourceProxy
@@ -56,8 +59,11 @@ class EconomicResource(DjangoObjectType):
     def resolve_current_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)
 
-    def resolve_resource_taxonomy_item(self, args, *rargs):
+    def resolve_resource_classified_as(self, args, *rargs):
         return self.resource_type
+
+    def resolve_current_location(self, args, *rargs):
+        return self.current_location
 
     def resolve_transfers(self, args, context, info):
         return self.transfers()

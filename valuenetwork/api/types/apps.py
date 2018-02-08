@@ -16,15 +16,17 @@ class ApiTypesAppConfig(AppConfig):
         from .models import CommentMixin
         comments.CommentMixin = CommentsMixin
         """
-        
-        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory, ResourceTaxonomyItem
+
+        from valuenetwork.api.types.EconomicResource import EconomicResource, EconomicResourceCategory, ResourceClassification
         types.EconomicResource = EconomicResource
         types.EconomicResourceCategory = EconomicResourceCategory
-        types.ResourceTaxonomyItem = ResourceTaxonomyItem
+        types.ResourceClassification = ResourceClassification
         from valuenetwork.api.types.Agent import Agent
         types.Agent = Agent
         from valuenetwork.api.types.Process import Process
         types.Process = Process
+        from valuenetwork.api.types.Plan import Plan
+        types.Plan = Plan
         from valuenetwork.api.types.EconomicEvent import EconomicEvent
         types.EconomicEvent = EconomicEvent
         from valuenetwork.api.types.Commitment import Commitment
@@ -35,6 +37,8 @@ class ApiTypesAppConfig(AppConfig):
         types.ExchangeAgreement = ExchangeAgreement
         from valuenetwork.api.types.Exchange import Transfer
         types.Transfer = Transfer
+        from valuenetwork.api.types.Place import Place
+        types.Place = Place
         super(ApiTypesAppConfig, self).ready()
 
         

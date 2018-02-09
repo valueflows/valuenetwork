@@ -11,6 +11,7 @@ local_settings.py
 faircoin/faircoin.log*
 faircoin/faircoin_cron.log*
 .vagrant
+.idea/
 bin/
 cmd/create-user.sh
 include/

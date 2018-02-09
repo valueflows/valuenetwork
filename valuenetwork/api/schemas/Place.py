@@ -1,45 +1,36 @@
 #
-# Graphene schema for exposing Process model
-#
-# @package: OCP
-# @since:   2017-06-22
+# Graphene schema for exposing Place model
 #
 
 import graphene
-import datetime
-from valuenetwork.valueaccounting.models import Process as ProcessProxy, EconomicAgent, AgentUser
-from valuenetwork.api.types.Process import Process
-from six import with_metaclass
-from django.contrib.auth.models import User
-from .Auth import AuthedInputMeta, AuthedMutation
-from django.core.exceptions import PermissionDenied
+from valuenetwork.valueaccounting.models import Location
+from valuenetwork.api.types.Place import Place
+#from six import with_metaclass
+#from django.contrib.auth.models import User
+#from .Auth import AuthedInputMeta, AuthedMutation
+#from django.core.exceptions import PermissionDenied
 
 
 class Query(graphene.AbstractType):
 
-    # define input query params
+    place = graphene.Field(Place,
+                           id=graphene.Int())
 
-    process = graphene.Field(Process,
-                            id=graphene.Int())
+    all_places = graphene.List(Place)
 
-    all_processes = graphene.List(Process)
-
-    # load single item
-
-    def resolve_process(self, args, *rargs):
+    def resolve_place(self, args, *rargs):
         id = args.get('id')
         if id is not None:
-            process = ProcessProxy.objects.get(pk=id)
-            if process:
-                return process
+            place = Location.objects.get(pk=id)
+            if place:
+                return place
         return None
 
-    # load all items
-
-    def resolve_all_processes(self, args, context, info):
-        return ProcessProxy.objects.all()
+    def resolve_all_places(self, args, context, info):
+        return Location.objects.all()
 
 
+'''
 class CreateProcess(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         name = graphene.String(required=True)
@@ -160,3 +151,4 @@ class DeleteProcess(AuthedMutation):
                 raise PermissionDenied("Process has economic events so cannot be deleted.")
 
         return DeleteProcess(process=process)
+'''

@@ -47,6 +47,8 @@ class EconomicResource(DjangoObjectType):
     current_quantity = graphene.Field(QuantityValue)
     note = graphene.String(source='note')
     category = graphene.String(source='category')
+    current_location = graphene.Field(lambda: types.Place)
+    created_date = graphene.String(source='created_date')
 
     class Meta:
         model = EconomicResourceProxy
@@ -59,6 +61,9 @@ class EconomicResource(DjangoObjectType):
 
     def resolve_resource_classified_as(self, args, *rargs):
         return self.resource_type
+
+    def resolve_current_location(self, args, *rargs):
+        return self.current_location
 
     def resolve_transfers(self, args, context, info):
         return self.transfers()

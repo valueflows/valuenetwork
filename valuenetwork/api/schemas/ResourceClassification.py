@@ -25,6 +25,11 @@ class Query(graphene.AbstractType):
     resource_classifications_by_action = graphene.List(ResourceClassification,
                                                       action=Action())
 
+    #returns resource classifications filtered by facet values in a string of comma delimited name:value, 
+    #with some resource quantity > 0, for use in inventory filtering
+    resource_classifications_by_facet_values = graphene.List(ResourceClassification,
+                                                       facet_values=graphene.String())
+
     facet = graphene.Field(Facet,
                            id=graphene.Int())
  
@@ -61,6 +66,10 @@ class Query(graphene.AbstractType):
         if action == Action.IMPROVE or action == Action.ACCEPT:
             return EconomicResourceType.objects.filter(Q(behavior="produced")|Q(behavior="used")|Q(behavior="cited")|Q(behavior="consumed"))
         return None
+
+    def resolve_resource_classifications_by_facet_values(self, args, context, info):
+        fvs = args.get('facet_values')
+        return EconomicResourceType.objects.resource_types_by_facet_values(fvs)
 
     def resolve_facet(self, args, *rargs):
         id = args.get('id')

@@ -1418,6 +1418,25 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    resourceClassificationsByFacetValues(facetValues: "Material: Product,Material: Raw material,Non-material: Digital,Non-material: Formation") {
+      id
+      name
+      classificationResources {
+        id
+        trackingIdentifier
+        currentQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     resourceClassificationsByAction(action: PRODUCE) {
       name
       category

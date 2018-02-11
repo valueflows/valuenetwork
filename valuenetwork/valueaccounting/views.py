@@ -1065,6 +1065,7 @@ def inventory(request):
     selected_values = "all"
     if request.method == "POST":
         selected_values = request.POST["categories"]
+        import pdb; pdb.set_trace()
         if selected_values:
             vals = selected_values.split(",")
             if vals[0] == "all":

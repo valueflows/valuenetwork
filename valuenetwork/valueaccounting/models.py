@@ -2208,6 +2208,71 @@ class EconomicResourceTypeManager(models.Manager):
             raise ValidationError("Membership Share does not exist by that name")
         return share
 
+    #moved this logic from views for use in api
+    def resource_types_by_facet_values(self, fvs_string=None):
+        """ Logic:
+            Facet values in different Facets are ANDed.
+            Ie, a resource type must have all of those facet values.
+            Facet values in the same Facet are ORed.
+            Ie, a resource type must have at least one of those facet values.
+        """
+        rts = EconomicResourceType.objects.all()
+        resource_types = []
+        facets = Facet.objects.all()
+        if fvs_string:
+            vals = fvs_string.split(",")
+            if vals[0] == "all":
+                for rt in rts:
+                    if rt.onhand_qty()>0:
+                        resource_types.append(rt)
+            else:
+                fvs = []
+                for val in vals:
+                    val_split = val.split(":")
+                    fname = val_split[0]
+                    fvalue = val_split[1].strip()
+                    fvs.append(FacetValue.objects.get(facet__name=fname,value=fvalue))
+                fv_ids = [fv.id for fv in fvs]
+                rt_facet_values = ResourceTypeFacetValue.objects.filter(facet_value__id__in=fv_ids)
+                rts = [rtfv.resource_type for rtfv in rt_facet_values]
+                answer = []
+                singles = [] #Facets with only one facet_value in the Pattern
+                multis = []  #Facets with more than one facet_value in the Pattern
+                aspects = {}
+                for fv in fvs:
+                    if fv.facet not in aspects:
+                        aspects[fv.facet] = []
+                    aspects[fv.facet].append(fv)
+                for facet, fvs in aspects.items():
+                    if len(fvs) > 1:
+                        for fv in fvs:
+                            multis.append(fv)
+                    else:
+                        singles.append(fvs[0])
+                single_ids = [s.id for s in singles]
+                for rt in rts:
+                    rt_singles = [rtfv.facet_value for rtfv in rt.facets.filter(facet_value_id__in=single_ids)]
+                    rt_multis = [rtfv.facet_value for rtfv in rt.facets.exclude(facet_value_id__in=single_ids)]
+                    if set(rt_singles) == set(singles):
+                        if not rt in answer:
+                            if multis:
+                                # if multis intersect
+                                if set(rt_multis) & set(multis):
+                                    answer.append(rt)
+                            else:
+                                answer.append(rt)
+                answer_ids = [a.id for a in answer]
+                rts = list(EconomicResourceType.objects.filter(id__in=answer_ids))
+                for rt in rts:
+                    if rt.onhand_qty()>0:
+                        resource_types.append(rt)
+                resource_types.sort(key=lambda rt: rt.label())
+        else:
+            for rt in rts:
+                if rt.onhand_qty()>0:
+                    resource_types.append(rt)
+        return resource_types
+
 
 INVENTORY_RULE_CHOICES = (
     ('yes', _('Keep inventory')),

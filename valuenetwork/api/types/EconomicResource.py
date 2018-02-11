@@ -58,13 +58,13 @@ class ResourceClassification(DjangoObjectType):
 
     classification_resources = graphene.List(lambda: EconomicResource)
 
-    classification_facet_values = graphene.List(lambda: FacetValue)
+    #classification_facet_values = graphene.List(lambda: FacetValue)
 
     def resolve_classification_resources(self, args, context, info):
         return self.resources.all()
 
-    def resolve_classification_facet_values(self, args, context, info):
-        return self.facets.all() #TODO in process, not working yet
+    #def resolve_classification_facet_values(self, args, context, info):
+    #    return self.facets.all() #TODO in process, not working yet
 
 class EconomicResource(DjangoObjectType):
     resource_classified_as = graphene.Field(ResourceClassification)

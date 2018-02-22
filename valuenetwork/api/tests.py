@@ -1337,6 +1337,19 @@ query ($token: String) {
   }
 }
 
+# notification data
+
+query ($token: String) {
+  viewer(token: $token) {
+    allNotificationTypes {
+      id
+      label
+      display
+      description
+    }
+  }
+}
+
 query ($token: String) {
   viewer(token: $token) {
     notificationSetting(id: 2) {

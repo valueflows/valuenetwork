@@ -585,6 +585,10 @@ class EconomicAgent(models.Model):
                     resource_types.append(rt)
         return resource_types
 
+    def notification_settings(self):
+        user = self.my_user()
+        return []
+
     def membership_request(self):
         reqs = self.membership_requests.all()
         if reqs:

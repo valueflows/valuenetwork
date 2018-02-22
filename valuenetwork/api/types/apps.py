@@ -41,4 +41,6 @@ class ApiTypesAppConfig(AppConfig):
         types.Transfer = Transfer
         from valuenetwork.api.types.Place import Place
         types.Place = Place
+        from valuenetwork.api.types.NotificationSetting import NotificationSetting
+        types.NotificationSetting = NotificationSetting
         super(ApiTypesAppConfig, self).ready()

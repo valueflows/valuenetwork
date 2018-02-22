@@ -62,6 +62,8 @@ class Agent(graphene.Interface):
 
     faircoin_address = graphene.String()
 
+    agent_notification_settings = graphene.List(lambda: types.NotificationSetting)
+
 
     def resolve_primary_location(self, args, *rargs):
         return self.primary_location
@@ -183,6 +185,11 @@ class Agent(graphene.Interface):
     def resolve_faircoin_address(self, args, *rargs):
         agent = _load_identified_agent(self)
         return agent.faircoin_address()
+
+    def resolve_agent_notification_settings(self, args, context, info):
+        agent = _load_identified_agent(self)
+        return agent.notification_settings()
+
 
     # returns resource classifications that have a recipe, for this and parent agents
     #def resolve_agent_recipe_bundles(self, args, context, info):

@@ -1337,6 +1337,57 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    notificationSetting(id: 2) {
+      id
+      agent {
+        name
+      }
+      send
+      notificationType {
+        id
+        label
+        display
+        description
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allNotificationSettings {
+      id
+      agent {
+        name
+      }
+      send
+      notificationType {
+        label
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 6) {
+      name
+      agentNotificationSettings {
+        id
+        agent {
+            name
+        }
+        send
+        notificationType {
+            label
+        }
+      }
+    }
+  }
+}
+
 # unit data
 
 query($token: String) {

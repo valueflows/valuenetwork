@@ -2959,4 +2959,19 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  createNotificationSetting(token: $token, notificationTypeId: 1, agentId: 107, send: true) {
+    notificationSetting {
+      id
+      notificationType {
+        display
+      }
+      send
+      agent {
+        name
+      }
+    }
+  }
+}
+
 '''

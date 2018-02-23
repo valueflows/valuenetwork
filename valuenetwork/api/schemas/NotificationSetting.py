@@ -5,6 +5,7 @@ import graphene
 
 from pinax.notifications.models import NoticeSetting, NoticeType
 from valuenetwork.api.types.NotificationSetting import NotificationSetting, NotificationType
+from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser
 from six import with_metaclass
 from django.contrib.auth.models import User
 from .Auth import AuthedInputMeta, AuthedMutation
@@ -65,10 +66,10 @@ class CreateNotificationSetting(AuthedMutation):
             user = agent.my_user()
         else:
             user = context.user
-        notification_type = NotificationType.objects.get(pk=notification_type_id)
-        notification_setting = NotificationSetting(
+        notification_type = NoticeType.objects.get(pk=notification_type_id)
+        notification_setting = NoticeSetting(
             send=send,
-            notification_type=notification_type,
+            notice_type=notification_type,
             user=user,
         )
 

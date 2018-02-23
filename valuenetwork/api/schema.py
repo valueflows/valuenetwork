@@ -90,8 +90,8 @@ class Mutation(graphene.ObjectType):
     delete_plan = valuenetwork.api.schemas.Plan.DeletePlan.Field()
     update_economic_resource = valuenetwork.api.schemas.EconomicResource.UpdateEconomicResource.Field()
     delete_economic_resource = valuenetwork.api.schemas.EconomicResource.DeleteEconomicResource.Field()
-    #create_notification_setting = valuenetwork.api.schemas.NotificationSetting.CreateNotificationSetting.Field()
-    #update_notification_setting = valuenetwork.api.schemas.NotificationSetting.UpdateNotificationSetting.Field()
+    create_notification_setting = valuenetwork.api.schemas.NotificationSetting.CreateNotificationSetting.Field()
+    update_notification_setting = valuenetwork.api.schemas.NotificationSetting.UpdateNotificationSetting.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

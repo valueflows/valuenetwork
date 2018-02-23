@@ -586,8 +586,9 @@ class EconomicAgent(models.Model):
         return resource_types
 
     def notification_settings(self):
+        from pinax.notifications.models import NoticeSetting
         user = self.my_user()
-        return []
+        return NoticeSetting.objects.filter(user=user)
 
     def membership_request(self):
         reqs = self.membership_requests.all()

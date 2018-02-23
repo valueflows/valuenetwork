@@ -1390,11 +1390,12 @@ query ($token: String) {
       agentNotificationSettings {
         id
         agent {
-            name
+          name
         }
         send
         notificationType {
-            label
+          id
+          label
         }
       }
     }

@@ -100,21 +100,20 @@ class UpdateNotificationSetting(AuthedMutation):
         id = args.get('id')
         send = args.get('send')
 
-        notification_setting = Order.objects.get(pk=id)
+        notification_setting = NoticeSetting.objects.get(pk=id)
         if notification_setting:
-            if send:
-                notification_setting.send = send
+            notification_setting.send = send
 
-                #non-standard auth
-                user_agent = AgentUser.objects.get(user=context.user).agent
-                is_authorized = False
-                if user_agent.is_superuser():
-                    is_authorized = True
-                if user == context.user:
-                    is_authorized = True
-                if is_authorized:
-                    notification_setting.save()
-                else:
-                    raise PermissionDenied('User not authorized to perform this action.')
+            #non-standard auth
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = False
+            if user_agent.is_superuser():
+                is_authorized = True
+            if notification_setting.user == context.user:
+                is_authorized = True
+            if is_authorized:
+                notification_setting.save()
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
 
         return UpdateNotificationSetting(notification_setting=notification_setting)

@@ -44,7 +44,13 @@ class Query(graphene.AbstractType):
         return None
 
     def resolve_all_notification_types(self, args, context, info):
-        return NoticeType.objects.all()
+        nts = NoticeType.objects.all()
+        admin_nt_labels = ["work_skill_suggestion", "comment_join_request", "comment_membership_request", "work_new_account", "work_join_request", "work_membership_request"]
+        show_nts = []
+        for nt in nts:
+            if nt.label not in admin_nt_labels:
+                show_nts.append(nt)
+        return show_nts
 
 
 class CreateNotificationSetting(AuthedMutation):

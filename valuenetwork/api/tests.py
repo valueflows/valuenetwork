@@ -1190,6 +1190,29 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    agent(id: 6) {
+      name
+      memberRelationships {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     agent(id: 7) {
       name
       agentRelationships(category: MEMBER) {

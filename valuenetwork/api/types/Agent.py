@@ -64,6 +64,8 @@ class Agent(graphene.Interface):
 
     agent_notification_settings = graphene.List(lambda: types.NotificationSetting)
 
+    member_relationships = graphene.List(AgentRelationship)
+
 
     def resolve_primary_location(self, args, *rargs):
         return self.primary_location
@@ -190,6 +192,20 @@ class Agent(graphene.Interface):
         agent = _load_identified_agent(self)
         return agent.notification_settings()
 
+    #Returns member type associations ordered by the type (hard-coded manager then member).
+    def resolve_member_relationships(self, args, context, info):
+        agent = _load_identified_agent(self)
+        if agent:
+            assocs = agent.all_active_associations()
+            filtered_assocs = []
+            for assoc in assocs:
+                if assoc.association_type.association_behavior == "manager":
+                    filtered_assocs.append(assoc)
+            for assoc in assocs:
+                if assoc.association_type.association_behavior == "member":
+                    filtered_assocs.append(assoc)
+            return filtered_assocs            
+        return None
 
     # returns resource classifications that have a recipe, for this and parent agents
     #def resolve_agent_recipe_bundles(self, args, context, info):

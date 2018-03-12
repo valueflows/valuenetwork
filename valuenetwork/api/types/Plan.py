@@ -34,6 +34,8 @@ class Plan(DjangoObjectType):
 
     outputs = graphene.List(lambda: types.EconomicEvent)
 
+    kanban_state = graphene.String()
+
     def resolve_scope(self, args, *rargs):
         return formatAgentList(self.plan_context_agents())
 
@@ -54,3 +56,7 @@ class Plan(DjangoObjectType):
 
     def resolve_outputs(self, args, context, info):
         return self.all_outgoing_events()
+
+    # returns "planned", "doing", "done"
+    def resolve_kanban_state(self, args, *rargs):
+        return self.kanban_state()

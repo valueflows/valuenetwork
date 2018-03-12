@@ -2079,6 +2079,7 @@ query ($token: String) {
         name
         __typename
       }
+      kanbanState
     }
   }
 }

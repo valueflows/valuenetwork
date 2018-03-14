@@ -14,10 +14,11 @@ class Plan(DjangoObjectType):
     planned_on = graphene.String(source='planned')
     due = graphene.String(source='due')
     note = graphene.String(source='note')
+    name = graphene.String(source='plan_name')
 
     class Meta:
         model = Order
-        only_fields = ('id', 'name')
+        only_fields = ('id')
 
 
     scope = graphene.List(lambda: types.Agent)

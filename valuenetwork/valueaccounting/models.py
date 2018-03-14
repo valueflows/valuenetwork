@@ -3992,6 +3992,17 @@ class Order(models.Model):
     def note(self):
         return self.description
 
+    @property #ValueFlows
+    def plan_name(self):
+        name = self.name
+        if not name:
+            procs = self.all_processes()
+            if len(procs) > 0:
+                name = procs[0].name
+            if not name:
+                name = str(self.id)
+        return name
+
     def delete_api(self):
         evs = self.all_events()
         if len(evs) == 0:

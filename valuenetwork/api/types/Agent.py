@@ -36,7 +36,8 @@ class Agent(graphene.Interface):
 
     owned_economic_resources = graphene.List(lambda: types.EconomicResource,
                                              category=types.EconomicResourceCategory(),
-                                             resourceClassificationId=graphene.Int())
+                                             resourceClassificationId=graphene.Int(),
+                                             page=graphene.Int())
 
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
@@ -73,6 +74,7 @@ class Agent(graphene.Interface):
     def resolve_owned_economic_resources(self, args, context, info):
         type = args.get('category', types.EconomicResourceCategory.NONE)
         resource_class_id = args.get('resourceClassificationId', None)
+        page = args.get('page', None)
         org = _load_identified_agent(self)
         resources = None
         if org:
@@ -89,6 +91,17 @@ class Agent(graphene.Interface):
                     if res.resource_type == rc:
                         resources_temp.append(res)
                 resources = resources_temp
+            if page:
+                from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+                paginator = Paginator(resources, 25)
+                try:
+                    resources = paginator.page(page)
+                except PageNotAnInteger:
+                    # If page is not an integer, deliver first page.
+                    resources = paginator.page(1)
+                except EmptyPage:
+                    # If page is out of range (e.g. 9999), deliver last page of results.
+                    resources = paginator.page(paginator.num_pages)
         return resources
 
     # if an organization, this returns processes done in that context

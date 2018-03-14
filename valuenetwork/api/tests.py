@@ -1761,6 +1761,20 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    agent (id:39) {
+      name
+      ownedEconomicResources(page:1) {
+        createdDate
+        resourceClassifiedAs {
+          name
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     agent(id: 6) {
       name
       ownedEconomicResources(category: CURRENCY) {

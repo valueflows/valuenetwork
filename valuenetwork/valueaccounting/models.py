@@ -9774,8 +9774,9 @@ class Commitment(models.Model):
         if not self.order_item:
             if self.process:
                 self.order_item = self.process.order_item()
-                if not self.order_item:
-                    raise ValidationError("Cannot find deliverable in this process chain, cannot save.")
+                #TODO: why did I do this?  how to handle processes that are part of a plan but have no deliverables?
+                #if not self.order_item:
+                #    raise ValidationError("Cannot find deliverable in this process chain, cannot save.")
         if self.pk:
             self.handle_commitment_changes()
         self.save()

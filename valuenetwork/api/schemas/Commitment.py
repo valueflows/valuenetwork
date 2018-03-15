@@ -221,7 +221,7 @@ class UpdateCommitment(AuthedMutation):
                 commitment.quantity = Decimal(committed_numeric_value)
             if committed_unit_id:
                 commitment.unit_of_quantity = Unit.objects.get(pk=committed_unit_id)
-            if is_finished:
+            if is_finished != None:
                 commitment.finished = is_finished
 
             user_agent = AgentUser.objects.get(user=context.user).agent

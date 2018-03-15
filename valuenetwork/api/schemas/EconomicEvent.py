@@ -269,7 +269,7 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.quantity = Decimal(affected_numeric_value)
             if affected_unit_id:
                 economic_event.unit_of_quantity = Unit.objects.get(pk=affected_unit_id)
-            if request_distribution:
+            if request_distribution != None:
                 economic_event.is_contribution = request_distribution
             if request_distribution is False:
                 economic_event.is_contribution = False

@@ -2503,10 +2503,11 @@ query ($token: String) {
       plan {
         name
       }
-      fulfilledBy {
+      fulfilledBy (requestDistribution: false) {
         fulfilledBy {
           action
           start
+          requestDistribution
           provider {
             name
           }

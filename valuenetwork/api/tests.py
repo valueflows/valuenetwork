@@ -2231,10 +2231,11 @@ query ($token: String) {
   viewer(token: $token) {
     agent(id: 6) {
       name
-      agentEconomicEvents(latestNumberOfDays: 30) {
+      agentEconomicEvents(latestNumberOfDays: 30, requestDistribution: true) {
         id
         action
         start
+        requestDistribution
         affectedQuantity {
           numericValue
           unit {

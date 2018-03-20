@@ -46,7 +46,8 @@ class Agent(graphene.Interface):
                                 is_finished=graphene.Boolean())
 
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
-                                          latest_number_of_days=graphene.Int())
+                                          latest_number_of_days=graphene.Int(),
+                                          request_distribution=graphene.Boolean())
 
     agent_commitments = graphene.List(lambda: types.Commitment,
                                       latest_number_of_days=graphene.Int())
@@ -140,11 +141,14 @@ class Agent(graphene.Interface):
         agent = _load_identified_agent(self)
         if agent:
             days = args.get('latest_number_of_days', 0)
+            request_distribution = args.get('request_distribution')
             if days > 0:
                 events = agent.involved_in_events().filter(event_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
             else:
                 events = agent.involved_in_events()
             events = events.exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            if request_distribution != None:
+                events = events.filter(is_contribution=request_distribution)
             return events
         return None
 

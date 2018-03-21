@@ -43,7 +43,8 @@ class Commitment(DjangoObjectType):
         model = CommitmentProxy
         only_fields = ('id')
 
-    fulfilled_by = graphene.List(lambda: types.Fulfillment)
+    fulfilled_by = graphene.List(lambda: types.Fulfillment,
+                                 request_distribution=graphene.Boolean())
 
     involved_agents = graphene.List(lambda: types.Agent)
 
@@ -88,6 +89,9 @@ class Commitment(DjangoObjectType):
 
     def resolve_fulfilled_by(self, args, context, info):
         events = self.fulfillment_events.all()
+        request_distribution = args.get('request_distribution')
+        if request_distribution != None:
+            events = events.filter(is_contribution=request_distribution)
         fulfillments = []
         for event in events:
             fulfill = FulfillmentProxy(

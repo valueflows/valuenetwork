@@ -585,6 +585,11 @@ class EconomicAgent(models.Model):
                     resource_types.append(rt)
         return resource_types
 
+    def notification_settings(self):
+        from pinax.notifications.models import NoticeSetting
+        user = self.my_user()
+        return NoticeSetting.objects.filter(user=user)
+
     def membership_request(self):
         reqs = self.membership_requests.all()
         if reqs:
@@ -2207,6 +2212,71 @@ class EconomicResourceTypeManager(models.Manager):
         except EconomicResourceType.DoesNotExist:
             raise ValidationError("Membership Share does not exist by that name")
         return share
+
+    #moved this logic from views for use in api
+    def resource_types_by_facet_values(self, fvs_string=None):
+        """ Logic:
+            Facet values in different Facets are ANDed.
+            Ie, a resource type must have all of those facet values.
+            Facet values in the same Facet are ORed.
+            Ie, a resource type must have at least one of those facet values.
+        """
+        rts = EconomicResourceType.objects.all()
+        resource_types = []
+        facets = Facet.objects.all()
+        if fvs_string:
+            vals = fvs_string.split(",")
+            if vals[0] == "all":
+                for rt in rts:
+                    if rt.onhand_qty()>0:
+                        resource_types.append(rt)
+            else:
+                fvs = []
+                for val in vals:
+                    val_split = val.split(":")
+                    fname = val_split[0]
+                    fvalue = val_split[1].strip()
+                    fvs.append(FacetValue.objects.get(facet__name=fname,value=fvalue))
+                fv_ids = [fv.id for fv in fvs]
+                rt_facet_values = ResourceTypeFacetValue.objects.filter(facet_value__id__in=fv_ids)
+                rts = [rtfv.resource_type for rtfv in rt_facet_values]
+                answer = []
+                singles = [] #Facets with only one facet_value in the Pattern
+                multis = []  #Facets with more than one facet_value in the Pattern
+                aspects = {}
+                for fv in fvs:
+                    if fv.facet not in aspects:
+                        aspects[fv.facet] = []
+                    aspects[fv.facet].append(fv)
+                for facet, fvs in aspects.items():
+                    if len(fvs) > 1:
+                        for fv in fvs:
+                            multis.append(fv)
+                    else:
+                        singles.append(fvs[0])
+                single_ids = [s.id for s in singles]
+                for rt in rts:
+                    rt_singles = [rtfv.facet_value for rtfv in rt.facets.filter(facet_value_id__in=single_ids)]
+                    rt_multis = [rtfv.facet_value for rtfv in rt.facets.exclude(facet_value_id__in=single_ids)]
+                    if set(rt_singles) == set(singles):
+                        if not rt in answer:
+                            if multis:
+                                # if multis intersect
+                                if set(rt_multis) & set(multis):
+                                    answer.append(rt)
+                            else:
+                                answer.append(rt)
+                answer_ids = [a.id for a in answer]
+                rts = list(EconomicResourceType.objects.filter(id__in=answer_ids))
+                for rt in rts:
+                    if rt.onhand_qty()>0:
+                        resource_types.append(rt)
+                resource_types.sort(key=lambda rt: rt.label())
+        else:
+            for rt in rts:
+                if rt.onhand_qty()>0:
+                    resource_types.append(rt)
+        return resource_types
 
 
 INVENTORY_RULE_CHOICES = (
@@ -3921,6 +3991,17 @@ class Order(models.Model):
     @property #ValueFlows
     def note(self):
         return self.description
+
+    @property #ValueFlows
+    def plan_name(self):
+        name = self.name
+        if not name:
+            procs = self.all_processes()
+            if len(procs) > 0:
+                name = procs[0].name
+            if not name:
+                name = str(self.id)
+        return name
 
     def delete_api(self):
         evs = self.all_events()
@@ -6389,6 +6470,13 @@ class EconomicResource(models.Model):
 
     def all_contacts(self):
         return self.agent_resource_roles.filter(is_contact=True)
+
+    def all_contact_agents(self):
+        arrs = self.all_contacts()
+        answer = []
+        for arr in arrs:
+            answer.append(arr.agent)
+        return answer
 
     def all_related_agents(self):
         arrs = self.agent_resource_roles.all()
@@ -9686,8 +9774,9 @@ class Commitment(models.Model):
         if not self.order_item:
             if self.process:
                 self.order_item = self.process.order_item()
-                if not self.order_item:
-                    raise ValidationError("Cannot find deliverable in this process chain, cannot save.")
+                #TODO: why did I do this?  how to handle processes that are part of a plan but have no deliverables?
+                #if not self.order_item:
+                #    raise ValidationError("Cannot find deliverable in this process chain, cannot save.")
         if self.pk:
             self.handle_commitment_changes()
         self.save()

@@ -14,10 +14,11 @@ class Plan(DjangoObjectType):
     planned_on = graphene.String(source='planned')
     due = graphene.String(source='due')
     note = graphene.String(source='note')
+    name = graphene.String(source='plan_name')
 
     class Meta:
         model = Order
-        only_fields = ('id', 'name')
+        only_fields = ('id')
 
 
     scope = graphene.List(lambda: types.Agent)
@@ -33,6 +34,8 @@ class Plan(DjangoObjectType):
     non_work_inputs = graphene.List(lambda: types.EconomicEvent)
 
     outputs = graphene.List(lambda: types.EconomicEvent)
+
+    kanban_state = graphene.String()
 
     def resolve_scope(self, args, *rargs):
         return formatAgentList(self.plan_context_agents())
@@ -54,3 +57,7 @@ class Plan(DjangoObjectType):
 
     def resolve_outputs(self, args, context, info):
         return self.all_outgoing_events()
+
+    # returns "planned", "doing", "done"
+    def resolve_kanban_state(self, args, *rargs):
+        return self.kanban_state()

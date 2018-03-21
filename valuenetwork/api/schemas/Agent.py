@@ -8,8 +8,8 @@
 
 import graphene
 from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser, Location
-from valuenetwork.api.models import formatAgent, formatAgentList, Person
-from valuenetwork.api.types.Agent import Agent, Person
+from valuenetwork.api.models import formatAgent, formatAgentList, Person, Organization
+from valuenetwork.api.types.Agent import Agent, Person, Organization
 from six import with_metaclass
 from django.contrib.auth.models import User
 from .Auth import AuthedInputMeta, AuthedMutation
@@ -166,6 +166,48 @@ class UpdatePerson(AuthedMutation):
                 raise PermissionDenied('User not authorized to perform this action.')
 
         return UpdatePerson(person=formatAgent(agent))
+
+class UpdateOrganization(AuthedMutation):
+    class Input(with_metaclass(AuthedInputMeta)):
+        id = graphene.Int(required=True)
+        name = graphene.String(required=False)
+        image = graphene.String(required=False)
+        primary_location_id = graphene.Int(required=False)
+        email = graphene.String(required=False)
+        note = graphene.String(required=False)
+
+    organization = graphene.Field(lambda: Organization)
+
+    @classmethod
+    def mutate(cls, root, args, context, info):
+        id = args.get('id')
+        name = args.get('name')
+        image = args.get('image')
+        note = args.get('note')
+        primary_location_id = args.get('primary_location_id')
+        email = args.get('email')
+
+        agent = EconomicAgent.objects.get(pk=id)
+        if agent:
+            if note:
+                agent.description = note
+            if image:
+                agent.photo_url = image
+            if name:
+                agent.name = name
+            if primary_location_id:
+                agent.primary_location = Location.objects.get(pk=primary_location_id)
+            if email:
+                agent.email = email
+
+            user_agent = AgentUser.objects.get(user=context.user).agent
+            is_authorized = user_agent.is_authorized(object_to_mutate=agent)
+            if is_authorized:
+                agent.save()
+            else:
+                raise PermissionDenied('User not authorized to perform this action.')
+
+        return UpdateOrganization(organization=formatAgent(agent))
 
 '''
 class DeleteAgent(AuthedMutation):

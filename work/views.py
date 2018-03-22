@@ -2593,7 +2593,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     pass
 
                   #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                  #  % ('work/agent', agent.id, 'exchange-logging-work', ext.id, gen_rt.id)) # ¿ use the exchange id for a resource id ?
+                  #  % ('work/agent', agent.id, 'exchange-logging-work', ext.id, gen_rt.id)) # ?? use the exchange id for a resource id ?
 
                 else: # endif hasattr(data["exchange_type"], 'id'):
                   #nav_form.add_error('exchange_type', _("No exchange type selected"))
@@ -3520,9 +3520,9 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 #if not transfer_type.can_create_resource:
                 res = data["resource"]
@@ -3723,9 +3723,9 @@ def add_transfer_commitment_work(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 description = data["description"]
                 if transfer_type.is_currency:
@@ -3847,9 +3847,9 @@ def change_transfer_commitments_work(request, transfer_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
 
                 description = data["description"]
@@ -3921,9 +3921,9 @@ def transfer_from_commitment(request, transfer_id):
                 to_agent = data["to_agent"]
 
             rt = data["resource_type"]
-            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                gen_rt = data["ocp_resource_type"]
-                rt = get_rt_from_ocp_rt(gen_rt)
+#            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                gen_rt = data["ocp_resource_type"]
+#                rt = get_rt_from_ocp_rt(gen_rt)
 
             #if not transfer_type.can_create_resource:
             res = data["resource"]
@@ -4060,9 +4060,9 @@ def change_transfer_events(request, transfer_id, context_agent_id=None):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 res = data["resource"]
                 res_from = None

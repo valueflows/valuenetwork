@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.views.generic import TemplateView
 from django.conf import settings
 import valuenetwork.valueaccounting.views
-import work.views
+#import work.views
 
 urlpatterns = [
     url(r"^start/$", valuenetwork.valueaccounting.views.start, name="start"),
@@ -526,8 +526,8 @@ urlpatterns += [
         name="change_transfer_type"),
     url(r'^delete-transfer-type/(?P<transfer_type_id>\d+)/$', valuenetwork.valueaccounting.views.delete_transfer_type,
         name="delete_transfer_type"),
-    url(r'^membership-requests/$', work.views.membership_requests, name="membership_requests"),
-    url(r'^membership-requests/(?P<state>\w+)/$', work.views.membership_requests, name="membership_requests"),
+    #url(r'^membership-requests/$', work.views.membership_requests, name="membership_requests"),
+    #url(r'^membership-requests/(?P<state>\w+)/$', work.views.membership_requests, name="membership_requests"),
     url(r'^membership-request/(?P<membership_request_id>\d+)/$', valuenetwork.valueaccounting.views.membership_request,
         name="membership_request"),
     url(r'^connect-agent/(?P<membership_request_id>\d+)/$', valuenetwork.valueaccounting.views.connect_agent_to_request,
@@ -541,7 +541,7 @@ urlpatterns += [
     url(r'^delete-request/(?P<membership_request_id>\d+)/$', valuenetwork.valueaccounting.views.delete_request,
         name="delete_request"),
     url(r"^comments/$", valuenetwork.valueaccounting.views.comments, name="comments"),
-    url(r'^skill-suggestions/$', work.views.skill_suggestions, name="skill_suggestions"),
+    #url(r'^skill-suggestions/$', work.views.skill_suggestions, name="skill_suggestions"),
     url(r'^create-skill/(?P<suggestion_id>\d+)/$', valuenetwork.valueaccounting.views.create_skill_for_suggestion,
         name="create_skill_for_suggestion"),
     url(r'^decline-suggestion/(?P<suggestion_id>\d+)/$', valuenetwork.valueaccounting.views.decline_suggestion,

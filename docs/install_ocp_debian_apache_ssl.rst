@@ -1,43 +1,9 @@
-This is a howto for installing ocp in a debian/ubuntu system.
+This is a howto for installing NRP in a debian/ubuntu system.
 
 - Install dependencies in the system: ::
 
     sudo apt-get install virtualenv git libjpeg-dev zlib1g-dev build-essential
     sudo apt-get install python-setuptools python2.7-dev python-imaging python-qt4
-
-- Install electrum-fair and daemon dependencies in the system: ::
-
-    sudo pip install https://electrum.fair-coin.org/download/Electrum-fair-2.3.3.tar.gz
-    sudo pip install jsonrpclib
-
-- Create an electrum-fair wallet: ::
-
-    electrum-fair create
-
-This gives you seed to keep in safe place, and ask for password to encript the wallet.
-All the electrum-fair data will be created in /home/user/.electrum-fair/ directory.
-Be carefull if you already have an electrum-fair wallet installed with the same user.
-
-- Download from github and copy daemon sample files: ::
-
-    cd [installation dir]
-    git clone https://github.com/FreedomCoop/valuenetwork.git
-    cd valuenetwork
-    cp faircoin/daemon/daemon_service.sample /faircoin/daemon/daemon_service
-    chmod a+x faircoin/daemon/daemon_service
-    cp faircoin/daemon/daemon.py.sample faircoin/daemon/daemon.py
-    chmod a+x faircoin/daemon/daemon.py
-    cp faircoin/daemon/daemon.conf.sample faircoin/daemon/daemon.conf
-
-- Setup daemon: ::
-
-    vim faircoin/daemon/daemon_service #Set paths and user for starting the daemon.
-    vim faircoin/daemon/daemon.conf #Set wallet config
-    sudo ./faircoin/daemon/daemon_service start
-    sudo ./faircoin/daemon/daemon_service status
-
-If daemon runs ok, *daemon_service status* returns *Running*.
-For ocp instances in production, better to move daemon_service to */etc/init.d/* and daemon.conf to */etc/*
 
 - Create virtual enviroment and update pip and setuptools: ::
 
@@ -48,10 +14,9 @@ For ocp instances in production, better to move daemon_service to */etc/init.d/*
     pip install --upgrade pip
     pip install --upgrade setuptools
 
-- Install ocp python dependencies: ::
+- Install NRP python dependencies: ::
 
     pip install -r requirements.txt --trusted-host dist.pinaxproject.com
-    pip install --no-deps easy_thumbnails
     pip install Image
 
 - Create database, load some data, run tests and start with dev server: ::
@@ -94,7 +59,7 @@ Apache2 and wsgi configuration
 
 - Configure virtual host: ::
 
-    sudo vim /etc/apache2/sites-available/ocp-ssl.conf
+    sudo vim /etc/apache2/sites-available/nrp-ssl.conf
 
 This is a sample of the file: ::
 
@@ -127,9 +92,9 @@ This is a sample of the file: ::
         </VirtualHost>
     </IfModule>
 
-- Enable site ocp-ssl: ::
+- Enable site nrp-ssl: ::
 
-    sudo a2ensite ocp-ssl.conf
+    sudo a2ensite nrp-ssl.conf
     sudo service apache2 reload
 
 - Modify wsgi.py: ::
@@ -163,9 +128,10 @@ Include absolute path to database, STATIC_ROOT constant and map settings in loca
     }
     }
     STATIC_ROOT = "/absolute/path/to/installation/static/"
-    MAP_LATITUDE = 48.1293204
-    MAP_LONGITUDE = 4.153537
-    MAP_ZOOM = 4
+    #Milwaukee
+    MAP_LATITUDE = 43.0580569
+    MAP_LONGITUDE = -88.1075141
+    MAP_ZOOM = 11
     DEFAULT_HTTP_PROTOCOL = "https"
 
 - Create the static directory: ::

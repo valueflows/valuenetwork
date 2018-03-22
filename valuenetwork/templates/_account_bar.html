@@ -23,8 +23,9 @@
 	                <li><a href="{% url 'misc' %}"><i class="icon-cog"></i> {% trans "Miscellaneous Pages" %}</a></li>
 				{% endif %}
 
+				{% comment %}
 				<li><a href="{% url 'my_dashboard' %}"><i class="icon-time"></i> {% trans "Coop Work App" %}</a></li>
-
+                {% endcomment %}
                 <li class="divider"></li>
                 <li><a href="{% url "account_logout" %}"><i class="icon-off"></i> {% trans "Log Out" %}</a></li>
             </ul>

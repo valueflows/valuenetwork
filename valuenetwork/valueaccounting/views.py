@@ -26,11 +26,11 @@ from django_comments.models import Comment, CommentFlag
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
-from valuenetwork.valueaccounting.service import ExchangeService
+#from valuenetwork.valueaccounting.service import ExchangeService
 from valuenetwork.valueaccounting.utils import *
-from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
-from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
-from work.utils import *
+#from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
+#from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
+#from work.utils import *
 
 if "pinax.notifications" in settings.INSTALLED_APPS:
     from pinax.notifications import models as notification
@@ -488,7 +488,7 @@ def agent(request, agent_id):
     member_hours_roles = []
     roles_height = 400
 
-    membership_request = agent.membership_request()
+
 
     if agent.is_individual():
         contributions = agent.given_events.filter(is_contribution=True)
@@ -556,7 +556,6 @@ def agent(request, agent_id):
 
     return render(request, "valueaccounting/agent.html", {
         "agent": agent,
-        "membership_request": membership_request,
         "photo_size": (128, 128),
         "change_form": change_form,
         "user_form": user_form,
@@ -1247,7 +1246,8 @@ def event_history(request, resource_id):
         "unit": unit,
         "events": events,
     })
-
+    
+""" not used in LearnDeep
 @login_required
 def send_faircoins(request, resource_id):
     if request.method == "POST":
@@ -1284,6 +1284,7 @@ def validate_faircoin_address(request):
         answer = "Invalid FairCoin address"
     response = simplejson.dumps(answer, ensure_ascii=False)
     return HttpResponse(response, content_type="text/json-comment-filtered")
+"""
 
 def all_contributions(request):
     event_list = EconomicEvent.objects.filter(is_contribution=True)
@@ -3730,7 +3731,7 @@ def work(request):
             if ca_form.is_valid():
                 proj_data = ca_form.cleaned_data
                 proj_id = proj_data["context_agent"]
-                if proj_id.isdigit:
+                if proj_id.isdigit():
                     context_id = proj_id
                     chosen_context_agent = EconomicAgent.objects.get(id=proj_id)
 
@@ -5600,9 +5601,9 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 #if not transfer_type.can_create_resource:
                 res = data["resource"]
@@ -5814,9 +5815,9 @@ def transfer_from_commitment(request, transfer_id):
                 to_agent = data["to_agent"]
 
             rt = data["resource_type"]
-            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                gen_rt = data["ocp_resource_type"]
-                rt = get_rt_from_ocp_rt(gen_rt)
+#            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                gen_rt = data["ocp_resource_type"]
+#                rt = get_rt_from_ocp_rt(gen_rt)
 
             #if not transfer_type.can_create_resource:
             res = data["resource"]
@@ -5943,9 +5944,9 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 description = data["description"]
                 if transfer_type.is_currency:
@@ -6068,9 +6069,9 @@ def change_transfer_events(request, transfer_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 res = data["resource"]
                 res_from = None
@@ -6195,9 +6196,9 @@ def change_transfer_commitments(request, transfer_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
 
                 description = data["description"]

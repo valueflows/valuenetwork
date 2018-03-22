@@ -70,7 +70,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 "pinax_utils.context_processors.settings",
                 "account.context_processors.account",
-                "fobi.context_processors.theme",
             ],
             'debug': DEBUG,
         },
@@ -81,12 +80,6 @@ LOGIN_URL = '/account/login/'
 
 LOGIN_EXEMPT_URLS = [
     r"^$",
-    r'^membership/',
-    r'^membershipthanks/',
-    r'^joinaproject/',
-    r'^join/',
-    r'^joinaproject-thanks/',
-    r'^work/payment-url/',
     r'^account/password/reset/',
     r'^account/password_reset_sent/',
     r'^captcha/image/',
@@ -143,7 +136,6 @@ INSTALLED_APPS = [
     #'debug_toolbar',
     'django_extensions',
     'easy_thumbnails',
-    #'report_builder',
     'pinax.notifications',
     'corsheaders',
     #'django_filters',
@@ -151,62 +143,11 @@ INSTALLED_APPS = [
     'graphene_django',
     'captcha',
 
-    # `django-fobi` core
-    'fobi',
-
-    # `django-fobi` themes
-    'fobi.contrib.themes.bootstrap3', # Bootstrap 3 theme
-    'fobi.contrib.themes.foundation5', # Foundation 5 theme
-    'fobi.contrib.themes.simple', # Simple theme
-
-    # `django-fobi` form elements - fields
-    'fobi.contrib.plugins.form_elements.fields.boolean',
-    'fobi.contrib.plugins.form_elements.fields.checkbox_select_multiple',
-    'fobi.contrib.plugins.form_elements.fields.date',
-    'fobi.contrib.plugins.form_elements.fields.date_drop_down',
-    'fobi.contrib.plugins.form_elements.fields.datetime',
-    'fobi.contrib.plugins.form_elements.fields.decimal',
-    'fobi.contrib.plugins.form_elements.fields.email',
-    'fobi.contrib.plugins.form_elements.fields.file',
-    'fobi.contrib.plugins.form_elements.fields.float',
-    'fobi.contrib.plugins.form_elements.fields.hidden',
-    'fobi.contrib.plugins.form_elements.fields.input',
-    'fobi.contrib.plugins.form_elements.fields.integer',
-    'fobi.contrib.plugins.form_elements.fields.ip_address',
-    'fobi.contrib.plugins.form_elements.fields.null_boolean',
-    'fobi.contrib.plugins.form_elements.fields.password',
-    'fobi.contrib.plugins.form_elements.fields.radio',
-    #'fobi.contrib.plugins.form_elements.fields.regex',
-    'fobi.contrib.plugins.form_elements.fields.select',
-    'fobi.contrib.plugins.form_elements.fields.select_model_object',
-    'fobi.contrib.plugins.form_elements.fields.select_multiple',
-    'fobi.contrib.plugins.form_elements.fields.select_multiple_model_objects',
-    'fobi.contrib.plugins.form_elements.fields.slug',
-    'fobi.contrib.plugins.form_elements.fields.text',
-    'fobi.contrib.plugins.form_elements.fields.textarea',
-    'fobi.contrib.plugins.form_elements.fields.time',
-    'fobi.contrib.plugins.form_elements.fields.url',
-
-    # `django-fobi` form elements - content elements
-    'fobi.contrib.plugins.form_elements.test.dummy',
-    'fobi.contrib.plugins.form_elements.content.content_image',
-    'fobi.contrib.plugins.form_elements.content.content_text',
-    'fobi.contrib.plugins.form_elements.content.content_video',
-
-    # `django-fobo` form handlers
-    'fobi.contrib.plugins.form_handlers.db_store',
-    'fobi.contrib.plugins.form_handlers.http_repost',
-    'fobi.contrib.plugins.form_handlers.mail',
-
-    #'work.fobi_form_callbacks',
-
     # project
     'valuenetwork.valueaccounting.apps.ValueAccountingAppConfig',
     'valuenetwork.equipment',
     'valuenetwork.board',
     'account',
-    'work.apps.WorkAppConfig',
-    'multicurrency',
     'valuenetwork.api',
     #'valuenetwork.api.apps.ApiAppConfig',
     #'valuenetwork.api.schemas.apps.ApiSchemasAppConfig',
@@ -214,11 +155,7 @@ INSTALLED_APPS = [
     #'valuenetwork.api.schemas',
     #'valuenetwork.api.types',
 
-    'faircoin',
 
-    # general
-    'general',
-    'mptt', # This provide Tree management in a 'nested set' style
 ]
 
 REST_FRAMEWORK = {
@@ -301,9 +238,9 @@ ACCOUNT_USE_OPENID = False
 ACCOUNT_REQUIRED_EMAIL = False
 ACCOUNT_EMAIL_VERIFICATION = False
 ACCOUNT_EMAIL_AUTHENTICATION = False
-ACCOUNT_LOGIN_REDIRECT_URL = "/work/home/" #"/accounting/start/"
-WORKER_LOGIN_REDIRECT_URL = "/work/home/"
-WORKER_LOGOUT_REDIRECT_URL = "/work/work-home/"
+ACCOUNT_LOGIN_REDIRECT_URL = "home"
+WORKER_LOGIN_REDIRECT_URL = "home"
+WORKER_LOGOUT_REDIRECT_URL = "home" 
 ACCOUNT_LOGOUT_REDIRECT_URL = "home"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 2
 LOGIN_URL = '/account/login/'

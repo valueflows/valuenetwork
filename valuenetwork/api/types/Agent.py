@@ -68,6 +68,11 @@ class Agent(graphene.Interface):
 
     member_relationships = graphene.List(AgentRelationship)
 
+    events_count = graphene.Int(year=graphene.Int(), month=graphene.Int())
+
+    event_hours_count = graphene.Int(year=graphene.Int(), month=graphene.Int())
+
+    event_people_count = graphene.Int(year=graphene.Int(), month=graphene.Int())
 
     def resolve_primary_location(self, args, *rargs):
         return self.primary_location
@@ -222,6 +227,65 @@ class Agent(graphene.Interface):
                 if assoc.association_type.association_behavior == "member":
                     filtered_assocs.append(assoc)
             return filtered_assocs            
+        return None
+
+    def resolve_events_count(self, args, *rargs):
+        agent = _load_identified_agent(self)
+        if agent:
+            year = args.get('year')
+            month = args.get('month')
+            count_month = False
+            if year and month:
+                count_month = True
+            events = agent.involved_in_events().exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            count = 0
+            for event in events:
+                if count_month:
+                    if event.event_date.year == year and event.event_date.month == month:
+                        count = count + 1
+                else:
+                    count = count + 1
+            return count
+        return None
+
+    def resolve_event_hours_count(self, args, *rargs):
+        agent = _load_identified_agent(self)
+        if agent:
+            year = args.get('year')
+            month = args.get('month')
+            count_month = False
+            if year and month:
+                count_month = True
+            events = agent.involved_in_events().exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            count = 0
+            for event in events:
+                if count_month:
+                    if event.event_date.year == year and event.event_date.month == month:
+                        count = count + event.quantity
+                else:
+                    count = count + event.quantity
+            return count
+        return None
+
+    def resolve_event_people_count(self, args, *rargs):
+        agent = _load_identified_agent(self)
+        if agent:
+            year = args.get('year')
+            month = args.get('month')
+            count_month = False
+            if year and month:
+                count_month = True
+            events = agent.involved_in_events().exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            people = []
+            for event in events:
+                if count_month:
+                    if event.event_date.year == year and event.event_date.month == month:
+                        if event.from_agent not in people:
+                            people.append(event.from_agent)
+                else:
+                    if event.from_agent not in people:
+                        people.append(event.from_agent)
+            return len(people)
         return None
 
     # returns resource classifications that have a recipe, for this and parent agents

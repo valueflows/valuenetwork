@@ -1001,6 +1001,9 @@ query($token: String) {
       image
       note
       type
+      eventsCount(month:12, year:2017)
+      eventHoursCount(month:12, year:2017)
+      eventPeopleCount(month:12, year:2017)
     }
   }
 }

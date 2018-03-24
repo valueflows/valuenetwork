@@ -1087,6 +1087,32 @@ query($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentPlans(month:12, year: 2017) {
+        name
+        planProcesses(month:12, year: 2017) {
+          name
+          committedInputs(action: WORK) {
+            note
+            fulfilledBy(requestDistribution: true) {
+              fulfilledBy {
+                provider {
+                  name
+                }
+                requestDistribution
+                note
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 query($token: String) {
   viewer(token: $token) {
     organizationTypes {

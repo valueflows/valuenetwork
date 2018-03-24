@@ -4430,6 +4430,14 @@ class Order(models.Model):
             events.extend(process.events.exclude(event_type__relationship="out"))
         return events
 
+    def worked_in_month(self,year, month):
+        events = self.all_events()
+        for event in events:
+            if event.event_type.relationship == "work":
+                if event.event_date.year == year and event.event_date.month == month and event.is_contribution == True:
+                    return True
+        return False
+
     def context_agents(self):
         items = self.order_items()
         return [item.context_agent for item in items]
@@ -7027,6 +7035,9 @@ class Process(models.Model):
     @property #ValueFlows
     def scope(self):
         return self.context_agent
+
+    def worked_in_month(self, year, month):
+        return self.events.filter(event_type__relationship='work').filter(event_date__year=year).filter(event_date__month=month).filter(is_contribution=True)
 
     def get_rts_by_action(self, event_type):
         try:

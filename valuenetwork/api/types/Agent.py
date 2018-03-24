@@ -43,7 +43,9 @@ class Agent(graphene.Interface):
                                     is_finished=graphene.Boolean())
 
     agent_plans = graphene.List(lambda: types.Plan,
-                                is_finished=graphene.Boolean())
+                                is_finished=graphene.Boolean(),
+                                year=graphene.Int(),
+                                month=graphene.Int())
 
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                           latest_number_of_days=graphene.Int(),
@@ -132,13 +134,22 @@ class Agent(graphene.Interface):
         agent = _load_identified_agent(self)
         if agent:
             finished = args.get('is_finished', None)
+            year = args.get('year', None)
+            month = args.get('month', None)
             if finished != None:
                 if not finished:
-                    return agent.unfinished_plans()
+                    plans = agent.unfinished_plans()
                 else:
-                    return agent.finished_plans()
+                    plans = agent.finished_plans()
             else:
-                return agent.all_plans()
+                plans = agent.all_plans()
+            if year and month:
+                dated_plans = []
+                for plan in plans:
+                    if plan.worked_in_month(year=year, month=month):
+                        dated_plans.append(plan)
+                plans = dated_plans
+            return plans
         return None
 
     # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events

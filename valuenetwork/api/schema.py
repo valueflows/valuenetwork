@@ -14,6 +14,7 @@ import valuenetwork.api.schemas.Agent
 import valuenetwork.api.schemas.AgentRelationship
 import valuenetwork.api.schemas.AgentRelationshipRole
 import valuenetwork.api.schemas.Organization
+import valuenetwork.api.schemas.OrganizationClassification
 import valuenetwork.api.schemas.Person
 import valuenetwork.api.schemas.EconomicResource
 import valuenetwork.api.schemas.Process
@@ -36,6 +37,7 @@ class ViewerQuery(
     valuenetwork.api.schemas.AgentRelationship.Query,
     valuenetwork.api.schemas.AgentRelationshipRole.Query,
     valuenetwork.api.schemas.Organization.Query,
+    valuenetwork.api.schemas.OrganizationClassification.Query,
     valuenetwork.api.schemas.Person.Query,
     valuenetwork.api.schemas.EconomicResource.Query,
     valuenetwork.api.schemas.Process.Query,
@@ -75,7 +77,10 @@ class Query(graphene.ObjectType):
 
 class Mutation(graphene.ObjectType):
     create_token = valuenetwork.api.schemas.Auth.CreateToken.Field()
+    create_person = valuenetwork.api.schemas.Agent.CreatePerson.Field()
+    create_organization = valuenetwork.api.schemas.Agent.CreateOrganization.Field()
     update_person = valuenetwork.api.schemas.Agent.UpdatePerson.Field()
+    update_organization = valuenetwork.api.schemas.Agent.UpdateOrganization.Field()
     create_process = valuenetwork.api.schemas.Process.CreateProcess.Field()
     update_process = valuenetwork.api.schemas.Process.UpdateProcess.Field()
     delete_process = valuenetwork.api.schemas.Process.DeleteProcess.Field()

@@ -23,7 +23,9 @@ class Plan(DjangoObjectType):
 
     scope = graphene.List(lambda: types.Agent)
 
-    plan_processes = graphene.List(lambda: types.Process)
+    plan_processes = graphene.List(lambda: types.Process,
+                                year=graphene.Int(),
+                                month=graphene.Int())
 
     working_agents = graphene.List(lambda: types.Agent)
 
@@ -41,6 +43,15 @@ class Plan(DjangoObjectType):
         return formatAgentList(self.plan_context_agents())
 
     def resolve_plan_processes(self, args, context, info):
+        year = args.get('year', None)
+        month = args.get('month', None)
+        if year and month:
+            procs = self.all_processes()
+            worked_procs = []
+            for proc in procs:
+                if proc.worked_in_month(year=year,month=month):
+                    worked_procs.append(proc)
+            return worked_procs
         return self.all_processes()
 
     def resolve_working_agents(self, args, context, info):

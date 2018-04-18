@@ -1001,6 +1001,9 @@ query($token: String) {
       image
       note
       type
+      eventsCount(month:12, year:2017)
+      eventHoursCount(month:12, year:2017)
+      eventPeopleCount(month:12, year:2017)
     }
   }
 }
@@ -1080,6 +1083,52 @@ query($token: String) {
       name
       image
       type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    organizationClassification(id:8) {
+      id
+      name
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allOrganizationClassifications {
+      id
+      name
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentPlans(month:12, year: 2017) {
+        name
+        planProcesses(month:12, year: 2017) {
+          name
+          committedInputs(action: WORK) {
+            note
+            fulfilledBy(requestDistribution: true) {
+              fulfilledBy {
+                provider {
+                  name
+                }
+                requestDistribution
+                note
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -3132,6 +3181,39 @@ mutation ($token: String!) {
       primaryLocation {
         name
       }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createOrganization(token: $token, type: "Organization", name: "test org 2") {
+    organization {
+      id
+      name
+      note
+      image
+      type
+      primaryLocation {
+        name
+      }
+      primaryPhone
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createPerson(token: $token, name: "anne person", note:"test", type: "Individual", primaryLocationId: 24, 
+    image: "https://testocp.freedomcoop.eu/site_media/media/photos/what_is_it.JPG", primaryPhone: "333-444-5555" ) {
+    person {
+      id
+      name
+      note
+      image
+      type
+      primaryLocation {
+        name
+      }
+      primaryPhone
     }
   }
 }

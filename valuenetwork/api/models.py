@@ -13,6 +13,7 @@ def formatAgent(agent):
                 name = agent.name,
                 note = agent.description,
                 primary_location = agent.primary_location,
+                primary_phone = agent.primary_phone,
                 image = agent.image,
                 email = agent.email)
         else:
@@ -23,6 +24,7 @@ def formatAgent(agent):
                 image = agent.image,
                 is_context = agent.is_context,
                 primary_location = agent.primary_location,
+                primary_phone = agent.primary_phone,
                 type = agent.agent_type,
                 email = agent.email)
 
@@ -55,6 +57,7 @@ class Organization(models.Model):
         related_name='orgs_at_location',
         blank=True, null=True,
         on_delete=models.DO_NOTHING)
+    primary_phone = models.CharField(max_length=32, blank=True, null=True)
     email = models.EmailField(max_length=96, blank=True, null=True)
 
     class Meta:
@@ -72,6 +75,7 @@ class Person(models.Model):
         related_name='people_at_location',
         blank=True, null=True,
         on_delete=models.DO_NOTHING)
+    primary_phone = models.CharField(max_length=32, blank=True, null=True)
     email = models.EmailField(max_length=96, blank=True, null=True)
 
     class Meta:

@@ -12,7 +12,7 @@ from valuenetwork.api.models import formatAgent, QuantityValue as QuantityValueP
 
 class ExchangeAgreement(DjangoObjectType):
     planned_start = graphene.String(source='planned_start')
-    scope = graphene.Field(lambda: types.Agent)
+    scope = graphene.Field(lambda: types.Agent) #not needed?
     note = graphene.String(source='note')
 
     class Meta:
@@ -38,9 +38,9 @@ class ExchangeAgreement(DjangoObjectType):
 
 
 class Transfer(DjangoObjectType):
-    exchange_agreement = graphene.Field(lambda: types.ExchangeAgreement)
+    exchange_agreement = graphene.Field(lambda: types.ExchangeAgreement) #under
     planned_start = graphene.String(source='planned_start')
-    scope = graphene.Field(lambda: types.Agent)
+    scope = graphene.Field(lambda: types.Agent) #not needed?
     note = graphene.String(source='note')
 
     class Meta:

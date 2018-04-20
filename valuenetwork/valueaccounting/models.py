@@ -315,6 +315,7 @@ class Location(models.Model):
 
 class AgentTypeManager(models.Manager):
 
+    #note the following context agent methods are not valid, context agent flag is on agent now
     def context_agent_types(self):
         return AgentType.objects.filter(is_context=True)
 
@@ -533,6 +534,10 @@ class EconomicAgent(models.Model):
     @property #ValueFlows
     def note(self):
         return self.description
+
+    @property #ValueFlows
+    def primary_phone(self):
+        return self.phone_primary
 
     @property #ValueFlows
     def type(self):

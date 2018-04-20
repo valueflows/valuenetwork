@@ -7,7 +7,7 @@
 #
 
 import graphene
-from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser, Location
+from valuenetwork.valueaccounting.models import EconomicAgent, AgentUser, Location, AgentType
 from valuenetwork.api.models import formatAgent, formatAgentList, Person, Organization
 from valuenetwork.api.types.Agent import Agent, Person, Organization
 from six import with_metaclass
@@ -50,80 +50,124 @@ class Query(graphene.AbstractType):
         user_agent = AgentUser.objects.filter(user=self.user).first().agent
         return user_agent.is_authorized(context_agent_id=context_agent_id)
 
-'''
-class CreateAgent(AuthedMutation):
+
+class CreateOrganization(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
-        action = graphene.String(required=True)
+        name = graphene.String(required=True)
+        image = graphene.String(required=False)
+        primary_location_id = graphene.Int(required=False)
+        primary_phone = graphene.String(required=False)
+        email = graphene.String(required=False)
         note = graphene.String(required=False)
+        type = graphene.String(required=True)
 
-
-    agent = graphene.Field(lambda: Agent)
+    organization = graphene.Field(lambda: Organization)
 
     @classmethod
     def mutate(cls, root, args, context, info):
-        action = args.get('action')
-        input_of_id = args.get('input_of_id')
-        output_of_id = args.get('output_of_id')
-        provider_id = args.get('provider_id')
-        receiver_id = args.get('receiver_id')
-        scope_id = args.get('scope_id')
-        committed_resource_classified_as_id = args.get('committed_resource_classified_as_id')
-        involves_id = args.get('involves_id')
-        committed_numeric_value = args.get('committed_numeric_value')
-        committed_unit_id = args.get('committed_unit_id')
-        planned_start = args.get('planned_start')
-        due = args.get('due')
+        #import pdb; pdb.set_trace()
+        name = args.get('name')
+        image = args.get('image')
         note = args.get('note')
-        plan_id = args.get('plan_id')
-        is_plan_deliverable = args.get('is_plan_deliverable')
-        #for_plan_deliverable_id = args.get('for_plan_deliverable_id')
+        primary_location_id = args.get('primary_location_id')
+        primary_phone = args.get('primary_phone')
+        email = args.get('email')
+        type = args.get('type')
 
-        if output_of_id or input_of_id:
-            if not plan_id:
-                raise ValidationError("Process related commitments must be part of a plan.")
-        event_type = EventType.objects.convert_action_to_event_type(action)
         if not note:
             note = ""
-        due = datetime.datetime.strptime(due, '%Y-%m-%d').date()
-        if planned_start:
-            planned_start = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
-        if scope_id:
-            scope = EconomicAgent.objects.get(pk=scope_id)
+        if not image:
+            image = ""
+        if primary_location_id:
+            location = Location.objects.get(pk=primary_location_id)
         else:
-            scope = None
-        if provider_id:
-            provider = EconomicAgent.objects.get(pk=provider_id)
-        else:
-            provider = None
+            location = None
+        get_type = None
+        if type:
+            get_type = AgentType.objects.get(name=type)
+        if not type:
+            get_types = AgentType.objects.get(party_type="org")
+            if get_types:
+                get_type = get_types[0]
 
-        agent = CommitmentProxy(
-            event_type = event_type,
-            process = process,
-            from_agent = provider,
-            to_agent = receiver,
-            resource_type = resource_classified_as,
-            resource = committed_resource,
-            quantity = Decimal(committed_numeric_value),
-            unit_of_quantity = committed_unit,
-            start_date = planned_start,
-            due_date = due,
-            description=note,
-            context_agent=scope,
-            order=deliverable_for,
-            independent_demand=plan,
-            order_item=None, #order_item,
+        agent = EconomicAgent(
+            name = name,
+            nick = name,
+            agent_type = get_type,
+            photo_url = image,
+            description = note,
+            primary_location = location,
+            phone_primary = primary_phone,
+            email = email,
             created_by=context.user,
         )
 
         user_agent = AgentUser.objects.get(user=context.user).agent
         is_authorized = user_agent.is_authorized(object_to_mutate=agent)
         if is_authorized:
-            agent.save_api()
+            agent.save()
         else:
             raise PermissionDenied('User not authorized to perform this action.')
 
-        return CreateAgent(agent=agent)
-'''
+        return CreateOrganization(organization=formatAgent(agent))
+
+class CreatePerson(AuthedMutation):
+    class Input(with_metaclass(AuthedInputMeta)):
+        name = graphene.String(required=True)
+        image = graphene.String(required=False)
+        primary_location_id = graphene.Int(required=False)
+        primary_phone = graphene.String(required=False)
+        email = graphene.String(required=False)
+        note = graphene.String(required=False)
+        type = graphene.String(required=False)
+
+    person = graphene.Field(lambda: Person)
+
+    @classmethod
+    def mutate(cls, root, args, context, info):
+        #import pdb; pdb.set_trace()
+        name = args.get('name')
+        image = args.get('image')
+        note = args.get('note')
+        primary_location_id = args.get('primary_location_id')
+        primary_phone = args.get('primary_phone')
+        email = args.get('email')
+        type = args.get('type')
+
+        if not note:
+            note = ""
+        if not image:
+            image = ""
+        if primary_location_id:
+            location = Location.objects.get(pk=primary_location_id)
+        else:
+            location = None
+        if type:
+            get_type = AgentType.objects.get(name=type)
+        if not type:
+            get_types = AgentType.objects.filter(party_type="individual")
+            get_type = get_types[0]
+
+        agent = EconomicAgent(
+            name = name,
+            nick = name,
+            agent_type = get_type,
+            photo_url = image,
+            description = note,
+            primary_location = location,
+            phone_primary = primary_phone,
+            email = email,
+            created_by=context.user,
+        )
+
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        is_authorized = user_agent.is_authorized(object_to_mutate=agent)
+        if is_authorized:
+            agent.save()
+        else:
+            raise PermissionDenied('User not authorized to perform this action.')
+
+        return CreatePerson(person=formatAgent(agent))
 
 class UpdatePerson(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):

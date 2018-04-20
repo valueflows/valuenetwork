@@ -32,6 +32,7 @@ class Agent(graphene.Interface):
     image = graphene.String(source='image')
     note = graphene.String(source='note')
     primary_location = graphene.Field(lambda: types.Place)
+    primary_phone = graphene.String(source='primary_phone')
     email = graphene.String(source='email')
 
     owned_economic_resources = graphene.List(lambda: types.EconomicResource,

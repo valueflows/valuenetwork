@@ -1087,6 +1087,26 @@ query($token: String) {
   }
 }
 
+query($token: String) {
+  viewer(token: $token) {
+    organizationClassification(id:8) {
+      id
+      name
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allOrganizationClassifications {
+      id
+      name
+      note
+    }
+  }
+}
+
 query ($token: String) {
   viewer(token: $token) {
     agent(id: 39) {

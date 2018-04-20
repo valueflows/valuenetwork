@@ -374,6 +374,10 @@ class AgentType(models.Model):
             if verbosity > 1:
                 print "Created %s AgentType" % name
 
+    @property #ValueFlows
+    def note(self):
+        return self.description
+
 
 class AgentAccount(object):
     def __init__(self, agent, event_type, count, quantity, events):

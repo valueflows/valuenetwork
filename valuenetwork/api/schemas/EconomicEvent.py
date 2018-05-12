@@ -16,14 +16,18 @@ from django.core.exceptions import PermissionDenied, ValidationError
 
 class Query(graphene.AbstractType):
 
-    # define input query params
-
     economic_event = graphene.Field(EconomicEvent,
                                     id=graphene.Int())
 
     all_economic_events = graphene.List(EconomicEvent)
-
-    # resolvers
+    
+    filtered_economic_events = graphene.List(EconomicEvent,
+                                             provider_id=graphene.Int(),
+                                             receiver_id=graphene.Int(),
+                                             resource_classified_as_id=graphene.Int(),
+                                             action=graphene.String(),
+                                             start_date=graphene.String(),
+                                             end_date=graphene.String())
 
     def resolve_economic_event(self, args, *rargs):
         id = args.get('id')
@@ -35,6 +39,28 @@ class Query(graphene.AbstractType):
 
     def resolve_all_economic_events(self, args, context, info):
         return EconomicEventProxy.objects.all()
+
+    def resolve_filtered_economic_events(self, args, context, info):
+        provider_id = args.get('provider_id')
+        receiver_id = args.get('receiver_id')
+        resource_classified_as_id = args.get('resource_classified_as_id')
+        action = args.get('action')
+        start_date = args.get('start_date')
+        end_date = args.get('end_date')
+        events = EconomicEventProxy.objects.all()
+        if provider_id:
+            events = EconomicEventProxy.objects.filter(from_agent=EconomicAgent.objects.get(pk=provider_id))
+        if receiver_id:
+            events = events.filter(to_agent=EconomicAgent.objects.get(pk=receiver_id))
+        if action:
+            events = events.filter(event_type=EventType.objects.convert_action_to_event_type(action))
+        if resource_classified_as_id:
+            events = events.filter(resource_type=EconomicResourceType.objects.get(pk=resource_classified_as_id))
+        if start_date:
+            events = events.filter(event_date__gte=start_date)
+        if end_date:
+            events = events.filter(event_date__lte=end_date)
+        return events
 
 
 class CreateEconomicEvent(AuthedMutation):

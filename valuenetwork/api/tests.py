@@ -2278,6 +2278,35 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    filteredEconomicEvents (action: "give", resourceClassifiedAsId: 28, startDate: "2017-01-01", endDate: "2017-04-27", receiverId: 56, providerId: 26) {
+      id
+      action
+      start
+      affects {
+        resourceClassifiedAs {
+          id
+          name
+          category
+        }
+      }
+      provider {
+        id
+        name
+      }
+      receiver {
+        id
+        name
+      }
+      scope {
+        id
+        name
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     agent(id: 6) {
       name
       agentEconomicEvents(latestNumberOfDays: 30, requestDistribution: true) {

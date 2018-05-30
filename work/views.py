@@ -6706,7 +6706,8 @@ def plan_work(request, rand=0):
                 start_date=start_date,
                 process_pattern=selected_pattern,
                 created_by=request.user,
-                context_agent=selected_context_agent
+                context_agent=selected_context_agent,
+                plan=demand,
             )
             process.save()
 

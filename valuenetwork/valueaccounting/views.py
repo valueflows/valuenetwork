@@ -9495,6 +9495,7 @@ def explode_dependent_demands(commitment, user):
                 context_agent=pt.context_agent,
                 url=pt.url,
                 end_date=commitment.due_date,
+                plan=demand,
                 start_date=start_date,
                 created_by=user,
             )
@@ -9706,7 +9707,8 @@ def process_selections(request, rand=0):
                 start_date=start_date,
                 process_pattern=selected_pattern,
                 created_by=request.user,
-                context_agent=selected_context_agent
+                context_agent=selected_context_agent,
+                plan=demand,
             )
             process.save()
 

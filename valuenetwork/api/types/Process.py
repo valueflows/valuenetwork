@@ -77,7 +77,7 @@ class Process(DjangoObjectType):
         return formatAgent(self.scope)
 
     def resolve_process_plan(self, args, *rargs):
-        return self.independent_demand()
+        return self.plan  #self.independent_demand()
 
     def resolve_process_classified_as(self, args, *rargs):
         return self.process_type

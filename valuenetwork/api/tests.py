@@ -220,6 +220,12 @@ class APITest(TestCase):
             order_type="rand",
             )
         order1.save()
+        proc1.plan = order1
+        proc1.save()
+        proc2.plan = order1
+        proc2.save()
+        proc3.plan = order1
+        proc3.save()
         et_cite = EventType.objects.get(name="Citation")
         et_produce = EventType.objects.get(name="Resource Production")
         et_todo = EventType.objects.get(name="Todo")
@@ -709,6 +715,9 @@ class APITest(TestCase):
                   viewer(token: "''' + token + '''") {
                     process(id: 1) {
                         name
+                        processPlan {
+                          name
+                        }
                         processClassifiedAs {
                             name
                             scope {
@@ -2792,22 +2801,29 @@ query ($token: String) {
 
 mutation ($token: String!) {
   createProcess(token: $token, name: "Make some fudge", plannedStart: "2017-10-01", 
-    plannedDuration: 9, scopeId: 39, note: "testing") {
+    plannedDuration: 9, scopeId: 39, note: "testing", planId: 62) {
     process {
       id
       name
       plannedStart
+      processPlan {
+        name
+      }
     }
   }
 }
 
 mutation ($token: String!) {
   updateProcess(token: $token, id: 50, 
-    plannedDuration: 10, isFinished: true) {
+    plannedDuration: 10, isFinished: true, planId: 62) {
     process {
       name
       isFinished
       plannedDuration
+      processPlan {
+        id
+        name
+      }
     }
   }
 }

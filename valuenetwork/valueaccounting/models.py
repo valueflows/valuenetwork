@@ -4283,6 +4283,7 @@ class Order(models.Model):
         ct.generate_producing_process(user, [], inheritance=None, explode=True)
         return ct
 
+    #TODO: check this and see if new order.plan will help
     def all_processes(self):
         # this method includes only processes for this order
         deliverables = self.commitments.filter(event_type__relationship="out")
@@ -4308,6 +4309,7 @@ class Order(models.Model):
         #this code might need more testing for orders with more than one end process
         return ordered_processes
 
+    #TODO: check this and see if new order.plan will help
     def unordered_processes(self):
         #this cd be cts = order.dependent_commitments.all()
         # or self.all_dependent_commitments()

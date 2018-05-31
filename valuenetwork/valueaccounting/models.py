@@ -4283,19 +4283,20 @@ class Order(models.Model):
         ct.generate_producing_process(user, [], inheritance=None, explode=True)
         return ct
 
-    #TODO: check this and see if new order.plan will help
     def all_processes(self):
         # this method includes only processes for this order
-        deliverables = self.commitments.filter(event_type__relationship="out")
-        if deliverables:
-            processes = [d.process for d in deliverables if d.process]
-        else:
-            processes = []
-            commitments = Commitment.objects.filter(independent_demand=self)
-            for c in commitments:
-                if c.process:
-                    processes.append(c.process)
-            processes = list(set(processes))
+        processes = Process.objects.filter(plan=self)
+        if not processes:
+            deliverables = self.commitments.filter(event_type__relationship="out")
+            if deliverables:
+                processes = [d.process for d in deliverables if d.process]
+            else:
+                processes = []
+                commitments = Commitment.objects.filter(independent_demand=self)
+                for c in commitments:
+                    if c.process:
+                        processes.append(c.process)
+                processes = list(set(processes))
         ends = []
         for proc in processes:
             if not proc.next_processes_for_order(self):
@@ -4309,15 +4310,16 @@ class Order(models.Model):
         #this code might need more testing for orders with more than one end process
         return ordered_processes
 
-    #TODO: check this and see if new order.plan will help
     def unordered_processes(self):
         #this cd be cts = order.dependent_commitments.all()
         # or self.all_dependent_commitments()
-        cts = Commitment.objects.filter(independent_demand=self)
-        processes = set()
-        for ct in cts:
-            if ct.process:
-                processes.add(ct.process)
+        processes = Process.objects.filter(plan=self)
+        if not processes:
+            cts = Commitment.objects.filter(independent_demand=self)
+            processes = set()
+            for ct in cts:
+                if ct.process:
+                    processes.add(ct.process)
         return processes
 
     def all_dependent_commitments(self):

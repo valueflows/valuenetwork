@@ -85,5 +85,5 @@ class Query(graphene.AbstractType):
         return FacetProxy.objects.all()
 
     def resolve_all_recipes(self, args, context, info):
-        return EconomicResourceType.objects.
+        return EconomicResourceType.objects.resource_types_with_recipes()
 

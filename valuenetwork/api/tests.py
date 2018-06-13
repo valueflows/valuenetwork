@@ -1081,6 +1081,9 @@ query($token: String) {
       note
       type
       __typename
+      agentRecipes {
+        name
+      }
     }
   }
 }
@@ -1668,6 +1671,19 @@ query($token: String) {
       classificationFacetValues {
         name
       }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allRecipes {
+      id
+      name
+      image
+      category
+      processCategory
+      note
     }
   }
 }

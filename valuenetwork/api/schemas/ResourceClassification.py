@@ -25,6 +25,8 @@ class Query(graphene.AbstractType):
     resource_classifications_by_action = graphene.List(ResourceClassification,
                                                       action=Action())
 
+    all_recipes = graphene.List(ResourceClassification)
+
     #returns resource classifications filtered by facet values in a string of comma delimited name:value, 
     #with some resource quantity > 0, for use in inventory filtering
     resource_classifications_by_facet_values = graphene.List(ResourceClassification,
@@ -81,3 +83,7 @@ class Query(graphene.AbstractType):
 
     def resolve_all_facets(self, args, context, info):
         return FacetProxy.objects.all()
+
+    def resolve_all_recipes(self, args, context, info):
+        return EconomicResourceType.objects.
+

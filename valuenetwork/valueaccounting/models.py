@@ -2216,6 +2216,27 @@ class ResourceClass(models.Model):
 
 class EconomicResourceTypeManager(models.Manager):
 
+    def resource_types_with_recipes(self, context_agent=None):
+        resource_types = []
+        if context_agent:
+            candidate_resource_types = context_agent.get_resource_types_with_recipe()
+            for rt in candidate_resource_types:
+                if rt.recipe_needs_starting_resource():
+                    rt.onhand_resources = []
+                    onhand = rt.onhand_for_resource_driven_recipe()
+                    if onhand:
+                        resource_types.append(rt)
+                        for oh in onhand:
+                            rt.onhand_resources.append(oh)
+                else:
+                    resource_types.append(rt)
+        else:
+            rts = EconomicResourceType.objects.all()
+            for rt in rts:
+                if rt.process_types.filter(event_type__relationship='out'):
+                    resource_types.append(rt)
+        return resource_types
+
     def membership_share(self):
         try:
             share = EconomicResourceType.objects.get(name="Membership Share")

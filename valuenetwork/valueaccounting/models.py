@@ -2800,6 +2800,43 @@ class EconomicResourceType(models.Model):
             return True
         return False
 
+    def generate_mfg_work_order(self, order_name, due_date, created_by):
+        #made from code in view plan_from_recipe but simplified to minimum requirement
+        today = datetime.date.today()
+        due = datetime.datetime.strptime(due_date, '%Y-%m-%d').date()
+        demand = Order(
+            order_type="rand",
+            order_date=today,
+            due_date=due,
+            name=order_name,
+            created_by=created_by)
+        demand.save()
+
+        ptrt, inheritance = self.main_producing_process_type_relationship()
+        et = ptrt.event_type
+        if et:
+            commitment = demand.add_commitment(
+                resource_type=self,
+                #Todo: apply selected_context_agent here? Only if inheritance?
+                context_agent=ptrt.process_type.context_agent,
+                quantity=ptrt.quantity,
+                event_type=et,
+                unit=self.unit,
+                description=ptrt.description or "",
+                stage=ptrt.stage,
+                state=ptrt.state,
+                due=demand.due_date,
+                )
+            commitment.created_by=created_by
+            commitment.save()
+
+            process = commitment.generate_producing_process(created_by, [], inheritance=inheritance, explode=True)
+
+        #TODO: add notifications here if wanted, see view
+
+        return demand
+
+
     def generate_staged_work_order(self, order_name, start_date, user):
         #pr changed
         pts, inheritance = self.staged_process_type_sequence()
@@ -10555,6 +10592,7 @@ class Commitment(models.Model):
                     url=pt.url,
                     end_date=self.due_date,
                     start_date=start_date,
+                    plan=self.independent_demand,
                     created_by=user,
                 )
                 process.save()

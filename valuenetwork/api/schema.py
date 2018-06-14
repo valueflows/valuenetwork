@@ -91,6 +91,7 @@ class Mutation(graphene.ObjectType):
     update_economic_event = valuenetwork.api.schemas.EconomicEvent.UpdateEconomicEvent.Field()
     delete_economic_event = valuenetwork.api.schemas.EconomicEvent.DeleteEconomicEvent.Field()
     create_plan = valuenetwork.api.schemas.Plan.CreatePlan.Field()
+    create_plan_from_recipe = valuenetwork.api.schemas.Plan.CreatePlanFromRecipe.Field()
     update_plan = valuenetwork.api.schemas.Plan.UpdatePlan.Field()
     delete_plan = valuenetwork.api.schemas.Plan.DeletePlan.Field()
     update_economic_resource = valuenetwork.api.schemas.EconomicResource.UpdateEconomicResource.Field()

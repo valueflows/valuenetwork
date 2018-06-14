@@ -4,7 +4,7 @@
 
 import graphene
 import datetime
-from valuenetwork.valueaccounting.models import Order, EconomicAgent, AgentUser
+from valuenetwork.valueaccounting.models import Order, EconomicAgent, AgentUser, EconomicResourceType
 from valuenetwork.api.types.Plan import Plan
 from six import with_metaclass
 from django.contrib.auth.models import User
@@ -64,6 +64,34 @@ class CreatePlan(AuthedMutation):
         is_authorized = user_agent.is_authorized(object_to_mutate=plan)
         if is_authorized:
             plan.save()
+        else:
+            raise PermissionDenied('User not authorized to perform this action.')
+
+        return CreatePlan(plan=plan)
+
+
+class CreatePlanFromRecipe(AuthedMutation):
+    class Input(with_metaclass(AuthedInputMeta)):
+        produces_resource_classification_id = graphene.Int(required=True)
+        due = graphene.String(required=True)
+        name = graphene.String(required=True)
+        scope_id = graphene.Int(required=True)
+
+    plan = graphene.Field(lambda: Plan)
+
+    @classmethod
+    def mutate(cls, root, args, context, info):
+        produces_resource_classification_id = args.get('produces_resource_classification_id')
+        due = args.get('due')
+        name = args.get('name')
+        scope_id = args.get('scope_id')
+
+        rc = EconomicResourceType.objects.get(pk=produces_resource_classification_id)
+
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        is_authorized = user_agent.is_authorized(context_agent_id=scope_id)
+        if is_authorized:
+            plan = rc.generate_mfg_work_order(order_name=name, due_date=due, created_by=context.user)
         else:
             raise PermissionDenied('User not authorized to perform this action.')
 

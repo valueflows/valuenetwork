@@ -1,0 +1,25 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block body %}
+  <style type="text/css">
+    .errorlist { color: #f00; }
+    .helptext {
+      font-style: italic;
+      padding-bottom: 10px;
+      display: block;
+      font-size: 0.9em;
+    }
+  </style>
+
+  <h2>Sign up</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign up</button>
+  </form>
+{% endblock %}

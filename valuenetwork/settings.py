@@ -80,6 +80,7 @@ LOGIN_URL = '/account/login/'
 
 LOGIN_EXEMPT_URLS = [
     r"^$",
+    r'^signup/',
     r'^account/password/reset/',
     r'^account/password_reset_sent/',
     r'^captcha/image/',

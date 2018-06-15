@@ -6,12 +6,14 @@ from operator import itemgetter, attrgetter, methodcaller
 
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseServerError, Http404, HttpResponseNotFound, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.core import serializers
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import validators
@@ -22,12 +24,15 @@ from collections import OrderedDict
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django_comments.models import Comment, CommentFlag
 
 from valuenetwork.valueaccounting.models import *
 from valuenetwork.valueaccounting.forms import *
 #from valuenetwork.valueaccounting.service import ExchangeService
 from valuenetwork.valueaccounting.utils import *
+from valuenetwork.tokens import signup_confirmation_token
 #from work.models import MembershipRequest, SkillSuggestion, Ocp_Artwork_Type
 #from work.forms import ContextTransferForm, ContextTransferCommitmentForm, ResourceRoleContextAgentForm
 #from work.utils import *
@@ -127,6 +132,52 @@ def create_agent(request):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/agent', agent.id))
     return HttpResponseRedirect("/accounting/agents/")
+
+class UserSignupForm(UserCreationForm):
+    email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2', )
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            subject = 'Activate Your OCP Account'
+            message = render_to_string('valueaccounting/signup/confirm_email.html', {
+                'user': user,
+                'domain': request.get_host(),
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': signup_confirmation_token.make_token(user),
+            })
+            user.email_user(subject, message)
+            return redirect('signup_confirm')
+    else:
+        if request.user.is_authenticated():
+            return redirect('home')
+        form = UserSignupForm()
+    return render(request, 'valueaccounting/signup/form.html', {'form': form})
+
+def signup_confirm(request):
+    return render(request, 'valueaccounting/signup/confirm.html')
+
+def signup_complete(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and signup_confirmation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return HttpResponseRedirect(settings.LOGIN_URL + "?info=signup_complete")
+    else:
+        return render(request, 'valueaccounting/signup/invalid.html')
 
 @login_required
 def create_user(request, agent_id):

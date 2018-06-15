@@ -25,3 +25,5 @@ MAP_LONGITUDE = 23.8102717
 MAP_ZOOM = 6
 
 #and you can override any other settings in settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

@@ -563,7 +563,16 @@ class EconomicAgent(models.Model):
         if context_agent_id:
             context_agent = EconomicAgent.objects.get(pk=context_agent_id)
         elif object_to_mutate:
-            context_agent = object_to_mutate.context_agent
+            if type(object_to_mutate) is Order: #orders do not have a context agent
+                if object_to_mutate.pk: #update or delete
+                    if object_to_mutate.created_by == user:
+                        return True
+                    else:
+                        return False
+                else: #create
+                    return True
+            else:
+                context_agent = object_to_mutate.context_agent
         else:
             return False
         if context_agent not in self.is_member_of():

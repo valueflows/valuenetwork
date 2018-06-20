@@ -4107,6 +4107,11 @@ class Order(models.Model):
         else:
             raise ValidationError("Cannot delete a plan with economic events recorded.")
 
+    def is_deletable(self):
+        if self.all_events():
+            return False
+        return True
+
     #TODO this is a start at something, check if it is still useful
     #assumes the order itself is already saved (adapted from view plan_from_recipe)
     #def create_order_details_from_recipe_api(self, resource_type_id=None, rt_list_id=None, resource_id=None): 

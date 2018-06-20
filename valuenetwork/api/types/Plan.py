@@ -39,6 +39,8 @@ class Plan(DjangoObjectType):
 
     kanban_state = graphene.String()
 
+    is_deletable = graphene.Boolean()
+
     def resolve_scope(self, args, *rargs):
         return formatAgentList(self.plan_context_agents())
 
@@ -72,3 +74,6 @@ class Plan(DjangoObjectType):
     # returns "planned", "doing", "done"
     def resolve_kanban_state(self, args, *rargs):
         return self.kanban_state()
+
+    def resolve_is_deletable(self, args, *rargs):
+        return self.is_deletable()

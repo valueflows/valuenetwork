@@ -2179,6 +2179,7 @@ query ($token: String) {
       planProcesses {
         name
       }
+      isDeletable
     }
   }
 }

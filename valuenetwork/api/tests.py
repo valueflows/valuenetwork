@@ -925,7 +925,6 @@ class APITest(TestCase):
         call_result = result.data['createToken']
         token = call_result['token']
         test_agent = EconomicAgent.objects.get(name="testUser11222")
-        import pdb; pdb.set_trace()
 
         result1 = schema.execute('''
                 mutation {

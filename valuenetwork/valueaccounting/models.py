@@ -944,6 +944,9 @@ class EconomicAgent(models.Model):
             if proc.independent_demand():
                 if proc.independent_demand() not in plans:
                     plans.append(proc.independent_demand())
+            elif proc.plan:
+                if proc.plan not in plans:
+                    plans.append(proc.plan)
         plans.sort(lambda x, y: cmp(x.due_date, y.due_date))
         return plans
 

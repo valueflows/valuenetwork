@@ -7101,6 +7101,10 @@ class Process(models.Model):
     def planned_start(self):
         return self.start_date
 
+    @property #for api, will propose for ValueFlows
+    def planned_finish(self):
+        return self.end_date
+
     @property #ValueFlows
     def planned_duration(self):
         return self.end_date - self.start_date

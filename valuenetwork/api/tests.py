@@ -928,7 +928,7 @@ class APITest(TestCase):
 
         result1 = schema.execute('''
                 mutation {
-                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2, planId: 1) {
+                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedFinish: "2017-07-14", scopeId: 2, planId: 1) {
                     process {
                         name
                         scope {
@@ -936,6 +936,7 @@ class APITest(TestCase):
                         }
                         isFinished
                         plannedStart
+                        plannedFinish
                         plannedDuration
                     }
                   }
@@ -945,11 +946,12 @@ class APITest(TestCase):
         self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
         self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
         self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result1.data['createProcess']['process']['plannedFinish'], "2017-07-14")
         self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
 
         result2 = schema.execute('''
                     mutation {
-                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
+                        updateProcess(token: "''' + token + '''", id: 4, plannedFinish: "2017-07-15", isFinished: true) {
                             process {
                                 name
                                 scope {
@@ -957,6 +959,7 @@ class APITest(TestCase):
                                 }
                                 isFinished
                                 plannedStart
+                                plannedFinish
                                 plannedDuration
                             }
                         }
@@ -967,7 +970,7 @@ class APITest(TestCase):
         self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
         self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
         self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
-        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "8 days, 0:00:00")
 
         result3 = schema.execute('''
                     mutation {
@@ -2112,6 +2115,7 @@ query($token: String) {
         id
         name
         plannedStart
+        plannedFinish
         plannedDuration
         isFinished
         note
@@ -2880,12 +2884,13 @@ query ($token: String) {
 ######################### SAMPLE MUTATIONS ###########################
 
 mutation ($token: String!) {
-  createProcess(token: $token, name: "Make some fudge", plannedStart: "2017-10-01", 
-    plannedDuration: 9, scopeId: 39, note: "testing", planId: 62) {
+  createProcess(token: $token, name: "Test planned finish", plannedStart: "2017-10-01", 
+    plannedFinish: "2017-10-10", scopeId: 39, note: "testing", planId: 62) {
     process {
       id
       name
       plannedStart
+      plannedFinish
       processPlan {
         name
       }
@@ -2894,11 +2899,12 @@ mutation ($token: String!) {
 }
 
 mutation ($token: String!) {
-  updateProcess(token: $token, id: 50, 
-    plannedDuration: 10, isFinished: true, planId: 62) {
+  updateProcess(token: $token, id: 85, 
+    plannedFinish: "2017-10-12", isFinished: true, planId: 62) {
     process {
       name
       isFinished
+      plannedFinish
       plannedDuration
       processPlan {
         id

@@ -1725,18 +1725,20 @@ query($token: String) {
   }
 }
 
-query($token: String) {
+query ($token: String) {
   viewer(token: $token) {
     allResourceClassifications {
       id
       name
+      unit {
+        id
+        name
+        symbol
+      }
       image
       category
       processCategory
       note
-      classificationFacetValues {
-        name
-      }
     }
   }
 }

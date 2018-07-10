@@ -54,7 +54,7 @@ class ResourceClassification(DjangoObjectType):
 
     class Meta:
         model = EconomicResourceType
-        only_fields = ('id', 'name')
+        only_fields = ('id', 'name', 'unit')
 
     classification_resources = graphene.List(lambda: EconomicResource)
 

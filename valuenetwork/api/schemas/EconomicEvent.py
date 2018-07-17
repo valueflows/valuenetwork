@@ -178,6 +178,7 @@ class CreateEconomicEvent(AuthedMutation):
             url = ""
         if not request_distribution:
             request_distribution = False
+        current_location = None
         if resource_current_location_id:
             current_location = Location.objects.get(pk=resource_current_location_id)
         if not affects:

@@ -61,7 +61,7 @@ class Agent(graphene.Interface):
     agent_roles = graphene.List(AgentRelationshipRole)
 
     agent_recipes = graphene.List(lambda: types.ResourceClassification)
-    
+
     #agent_recipe_bundles = graphene.List(ResourceClassification)
 
     faircoin_address = graphene.String()

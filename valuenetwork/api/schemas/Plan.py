@@ -75,7 +75,6 @@ class CreatePlanFromRecipe(AuthedMutation):
         produces_resource_classification_id = graphene.Int(required=True)
         due = graphene.String(required=True)
         name = graphene.String(required=True)
-        scope_id = graphene.Int(required=True)
 
     plan = graphene.Field(lambda: Plan)
 
@@ -84,12 +83,12 @@ class CreatePlanFromRecipe(AuthedMutation):
         produces_resource_classification_id = args.get('produces_resource_classification_id')
         due = args.get('due')
         name = args.get('name')
-        scope_id = args.get('scope_id')
 
         rc = EconomicResourceType.objects.get(pk=produces_resource_classification_id)
+        scope = rc.main_producing_process_type().context_agent
 
         user_agent = AgentUser.objects.get(user=context.user).agent
-        is_authorized = user_agent.is_authorized(context_agent_id=scope_id)
+        is_authorized = user_agent.is_authorized(context_agent_id=scope.id)
         if is_authorized:
             plan = rc.generate_mfg_work_order(order_name=name, due_date=due, created_by=context.user)
         else:

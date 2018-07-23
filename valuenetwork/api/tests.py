@@ -3031,7 +3031,7 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   createPlanFromRecipe(token: $token, name: "More Jam!", due: "2018-06-20", 
-    producesResourceClassificationId: 37, scopeId: 39) {
+    producesResourceClassificationId: 37, note: "test") {
     plan {
       id
       name

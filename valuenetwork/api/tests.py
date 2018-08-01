@@ -1917,7 +1917,7 @@ query ($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    agent(id:39) {
+    agent(id:106) {
       searchOwnedInventoryResources(searchString: "jam Jars lids") {
         id
         note

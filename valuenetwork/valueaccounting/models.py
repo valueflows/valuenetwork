@@ -1377,14 +1377,12 @@ class EconomicAgent(models.Model):
         parents = EconomicAgent.objects.filter(pk__in=parent_ids)
         return parents
 
-    def children(self): #returns a list or None
-        associations = self.has_associates.filter(association_type__association_behavior="child").filter(state="active")
-        children = None
-        if associations.count() > 0:
-            children = []
-            for association in associations:
-                children.append(association.from_agent)
-        return children
+    #def children(self): #TODO: not tested
+    #    associations = self.has_associates.filter(association_type__association_behavior="child").filter(state="active")
+    #    children = []
+    #    for association in associations:
+    #        children.append(association.has_associate)
+    #    return children
 
     def is_root(self):
         if self.parent():
@@ -1529,10 +1527,14 @@ class EconomicAgent(models.Model):
         arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(resource__quantity=0)
         return [arr.resource for arr in arrs]
 
-    #TODO: this is too simple, would be good to eliminate non-searchable words, manage ""'d words, search whole words, etc.
+    #TODO: this is too simple, would be good to eliminate non-searchable words, manage ""'d words, search whole words only, etc.
     #used for inventory type resources only
-    def search_owned_resources(self, search_string):
+    def search_owned_resources(self, search_string, also_search_children=True):
         resources = self.owned_resources()
+        if also_search_children:
+            children = self.with_all_sub_agents()
+            for child in children:
+                resources.extend(child.owned_resources())
         answer = []
         strings = search_string.lower().split(" ")
         for res in resources:

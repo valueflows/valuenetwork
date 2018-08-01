@@ -1915,6 +1915,21 @@ query ($token: String) {
   }
 }
 
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:39) {
+      searchOwnedInventoryResources(searchString: "jam Jars lids") {
+        id
+        note
+        resourceClassifiedAs {
+          name
+          note
+        }
+      }
+    }
+  }
+}
+
 query ($token: String) {
   viewer(token: $token) {
     agent(id: 6) {

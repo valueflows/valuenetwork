@@ -8,7 +8,7 @@ from valuenetwork.api.types.EconomicResource import EconomicResource
 from six import with_metaclass
 from django.contrib.auth.models import User
 from .Auth import AuthedInputMeta, AuthedMutation
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 
 
 class Query(graphene.AbstractType):
@@ -20,7 +20,11 @@ class Query(graphene.AbstractType):
 
     all_economic_resources = graphene.List(EconomicResource)
 
-    # resolve methods
+    #not implementing this yet, unclear if we ever will want everything in an instance, instead of by agent
+    #search_economic_resources = graphene.List(EconomicResource,
+    #                                          agent_id=graphene.Int(),
+    #                                          search_string=graphene.String())
+
 
     def resolve_economic_resource(self, args, *rargs):
         id = args.get('id')
@@ -36,6 +40,13 @@ class Query(graphene.AbstractType):
         #for resource in resources:
             #resource.current_quantity = self._current_quantity(quantity=resource.quantity, unit=resource.unit)
         return resources
+
+    #def resolve_search_economic_resources(self, args, context, info):
+    #    agent_id = args.get('agent_id', None)
+    #    search_string = args.get('search_string', "")
+    #    if search_string == "":
+    #        raise ValidationError("A search string is required.")
+    #    return EconomicResourceProxy.objects.search(agent_id=agent_id, search_string=search_string)
 
 '''
 class CreateEconomicResource(AuthedMutation):

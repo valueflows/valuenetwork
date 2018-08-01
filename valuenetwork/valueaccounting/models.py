@@ -1529,6 +1529,23 @@ class EconomicAgent(models.Model):
         arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(resource__quantity=0)
         return [arr.resource for arr in arrs]
 
+    #TODO: this is too simple, would be good to eliminate non-searchable words, manage ""'d words, search whole words, etc.
+    #used for inventory type resources only
+    def search_owned_resources(self, search_string):
+        resources = self.owned_resources()
+        answer = []
+        strings = search_string.lower().split(" ")
+        for res in resources:
+            if res.resource_type.inventory_rule == "yes":
+                for string in strings:
+                    if string in res.resource_type.name.lower():
+                        answer.append(res)
+                    elif string in res.resource_type.description.lower():
+                        answer.append(res)
+                    elif string in res.notes.lower():
+                        answer.append(res)
+        return list(set(answer))
+
     def owned_currency_resources(self):
         arrs = self.agent_resource_roles.filter(role__is_owner=True).exclude(
             resource__resource_type__behavior="other").exclude(
@@ -5040,6 +5057,18 @@ class EconomicResourceManager(models.Manager):
     
     def all_economic_resources(self):
         return EconomicResource.objects.all()
+
+    #def search(self, agent_id=None, search_string):
+    #    agent = None
+    #    if agent_id:
+    #        agent = EconomicAgent.objects.get(pk=agent_id)
+    #    if search_string = "" or search_string is None:
+    #        raise ValidationError("Search string is required.")
+    #    if agent:
+    #        rts = agent.
+    #    else:
+    #        rts = EconomicResourceType.objects.all()
+
 
 class EconomicResource(models.Model):
     resource_type = models.ForeignKey(EconomicResourceType,

@@ -9,6 +9,7 @@ from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceT
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship, AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
+from django.core.exceptions import ValidationError
 import datetime
 
 
@@ -38,6 +39,9 @@ class Agent(graphene.Interface):
                                              category=types.EconomicResourceCategory(),
                                              resourceClassificationId=graphene.Int(),
                                              page=graphene.Int())
+
+    search_owned_inventory_resources = graphene.List(lambda: types.EconomicResource,
+                                              search_string=graphene.String())
 
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
@@ -115,6 +119,13 @@ class Agent(graphene.Interface):
                     # If page is out of range (e.g. 9999), deliver last page of results.
                     resources = paginator.page(paginator.num_pages)
         return resources
+
+    def resolve_search_owned_inventory_resources(self, args, context, info):
+        agent = _load_identified_agent(self)
+        search_string = args.get('search_string', "")
+        if search_string == "":
+            raise ValidationError("A search string is required.")
+        return agent.search_owned_resources(search_string=search_string)
 
     # if an organization, this returns processes done in that context
     # if a person, this returns proceses the person has worked on

@@ -5,7 +5,7 @@
 import graphene
 import datetime
 from decimal import Decimal
-from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment, EventType, EconomicAgent, Process, EconomicResourceType, EconomicResource as EconomicResourceProxy, Unit, AgentUser, Location
+from valuenetwork.valueaccounting.models import EconomicEvent as EconomicEventProxy, Commitment, EventType, EconomicAgent, Process, EconomicResourceType, EconomicResource as EconomicResourceProxy, Unit, AgentUser, Location, AgentResourceRoleType, AgentResourceRole
 from valuenetwork.api.types.EconomicEvent import EconomicEvent, Action
 from valuenetwork.api.models import Fulfillment
 from six import with_metaclass
@@ -181,6 +181,7 @@ class CreateEconomicEvent(AuthedMutation):
         current_location = None
         if resource_current_location_id:
             current_location = Location.objects.get(pk=resource_current_location_id)
+        arr = None
         if not affects:
             if create_resource:
                 if not resource_note:
@@ -221,7 +222,17 @@ class CreateEconomicEvent(AuthedMutation):
         user_agent = AgentUser.objects.get(user=context.user).agent
         is_authorized = user_agent.is_authorized(object_to_mutate=economic_event)
         if is_authorized:
-            economic_event.save_api(user=context.user, create_resource=create_resource)
+            economic_event.save_api(user=context.user, create_resource=create_resource)                
+            #find the first "owner" type resource-agent role, use it for a relationship so inventory will show up #TODO: make more coherent when VF does so
+            roles = AgentResourceRoleType.objects.filter(is_owner=True)
+            if roles and receiver:
+                owner_role = roles[0]
+                arr = AgentResourceRole(
+                    agent=receiver,
+                    resource=affects,
+                    role=owner_role,
+                )
+                arr.save()
         else:
             raise PermissionDenied('User not authorized to perform this action.')
 

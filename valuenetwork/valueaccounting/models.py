@@ -1546,6 +1546,8 @@ class EconomicAgent(models.Model):
                         answer.append(res)
                     elif string in res.notes.lower():
                         answer.append(res)
+                    elif string in res.identifier.lower():
+                        answer.append(res)
         return list(set(answer))
 
     def owned_currency_resources(self):

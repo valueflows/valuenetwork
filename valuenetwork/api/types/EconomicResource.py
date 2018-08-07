@@ -78,7 +78,7 @@ class EconomicResource(DjangoObjectType):
 
     class Meta:
         model = EconomicResourceProxy
-        only_fields = ('id')
+        only_fields = ('id', 'url')
 
     transfers = graphene.List(lambda: types.Transfer)
 

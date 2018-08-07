@@ -95,6 +95,7 @@ class UpdateEconomicResource(AuthedMutation):
         image = graphene.String(required=False)
         note = graphene.String(required=False)
         current_location_id = graphene.Int(required=False)
+        url = graphene.String(required=False)
 
     economic_resource = graphene.Field(lambda: EconomicResource)
 
@@ -106,12 +107,15 @@ class UpdateEconomicResource(AuthedMutation):
         image = args.get('image')
         current_location_id = args.get('current_location_id')
         note = args.get('note')
+        url = args.get('url')
         economic_resource = EconomicResourceProxy.objects.get(pk=id)
         if economic_resource:
             if tracking_identifier:
                 economic_resource.identifier = tracking_identifier
             if note:
                 economic_resource.notes=note
+            if url:
+                economic_resource.url=url
             if image:
                 economic_resource.photo_url=image
             if resource_classified_as_id:

@@ -571,6 +571,9 @@ class EconomicAgent(models.Model):
                         return False
                 else: #create not from recipe
                     return True
+            elif type(object_to_mutate) is EconomicResource:
+                #arr = object_to_mutate. #TODO: add auth for resource (what?)
+                return True
             else:
                 context_agent = object_to_mutate.context_agent
         else:

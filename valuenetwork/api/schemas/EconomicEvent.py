@@ -85,6 +85,7 @@ class CreateEconomicEvent(AuthedMutation):
         resource_image = graphene.String(required=False)
         resource_note = graphene.String(required=False)
         resource_current_location_id = graphene.Int(required=False)
+        resource_url = graphene.String(required=False)
 
     economic_event = graphene.Field(lambda: EconomicEvent)
 
@@ -110,6 +111,7 @@ class CreateEconomicEvent(AuthedMutation):
         resource_image = args.get('resource_image')
         resource_current_location_id = args.get('resource_current_location_id')
         resource_note = args.get('resource_note')
+        resource_url = args.get('resource_url')
 
         if fulfills_commitment_id:
             commitment = Commitment.objects.get(pk=fulfills_commitment_id)
@@ -190,6 +192,8 @@ class CreateEconomicEvent(AuthedMutation):
                     resource_image = ""
                 if not resource_tracking_identifier:
                     resource_tracking_identifier = ""
+                if not resource_url:
+                    resource_url = ""
                 affects = EconomicResourceProxy(
                     resource_type=affected_resource_classification,
                     quantity=Decimal(affected_numeric_value),
@@ -197,6 +201,7 @@ class CreateEconomicEvent(AuthedMutation):
                     identifier=resource_tracking_identifier,
                     current_location=current_location,
                     notes=resource_note,
+                    url=resource_url,
                     created_by=context.user,
                     #location
                 )

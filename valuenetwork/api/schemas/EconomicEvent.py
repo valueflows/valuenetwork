@@ -321,7 +321,6 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.save_api(user=context.user, old_quantity=old_quantity, old_resource=old_resource)
             else:
                 raise PermissionDenied('User not authorized to perform this action.')
-            
 
         return UpdateEconomicEvent(economic_event=economic_event)
 

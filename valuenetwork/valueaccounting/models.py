@@ -1573,6 +1573,14 @@ class EconomicAgent(models.Model):
             resource__quantity=0)
         return [arr.resource for arr in arrs]
 
+    def owned_inventory_resources_with_subs(self):
+        agents = self.with_all_sub_agents()
+        resources = []
+        for agent in agents:
+            ress = agent.owned_inventory_resources()
+            resources.extend(ress)
+        return resources
+
     def create_virtual_account(self, resource_type):
         role_types = AgentResourceRoleType.objects.filter(is_owner=True)
         owner_role_type = None

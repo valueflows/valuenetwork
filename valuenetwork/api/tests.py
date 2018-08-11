@@ -1916,6 +1916,22 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    agent (id:39) {
+      name
+      ownedEconomicResources(category: INVENTORY) {
+        owners {
+          name
+        }
+        resourceClassifiedAs {
+          name
+        }
+      }
+    }
+  }
+}
+
 query($token: String) {
   viewer(token: $token) {
     agent(id:106) {

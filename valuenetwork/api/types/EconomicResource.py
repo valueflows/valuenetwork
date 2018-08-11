@@ -83,6 +83,8 @@ class EconomicResource(DjangoObjectType):
     transfers = graphene.List(lambda: types.Transfer)
 
     resource_contacts = graphene.List(lambda: types.Agent)
+    
+    owners = graphene.List(lambda: types.Agent)
 
     def resolve_current_quantity(self, args, *rargs):
         return QuantityValueProxy(numeric_value=self.quantity, unit=self.unit)
@@ -98,3 +100,6 @@ class EconomicResource(DjangoObjectType):
 
     def resolve_resource_contacts(self, args, context, info):
         return formatAgentList(self.all_contact_agents())
+
+    def resolve_owners(self, args, context, info):
+        return formatAgentList(self.owners())

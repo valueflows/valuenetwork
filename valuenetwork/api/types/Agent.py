@@ -97,7 +97,7 @@ class Agent(graphene.Interface):
             if type == types.EconomicResourceCategory.CURRENCY:
                 resources = org.owned_currency_resources()
             elif type == types.EconomicResourceCategory.INVENTORY:
-                resources = org.owned_inventory_resources()
+                resources = org.owned_inventory_resources_with_subs() #TODO: include sub-agents, is this OK for LearnDeep?
             else:
                 resources = org.owned_resources()
             if resource_class_id:

@@ -62,6 +62,14 @@ class Agent(graphene.Interface):
                                         role_id=graphene.Int(),
                                         category=AgentRelationshipCategory())
 
+    agent_relationships_as_subject = graphene.List(AgentRelationship,
+                                        role_id=graphene.Int(),
+                                        category=AgentRelationshipCategory())
+
+    agent_relationships_as_object = graphene.List(AgentRelationship,
+                                        role_id=graphene.Int(),
+                                        category=AgentRelationshipCategory())
+
     agent_roles = graphene.List(AgentRelationshipRole)
 
     agent_recipes = graphene.List(lambda: types.ResourceClassification)
@@ -197,15 +205,16 @@ class Agent(graphene.Interface):
             return commits
         return None
 
-    # returns relationships where an agent is a subject or object, optionally filtered by role category
     def resolve_agent_relationships(self, args, context, info):
         agent = _load_identified_agent(self)
         cat = args.get('category')
         role_id = args.get('role_id')
+        if cat and role_id:
+            raise ValidationError('Please do not submit both category and role.')
         if agent:
             assocs = agent.all_active_associations()
             filtered_assocs = []
-            if role_id: #try the most specific first
+            if role_id:
                 for assoc in assocs:
                     if assoc.association_type.id == role_id:
                         filtered_assocs.append(assoc)
@@ -216,10 +225,55 @@ class Agent(graphene.Interface):
                         filtered_assocs.append(assoc)
                 return filtered_assocs
             else:
-                return agent.all_active_associations()
+                return assocs
         return None
 
-    # returns relationships where an agent is a subject or object, optionally filtered by role category
+    def resolve_agent_relationships_as_subject(self, args, context, info):
+        agent = _load_identified_agent(self)
+        cat = args.get('category')
+        role_id = args.get('role_id')
+        if cat and role_id:
+            raise ValidationError('Please do not submit both category and role.')
+        if agent:
+            assocs = agent.active_associates_as_subject()
+            filtered_assocs = []
+            if role_id: 
+                for assoc in assocs:
+                    if assoc.association_type.id == role_id:
+                        filtered_assocs.append(assoc)
+                return filtered_assocs
+            if cat:
+                for assoc in assocs:
+                    if assoc.association_type.category == cat:
+                        filtered_assocs.append(assoc)
+                return filtered_assocs
+            else:
+                return assocs
+        return None
+
+    def resolve_agent_relationships_as_object(self, args, context, info):
+        agent = _load_identified_agent(self)
+        cat = args.get('category')
+        role_id = args.get('role_id')
+        if cat and role_id:
+            raise ValidationError('Please do not submit both category and role.')
+        if agent:
+            assocs = agent.active_associates_as_object()
+            filtered_assocs = []
+            if role_id: 
+                for assoc in assocs:
+                    if assoc.association_type.id == role_id:
+                        filtered_assocs.append(assoc)
+                return filtered_assocs
+            if cat:
+                for assoc in assocs:
+                    if assoc.association_type.category == cat:
+                        filtered_assocs.append(assoc)
+                return filtered_assocs
+            else:
+                return assocs
+        return None
+
     def resolve_agent_roles(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:

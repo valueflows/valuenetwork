@@ -229,15 +229,16 @@ class CreateEconomicEvent(AuthedMutation):
         if is_authorized:
             economic_event.save_api(user=context.user, create_resource=create_resource)                
             #find the first "owner" type resource-agent role, use it for a relationship so inventory will show up #TODO: make more coherent when VF does so
-            roles = AgentResourceRoleType.objects.filter(is_owner=True)
-            if roles and receiver:
-                owner_role = roles[0]
-                arr = AgentResourceRole(
-                    agent=receiver,
-                    resource=affects,
-                    role=owner_role,
-                )
-                arr.save()
+            if create_resource:
+                roles = AgentResourceRoleType.objects.filter(is_owner=True)
+                if roles and receiver:
+                    owner_role = roles[0]
+                    arr = AgentResourceRole(
+                        agent=receiver,
+                        resource=affects,
+                        role=owner_role,
+                    )
+                    arr.save()
         else:
             raise PermissionDenied('User not authorized to perform this action.')
 

@@ -41,7 +41,7 @@ class Commitment(DjangoObjectType):
 
     class Meta:
         model = CommitmentProxy
-        only_fields = ('id')
+        only_fields = ('id', 'url')
 
     fulfilled_by = graphene.List(lambda: types.Fulfillment,
                                  request_distribution=graphene.Boolean())

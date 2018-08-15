@@ -50,6 +50,7 @@ class CreateCommitment(AuthedMutation):
         planned_start = graphene.String(required=False)
         due = graphene.String(required=True)
         note = graphene.String(required=False)
+        url = graphene.String(required=False)
         plan_id = graphene.Int(required=False)
         is_plan_deliverable = graphene.Boolean(required=False)
         #for_plan_deliverable_id = graphene.Int(required=False)
@@ -74,6 +75,7 @@ class CreateCommitment(AuthedMutation):
         plan_id = args.get('plan_id')
         is_plan_deliverable = args.get('is_plan_deliverable')
         #for_plan_deliverable_id = args.get('for_plan_deliverable_id')
+        url = args.get('url')
 
         if output_of_id or input_of_id:
             if not plan_id:
@@ -111,6 +113,8 @@ class CreateCommitment(AuthedMutation):
         else:
             committed_resource = None
         committed_unit = Unit.objects.get(pk=committed_unit_id)
+        if not url:
+            url = ""
         if plan_id:
             plan = Order.objects.get(pk=plan_id)
         else:
@@ -133,6 +137,7 @@ class CreateCommitment(AuthedMutation):
             resource = committed_resource,
             quantity = Decimal(committed_numeric_value),
             unit_of_quantity = committed_unit,
+            url=url,
             start_date = planned_start,
             due_date = due,
             description=note,
@@ -171,6 +176,7 @@ class UpdateCommitment(AuthedMutation):
         due = graphene.String(required=False)
         is_finished = graphene.Boolean(required=False)
         note = graphene.String(required=False)
+        url = graphene.String(required=False)
 
     commitment = graphene.Field(lambda: Commitment)
 
@@ -192,6 +198,7 @@ class UpdateCommitment(AuthedMutation):
         due = args.get('due')
         note = args.get('note')
         is_finished = args.get('is_finished')
+        url = args.get('url')
 
         commitment = CommitmentProxy.objects.get(pk=id)
         if commitment:
@@ -223,6 +230,8 @@ class UpdateCommitment(AuthedMutation):
                 commitment.unit_of_quantity = Unit.objects.get(pk=committed_unit_id)
             if is_finished != None:
                 commitment.finished = is_finished
+            if url:
+                commitment.url = url
 
             user_agent = AgentUser.objects.get(user=context.user).agent
             is_authorized = user_agent.is_authorized(object_to_mutate=commitment)

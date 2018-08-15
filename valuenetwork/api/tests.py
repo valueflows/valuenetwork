@@ -2980,16 +2980,17 @@ mutation ($token: String!) {
   }
 }
 
-mutation ($token: String!) {
-  createCommitment(token: $token, action: "use", plannedStart: "2017-10-01", due: "2017-10-10",
+mutation ($token: String!) {  
+  createCommitment(token: $token, action: "use", plannedStart: "2018-10-01", due: "2018-10-10",
     scopeId: 39, note: "testing", committedResourceClassifiedAsId: 17, involvesId: 11, 
     committedNumericValue: "3.5", committedUnitId: 2, inputOfId: 6, planId: 52,
-    providerId: 79, receiverId: 39) {
+    providerId: 79, receiverId: 39, url: "http://www.test.coop") {
     commitment {
       id
       action
       plannedStart
       due
+      url
       inputOf {
         name
       }
@@ -3026,12 +3027,13 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   updateCommitment(token: $token, plannedStart: "2017-10-03", due: "2017-10-12",
-    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 363) {
+    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 440, url: "http://www.testagain.coop") {
     commitment {
       id
       action
       plannedStart
       due
+      url
       inputOf {
         name
       }

@@ -317,6 +317,8 @@ class UpdateEconomicEvent(AuthedMutation):
                 economic_event.is_contribution = request_distribution
             if request_distribution is False:
                 economic_event.is_contribution = False
+            if url:
+                economic_event.url = url
             if fulfills_commitment_id:
                 economic_event.commitment = Commitment.objects.get(pk=fulfills_commitment_id)
             economic_event.changed_by = context.user

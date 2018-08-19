@@ -25,6 +25,7 @@ class Action(graphene.Enum):
     IMPROVE = "improve"
     GIVE = "give"
     TAKE = "take"
+    ADJUST = "adjust"
 
 
 class EconomicEvent(DjangoObjectType):

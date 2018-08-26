@@ -149,11 +149,14 @@ class DeletePlan(AuthedMutation):
         id = args.get('id')
         plan = Order.objects.get(pk=id)
         if plan:
-            user_agent = AgentUser.objects.get(user=context.user).agent
-            is_authorized = user_agent.is_authorized(object_to_mutate=plan)
-            if is_authorized:
-                plan.delete_api()
+            if plan.is_deletable():
+                user_agent = AgentUser.objects.get(user=context.user).agent
+                is_authorized = user_agent.is_authorized(object_to_mutate=plan)
+                if is_authorized:
+                    plan.delete_api()
+                else:
+                    raise PermissionDenied('User not authorized to perform this action.')
             else:
-                raise PermissionDenied('User not authorized to perform this action.')
+                raise PermissionDenied('Plan has related events, cannot be deleted.')
 
         return DeletePlan(plan=plan)

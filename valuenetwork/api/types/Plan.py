@@ -21,6 +21,8 @@ class Plan(DjangoObjectType):
         only_fields = ('id')
 
 
+    created_by = graphene.Field(lambda: types.Agent)
+
     scope = graphene.List(lambda: types.Agent)
 
     plan_processes = graphene.List(lambda: types.Process,
@@ -43,6 +45,9 @@ class Plan(DjangoObjectType):
 
     def resolve_scope(self, args, *rargs):
         return formatAgentList(self.plan_context_agents())
+
+    def resolve_created_by(self, args, *rargs):
+        return formatAgent(self.created_by_agent)
 
     def resolve_plan_processes(self, args, context, info):
         year = args.get('year', None)

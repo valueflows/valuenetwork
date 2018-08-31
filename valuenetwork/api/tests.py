@@ -2305,6 +2305,9 @@ query ($token: String) {
         name
       }
       isDeletable
+      createdBy {
+        name
+      }
     }
   }
 }

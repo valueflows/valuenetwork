@@ -5,7 +5,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from django.db.models import Q
-from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType
+from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType, EventTypeManager, EventType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship, AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
@@ -53,7 +53,10 @@ class Agent(graphene.Interface):
 
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                           latest_number_of_days=graphene.Int(),
-                                          request_distribution=graphene.Boolean())
+                                          request_distribution=graphene.Boolean(),
+                                          action=graphene.String(),
+                                          year=graphene.Int(),
+                                          month=graphene.Int())
 
     agent_commitments = graphene.List(lambda: types.Commitment,
                                       latest_number_of_days=graphene.Int())
@@ -175,17 +178,24 @@ class Agent(graphene.Interface):
             return plans
         return None
 
-    # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events
+    # returns events where an agent is a provider, receiver, or scope agent
     def resolve_agent_economic_events(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
             days = args.get('latest_number_of_days', 0)
             request_distribution = args.get('request_distribution')
+            action = args.get('action')
+            year = args.get('year')
+            month = args.get('month')
             if days > 0:
                 events = agent.involved_in_events().filter(event_date__gte=(datetime.date.today() - datetime.timedelta(days=days)))
+            elif year and month:
+                events = agent.involved_in_events().filter(event_date__year=year).filter(event_date__month=month)
             else:
                 events = agent.involved_in_events()
-            events = events.exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            #events = events.exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            if action != None:
+                events = events.filter(event_type=EventType.objects.convert_action_to_event_type(action))
             if request_distribution != None:
                 events = events.filter(is_contribution=request_distribution)
             return events

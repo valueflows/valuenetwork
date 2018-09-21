@@ -2063,6 +2063,72 @@ query ($token: String) {
   }
 }
 
+# kispagi
+# old
+query($token: String) {
+  viewer(token: $token) { agent(id:""" + str(project_id) + """) { name
+      agentProcesses {
+        name id  plannedStart plannedDuration
+        unplannedEconomicEvents { id note }
+        committedInputs { note id fulfilledBy { fulfilledBy { id }}}
+        inputs {
+          id start
+          provider {id name faircoinAddress} action note requestDistribution
+          affectedQuantity{ numericValue unit {name}} note
+          validations { id validationDate validatedBy { id name } }
+        }
+        processClassifiedAs {name} plannedDuration isFinished note
+      }
+    }
+  }
+}
+
+#new suggested
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      id
+      name
+      agentEconomicEvents(action: "work", year: 2017, month: 9) {
+        id
+        start
+        requestDistribution
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+        affects {
+          resourceClassifiedAs {
+            name
+            category
+          }
+          trackingIdentifier
+        }
+        provider {
+          id
+          name
+          faircoinAddress
+        }
+        note
+        inputOf {
+          id
+          name
+        }
+        validations {
+          id
+          validationDate
+          validatedBy {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
 # process data
 
 query($token: String) {

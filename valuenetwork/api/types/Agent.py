@@ -178,7 +178,7 @@ class Agent(graphene.Interface):
             return plans
         return None
 
-    # returns events where an agent is a provider, receiver, or scope agent
+    # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events
     def resolve_agent_economic_events(self, args, context, info):
         agent = _load_identified_agent(self)
         if agent:
@@ -193,7 +193,7 @@ class Agent(graphene.Interface):
                 events = agent.involved_in_events().filter(event_date__year=year).filter(event_date__month=month)
             else:
                 events = agent.involved_in_events()
-            #events = events.exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            events = events.exclude(event_type__name="Give").exclude(event_type__name="Receive")
             if action != None:
                 events = events.filter(event_type=EventType.objects.convert_action_to_event_type(action))
             if request_distribution != None:

@@ -4113,7 +4113,18 @@ class Order(models.Model):
     def number_of_processes(self):
         procs = self.unordered_processes()
         return len(list(procs))
-        
+    
+    def is_deletable(self):
+        answer = True
+        for proc in self.unordered_processes():
+            if not proc.is_deletable():
+                answer = False
+                break
+        if answer:
+            ex = self.exchange()
+            if ex:
+                answer = ex.is_deletable()
+        return answer
 
     @models.permalink
     def get_absolute_url(self):
@@ -4170,10 +4181,10 @@ class Order(models.Model):
         else:
             raise ValidationError("Cannot delete a plan with economic events recorded.")
 
-    def is_deletable(self):
-        if self.all_events():
-            return False
-        return True
+    #def is_deletable(self):
+    #    if self.all_events():
+    #        return False
+    #    return True
 
     #TODO this is a start at something, check if it is still useful
     #assumes the order itself is already saved (adapted from view plan_from_recipe)

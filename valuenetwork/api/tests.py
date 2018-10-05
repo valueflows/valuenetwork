@@ -914,7 +914,71 @@ class APITest(TestCase):
         self.assertEqual(notifSettings[0]['id'], "1")
         self.assertEqual(notifSettings[0]['notificationType']['label'], "api_test")
 
+    def test_create_update_delete_process(self):
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''', context_value=MockContext())
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
+        import pdb; pdb.set_trace()
 
+        result1 = schema.execute('''
+                mutation {
+                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2, planId: 1) {
+                    process {
+                        name
+                        scope {
+                            name
+                        }
+                        isFinished
+                        plannedStart
+                        plannedDuration
+                    }
+                  }
+                }
+                ''', context_value=MockContext())
+        self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
+        self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
+        self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
+        self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
+
+        result2 = schema.execute('''
+                    mutation {
+                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
+                            process {
+                                name
+                                scope {
+                                    name
+                                }
+                                isFinished
+                                plannedStart
+                                plannedDuration
+                            }
+                        }
+                    }
+                    ''', context_value=MockContext())
+
+        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
+        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
+        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
+        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+
+        result3 = schema.execute('''
+                    mutation {
+                        deleteProcess(token: "''' + token + '''", id: 4) {
+                            process {
+                                name
+                            }
+                        }
+                    }
+                    ''', context_value=MockContext())
 
 #    def test_create_update_delete_process(self):
 #        result = schema.execute('''

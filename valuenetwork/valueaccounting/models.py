@@ -869,6 +869,14 @@ class EconomicAgent(models.Model):
     def score(self):
         return sum(art.score for art in self.resource_types.all())
 
+    def skills(self):
+        arts = self.resource_types.all()
+        rts = []
+        for art in arts:
+            if art.resource_type not in rts:
+                rts.append(art.resource_type)
+        return rts
+
     def contributions(self):
         return self.given_events.filter(is_contribution=True)
     

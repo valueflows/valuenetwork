@@ -1,10 +1,6 @@
 #
 # EconomicAgent:A person or group or organization with economic agency.
 #
-# @package: OCP
-# @author:  pospi <pospi@spadgos.com>
-# @since:   2017-06-10
-#
 
 import graphene
 from graphene_django.types import DjangoObjectType
@@ -73,6 +69,10 @@ class Agent(graphene.Interface):
     agent_notification_settings = graphene.List(lambda: types.NotificationSetting)
 
     member_relationships = graphene.List(AgentRelationship)
+
+    agent_skills = graphene.List(lambda: types.ResourceClassification)
+
+    validated_events_count = graphene.Int(month=graphene.Int(), year=graphene.Int())
 
     events_count = graphene.Int(year=graphene.Int(), month=graphene.Int())
 
@@ -241,7 +241,31 @@ class Agent(graphene.Interface):
             for assoc in assocs:
                 if assoc.association_type.association_behavior == "member":
                     filtered_assocs.append(assoc)
-            return filtered_assocs            
+            return filtered_assocs
+        return None
+
+    def resolve_agent_skills(self, args, context, info):
+        agent = _load_identified_agent(self)
+        return agent.skills()
+
+    def resolve_validated_events_count(self, args, *rargs):
+        agent = _load_identified_agent(self)
+        month = args.get('month')
+        year = args.get('year')
+        val_month = False
+        if month and year:
+            val_month=True
+        if agent:
+            events = agent.involved_in_events().exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            count = 0
+            for event in events:
+                if val_month:
+                    if event.event_date.year == year and event.event_date.month == month:
+                        if event.is_double_validated():
+                            count = count + 1
+                else:
+                    count = count + 1
+            return count
         return None
 
     def resolve_events_count(self, args, *rargs):

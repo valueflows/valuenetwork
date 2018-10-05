@@ -574,6 +574,16 @@ class EconomicAgent(models.Model):
             elif type(object_to_mutate) is EconomicResource:
                 #arr = object_to_mutate. #TODO: add auth for resource (what?)
                 return True
+            elif type(object_to_mutate) is AgentAssociation:
+                #TODO: probably needs more definition, possibly including joining options; maybe a separate method....
+                if object_to_mutate.is_associate == self:
+                    return True
+                if object_to_mutate.has_associate == self:
+                    return True
+                if object_to_mutate.is_associate.is_context:
+                    context_agent = object_to_mutate.is_associate
+                elif object_to_mutate.has_associate.is_context:
+                    context_agent = object_to_mutate.has_associate
             else:
                 context_agent = object_to_mutate.context_agent
         else:

@@ -30,3 +30,4 @@ faircoin/daemon/daemon.py
 faircoin/daemon/daemon_service
 faircoin/daemon/new_privkeys.txt
 fixtures/*.json
+.idea/*

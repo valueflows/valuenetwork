@@ -1013,7 +1013,7 @@ def change_your_project(request, agent_id):
         else:
           pro_form = ProjectCreateForm(instance=project, data=request.POST or None)
 
-        agn_form = AgentCreateForm(instance=agent, data=request.POST or None)
+        agn_form = WorkAgentCreateForm(instance=agent, data=request.POST or None)
         if pro_form.is_valid() and agn_form.is_valid():
             project = pro_form.save()
             data = agn_form.cleaned_data
@@ -2593,7 +2593,7 @@ def exchanges_all(request, agent_id): #all types of exchanges for one context ag
                     pass
 
                   #return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                  #  % ('work/agent', agent.id, 'exchange-logging-work', ext.id, gen_rt.id)) # ¿ use the exchange id for a resource id ?
+                  #  % ('work/agent', agent.id, 'exchange-logging-work', ext.id, gen_rt.id)) # ?? use the exchange id for a resource id ?
 
                 else: # endif hasattr(data["exchange_type"], 'id'):
                   #nav_form.add_error('exchange_type', _("No exchange type selected"))
@@ -3520,9 +3520,9 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 #if not transfer_type.can_create_resource:
                 res = data["resource"]
@@ -3723,9 +3723,9 @@ def add_transfer_commitment_work(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 description = data["description"]
                 if transfer_type.is_currency:
@@ -3847,9 +3847,9 @@ def change_transfer_commitments_work(request, transfer_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
 
                 description = data["description"]
@@ -3921,9 +3921,9 @@ def transfer_from_commitment(request, transfer_id):
                 to_agent = data["to_agent"]
 
             rt = data["resource_type"]
-            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                gen_rt = data["ocp_resource_type"]
-                rt = get_rt_from_ocp_rt(gen_rt)
+#            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                gen_rt = data["ocp_resource_type"]
+#                rt = get_rt_from_ocp_rt(gen_rt)
 
             #if not transfer_type.can_create_resource:
             res = data["resource"]
@@ -4060,9 +4060,9 @@ def change_transfer_events(request, transfer_id, context_agent_id=None):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 res = data["resource"]
                 res_from = None
@@ -5005,17 +5005,18 @@ def process_logging(request, process_id):
                     }
                     unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", context_agent=context_agent, initial=work_init)
                     unplanned_work_form.fields["resource_type"].queryset = work_resource_types
+                    if logger:
+                        work_init = {
+                            "from_agent": agent,
+                            "unit_of_quantity": work_unit,
+                            "is_contribution": True,
+                            "due_date": process.end_date,
+                        }
+                        add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=work_init)
+                        add_work_form.fields["resource_type"].queryset = work_resource_types
                 else:
                     unplanned_work_form = UnplannedWorkEventForm(prefix="unplanned", pattern=pattern, context_agent=context_agent, initial=work_init)
-                if logger:
-                    work_init = {
-                        "from_agent": agent,
-                        "unit_of_quantity": work_unit,
-                        "is_contribution": True,
-                        "due_date": process.end_date,
-                    }
-                    add_work_form = WorkCommitmentForm(prefix='work', pattern=pattern, initial=work_init)
-                    add_work_form.fields["resource_type"].queryset = work_resource_types
+
 
         if "cite" in slots:
             cite_unit = None
@@ -6705,7 +6706,8 @@ def plan_work(request, rand=0):
                 start_date=start_date,
                 process_pattern=selected_pattern,
                 created_by=request.user,
-                context_agent=selected_context_agent
+                context_agent=selected_context_agent,
+                plan=demand,
             )
             process.save()
 
@@ -6890,6 +6892,37 @@ def project_history_csv(request):
 
     return response
 
+def fake_kanban(request, agent_id):
+    project = get_object_or_404(EconomicAgent, pk=agent_id)
+    agent = get_agent(request)
+    
+    """
+    event_list = project.contribution_events()
+    event_list = project.all_events()
+    agent_ids = {event.from_agent.id for event in event_list if event.from_agent}
+    agents = EconomicAgent.objects.filter(id__in=agent_ids)
+    filter_form = ProjectContributionsFilterForm(agents=agents, data=request.POST or None)
+    if request.method == "POST":
+        if filter_form.is_valid():
+            data = filter_form.cleaned_data
+            #event_type = data["event_type"]
+            from_agents = data["from_agents"]
+            start = data["start_date"]
+            end = data["end_date"]
+            if from_agents:
+                event_list = event_list.filter(from_agent__in=from_agents)
+            if start:
+                event_list = event_list.filter(event_date__gte=start)
+            if end:
+                event_list = event_list.filter(event_date__lte=end)
+    event_ids = ",".join([str(event.id) for event in event_list])
+    """
+    
+    return render(request, "work/fake_kanban.html", {
+        "project": project,
+        "agent": agent,
+
+    })
 
 @login_required
 def order_delete_confirmation_work(request, order_id):

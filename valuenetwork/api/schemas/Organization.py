@@ -44,6 +44,10 @@ class Query(graphene.AbstractType):
 
     all_organizations = graphene.List(Organization)
 
+    fc_organizations = graphene.List(Organization,
+                                     joining_style=graphene.String(),
+                                     visibility=graphene.String())
+
     # load any organisation
 
     def resolve_organization(self, args, context, info):

@@ -5652,9 +5652,9 @@ def add_transfer(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 #if not transfer_type.can_create_resource:
                 res = data["resource"]
@@ -5866,9 +5866,9 @@ def transfer_from_commitment(request, transfer_id):
                 to_agent = data["to_agent"]
 
             rt = data["resource_type"]
-            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                gen_rt = data["ocp_resource_type"]
-                rt = get_rt_from_ocp_rt(gen_rt)
+#            if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                gen_rt = data["ocp_resource_type"]
+#                rt = get_rt_from_ocp_rt(gen_rt)
 
             #if not transfer_type.can_create_resource:
             res = data["resource"]
@@ -5995,9 +5995,9 @@ def add_transfer_commitment(request, exchange_id, transfer_type_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 description = data["description"]
                 if transfer_type.is_currency:
@@ -6120,9 +6120,9 @@ def change_transfer_events(request, transfer_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
                 res = data["resource"]
                 res_from = None
@@ -6247,9 +6247,9 @@ def change_transfer_commitments(request, transfer_id):
                     to_agent = data["to_agent"]
 
                 rt = data["resource_type"]
-                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
-                    gen_rt = data["ocp_resource_type"]
-                    rt = get_rt_from_ocp_rt(gen_rt)
+#                if data["ocp_resource_type"]: #next and next == "exchange-work": # bumbum
+#                    gen_rt = data["ocp_resource_type"]
+#                    rt = get_rt_from_ocp_rt(gen_rt)
 
 
                 description = data["description"]
@@ -9048,6 +9048,7 @@ def change_expense_event(request, event_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('accounting/exchange', exchange.id))
 
+#this has been duplicated in models in class Commitment, to support the api
 def handle_commitment_changes(old_ct, new_rt, new_qty, old_demand, new_demand):
     propagators = []
     explode = True
@@ -9545,6 +9546,7 @@ def explode_dependent_demands(commitment, user):
                 context_agent=pt.context_agent,
                 url=pt.url,
                 end_date=commitment.due_date,
+                plan=demand,
                 start_date=start_date,
                 created_by=user,
             )
@@ -9756,7 +9758,8 @@ def process_selections(request, rand=0):
                 start_date=start_date,
                 process_pattern=selected_pattern,
                 created_by=request.user,
-                context_agent=selected_context_agent
+                context_agent=selected_context_agent,
+                plan=demand,
             )
             process.save()
 

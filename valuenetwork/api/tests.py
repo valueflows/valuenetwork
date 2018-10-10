@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from valuenetwork.valueaccounting.models import *
+from pinax.notifications.models import NoticeSetting, NoticeType
 from valuenetwork.api.models import *
 from .schema import schema
 import datetime
@@ -36,6 +37,18 @@ class APITest(TestCase):
             agent_user, _ = AgentUser.objects.get_or_create(agent=test_agent, user=test_user)
             test_agent.users.add(agent_user)
         test_agent.save()
+        notice_type = NoticeType(
+            label="api_test",
+            display="api test",
+            default=0,
+            )
+        notice_type.save()
+        notice_set = NoticeSetting(
+            notice_type=notice_type,
+            send=True,
+            user=test_user,
+            )
+        notice_set.save()
         org1 = EconomicAgent(
             name="org1",
             nick="org1",
@@ -166,13 +179,21 @@ class APITest(TestCase):
             )
         a1r1.save()
 
-        # process-commitment-event data
+        # order-process-commitment-event data
+
+        pt1 = ProcessType(
+            name="pt1",
+            context_agent=org1,
+            estimated_duration=300,
+            )
+        pt1.save()
         proc1 = Process(
             name="proc1",
             start_date=datetime.date.today(),
             end_date=datetime.date.today() + datetime.timedelta(days=5),
             finished=False,
             context_agent=org1,
+            process_type=pt1,
             )
         proc1.save()
         proc2 = Process(
@@ -191,6 +212,20 @@ class APITest(TestCase):
             context_agent=org2,
             )
         proc3.save()
+        order1 = Order(
+            name="order1",
+            due_date=proc3.end_date,
+            order_date=proc1.start_date,
+            provider=org1,
+            order_type="rand",
+            )
+        order1.save()
+        proc1.plan = order1
+        proc1.save()
+        proc2.plan = order1
+        proc2.save()
+        proc3.plan = order1
+        proc3.save()
         et_cite = EventType.objects.get(name="Citation")
         et_produce = EventType.objects.get(name="Resource Production")
         et_todo = EventType.objects.get(name="Todo")
@@ -208,6 +243,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=3,
             unit_of_quantity=unit_hours,
+            independent_demand=order1,
             )
         proc1_c1.save()
         proc1_c2 = Commitment(
@@ -219,6 +255,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=2.5,
             unit_of_quantity=unit_hours,
+            independent_demand=order1,
             )
         proc1_c2.save()
         proc1_c3 = Commitment(
@@ -230,6 +267,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=3,
             unit_of_quantity=unit_each,
+            independent_demand=order1,
             )
         proc1_c3.save()
         proc1_c4 = Commitment(
@@ -241,6 +279,7 @@ class APITest(TestCase):
             context_agent=org1,
             quantity=1,
             unit_of_quantity=unit_each,
+            independent_demand=order1,
             )
         proc1_c4.save()
         proc1_e1 = EconomicEvent(
@@ -568,6 +607,11 @@ class APITest(TestCase):
                         name
                         isFinished
                       }
+                      agentPlans {
+                        name
+                        due
+                        note
+                      }
                     }
                   }
                 }
@@ -576,6 +620,7 @@ class APITest(TestCase):
         agent = result.data['viewer']['agent']
         ownedEconomicResources = result.data['viewer']['agent']['ownedEconomicResources']
         processes = result.data['viewer']['agent']['agentProcesses']
+        plans = result.data['viewer']['agent']['agentPlans']
         self.assertEqual(agent['name'], 'org1')
         self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['name'], 'product1')
         self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['processCategory'], 'produced')
@@ -583,8 +628,10 @@ class APITest(TestCase):
         self.assertEqual(ownedEconomicResources[0]['currentQuantity']['unit']['name'], 'Each')
         self.assertEqual(len(processes), 1)
         self.assertEqual(processes[0]['name'], 'proc1')
+        self.assertEqual(len(plans), 1)
+        self.assertEqual(plans[0]['name'], 'order1')
 
-    def test_processes_commitments_events(self):
+    def test_orders_processes_commitments_events(self):
         result = schema.execute('''
                 mutation {
                   createToken(username: "testUser11222", password: "123456") {
@@ -648,27 +695,40 @@ class APITest(TestCase):
                     involvedAgents {
                         name
                     }
+                    plan {
+                        name
+                        plannedOn
+                        due
+                        note
+                        scope {
+                            name
+                        }
+                        workingAgents {
+                            name
+                        }
+                        planProcesses {
+                            name
+                        }
+                    }
                 }
                 query {
                   viewer(token: "''' + token + '''") {
                     process(id: 1) {
                         name
+                        processPlan {
+                          name
+                        }
+                        processClassifiedAs {
+                            name
+                            scope {
+                                name
+                            }
+                            estimatedDuration
+                        }
                         unplannedEconomicEvents(action: PRODUCE) {
                             ...coreEventFields
                         }
-                        processEconomicEvents {
-                            ...coreEventFields
-                        }
-                        processCommitments {
-                            ...coreCommitmentFields
-                        }
                         inputs {
-                            ...coreEventFields
-                        }
-                        workInputs {
-                            ...coreEventFields
-                        }
-                        nonWorkInputs {
                             ...coreEventFields
                         }
                         outputs {
@@ -677,13 +737,7 @@ class APITest(TestCase):
                         committedInputs {
                             ...coreCommitmentFields
                         }
-                        committedWorkInputs {
-                            ...coreCommitmentFields
-                        }
-                        committedNonWorkInputs {
-                            ...coreCommitmentFields
-                        }
-                        committedOutputs {
+                        committedOutputs (action: PRODUCE) {
                             ...coreCommitmentFields
                         }
                         nextProcesses {
@@ -705,29 +759,17 @@ class APITest(TestCase):
         process = result.data['viewer']['process']
         self.assertEqual(process['name'], 'proc1')
         unplannedEconomicEvents = process['unplannedEconomicEvents']
-        processEconomicEvents = process['processEconomicEvents']
-        processCommitments = process['processCommitments']
         inputs = process['inputs']
-        workInputs = process['workInputs']
-        nonWorkInputs = process['nonWorkInputs']
         outputs = process['outputs']
         committedInputs = process['committedInputs']
-        committedWorkInputs = process['committedWorkInputs']
-        committedNonWorkInputs = process['committedNonWorkInputs']
         committedOutputs = process['committedOutputs']
         nextProcesses = process['nextProcesses']
         previousProcesses = process['previousProcesses']
         workingAgents = process['workingAgents']
         self.assertEqual(len(unplannedEconomicEvents), 1)
-        self.assertEqual(len(processEconomicEvents), 6)
-        self.assertEqual(len(processCommitments), 4)
         self.assertEqual(len(inputs), 4)
-        self.assertEqual(len(workInputs), 3)
-        self.assertEqual(len(nonWorkInputs), 1)
         self.assertEqual(len(outputs), 2)
         self.assertEqual(len(committedInputs), 3)
-        self.assertEqual(len(committedWorkInputs), 2)
-        self.assertEqual(len(committedNonWorkInputs), 1)
         self.assertEqual(len(committedOutputs), 1)
         self.assertEqual(len(nextProcesses), 1)
         self.assertEqual(len(previousProcesses), 1)
@@ -740,13 +782,16 @@ class APITest(TestCase):
         self.assertEqual(outputs[0]['action'], "produce")
         self.assertEqual(committedInputs[0]['action'], "work")
         self.assertEqual(committedInputs[1]['committedQuantity']['numericValue'], 2.5)
+        self.assertEqual(committedInputs[1]['plan']['name'], 'order1')
+        self.assertEqual(committedInputs[1]['plan']['scope'][0]['name'], 'org1')
         self.assertEqual(committedInputs[2]['resourceClassifiedAs']['name'], "component1")
         self.assertEqual(committedInputs[1]['provider']['name'], "not user")
         self.assertEqual(committedOutputs[0]['action'], "produce")
         self.assertEqual(previousProcesses[0]['name'], 'proc2')
         self.assertEqual(nextProcesses[0]['name'], 'proc3')
+        self.assertEqual(process['processClassifiedAs']['name'], 'pt1')
 
-    def test_create_update_delete_process(self):
+    def test_plan(self):
         result = schema.execute('''
                 mutation {
                   createToken(username: "testUser11222", password: "123456") {
@@ -758,9 +803,132 @@ class APITest(TestCase):
         token = call_result['token']
         test_agent = EconomicAgent.objects.get(name="testUser11222")
 
+        query = '''
+                query {
+                  viewer(token: "''' + token + '''") {
+                    agent(id: 2) {
+                      name
+                      ownedEconomicResources(category: INVENTORY) {
+                        id
+                        resourceClassifiedAs {
+                          name
+                          category
+                          processCategory
+                        }
+                        trackingIdentifier
+                        currentQuantity {
+                          numericValue
+                          unit {
+                            name
+                          }
+                        }
+                        image
+                        note
+                      }
+                      agentProcesses (isFinished: false) {
+                        name
+                        isFinished
+                      }
+                      agentPlans {
+                        name
+                        due
+                        note
+                      }
+                    }
+                  }
+                }
+                '''
+        result = schema.execute(query)
+        agent = result.data['viewer']['agent']
+        ownedEconomicResources = result.data['viewer']['agent']['ownedEconomicResources']
+        processes = result.data['viewer']['agent']['agentProcesses']
+        plans = result.data['viewer']['agent']['agentPlans']
+        self.assertEqual(agent['name'], 'org1')
+        self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['name'], 'product1')
+        self.assertEqual(ownedEconomicResources[0]['resourceClassifiedAs']['processCategory'], 'produced')
+        self.assertEqual(len(ownedEconomicResources), 2)
+        self.assertEqual(ownedEconomicResources[0]['currentQuantity']['unit']['name'], 'Each')
+        self.assertEqual(len(processes), 1)
+        self.assertEqual(processes[0]['name'], 'proc1')
+        self.assertEqual(len(plans), 1)
+        self.assertEqual(plans[0]['name'], 'order1')
+
+    def test_notification_settings(self):
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''')
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
+
+        #result1 = schema.execute('''
+        #        mutation {
+        #          createNotificationSetting(token: "''' + token + '''", notificationTypeId: 1, agentId: 1, send: true) {
+        #            notificationSetting {
+        #              id
+        #              notificationType {
+        #                id
+        #                display
+        #                label
+        #                description
+        #              }
+        #              send
+        #              agent {
+        #                name
+        #              }
+        #            }
+        #          }
+        #        }
+        #        ''')
+        #import pdb; pdb.set_trace()
+        #self.assertEqual(result1.data['createNotificationSetting']['notificationSetting']['send'], True)
+
+        query = '''
+                query {
+                  viewer(token: "''' + token + '''") {
+                    agent(id: 1) {
+                        name
+                        agentNotificationSettings {
+                            id
+                            agent {
+                              name
+                            }
+                            send
+                            notificationType {
+                              id
+                              label
+                              display
+                              description
+                            }
+                        }
+                    }
+                  }
+                }
+                '''
+        result5 = schema.execute(query)
+        notifSettings = result5.data['viewer']['agent']['agentNotificationSettings']
+        self.assertEqual(notifSettings[0]['id'], "1")
+        self.assertEqual(notifSettings[0]['notificationType']['label'], "api_test")
+
+    def test_create_update_delete_process(self):
+        result = schema.execute('''
+                mutation {
+                  createToken(username: "testUser11222", password: "123456") {
+                    token
+                  }
+                }
+                ''', context_value=MockContext())
+        call_result = result.data['createToken']
+        token = call_result['token']
+        test_agent = EconomicAgent.objects.get(name="testUser11222")
+
         result1 = schema.execute('''
                 mutation {
-                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2) {
+                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedFinish: "2017-07-14", scopeId: 2, planId: 1) {
                     process {
                         name
                         scope {
@@ -768,21 +936,22 @@ class APITest(TestCase):
                         }
                         isFinished
                         plannedStart
+                        plannedFinish
                         plannedDuration
                     }
                   }
                 }
-                ''')
-        #import pdb; pdb.set_trace()
+                ''', context_value=MockContext())
         self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
         self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
         self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
         self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
+        self.assertEqual(result1.data['createProcess']['process']['plannedFinish'], "2017-07-14")
         self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
 
         result2 = schema.execute('''
                     mutation {
-                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
+                        updateProcess(token: "''' + token + '''", id: 4, plannedFinish: "2017-07-15", isFinished: true) {
                             process {
                                 name
                                 scope {
@@ -790,17 +959,18 @@ class APITest(TestCase):
                                 }
                                 isFinished
                                 plannedStart
+                                plannedFinish
                                 plannedDuration
                             }
                         }
                     }
-                    ''')
+                    ''', context_value=MockContext())
 
         self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
         self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
         self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
         self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
-        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "8 days, 0:00:00")
 
         result3 = schema.execute('''
                     mutation {
@@ -810,20 +980,93 @@ class APITest(TestCase):
                             }
                         }
                     }
-                    ''')
+                    ''', context_value=MockContext())
 
-        proc = None
-        try:
-            proc = Process.objects.get(pk=4)
-        except:
-            pass
-        self.assertEqual(proc, None)
+#    def test_create_update_delete_process(self):
+#        result = schema.execute('''
+#                mutation {
+#                  createToken(username: "testUser11222", password: "123456") {
+#                    token
+#                  }
+#                }
+#                ''')
+#        call_result = result.data['createToken']
+#        token = call_result['token']
+#        test_agent = EconomicAgent.objects.get(name="testUser11222")
+
+#        result1 = schema.execute('''
+#                mutation {
+#                  createProcess(token: "''' + token + '''", name: "Make something cool", plannedStart: "2017-07-07", plannedDuration: 7, scopeId: 2) {
+#                    process {
+#                        name
+#                        scope {
+#                            name
+#                        }
+#                        isFinished
+#                        plannedStart
+#                        plannedDuration
+#                    }
+#                  }
+#                }
+#                ''')
+#        #import pdb; pdb.set_trace()
+#        self.assertEqual(result1.data['createProcess']['process']['name'], "Make something cool")
+#        self.assertEqual(result1.data['createProcess']['process']['scope']['name'], "org1")
+#        self.assertEqual(result1.data['createProcess']['process']['isFinished'], False)
+#        self.assertEqual(result1.data['createProcess']['process']['plannedStart'], "2017-07-07")
+#        self.assertEqual(result1.data['createProcess']['process']['plannedDuration'], "7 days, 0:00:00")
+
+#        result2 = schema.execute('''
+#                    mutation {
+#                        updateProcess(token: "''' + token + '''", id: 4, plannedDuration: 10, isFinished: true) {
+#                            process {
+#                                name
+#                                scope {
+#                                    name
+#                                }
+#                                isFinished
+#                                plannedStart
+#                                plannedDuration
+#                            }
+#                        }
+#                    }
+#                    ''')
+
+#        self.assertEqual(result2.data['updateProcess']['process']['name'], "Make something cool")
+#        self.assertEqual(result2.data['updateProcess']['process']['scope']['name'], "org1")
+#        self.assertEqual(result2.data['updateProcess']['process']['isFinished'], True)
+#        self.assertEqual(result2.data['updateProcess']['process']['plannedStart'], "2017-07-07")
+#        self.assertEqual(result2.data['updateProcess']['process']['plannedDuration'], "10 days, 0:00:00")
+
+#        result3 = schema.execute('''
+#                    mutation {
+#                        deleteProcess(token: "''' + token + '''", id: 4) {
+#                            process {
+#                                name
+#                            }
+#                        }
+#                    }
+#                    ''')
+
+#        proc = None
+#        try:
+#            proc = Process.objects.get(pk=4)
+#        except:
+#            pass
+#        self.assertEqual(proc, None)
 
 
 ######################### SAMPLE QUERIES #####################
 
 '''
 # agent data
+
+# user agent is authorized to create objects within that scope
+query($token: String) {
+  viewer(token: $token) {
+    userIsAuthorizedToCreate(scopeId:23) 
+  }
+}
 
 query($token: String) {
   viewer(token: $token) {
@@ -833,6 +1076,9 @@ query($token: String) {
       image
       note
       type
+      eventsCount(month:12, year:2017)
+      eventHoursCount(month:12, year:2017)
+      eventPeopleCount(month:12, year:2017)
     }
   }
 }
@@ -843,6 +1089,10 @@ query($token: String) {
       id
       name
       image
+      primaryLocation {
+        name
+        address
+      }
       note
       type
       __typename
@@ -897,6 +1147,9 @@ query($token: String) {
       note
       type
       __typename
+      agentRecipes {
+        name
+      }
     }
   }
 }
@@ -908,6 +1161,52 @@ query($token: String) {
       name
       image
       type
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    organizationClassification(id:8) {
+      id
+      name
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allOrganizationClassifications {
+      id
+      name
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentPlans(month:12, year: 2017) {
+        name
+        planProcesses(month:12, year: 2017) {
+          name
+          committedInputs(action: WORK) {
+            note
+            fulfilledBy(requestDistribution: true) {
+              fulfilledBy {
+                provider {
+                  name
+                }
+                requestDistribution
+                note
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -1016,6 +1315,84 @@ query ($token: String) {
   }
 }
 
+#also ...asSubject works
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      name
+      agentRelationshipsAsObject {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 6) {
+      name
+      memberRelationships {
+        id
+        subject {
+          name
+          type
+        }
+        relationship {
+          label
+          category
+        }
+        object {
+          name
+          type
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 7) {
+      name
+      agentRelationships(category: MEMBER) {
+        id
+        subject {
+          name
+          type
+          ownedEconomicResources (resourceClassificationId: 28) {
+            createdDate
+            resourceClassifiedAs {
+              name
+            }
+            currentQuantity {
+              numericValue
+              unit {
+                name
+              }
+            }
+          }
+        }
+        relationship {
+          label
+          category
+        }
+      }
+    }
+  }
+}
+
 query ($token: String) {
   viewer(token: $token) {
     agent(id: 39) {
@@ -1082,6 +1459,7 @@ query($token: String) {
       name
       image
       note
+      email
       type
       __typename
     }
@@ -1270,6 +1648,71 @@ query ($token: String) {
   }
 }
 
+# notification data
+
+query ($token: String) {
+  viewer(token: $token) {
+    allNotificationTypes {
+      id
+      label
+      display
+      description
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    notificationSetting(id: 2) {
+      id
+      agent {
+        name
+      }
+      send
+      notificationType {
+        id
+        label
+        display
+        description
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allNotificationSettings {
+      id
+      agent {
+        name
+      }
+      send
+      notificationType {
+        label
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 6) {
+      name
+      agentNotificationSettings {
+        id
+        agent {
+          name
+        }
+        send
+        notificationType {
+          id
+          label
+        }
+      }
+    }
+  }
+}
+
 # unit data
 
 query($token: String) {
@@ -1306,9 +1749,27 @@ query($token: String) {
   }
 }
 
-query($token: String) {
+query ($token: String) {
   viewer(token: $token) {
     allResourceClassifications {
+      id
+      name
+      unit {
+        id
+        name
+        symbol
+      }
+      image
+      category
+      processCategory
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allRecipes {
       id
       name
       image
@@ -1348,6 +1809,25 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    resourceClassificationsByFacetValues(facetValues: "Material: Product,Material: Raw material,Non-material: Digital,Non-material: Formation") {
+      id
+      name
+      classificationResources {
+        id
+        trackingIdentifier
+        currentQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     resourceClassificationsByAction(action: PRODUCE) {
       name
       category
@@ -1358,9 +1838,23 @@ query ($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
-    economicResource(id: 26) {
+    allFacets {
       id
-      resourceClassification {
+      name
+      description
+      facetValues {
+        value
+        description
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    economicResource(id: 157) {
+      id
+      resourceClassifiedAs {
         name
         category
       }
@@ -1373,6 +1867,7 @@ query($token: String) {
       }
       image
       category
+      url
       note
     }
   }
@@ -1382,7 +1877,7 @@ query ($token: String) {
   viewer(token: $token) {
     allEconomicResources {
       id
-      resourceClassification {
+      resourceClassifiedAs {
         name
         category
       }
@@ -1393,8 +1888,15 @@ query ($token: String) {
           name
         }
       }
+      currentLocation {
+        name
+        address
+      }
       image
       note
+      resourceContacts {
+        name
+      }
     }
   }
 }
@@ -1405,7 +1907,7 @@ query ($token: String) {
       name
       ownedEconomicResources {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1426,11 +1928,56 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    agent (id:39) {
+      name
+      ownedEconomicResources(page:1) {
+        createdDate
+        resourceClassifiedAs {
+          name
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent (id:39) {
+      name
+      ownedEconomicResources(category: INVENTORY) {
+        owners {
+          name
+        }
+        resourceClassifiedAs {
+          name
+        }
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:106) {
+      searchOwnedInventoryResources(searchString: "jam Jars lids") {
+        id
+        note
+        resourceClassifiedAs {
+          name
+          note
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     agent(id: 6) {
       name
       ownedEconomicResources(category: CURRENCY) {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1454,7 +2001,7 @@ query ($token: String) {
       name
       ownedEconomicResources(category: INVENTORY) {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1476,7 +2023,7 @@ query ($token: String) {
   viewer(token: $token) {
     economicResource(id: 20) {
       id
-      resourceClassification {
+      resourceClassifiedAs {
         name
         category
       }
@@ -1496,7 +2043,7 @@ query ($token: String) {
         receiver {
           name
         }
-        resourceClassification {
+        resourceClassifiedAs {
           name
         }
         giveResource {
@@ -1516,20 +2063,92 @@ query ($token: String) {
   }
 }
 
+# kispagi
+# old
+query($token: String) {
+  viewer(token: $token) { agent(id:""" + str(project_id) + """) { name
+      agentProcesses {
+        name id  plannedStart plannedDuration
+        unplannedEconomicEvents { id note }
+        committedInputs { note id fulfilledBy { fulfilledBy { id }}}
+        inputs {
+          id start
+          provider {id name faircoinAddress} action note requestDistribution
+          affectedQuantity{ numericValue unit {name}} note
+          validations { id validationDate validatedBy { id name } }
+        }
+        processClassifiedAs {name} plannedDuration isFinished note
+      }
+    }
+  }
+}
+
+#new suggested
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 39) {
+      id
+      name
+      agentEconomicEvents(action: "work", year: 2017, month: 9) {
+        id
+        start
+        requestDistribution
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+        affects {
+          resourceClassifiedAs {
+            name
+            category
+          }
+          trackingIdentifier
+        }
+        provider {
+          id
+          name
+          faircoinAddress
+        }
+        note
+        inputOf {
+          id
+          name
+        }
+        validations {
+          id
+          validationDate
+          validatedBy {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
 # process data
 
 query($token: String) {
   viewer(token: $token) {
-    process(id:3) {
+    process(id:51) {
       id
       name
       scope {
         name
       }
+      processPlan {
+        name
+        due
+      }
       plannedStart
       plannedDuration
       isFinished
       note
+      userIsAuthorizedToUpdate
+      userIsAuthorizedToDelete
     }
   }
 }
@@ -1542,9 +2161,41 @@ query($token: String) {
       scope {
         name
       }
+      processClassifiedAs {
+        name
+      }
       plannedStart
       plannedDuration
       isFinished
+      note
+      isDeletable
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    processClassification (id: 3) {
+      id
+      name
+      scope {
+        name
+      }
+      estimatedDuration
+      note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    allProcessClassifications {
+      id
+      name
+      scope {
+        name
+      }
+      estimatedDuration
       note
     }
   }
@@ -1568,12 +2219,27 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
+    agent(id:39) {
+      name
+      agentPlans (isFinished: false) {
+        id
+        name
+        due
+        note
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
     agent(id:26) {
       name
       agentProcesses (isFinished: false) {
         id
         name
         plannedStart
+        plannedFinish
         plannedDuration
         isFinished
         note
@@ -1591,8 +2257,8 @@ fragment coreEventFields on EconomicEvent {
       name
     }
   }
-  affectedResource {
-    resourceClassification {
+  affects {
+    resourceClassifiedAs {
       name
       category
     }
@@ -1618,7 +2284,7 @@ fragment coreCommitmentFields on Commitment {
       name
     }
   }
-  committedClassification {
+  resourceClassifiedAs {
     name
     category
   }
@@ -1638,25 +2304,7 @@ query ($token: String) {
       unplannedEconomicEvents(action: WORK) {
         ...coreEventFields
       }
-      processEconomicEvents {
-        ...coreEventFields
-      }
-      processEconomicEvents(action: PRODUCE) {
-        ...coreEventFields
-      }
-      processCommitments {
-        ...coreCommitmentFields
-      }
-      processCommitments(action: WORK) {
-        ...coreCommitmentFields
-      }
-      inputs {
-        ...coreEventFields
-      }
-      workInputs {
-        ...coreEventFields
-      }
-      nonWorkInputs {
+      inputs (action: WORK) {
         ...coreEventFields
       }
       outputs {
@@ -1665,13 +2313,7 @@ query ($token: String) {
       committedInputs {
         ...coreCommitmentFields
       }
-      committedWorkInputs {
-        ...coreCommitmentFields
-      }
-      committedNonWorkInputs {
-        ...coreCommitmentFields
-      }
-      committedOutputs {
+      committedOutputs (action: PRODUCE) {
         ...coreCommitmentFields
       }
       nextProcesses {
@@ -1699,6 +2341,106 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    plan(id: 50) {
+      name
+      scope {
+        name
+      }
+      plannedOn
+      due
+      note
+      planProcesses {
+        name
+      }
+      workingAgents {
+        name
+        __typename
+      }
+      kanbanState
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allPlans {
+      name
+      planProcesses {
+        name
+      }
+      isDeletable
+      createdBy {
+        name
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allPlans {
+      id
+      name
+      plannedNonWorkInputs {
+        action
+        resourceClassifiedAs {
+          name
+        }
+        committedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      plannedOutputs {
+        action
+        resourceClassifiedAs {
+          name
+        }
+        committedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      nonWorkInputs {
+        action
+        affects {
+          trackingIdentifier
+          resourceClassifiedAs {
+            name
+          }
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      outputs {
+        action
+        affects {
+          trackingIdentifier
+          resourceClassifiedAs {
+            name
+          }
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
 # event data
 
 query ($token: String) {
@@ -1714,8 +2456,9 @@ query ($token: String) {
         }
       }
       note
-      affectedResource {
-        resourceClassification {
+      url
+      affects {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1741,6 +2484,43 @@ query ($token: String) {
         id
         name
       }
+      fulfills {
+        fulfilledQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    filteredEconomicEvents (action: "give", resourceClassifiedAsId: 28, startDate: "2017-01-01", endDate: "2017-04-27", receiverId: 56, providerId: 26) {
+      id
+      action
+      start
+      affects {
+        resourceClassifiedAs {
+          id
+          name
+          category
+        }
+      }
+      provider {
+        id
+        name
+      }
+      receiver {
+        id
+        name
+      }
+      scope {
+        id
+        name
+      }
     }
   }
 }
@@ -1749,18 +2529,19 @@ query ($token: String) {
   viewer(token: $token) {
     agent(id: 6) {
       name
-      agentEconomicEvents(latestNumberOfDays: 30) {
+      agentEconomicEvents(latestNumberOfDays: 30, requestDistribution: true) {
         id
         action
         start
+        requestDistribution
         affectedQuantity {
           numericValue
           unit {
             name
           }
         }
-        affectedResource {
-          resourceClassification {
+        affects {
+          resourceClassifiedAs {
             name
             category
           }
@@ -1788,7 +2569,7 @@ query ($token: String) {
             name
           }
         }
-        committedClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1819,8 +2600,8 @@ query ($token: String) {
         }
       }
       note
-      affectedResource {
-        resourceClassification {
+      affects {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1838,6 +2619,8 @@ query ($token: String) {
         id
         name
       }
+      userIsAuthorizedToUpdate
+      userIsAuthorizedToDelete
     }
   }
 }
@@ -1856,7 +2639,7 @@ query ($token: String) {
       }
       note
       affects {
-        resourceClassification {
+        resourceClassifedAs {
           name
           category
         }
@@ -1919,13 +2702,13 @@ query ($token: String) {
         }
       }
       note
-      committedClassification {
+      resourceClassifiedAs {
         name
         category
       }
       involves {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -1951,6 +2734,19 @@ query ($token: String) {
         id
         name
       }
+      plan {
+        id
+        name
+      }
+      isPlanDeliverable
+      forPlanDeliverable {
+        id
+        action
+        outputOf {
+          name
+        }
+      }
+      isDeletable
     }
   }
 }
@@ -1970,13 +2766,13 @@ query ($token: String) {
         }
       }
       note
-      committedClassification {
+      resourceClassifiedAs {
         name
         category
       }
       involves {
         id
-        resourceClassification {
+        resourceClassifiedAs {
           name
           category
         }
@@ -2002,10 +2798,14 @@ query ($token: String) {
         id
         name
       }
-      fulfilledBy {
+      plan {
+        name
+      }
+      fulfilledBy (requestDistribution: false) {
         fulfilledBy {
           action
           start
+          requestDistribution
           provider {
             name
           }
@@ -2020,6 +2820,9 @@ query ($token: String) {
       involvedAgents {
         name
       }
+      userIsAuthorizedToUpdate
+      userIsAuthorizedToDelete
+      isDeletable
     }
   }
 }
@@ -2117,7 +2920,7 @@ query ($token: String) {
       receiver {
         name
       }
-      resourceClassification {
+      resourceClassifiedAs {
         name
       }
       giveResource {
@@ -2162,27 +2965,78 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    place(id: 4) {
+      id
+      name
+      address
+      latitude
+      longitude
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    allPlaces {
+      id
+      name
+      address
+      latitude
+      longitude
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    place(id: 5) {
+      placeAgents {
+        name
+      }
+      placeResources {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+    }
+  }
+}
+
 
 ######################### SAMPLE MUTATIONS ###########################
 
 mutation ($token: String!) {
-  createProcess(token: $token, name: "Make some fudge", plannedStart: "2017-10-01", 
-    plannedDuration: 9, scopeId: 39, note: "testing") {
+  createProcess(token: $token, name: "Test planned finish", plannedStart: "2017-10-01", 
+    plannedFinish: "2017-10-10", scopeId: 39, note: "testing", planId: 62) {
     process {
       id
       name
       plannedStart
+      plannedFinish
+      processPlan {
+        name
+      }
     }
   }
 }
 
 mutation ($token: String!) {
-  updateProcess(token: $token, id: 50, 
-    plannedDuration: 10, isFinished: true) {
+  updateProcess(token: $token, id: 85, 
+    plannedFinish: "2017-10-12", isFinished: true, planId: 62) {
     process {
       name
       isFinished
+      plannedFinish
       plannedDuration
+      processPlan {
+        id
+        name
+      }
     }
   }
 }
@@ -2195,17 +3049,21 @@ mutation ($token: String!) {
   }
 }
 
-mutation ($token: String!) {
-  createCommitment(token: $token, action: "use", plannedStart: "2017-10-01", due: "2017-10-10",
-    scopeId: 39, note: "testing", committedResourceClassificationId: 17, committedResourceId: 11, 
-    committedNumericValue: "3.5", committedUnitId: 2, processId: 62,
-    providerId: 79, receiverId: 39) {
+mutation ($token: String!) {  
+  createCommitment(token: $token, action: "use", plannedStart: "2018-10-01", due: "2018-10-10",
+    scopeId: 39, note: "testing", committedResourceClassifiedAsId: 17, involvesId: 11, 
+    committedNumericValue: "3.5", committedUnitId: 2, inputOfId: 6, planId: 52,
+    providerId: 79, receiverId: 39, url: "http://www.test.coop") {
     commitment {
       id
       action
       plannedStart
       due
-      process {
+      url
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       provider {
@@ -2217,10 +3075,10 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedClassification {
+      resourceClassifiedAs {
         name
       }
-      committedResource {
+      involves {
         trackingIdentifier
       }
       committedQuantity {
@@ -2238,13 +3096,17 @@ mutation ($token: String!) {
 
 mutation ($token: String!) {
   updateCommitment(token: $token, plannedStart: "2017-10-03", due: "2017-10-12",
-    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 362) {
+    note: "testing more", committedNumericValue: "5.5", isFinished: true, id: 440, url: "http://www.testagain.coop") {
     commitment {
       id
       action
       plannedStart
       due
-      process {
+      url
+      inputOf {
+        name
+      }
+      outputOf {
         name
       }
       provider {
@@ -2256,10 +3118,10 @@ mutation ($token: String!) {
       scope {
         name
       }
-      committedClassification {
+      resourceClassifiedAs {
         name
       }
-      committedResource {
+      involves {
         trackingIdentifier
       }
       committedQuantity {
@@ -2279,6 +3141,475 @@ mutation ($token: String!) {
   deleteCommitment(token: $token, id: 11) {
     commitment {
       action
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createPlan(token: $token, name: "Fudge!", due: "2017-10-15", note: "testing") {
+    plan {
+      id
+      name
+      due
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createPlanFromRecipe(token: $token, name: "More Jam!", due: "2018-06-20", 
+    producesResourceClassificationId: 37, note: "test") {
+    plan {
+      id
+      name
+      due
+      note
+      planProcesses {
+        name
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updatePlan(token: $token, id:53, name: "Fudge!", due: "2017-10-16", note: "testing more") {
+    plan {
+      id
+      name
+      due
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deletePlan(token: $token, id: 53) {
+    plan {
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "use", start: "2017-10-01", scopeId: 39, 
+    note: "testing", affectedResourceClassifiedAsId: 17, affectsId: 11, affectedNumericValue: "3.5", 
+    affectedUnitId: 2, inputOfId: 62, providerId: 79, receiverId: 39, url: "hi.com") {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+    }
+  }
+}
+
+#creates a resource also
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "produce", start: "2017-10-07", scopeId: 39, 
+    note: "testing new resource", affectedResourceClassifiedAsId: 37, affectedNumericValue: "30", 
+    affectedUnitId: 4, outputOfId: 67, providerId: 39, receiverId: 39, createResource: true,
+    resourceNote: "new one", resourceImage: "rrr.com/image", resourceTrackingIdentifier: "test-url",
+    resourceUrl: "resource.com") {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        id
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+        currentQuantity {
+          numericValue
+        }
+        note
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "work", start: "2017-10-01", scopeId: 39, 
+    note: "testing no provider", affectedNumericValue: "5", affectedResourceClassifiedAsId: 61,
+    inputOfId: 65, affectedUnitId: 2, requestDistribution: true) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+        note
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+      requestDistribution
+    }
+  }
+}
+
+#create a resource with an event
+mutation ($token: String!) {
+  createEconomicEvent(token: $token, action: "take", start: "2017-12-01", 
+    scopeId: 39, note: "creating a resource", affectedNumericValue: "5", 
+    affectedResourceClassifiedAsId: 38, affectedUnitId: 4, resourceCurrentLocationId: 7, 
+    resourceTrackingIdentifier: "lynn-test-1234", createResource: true) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+        currentLocation {
+          name
+        }
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      url
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateEconomicEvent(token: $token, id: 350, start: "2017-10-02", scopeId: 39, 
+    note: "testing more", affectedResourceClassifiedAsId: 17, affectsId: 11, 
+    affectedNumericValue: "4.5", affectedUnitId: 2, inputOfId: 62, providerId: 79, receiverId: 39) {
+    economicEvent {
+      id
+      action
+      start
+      inputOf {
+        name
+      }
+      outputOf {
+        name
+      }
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      scope {
+        name
+      }
+      affects {
+        trackingIdentifier
+        resourceClassifiedAs {
+          name
+        }
+      }
+      affectedQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteEconomicEvent(token: $token, id: 350) {
+    economicEvent {
+      action
+      start
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateEconomicResource(token: $token, id: 128, trackingIdentifier: "xxxccc333", 
+    note: "testing url", resourceClassifiedAsId: 37, image: "xxx.com", url: "rrr.com") {
+    economicResource {
+      id
+      trackingIdentifier
+      resourceClassifiedAs {
+        name
+      }
+      currentQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      note
+      image
+      url
+      currentLocation {
+        id
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteEconomicResource(token: $token, id: 34) {
+    economicResource {
+      trackingIdentifier
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updatePerson(token: $token, id: 74, note: "test", name: "test agent", primaryLocationId: 24,
+  image: "https://testocp.freedomcoop.eu/site_media/media/photos/what_is_it.JPG") {
+    person {
+      id
+      name
+      note
+      image
+      primaryLocation {
+        name
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createOrganization(token: $token, type: "Organization", name: "test org 2") {
+    organization {
+      id
+      name
+      note
+      image
+      type
+      primaryLocation {
+        name
+      }
+      primaryPhone
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createPerson(token: $token, name: "anne person", note:"test", type: "Individual", primaryLocationId: 24, 
+    image: "https://testocp.freedomcoop.eu/site_media/media/photos/what_is_it.JPG", primaryPhone: "333-444-5555" ) {
+    person {
+      id
+      name
+      note
+      image
+      type
+      primaryLocation {
+        name
+      }
+      primaryPhone
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deletePerson(token: $token, id: 39) {
+    person {
+      id
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteOrganization(token: $token, id: 142) {
+    organization {
+      id
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createNotificationSetting(token: $token, notificationTypeId: 1, agentId: 107, send: true) {
+    notificationSetting {
+      id
+      notificationType {
+        display
+      }
+      send
+      agent {
+        name
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateNotificationSetting (token: $token, id: 137, send: true) {
+    notificationSetting {
+      id
+      notificationType {
+        display
+      }
+      send
+      agent {
+        name
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createValidation(token: $token, validatedById: 6, economicEventId: 392) {
+    validation {
+      id
+      validatedBy {
+        name
+      }
+      economicEvent {
+        action
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      validationDate
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteValidation(token: $token, id: 4) {
+    validation {
+      validationDate
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createAgentRelationship(token: $token, subjectId: 122, objectId: 119, 
+    relationshipId: 9, note: "test") {
+    agentRelationship {
+      id
+      subject {
+        name
+      }
+      relationship {
+        label
+      }
+      object {
+        name
+      }
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateAgentRelationship(token: $token, id: 275, subjectId: 122, objectId: 131, 
+    note: "test update") {
+    agentRelationship {
+      id
+      subject {
+        name
+      }
+      relationship {
+        label
+      }
+      object {
+        name
+      }
+      note
     }
   }
 }

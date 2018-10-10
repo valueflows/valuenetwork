@@ -33,6 +33,7 @@ class AgentRelationship(DjangoObjectType):
     subject = graphene.Field(lambda: types.Agent)
     object = graphene.Field(lambda: types.Agent)
     relationship = graphene.Field(lambda: AgentRelationshipRole)
+    note = graphene.String(source='description')
 
     class Meta:
         model = AgentAssociation

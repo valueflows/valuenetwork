@@ -73,6 +73,12 @@ class Query(graphene.ObjectType):
 
 class Mutation(graphene.ObjectType):
     create_token = valuenetwork.api.schemas.Auth.CreateToken.Field()
+    create_person = valuenetwork.api.schemas.Agent.CreatePerson.Field()
+    create_organization = valuenetwork.api.schemas.Agent.CreateOrganization.Field()
+    update_person = valuenetwork.api.schemas.Agent.UpdatePerson.Field()
+    update_organization = valuenetwork.api.schemas.Agent.UpdateOrganization.Field()
+    delete_person = valuenetwork.api.schemas.Agent.DeletePerson.Field()
+    delete_organization = valuenetwork.api.schemas.Agent.DeleteOrganization.Field()
     create_process = valuenetwork.api.schemas.Process.CreateProcess.Field()
     update_process = valuenetwork.api.schemas.Process.UpdateProcess.Field()
     delete_process = valuenetwork.api.schemas.Process.DeleteProcess.Field()

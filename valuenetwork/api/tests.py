@@ -2839,4 +2839,167 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  updatePerson(token: $token, id: 74, note: "test", name: "test agent", primaryLocationId: 24,
+  image: "https://testocp.freedomcoop.eu/site_media/media/photos/what_is_it.JPG") {
+    person {
+      id
+      name
+      note
+      image
+      primaryLocation {
+        name
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createOrganization(token: $token, type: "Organization", name: "test org 2") {
+    organization {
+      id
+      name
+      note
+      image
+      type
+      primaryLocation {
+        name
+      }
+      primaryPhone
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createPerson(token: $token, name: "anne person", note:"test", type: "Individual", primaryLocationId: 24, 
+    image: "https://testocp.freedomcoop.eu/site_media/media/photos/what_is_it.JPG", primaryPhone: "333-444-5555" ) {
+    person {
+      id
+      name
+      note
+      image
+      type
+      primaryLocation {
+        name
+      }
+      primaryPhone
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deletePerson(token: $token, id: 39) {
+    person {
+      id
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteOrganization(token: $token, id: 142) {
+    organization {
+      id
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createNotificationSetting(token: $token, notificationTypeId: 1, agentId: 107, send: true) {
+    notificationSetting {
+      id
+      notificationType {
+        display
+      }
+      send
+      agent {
+        name
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateNotificationSetting (token: $token, id: 137, send: true) {
+    notificationSetting {
+      id
+      notificationType {
+        display
+      }
+      send
+      agent {
+        name
+      }
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createValidation(token: $token, validatedById: 6, economicEventId: 392) {
+    validation {
+      id
+      validatedBy {
+        name
+      }
+      economicEvent {
+        action
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      validationDate
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteValidation(token: $token, id: 4) {
+    validation {
+      validationDate
+    }
+  }
+}
+
+mutation ($token: String!) {
+  createAgentRelationship(token: $token, subjectId: 122, objectId: 119, 
+    relationshipId: 9, note: "test") {
+    agentRelationship {
+      id
+      subject {
+        name
+      }
+      relationship {
+        label
+      }
+      object {
+        name
+      }
+      note
+    }
+  }
+}
+
+mutation ($token: String!) {
+  updateAgentRelationship(token: $token, id: 275, subjectId: 122, objectId: 131, 
+    note: "test update") {
+    agentRelationship {
+      id
+      subject {
+        name
+      }
+      relationship {
+        label
+      }
+      object {
+        name
+      }
+      note
+    }
+  }
+}
+
 '''

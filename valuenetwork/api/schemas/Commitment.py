@@ -212,7 +212,9 @@ class UpdateCommitment(AuthedMutation):
                 commitment.start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
             if scope_id:
                 commitment.context_agent = EconomicAgent.objects.get(pk=scope_id)
-            if provider_id:
+            if provider_id == 0:
+                commitment.from_agent = None
+            elif provider_id:
                 commitment.from_agent = EconomicAgent.objects.get(pk=provider_id)
             if receiver_id:
                 commitment.to_agent = EconomicAgent.objects.get(pk=receiver_id)

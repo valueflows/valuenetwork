@@ -1185,6 +1185,21 @@ query($token: String) {
   }
 }
 
+query($token: String) {
+  viewer(token: $token) {
+    person(id:6) {
+      name
+      commitmentsMatchingSkills {
+        id
+        action
+        resourceClassifiedAs {
+          name
+        }
+      }
+    }
+  }
+}
+
 query ($token: String) {
   viewer(token: $token) {
     agent(id: 39) {

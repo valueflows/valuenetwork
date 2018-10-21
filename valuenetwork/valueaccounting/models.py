@@ -1313,6 +1313,21 @@ class EconomicAgent(models.Model):
             answer = [a.is_associate for a in self.all_has_associates() if a.is_associate.is_individual()]
         return answer
 
+    def commitments_with_my_skills(self):
+        answer = []
+        if not self.is_context:
+            skill_ids = self.resource_types.values_list('resource_type__id', flat=True)
+            my_projects = self.is_member_of()
+            project_ids = []
+            for proj in my_projects:
+                project_ids.append(proj.id)
+            answer = Commitment.objects.unfinished().filter(
+                from_agent=None,
+                event_type__relationship="work",
+                resource_type__id__in=skill_ids,
+                process__context_agent__id__in=project_ids)
+        return answer
+
     def child_tree(self):
         from valuenetwork.valueaccounting.utils import agent_dfs_by_association
         #todo: figure out why this failed when AAs were ordered by from_agent

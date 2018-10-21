@@ -87,6 +87,8 @@ class Agent(graphene.Interface):
 
     agent_skills = graphene.List(lambda: types.ResourceClassification)
 
+    commitments_matching_skills = graphene.List(lambda: types.Commitment)
+
     validated_events_count = graphene.Int(month=graphene.Int(), year=graphene.Int())
 
     events_count = graphene.Int(year=graphene.Int(), month=graphene.Int())
@@ -322,6 +324,10 @@ class Agent(graphene.Interface):
     def resolve_agent_skills(self, args, context, info):
         agent = _load_identified_agent(self)
         return agent.skills()
+
+    def resolve_commitments_matching_skills(self, args, context, info):
+        agent = _load_identified_agent(self)
+        return agent.commitments_with_my_skills()
 
     def resolve_validated_events_count(self, args, *rargs):
         agent = _load_identified_agent(self)

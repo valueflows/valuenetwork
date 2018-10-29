@@ -5,7 +5,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from django.db.models import Q
-from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType, EventTypeManager, EventType
+from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType, EventTypeManager, EventType, AgentResourceType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship, AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
@@ -86,6 +86,8 @@ class Agent(graphene.Interface):
     member_relationships = graphene.List(AgentRelationship)
 
     agent_skills = graphene.List(lambda: types.ResourceClassification)
+
+    agent_skill_relationships = graphene.List(lambda: types.AgentResourceClassification)
 
     commitments_matching_skills = graphene.List(lambda: types.Commitment)
 
@@ -324,6 +326,10 @@ class Agent(graphene.Interface):
     def resolve_agent_skills(self, args, context, info):
         agent = _load_identified_agent(self)
         return agent.skills()
+ 
+    def resolve_agent_skill_relationships(self, args, context, info):
+        agent = _load_identified_agent(self)
+        return agent.skill_relationships()
 
     def resolve_commitments_matching_skills(self, args, context, info):
         agent = _load_identified_agent(self)

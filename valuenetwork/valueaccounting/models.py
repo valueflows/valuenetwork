@@ -905,6 +905,9 @@ class EconomicAgent(models.Model):
                 rts.append(art.resource_type)
         return rts
 
+    def skill_relationships(self):
+        return self.resource_types.all()
+
     def contributions(self):
         return self.given_events.filter(is_contribution=True)
     

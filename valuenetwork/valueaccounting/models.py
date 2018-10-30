@@ -917,6 +917,36 @@ class EconomicAgent(models.Model):
     def involved_in_commitments(self):
         return Commitment.objects.filter(Q(from_agent=self)|Q(to_agent=self)|Q(context_agent=self))
 
+    def active_commitments(self):
+        return [p for p in self.involved_in_commitments() if p.finished==False]
+
+    def finished_commitments(self):
+        return [p for p in self.involved_in_commitments() if p.finished==True]
+
+    # primitive search
+    def search_commitments(self, search_string, finished=None, also_search_children=True):
+        if also_search_children:
+            agents = self.with_all_sub_agents() #includes self
+        else: #not tested
+            agents = []
+            agents.append(self)
+        commits = []
+        for agent in agents:
+            if finished==True:
+                commits.extend(list(agent.finished_commitments()))
+            elif finished==False:
+                commits.extend(list(agent.active_commitments()))
+            else:
+                commits.extend(list(agent.involved_in_commitments()))
+        answer = []
+        strings = search_string.lower().split(" ")
+        for com in commits:
+            for string in strings:
+                if com.description:
+                    if string in com.description.lower():
+                        answer.append(com)
+        return list(set(answer))
+
     def user(self):
         users = self.users.filter(user__is_active=True)
         if users:
@@ -976,6 +1006,31 @@ class EconomicAgent(models.Model):
         else:
             return self.context_processes()
 
+    # primitive search
+    def search_processes(self, search_string, finished=None, also_search_children=True):
+        if also_search_children:
+            agents = self.with_all_sub_agents() #includes self
+        else: #not tested
+            agents = []
+            agents.append(self)
+        procs = []
+        for agent in agents:
+            if finished==True:
+                procs.extend(list(agent.finished_processes()))
+            elif finished==False:
+                procs.extend(list(agent.active_processes()))
+            else:
+                procs.extend(list(agent.all_processes()))
+        answer = []
+        strings = search_string.lower().split(" ")
+        for proc in procs:
+            for string in strings:
+                if string in proc.name.lower():
+                    answer.append(proc)
+                elif string in proc.notes.lower():
+                    answer.append(proc)
+        return list(set(answer))
+
     def all_plans(self):
         procs = self.all_processes()
         plans = []
@@ -1004,6 +1059,33 @@ class EconomicAgent(models.Model):
             if plan.has_open_processes(): 
                 open_plans.append(plan)
         return open_plans
+
+    # primitive search
+    def search_plans(self, search_string, finished=None, also_search_children=True):
+        if also_search_children:
+            agents = self.with_all_sub_agents() #includes self
+        else: #not tested
+            agents = []
+            agents.append(self)
+        plans = []
+        for agent in agents:
+            if finished==True:
+                plans.extend(list(agent.finished_plans()))
+            elif finished==False:
+                plans.extend(list(agent.unfinished_plans()))
+            else:
+                plans.extend(list(agent.all_plans()))
+        answer = []
+        strings = search_string.lower().split(" ")
+        for plan in plans:
+            for string in strings:
+                if plan.name:
+                    if string in plan.name.lower():
+                        answer.append(plan)
+                if plan.description:
+                    if string in plan.description.lower():
+                        answer.append(plan)
+        return list(set(answer))
 
     def resources_created(self):
         creations = []

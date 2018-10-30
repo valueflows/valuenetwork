@@ -46,10 +46,18 @@ class Agent(graphene.Interface):
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
 
+    search_agent_processes = graphene.List(lambda: types.Process,
+                                              search_string=graphene.String(),
+                                              is_finished=graphene.Boolean())
+
     agent_plans = graphene.List(lambda: types.Plan,
                                 is_finished=graphene.Boolean(),
                                 year=graphene.Int(),
                                 month=graphene.Int())
+
+    search_agent_plans = graphene.List(lambda: types.Plan,
+                                              search_string=graphene.String(),
+                                              is_finished=graphene.Boolean())
 
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                           latest_number_of_days=graphene.Int(),
@@ -60,6 +68,10 @@ class Agent(graphene.Interface):
 
     agent_commitments = graphene.List(lambda: types.Commitment,
                                       latest_number_of_days=graphene.Int())
+
+    search_agent_commitments = graphene.List(lambda: types.Commitment,
+                                              search_string=graphene.String(),
+                                              is_finished=graphene.Boolean())
 
     agent_relationships = graphene.List(AgentRelationship,
                                         role_id=graphene.Int(),
@@ -158,6 +170,16 @@ class Agent(graphene.Interface):
                 return agent_processes
         return None
 
+    def resolve_search_agent_processes(self, args, context, info):
+        agent = _load_identified_agent(self)
+        finished = args.get('is_finished', None)
+        search_string = args.get('search_string', "")
+        if search_string == "":
+            raise ValidationError("A search string is required.")
+        if agent:
+            return agent.search_processes(search_string=search_string, finished=finished)
+        return None
+
     # if an organization, this returns plans from that context
     # if a person, this returns plans the person has worked on
     def resolve_agent_plans(self, args, context, info):
@@ -180,6 +202,16 @@ class Agent(graphene.Interface):
                         dated_plans.append(plan)
                 plans = dated_plans
             return plans
+        return None
+
+    def resolve_search_agent_plans(self, args, context, info):
+        agent = _load_identified_agent(self)
+        finished = args.get('is_finished', None)
+        search_string = args.get('search_string', "")
+        if search_string == "":
+            raise ValidationError("A search string is required.")
+        if agent:
+            return agent.search_plans(search_string=search_string, finished=finished)
         return None
 
     # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events
@@ -217,6 +249,16 @@ class Agent(graphene.Interface):
                 commits = agent.involved_in_commitments()
             commits = commits.exclude(event_type__name="Give").exclude(event_type__name="Receive")
             return commits
+        return None
+
+    def resolve_search_agent_commitments(self, args, context, info):
+        agent = _load_identified_agent(self)
+        finished = args.get('is_finished', None)
+        search_string = args.get('search_string', "")
+        if search_string == "":
+            raise ValidationError("A search string is required.")
+        if agent:
+            return agent.search_commitments(search_string=search_string, finished=finished)
         return None
 
     def resolve_agent_relationships(self, args, context, info):

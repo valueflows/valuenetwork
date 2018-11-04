@@ -9843,7 +9843,7 @@ class Option(models.Model):
 class CommitmentManager(models.Manager):
 
     def unfinished(self):
-        return Commitment.objects.filter(finished=False)
+        return Commitment.objects.filter(finished=False).filter(process__finished=False)
 
     def finished(self):
         return Commitment.objects.filter(finished=True)

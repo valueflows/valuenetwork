@@ -77,9 +77,9 @@ class CreateCommitment(AuthedMutation):
         #for_plan_deliverable_id = args.get('for_plan_deliverable_id')
         url = args.get('url')
 
-        if output_of_id or input_of_id:
-            if not plan_id:
-                raise ValidationError("Process related commitments must be part of a plan.")
+        #if output_of_id or input_of_id:
+        #    if not plan_id:
+        #        raise ValidationError("Process related commitments must be part of a plan.")
         event_type = EventType.objects.convert_action_to_event_type(action)
         if not note:
             note = ""

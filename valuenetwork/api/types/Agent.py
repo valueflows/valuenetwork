@@ -5,7 +5,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from django.db.models import Q
-from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType, EventTypeManager, EventType, AgentResourceType
+from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType, EventTypeManager, EventType, AgentResourceType, EconomicResourceType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship, AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
@@ -42,6 +42,9 @@ class Agent(graphene.Interface):
 
     search_owned_inventory_resources = graphene.List(lambda: types.EconomicResource,
                                               search_string=graphene.String())
+
+    agent_defined_resource_classifications = graphene.List(lambda: types.ResourceClassification,
+                                                   action=graphene.String())
 
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
@@ -155,6 +158,37 @@ class Agent(graphene.Interface):
         if search_string == "":
             raise ValidationError("A search string is required.")
         return agent.search_owned_resources(search_string=search_string)
+
+    def resolve_agent_defined_resource_classifications(self, args, context, info):
+        agent = _load_identified_agent(self)
+        action = args.get('action', None)
+        rts = agent.defined_resource_types()
+        if action == None:
+            return rts
+        else:
+            filtered_rts = []
+            if action == "work":
+                for rt in rts:
+                    if rt.behavior == "work":
+                        filtered_rts.append(rt)
+            if action == "use":
+                for rt in rts:
+                    if rt.behavior == "used":
+                        filtered_rts.append(rt)
+            if action == "consume":
+                for rt in rts:
+                    if rt.behavior == "consumed":
+                        filtered_rts.append(rt)
+            if action == "cite":
+                for rt in rts:
+                    if rt.behavior == "cited":
+                        filtered_rts.append(rt)
+            if action == "produce" or action == "improve" or action == "accept":
+                for rt in rts:
+                    if rt.behavior == "produced" or rt.behavior == "used" or rt.behavior == "cited" or rt.behavior == "consumed":
+                        filtered_rts.append(rt)
+            return filtered_rts
+
 
     # if an organization, this returns processes done in that context
     # if a person, this returns proceses the person has worked on

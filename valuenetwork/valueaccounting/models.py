@@ -1645,6 +1645,13 @@ class EconomicAgent(models.Model):
             parent = parent.parent()
         return None
 
+    def defined_resource_types(self, event_type=None):
+        agents = list(self.all_ancestors())
+        rts = []
+        for agent in agents:
+            rts.extend(agent.context_resource_types.all())
+        return list(set(rts))
+
     def virtual_accounts(self):
         vars = self.agent_resource_roles.filter(
             role__is_owner=True,

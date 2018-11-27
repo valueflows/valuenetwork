@@ -1818,6 +1818,17 @@ query ($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 146) {
+      agentDefinedResourceClassifications(action: "work") {
+        id
+        name
+      }
+    }
+  }
+}
+
 query($token: String) {
   viewer(token: $token) {
     allRecipes {

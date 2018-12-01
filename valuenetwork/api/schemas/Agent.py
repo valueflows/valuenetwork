@@ -253,12 +253,11 @@ class UpdateOrganization(AuthedMutation):
 
         return UpdateOrganization(organization=formatAgent(agent))
 
-'''
-class DeleteAgent(AuthedMutation):
+class DeletePerson(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         id = graphene.Int(required=True)
 
-    agent = graphene.Field(lambda: Commitment)
+    person = graphene.Field(lambda: Person)
 
     @classmethod
     def mutate(cls, root, args, context, info):
@@ -267,13 +266,35 @@ class DeleteAgent(AuthedMutation):
         if agent:
             if agent.is_deletable():
                 user_agent = AgentUser.objects.get(user=context.user).agent
-                is_authorized = user_agent.is_authorized(object_to_mutate=commitment)
-                if is_authorized:
-                    agent.delete()
-                else:
-                    raise PermissionDenied('User not authorized to perform this action.')
+                #is_authorized = user_agent.is_authorized(context_agent_id=agent.id) TODO: what should be the rule?
+                #if is_authorized:
+                agent.delete()
+                #else:
+                #    raise PermissionDenied('User not authorized to perform this action.')
             else:
-                raise PermissionDenied("Commitment has fulfilling events so cannot be deleted.")
+                raise PermissionDenied("Person has activity or relationships and cannot be deleted.")
 
-        return DeleteAgent(agent=agent)
-'''
+        return DeletePerson(person=formatAgent(agent))
+
+class DeleteOrganization(AuthedMutation):
+    class Input(with_metaclass(AuthedInputMeta)):
+        id = graphene.Int(required=True)
+
+    organization = graphene.Field(lambda: Organization)
+
+    @classmethod
+    def mutate(cls, root, args, context, info):
+        id = args.get('id')
+        agent = EconomicAgent.objects.get(pk=id)
+        if agent:
+            if agent.is_deletable():
+                user_agent = AgentUser.objects.get(user=context.user).agent
+                #is_authorized = user_agent.is_authorized(context_agent_id=agent.id) TODO: what should be the rule?
+                #if is_authorized:
+                agent.delete()
+                #else:
+                #    raise PermissionDenied('User not authorized to perform this action.')
+            else:
+                raise PermissionDenied("Organization has activity or relationships and cannot be deleted.")
+
+        return DeleteOrganization(organization=formatAgent(agent))

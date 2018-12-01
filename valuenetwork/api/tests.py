@@ -3500,6 +3500,24 @@ mutation ($token: String!) {
 }
 
 mutation ($token: String!) {
+  deletePerson(token: $token, id: 39) {
+    person {
+      id
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteOrganization(token: $token, id: 142) {
+    organization {
+      id
+      name
+    }
+  }
+}
+
+mutation ($token: String!) {
   createNotificationSetting(token: $token, notificationTypeId: 1, agentId: 107, send: true) {
     notificationSetting {
       id

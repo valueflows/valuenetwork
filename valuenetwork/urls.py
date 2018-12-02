@@ -12,10 +12,12 @@ admin.autodiscover()
 
 import valuenetwork.valueaccounting.views
 
-
 urlpatterns = [
     #url(r"^$", LoginView.as_view(template_name='account/login.html'), name='home'),
     url(r"^$", valuenetwork.valueaccounting.views.home, name="home"),
+    url(r"^signup/$", valuenetwork.valueaccounting.views.signup, name="signup"),
+    url(r'^signup/confirm/$', valuenetwork.valueaccounting.views.signup_confirm, name='signup_confirm'),
+    url(r'^signup/complete/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', valuenetwork.valueaccounting.views.signup_complete, name='signup_complete'),
     url(r"^accounting/", include("valuenetwork.valueaccounting.urls")),
     url(r"^admin/", include(admin.site.urls)),
     url(r"^account/", include("account.urls")),
@@ -26,6 +28,7 @@ urlpatterns = [
     url(r'^comments/', include('django_comments.urls')),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^robots.txt$', lambda r: HttpResponse("User-agent: *\nAllow: /$\nDisallow: /", content_type="text/plain")),
+
 
 ]
 

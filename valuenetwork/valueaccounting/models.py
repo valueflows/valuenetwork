@@ -1814,6 +1814,14 @@ class EconomicAgent(models.Model):
             return False
         if self.faircoin_resource():
             return False
+        if self.events.filter(quantity__gt=0):
+            return False
+        if self.commitments.filter(quantity__gt=0):
+            return False
+        if self.is_associate_of.all():
+            return False
+        if self.has_associates.all():
+            return False        
         return True
 
     def contexts_participated_in(self):

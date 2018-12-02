@@ -253,6 +253,7 @@ class UpdateOrganization(AuthedMutation):
 
         return UpdateOrganization(organization=formatAgent(agent))
 
+
 class DeletePerson(AuthedMutation):
     class Input(with_metaclass(AuthedInputMeta)):
         id = graphene.Int(required=True)

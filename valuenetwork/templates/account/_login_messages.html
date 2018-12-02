@@ -1,0 +1,9 @@
+{% load i18n %}
+
+{% if 'info' in request.GET %}
+  <div class="alert alert-info">
+    {% if request.GET.info == 'signup_complete' %}
+      {% trans "<strong>Sign up complete.</strong><br>You can now login." %}
+    {% endif %}
+  </div>
+{% endif %}

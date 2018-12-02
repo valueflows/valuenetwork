@@ -69,7 +69,8 @@ body {
         <li>{% trans "Use some legal services that can be covered with a quarterly fee and tax distribution between Freedom Coop members." %}</li>
         <li>{% trans "Manage an online Faircoin wallet to accept and make payments." %}</li></ul>
         <p>{% trans "Freedom Coop, will use OCP for our collective organization as an open cooperative process." %}</p>
-        </p></td>
+        <p style="text-align:center;"><a href="{% url "signup" %}" class="btn btn-primary">{% trans "Sign Up" %}</a></p>
+        </td>
       </tr>
       <tr>
         <td width="50%" class="login-block">
@@ -78,6 +79,7 @@ body {
           <div class="log">
             <form method="POST" action="{% url "account_login" %}" autocapitalize="off" class="form-horizontal"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
                 {% csrf_token %}
+                {% include "account/_login_messages.html" %}
                 {{ form|as_bootstrap }}
                 {% if redirect_field_value %}
                     <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />

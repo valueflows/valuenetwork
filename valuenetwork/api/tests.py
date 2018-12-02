@@ -1167,6 +1167,32 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
+    emailExists(email:"xxx@gmail.com")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    usernameExists(username:"lynn")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    createInactiveUser(username:"lynn-xfxzz", email:"qxaw@gmail.com", pswd:"xxdd")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    activateUserCreatePerson(username:"lynn-xfxzz", 
+      userToken:"51s-10ed8117b79f4863e46b", 
+      name:"Lynn F", image:"http://images.example.com/jdskdsf", phone:"555-3434")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
     organizationClassification(id:8) {
       id
       name

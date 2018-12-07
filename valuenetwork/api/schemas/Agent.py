@@ -57,6 +57,7 @@ class Query(graphene.AbstractType):
 
     email_exists = graphene.Boolean(email=graphene.String())
 
+    # the next 2 methods are for someone registering, sending an email, they click a link in the email to complete registration
     create_inactive_user = graphene.String(username=graphene.String(), 
                                            email=graphene.String(), 
                                            pswd=graphene.String())
@@ -66,6 +67,14 @@ class Query(graphene.AbstractType):
                                                   image=graphene.String(),
                                                   phone=graphene.String(),
                                                   user_token=graphene.String())
+
+    # the next method is for using a captcha so everything is created at once
+    create_user_person = graphene.String(username=graphene.String(),
+                                        email=graphene.String(), 
+                                        pswd=graphene.String(),
+                                        name=graphene.String(),
+                                        image=graphene.String(),
+                                        phone=graphene.String())
 
     def resolve_username_exists(self, args, *rargs):
         username = args.get('username')
@@ -146,6 +155,45 @@ class Query(graphene.AbstractType):
             user = user)
         au.save()
         return "User " + username + " activated, Agent and AgentUser created."
+
+    def resolve_create_user_person(self, args, *rargs):
+        username = args.get('username', None)
+        email = args.get('email', None)
+        pswd = args.get('pswd', None)
+        name = args.get('name', None)
+        image = args.get('image', None)
+        phone = args.get('phone', None)
+
+        if username is None:
+            raise ValidationError("Username is required.")
+        if name is None:
+            raise ValidationError("Name is required.")
+        if email is None:
+            raise ValidationError("Email is required.")
+        if pswd is None:
+            raise ValidationError("Password is required.")
+
+        user = User.objects.create_user(username=username, email=email, password=pswd)
+        user.is_active = True
+        user.save()
+        at_person = AgentType.objects.get(party_type="individual")
+        agent = EconomicAgent(
+            nick = name,
+            name = name,
+            photo_url = image,
+            phone_primary = phone,
+            agent_type = at_person,
+            email = user.email,
+            created_by = user,
+        )
+        agent.save()
+        au = AgentUser(
+            agent = agent,
+            user = user)
+        au.save()
+        return "User " + username + " created, Agent and AgentUser created."
+
+
 
     ##################################################################
 

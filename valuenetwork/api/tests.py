@@ -1193,6 +1193,13 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
+    createUserPerson(username:"lynn-xfqxxzzs", email:"qxsxqaw@gmail.com", pswd:"xxdd",
+    name:"Lynn Test", image:"http://xxx.image.com", phone:"608-555-1212" )
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
     organizationClassification(id:8) {
       id
       name

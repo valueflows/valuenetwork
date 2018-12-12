@@ -47,7 +47,7 @@ class CreateProcess(AuthedMutation):
         planned_finish = graphene.String(required=True)
         scope_id = graphene.Int(required=True)
         note = graphene.String(required=False)
-        plan_id = graphene.Int(required=True)
+        plan_id = graphene.Int(required=False)
 
     process = graphene.Field(lambda: Process)
 
@@ -66,7 +66,9 @@ class CreateProcess(AuthedMutation):
         start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
         end_date = datetime.datetime.strptime(planned_finish, '%Y-%m-%d').date()
         scope = EconomicAgent.objects.get(pk=scope_id)
-        plan = Order.objects.get(pk=plan_id)
+        plan = None
+        if plan_id:
+            plan = Order.objects.get(pk=plan_id)
         process = ProcessProxy(
             name=name,
             start_date=start_date,

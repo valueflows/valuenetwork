@@ -584,6 +584,21 @@ class EconomicAgent(models.Model):
                     context_agent = object_to_mutate.is_associate
                 elif object_to_mutate.has_associate.is_context:
                     context_agent = object_to_mutate.has_associate
+            elif type(object_to_mutate) is EconomicAgent:
+                if object_to_mutate == self:
+                    return True
+                elif object_to_mutate.is_context == True:
+                    if self.is_manager_of(object_to_mutate): #TODO: need actual generic requirement
+                        return True
+                    else:
+                        return False
+                else:
+                    return False
+            elif type(object_to_mutate) is AgentResourceType:
+                if self == object_to_mutate.agent:
+                    return True
+                else:
+                    return False
             else:
                 context_agent = object_to_mutate.context_agent
         else:
@@ -890,6 +905,9 @@ class EconomicAgent(models.Model):
                 rts.append(art.resource_type)
         return rts
 
+    def skill_relationships(self):
+        return self.resource_types.all()
+
     def contributions(self):
         return self.given_events.filter(is_contribution=True)
     
@@ -898,6 +916,36 @@ class EconomicAgent(models.Model):
     
     def involved_in_commitments(self):
         return Commitment.objects.filter(Q(from_agent=self)|Q(to_agent=self)|Q(context_agent=self))
+
+    def active_commitments(self):
+        return [p for p in self.involved_in_commitments() if p.finished==False]
+
+    def finished_commitments(self):
+        return [p for p in self.involved_in_commitments() if p.finished==True]
+
+    # primitive search
+    def search_commitments(self, search_string, finished=None, also_search_children=True):
+        if also_search_children:
+            agents = self.with_all_sub_agents() #includes self
+        else: #not tested
+            agents = []
+            agents.append(self)
+        commits = []
+        for agent in agents:
+            if finished==True:
+                commits.extend(list(agent.finished_commitments()))
+            elif finished==False:
+                commits.extend(list(agent.active_commitments()))
+            else:
+                commits.extend(list(agent.involved_in_commitments()))
+        answer = []
+        strings = search_string.lower().split(" ")
+        for com in commits:
+            for string in strings:
+                if com.description:
+                    if string in com.description.lower():
+                        answer.append(com)
+        return list(set(answer))
 
     def user(self):
         users = self.users.filter(user__is_active=True)
@@ -958,6 +1006,31 @@ class EconomicAgent(models.Model):
         else:
             return self.context_processes()
 
+    # primitive search
+    def search_processes(self, search_string, finished=None, also_search_children=True):
+        if also_search_children:
+            agents = self.with_all_sub_agents() #includes self
+        else: #not tested
+            agents = []
+            agents.append(self)
+        procs = []
+        for agent in agents:
+            if finished==True:
+                procs.extend(list(agent.finished_processes()))
+            elif finished==False:
+                procs.extend(list(agent.active_processes()))
+            else:
+                procs.extend(list(agent.all_processes()))
+        answer = []
+        strings = search_string.lower().split(" ")
+        for proc in procs:
+            for string in strings:
+                if string in proc.name.lower():
+                    answer.append(proc)
+                elif string in proc.notes.lower():
+                    answer.append(proc)
+        return list(set(answer))
+
     def all_plans(self):
         procs = self.all_processes()
         plans = []
@@ -986,6 +1059,33 @@ class EconomicAgent(models.Model):
             if plan.has_open_processes(): 
                 open_plans.append(plan)
         return open_plans
+
+    # primitive search
+    def search_plans(self, search_string, finished=None, also_search_children=True):
+        if also_search_children:
+            agents = self.with_all_sub_agents() #includes self
+        else: #not tested
+            agents = []
+            agents.append(self)
+        plans = []
+        for agent in agents:
+            if finished==True:
+                plans.extend(list(agent.finished_plans()))
+            elif finished==False:
+                plans.extend(list(agent.unfinished_plans()))
+            else:
+                plans.extend(list(agent.all_plans()))
+        answer = []
+        strings = search_string.lower().split(" ")
+        for plan in plans:
+            for string in strings:
+                if plan.name:
+                    if string in plan.name.lower():
+                        answer.append(plan)
+                if plan.description:
+                    if string in plan.description.lower():
+                        answer.append(plan)
+        return list(set(answer))
 
     def resources_created(self):
         creations = []
@@ -1313,6 +1413,21 @@ class EconomicAgent(models.Model):
             answer = [a.is_associate for a in self.all_has_associates() if a.is_associate.is_individual()]
         return answer
 
+    def commitments_with_my_skills(self):
+        answer = []
+        if not self.is_context:
+            skill_ids = self.resource_types.values_list('resource_type__id', flat=True)
+            my_projects = self.is_member_of()
+            project_ids = []
+            for proj in my_projects:
+                project_ids.append(proj.id)
+            answer = Commitment.objects.unfinished().filter(
+                from_agent=None,
+                event_type__relationship="work",
+                resource_type__id__in=skill_ids,
+                process__context_agent__id__in=project_ids)
+        return answer
+
     def child_tree(self):
         from valuenetwork.valueaccounting.utils import agent_dfs_by_association
         #todo: figure out why this failed when AAs were ordered by from_agent
@@ -1529,6 +1644,13 @@ class EconomicAgent(models.Model):
                 return xs[0]
             parent = parent.parent()
         return None
+
+    def defined_resource_types(self, event_type=None):
+        agents = list(self.all_ancestors())
+        rts = []
+        for agent in agents:
+            rts.extend(agent.context_resource_types.all())
+        return list(set(rts))
 
     def virtual_accounts(self):
         vars = self.agent_resource_roles.filter(
@@ -6757,6 +6879,10 @@ class AgentResourceType(models.Model):
             self.resource_type.name,
         ])
 
+    @property #ValueFlows
+    def action(self):
+        return self.event_type.action
+
     def label(self):
         return "source"
 
@@ -9724,7 +9850,7 @@ class Option(models.Model):
 class CommitmentManager(models.Manager):
 
     def unfinished(self):
-        return Commitment.objects.filter(finished=False)
+        return Commitment.objects.filter(finished=False).filter(process__finished=False)
 
     def finished(self):
         return Commitment.objects.filter(finished=True)

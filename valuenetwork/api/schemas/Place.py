@@ -55,14 +55,14 @@ class CreatePlace(AuthedMutation):
             name=name,
             address=address,
             latitude=latitude,
-            notes=note,
+            description=note,
             longitude=longitude,
         )
 
-        user_agent = AgentUser.objects.get(user=context.user).agent
-        is_authorized = true #user_agent.is_authorized(object_to_mutate=place)
+        #user_agent = AgentUser.objects.get(user=context.user).agent
+        is_authorized = True #user_agent.is_authorized(object_to_mutate=place)
         if is_authorized:
-            process.save()  
+            place.save()  
         else:
             raise PermissionDenied('User not authorized to perform this action.')
 

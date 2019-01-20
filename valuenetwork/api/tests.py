@@ -3710,6 +3710,18 @@ mutation ($token: String!) {
 }
 
 mutation ($token: String!) {
+  createPlace(token: $token, name:"testloc2", note:"test", address:"123 some street", latitude: 54.333, longitude: 45.333) {
+    place {
+      id
+      name
+      address
+      latitude
+      longitude
+      note
+    }
+  }
+}
+
   createAgentResourceClassification(token: $token, agentId: 6, resourceClassificationId: 60) {
     agentResourceClassification {
       id

@@ -103,6 +103,7 @@ class Mutation(graphene.ObjectType):
     create_agent_relationship = valuenetwork.api.schemas.AgentRelationship.CreateAgentRelationship.Field()
     update_agent_relationship = valuenetwork.api.schemas.AgentRelationship.UpdateAgentRelationship.Field()
     #delete_agent_relationship = valuenetwork.api.schemas.AgentRelationship.DeleteAgentRelationship.Field()
+    create_place = valuenetwork.api.schemas.Place.CreatePlace.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

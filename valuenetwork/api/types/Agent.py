@@ -5,7 +5,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from django.db.models import Q
-from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType, EventTypeManager, EventType
+from valuenetwork.valueaccounting.models import EconomicAgent, EconomicResourceType, AgentType, EventTypeManager, EventType, AgentResourceType, EconomicResourceType
 import valuenetwork.api.types as types
 from valuenetwork.api.types.AgentRelationship import AgentRelationship, AgentRelationshipCategory, AgentRelationshipRole
 from valuenetwork.api.models import Organization as OrganizationModel, Person as PersonModel, formatAgentList
@@ -43,13 +43,24 @@ class Agent(graphene.Interface):
     search_owned_inventory_resources = graphene.List(lambda: types.EconomicResource,
                                               search_string=graphene.String())
 
+    agent_defined_resource_classifications = graphene.List(lambda: types.ResourceClassification,
+                                                   action=graphene.String())
+
     agent_processes = graphene.List(lambda: types.Process,
                                     is_finished=graphene.Boolean())
+
+    search_agent_processes = graphene.List(lambda: types.Process,
+                                              search_string=graphene.String(),
+                                              is_finished=graphene.Boolean())
 
     agent_plans = graphene.List(lambda: types.Plan,
                                 is_finished=graphene.Boolean(),
                                 year=graphene.Int(),
                                 month=graphene.Int())
+
+    search_agent_plans = graphene.List(lambda: types.Plan,
+                                              search_string=graphene.String(),
+                                              is_finished=graphene.Boolean())
 
     agent_economic_events = graphene.List(lambda: types.EconomicEvent,
                                           latest_number_of_days=graphene.Int(),
@@ -59,7 +70,12 @@ class Agent(graphene.Interface):
                                           month=graphene.Int())
 
     agent_commitments = graphene.List(lambda: types.Commitment,
-                                      latest_number_of_days=graphene.Int())
+                                      latest_number_of_days=graphene.Int(),
+                                      page=graphene.Int())
+
+    search_agent_commitments = graphene.List(lambda: types.Commitment,
+                                              search_string=graphene.String(),
+                                              is_finished=graphene.Boolean())
 
     agent_relationships = graphene.List(AgentRelationship,
                                         role_id=graphene.Int(),
@@ -86,6 +102,11 @@ class Agent(graphene.Interface):
     member_relationships = graphene.List(AgentRelationship)
 
     agent_skills = graphene.List(lambda: types.ResourceClassification)
+
+    agent_skill_relationships = graphene.List(lambda: types.AgentResourceClassification)
+
+    commitments_matching_skills = graphene.List(lambda: types.Commitment,
+                                                page=graphene.Int())
 
     validated_events_count = graphene.Int(month=graphene.Int(), year=graphene.Int())
 
@@ -138,6 +159,37 @@ class Agent(graphene.Interface):
             raise ValidationError("A search string is required.")
         return agent.search_owned_resources(search_string=search_string)
 
+    def resolve_agent_defined_resource_classifications(self, args, context, info):
+        agent = _load_identified_agent(self)
+        action = args.get('action', None)
+        rts = agent.defined_resource_types()
+        if action == None:
+            return rts
+        else:
+            filtered_rts = []
+            if action == "work":
+                for rt in rts:
+                    if rt.behavior == "work":
+                        filtered_rts.append(rt)
+            if action == "use":
+                for rt in rts:
+                    if rt.behavior == "used":
+                        filtered_rts.append(rt)
+            if action == "consume":
+                for rt in rts:
+                    if rt.behavior == "consumed":
+                        filtered_rts.append(rt)
+            if action == "cite":
+                for rt in rts:
+                    if rt.behavior == "cited":
+                        filtered_rts.append(rt)
+            if action == "produce" or action == "improve" or action == "accept":
+                for rt in rts:
+                    if rt.behavior == "produced" or rt.behavior == "used" or rt.behavior == "cited" or rt.behavior == "consumed":
+                        filtered_rts.append(rt)
+            return filtered_rts
+
+
     # if an organization, this returns processes done in that context
     # if a person, this returns proceses the person has worked on
     def resolve_agent_processes(self, args, context, info):
@@ -152,6 +204,16 @@ class Agent(graphene.Interface):
                     return agent_processes.filter(finished=True)
             else:
                 return agent_processes
+        return None
+
+    def resolve_search_agent_processes(self, args, context, info):
+        agent = _load_identified_agent(self)
+        finished = args.get('is_finished', None)
+        search_string = args.get('search_string', "")
+        if search_string == "":
+            raise ValidationError("A search string is required.")
+        if agent:
+            return agent.search_processes(search_string=search_string, finished=finished)
         return None
 
     # if an organization, this returns plans from that context
@@ -176,6 +238,16 @@ class Agent(graphene.Interface):
                         dated_plans.append(plan)
                 plans = dated_plans
             return plans
+        return None
+
+    def resolve_search_agent_plans(self, args, context, info):
+        agent = _load_identified_agent(self)
+        finished = args.get('is_finished', None)
+        search_string = args.get('search_string', "")
+        if search_string == "":
+            raise ValidationError("A search string is required.")
+        if agent:
+            return agent.search_plans(search_string=search_string, finished=finished)
         return None
 
     # returns events where an agent is a provider, receiver, or scope agent, excluding exchange related events
@@ -204,6 +276,7 @@ class Agent(graphene.Interface):
     # returns commitments where an agent is a provider, receiver, or scope agent, excluding exchange related events
     def resolve_agent_commitments(self, args, context, info):
         agent = _load_identified_agent(self)
+        page = args.get('page', None)
         if agent:
             days = args.get('latest_number_of_days', 0)
             if days > 0:
@@ -212,7 +285,28 @@ class Agent(graphene.Interface):
             else:
                 commits = agent.involved_in_commitments()
             commits = commits.exclude(event_type__name="Give").exclude(event_type__name="Receive")
+            if page:
+                from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+                paginator = Paginator(commits, 25)
+                try:
+                    commits = paginator.page(page)
+                except PageNotAnInteger:
+                    # If page is not an integer, deliver first page.
+                    commits = paginator.page(1)
+                except EmptyPage:
+                    # If page is out of range (e.g. 9999), deliver last page of results.
+                    commits = paginator.page(paginator.num_pages)
             return commits
+        return None
+
+    def resolve_search_agent_commitments(self, args, context, info):
+        agent = _load_identified_agent(self)
+        finished = args.get('is_finished', None)
+        search_string = args.get('search_string', "")
+        if search_string == "":
+            raise ValidationError("A search string is required.")
+        if agent:
+            return agent.search_commitments(search_string=search_string, finished=finished)
         return None
 
     def resolve_agent_relationships(self, args, context, info):
@@ -322,6 +416,29 @@ class Agent(graphene.Interface):
     def resolve_agent_skills(self, args, context, info):
         agent = _load_identified_agent(self)
         return agent.skills()
+ 
+    def resolve_agent_skill_relationships(self, args, context, info):
+        agent = _load_identified_agent(self)
+        return agent.skill_relationships()
+
+    def resolve_commitments_matching_skills(self, args, context, info):
+        agent = _load_identified_agent(self)
+        page = args.get('page', None)
+        if agent:
+            commits = agent.commitments_with_my_skills()
+            if page:
+                from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+                paginator = Paginator(commits, 25)
+                try:
+                    commits = paginator.page(page)
+                except PageNotAnInteger:
+                    # If page is not an integer, deliver first page.
+                    commits = paginator.page(1)
+                except EmptyPage:
+                    # If page is out of range (e.g. 9999), deliver last page of results.
+                    commits = paginator.page(paginator.num_pages)
+            return commits
+        return None
 
     def resolve_validated_events_count(self, args, *rargs):
         agent = _load_identified_agent(self)

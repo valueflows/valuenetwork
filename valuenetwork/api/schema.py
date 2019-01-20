@@ -13,6 +13,7 @@ import valuenetwork.api.schemas.Auth
 import valuenetwork.api.schemas.Agent
 import valuenetwork.api.schemas.AgentRelationship
 import valuenetwork.api.schemas.AgentRelationshipRole
+import valuenetwork.api.schemas.AgentResourceClassification
 import valuenetwork.api.schemas.Organization
 import valuenetwork.api.schemas.OrganizationClassification
 import valuenetwork.api.schemas.Person
@@ -36,6 +37,7 @@ class ViewerQuery(
     valuenetwork.api.schemas.Agent.Query,
     valuenetwork.api.schemas.AgentRelationship.Query,
     valuenetwork.api.schemas.AgentRelationshipRole.Query,
+    valuenetwork.api.schemas.AgentResourceClassification.Query,
     valuenetwork.api.schemas.Organization.Query,
     valuenetwork.api.schemas.OrganizationClassification.Query,
     valuenetwork.api.schemas.Person.Query,
@@ -104,6 +106,8 @@ class Mutation(graphene.ObjectType):
     update_agent_relationship = valuenetwork.api.schemas.AgentRelationship.UpdateAgentRelationship.Field()
     #delete_agent_relationship = valuenetwork.api.schemas.AgentRelationship.DeleteAgentRelationship.Field()
     create_place = valuenetwork.api.schemas.Place.CreatePlace.Field()
+    create_agent_resource_classification = valuenetwork.api.schemas.AgentResourceClassification.CreateAgentResourceClassification.Field()
+    delete_agent_resource_classification = valuenetwork.api.schemas.AgentResourceClassification.DeleteAgentResourceClassification.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

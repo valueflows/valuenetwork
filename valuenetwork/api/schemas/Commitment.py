@@ -77,9 +77,9 @@ class CreateCommitment(AuthedMutation):
         #for_plan_deliverable_id = args.get('for_plan_deliverable_id')
         url = args.get('url')
 
-        if output_of_id or input_of_id:
-            if not plan_id:
-                raise ValidationError("Process related commitments must be part of a plan.")
+        #if output_of_id or input_of_id:
+        #    if not plan_id:
+        #        raise ValidationError("Process related commitments must be part of a plan.")
         event_type = EventType.objects.convert_action_to_event_type(action)
         if not note:
             note = ""
@@ -212,7 +212,9 @@ class UpdateCommitment(AuthedMutation):
                 commitment.start_date = datetime.datetime.strptime(planned_start, '%Y-%m-%d').date()
             if scope_id:
                 commitment.context_agent = EconomicAgent.objects.get(pk=scope_id)
-            if provider_id:
+            if provider_id == 0:
+                commitment.from_agent = None
+            elif provider_id:
                 commitment.from_agent = EconomicAgent.objects.get(pk=provider_id)
             if receiver_id:
                 commitment.to_agent = EconomicAgent.objects.get(pk=receiver_id)

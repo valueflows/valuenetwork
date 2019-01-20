@@ -45,4 +45,6 @@ class ApiTypesAppConfig(AppConfig):
         types.NotificationSetting = NotificationSetting
         from valuenetwork.api.types.Agent import OrganizationClassification
         types.OrganizationClassification = OrganizationClassification
+        from valuenetwork.api.types.AgentResourceClassification import AgentResourceClassification
+        types.AgentResourceClassification = AgentResourceClassification
         super(ApiTypesAppConfig, self).ready()

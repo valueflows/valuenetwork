@@ -13,14 +13,11 @@ from valuenetwork.api.models import formatAgent, formatAgentList
 
 class Query(graphene.AbstractType):
 
-    # define input query params
-
     person = graphene.Field(Person,
                            id=graphene.Int())
 
     all_people = graphene.List(Person)
 
-    # load any person
 
     def resolve_person(self, args, context, info):
         id = args.get('id')

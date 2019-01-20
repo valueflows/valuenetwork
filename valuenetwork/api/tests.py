@@ -1112,6 +1112,20 @@ query($token: String) {
   }
 }
 
+query ($token: String) {
+  viewer(token: $token) {
+    myAgent {
+      id
+      agentSkillRelationships {
+        id
+        resourceClassification {
+          name
+        }
+      }
+    }
+  }
+}
+
 query($token: String) {
   viewer(token: $token) {
     allPeople {
@@ -1167,6 +1181,39 @@ query($token: String) {
 
 query($token: String) {
   viewer(token: $token) {
+    emailExists(email:"xxx@gmail.com")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    usernameExists(username:"lynn")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    createInactiveUser(username:"lynn-xfxzz", email:"qxaw@gmail.com", pswd:"xxdd")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    activateUserCreatePerson(username:"lynn-xfxzz", 
+      userToken:"51s-10ed8117b79f4863e46b", 
+      name:"Lynn F", image:"http://images.example.com/jdskdsf", phone:"555-3434")
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    createUserPerson(username:"lynn-xfqxxzzs", email:"qxsxqaw@gmail.com", pswd:"xxdd",
+    name:"Lynn Test", image:"http://xxx.image.com", phone:"608-555-1212" )
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
     organizationClassification(id:8) {
       id
       name
@@ -1181,6 +1228,21 @@ query($token: String) {
       id
       name
       note
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    person(id:6) {
+      name
+      commitmentsMatchingSkills(page:1) {
+        id
+        action
+        resourceClassifiedAs {
+          name
+        }
+      }
     }
   }
 }
@@ -1206,6 +1268,28 @@ query ($token: String) {
             }
           }
         }
+      }
+    }
+  }
+}
+
+query($token: String) {
+  viewer(token: $token) {
+    agent(id:106) {
+      name
+      searchAgentCommitments(searchString:"Fruit") {
+        id
+        note
+      }
+      searchAgentPlans(searchString:"Fruit", isFinished: false) {
+        id
+        name
+        note
+      }
+      searchAgentProcesses(searchString:"fruit") {
+        id
+        name
+        note
       }
     }
   }
@@ -1763,6 +1847,17 @@ query ($token: String) {
       category
       processCategory
       note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
+    agent(id: 146) {
+      agentDefinedResourceClassifications(action: "work") {
+        id
+        name
+      }
     }
   }
 }
@@ -2557,7 +2652,7 @@ query ($token: String) {
         }
         note
       }
-      agentCommitments(latestNumberOfDays: 30) {
+      agentCommitments(page:1) {
         id
         action
         plannedStart
@@ -3623,6 +3718,34 @@ mutation ($token: String!) {
       latitude
       longitude
       note
+    }
+  }
+}
+
+  createAgentResourceClassification(token: $token, agentId: 6, resourceClassificationId: 60) {
+    agentResourceClassification {
+      id
+      agent {
+        name
+      }
+      resourceClassification {
+        name
+      }
+      action
+    }
+  }
+}
+
+mutation ($token: String!) {
+  deleteAgentResourceClassification(token: $token, id: 42) {
+    agentResourceClassification {
+      agent {
+        name
+      }
+      resourceClassification {
+        name
+      }
+      action
     }
   }
 }

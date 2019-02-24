@@ -14,7 +14,8 @@ from django.core.exceptions import PermissionDenied
 class Query(graphene.AbstractType):
 
     place = graphene.Field(Place,
-                           id=graphene.Int())
+                           id=graphene.Int(),
+                           address=graphene.String())
 
     all_places = graphene.List(Place)
 
@@ -22,6 +23,11 @@ class Query(graphene.AbstractType):
         id = args.get('id')
         if id is not None:
             place = Location.objects.get(pk=id)
+            if place:
+                return place
+        address = args.get('address')
+        if address is not None:
+            place = Location.objects.get(address=address)
             if place:
                 return place
         return None

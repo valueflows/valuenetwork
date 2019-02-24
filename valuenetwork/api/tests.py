@@ -3075,6 +3075,19 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    place(address: "Anacortes, WA 98221") {
+      id
+      name
+      address
+      latitude
+      longitude
+      note
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     allPlaces {
       id
       name

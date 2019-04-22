@@ -3614,4 +3614,21 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  createResourceClassification(token: $token, note: "test create", name:"testrc", 
+    image:"http://image.example", category: "inventory", unit:"Each") {
+    resourceClassification {
+      id
+      name
+      note
+      unit {
+        id
+        name
+      }
+      image
+      category
+    }
+  }
+}
+
 '''

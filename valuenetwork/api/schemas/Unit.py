@@ -4,7 +4,6 @@
 
 import graphene
 
-from valuenetwork.valueaccounting.models import Process as ProcessProxy
 from valuenetwork.api.types.QuantityValue import Unit
 from valuenetwork.valueaccounting.models import Unit as UnitProxy
 

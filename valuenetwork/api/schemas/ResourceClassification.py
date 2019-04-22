@@ -4,10 +4,14 @@
 
 import graphene
 
-from valuenetwork.valueaccounting.models import EconomicResourceType, Facet as FacetProxy, FacetValue as FacetValueProxy
+from valuenetwork.valueaccounting.models import EconomicResourceType, Facet as FacetProxy, FacetValue as FacetValueProxy, Unit, AgentUser
 from valuenetwork.api.types.EconomicResource import ResourceClassification, EconomicResourceProcessCategory, Facet, FacetValue
 from valuenetwork.api.types.EconomicEvent import Action
 from django.db.models import Q
+from six import with_metaclass
+from django.contrib.auth.models import User
+from .Auth import AuthedInputMeta, AuthedMutation
+from django.core.exceptions import PermissionDenied
 
 
 class Query(graphene.AbstractType):
@@ -87,3 +91,52 @@ class Query(graphene.AbstractType):
     def resolve_all_recipes(self, args, context, info):
         return EconomicResourceType.objects.resource_types_with_recipes()
 
+
+class CreateResourceClassification(AuthedMutation):
+    class Input(with_metaclass(AuthedInputMeta)):
+        name = graphene.String(required=True)
+        note = graphene.String(required=False)
+        image = graphene.String(required=False)
+        category = graphene.String(required=False)
+        unit = graphene.String(required=True)
+
+    resourceClassification = graphene.Field(lambda: ResourceClassification)
+
+    @classmethod
+    def mutate(cls, root, args, context, info):
+        #import pdb; pdb.set_trace()
+        name = args.get('name')
+        image = args.get('image')
+        note = args.get('note')
+        category = args.get('category')
+        unit = args.get('unit')
+
+        if not note:
+            note = ""
+        if not image:
+            image = ""
+        if category == "work":
+            behavior = "work"
+        elif category == "currency":
+            behavior = "account"
+        else:
+            behavior = "other"
+        #import pdb; pdb.set_trace()
+        resourceClassification = EconomicResourceType(
+            name=name,
+            description=note,
+            behavior=behavior,
+            unit=Unit.objects.get(name=unit),
+            photo_url=image,
+            created_by=context.user,
+        )
+
+        user_agent = AgentUser.objects.get(user=context.user).agent
+        #is_authorized = user_agent.is_authorized(object_to_mutate=ResourceClassification)
+        #if is_authorized:
+        if user_agent:
+            resourceClassification.save()  
+        else:
+           raise PermissionDenied('User not authorized to perform this action.')
+
+        return CreateResourceClassification(resourceClassification=resourceClassification)

@@ -3781,4 +3781,14 @@ mutation ($token: String!) {
   }
 }
 
+mutation ($token: String!) {
+  createUnit(token: $token, name: "USD", symbol: "$") {
+    unit {
+      id
+      name
+      symbol
+    }
+  }
+}
+
 '''

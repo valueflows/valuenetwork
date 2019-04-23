@@ -106,6 +106,7 @@ class Mutation(graphene.ObjectType):
     update_agent_relationship = valuenetwork.api.schemas.AgentRelationship.UpdateAgentRelationship.Field()
     #delete_agent_relationship = valuenetwork.api.schemas.AgentRelationship.DeleteAgentRelationship.Field()
     create_resource_classification = valuenetwork.api.schemas.ResourceClassification.CreateResourceClassification.Field()
+    create_unit = valuenetwork.api.schemas.Unit.CreateUnit.Field()
     create_place = valuenetwork.api.schemas.Place.CreatePlace.Field()
     create_agent_resource_classification = valuenetwork.api.schemas.AgentResourceClassification.CreateAgentResourceClassification.Field()
     delete_agent_resource_classification = valuenetwork.api.schemas.AgentResourceClassification.DeleteAgentResourceClassification.Field()

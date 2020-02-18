@@ -76,7 +76,6 @@ class CreateTransfer(AuthedMutation):
         receiver_affects = None
         if receiver_affects_id:
             receiver_affects = EconomicResourceProxy.objects.get(pk=receiver_affects_id)
-            receiver_affects.quantity = receiver_affects.quantity + Decimal(affected_numeric_value)
         if not receiver_affects:
             if create_resource:
                 if not resource_note:
@@ -141,7 +140,7 @@ class CreateTransfer(AuthedMutation):
         if is_authorized:
             transfer.save_api()
             give_event.transfer = transfer
-            give_event.save_api(user=context.user, create_resource=create_resource)
+            give_event.save_api(user=context.user, create_resource=False)
             if receiver_affects:
                 receiver_affects.save()
                 receive_event.resource = receiver_affects
@@ -161,4 +160,3 @@ class CreateTransfer(AuthedMutation):
             raise PermissionDenied('User not authorized to perform this action.')
 
         return CreateTransfer(transfer=transfer)
-

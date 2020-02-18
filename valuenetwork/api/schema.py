@@ -110,5 +110,7 @@ class Mutation(graphene.ObjectType):
     create_place = valuenetwork.api.schemas.Place.CreatePlace.Field()
     create_agent_resource_classification = valuenetwork.api.schemas.AgentResourceClassification.CreateAgentResourceClassification.Field()
     delete_agent_resource_classification = valuenetwork.api.schemas.AgentResourceClassification.DeleteAgentResourceClassification.Field()
+    create_transfer = valuenetwork.api.schemas.Transfer.CreateTransfer.Field()
+    #update_transfer = valuenetwork.api.schemas.Transfer.UpdateTransfer.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

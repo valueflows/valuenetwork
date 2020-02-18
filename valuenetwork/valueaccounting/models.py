@@ -12137,7 +12137,7 @@ class EconomicEvent(models.Model):
         #        old_resource = None
         #    else:
         #        has_new_resource = True
-                
+
         resource = self.resource
         if resource:
             #quantity = delta or self.quantity

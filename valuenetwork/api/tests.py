@@ -3751,7 +3751,7 @@ mutation ($token: String!) {
   createTransfer(token: $token, 
     providerId: 39, 
     receiverId: 26, 
-    affectsId: 111, 
+    affectsId: 124,
     affectedNumericValue: "1", 
     start: "2020-02-10", 
     createResource: true, 
@@ -3816,6 +3816,72 @@ mutation ($token: String!) {
   }
 }
 
-
+mutation ($token: String!) {
+  createTransfer(token: $token, 
+    providerId: 39, 
+    receiverId: 26, 
+    affectsId: 124,
+    receiverAffectsId: 129,
+    affectedNumericValue: "3", 
+    start: "2020-02-10", 
+    createResource: false) {
+    transfer {
+      id
+      name
+      plannedDate
+      scope {
+        name
+      }
+      note
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      giveResource {
+        id
+        trackingIdentifier
+      }
+      takeResource {
+        id
+        trackingIdentifier
+      }
+      transferQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      transferEconomicEvents {
+        action
+      }
+      giveEconomicEvent {
+        id
+        action
+        provider {
+          name
+        }
+        receiver {
+          name
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      takeEconomicEvent {
+        id
+        action
+      }
+      involvedAgents {
+        id
+        name
+      }
+    }
+  }
+}
 
 '''

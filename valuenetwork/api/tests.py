@@ -2959,52 +2959,9 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
-    transfer(id: 160) {
-      name
-      plannedStart
-      scope {
-        name
-      }
-      exchangeAgreement {
-        name
-      }
-      note
-      provider {
-        name
-      }
-      receiver {
-        name
-      }
-      transferQuantity {
-        numericValue
-        unit {
-          name
-        }
-      }
-      transferEconomicEvents {
-        action
-      }
-      transferCommitments {
-        action
-      }
-      giveCommitment {
-        action
-      }
-      takeCommitment {
-        action
-      }
-      involvedAgents {
-        name
-      }
-    }
-  }
-}
-
-query ($token: String) {
-  viewer(token: $token) {
     transfer(id: 76) {
       name
-      plannedStart
+      plannedDate
       scope {
         name
       }
@@ -3013,9 +2970,6 @@ query ($token: String) {
         name
       }
       receiver {
-        name
-      }
-      resourceClassifiedAs {
         name
       }
       giveResource {
@@ -3059,6 +3013,8 @@ query ($token: String) {
     }
   }
 }
+
+# PLACE / LOCATION
 
 query ($token: String) {
   viewer(token: $token) {
@@ -3790,5 +3746,76 @@ mutation ($token: String!) {
     }
   }
 }
+
+mutation ($token: String!) {
+  createTransfer(token: $token, 
+    providerId: 39, 
+    receiverId: 26, 
+    affectsId: 111, 
+    affectedNumericValue: "1", 
+    start: "2020-02-10", 
+    createResource: true, 
+    resourceImage: "http://someimage.com/image", 
+    resourceNote: "first trying with a translation") {
+    transfer {
+      id
+      name
+      plannedDate
+      scope {
+        name
+      }
+      note
+      provider {
+        name
+      }
+      receiver {
+        name
+      }
+      giveResource {
+        id
+        trackingIdentifier
+      }
+      takeResource {
+        id
+        trackingIdentifier
+      }
+      transferQuantity {
+        numericValue
+        unit {
+          name
+        }
+      }
+      transferEconomicEvents {
+        action
+      }
+      giveEconomicEvent {
+        id
+        action
+        provider {
+          name
+        }
+        receiver {
+          name
+        }
+        affectedQuantity {
+          numericValue
+          unit {
+            name
+          }
+        }
+      }
+      takeEconomicEvent {
+        id
+        action
+      }
+      involvedAgents {
+        id
+        name
+      }
+    }
+  }
+}
+
+
 
 '''

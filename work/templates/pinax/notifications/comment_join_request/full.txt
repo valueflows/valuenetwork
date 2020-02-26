@@ -1,5 +1,0 @@
-{% load i18n %}{% blocktrans %}New comment from {{ name }} at {{ jn_req.project.agent }}:
-
-{{ comment }}
-
-You can answer the comment at{% endblocktrans %} {{ joinrequest_url }}

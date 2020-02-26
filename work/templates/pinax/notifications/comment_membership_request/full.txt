@@ -1,5 +1,0 @@
-{% load i18n %}{% blocktrans %}New comment from {{ name }}:
-
-{{ comment }}
-
-You can answer the comment at{% endblocktrans %} {{ membership_url }}

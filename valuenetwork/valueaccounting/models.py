@@ -16,7 +16,6 @@ import json as simplejson
 from django.db.models.functions import Lower
 from django.conf import settings
 
-from faircoin import utils as faircoin_utils
 from easy_thumbnails.fields import ThumbnailerImageField
 
 """Models based on REA
@@ -31,7 +30,6 @@ http://global.ihs.com/doc_detail.cfm?item_s_key=00495115&item_key_date=920616
 """
 
 
-FAIRCOIN_DIVISOR = Decimal("100000000.00")
 
 def unique_slugify(instance, value, slug_field_name='slug', queryset=None,
                    slug_separator='-'):
@@ -440,28 +438,6 @@ class AgentManager(models.Manager):
         #todo: should there be some limits?  Ran into condition where we needed an organization, therefore change to below.
         return EconomicAgent.objects.all()
 
-    def freedom_coop(self):
-        if 'faircoin' not in settings.INSTALLED_APPS:
-            return None
-        try:
-            fc = EconomicAgent.objects.get(name="Freedom Coop")
-        except EconomicAgent.DoesNotExist:
-            raise ValidationError("Freedom Coop does not exist by that name")
-        return fc
-
-    def freedom_coop_projects(self):
-        try:
-            fc = EconomicAgent.objects.get(nick="FC_Projects")
-        except EconomicAgent.DoesNotExist:
-            raise ValidationError("FreedomCoop Projects group does not exist by 'FC_Projects' nickname.")
-        return fc
-
-    def root_ocp_agent(self):
-        try:
-            ocp = EconomicAgent.objects.get(nick="OCP")
-        except EconomicAgent.DoesNotExist:
-            raise ValidationError("OCP main root Agent does not exist by 'OCP' nickname.")
-        return ocp
 
     def open_projects(self):
         return EconomicAgent.objects.filter(project__visibility="public") #is_public="True")

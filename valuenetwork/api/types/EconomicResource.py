@@ -4,6 +4,12 @@
 
 import graphene
 from graphene_django.types import DjangoObjectType
+from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from valuenetwork.api.schemas.Auth import _authUser
+import datetime
 
 import valuenetwork.api.types as types
 from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType, Facet as FacetProxy, FacetValue as FacetValueProxy
@@ -54,14 +60,32 @@ class ResourceClassification(DjangoObjectType):
 
     class Meta:
         model = EconomicResourceType
-        only_fields = ('id', 'name', 'unit')
+        only_fields = ('id', 'name', 'unit', 'context_agent')
 
     classification_resources = graphene.List(lambda: EconomicResource)
+
+    classification_facets = graphene.List(lambda: Facet)
+
+    generate_plan_from_workflow_recipe = graphene.Field(lambda: types.Plan)
 
     #classification_facet_values = graphene.List(lambda: FacetValue)
 
     def resolve_classification_resources(self, args, context, info):
         return self.resources.all()
+
+    def resolve_classification_facets(self, args, context, info):
+        rtfvs = self.facets.all()
+        facets = []
+        for rtfv in rtfvs:
+            if rtfv.facet_value.facet not in facets:
+                facets.append(rtfv.facet_value.facet)
+        return facets
+
+    # This is a shameless hack!!!
+    def resolve_generate_plan_from_workflow_recipe(self, args, context, *rargs):
+        token = rargs[0].variable_values['token']
+        context.user = _authUser(token)
+        return self.generate_staged_work_order("Plan name", datetime.date.today(), context.user)
 
     #def resolve_classification_facet_values(self, args, context, info):
     #    return self.facets.all() #TODO in process, not working yet

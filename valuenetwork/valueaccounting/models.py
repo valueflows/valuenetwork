@@ -7321,7 +7321,10 @@ class Process(models.Model):
 
     @property #ValueFlows
     def is_started(self):
-        return self.started
+        if self.started is not None:
+            return True
+        else:
+            return False
 
     @property #ValueFlows
     def note(self):

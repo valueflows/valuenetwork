@@ -47,7 +47,7 @@ class Query(graphene.AbstractType):
         return formatAgentList(EconomicAgent.objects.all())
 
     def resolve_user_is_authorized_to_create(self, args, context, info):
-        context_agent_id = args.get('contest_agent_id')
+        context_agent_id = args.get('context_agent_id')
         user_agent = AgentUser.objects.filter(user=self.user).first().agent
         return user_agent.is_authorized(context_agent_id=context_agent_id)
 

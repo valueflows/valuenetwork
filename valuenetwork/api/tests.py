@@ -1853,6 +1853,19 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    resourceClassification (id: 62) {
+      name
+      id
+      generatePlanFromWorkflowRecipe {
+        id
+        name
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     agent(id: 146) {
       agentDefinedResourceClassifications(action: "work") {
         id

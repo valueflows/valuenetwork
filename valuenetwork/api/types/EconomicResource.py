@@ -85,7 +85,7 @@ class ResourceClassification(DjangoObjectType):
     def resolve_generate_plan_from_workflow_recipe(self, args, context, *rargs):
         token = rargs[0].variable_values['token']
         context.user = _authUser(token)
-        return self.generate_staged_work_order("test disco order", datetime.date.today(), context.user)
+        return self.generate_staged_work_order("Plan name", datetime.date.today(), context.user)
 
     #def resolve_classification_facet_values(self, args, context, info):
     #    return self.facets.all() #TODO in process, not working yet

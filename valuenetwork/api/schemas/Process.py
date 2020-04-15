@@ -98,6 +98,7 @@ class UpdateProcess(AuthedMutation):
         scope_id = graphene.Int(required=False)
         note = graphene.String(required=False)
         is_finished = graphene.Boolean(required=False)
+        is_started = graphene.Boolean(required=False)
         plan_id = graphene.Int(required=False)
 
     process = graphene.Field(lambda: Process)
@@ -111,6 +112,7 @@ class UpdateProcess(AuthedMutation):
         note = args.get('note')
         scope_id = args.get('scope_id')
         is_finished = args.get('is_finished')
+        is_started = args.get('is_started')
         plan_id = args.get('plan_id')
 
         process = ProcessProxy.objects.get(pk=id)
@@ -133,6 +135,8 @@ class UpdateProcess(AuthedMutation):
                 process.plan=plan
             if is_finished != None:
                 process.finished=is_finished
+            if is_started == True:
+                process.started=datetime.date.today()
             process.changed_by=context.user
 
             user_agent = AgentUser.objects.get(user=context.user).agent

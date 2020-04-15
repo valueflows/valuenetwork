@@ -114,7 +114,6 @@ class UpdateProcess(AuthedMutation):
         is_finished = args.get('is_finished')
         is_started = args.get('is_started')
         plan_id = args.get('plan_id')
-
         process = ProcessProxy.objects.get(pk=id)
         if process:
             if name:
@@ -135,8 +134,9 @@ class UpdateProcess(AuthedMutation):
                 process.plan=plan
             if is_finished != None:
                 process.finished=is_finished
-            if is_started == True:
-                process.started=datetime.date.today()
+            if is_started != None:
+                if is_started == True:
+                    process.started=datetime.date.today()
             process.changed_by=context.user
 
             user_agent = AgentUser.objects.get(user=context.user).agent

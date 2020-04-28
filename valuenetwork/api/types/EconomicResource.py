@@ -45,7 +45,7 @@ class Facet(DjangoObjectType):
         return self.values.all()
 
 class FacetValue(DjangoObjectType):
-    facet = graphene.List(lambda: types.Facet)
+    facet = graphene.Field(lambda: types.Facet)
 
     class Meta:
         model = FacetValueProxy
@@ -66,6 +66,8 @@ class ResourceClassification(DjangoObjectType):
 
     classification_facets = graphene.List(lambda: Facet)
 
+    classification_facet_values = graphene.List(lambda: FacetValue)
+
     generate_plan_from_workflow_recipe = graphene.Field(lambda: types.Plan)
 
     #classification_facet_values = graphene.List(lambda: FacetValue)
@@ -80,6 +82,14 @@ class ResourceClassification(DjangoObjectType):
             if rtfv.facet_value.facet not in facets:
                 facets.append(rtfv.facet_value.facet)
         return facets
+
+    def resolve_classification_facet_values(self, args, context, info):
+        rtfvs = self.facets.all()
+        fvs = []
+        for rtfv in rtfvs:
+            if rtfv.facet_value not in fvs:
+                fvs.append(rtfv.facet_value)
+        return fvs
 
     # This is a shameless hack!!!
     def resolve_generate_plan_from_workflow_recipe(self, args, context, *rargs):

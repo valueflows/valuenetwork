@@ -1853,6 +1853,21 @@ query ($token: String) {
 
 query ($token: String) {
   viewer(token: $token) {
+    allResourceClassifications {
+      id
+      name
+      classificationFacetValues {
+        value
+        facet {
+          name
+        }
+      }
+    }
+  }
+}
+
+query ($token: String) {
+  viewer(token: $token) {
     resourceClassification (id: 62) {
       name
       id

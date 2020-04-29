@@ -1856,6 +1856,9 @@ query ($token: String) {
     allResourceClassifications {
       id
       name
+      contextAgent {
+        name
+      }
       classificationFacetValues {
         value
         facet {

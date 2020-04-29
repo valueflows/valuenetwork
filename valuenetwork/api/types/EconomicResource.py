@@ -12,8 +12,8 @@ from valuenetwork.api.schemas.Auth import _authUser
 import datetime
 
 import valuenetwork.api.types as types
-from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType, Facet as FacetProxy, FacetValue as FacetValueProxy
-from valuenetwork.api.models import QuantityValue as QuantityValueProxy, formatAgentList
+from valuenetwork.valueaccounting.models import EconomicResource as EconomicResourceProxy, EconomicResourceType, Facet as FacetProxy, FacetValue as FacetValueProxy, EconomicAgent
+from valuenetwork.api.models import QuantityValue as QuantityValueProxy, formatAgentList, formatAgent
 from valuenetwork.api.types.QuantityValue import Unit, QuantityValue
 
 
@@ -57,10 +57,11 @@ class ResourceClassification(DjangoObjectType):
     note = graphene.String(source='note')
     category = graphene.String(source='category')
     process_category = graphene.String(source='process_category')
+    context_agent = graphene.Field(lambda: types.Agent)
 
     class Meta:
         model = EconomicResourceType
-        only_fields = ('id', 'name', 'unit', 'context_agent')
+        only_fields = ('id', 'name', 'unit')
 
     classification_resources = graphene.List(lambda: EconomicResource)
 
@@ -70,7 +71,8 @@ class ResourceClassification(DjangoObjectType):
 
     generate_plan_from_workflow_recipe = graphene.Field(lambda: types.Plan)
 
-    #classification_facet_values = graphene.List(lambda: FacetValue)
+    def resolve_context_agent(self, args, *rargs):
+        return formatAgent(self.context_agent)
 
     def resolve_classification_resources(self, args, context, info):
         return self.resources.all()
